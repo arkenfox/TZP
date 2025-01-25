@@ -1315,8 +1315,8 @@ function addData(section, metric, data, hash ='', isLies = false, donotuse ='x')
 	sDataTemp[zFP][isScope][section][metric] = isLies ? zLIE : value
 	if (isLies) {
 		// don't add spoofed domrect data
-		let aIgnore = ['element_font','element_forms','element_mathml','glyphs_clientrect']
-		if (aIgnore.includes(metric)) {value = ''}
+		let aIgnore = ['element_font','element_forms','element_mathml','glyphs']
+		if (aIgnore.includes(metric)) {value = zLIE}
 		log_known(section, metric, value)
 	}
 }
@@ -1600,7 +1600,7 @@ function countJS(item) {
 					dom.A1.classList.add('togS')
 					dom.A1.classList.remove('hidden')
 					// hide and remove togS on the entire viewport section + also window.inner - not used by android
-					// + visualViewportScale
+					// + visualViewportScale + window_scrollbar
 					let items = document.getElementsByClassName('A2')
 					for (let i=0; i < items.length; i++) {
 						items[i].classList.remove('togS')

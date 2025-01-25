@@ -220,20 +220,21 @@ const get_scr_measure = () => new Promise(resolve => {
 			// desktop: same as viewport element + clientrect but it ignores scollbars, so can
 			// add information and is a more precise measurement of matchMedia
 			// android: used to calculate dynamic toolbar
-		let vpData = get_scr_viewport_units()
-		oTmp.inner.width['svw'] = vpData.width.svw
-		oTmp.inner.height['svh'] = vpData.height.svh
+		let vpWidth = isViewportUnits.width, vpHeight = isViewportUnits.height
+		oTmp.inner.width['svw'] = vpWidth.svw
+		oTmp.inner.height['svh'] = vpHeight.svh
+
 		// document
 		if ('android' == isOS) {
-			oTmp.inner.width['document'] = adoc.width
-			oTmp.inner.height['document'] = adoc.height
+			oTmp.inner.width['document'] = vpWidth.document
+			oTmp.inner.height['document'] = vpHeight.document
 			// dynamic toolbar: display only - let it NaN for I care
-			let strToolbar = (vpData.width.lvw - vpData.width.svw) +' x '+ (vpData.height.lvh - vpData.height.svh)
+			let strToolbar = (vpWidth.lvw - vpWidth.svw) +' x '+ (vpHeight.lvh - vpHeight.svh)
 			addDisplay(1, 'dynamic_toolbar', strToolbar)
 			// large viewport units 
-			addDisplay(1, 'viewport_large', vpData.width.lvw +' x '+ vpData.height.lvh)
+			addDisplay(1, 'viewport_large', vpWidth.lvw +' x '+ vpHeight.lvh)
 			// sizes_viewport metric (small is already under sizes_inner)
-			let newobj = {'height': {'lvh': vpData.height.lvh}, 'width': {'lvw': vpData.width.lvw}}
+			let newobj = {'height': {'lvh': vpHeight.lvh}, 'width': {'lvw': vpWidth.lvw}}
 			addData(1, 'sizes_viewport', newobj, mini(newobj))
 		}
 
@@ -332,6 +333,8 @@ const get_scr_measure = () => new Promise(resolve => {
 				}
 			}
 		}
+
+		// initial
 		oDisplay['initial_inner'] = isInitial.width.inner + ' x ' + isInitial.height.inner
 		oDisplay['initial_outer'] = isInitial.width.outer + ' x ' + isInitial.height.outer
 		//console.log('oData', oData)
@@ -342,17 +345,29 @@ const get_scr_measure = () => new Promise(resolve => {
 		let innerw = oData.inner.width.window, innerh = oData.inner.height.window
 		let screenw = oData.screen.width.screen, screenh = oData.screen.height.screen
 		let isNew = (isTB || isVer > 132) // 1556002 newWin & LB step alignment
-		// valid defaults
-		let isCompareValid = 'number' == typeFn(innerw) && 'number' == typeFn(innerh)
-		let controlw = innerw,
-			controlh = innerh
 
+		// controls: we want integers so we know what to match to
+		let controlw = innerw, controlh = innerh
 		if ('android' == isOS) {
-			// on android window.inner can differ due to dynamic toolbar, so we use doc
-			let docw = oData.inner.width.document, doch = oData.inner.height.document
-			isCompareValid = 'number' == typeFn(docw) && 'number' == typeFn(doch)
-			controlw = docw
-			controlh = doch
+			/* on android
+			height
+				- window.inner height can differ due to dynamic toolbar, so we use doc
+				- documentElement height = clientHeight because we want the window, not the entire page length
+				and is thus always our preferred integer to match to
+			width
+				- documentElement width = domrect and not an integer
+				- but TZP uses a fixed width <meta name="viewport" content="width=800"> so width should be constant
+				- but window.inner width is also not affected by dynamic toolbar
+				- so use window in case a phone's native res exceeds or we drop (or lower) the fixed width
+			*/
+			controlh = oData.inner.height.document
+			// controlw is undefined, we need to grab it
+			try {
+				controlw = window.innerWidth
+				if ('number' !== typeFn(controlw)) {controlw = zErr} else if (!Number.isInteger(controlw)) {control = zErr}
+			} catch(e) {
+				controlw = zErr
+			}
 			// initial_sizes
 			// ToDo: add notation
 			initData = isInitial; initHash = mini(isInitial)
@@ -360,6 +375,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			// NW
 			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh, isNew))
 		}
+		let isCompareValid = 'number' == typeFn(controlw) && 'number' == typeFn(controlh)
 
 		// RFP/match
 		for (const k of Object.keys(oData)) {
@@ -369,6 +385,7 @@ const get_scr_measure = () => new Promise(resolve => {
 				let tmpSet = new Set
 				for (const n of Object.keys(oData[k][j])) {
 					let value = oData[k][j][n]
+					let original = value
 					//console.log(k, j, n, value)
 					// ignore css out of range
 					let isIgnore = '?' == value && 'css' == n
@@ -377,28 +394,32 @@ const get_scr_measure = () => new Promise(resolve => {
 						isIgnore = true // don't add errors or lies to our set
 						if (zErr == value) {oSummary[k][j] = zErr}
 					}
-					// android window.inner
-						// a non-match doesn't matter for notation: we don't notate RFP inner on android yet
-						// it does cause a "mixed" in summary which with a green RFP is misleading, so ignore
-						// Note: once we add lies logic to our data, handled just above, we also won't be
-						// letting a possible genuine mismatch thru by not checking it for sameness
+					/* android window.inner
+						a non-match doesn't matter for notation: we don't notate RFP inner on android yet
+						it does cause a "mixed" in summary which with a green RFP is misleading, so ignore
+						Note: once we add lies logic to our data, handled just above, we also won't be
+						letting a possible genuine mismatch thru by not checking it for sameness
+					*/
 					if ('android' == isOS && 'inner' == k && 'window' == n) {isIgnore = true}
-
+					let control
 					if (!isIgnore) {
 						// *vw/h can be non-integer in inner
 						// media can be non-integer | css can be off by 1 | both only screen + inner metrics
+						// document (used by android) width uses domrect
 						// match them to our inner or screen if within 1
-						if ('media' == n || 'css' == n || 'svh' == n || 'svw' == n) {
+						if ('media' == n || 'css' == n || 'svh' == n || 'svw' == n || 'document' == n) {
 							value = Math.floor(value) // to remove non-integers + ensure valid diffs are positive
-							let control = 'width' == j ? screenw : screenh // if these are invalid diff == NaN
+							control = 'width' == j ? screenw : screenh // if these are invalid diff == NaN
 							if ('inner' == k) {control = 'width' == j ? controlw : controlh}
 							// we floored so any valid diff must be 1 or 0 because we substract value from control
 							if (1 == control - value) {value = control} // match control
 						}
+						//if ('inner' == k) {console.log(k, j, n, '\norig', original, '\ncontrol', control, '\nfinal value for sameness', value)}
 						tmpSet.add(value)
 					}
 				}
 				let aSet = Array.from(tmpSet)
+
 				// summary
 				// if the array is empty, isSame should already be false
 				// we already rounded + matched non-integers, there should only be one
@@ -920,9 +941,16 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		// get the viewport width: we only return zErr or a number
 		get_scr_viewport(runtype)
 	]).then(function(res) {
-		let oData = {'element': {}, 'scrollWidth': {}}
-		let aDisplay = []
+		let oData = {'element': {}, 'scrollWidth': {}}, aDisplay = []
+		let oDataWindow = {}, aDisplayWindow = []
 		let list = ['auto','thin']
+		let vpData = res[0]
+		// NOTE: values are all widths and have been type checked
+		// desktop: document, element, visualViewport, svw
+			// "element" is the window size using an element - we used the name "element" in viewport sizes
+				// but here "element" is the an element (such as a test field) scrollbar, so we call it "window"
+			// visualViewport = visualViewport.width
+			// svw is small viewport unit which is a css way of getting visualViewport.width: so a different method
 
 		// scrollWidth
 		function get_scroll() {
@@ -979,12 +1007,12 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 			})
 		}
 
-		// viewport (calculated from element), visualViewport
-		// note: res from get_scr_viewport: falls back to offsetWidth if domrect compromised
+		// oDataWindow items
 		function get_viewport(item) {
-			let viewport = item == 'viewport' ? res[0][0] : res[0][1]
+			let viewport = item == 'element' ? vpData.width.element : vpData.width[item]
 			let value, display
 			try {
+				// on desktop our integer base value is window.inner
 				let iwidth = window.innerWidth
 				//iwidth = 9000 // test cssW fallback
 				value = (iwidth - viewport)
@@ -1002,30 +1030,46 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 				}
 			} catch(e) {
 				value = zErr; display = zErr
-				log_error(1, METRIC +'_'+ item, e)
+				log_error(1, METRIC +'_window_'+ item, e)
 			}
-			oData[item] = value
-			aDisplay.push(display)
+			oDataWindow[item] = value
+			aDisplayWindow.push(display)
 		}
 
 		get_scroll()
-		// android
-			// will always be zero or almost zero
-			// visualViewport changes with pinch-zoom and is redundant with viewport
-			// viewport is almost stable but pull to refresh and pinch-zoom is causing
-			// it to vary between 0 and some fraction, so ignore them. We already have
-			// lots of other subpixel entropy
-		if ('android' !== isOS) {
-			get_viewport('viewport')
-			get_viewport('visualViewport')
-		}
-		/*
+		/* health example if we go overlays
+			// if the diff is between 0 and 1, this entropy is already in the window measurement data: so round down for health
 		let isScrollbarOverlay = false
 		aDisplay.forEach(function(item) {if (0 !== Math.floor(Math.abs(item))) {isScrollbarOverlay = true}})
 		*/
-		// output
 		addDisplay(1, METRIC, aDisplay.join(', '))
 		addData(1, METRIC, oData, mini(oData))
+
+		/* android
+			- visualViewport.width changes with pinch-zoom
+			- window (which is a full width element + domrect) is almost stable but pull to refresh and pinch-zoom can cause slight variation
+			- svw has nothing to compare to: since we don't have a stable window.inner due to dynamic toolbar
+			- nothimg we can measure against
+		*/
+		if ('android' == isOS) {
+			addData(1, METRIC +'_window', zNA)
+			return resolve()
+		}
+
+		/* window scrollbar [desktop only]
+			- we are using high precision measurments (viewport or a fullsize element) vs window (integer)
+			- if an overlay, this = diff reflects devicePixelRatio/zoom etc
+				- and this entropy is already in the window measurement data
+			- if not an overlay: the diff will reflect the scrollbar width more accurately and well as subpixel issues
+				- IDK if this is added entropy
+		*/
+		// in alphabetical order
+		get_viewport('document')
+		get_viewport('element') // full-size element
+		get_viewport('svw')
+		get_viewport('visualViewport')
+		addDisplay(1, METRIC +'_window', aDisplayWindow.join(', '))
+		addData(1, METRIC +'_window', oDataWindow, mini(oDataWindow))
 		return resolve()
 	})
 })
@@ -1076,8 +1120,11 @@ function get_scr_viewport_units() {
 }
 
 const get_scr_viewport = (runtype) => new Promise(resolve => {
+	// get viewport units
+	isViewportUnits = get_scr_viewport_units()
+
 	let oData = {height: {}, width: {}}, aDisplay = []
-	const METRIC = 'sizes_viewport', isHeight = 'height' == runtype, id= 'vp-element'
+	const METRIC = 'sizes_viewport', id= 'vp-element'
 	const aMETRIC = 'sizes_inner'
 
 	function get_viewport(type) {
@@ -1133,11 +1180,11 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 			if (runST) {w = NaN, h = undefined}
 			let wType = typeFn(w), hType = typeFn(h)
 			if ('number' !== wType) {
-				if (!isHeight) {log_error(1, metric +'_width_'+ type, zErrType + wType)}
+				log_error(1, metric +'_width_'+ type, zErrType + wType)
 				w = zErr
 			}
 			if ('number' !== hType) {
-				if (!isHeight) {log_error(1, metric +'_height_'+ type, zErrType + hType)}
+				log_error(1, metric +'_height_'+ type, zErrType + hType)
 				h = zErr
 			}
 			hDisplay = h, wDisplay = w
@@ -1150,44 +1197,44 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 				hDisplay = log_error(1, metric +'_'+ type, e)
 			}
 		}
+		oData.height[type] = h
+		oData.width[type] = w
+
 		// android only calls document and uses it in inner section
+		// we can just store this in isViewportUnits
 		if ('android' == isOS) {
-			adoc['height'] = h
-			adoc['width'] = w
+			isViewportUnits.height['document'] = h
+			isViewportUnits.width['document'] = w
 		} else {
-			oData.height[type] = h
-			oData.width[type] = w
-			if (!isHeight) {
-				addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
-				// only do a summary for desktop
-				// android with dynamic urlbar & pinch to zoom can get all funky
-				if ('android' !== isOS && 'visualViewport' == type) {
-					addDisplay(1, 'vp_summary', ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
-				}
+			addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
+			// only do a summary for desktop
+			// toDo: correctly summarize it
+			if ('visualViewport' == type) {
+				addDisplay(1, 'vp_summary', ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
 			}
 		}
 	}
 
 	// ToDo: we could also use size observer / IntersectionObserverEntry
-
 	// all
 	get_viewport('document')
 	// android: there is no viewport section: document becomes part of inner section.
 		// element + visualViewport are redundant with a TZP clean load (new tab etc) and
 		// can be or are unstable with dynamic urlbar/toolbar and pinch to zoom/reruns combos etc
-	if ('android' == isOS) {return resolve()}
-	//desktop
-	get_viewport('element')
-	get_viewport('visualViewport')
-	removeElementFn(id)
-	// return
-	if (isHeight) {
-		let vvh = oData.height.visualViewport
-		return resolve(vvh !== zErr ? vvh : oData.height.element) // android tests
-	} else {
+	if ('android' !== isOS) {
+		//desktop
+		get_viewport('element')
+		get_viewport('visualViewport')
+		removeElementFn(id)
+		// return
 		addData(1, METRIC, oData, mini(oData))
-		return resolve([oData.width.element, oData.width.visualViewport]) // for scrollbar
 	}
+	// resolve
+		// add viewport units to oData for retunring to scrollbars function
+	for (const k of Object.keys(isViewportUnits.width)) {
+		if (undefined == oData[k]) {oData.width[k] = isViewportUnits.width[k]}
+	}
+	return resolve(oData) // for scrollbar
 })
 
 /* UA */
@@ -1615,7 +1662,7 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 		get_scr_fullscreen('fullscreen'),
 		get_scr_positions('positions'),
 		get_scr_pixels('pixels'),
-		get_scr_scrollbar('scrollbars', runtype), // gets viewport
+		get_scr_scrollbar('scrollbars', runtype), // gets viewport + viewport units
 		get_scr_orientation('orientation'),
 		get_scr_measure(),
 	]).then(function(){
