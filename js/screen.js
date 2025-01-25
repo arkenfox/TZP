@@ -1066,7 +1066,6 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		// in alphabetical order
 		get_viewport('document')
 		get_viewport('element') // full-size element
-		get_viewport('svw')
 		get_viewport('visualViewport')
 		addDisplay(1, METRIC +'_window', aDisplayWindow.join(', '))
 		addData(1, METRIC +'_window', oDataWindow, mini(oDataWindow))
