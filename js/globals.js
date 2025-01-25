@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 147
+	expectedMetrics = 148
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -90,7 +90,6 @@ function get_scr_initial() {
 	}
 }
 get_scr_initial()
-let adoc = {} // android document sizes
 
 // notation
 	// https://en.wikipedia.org/wiki/Check_mark
@@ -149,6 +148,7 @@ let isArch = true,
 	isTB = false,
 	isVer = 0,
 	isVerExtra = '',
+	isViewportUnits = {},
 	isXML = {}
 
 // region
