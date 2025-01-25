@@ -1236,10 +1236,6 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 		addData(1, METRIC, oData, mini(oData))
 	}
 	// resolve
-		// add viewport units to oData for retunring to scrollbars function
-	for (const k of Object.keys(isViewportUnits.width)) {
-		if (undefined == oData[k]) {oData.width[k] = isViewportUnits.width[k]}
-	}
 	return resolve(oData) // for scrollbar
 })
 
