@@ -1036,13 +1036,20 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 			aDisplayWindow.push(display)
 		}
 
+		function tidy_display(array) {
+			let str = array.join(', ')
+			array = array.filter(function(item, position) {return array.indexOf(item) === position})
+			if (1 == array.length) {str = array[0]}
+			return str
+		}
+
 		get_scroll()
 		/* health example if we go overlays
 			// if the diff is between 0 and 1, this entropy is already in the window measurement data: so round down for health
 		let isScrollbarOverlay = false
 		aDisplay.forEach(function(item) {if (0 !== Math.floor(Math.abs(item))) {isScrollbarOverlay = true}})
 		*/
-		addDisplay(1, METRIC, aDisplay.join(', '))
+		addDisplay(1, METRIC, tidy_display(aDisplay))
 		addData(1, METRIC, oData, mini(oData))
 
 		/* android
@@ -1067,7 +1074,7 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		get_viewport('document')
 		get_viewport('element') // full-size element
 		get_viewport('visualViewport')
-		addDisplay(1, METRIC +'_window', aDisplayWindow.join(', '))
+		addDisplay(1, METRIC +'_window', tidy_display(aDisplayWindow))
 		addData(1, METRIC +'_window', oDataWindow, mini(oDataWindow))
 		return resolve()
 	})
