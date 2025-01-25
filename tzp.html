@@ -310,7 +310,6 @@
 			<div class="btn-right s99">viewport</div>
 		</td></tr>
 		<tr class="togA"><td>dynamic toolbar</td><td class="c mono" id="dynamic_toolbar"></td></tr>
-
 		<tr class="A2"><td>viewport</td><td class="c mono" id="vp_summary"></td></tr>
 		<tr class="A2 togS"><td>document</td><td class="mono">
 			<span class="c" id="vp_document"></span>
@@ -322,15 +321,16 @@
 		<!--scrollbars-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">element (auto | thin)<br>scrollWidth (auto | thin)</div>
-			&nbsp; scrollbar</td><td class="c mono" id="scrollbars"></td></tr>
-		<tr class="A2"><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">document<br>element<br>svw<br>visualViewport</div>
-			&nbsp; [window] scrollbar</td><td class="c mono border-bottom" id="scrollbars_window"></td></tr>
+			&nbsp; scrollbar</td><td class="mono border-top">
+			<span class="c" id="scrollbars"></span>
+			<div class="A2 btn-right s99">scrollbar</div>
+		</td></tr>
+		<tr class="A2"><td>[window] scrollbar</td><td class="c mono border-bottom" id="scrollbars_window"></td></tr>
 		<!--other-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">[css] display-mode<br>display-mode<br>fullScreen<br>mozFullScreenEnabled</span></div>
 			&nbsp; display-mode | fullscreen</td>
-			<td class="mono border-top"><span id="cssDM"></span> | <span class="c" id="display-mode"></span>
+			<td class="mono"><span id="cssDM"></span> | <span class="c" id="display-mode"></span>
 				| <span class="c" id="windowfullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
