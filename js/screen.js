@@ -830,14 +830,27 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		let rfpvalue = isVer > 133 ? 192 : 96
 		addDisplay(1, METRIC +'_'+ item,'','', (value == rfpvalue || '?' == value ? rfp_green : rfp_red)) // css notate
 		oData[item] = value
-
 	}
 
 	// DPI DIV
 	function get_dpi_div(item) {
+		/* this FP value is redundant: it's essentially 96 * our DPR PoC (IIUIC)
+		IIUIC: monitors always have a native resolution of 96 dpi
+			- our div element should always have a height of 96
+			- regardless of zoom + system scaling + layout.css.devPixelsPerPx (which combined == devicePixelRatio)
+			- but IDK about e.g. QLED/Quantum "dots" and other emerging standards
+		// tested with zooming levels: it's always 96
+			- system scaling 100% | 125%
+			- layout.css.devPixelsPerPx 1.1 (equivalent to 110% zoom)
+			- system scaling 125% + layout.css.devPixelsPerPx 1.1 combined
+		*/
 		let display, value
 		try {
-			try {value = Math.round(dom.tzpDPI.offsetHeight * varDPR)} catch(e) {}
+			let target = dom.tzpDPI
+			// domrect will not give us any greater precision AFAICT, but why not
+			let targetValue = 0 == isDomRect ? target.getBoundingClientRect().height : target.offsetHeight
+			// the final "dpi" value comes from multiplying by DPR (our poc leak one)
+			value = targetValue * varDPR
 			let typeCheck = typeFn(value)
 			if ('number' !== typeCheck) {throw zErrType + typeCheck}
 			display = value
