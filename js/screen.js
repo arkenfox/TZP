@@ -941,8 +941,8 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		// get the viewport width: we only return zErr or a number
 		get_scr_viewport(runtype)
 	]).then(function(res) {
-		let oData = {'element': {}, 'scrollWidth': {}}, aDisplay = []
-		let oDataWindow = {}, aDisplayWindow = []
+		let oData = {'auto': {}, 'thin': {}}
+		let aAuto = [], aThin = [], aWindow = []
 		let list = ['auto','thin']
 		let vpData = res[0]
 		// NOTE: values are all widths and have been type checked
@@ -956,27 +956,11 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		function get_scroll() {
 			let element
 			list.forEach(function(p) {
-				// scrollWidth
-				let value, display, item = 'scrollWidth'
+				// element
+				let value, item = 'element'
 				try {
 					element = dom.tzpScroll
 					element.style['scrollbar-width'] = p
-					value = 100 - element.scrollWidth
-					if (runST) {value = NaN} else if (runSI) {value = -1}
-					let typeCheck = typeFn(value)
-					if ('number' !== typeCheck) {throw zErrType + typeCheck}
-					if (value < 0) {throw zErrInvalid + '< 0'}
-					display = value
-				} catch(e) {
-					value = zErr, display = zErr
-					log_error(1, METRIC +'_'+ item +'_'+p, e)
-				}
-				oData[item][p] = value
-				aDisplay.push(display)
-
-				// element
-				value = undefined, display = undefined, item = 'element'
-				try {
 					let target = element.children[0]
 					let range, width
 					if (isDomRect == -1) {
@@ -997,20 +981,35 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 					if ('number' !== typeCheck) {throw zErrType + typeCheck}
 					value = 100 - width // 100 set in html, not affected by zoom
 					if (value < 0) {throw zErrInvalid + '< 0'}
-					display = value
 				} catch(e) {
-					value = zErr, display = zErr
-					log_error(1, METRIC +'_'+ item +'_'+ p, e)
+					value = zErr
+					log_error(1, METRIC +'_'+ p +'_'+ item, e)
 				}
-				oData[item][p] = value
-				aDisplay.push(display)
+				oData[p][item] = value
+				if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
+
+				// scrollWidth
+				value = undefined, item = 'scrollWidth'
+				try {
+					element.style['scrollbar-width'] = p
+					value = 100 - element.scrollWidth
+					if (runST) {value = NaN} else if (runSI) {value = -1}
+					let typeCheck = typeFn(value)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					if (value < 0) {throw zErrInvalid + '< 0'}
+				} catch(e) {
+					value = zErr
+					log_error(1, METRIC +'_'+ p +'_'+ item, e)
+				}
+				oData[p][item] = value
+				if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
 			})
 		}
 
 		// oDataWindow items
 		function get_viewport(item) {
 			let viewport = item == 'element' ? vpData.width.element : vpData.width[item]
-			let value, display
+			let value
 			try {
 				// on desktop our integer base value is window.inner
 				let iwidth = window.innerWidth
@@ -1020,23 +1019,21 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				if (value < -1) {throw zErrInvalid + '< -1'}
-				display = value
 				// leverage css inner width
 				let cssW = getElementProp(1, '#D', METRIC +'_'+ item +'_css', ':before')
 				if (cssW !== '?' && cssW !== zErr) {
 					if (cssW * 1 == iwidth - 1) {cssW = iwidth} // round up: i.e allow for min-
 					value = cssW - viewport
-					display = value
 				}
 			} catch(e) {
-				value = zErr; display = zErr
+				value = zErr
 				log_error(1, METRIC +'_window_'+ item, e)
 			}
-			oDataWindow[item] = value
-			aDisplayWindow.push(display)
+			oData.window[item] = value
+			aWindow.push(value)
 		}
 
-		function tidy_display(array) {
+		function tidySB(array) {
 			let str = array.join(', ')
 			array = array.filter(function(item, position) {return array.indexOf(item) === position})
 			if (1 == array.length) {str = array[0]}
@@ -1044,13 +1041,13 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		}
 
 		get_scroll()
+		addDisplay(1, METRIC, tidySB(aAuto) +' | '+ tidySB(aThin))
 		/* health example if we go overlays
 			// if the diff is between 0 and 1, this entropy is already in the window measurement data: so round down for health
 		let isScrollbarOverlay = false
-		aDisplay.forEach(function(item) {if (0 !== Math.floor(Math.abs(item))) {isScrollbarOverlay = true}})
+		array.forEach(function(item) {if (0 !== Math.floor(Math.abs(item))) {isScrollbarOverlay = true}})
 		*/
-		addDisplay(1, METRIC, tidy_display(aDisplay))
-		addData(1, METRIC, oData, mini(oData))
+
 
 		/* android
 			- visualViewport.width changes with pinch-zoom
@@ -1058,11 +1055,6 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 			- svw has nothing to compare to: since we don't have a stable window.inner due to dynamic toolbar
 			- nothimg we can measure against
 		*/
-		if ('android' == isOS) {
-			addData(1, METRIC +'_window', zNA)
-			return resolve()
-		}
-
 		/* window scrollbar [desktop only]
 			- we are using high precision measurments (viewport or a fullsize element) vs window (integer)
 			- if an overlay, this = diff reflects devicePixelRatio/zoom etc
@@ -1070,12 +1062,16 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 			- if not an overlay: the diff will reflect the scrollbar width more accurately and well as subpixel issues
 				- IDK if this is added entropy
 		*/
-		// in alphabetical order
-		get_viewport('document')
-		get_viewport('element') // full-size element
-		get_viewport('visualViewport')
-		addDisplay(1, METRIC +'_window', tidy_display(aDisplayWindow))
-		addData(1, METRIC +'_window', oDataWindow, mini(oDataWindow))
+		if ('android' !== isOS) {
+			oData['window'] = {}
+			// in alphabetical order
+			get_viewport('document')
+			get_viewport('element') // full-size element
+			get_viewport('visualViewport')
+			addDisplay(1, METRIC +'_window', tidySB(aWindow))
+		}
+
+		addData(1, METRIC, oData, mini(oData))
 		return resolve()
 	})
 })
