@@ -401,16 +401,16 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 		log_perf(SECTG, METRIC, t0,'', value)
 		return resolve(value)
 	}
-	// FF121+: 1855861
-	const get_event = () => new Promise(resolve => {
-		el.onload = function() {exit(true)}
-		el.onerror = function() {exit(false)}
-	})
 	if (!runSG) {
 		try {
 			if (isVer > 127) {
 				el = new Image();
-				el.src = 'chrome://global/content/torconnect/tor-connect.svg' // TB13.5
+				el.onload = function() {exit(true)}
+				el.onerror = () => {
+					el.onerror = () => { exit(false) }
+					el.src = 'chrome://global/content/torconnect/tor-connect.svg' // TB13.5
+				}
+				el.src = 'chrome://global/skin/icons/torbrowser.png' // TB14.5
 				document.body.appendChild(el)
 			} else {
 				// support TB13 until we raise minVer next ESR
@@ -419,8 +419,10 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 				el.type = 'text/css'
 				el.rel = 'stylesheet'
 				document.head.appendChild(el)
+				// FF121+: 1855861
+				el.onload = function() {exit(true)}
+				el.onerror = function() {exit(false)}
 			}
-			get_event()
 		} catch(e) {
 			log_error(3, METRIC, e, isScope, true) // persist sect3
 			log_alert(SECTG, METRIC, e.name, isScope, true)
@@ -428,6 +430,19 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 		}
 	}
 })
+
+const get_isMullvad = () => Promise.race([
+  new Promise(resolve => setTimeout(resolve, 100)),
+  new Promise(resolve => {
+    const im = new Image();
+    im.onload = () => {
+      isMullvad = true
+      resolve(true)
+    }
+    im.onerror = resolve
+    im.src = "chrome://global/skin/icons/mullvadbrowser.png";
+  }),
+])
 
 function get_isVer(METRIC) {
 	if (!isGecko) {return}
@@ -1575,6 +1590,7 @@ function countJS(item) {
 
 		Promise.all([
 			get_isTB('isTB'),
+			get_isMullvad(),
 			get_isFileSystem('isFileSystem'),
 			get_isAutoplay('getAutoplayPolicy'),
 		]).then(function(){
