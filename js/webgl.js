@@ -24,6 +24,7 @@ const WebGLConstants = [
 	'RENDERER',
 	'SHADING_LANGUAGE_VERSION',
 	'STENCIL_BITS',
+	'VENDOR',
 	'VERSION'
 ]
 
@@ -64,10 +65,6 @@ const Categories = {
 		'MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS',
 		'MAX_COMBINED_UNIFORM_BLOCKS',
 		'MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS',
-	],
-	'debugRendererInfo': [
-		'UNMASKED_VENDOR_WEBGL',
-		'UNMASKED_RENDERER_WEBGL',
 	],
 	'fragmentShader': [
 		'MAX_FRAGMENT_UNIFORM_VECTORS',
@@ -124,7 +121,11 @@ const Categories = {
 		'MAJOR_PERFORMANCE_CAVEAT',
 		'RENDERER',
 		'SHADING_LANGUAGE_VERSION',
+		'VENDOR',
 		'VERSION',
+		'UNMASKED_VENDOR_WEBGL',
+		'UNMASKED_RENDERER_WEBGL',
+
 	],
 }
 
@@ -194,13 +195,14 @@ const getShaderPrecisionFormat = (context, shaderType) => {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_debug_renderer_info
-const getUnmasked = (context, constant) => {
+const getUnmasked = (contextType, context, constant) => {
 	try {
 		const extension = context.getExtension('WEBGL_debug_renderer_info')
 		const unmasked = context.getParameter(extension[constant])
 		return unmasked
-	} catch (error) {
-		return undefined
+	} catch (e) {
+		log_error(10, contextType +'_'+ constant, e)
+		return zErr
 	}
 }
 
@@ -266,8 +268,8 @@ function getWebGL(contextType) {
 			VERTEX_SHADER_BEST_FLOAT_PRECISION: Object.values(VERTEX_SHADER.HIGH_FLOAT),
 			FRAGMENT_SHADER,
 			FRAGMENT_SHADER_BEST_FLOAT_PRECISION: Object.values(FRAGMENT_SHADER.HIGH_FLOAT),
-			UNMASKED_VENDOR_WEBGL: getUnmasked(context, 'UNMASKED_VENDOR_WEBGL'),
-			UNMASKED_RENDERER_WEBGL: getUnmasked(context, 'UNMASKED_RENDERER_WEBGL')
+			UNMASKED_VENDOR_WEBGL: getUnmasked(contextType, context, 'UNMASKED_VENDOR_WEBGL'),
+			UNMASKED_RENDERER_WEBGL: getUnmasked(contextType, context, 'UNMASKED_RENDERER_WEBGL')
 		}
         
 		const glConstants =  [...WebGLConstants, ...(supportsWebGL2 ? WebGL2Constants : [])]
@@ -299,9 +301,6 @@ function getWebGL(contextType) {
 		errors.push(['parameters', e+'']) // 'parameters blocked'
 	}
 
-	const gpuVendor = parameters.UNMASKED_VENDOR_WEBGL
-	const gpuRenderer = parameters.UNMASKED_RENDERER_WEBGL
-
 	// Structure parameter data
 	let components = {}
 	if (parameters) {
@@ -320,8 +319,6 @@ function getWebGL(contextType) {
 	}
 
 	data = {
-		gpuRenderer,
-		gpuVendor,
 		...components,
 		webGLExtensions
 	}
@@ -329,7 +326,9 @@ function getWebGL(contextType) {
 }
 
 const outputWebGL = () => new Promise(resolve => {
-	//return resolve()
+	if (isFile) {
+		return resolve()
+	}
 
 	Promise.all([
 		getWebGL('webgl'),
