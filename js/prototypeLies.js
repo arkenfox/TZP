@@ -765,7 +765,8 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				'serviceWorker',
 				'userAgent',
 				'vendor',
-				'vendorSub'
+				'vendorSub',
+				'webdriver',
 			]
 		})
 		searchLies(() => Node, {
