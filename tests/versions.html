@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 86, maxVer = 135, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 87, maxVer = 136, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -265,12 +265,24 @@ function outputVersion() {
 			}
 		}
 
+		// 136: 1939533
+			// pref enabled since FF132: javascript.options.experimental.regexp_modifiers
+			// note: TB slider's `javascript.options.native_regexp` (requires restart) has no effect
+		let t136 = performance.now(), ver136
+		try {
+			ver136 = eval("/(?i:[A-Z]{4})/.test('abcd')")
+		} catch(e) {
+			// FF131 or lower: SyntaxError: invalid regexp group
+			console.log(e)
+		}
+		rec(136, 136, "1939533", ver136, performance.now()-t136, 'p') // 0.02ms
+
 		// 135: 1930464
 		let t135 = performance.now(), ver135
 		try {
 			// returns 2 in FF52 but lets avoid any possible old-timey regressions/changes
 			// tested FF115-135
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) { // FF115+
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) { // FF115+
 				let test135 = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
 				ver135 = 0 == test135.resolvedOptions().minimumFractionDigits
 			}
@@ -281,7 +293,7 @@ function outputVersion() {
 		let t134 = performance.now(), ver134
 		try {
 			// avoid old timey false positives e.g FF78-109
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) { // FF115+
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) { // FF115+
 				ver134 = '$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})
 			}
 		} catch(e) {}
@@ -755,7 +767,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 61, oOther = {}
+	let countOther = 0, expectOther = 62, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -772,6 +784,16 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 135: 1775215
+		let t135a = performance.now(), ver135a
+		try {
+			eval('var else')
+		} catch(e) {
+			// SyntaxError: missing variable name, got keyword 'else'
+			ver135a = (e+'').includes('else')
+		}
+		rec(135.1, 135, "1775215", ver135a, performance.now()-t135a) // 0.05ms
 
 		// 135: 1930466
 		let t135 = performance.now(), ver135 = false
