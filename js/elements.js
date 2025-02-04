@@ -385,6 +385,91 @@ function get_element_mathml(METRIC) {
 	return
 }
 
+function get_element_scrollbars(METRIC) {
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
+		// ui.useOverlayScrollbars: 0 = no, 1 = yes
+		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only in css pixels at full zoom (default 0)
+			// this bypasses TB and changes auto + thin
+		// widget.non-native-theme.scrollbar.style = values 0 to 5 (default, mac, gtk, android, win10, win11)
+			// values 1,2,3 bypass TB and change both sizes
+		// layout.css.scrollbar-width-thin.disabled = true
+			// this bypasses TB and changes thin to match auto
+		// widget.non-native-theme.win.scrollbar.use-system-size = boolean
+
+	let oData = {'auto': {}, 'thin': {}}
+	let aAuto = [], aThin = [], aWindow = []
+	let list = ['auto','thin']
+
+	// scrollWidth
+	function get_scroll() {
+		let element
+		list.forEach(function(p) {
+			// element
+			let value, item = 'element'
+			try {
+				element = dom.tzpScroll
+				element.style['scrollbar-width'] = p
+				let target = element.children[0]
+				let range, width, method
+				if (isDomRect > 1) {
+					range = document.createRange()
+					range.selectNode(target)
+				}
+				// method
+				if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
+				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+				} else if (isDomRect == 1) {method = target.getClientRects()[0]
+				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+				} else if (isDomRect > 2) {method = range.getClientRects()[0]
+				}
+				width = method.width
+				if (runST) {width = NaN} else if (runSI) {width = 101}
+				let typeCheck = typeFn(width)
+				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				value = 100 - width // 100 set in html, not affected by zoom
+				if (value < 0) {throw zErrInvalid + '< 0'}
+			} catch(e) {
+				value = zErr
+				log_error(1, METRIC +'_'+ p +'_'+ item, e)
+			}
+			let fpvalue = value
+			if (isDomRect < 0 && zErr !== value) {
+				value = log_known(15, METRIC +'_'+ p +'_'+ item, value)
+				fpvalue = zLIE
+			}
+			oData[p][item] = fpvalue
+			if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
+
+			// scrollWidth
+			value = undefined, item = 'scrollWidth'
+			try {
+				element.style['scrollbar-width'] = p
+				value = 100 - element.scrollWidth
+				if (runST) {value = NaN} else if (runSI) {value = -1}
+				let typeCheck = typeFn(value)
+				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				if (value < 0) {throw zErrInvalid + '< 0'}
+			} catch(e) {
+				value = zErr
+				log_error(1, METRIC +'_'+ p +'_'+ item, e)
+			}
+			oData[p][item] = value
+			if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
+		})
+	}
+
+	function tidySB(array) {
+		let str = array.join(', ')
+		array = array.filter(function(item, position) {return array.indexOf(item) === position})
+		if (1 == array.length) {str = array[0]}
+		return str
+	}
+	get_scroll()
+	addDisplay(15, METRIC, tidySB(aAuto) +' | '+ tidySB(aThin))
+	addData(15, METRIC, oData, mini(oData))
+	return
+}
+
 const outputElements = () => new Promise(resolve => {
 	Promise.all([
 		get_domrect('domrect'),
@@ -392,6 +477,7 @@ const outputElements = () => new Promise(resolve => {
 		get_element_keys('htmlelement_keys'),
 		get_element_forms('element_forms'),
 		get_element_mathml('element_mathml'),
+		get_element_scrollbars('element_scrollbars'),
 	]).then(function(){
 		return resolve()
 	})
