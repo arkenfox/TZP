@@ -567,8 +567,8 @@ const get_isVer = () => new Promise(resolve => {
 				if (0 == test135.resolvedOptions().minimumFractionDigits) return 135 // 1930464
 			} catch(e) {}
 			try {
-				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
-			} catch(e){}
+				if ('lij' == Intl.PluralRules.supportedLocalesOf('lij').join()) return 134 // 1927706
+			} catch(e) {}
 			try {
 				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
 				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
