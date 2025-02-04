@@ -457,9 +457,7 @@ function get_isVer(METRIC) {
 				test = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
 				if (0 == test.resolvedOptions().minimumFractionDigits) return 135 // 1930464
 			} catch(e) {}
-			try {
-				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
-			} catch(e){}
+			if ('lij' == Intl.PluralRules.supportedLocalesOf('lij').join()) return 134 // 1927706
 			try {
 				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
 				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
@@ -1879,7 +1877,6 @@ function run_immediate() {
 			warm = Intl.DateTimeFormat(undefined, {timeZone: 'Europe/London', timeZoneName: 'shortGeneric'}).format(new Date)
 			warm = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
 			warm = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
-			warm = (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'}) // v134 test
 		} catch(e) {}
 		get_isXML()
 		get_isArch('isArch')
