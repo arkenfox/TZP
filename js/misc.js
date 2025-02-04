@@ -528,6 +528,7 @@ function get_navigator_keys(METRIC) {
 				'productSub','userAgent','vendor','vendorSub','hardwareConcurrency','language',
 				'languages','mimeTypes','onLine','plugins','taintEnabled','doNotTrack',
 				'cookieEnabled','pdfViewerEnabled','requestMediaKeySystemAccess',
+				'webdriver', // FF60+
 				'locks', // 1851539
 				'userActivation', // 1791079
 			]
@@ -683,6 +684,21 @@ function get_window_prop(METRIC) {
 	return
 }
 
+function get_webdriver(METRIC) {
+	// expected FF60+
+	let value, data =''
+	try {
+		value = navigator[METRIC]
+		if (runST) {value = null}
+		let typeCheck = typeFn(value)
+		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(18, METRIC, value,'','', data, isProxyLie('Navigator.'+ METRIC))
+	return
+}
+
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
@@ -813,6 +829,7 @@ const outputMisc = () => new Promise(resolve => {
 		get_window_prop('wasm'),
 		get_window_props('window_properties'),
 		get_navigator_keys('navigator_keys'),
+		get_webdriver('webdriver'),
 		get_pdf('pdf'),
 	]).then(function(){
 		return resolve()
