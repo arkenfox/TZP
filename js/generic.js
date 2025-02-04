@@ -434,7 +434,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 135) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 136) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -449,6 +449,10 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
+			try {
+				// fastpath: FF132+: javascript.options.experimental.regexp_modifiers
+				if (eval("/(?i:[A-Z]{4})/.test('abcd')")) return 136 // 1939533
+			} catch(e) {}
 			try {
 				test = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
 				if (0 == test.resolvedOptions().minimumFractionDigits) return 135 // 1930464
