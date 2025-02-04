@@ -554,10 +554,14 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 135
+		isVerMax = 136
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {
+				// fastpath: FF132+: javascript.options.experimental.regexp_modifiers
+				if (eval("/(?i:[A-Z]{4})/.test('abcd')")) return 136 // 1939533
+			} catch(e) {}
 			try {
 				let test135 = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
 				if (0 == test135.resolvedOptions().minimumFractionDigits) return 135 // 1930464
