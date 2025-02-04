@@ -37,14 +37,15 @@
 
 	<table id="tb3">
 		<col width="1%"><col width="33%"><col width="33%"><col width="32%"><col width="1%">
-		<thead><tr><th colspan="5"><div class="nav-title">versions</div></th></tr></thead>
+		<thead><tr><th colspan="5"><div class="nav-title">gecko versions</div></th></tr></thead>
 		<tr><td colspan="5" class="intro">
-			<span class="no_color">Gecko version-specific PoCs : &nbsp;
-				&nbsp; <b><span class='good'> &#x2713; </span></b> &nbsp; pass
+			<span class="no_color">
+				<b><span class='good'> &#x2713; </span></b> &nbsp; pass
 				&nbsp; <b><span class='bad'> &#x2715; </span></b> &nbsp; fail
 				&nbsp; <b><span class='s4'> &#x2715; </span></b> &nbsp; error
 				&nbsp; <b> &#x2715; </b> &nbsp; n/a &nbsp;
 				&nbsp; <b><span class='s3'> d </span></b> &nbsp; dom
+				&nbsp; <b><span class='s3'> i </span></b> &nbsp; <code>--with-system-icu</code>
 				&nbsp; <b><span class='s3'> p </span></b> &nbsp; pref
 				&nbsp; <b><span class='s14'> ex | fb </span></b> &nbsp; extension | fallback
 			</span>
@@ -289,15 +290,11 @@ function outputVersion() {
 		} catch(e) {}
 		rec(135, 135, "1930464", ver135, performance.now()-t135) // 0.2ms
 
-		// 134: 1927706 (see 1931044)
+		// 134: 1927706 : ie, lij, oc, st, szl, tn, za
+		// packages that use --with-system-icu can cause issues
 		let t134 = performance.now(), ver134
-		try {
-			// avoid old timey false positives e.g FF78-109
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) { // FF115+
-				ver134 = '$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})
-			}
-		} catch(e) {}
-		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.2ms
+		try {ver134 = ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join())} catch(e) {}
+		rec(134, 134, "1927706", ver134, performance.now()-t134, 'i') // 0.125ms
 
 		// 133: 1837773
 		let t133 = performance.now(), ver133
@@ -544,7 +541,7 @@ function outputVersion() {
 		let t96 = performance.now(), ver96
 		try {ver96 = ("undefined" === typeof Object.toSource
 			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
-		rec(96, 96, "1738422", ver96, performance.now()-t96)
+		rec(96, 96, "1738422", ver96, performance.now()-t96, 'i')
 
 		// 95: 1723674: fast path: dom.crypto.randomUUID.enabled = true (default)
 		let t95p = performance.now(), ver95p = ("function" === typeof crypto.randomUUID)
@@ -587,7 +584,7 @@ function outputVersion() {
 		let t91 = performance.now(), ver91
 		try {ver91 = ("undefined" === typeof Object.toSource
 			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
-		rec(91, 91, "1714933", ver91, performance.now()-t91)
+		rec(91, 91, "1714933", ver91, performance.now()-t91, 'i')
 
 		// 90: 1681371 shipped
 		let t90 = performance.now(), ver90 = ("function" == typeof Array.prototype.at)
@@ -804,11 +801,16 @@ function outputVersion() {
 		}
 		rec(135, 135, "1930466", ver135, performance.now()-t135) // very slow if not an error, slow if an eror
 
-		// 134: 1927706 : ie, lij, oc, st, szl, tn, za
+		// 134: 1927706 (see 1931044)
 		// packages that use --with-system-icu can cause issues
 		let t134 = performance.now(), ver134
-		try {ver134 = ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join())} catch(e) {}
-		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.125ms
+		try {
+			// avoid old timey false positives e.g FF78-109
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) { // FF115+
+				ver134 = '$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})
+			}
+		} catch(e) {}
+		rec(134, 134, "1927706", ver134, performance.now()-t134, 'i') // 0.2ms
 
 		// 133: 1922503
 		let t133 = performance.now(), ver133
@@ -1199,7 +1201,7 @@ function outputVersion() {
 		// 65b: 1499026
 		let t65b = performance.now(), ver65b
 		try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
-		rec(65.1, 65, "1499026", ver65b, performance.now()-t65b)
+		rec(65.1, 65, "1499026", ver65b, performance.now()-t65b, 'i')
 
 		// 65a: 1504334
 		let t65a = performance.now(), ver65a = ("function" === typeof Intl.RelativeTimeFormat)
@@ -1213,7 +1215,7 @@ function outputVersion() {
 		// 59: 1405993
 		let t59 = performance.now(), ver59
 		try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
-		rec(59, 59, "1405993", ver59, performance.now()-t59)
+		rec(59, 59, "1405993", ver59, performance.now()-t59, 'i')
 
 		// 55: 1354974: isFF check: this test hangs blink
 		if (isFF) {
