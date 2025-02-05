@@ -385,6 +385,87 @@ function get_element_mathml(METRIC) {
 	return
 }
 
+function get_element_other(METRIC) {
+	let t0 = nowFn()
+	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
+
+	// note: some elements we insert a char "." to force a height: always use the same char
+	let oList = {
+		a: '<a href="">.</a>',
+		audio: '<audio controls=""></audio>',
+		base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+		big_x2: '<big><big>.</big></big>',
+		big_x3: '<big><big><big>.</big></big></big>',
+		br: '<br>',
+		canvas: '<canvas></canvas>',
+		// always revert tables because we have that in our inline style in the plain test
+		caption: '<table class="revert"><caption>.</caption></table>',
+		dd: '<dl><dd>.</dd></dl>',
+		dialog: '<dialog open=""></dialog>',
+		dt: '<dl><dt>.</dt></dl>',
+		fieldset: '<fieldset></fieldset>', // don't include char
+		figcaption: '<figure><figcaption>.</figcaption></figure>',
+		hr: '<hr>',
+		legend: '<fieldset><legend>.</legend></fieldset>',
+	}
+	let aListAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','iframe','small','sub','sup',]
+	aListAdd.forEach(function(item){oList[item] = '<'+item+'>.</'+item+'>'})
+
+	let width, height, x, y, range, method
+	const id = 'element-fp'
+	try {
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		let parent = dom[id], isFirst = true
+		for (const k of Object.keys(oList).sort()) {
+			// set parent, determine target to measure and as we walk
+			// the children, ensure no other css affects any element
+			//parent.innerHTML = ''
+			parent.innerHTML = oList[k]
+			let target = parent.firstChild
+			target.classList.add('revert')
+			let newtarget = target.children[0]
+			if (undefined !== newtarget) {
+				target = newtarget
+				target.classList.add('revert')
+				newtarget = target.children[0]
+				if (undefined !== newtarget) {
+					target = newtarget
+					target.classList.add('revert')
+				}
+			}
+			target.setAttribute('style','display:inline; writing-mode: vertical-lr;')
+			// method
+			if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
+			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+			} else if (isDomRect == 1) {method = target.getClientRects()[0]
+			} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+			} else if (isDomRect > 2) {method = range.getClientRects()[0]
+			}
+			// typecheck
+			let itemdata = [method.width, method.height, method.x, method.y]
+			if (isFirst) {
+				isFirst = false
+				itemdata.forEach(function(item){
+					if (runST) {item = null}
+					let typeCheck = typeFn(item)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				})
+			}
+			data[k] = itemdata
+		}
+		hash = mini(data); btn = addButton(15, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	removeElementFn(id)
+	addBoth(15, METRIC, hash, btn,'', data, (isDomRect == -1))
+	log_perf(15, METRIC, t0)
+	return
+}
+
 function get_element_scrollbars(METRIC) {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
 		// ui.useOverlayScrollbars: 0 = no, 1 = yes
@@ -477,6 +558,7 @@ const outputElements = () => new Promise(resolve => {
 		get_element_keys('htmlelement_keys'),
 		get_element_forms('element_forms'),
 		get_element_mathml('element_mathml'),
+		get_element_other('element_other'),
 		get_element_scrollbars('element_scrollbars'),
 	]).then(function(){
 		return resolve()
