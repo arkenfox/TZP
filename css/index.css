@@ -354,6 +354,9 @@ tr td.border-top {
 	-webkit-appearance: none;
 	appearance: none;
 }
+#element-fp .revert {
+	all: revert;
+}
 .skew {transform: skew(1.787542deg,3.263901deg);}
 
 /*** TZP MAIN ***/
