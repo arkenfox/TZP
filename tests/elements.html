@@ -124,8 +124,8 @@ let oData = {}
 	// always use the same char
 let oListBase = {
 	a: '<a href="">.</a>',
-	base: '<base href=""/>', // empty: width/x are zero but height/y are intesring
 	audio: '<audio controls=""></audio>',
+	base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
 	big_x2: '<big><big>.</big></big>',
 	big_x3: '<big><big><big>.</big></big></big>',
 	br: '<br>',
@@ -234,7 +234,7 @@ function get_elements() {
 				try {
 					target.setAttribute("style","display:inline; writing-mode: "+ style +";")
 					let method = target.getBoundingClientRect()
-					let data = [method.height, method.width, method.x, method.y]
+					let data = [method.width, method.height, method.x, method.y]
 					data = isNotateStyle ? [styleCode].concat(data) : data
 					// always use x as this helps ensure entropy regardless of isVertical
 					let dataExtra = isNotateStyle ? [styleCode, method.x] : [method.x]
