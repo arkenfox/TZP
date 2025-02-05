@@ -61,6 +61,7 @@ var aLegend = [],
 	aDates = [],
 	aDays = ["January 1","July 1",],
 	aYears = [],
+	aYearsTZP = [1879,1921,1952,1976,2025],
 	loopYear = "",
 	loopData = [],
 	tzResolved = ""
@@ -200,7 +201,7 @@ function run_test(isLoopy) {
 				}
 				tzpdata[aYears[i]] = tzyear
 			}
-			if (aYears.join() == "1879,1921,1952,1976,2018") {
+			if (aYears.join(',') == aYearsTZP.join(',')) {
 				tzpHash = mini(tzpdata)
 				console.log("TZP HASH/DATA", tzpHash+"\n", tzpdata)
 			} else {
@@ -560,7 +561,7 @@ function run(isLoopy) {
 			// tested: every year from 0-2100
 			// tested: negative years
 		// use a year in the future to catch some changes from tzdata
-		aYears = [1879,1921,1952,1976,2025]
+		aYears = aYearsTZP
 /*
 old: using 2018
 unique:  49 groups (>1) 173 timezones
@@ -581,7 +582,7 @@ unique:  48 groups (>1) 171 timezones <- less shared
 		//for (let i = -1050; i < -350; i=i+7) {aYears.push(i)} // add negative years
 		//for (let i = 2000; i < 2100; i++) {aYears.push(i)}    // add the future
 
-		dom.inputYears.value = aYears.join(",")
+		dom.inputYears.value = aYears.join(',')
 		go = true
 	}
 
@@ -628,6 +629,8 @@ function start() {
 		dom.elementSupported.style.display = "none"
 	}
 	legend()
+	
+
 }
 
 start()
