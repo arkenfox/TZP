@@ -728,7 +728,7 @@ function get_window_props(METRIC) {
 				// isLies: exempt exact NS hashes: 11.4.37
 				/*
 				IDK why I get two pre-clicktoplay safers
-				c36227b3 (standard)
+				c36227b3 (standard - no longer exposed)
 					Element,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement
 				78e565db (safer: sometimes)
 					Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
@@ -746,7 +746,7 @@ function get_window_props(METRIC) {
 				97f1edb8 (safer: sometimes) 
 					same as e530ee88 but without OffscreenCanvas
 				*/
-				let aGood = ['c36227b3','e530ee88','18d6b7c6','78e565db']
+				let aGood = ['e530ee88','18d6b7c6','78e565db']
 				if (isTB) {aGood.push('97f1edb8')} // ToDo: remove once offscreencanvas is enabled in TB
 				if (!aGood.includes(mini(aTampered))) {
 					isLies = true
@@ -764,27 +764,37 @@ function get_window_props(METRIC) {
 				addDisplay(18, 'consolestatus', strConsole)
 			}
 		}
-		data.sort() // sort: console state affects order
+		if (isGecko) {
+			// move expected Performance, Event, Location to the end
+				// these affect the order if console open and various tabs selected
+			let aCheck = ['Location','Performance','Event']
+			let aItems = data.filter(x => aCheck.includes(x))
+			aItems.sort() // because an open console can change the order
+			data = data.filter(x => !aItems.includes(x))
+			data = data.concat(aItems)
+		} else {
+			data.sort()
+		}
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
-		if (isTB) {
-			// ToDo: touch devices
-				// Touch, TouchEvent, TouchList, ontouchcancel, ontouchend, ontouchmove, ontouchstart
-				// e.g. is not in my windows touch-capable laptop but may be present in a tablet
-			// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
-				// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)
-				// on touch devices: 0 (all false) 1 or 2 (all true)
 
-			if (isMullvad) {
-				//if ('3240d823' == hash || 'ce268b01' == hash) {notation = tb_green} // MB14: 840 standard | 839 safer
-				if ('e3d2df78' == hash || '2c04db16' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
+		// ToDo: touch devices
+			// Touch, TouchEvent, TouchList, ontouchcancel, ontouchend, ontouchmove, ontouchstart
+			// e.g. is not in my windows touch-capable laptop but may be present in a tablet
+		// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
+			// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)
+			// on touch devices: 0 (all false) 1 or 2 (all true)
 
+		// hashes are standard | safer | safer with click to play webgl
+		if (isMullvad) {
+			// MB14: #42767 offScreenCanvas disabled
+			if ('5508d87e' == hash || '6002b356' == hash || '948272e4' == hash) {notation = tb_green}
+		} else if (isTB) {
+			if (isOS == 'android') {
+				// TB14: #42767 offScreenCanvas disabled
+				//ToDo: if ('' == hash || '' == hash) {notation = tb_green}
 			} else {
-				if (isOS == 'android') {
-					if ('8835233b' == hash || '16ca79d9' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
-				} else {
-					//if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
-					if ('e0f2c491' == hash || 'beeaafef' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
-				}
+				// TB14: #42767 offScreenCanvas disabled
+				if ('62b9b2e9' == hash || '759e94b7' == hash || 'be2132e3' == hash) {notation = tb_green}
 			}
 		}
 	} catch(e) {
