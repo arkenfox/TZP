@@ -203,59 +203,50 @@
 				&nbsp; window</td><td class="mono border-bottom"><span class="c" id="window_positions"></span>
 				<span class="c" id="positions"></span>
 			</td></tr>
-		<!--orientation-->
+		<!--device orientation-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">type<br>angle<br>orientation + aspect-ratio</span></div>
+				&nbsp; [device] orientation</td>
+			<td class="mono">
+				<span class="c" id="orientation_device_summary"></span>
+				<span class="c" id="orientation_device"></span>
+				<div class="btn-right s99"><span id="labelS" class="btn btnright" onClick="togglerows('S','btn')">[+]</span></div>
+			</td>
+		</tr>
+		<tr class="togS"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mozOrientation<br>orientation.angle<br>orientation.type</span></div>
-			&nbsp; screen</td>
+			&nbsp; device</td>
 			<td class="mono">
 				<span class="c" id="orientation_mozOrientation"></span>
 				| <span class="c" id="orientation_orientation.angle"></span>
 				| <span class="c" id="orientation_orientation.type"></span>
-				<div class="btn-right s99">orientation</div>
+			<div class="btn-right s99">orientation</div>
 			</td></tr>
-		<tr>
+		<tr class="togS">
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
-			device-aspect-ratio</span></div> &nbsp; [css] screen</td>
-			<td class="mono">
-				<span id="cssOm"></span> | <span id="cssDAR"></span>
-			</td></tr>
-		<tr>
+			device-aspect-ratio</span></div> &nbsp; [css] device</td>
+			<td class="mono"><span id="cssOm"></span> | <span id="cssDAR"></span></td>
+		</tr>
+		<tr class="togS">
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
-			device-aspect-ratio</span></div> &nbsp; [matchMedia] screen</td>
-			<td class="mono">
-				<span class="c" id="orientation_-moz-device-orientation"></span>
-				| <span class="c" id="orientation_device-aspect-ratio"></span>
-			</td></tr>
-		<tr>
-			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span>
-				</div> &nbsp; [css] window</td>
-			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span></td></tr>
-		<tr>
-			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span>
-				</div> &nbsp; [matchMedia] window</td>
+			device-aspect-ratio</span></div> &nbsp; [matchMedia] device</td>
 			<td class="mono border-bottom">
-				<span class="c" id="orientation_aspect-ratio"></span>
-				| <span class="c" id="orientation_orientation"></span>
-				<span class="c" id="orientation"></span>
-		</td></tr>
-
+				<span class="c" id="orientation_-moz-device-orientation"></span> | <span class="c" id="orientation_device-aspect-ratio"></span>
+			</td>
+		</tr>
 		<!--screen-->
 		<tr><td>screen</td><td class="mono">
 			<span class="c" id="screen_summary"></span>
 			<span class="c" id="sizes_screen"></span>
-			<div class="btn-right s99"><span id="labelS" class="btn btnright" onClick="togglerows('S','btn')">[+]</span></div>
 		</td></tr>
 		<tr class="togS"><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
 			&nbsp; [min-device-] css <sup>1</sup></td>
-			<td class="mono"><span id="S"><span>
-			<div class="btn-right s99">screen</div>
-		</td></tr>
+			<td class="mono"><span id="S"><span><div class="btn-right s99">screen</div></td>
+		</tr>
 		<tr class="togS"><td>iframe</td><td class="c mono" id="screen_iframe"></td></tr>
 		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="screen_media"></td></tr>
-		<tr class="togS"><td>screen</td><td class="mono border-bottom">
-			<span class="c" id="screen_screen"></span>
-		</td></tr>
+		<tr class="togS"><td>screen</td><td class="mono border-bottom"><span class="c" id="screen_screen"></span></td></tr>
 		<!--available-->
 		<tr><td>available</td><td class="mono">
 			<span class="c" id="available_summary"></span>
@@ -266,12 +257,12 @@
 			<div class="btn-right s99">available</div>
 			<span class="c" id="screen_sizes"></span>
 		</td></tr>
-		</td></tr>
+
 		<tr class="togS"><td>screen</td><td class="mono border-bottom">
 			<span class="c" id="available_screen"></span>
 		</td></tr>
 		<!--outer-->
-		<tr class="togA"><td>initial outer</span></td><td class="mono" id="initial_outer"></td></tr>
+		<tr class="togA"><td>initial outer</td><td class="mono" id="initial_outer"></td></tr>
 		<tr><td>outer</td><td class="mono">
 				<span class="c" id="outer_summary"></span>
 				<span class="c" id="sizes_outer"></span>
@@ -283,6 +274,17 @@
 		<tr class="togS"><td>window</td><td class="mono border-bottom">
 			<span class="c" id="outer_window"></span>
 			<span class="c" id="window_sizes"></span>
+		</td></tr>
+		<!--window orientation-->
+		<tr class="togS">
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp; [css] window</td>
+			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span><div class="btn-right s99">orientation</div>
+		</td></tr>
+		<tr class="togS">
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span>
+				</div> &nbsp; [matchMedia] window</td>
+			<td class="mono border-bottom">
+				<span class="c" id="orientation_aspect-ratio"></span> | <span class="c" id="orientation_orientation"></span>
 		</td></tr>
 		<!--inner-->
 		<tr class="togA"><td>initial inner</td><td class="c mono" id="initial_inner"></td></tr>
