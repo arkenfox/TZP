@@ -791,7 +791,7 @@ function get_window_props(METRIC) {
 		} else if (isTB) {
 			if (isOS == 'android') {
 				// TB14: #42767 offScreenCanvas disabled
-				//ToDo: if ('' == hash || '' == hash) {notation = tb_green}
+				if ('1059445d' == hash || '077a3df7' == hash || '8fc6eaf7' == hash) {notation = tb_green}
 			} else {
 				// TB14: #42767 offScreenCanvas disabled
 				if ('62b9b2e9' == hash || '759e94b7' == hash || 'be2132e3' == hash) {notation = tb_green}
