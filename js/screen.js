@@ -638,10 +638,10 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 	// NOTE: a screen.orientation.addEventListener('change'.. event
 		// does not detect css changes, but a resize event does, which
 		// is the only one we use, so treat css as truthy
-	let oData = {'screen': {}, 'window': {}}, oDisplay = {}, lieCount = 0
+	let oData = {'device': {}, 'window': {}}, oDisplay = {}
 	// matchmedia: sorted names
 	let oTests = {
-		'screen': {'-moz-device-orientation': '#cssOm', 'device-aspect-ratio': '#cssDAR'},
+		'device': {'-moz-device-orientation': '#cssOm', 'device-aspect-ratio': '#cssDAR'},
 		'window': {'aspect-ratio': '#cssAR', 'orientation': '#cssO'}
 	}
 	let l = 'landscape', p = 'portrait', q = '(orientation: ', s = 'square', a = 'aspect-ratio'
@@ -669,7 +669,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 				if (runST) {value = undefined} else if (runSL) {value += '_fake'}
 				if (value == undefined) {throw zErrType +'undefined'} // we expect values (in gecko)
 			} catch(e) {
-				log_error(1, METRIC +'_'+ item, e)
+				log_error(1, METRIC +'_'+ type +'_'+ item, e)
 				value = zErr
 				isErr = true
 			}
@@ -680,17 +680,17 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			let isLies = (!isErr && !isErrCss && value !== cssvalue)
 			oDisplay[METRIC +'_'+ item] = {'value': value, 'lies': isLies}
 			if (isSmart && isLies) {
-				log_known(1, METRIC +'_'+ item, value)
+				log_known(1, METRIC +'_'+ type +'_'+ item, value)
 				value = zLIE
-				lieCount++
 			}
 			oData[type][item] = value
 			oData[type][cssitem] = cssvalue
 		}
 	}
-	// try and get a valid css value
-	let check = oData.screen['-moz-device-orientation_css']
-	if (zErr == check) {check = oData.screen['device-aspect-ratio_css']}
+
+	// device: try and get a valid css value
+	let check = oData.device['-moz-device-orientation_css']
+	if (zErr == check) {check = oData.device['device-aspect-ratio_css']}
 	if ('square' == check) {check = 'portrait'}
 
 	// screen
@@ -720,50 +720,51 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 				// check mozOrientation + .type matches css
 				// note: we can't check the angle, it could be anything - see Piero tablet tests
 				if ('string' == expected && value.split('-')[0] !== check) {
-					log_known(1, METRIC +'_'+ item, value)
+					log_known(1, METRIC +'_device_'+ item, value)
 					isLies = true
-					lieCount++
 				}
 			}
 		} catch(e) {
-			log_error(1, METRIC +'_'+ item, e)
+			log_error(1, METRIC +'_device_'+ item, e)
 			value = zErr
 		}
 		oDisplay[METRIC +'_'+ item] = {'value': value, 'lies': isLies}
-		oData['screen'][item] = isLies ? zLIE : value
+		oData['device'][item] = isLies ? zLIE : value
 	})
 
 	// https://searchfox.org/mozilla-central/source/testing/web-platform/tests/screen-orientation/orientation-reading.html
 	// see expectedAnglesLandscape + expectedAnglesPortrait
-	// harden
-		// ToDo: 2 x css match | 2 x matchmedia match | 2 x mozOrientation + .type match
-		// this is done with aGood below, but for non-RFP, we could check
-	// and update oDisplay and oData and lieCount
+	// display, data
+	for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k]['value'],'','', oDisplay[k]['lies'])}
+	for (const k of Object.keys(oData)) {
+		// objects are already sorted
+		let data = oData[k]
+		let hash = mini(data)
+		addData(1, METRIC +'_'+ k, oData[k], hash)
+		if ('device' == k) {
+			// device health check
+			// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to BB
+			// RFP is always primary | on android the angle of 0 vs 90 is reversed
 
-	for (const k of Object.keys(oDisplay)) {
-		addDisplay(1, k, oDisplay[k]['value'],'','', oDisplay[k]['lies'])
+			// type | angle | orientation (css) + aspect ratio (css)
+			let oGood = {
+				'a1de035c': 'landscape-primary | 0 | landscape',
+				'ccc8dc6d': 'portrait-primary | 90 | portrait',
+				'fb6084ad': 'portrait-primary | 90 | portrait | square',
+			}
+			if ('android' == isOS) {
+				oGood = {
+					'813838a9': 'landscape-primary | 90 | landscape',
+					'360dd99a': 'portrait-primary | 0 | portrait',
+					'fdc0295a': 'portrait-primary | 0 | portrait | square',
+				}
+			}
+			let display = undefined !== oGood[hash] ? oGood[hash] : hash
+			addDisplay(1, METRIC +'_'+ k +'_summary', display)
+			addDisplay(1, METRIC +'_'+ k,'','', (undefined !== oGood[hash] ? rfp_green : rfp_red))
+		}
 	}
 
-	// objects are already sorted
-	let hash = mini(oData)
-	// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to TB
-		// all seven metrics should always return one of 3 hashes
-		// landscape, portrait, portrait but square
-	// RFP is always primary | on android the angle of 0 vs 90 is reversed
-	let aGood = [
-		'7a1ec766', //  0 landscape
-		'5c281761', // 90 portrait
-		'a55cb95d', // 90 portrait/square
-	]
-	if ('android' == isOS) {
-		aGood = [
-			'bd9328e9', // 90 landscape
-			'df6d41d8', //  0 portrait
-			'e6c593d4', //  0 portrait/square
-		]
-	}
-	addDisplay(1, METRIC,'','', (aGood.includes(hash) ? orientation_green : orientation_red))
-	addData(1, METRIC, oData, hash)
 	return resolve()
 })
 
