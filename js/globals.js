@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 149
+	expectedMetrics = 150
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -120,9 +120,7 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	tz_green = sgtick+' timezone]'+sc,
 	tz_red = sbx+' timezone]'+sc,
 	position_green = sgtick+'RFP positions]'+sc,
-	position_red = sbx+'RFP positions]'+sc,
-	orientation_green = sgtick+'RFP orientation]'+sc,
-	orientation_red = sbx+'RFP orientation]'+sc
+	position_red = sbx+'RFP positions]'+sc
 
 // dynamic TB/MB notation
 let tb_green = sgtick+'TB]'+sc,
