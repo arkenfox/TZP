@@ -97,13 +97,15 @@ function get_element_keys(METRIC) {
 		const aExpected = ['scrollWidth','scrollHeight','clientWidth','clientHeight']
 		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
 		if (isTB) {
+			// NS 12.1.1 only exposes all the set/value tampering on safer
 			if ('android' == isOS) {
-				if ('7766b529' == hash) {notation = tb_green}
+				// 7db91b52: standard
+				// 7766b529: safer (including webgl click-to-play)
+				if ('7db91b52' == hash || '7766b529' == hash) {notation = tb_green}
 			} else {
-				// NS 12.1.1 only exposes all the set/value tampering on safer
-					// eb81553d: 353 safer
-					// 1817fdbe: 340 standard
-				if ('eb81553d' == hash || '1817fdbe' == hash) {notation = tb_green}
+				// 1817fdbe: 340 standard
+				// eb81553d: 353 safer (including webgl click-to-play)
+				if ('1817fdbe' == hash || 'eb81553d' == hash) {notation = tb_green}
 			}
 		}
 	} catch (e) {
