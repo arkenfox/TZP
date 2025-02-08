@@ -169,8 +169,9 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	bottom: 0;
 	transform: translate(-50%, -50%);
 	display: none;
-	width: 710px;
-	min-width: 400px;
+	width: 95%;
+	max-width: 725px;
+	min-width: 525px;
 	height: 85%;
 	overflow-y:scroll;
 	border: 2px solid var(--test0);
@@ -212,7 +213,9 @@ div.nav-right {position: absolute; right: 5px; top: -2px; width: 0px;}
 
 /* tables */
 table {
-	width: 765px;
+	width: 98%;
+	min-width: 575px;
+	max-width: 775px;
 	border-collapse: collapse;
 	margin: 0 auto 10px auto;
 	font-size: 12px;
