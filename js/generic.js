@@ -714,6 +714,8 @@ function json_highlight(json, clrValues = false) {
 function json_stringify(passedObj, options = {}) {
 	/* https://github.com/lydell/json-stringify-pretty-compact */
 	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
+	// overlay: (425-50 margin) 375 vs 675 (725-50) = 56%: 88->50, but this seems too low
+	const osMaxLength = 'android' == isOS ? 68 : 88
 	const indent = JSON.stringify(
 		[1],
 		undefined,
@@ -723,7 +725,7 @@ function json_stringify(passedObj, options = {}) {
 		indent === ''
 			? Infinity
 			: options.maxLength === undefined
-			? 88
+			? osMaxLength
 			: options.maxLength;
 	let { replacer } = options;
 
