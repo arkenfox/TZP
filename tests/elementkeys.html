@@ -22,6 +22,7 @@
 		<thead><tr><th>
 			<div class="nav-title">element keys
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-down"><span class="c perf" id="perf2"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td class="intro">
@@ -59,7 +60,6 @@ let oListIgnore = {
 		'tfoot','thead', // = tbody
 		'th', // = td
 		'colgroup', // = col
-
 		// = span
 		'abbr','acronym','address','applet','article','aside','b',
 		'basefont','bdi','bdo','big','center','cite','code','dd','dfn','dt',
@@ -72,39 +72,63 @@ let oListIgnore = {
 }
 
 let oList = {
-	// as of 130 nightly
-	"CHECK": [
-		// elements: 11ms cold | 7ms warm
-		// domparser: 3ms cold | 2ms warm
-
-		// changes since FF56
-		'audio', // 58, 59, 101, 115, 116, 128, 130n
-		'button', // 110, 125
-		'details', // 130n (name)
-		'iframe', // 74, 83, 121
-		'img', // 63, 68, 75, 130n (fetchPriority)
-		'input', // 57, 101, 110, 116, 125
-		'marquee', // 65, 126 (removed onbounce, onfinish, onstart)
-		'select', // 59, 110, 122
-		'template', // 123 (shadowRootMode, shadowRootDelegatesFocus), 125 (shadowRootClonable), 128 (shadowRootSerializable)
-		'textarea', // 59, 110, 116
-		'video', // 58, 59, 101, 115, 116, 122, 128, 130n
+	// as of 137n
+	"CHECK A": [
+	// changes since FF128
+		// cold 3.5 | rerun 1.7
+		'audio',
+			// 116	setSinkId, sinkId
+			// 128	(seekToNextFrame)
+			// 137n	allowedToPlay
+		'details',
+			// 130	name
+		'template',
+			// 123	shadowRootMode, shadowRootDelegatesFocus
+			// 125	shadowRootClonable
+			// 128	shadowRootSerializable
+		'video',
+			// 116	setSinkId, sinkId
+			// 122	disablePictureInPicture
+			// 128	(seekToNextFrame)
+			// 132	requestVideoFrameCallback, cancelVideoFrameCallback
+			// 137n	allowedToPlay
+		'img',
+			// 132	fetchPriority
+		//'link',
+			// 132	fetchPriority
+		'script',
+			// 132	fetchPriority
+			// 135	innerText, textContent
 	],
-	//*
-	"OTHER": [
-		'script', // 59, 65, 130n (fetchPriority)
-		'link', // 78, 130n (fetchPriority)
-		'form', // 75, 111 (rel, relList)
+	"CHECK B": [
+	// changes since FF115: added or (removed)
+		// fast since the pasrer is already created
+		// cold: 0.7 | rerun 0.7
+		'button',
+			// 125	popoverTargetElement, popoverTargetAction
+		'iframe',
+			// 121	(loading)
+		'input',
+			// 116	dirName
+			// 125	popoverTargetElement, popoverTargetAction
+		'marquee',
+			// 126	(onbounce, onfinish, onstart)
+		'select',
+			// 122	showPicker
+		'textarea',
+			// 116	dirName
+	],
+	// no changes since FF111
+	"STABLE": [
 		'source', // 108 (width, height)
 		'meta', // 106 (media)
-		'canvas', // 74, 105
 		'dialog', // first added in 98 (show, showModal, close, open, returnValue)
+		'form', // 75, 111 (rel, relList)
+		'canvas', // 74, 105
+		'object', // 68
 		'slot', // assignedNodes + name (63) assignedElements (66), assign (92)
 		'body', // 57, 69, 89
 		'frameset', // 57, 69, 89
-	],
-	"STABLE": [
-		'object', // 68
 		'meter', // 56 (labels)
 		'progress', // 56 (labels)
 		'style', // disabled, media, type, sheet (scoped removed in 55)
@@ -158,8 +182,8 @@ let oPreHash = {}
 let isDOMParser = true
 // DOMParser can't be used for these
 let aNoParser = [
-	'link','template','frameset','base','basefont','caption','col','colgroup',
-	'frame','noframes','noscript','tbody','td','tfoot','th','thead','tr'
+	'link','template', // checkA
+	'base','basefont','caption','col','colgroup','frame','frameset','noframes','noscript','tbody','td','tfoot','th','thead','tr', // stable
 ]
 
 function run() {
@@ -173,6 +197,9 @@ function run() {
 	let tmpHash = {}
 	let tmpPreHash = {}
 	let oOrder = {}
+	let perfA, perfB
+
+
 	let splitValue = isFF ? "click" : "title" // title works for chrome + safari
 	/* interesting (without extension fuckery which I have not tested)
 		FF122
@@ -225,6 +252,12 @@ function run() {
 
 		// loop elements
 		for (const k of Object.keys(tmpList).sort()) {
+			if (k == 'CHECK B') {
+				perfA = performance.now() - t0
+			} else if (k =="STABLE") {
+				perfB = (performance.now() - t0) - perfA
+			}
+
 			let aList = tmpList[k]
 			tmpHash[k] = {}
 			tmpPreHash[k] = {}
@@ -340,6 +373,7 @@ function run() {
 		// remove parent div
 		cleanup()
 		dom.perf = Math.round(performance.now() - t0) +" ms"
+		dom.perf2 = perfA.toFixed(1) +" | " + perfB.toFixed(1)
 
 		//* everything
 		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
@@ -397,10 +431,46 @@ function run() {
 			let notation = '', hash = mini(oPreHash[m])
 			if (isFF && !dom.optAll.checked) {
 				if ('STABLE' == m) {
-					if (hash == "74df70ef") {notation = sg +' ['+ green_tick +' FF68+]'+ sc
-					} else if (hash == "6b68a739") {notation = sg +' ['+ green_tick +' FF56-67]'+ sc
-					} else if (hash == '729f9c8d') {notation = sg +' ['+ green_tick +' FF55]'+ sc
-					} else if (hash == 'b4fa0221') {notation = sg +' ['+ green_tick +' FF52-54]'+ sc
+					/*
+						111 'form'			(rel, relList)
+						108 'source'		(width, height)
+						106 'meta'			(media)
+						105 'canvas'
+						98 'dialog', 		(show, showModal, close, open, returnValue)
+						92 'slot' 			assign
+						89 'body' + frameset
+						75 'form'
+						74 'canvas'
+						69 'body' + 'frameset'
+						68 'object',
+						66 'slot' 			assignedElements
+						63 'slot' 			assignedNodes + name
+						57 'body' + frameset
+						56 'meter'			labels
+						56 'progress'		labels
+						55 'style'			disabled, media, type, sheet (scoped removed)
+					*/
+					let aOld = [
+						'a488bcc2', // 52-54
+						'af10529e', // 55
+						"6eec601a", // 56
+						"41d93fcb", // 57-62
+						"78f06620", // 63-65
+						"18ab13c8", // 66-67
+						"e814e712", // 68
+						"4b789ebc", // 69-73
+						"32f32119", // 74
+						"4f0ebd4c", // 75-88
+						"9bbc22ad", // 89-91
+						"5a242cc8", // 92-97
+						"8ecb0dbe", // 98-104
+						'1306147e', // 105
+						'bedac0de', // 106-107
+						'28bef477', // 108-110
+						'cc0e42c9', // TB128 without NoScript tampering (offscreencanvas)
+					]
+					if (hash == "93802989") {notation = sg +' ['+ green_tick +' FF111+]'+ sc
+					} else if (aOld.includes(hash)) {notation = sg +' ['+ green_tick +' FF114 or lower]'+ sc
 					} else {notation = ' '+ zNEW
 					}
 				}
