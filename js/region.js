@@ -915,15 +915,18 @@ function get_timezone(METRIC) {
 	]
 
 	function get_tz() {
-		let methods = ['timeZone','timeZoneId']
+		let methods = ['timeZone','timeZoneId','zonedDateTime']
 		let tzData = {}
 		methods.forEach(function(k) {
 			let tz, isErr = false
 			try {
 				if ('timeZone' == k) {
 					tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-				} else {
+				} else if ('timeZoneId' == k) {
 					tz = Temporal.Now.timeZoneId()
+				} else {
+					tz = Temporal.Now.zonedDateTimeISO().toString()
+					tz = tz.slice(tz.indexOf('[') + 1, tz.length - 1)
 				}
 				if (runST) {tz = undefined} else if (runSI) {tz = 'tzp'}
 				let typeCheck = typeFn(tz)
@@ -1086,8 +1089,8 @@ function get_timezone(METRIC) {
 		if (isTimeZoneValid) {
 			let tzHash = mini(tzObj)
 			let tzGood = [
-				'76724157', // Atlantic/Reykjavik + "ReferenceError: Temporal is not defined"
-				'35c01582', // both Atlantic/Reykjavik
+				'0282cadf', // Atlantic/Reykjavik + 2x "ReferenceError: Temporal is not defined"
+				'8d787cb5', // all Atlantic/Reykjavik
 			]
 			notation = tzGood.includes(tzHash) ? rfp_green : rfp_red
 			addBoth(4, METRICtz, tz,'', notation)
@@ -1125,7 +1128,7 @@ function get_timezone_offset(METRIC) {
 		+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
 	const doc = (new DOMParser).parseFromString(xslText, 'text/xml')
 	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tz
-	let methods = ['control','date','exslt','iframe','string','unsafe']
+	let methods = ['control','date','exslt','iframe','plain','string','unsafe','zoned']
 	let notation = tz_red
 
 	function checkValidDate(method, value) {
@@ -1137,7 +1140,7 @@ function get_timezone_offset(METRIC) {
 		methods.forEach(function(k){
 			let n = METRIC +'_'+ k
 			let value, data ='', extra ='', isLies = false
-			if (oData.format[k] !== undefined) {
+			if (undefined !== oData.format[k]) {
 				// style + record lies
 				// technically control isn't a lie, even if it can be tampered with
 				// and any tampering with the date object will already show up as lies vs exslt
@@ -1237,12 +1240,26 @@ function get_timezone_offset(METRIC) {
 			let control = (new Date()).toLocaleDateString('en', option)
 			oData.raw['control'] = control.replace(',','')
 		} catch(e) {oErr['control'] = e+''}
+		try {
+			oData.raw['zoned'] = Temporal.Now.zonedDateTimeISO().toString()
+		} catch(e) {
+			oErr['zoned'] = e+''
+		}
+		try {
+			oData.raw['plain'] = Temporal.Now.plainDateTimeISO().toString()
+		} catch(e) {
+			oErr['plain'] = e+''
+		}
+		//console.log(oData.raw)
+
 		// test
 		if (runST) {
 			oData.raw['date'] = {}
 			oData.raw['iframe'] = null
 			oData.raw['string'] = undefined
+			oData.raw['plain'] = ''
 			oData.raw['unsafe'] = '99-99-99' // invalid
+			oData.raw['zoned'] = 4
 		}
 		// type check/format
 		methods.forEach(function(k){
@@ -1254,7 +1271,7 @@ function get_timezone_offset(METRIC) {
 					let formatted
 					if ('exslt' == k) {
 						// set xOffset
-						xOffset = (oData.raw.exslt).slice(-6)
+						xOffset = (oData.raw[k]).slice(-6)
 						// get xMinutes in getTimezoneoffset format
 							// *1 works as it ignores leading 0's and returns a number
 							// flip the sign but drop if positive or 0 to match calculated/getTimezoneOffset
@@ -1262,6 +1279,9 @@ function get_timezone_offset(METRIC) {
 						let xSign = (xOffset[0] == '+' ? (xMinutes == 0 ? '': '-') : '')
 						xMinutes = xSign + xMinutes
 						formatted = ((oData.raw[k]).slice(0,-10)).replace('T',' ')
+					} else if ('zoned' == k || 'plain' == k) {
+						// we only want the first 19 chars
+						formatted = ((oData.raw[k]).slice(0,19)).replace('T',' ')
 					} else {
 						formatted = (oData.raw[k]).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
 					}
@@ -1282,8 +1302,12 @@ function get_timezone_offset(METRIC) {
 			get_mods()
 			isMatch = checkMatch(2)
 		}
+		// ignore temporal not defined errors for notation
+		let errLen = Object.keys(oErr).length
+		if ('ReferenceError: Temporal is not defined' == oErr['zoned']) {errLen = errLen - 1}
+		if ('ReferenceError: Temporal is not defined' == oErr['plain']) {errLen = errLen - 1}
 		// no lies + no errors: includes control even though we ignore it for display/recording
-		if (0 == Object.keys(oLies).length && 0 == Object.keys(oErr).length) {notation = tz_green}
+		if (0 == Object.keys(oLies).length && 0 == errLen) {notation = tz_green}
 		addBoth(4, METRIC, xValue,'', notation)
 	}
 	display_detail()
