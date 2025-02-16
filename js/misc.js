@@ -212,11 +212,13 @@ function get_timing(METRIC) {
 		// check isPerf again
 		if (isPerf) {get_isPerf()}
 		// get a last value for each to ensure a max diff
-		try {gData.timing['now'].push(performance.now())} catch(e) {}
-		try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
-		try {performance.mark('a')} catch(e) {}
-		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
-		try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch(e) {}
+		try {gData.timing['now'].push(performance.now())} catch {}
+		try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch {}
+		try {performance.mark('a')} catch {}
+		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
+		try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch {}
+		try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch {}
+
 		// poulate some data
 		get_timing_mark()
 		get_timing_navigation()
@@ -240,6 +242,7 @@ function get_timing(METRIC) {
 	}
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
+		'instant': [0, 1, 16, 17, 33, 34],
 		'performance': [0, 1, 16, 17, 33, 34],
 		'exslt': [0], // 1912129: exslt diffs must be 1000, and all end in .000
 		'other': [
@@ -271,7 +274,7 @@ function get_timing(METRIC) {
 			if (aTimes.length) {sDetail.document[METRIC +'_data'][k] = aTimes}
 			// type check
 			let setDiffs = new Set(), aTotal = []
-			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
+			let start = aTimes[0], expected = ('exslt' == k || 'instant' == k) ? 'string' : 'number'
 			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
 			// check noise
@@ -285,6 +288,9 @@ function get_timing(METRIC) {
 				if ('.000' !== start.slice(-4)) {isMatch = false}
 				// we use epoch time so each entry is always moving forward in time | remove leading 0 in ms
 				start = start.slice(0,20) + start.slice(-2)+ '0'
+				start = (new Date(start))[Symbol.toPrimitive]('number')
+			} else if ('instant' == k) {
+				start = start.slice(0,-1) // remove trailing Z
 				start = (new Date(start))[Symbol.toPrimitive]('number')
 			}
 			// get diffs
@@ -301,6 +307,9 @@ function get_timing(METRIC) {
 				if ('exslt' == k) {
 					if ('.000' !== end.slice(-4)) {isMatch = false}
 					end = end.slice(0,20) + end.slice(-2)+ '0'
+					end = (new Date(end))[Symbol.toPrimitive]('number')
+				} else if ('instant' == k) {
+					end = end.slice(0,-1) // remove trailing Z
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
 				// truncate to 1 decimal place
@@ -372,6 +381,7 @@ function get_timing(METRIC) {
 		} catch(e) {
 			oData[k] = ''
 			if ('reducetimer' !== k) {
+				if ('instant' == k && 'ReferenceError: Temporal is not defined' == e) {e = zSKIP}
 				str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
 				oData[k] = (zD == e || zSKIP == e) ? e : zErr
 				data = str
@@ -394,7 +404,7 @@ function get_timing(METRIC) {
 	// data
 	if ('timing_precision' == METRIC) {
 		// reducetimer: privacy.reduceTimerPrecision
-		// we didn't countFail reducetimer so RFP will zero fails
+		// we didn't countFail reducetimer or skipped Temporal so RFP will have zero fails
 		let isProtected = countProtected == aLoop.length
 		let rtvalue
 		notation = silent_green
