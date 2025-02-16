@@ -913,20 +913,29 @@ function get_timezone(METRIC) {
 	let aMethods = [
 		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','Symbol.toPrimitive',
 	]
-	let isTimeZoneErr = true
 
 	function get_tz() {
-		try {
-			let tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-			if (runST) {tz = undefined} else if (runSI) {tz = 'tzp'}
-			let typeCheck = typeFn(tz)
-			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			let tztest = (new Date('January 1, 2018 13:00:00 UTC')).toLocaleString('en', {timeZone: tz})
-			isTimeZoneErr = false
-			return (tz)
-		} catch(e) {
-			return ([log_error(4, METRICtz, e)])
-		}
+		let methods = ['timeZone','timeZoneId']
+		let tzData = {}
+		methods.forEach(function(k) {
+			let tz, isErr = false
+			try {
+				if ('timeZone' == k) {
+					tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+				} else {
+					tz = Temporal.Now.timeZoneId()
+				}
+				if (runST) {tz = undefined} else if (runSI) {tz = 'tzp'}
+				let typeCheck = typeFn(tz)
+				if ('string' !== typeCheck) {throw zErrType + typeCheck}
+				let tztest = (new Date('January 1, 2018 13:00:00 UTC')).toLocaleString('en', {timeZone: tz})
+			} catch(e) {
+				tz = e+''
+				isErr = true
+			}
+			tzData[k] = {'isErr': isErr, 'name': tz}
+		})
+		return tzData
 	}
 
 	function get_offsets() {
@@ -985,9 +994,18 @@ function get_timezone(METRIC) {
 		get_offsets(),
 	]).then(function(res){
 
-		// TZ: we returned a string (valid but could be a lie) or an array [error]
-		let tz = res[0]
-		if ('string' == typeof tz) {isTimeZoneValue = tz}
+		// TZ: we returned an object
+		let tz, tzObj = res[0], tzData = []
+		// display each item and track non-errors
+		for (const k of Object.keys(tzObj)) {
+			let display = tzObj[k].name
+			if (false == tzObj[k].isErr) {tzData.push(display) // track non errors
+			} else {display = log_error(4, METRICtz +'_'+ k, display)} // log errors
+			addDisplay(4, METRICtz +'_'+ k, display) // display
+		}
+		// dedupe, if only 1 non-error, then we have a tz value
+		tzData = tzData.filter(function(item, position) {return tzData.indexOf(item) === position})
+		if (1 == tzData.length) {tz = tzData[0]; isTimeZoneValue = tz}
 
 		// OFFSETS
 		let oOffsets = res[1], notation = tz_red, go = true, aHash = {}, countErr = 0, allHash
@@ -1029,8 +1047,8 @@ function get_timezone(METRIC) {
 		}
 
 		// all valid + same
+		let isLies = false
 		if (go) {
-			let isLies = false
 			if (isTimeZoneValue !== undefined) {
 				try {
 					let oTest = {}
@@ -1051,24 +1069,43 @@ function get_timezone(METRIC) {
 					if (testHash !== allHash) {
 						isLies = true
 					} else if (isSmart) {
-						// legit timezonename
+						// legit single timezonename
 						// legit looking offset values
 						// all offsets methods match
 						// a control matches using the timezonename
 					 isTimeZoneValid = true
 					}
-				} catch(e) {}
+				} catch {}
 			}
 			// display
 			addBoth(4, METRIC, allHash, addButton(4, METRIC), notation, oOffsets['getTime'], isLies)
 		}
 
-		// TZ: after isTimeZoneValid
-		if (!isTimeZoneValid && !isTimeZoneErr) { // ignore error
-			addBoth(4, METRICtz, tz,'', rfp_red,'', true)
-		} else {
-			notation = 'Atlantic/Reykjavik' == tz ? rfp_green : rfp_red
-			addBoth(4, METRICtz, tz,'', notation, (isTimeZoneErr ? zErr : ''))
+		// TZ: after isTimeZoneValid set above
+			// which can only be true if we had a single tz (ignoring errors) after deduping
+		if (isTimeZoneValid) {
+			let tzHash = mini(tzObj)
+			let tzGood = [
+				'76724157', // Atlantic/Reykjavik + "ReferenceError: Temporal is not defined"
+				'35c01582', // both Atlantic/Reykjavik
+			]
+			notation = tzGood.includes(tzHash) ? rfp_green : rfp_red
+			addBoth(4, METRICtz, tz,'', notation)
+		}	else {
+			notation = rfp_red
+			isLies = false // reset
+			if (undefined == tz) {
+				if (0 == tzData.length) {tz = zErr // all errors
+				} else if (tzData.length > 1) {tz = 'mixed'; isLies = true} // mixed so untrustworthy
+			} else {
+				isLies = true // single tz but failed the test, so untrustworthy
+			}
+			addBoth(4, METRICtz, tz,'', notation,'', isLies)
+		}
+		// health lookup
+		if (rfp_red == notation) {
+			sDetail.document[METRICtz] = {}
+			for (const k of Object.keys(tzObj)) {sDetail.document[METRICtz][k] = tzObj[k].name}
 		}
 		log_perf(4, METRIC, t0)
 		return

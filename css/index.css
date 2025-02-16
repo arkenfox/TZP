@@ -270,7 +270,7 @@ tr td.border-top {
 #tbblock th {background-color: var(--bg99);}
 
 .togA, .togP, /* android, perf */
-.togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTO, .togUAI, .togUAW {display: none;}
+.togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO, .togUAI, .togUAW {display: none;}
 
 
 #tb1 td:first-child {color: var(--test1);}
@@ -280,6 +280,7 @@ tr td.border-top {
 	#tb2 .togUAW td:first-child {color: var(--test99);} /* user agent workers */
 #tb3 td:first-child {color: var(--test3);}
 #tb4 td:first-child {color: var(--test4);}
+	#tb4 .togTT td:first-child {color: var(--test99);} /* timezone timezone */
 	#tb4 .togTL td:first-child {color: var(--test99);} /* timezone lastmodified */
 	#tb4 .togTO td:first-child {color: var(--test99);} /* timezone offsets */
 #tb5 td:first-child {color: var(--test5);}
