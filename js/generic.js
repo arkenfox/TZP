@@ -1386,6 +1386,9 @@ function addTiming(metric) {
 			value = (new Date())[Symbol.toPrimitive]('number')
 		} else if (6 == remainder) {
 			performance.mark('a')
+		} else if (7 == remainder) {
+			key = 'instant'
+			value = Temporal.Now.instant().toString()
 		}
 		if (undefined !== key) {
 			if (runST) {value = undefined}
@@ -1792,6 +1795,7 @@ function outputSection(id, isResize = false) {
 				performance.clearMarks('a')
 				performance.mark('a')
 			} catch(e) {}
+			try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch {}
 			gCountTiming = 0
 			addTiming('start') // adds first exslt
 
