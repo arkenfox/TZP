@@ -611,7 +611,7 @@ const get_canvas = () => new Promise(resolve => {
 						}
 						if (isFPPfallback) {
 							// TB but non-white, non-solid, persistent with no proxy lies: i.e FPP
-							notation += ' [FPP]'+ stats
+							notation += sg +' [FPP]'+ sc + stats
 						} else {
 							notation += ' [persistent' + (isWhite ? ' white]' : ']'+ stats)
 						}
