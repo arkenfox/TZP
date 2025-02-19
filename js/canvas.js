@@ -572,10 +572,11 @@ const get_canvas = () => new Promise(resolve => {
 					if ('skip' == getCheck) {checkValue = 'skip'}
 				}
 				if (checkValue !== 'skip') {
-					let	data ='', notation ='', stats ='', rfpvalue =''
+					let data ='', notation ='', stats ='', rfpvalue =''
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
+						let isFPPfallback = false // isTB but falls back to FPP
 						if ('is' == key) {
 							notation = (value === allZeros && !isProxyLie(proxyMap[name] +'.'+ name)) ? rfp_green : rfp_red // all zeros
 						} else {
@@ -584,24 +585,36 @@ const get_canvas = () => new Promise(resolve => {
 								// privacy.resistFingerprinting.randomDataOnCanvasExtract
 							if (oKnown[key +'_white'] == value) {isWhite = true}
 							// FPP: 119+ and no proxy lies and no getImageData stealth
-							// exclude TB14+ as PB mode falls back to FPP with canvas exceptions
 							// exclude solids: FPP does not tamper with those
 							// exclude if all white | exclude if proxy lies
 							// note: isGetStealth is getImageData
 							if (!isWhite && !isTB && !name.includes('_solid')) {
 								if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 									if ('ge' == key && !isGetStealth || 'ge' !== key) {
-										notation = fpp_green
+										// no proxy lies but persistent, so must be FPP
+										if (isTB) {
+											// TB uses PB mode which falls back to FPP with canvas exceptions
+											// but we want to keep our red RFP health check, and instead notate
+											// FPP is used rather than a generic persistent
+											isFPPfallback = true
+										} else {
+											notation = fpp_green
+										}
 									}
 								}
 							}
 						}
-						rfpvalue = notation == rfp_green ? ' | RFP' : (notation == fpp_green ? ' | FPP' : '')
+						rfpvalue = notation == rfp_green ? ' | RFP' : ((notation == fpp_green || isFPPfallback) ? ' | FPP' : '')
 						if ('ge' == key) {
 							stats = isCanvasGet
 							rfpvalue += ' | '+ isCanvasGetChannels
 						}
-						notation += ' [persistent' + (isWhite ? ' white]' : ']'+ stats)
+						if (isFPPfallback) {
+							// TB but non-white, non-solid, persistent with no proxy lies: i.e FPP
+							notation += ' [FPP]'+ stats
+						} else {
+							notation += ' [persistent' + (isWhite ? ' white]' : ']'+ stats)
+						}
 						data = 'protected | persistent'+ (isWhite ? ' white' : rfpvalue)
 
 					} else {
