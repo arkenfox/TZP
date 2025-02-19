@@ -588,7 +588,7 @@ const get_canvas = () => new Promise(resolve => {
 							// exclude solids: FPP does not tamper with those
 							// exclude if all white | exclude if proxy lies
 							// note: isGetStealth is getImageData
-							if (!isWhite && !isTB && !name.includes('_solid')) {
+							if (!isWhite && !name.includes('_solid')) {
 								if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 									if ('ge' == key && !isGetStealth || 'ge' !== key) {
 										// no proxy lies but persistent, so must be FPP
