@@ -62,7 +62,7 @@ function get_nav_gpc(METRIC) {
 		// privacy.globalprivacycontrol.functionality.enabled = navigator
 		// privacy.globalprivacycontrol.enabled = true/false
 	// FF120+ desktop (?android): gpc enabled: false but true in pb mode
-	let hash, data='', notation = isTB ? default_red : ''
+	let hash, data='', notation = isBB ? default_red : ''
 	try {
 		hash = navigator[METRIC]
 		if (runST) {hash = null} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
@@ -72,8 +72,8 @@ function get_nav_gpc(METRIC) {
 			let typeCheck = typeFn(hash)
 			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
 			// expected boolean but could be true or false, so don't notate
-			// except TB where we expect true due to pb mode
-			if (isTB && true === hash) {notation = default_green}
+			// except BB where we expect true due to pb mode
+			if (isBB && true === hash) {notation = default_green}
 		}
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -88,9 +88,9 @@ function set_isLanguageSmart() {
 	// set once: ignore android for now
 	if (!gLoad || !isSmart || 'android' == isOS) {return}
 
-	// TB/MB always or FF if locale matches
+	// BB always or FF if locale matches
 		// resource://gre/res/multilocale.txt
-	isLanguageSmart = isTB
+	isLanguageSmart = isBB
 
 	const en = 'en-US, en'
 	languagesSupported = {
@@ -137,7 +137,7 @@ function set_isLanguageSmart() {
 		'zh-CN': ['zh, zh-TW, zh-HK, '+ en, 'zh-Hans-CN'],
 		'zh-TW': ['zh, '+ en, 'zh-Hant-TW'],
 	}
-	// these are current stable TB hashes since last checked
+	// these are current stable BB hashes since last checked
 		// note: upstream ESR seems to pick up stable l10n changes
 	// last checked 13.5.1
 	localesSupported = {
@@ -191,7 +191,7 @@ function set_isLanguageSmart() {
 		delete localesSupported['ja']
 		localesSupported['ja-JP'] = macvalue
 	}
-	if (isMullvad) {
+	if (isMB) {
 		// 22 of 38 supported
 		let notSupported = [
 			// lang
@@ -316,9 +316,9 @@ function set_oIntlTests() {
 			'terabyte': unitL,
 		}
 	}
-	try {oIntlTests['compact']['long'].push(BigInt('987354000000000000'))} catch(e) {}
+	try {oIntlTests['compact']['long'].push(BigInt('987354000000000000'))} catch {}
 	let nBig = 987654
-	try {nBig = BigInt('987354000000000000')} catch(e) {}
+	try {nBig = BigInt('987354000000000000')} catch {}
 	oIntlTests['notation']['scientific']['decimal'].push(nBig)
 	// build keys
 	for (const k of Object.keys(oIntlTests)) {
@@ -364,9 +364,9 @@ const get_geo = (METRIC) => new Promise(resolve => {
 	function exit(state) {
 		res.push(state)
 		let hash = mini(res)
-		if (isTB && hash == '5ce0a555') {
-			notation = default_green // TB ESR78+: disabled, true, prompt
-		} else if (!isTB && hash == 'e36e1742') {
+		if (isBB && hash == '5ce0a555') {
+			notation = default_green // BB ESR78+: disabled, true, prompt
+		} else if (!isBB && hash == 'e36e1742') {
 			notation = default_green // FF72+: enabled, true, prompt
 		}
 		addBoth(4, METRIC, res[1] +' | '+ res[2],'', notation, res.join(' | '))
@@ -410,11 +410,11 @@ function get_language_locale() {
 	let oData = {}, metrics = ['language','languages'], notation =''
 	metrics.forEach(function(m) {oData[m] = get_langmetric(m)})
 	Object.keys(oData).forEach(function(METRIC){
-		if (isLanguageSmart && isTB) { // only notate TB/MB
-			notation = tb_red
+		if (isLanguageSmart && isBB) { // only notate BB
+			notation = bb_red
 			if (languagesSupported[oData.language] !== undefined) {
-				if ('language' == METRIC) {notation = tb_green
-				} else {if (oData[METRIC] == oData.language +', '+ languagesSupported[oData.language][0]) {notation = tb_green}
+				if ('language' == METRIC) {notation = bb_green
+				} else {if (oData[METRIC] == oData.language +', '+ languagesSupported[oData.language][0]) {notation = bb_green}
 				}
 			}
 		}
@@ -469,27 +469,27 @@ function get_language_locale() {
 		value = res[0]
 		isLocaleValue = value
 		// reduce en health false positives
-		// but only for isTB since as it only ships with en-US
+		// but only for isBB since as it only ships with en-US
 			// use isLocaleAlt in validation checks: allow e.g. en-CA to use en-US for lookup
 			// ^ we already have a health check for wrong locale
-		isLocaleAlt = (isTB && 'en-' == isLocaleValue.slice(0,3) ? 'en-US' : isLocaleValue)
+		isLocaleAlt = (isBB && 'en-' == isLocaleValue.slice(0,3) ? 'en-US' : isLocaleValue)
 		if (isSmart) {isLocaleValid = true} // only set if smart
 	} else if (res.length == 0) {
 		value = zErr
 	} else {
 		value = 'mixed'; isLies = true
 	}
-	if (isLanguageSmart && isTB) { // only notate TB/MB
-		notation = tb_red
+	if (isLanguageSmart && isBB) { // only notate BB
+		notation = bb_red
 		let errHash = mini(oErr)
 		//61a9b098: { durationformat: "TypeError: Intl.DurationFormat is not a constructor" }
-		// we only expect 1 exact error for TB14
+		// we only expect 1 exact error for BB14
 		if ('61a9b098' == errHash) {
 			let key = oData.language
-			// only green if TB supported
+			// only green if BB supported
 			if (languagesSupported[key] !== undefined) {
 				let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
-				if (value === expected) {notation = tb_green}
+				if (value === expected) {notation = bb_green}
 			}
 		}
 	}
@@ -680,7 +680,7 @@ function get_locale_intl() {
 							tests[key][tzn].forEach(function(dte){
 								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(code, option)); data.push(value)
 							})
-						} catch (e) {} // ignore invalid
+						} catch {} // ignore invalid
 						if (data.length) {obj[key] = data}
 					})
 				}
@@ -694,7 +694,7 @@ function get_locale_intl() {
 							tests[key][ud].forEach(function(n){
 								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: 'unit', unit: key, unitDisplay: ud})); data.push(value)
 							})
-						} catch (e) {} // ignore invalid
+						} catch {} // ignore invalid
 					})
 					if (data.length) {obj[key] = data}
 				}
@@ -1127,7 +1127,7 @@ function get_timezone_offset(METRIC) {
 		+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
 		+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
 	const doc = (new DOMParser).parseFromString(xslText, 'text/xml')
-	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tz
+	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tzControl, zOffset
 	let methods = ['control','date','exslt','iframe','plain','string','unsafe','zoned']
 	let notation = tz_red
 
@@ -1148,7 +1148,9 @@ function get_timezone_offset(METRIC) {
 					isLies = true
 					log_known(4, n, oData.format[k])
 				}
-				if ('exslt' == k) {extra = ' ['+ xOffset +']'} else if ('control' == k) {extra = ' ['+ tz +']'}
+				if ('exslt' == k) {extra = ' ['+ xOffset +']'
+				} else if ('zoned' == k) {extra = ' ['+ zOffset +']'
+				} else if ('control' == k) {extra = ' ['+ tzControl +']'}
 				value = oData.format[k] + extra
 			} else {
 				// if exslt then we log as the metric error and final result
@@ -1235,8 +1237,9 @@ function get_timezone_offset(METRIC) {
 			oErr['date'] = e+''
 		}
 		try {
-			tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-			option['timeZone'] = tz
+			// just use the resolvedOptions: if they're lying it will create a mix
+			tzControl = Intl.DateTimeFormat().resolvedOptions().timeZone
+			option['timeZone'] = tzControl // if nothing valid we pass undefined
 			let control = (new Date()).toLocaleDateString('en', option)
 			oData.raw['control'] = control.replace(',','')
 		} catch(e) {oErr['control'] = e+''}
@@ -1249,6 +1252,11 @@ function get_timezone_offset(METRIC) {
 			oData.raw['plain'] = Temporal.Now.plainDateTimeISO().toString()
 		} catch(e) {
 			oErr['plain'] = e+''
+		}
+		try {
+			oData.raw['isostring'] = new Date().toISOString()
+		} catch(e) {
+			oErr['isostring'] = e+''
 		}
 		//console.log(oData.raw)
 
@@ -1282,6 +1290,11 @@ function get_timezone_offset(METRIC) {
 					} else if ('zoned' == k || 'plain' == k) {
 						// we only want the first 19 chars
 						formatted = ((oData.raw[k]).slice(0,19)).replace('T',' ')
+						// set zOffset
+						if ('zoned' == k) {
+							let end = (oData.raw[k]).indexOf('[')
+							zOffset = (oData.raw[k]).slice(end - 6, end)
+						}
 					} else {
 						formatted = (oData.raw[k]).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
 					}
@@ -1321,7 +1334,7 @@ const get_dates = () => new Promise(resolve => {
 			minute: 'numeric', second: 'numeric', hour12: true, timeZoneName: 'long'}
 	let localecode = undefined
 	let DTFo
-	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
+	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch {}
 
 	function get_item(item) {
 		let itemPad = 'item '+ item
@@ -1408,7 +1421,7 @@ const get_dates = () => new Promise(resolve => {
 })
 
 const outputRegion = () => new Promise(resolve => {
-	set_isLanguageSmart() // required for TB/MB health in get_language_locale()
+	set_isLanguageSmart() // required for BB health in get_language_locale()
 	Promise.all([
 		get_geo('geolocation'),
 		get_language_locale(), // sets isLocaleValid/Value, isLanguagesNav
