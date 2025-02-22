@@ -100,7 +100,7 @@ function get_computed_styles(METRIC) {
 	const names = ['cssrulelist','domparser','getcomputed','htmlelement',]
 	let aErr = [false, false, false, false]
 	let aHashes = [], intHashes = [], oDisplay = {}
-	let notation = isTB ? tb_red : '', isLies = false
+	let notation = isBB ? bb_red : '', isLies = false
 
 	let styleVersion = type => {
 		return new Promise(resolve => {
@@ -270,19 +270,19 @@ function get_computed_styles(METRIC) {
 				hash = aHashes[0], data = res[intHashes[0]]['keys']
 				btn = addButton(14, METRIC, data.length)
 				// notate
-				if (isTB) {
+				if (isBB) {
 					if ('mac' == isOS) {
 						/* mac has
 							MozOsxFontSmoothing,-moz-osx-font-smoothing,
 							WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
 						*/
-						if ('9f958210' == hash) {notation = tb_green} // TB14 1106
+						if ('9f958210' == hash) {notation = bb_green} // BB14 1106
 					} else {
 						// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
 							// some older (mostly unsupported) win10 and android <= 6 will lack
 							// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
 							// but I consider these out-of-scope
-						if ('d86abd90' == hash) {notation = tb_green} // TB14 1101
+						if ('d86abd90' == hash) {notation = bb_green} // BB14 1101
 					}
 				}
 			} else {
