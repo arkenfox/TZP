@@ -576,7 +576,7 @@ const get_canvas = () => new Promise(resolve => {
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
-						let isFPPfallback = false // isTB but falls back to FPP
+						let isFPPfallback = false // isBB but falls back to FPP
 						if ('is' == key) {
 							notation = (value === allZeros && !isProxyLie(proxyMap[name] +'.'+ name)) ? rfp_green : rfp_red // all zeros
 						} else {
@@ -592,8 +592,8 @@ const get_canvas = () => new Promise(resolve => {
 								if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 									if ('ge' == key && !isGetStealth || 'ge' !== key) {
 										// no proxy lies but persistent, so must be FPP
-										if (isTB) {
-											// TB uses PB mode which falls back to FPP with canvas exceptions
+										if (isBB) {
+											// BB uses PB mode which falls back to FPP with canvas exceptions
 											// but we want to keep our red RFP health check, and instead notate
 											// FPP is used rather than a generic persistent
 											isFPPfallback = true
@@ -610,7 +610,7 @@ const get_canvas = () => new Promise(resolve => {
 							rfpvalue += ' | '+ isCanvasGetChannels
 						}
 						if (isFPPfallback) {
-							// TB but non-white, non-solid, persistent with no proxy lies: i.e FPP
+							// BB but non-white, non-solid, persistent with no proxy lies: i.e FPP
 							notation += sg +' [FPP]'+ sc + stats
 						} else {
 							notation += ' [persistent' + (isWhite ? ' white]' : ']'+ stats)

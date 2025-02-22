@@ -1,7 +1,6 @@
 'use strict';
 
 var dom;
-
 let sDetail = {}
 
 // css
@@ -43,7 +42,6 @@ let s0 = "<span class='",
 	zUQ = "\"undefined\"",
 	zNEW = sb+"[NEW]"+sc,
 // other
-	canPerf = false,
 	is95 = false,
 	isEngine = "",
 	isEnginePretty = "", // results string with perf
@@ -51,10 +49,6 @@ let s0 = "<span class='",
 	isFFpretty = "", // results string with perf
 	isFFvalid = false, // no errors
 	isFile = false,
-	isOS = "",
-	isRFP = false,
-	isSecure = false,
-	isTB = false,
 	isVer = "",
 	isVerMax = ""
 

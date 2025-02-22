@@ -340,7 +340,7 @@ function outputAudioUser() {
 	try {
 		let tbl = dom.tb11
 		tbl.querySelectorAll('.c2').forEach(e => {e.innerHTML =''})
-	} catch(e) {}
+	} catch {}
 
 	get_isPerf()
 	Promise.all([

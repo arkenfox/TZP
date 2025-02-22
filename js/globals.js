@@ -81,7 +81,7 @@ function get_scr_initial() {
 			try {
 				x = window[k]
 				if ('number' !== typeof x || Number.isNaN(x)) {x = zErr}
-			} catch(e) {
+			} catch {
 				x = zErr
 			}
 			if (k.includes('inner')) {k = 'inner'} else {k = 'outer'}
@@ -122,12 +122,12 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	position_green = sgtick+'RFP positions]'+sc,
 	position_red = sbx+'RFP positions]'+sc
 
-// dynamic TB/MB notation
-let tb_green = sgtick+'TB]'+sc,
-	tb_red = sbx+'TB]'+sc,
-	tb_slider_red = sbx+'TB Slider]'+sc,
-	tb_standard = sg+'[TB Standard]'+sc,
-	tb_safer = sg+'[TB Safer]'+sc // don't tick/cross slider
+// dynamic BB notation
+let bb_green = sgtick+'TB]'+sc,
+	bb_red = sbx+'TB]'+sc,
+	bb_slider_red = sbx+'TB Slider]'+sc,
+	bb_standard = sg+'[TB Standard]'+sc,
+	bb_safer = sg+'[TB Safer]'+sc // don't tick/cross slider
 
 // run once
 let isArch = true,
@@ -138,16 +138,18 @@ let isArch = true,
 	isFileSystem,
 	isFileSystemError,
 	isGecko = false,
-	isMullvad = false,
 	isOS,
 	isOSErr,
 	isRecursion,
 	isSystemFont = [],
-	isTB = false,
 	isVer = 0,
 	isVerExtra = '',
 	isViewportUnits = {},
 	isXML = {}
+
+let isBB = false,
+	isMB = false,
+	isTB = false
 
 // region
 let languagesSupported = {},
@@ -176,6 +178,7 @@ let overlayScope = 'document',
 	overlayHealthCount = '',
 	overlaySection = '',
 	overlayName = '',
+	overlayMaxLength = 88,
 	metricsData,
 	metricsTitle,
 	metricsPrefix = ''
@@ -186,7 +189,7 @@ let gt0, gt1,
 	gRun = true,
 	gClick = true,
 	gFS = false, // don't run FS measurements if already tiggered
-	gClear = true, // clear console of xml and TB's prototype/proxy errors
+	gClear = true, // clear console of xml and BB's prototype/proxy errors
 	isAllowNonGecko = false, // not supported
 	isBlock = true,
 	isBlockMin = 115,
@@ -194,11 +197,12 @@ let gt0, gt1,
 	isFontSizesPrevious = false, 
 	isScreenLog = false, // console log screen/window/taskbar/chrome
 	isSmart = false,
-	isSmartMin = 128 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
+	isSmartMin = 128,
+	isMaintenance = true // if not maintaining TZP we do not want to potentially give off false health signals
 
 /** DEV **/
 // simulate errors
-let runSG = false, // globals: break separately eg isTB, isOS
+let runSG = false, // break globals
 	runST = false, // throw type
 	runSI = false, // throw invalid
 	runSE = false, // generic if not thrown

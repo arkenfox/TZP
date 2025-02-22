@@ -50,7 +50,7 @@ let fntMaster = {
 			'Grantha','Gunjala Gondi','Hanifi Rohingya','Khojki','Masaram Gondi','Medefaidrin','Modi','Soyombo','Takri','Wancho','Warang Citi'],
 		notoserif: ['Dogra','Nyiakeng Puachue Hmong','Yezidi'], // 12+
 	},
-	// TB13 bundled: reuse for android/linux
+	// BB13+ bundled: reuse for android/linux
 	bundled: {
 		// all: win/mac/linux: 80sans-only 4serif-only 17both: total 118, sorted hash: 8949a424
 		notoboth: [
@@ -76,7 +76,7 @@ let fntMaster = {
 		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Two Math',],
 		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla'],
 	},
-	// TB whitelist system
+	// BB whitelist system
 	allowlist: {
 		android: [],
 		linux: [
@@ -86,26 +86,27 @@ let fntMaster = {
 			// bundled
 			'Arimo Regular','Cousine','Cousine Regular','Noto Sans JP','Noto Sans Symbols Regular','Tinos','Tinos Regular',
 		],
-		// MAC: NOTE: except 10.15, lists don't distinguish between built-in vs downloadable
-		// 10.15: https://support.apple.com/en-us/101429
-		//    11: ?
-		//    12: https://support.apple.com/en-us/103203
-		//    13: https://support.apple.com/en-nz/103197
-		//    14: https://support.apple.com/en-nz/108939
-		//    15: https://support.apple.com/en-us/120414
 		mac: [
-			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
-			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
-			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC',
-			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
-			// always
-			'-apple-system',
+			// 10.15+
+			'AppleGothic','Arial','Courier New','Geneva','Georgia','Heiti TC',
+			'Helvetica','Helvetica Neue','Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC',
+			'PingFang TC','Songti SC','Songti TC','Tahoma','Thonburi','Times New Roman','Verdana',
+			// other
+			'Apple Color Emoji', // listed as 11+ but likely also on 10.15 
+			'-apple-system', // always
+			// 11- | legacy
+				// https://searchfox.org/mozilla-central/rev/f53c09a22edc700ab1a9eaaf4da0f0dd9f11bff3/gfx/thebes/CoreTextFontList.cpp#38-44
+			'Courier','Times',
+			// ToDo: document-supported only
+			'Hiragino Kaku Gothic ProN',
+			// ToDo: in faces: maybe remove when that lands in TB
+			'Arial Black','Arial Narrow',
 		],
 		macfaces: [
-			// weighted/styles
+			// 10.15+
+			'Arial Black',
 			'Arial Bold','Arial Bold Italic','Arial Italic',
-			'Arial Narrow Bold','Arial Narrow Bold Italic','Arial Narrow Italic',
-			'Courier Bold','Courier Bold Oblique','Courier Oblique',
+			'Arial Narrow','Arial Narrow Bold','Arial Narrow Bold Italic','Arial Narrow Italic',
 			'Courier New Bold','Courier New Bold Italic','Courier New Italic',
 			'Georgia Bold','Georgia Bold Italic','Georgia Italic',
 			'Heiti TC Light','Heiti TC Medium',
@@ -113,7 +114,6 @@ let fntMaster = {
 			'Helvetica Neue Bold','Helvetica Neue Bold Italic','Helvetica Neue Italic','Helvetica Neue Light',
 				'Helvetica Neue Light Italic','Helvetica Neue Medium','Helvetica Neue Medium Italic','Helvetica Neue Thin',
 				'Helvetica Neue Thin Italic','Helvetica Neue UltraLight','Helvetica Neue UltraLight Italic',
-			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
 			'Kailasa Bold',
 			'Lucida Grande Bold',
 			'Menlo Bold','Menlo Bold Italic','Menlo Italic',
@@ -124,13 +124,17 @@ let fntMaster = {
 			'Songti TC Bold','Songti TC Light',
 			'Tahoma Bold',
 			'Thonburi Bold','Thonburi Light',
-			'Times Bold','Times Bold Italic','Times Italic',
 			'Times New Roman Bold','Times New Roman Bold Italic','Times New Roman Italic',
 			'Verdana Bold','Verdana Bold Italic','Verdana Italic',
-			// other: system
-			'AppleGothic Regular','Geneva','Monaco',
-			// other: bundled not in macOS/kBaseFonts
-			'Noto Sans Hebrew Regular','Noto Serif Armenian Regular',
+			// problematic
+			'Courier Bold','Courier Bold Oblique','Courier Oblique', // 11 or lower | legacy
+			'Times Bold','Times Bold Italic','Times Italic', // 11 or lower
+			// non weight/style
+			'AppleGothic Regular','Geneva','Monaco', // 10.15+
+			'Apple Color Emoji', // 11+
+			'Noto Sans Hebrew Regular','Noto Serif Armenian Regular', // bundled not in macOS/kBaseFonts
+			// ToDo: document-supported only
+			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6', 
 		],
 		windows: [
 			// 7
@@ -141,13 +145,13 @@ let fntMaster = {
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
 			// system aliases
 				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-				// should always be the same but lets test everything in TB
+				// should always be the same but lets test everything in BB
 			'MS Serif','Courier','Small Fonts','Roman', // TNR, Courier New, Arial, TNR
 			// fntPlatformFont
 			'MS Shell Dlg \\32',
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
-				// TB FontSubstitutes -> whitelisted
+				// BB FontSubstitutes -> whitelisted
 			'Arabic Transparent','Arial (Arabic)','Arial (Hebrew)','Arial Baltic','Arial CE','Arial CYR',
 			'Arial Greek','Arial TUR','Courier New (Hebrew)','Courier New Baltic','Courier New CE',
 			'Courier New CYR','Courier New Greek','Courier New TUR','Helvetica','MS Shell Dlg 2','Tahoma Armenian',
@@ -176,14 +180,14 @@ let fntMaster = {
 			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla', // bundled
 		],
 		windowsoffscreen: [
-			// proportional only: in TB we test once against monospace + fallbacks
+			// proportional only: in BB we test once against monospace + fallbacks
 			'Arial','Cambria Math','MS PGothic','Malgun Gothic','Microsoft JhengHei','Microsoft YaHei',
 			'Segoe UI','Sylfaen','Times New Roman','Verdana',
 			// some windows-only bundled fonts + twemoji
 			'Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',
 		],
 	},
-	// TB unexpected
+	// BB unexpected
 	blocklist: {
 		android: [],
 		linux: [
@@ -192,7 +196,7 @@ let fntMaster = {
 			'Dingbats','FreeMono','Ubuntu', // ubuntu
 			'Bitstream Charter','C059','Nimbus Sans','P052','Quicksand', // debian
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
-			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // BB12 fontnames
 		],
 		linuxfaces: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
@@ -202,26 +206,33 @@ let fntMaster = {
 			'Ubuntu', // ubuntu
 			'Nimbus Sans','Nimbus Sans Regular', // debian
 			'FreeSans','Liberation Sans', // popular
+			// expand: ^ above the only NEW font tested is FreeSans
+			'Symbola', // fedora
+			'Jamrul','Kinnari', // ubuntu
+			'OpenSymbol', // openoffice
+			'Amiri', // libreoffice
+			'Bitstream Charter' // debian
 		],
 		mac: [
-			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell', // system
-			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
+			'Apple Symbols','Impact','Palatino','Rockwell', // system
+			'Noto Serif Hmong Nyiakeng','STIX Math', // BB12 fontnames
+			'Noto Sans Symbols2', // BB12 bundled: ToDo: in faces: maybe remove when that lands in TB
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
 		macfaces: [
 			// weighted
 			'Avenir Light','Charter Black','Damascus Medium','Gill Sans Light','Hiragino Sans W3',
-
 			// other
 			'Apple Braille','Trebuchet MS','Webdings','Wingdings','Zapfino', // system
-			'Noto Sans Symbols2', // TB12 bundled
+			'Noto Sans Symbols2', // BB12 bundled
 		],
 		windows: [
 			'Calibri','Candara','Microsoft JhengHei UI','MS UI Gothic','Microsoft YaHei UI','NSimSun','Segoe UI Emoji','SimSun-ExtB', // system
 			'MS Shell Dlg', // system alias == Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
 			// other
-			'Noto Sans Symbols2', // TB12 bundled
+			'Noto Sans Symbols2', // BB12 bundled
+			'Helv', // ToDo: this might need to move with font.vis
 		],
 		windowsfaces: [
 			// weighted
@@ -232,18 +243,18 @@ let fntMaster = {
 			// other
 			'MS UI Gothic','Microsoft YaHei UI','NSimSun','SimSun-ExtB', // system
 			'Gill Sans','Gill Sans MT', // MS bundled
-			'Noto Serif Hmong Nyiakeng Regular', // TB12 bundled
+			'Noto Serif Hmong Nyiakeng Regular', // BB12 bundled
 			'Arabic Transparent', // fontSubstitutes
 			'Courier','MS Serif','Roman', // aliases
 			'微软雅黑','ＭＳ ゴシック', // localized
 		],
 		windowsoffscreen: [
-			// proportional only: in TB we test once against monospace + fallbacks
+			// proportional only: in BB we test once against monospace + fallbacks
 			'Cambria','Comic Sans MS','Gabriola','Impact','Webdings', // system
 			'MS Shell Dlg', // system alias == Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
 			// other
-			'Noto Sans Symbols2', // TB12 bundled
+			'Noto Sans Symbols2', // BB12 bundled
 		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
@@ -255,28 +266,27 @@ let fntMaster = {
 			'-apple-system',
 			//kBaseFonts
 			'Al Bayan','Al Nile','Al Tarikh','American Typewriter','Andale Mono','Apple Braille','Apple Chancery',
-				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo','Arial',
-				'Arial Black','Arial Hebrew','Arial Hebrew Scholar','Arial Narrow','Arial Rounded MT Bold',
-				'Arial Unicode MS','Avenir','Avenir Next','Ayuthaya',
-			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Big Caslon','Bodoni 72',
-				'Bodoni 72 Oldstyle','Bodoni 72 Smallcaps','Bodoni Ornaments','Bradley Hand','Brush Script MT',
-			'Chalkboard','Chalkboard SE','Chalkduster','Charter','Cochin','Comic Sans MS','Copperplate',
-				'Corsiva Hebrew','Courier','Courier New',
-			'DIN Alternate','DIN Condensed','Damascus','DecoType Naskh','Devanagari MT','Devanagari Sangam MN',
-				'Didot','Diwan Kufi','Diwan Thuluth',
+				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo','Arial','Arial Hebrew',
+				'Arial Hebrew Scholar','Arial Unicode MS','Avenir Next','Ayuthaya',
+			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Bodoni 72 Book','Bodoni 72 Oldstyle Book',
+				'Bodoni 72 Smallcaps Book','Bodoni Ornaments',
+			'Catamaran','Chalkboard','Chalkboard SE','Chalkduster','Cochin','Comic Sans MS','Copperplate',
+				'Corsiva Hebrew','Courier New',
+			'Damascus','DecoType Naskh','Devanagari MT','Devanagari Sangam MN','Didot','Diwan Kufi','Diwan Thuluth',
 			'Euphemia UCAS',
-			'Farah','Farisi','Futura',
+			'Farah','Farisi',
 			'GB18030 Bitmap','Galvji','Geeza Pro','Geneva','Georgia','Gill Sans','Gujarati MT','Gujarati Sangam MN',
 				'Gurmukhi MN','Gurmukhi MT','Gurmukhi Sangam MN',
-			'Heiti SC','Heiti TC','Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN',
-				'Hiragino Mincho ProN','Hiragino Sans','Hiragino Sans GB',
-			'ITF Devanagari','ITF Devanagari Marathi','Impact','InaiMathi',
+			'Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN',
+				'Hiragino Sans', // does this need a W4
+			'ITF Devanagari Book','ITF Devanagari Marathi Book', //
+				'Impact','InaiMathi',
 			'Kailasa','Kannada MN','Kannada Sangam MN','Kefa','Khmer MN','Khmer Sangam MN','Kohinoor Bangla',
 				'Kohinoor Devanagari','Kohinoor Gujarati','Kohinoor Telugu','Kokonor','Krungthep','KufiStandardGK',
 			'Lao MN','Lao Sangam MN','Lucida Grande','Luminari',
-			'Malayalam MN','Malayalam Sangam MN','Marker Felt','Menlo','Microsoft Sans Serif','Mishafi','Mishafi Gold',
+			'Malayalam MN','Malayalam Sangam MN','Menlo','Microsoft Sans Serif','Mishafi','Mishafi Gold',
 				'Monaco','Mshtakan','Mukta Mahee','Muna','Myanmar MN','Myanmar Sangam MN',
-			'Nadeem','New Peninim MT','Noteworthy',
+			'Nadeem','New Peninim MT',
 			'Noto Nastaliq Urdu',
 			'Noto Sans Adlam','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Bamum','Noto Sans Bassa Vah',
 				'Noto Sans Batak','Noto Sans Bhaiksuki','Noto Sans Brahmi','Noto Sans Buginese','Noto Sans Buhid',
@@ -302,22 +312,51 @@ let fntMaster = {
 				'Noto Sans Vai','Noto Sans Wancho','Noto Sans Warang Citi','Noto Sans Yi','Noto Sans Zawgyi',
 			'Noto Serif Ahom','Noto Serif Balinese','Noto Serif Hmong Nyiakeng','Noto Serif Myanmar','Noto Serif Yezidi',
 			'Optima','Oriya MN','Oriya Sangam MN',
-			'PT Mono','PT Sans','PT Sans Caption','PT Sans Narrow','PT Serif','PT Serif Caption','Palatino','Papyrus',
-				'Phosphate','PingFang HK','PingFang SC','PingFang TC','Plantagenet Cherokee',
+			'PT Mono','PT Sans','PT Sans Caption','PT Serif','PT Serif Caption','Palatino','Papyrus',
+				'PingFang HK','PingFang SC','PingFang TC','Plantagenet Cherokee',
 			'Raanana','Rockwell',
 			'STIX Two Math', // FF133+ 1902570
 			'STIXGeneral','STIXIntegralsD','STIXIntegralsSm','STIXIntegralsUp','STIXIntegralsUpD','STIXIntegralsUpSm',
 				'STIXNonUnicode','STIXSizeFiveSym','STIXSizeFourSym','STIXSizeOneSym','STIXSizeThreeSym','STIXSizeTwoSym',
 				'STIXVariants','STSong','Sana','Sathu','Savoye LET','Shree Devanagari 714','SignPainter','Silom','Sinhala MN',
-				'Sinhala Sangam MN','Skia','Snell Roundhand','Songti SC','Songti TC','Sukhumvit Set','Symbol',
-			'Tahoma','Tamil MN','Tamil Sangam MN','Telugu MN','Telugu Sangam MN','Thonburi','Times','Times New Roman',
+				'Sinhala Sangam MN','Skia','Snell Roundhand','Songti SC','Songti TC','Symbol',
+			'Tahoma','Tamil MN','Tamil Sangam MN','Telugu MN','Telugu Sangam MN','Thonburi','Times New Roman',
 				'Trattatello','Trebuchet MS',
 			'Verdana',
 			'Waseem','Webdings','Wingdings','Wingdings 2','Wingdings 3',
 			'Zapf Dingbats','Zapfino',
+			// 11- | legacy
+			'Courier','Times',
+		],
+		macfaces: [
+			// weighted/styled
+			'Arial Black','Arial Rounded MT Bold','Arial Narrow','PT Sans Narrow',
+			// legacy
+			'Courier','Courier Bold','Courier Bold Oblique','Courier Oblique',
+			'Times','Times Bold','Times Bold Italic','Times Italic','Times Roman',
+			// these ones have no regular/normal
+			'Avenir Black','Avenir Black Oblique','Avenir Heavy','Avenir Heavy Oblique','Avenir Light',
+				'Avenir Light Oblique','Avenir Medium','Avenir Medium Oblique','Avenir Oblique',
+			'Avenir Next Bold','Avenir Next Bold Italic','Avenir Next Demi Bold','Avenir Next Heavy',
+				'Avenir Next Medium','Avenir Next Ultra Light',
+			'Big Caslon Medium','Bradley Hand Bold','Brush Script MT Italic',
+			'Charter Black','Charter Bold', //'Charter Black Italic','Charter Bold Italic','Charter Italic',
+			'DIN Alternate Bold','DIN Condensed Bold',
+			'Futura Condensed ExtraBold','Futura Condensed Medium',
+			'Futura Medium', //'Futura Bold','Futura Medium Italic',
+			'Heiti SC Light','Heiti SC Medium','Heiti TC Light','Heiti TC Medium',
+			'Hiragino Mincho ProN W3','Hiragino Mincho ProN W6',
+			'Hiragino Sans GB W3','Hiragino Sans GB W6',
+			'ITF Devanagari Demi','ITF Devanagari Light','ITF Devanagari Medium',//'ITF Devanagari Bold', 
+			'ITF Devanagari Marathi Demi','ITF Devanagari Marathi Light','ITF Devanagari Marathi Medium',//'ITF Devanagari Marathi Bold',
+			'Marker Felt Thin','Marker Felt Wide',
+			'Noteworthy Bold','Noteworthy Light',
+			'Phosphate Inline','Phosphate Solid',
+			'Sukhumvit Set Light','Sukhumvit Set Medium','Sukhumvit Set Text','Sukhumvit Set Thin', //'Sukhumvit Set Bold','Sukhumvit Set Semi Bold',
+			// SyntaxError: An invalid or illegal string was specified
+				// 'Bodoni 72 Bold','Bodoni 72 Book Italic','Bodoni 72 Oldstyle Bold','Bodoni 72 Oldstyle Book Italic',
 		],
 		windows: [
-			'AlternateGothic2 BT', // ?
 			// 7
 			'Arial','Calibri','Cambria','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New','Ebrima',
 			'Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','MS PGothic','MS UI Gothic','MV Boli',
@@ -331,7 +370,8 @@ let fntMaster = {
 			'Javanese Text','Leelawadee UI','Segoe UI Emoji','Sitka Banner','Sitka Display',
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
 			// 10
-			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
+			'Bahnschrift','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
+			'HoloLens MDL2 Assets', // removed FF136+ 1942883
 			// localized: kBase: detected FF119+: 1850672
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体','游ゴシック', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun, Yu Gothic 
 			// fntPlatformFont
@@ -386,9 +426,10 @@ let fntMaster = {
 			'JasmineUPC','KaiTi','Kalinga','Kartika','Khmer UI','KodchiangUPC','Kokila','Lao UI','Latha','Leelawadee','Levenim MT',
 			'LilyUPC','MS Mincho','MS PMincho','Mangal','Meiryo','Meiryo UI','Microsoft Uighur','MingLiU','MingLiU_HKSCS','Miriam',
 			'Miriam Fixed','MoolBoran','Narkisim','Nyala','PMingLiU','Plantagenet Cherokee','Raavi','Rod','Sakkal Majalla','Sanskrit Text',
-			'Shonar Bangla','Shruti','SimHei','Simplified Arabic','Traditional Arabic','Tunga','UD Digi Kyokasho N-B','UD Digi Kyokasho N-R',
-			'UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R','Urdu Typesetting','Utsaah',
-			'Vani','Vijaya','Vrinda','Yu Mincho',
+			'Shonar Bangla','Shruti','SimHei','Simplified Arabic','Traditional Arabic','Tunga','Urdu Typesetting','Utsaah','Vani','Vijaya',
+			'Vrinda','Yu Mincho',
+			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-R', // original -R regular -B bold
+			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // late 2024 update
 			// localized from ^
 			'바탕', // Batang
 			'BIZ UDPゴシック', // BIZ UDPGothic
@@ -416,6 +457,7 @@ let fntMaster = {
 			'Raavi','Shonar Bangla','Shruti','Tunga',
 		]
 	},
+	// NOT kBase/LangPack
 	system: {
 		android: [
 			// all
@@ -501,23 +543,23 @@ let fntMaster = {
 			// ToDo: expand
 		],
 		mac: [
-			'Academy Engraved LET','Adelle Sans Devanagari','AkayaKanadaka','AkayaTelivigala','Annai MN','Apple LiGothic',
-				'Apple LiSung','Arima Koshi','Arima Madurai','Athelas','Avenir Next Condensed',
+			'Academy Engraved LET','Adelle Sans Devanagari','AkayaKanadaka','AkayaTelivigala','Annai MN','Arima Koshi','Arima Madurai',
+				'Avenir Book','Avenir Next Condensed','Avenir Roman',
 			'Bai Jamjuree','Baloo 2','Baloo Bhai 2','Baloo Bhaijaan','Baloo Bhaina 2','Baloo Chettan 2','Baloo Da 2','Baloo Paaji 2',
-				'Baloo Tamma 2','Baloo Tammudu 2','Baloo Thambi 2','Baoli SC','Baoli TC','BiauKaiHK','BiauKaiTC','BIZ UDGothic',
-				'BIZ UDMincho','BM Dohyeon','BM Hanna 11yrs Old','BM Hanna Air','BM Hanna Pro','BM Jua','BM Kirang Haerang','BM Yeonsung','Brill',
+				'Baloo Tamma 2','Baloo Tammudu 2','Baloo Thambi 2','Baoli SC','Baoli TC','BiauKai','BiauKaiHK','BiauKaiTC','BIZ UDGothic',
+				'BIZ UDMincho','BM DoHyeon','BM Hanna 11yrs Old','BM Hanna Air','BM Hanna Pro','BM Jua','BM Kirang Haerang','BM Yeonsung',
+				'Brill Roman',
 			'Cambay Devanagari','Canela','Canela Deck','Canela Text','Chakra Petch','Charm','Charmonman',
 			'Dash','Domaine Display',
-			'Fahkwang','Founders Grotesk','Founders Grotesk Condensed','Founders Grotesk Text',
+			'Fahkwang','Founders Grotesk','Founders Grotesk Text',
 			'Gotu','Grantha Sangam MN','Graphik','Graphik Compact','GungSeo',
-			'Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Herculanum','Hiragino Kaku Gothic ProN','Hiragino Sans CNS','Hiragino Sans TC','Hubballi',
+			'Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Herculanum','Hubballi',
 			'Jaini','Jaini Purva',
-			'Iowan Old Style',
-			'K2D','Kai','Kaiti SC','Kaiti TC','Katari','Kavivanar','Kigelia','Kigelia Arabic','Klee','Kodchasan','KoHo','Krub',
-			'Lahore Gurmukhi','Lantinghei SC','Lantinghei TC','Lava Devanagari','Lava Kannada','Lava Telugu',
-				'LiHei Pro','LiSong Pro','Libian SC','Libian TC','LingWai SC','LingWai TC',
-			'Maku','Mali','Marion','Modak','Mukta','Mukta Malar','Mukta Vaani','Myriad Arabic',
-			'Nanum Brush Script','Nanum Gothic','Nanum Myeongjo','Nanum Pen Script','Niramit','Nom Na Tong','Noto Serif Kannada','November Bangla Traditonal',
+			'K2D','Kai','Kaiti SC','Kaiti TC','Katari','Kavivanar','Kigelia','Kigelia Arabic','Kodchasan','KoHo','Krub',
+			'Lahore Gurmukhi','Lava Devanagari','Lava Kannada','Lava Telugu',
+				'LiHei Pro','LiSong Pro','Libian SC','Libian TC',
+			'Maku','Mali','Modak','Mukta','Mukta Malar','Mukta Vaani','Myriad Arabic',
+			'Nanum Brush Script','Nanum Gothic','Nanum Myeongjo','Nanum Pen Script','Niramit','Nom Na Tong','Noto Serif Kannada','November Bangla Traditional',
 			'October Compressed Devanagari','October Compressed Gujarati','October Compressed Gurmukhi','October Compressed Kannada',
 				'October Compressed Meetei Mayek','October Compressed Odia','October Compressed Ol Chiki','October Compressed Tamil','October Compressed Telugu',
 			'October Condensed Devanagari','October Condensed Gujarati','October Condensed Gurmukhi','October Condensed Kannada',
@@ -525,27 +567,57 @@ let fntMaster = {
 			'October Devanagari','October Gujarati','October Gurmukhi','October Kannada',
 				'October Meetei Mayek','October Odia','October Ol Chiki','October Tamil','October Telugu',
 			'Osaka','Osaka-Mono',
-			'Padyakke Expanded One','Party LET','PCMyungjo','PilGi','PingFang MO','Produkt','Proxima Nova','PSL Ornanong Pro','Publico Headline','Publico Text',
+			'Padyakke Expanded One','Party LET','PCMyungjo','PilGi','PingFang MO','Produkt','Proxima Nova','PSL Ornanong Pro',
+				'Publico Headline Roman','Publico Text Roman',
 			'Quotes Caps','Quotes Script',
-			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script','Seravek',
-				'Shobhika','SimSong','Spot Mono','Srisakdi','STFangsong','STHeiti','STIX Two Text','STKaiti','Superclarendon',
-			'Tiro Bangla','Tiro Devanagari Hindi','Tiro Devanagari Marathi','Tiro Devanagari Sanskrit','Tiro Gurmukhi',
-				'Tiro Kannada','Tiro Tamil','Tiro Telugu','Toppan Bunkyu Gothic','Toppan Bunkyu Midashi Gothic',
-				'Toppan Bunkyu Midashi Mincho','Toppan Bunkyu Mincho','Tsukushi A Round Gothic','Tsukushi B Round Gothic',
-			'Wawati SC','Wawati TC','Weibei SC','Weibei TC',
-			'Xingkai SC','Xingkai TC',
-			'Yuanti SC','Yuanti TC','YuGothic','YuKyokasho','YuKyokasho Yoko','YuMincho','YuMincho +36p Kana','Yuppy SC','Yuppy TC',
+			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script',
+				'Shobhika','SimSong','Spot Mono','Srisakdi','STFangsong','STHeiti','STIX Two Text','STKaiti','STXihei',
+			'Tiro Bangla','Tiro Devanagari Hindi','Tiro Devanagari Marathi','Tiro Devanagari Sanskrit','Tiro Gurmukhi','Tiro Kannada','Tiro Tamil',
+				'Tiro Telugu','Toppan Bunkyu Gothic','Toppan Bunkyu Mincho','Tsukushi A Round Gothic','Tsukushi B Round Gothic',
+			'Wawati SC','Wawati TC',
+			'Yuanti SC','Yuanti TC','Yuppy SC','Yuppy TC',
+			// legacy
+				// https://searchfox.org/mozilla-central/rev/f53c09a22edc700ab1a9eaaf4da0f0dd9f11bff3/gfx/thebes/CoreTextFontList.cpp#38-44
+			'Athelas','Marion','Seravek','Superclarendon',
+			// downloadable but I have it
+			'Iowan Old Style',
+		],
+		macfaces: [
+			'Avenir Book Oblique','Avenir Next Condensed Bold','Avenir Next Condensed Demi Bold','Avenir Next Condensed Heavy',
+				'Avenir Next Condensed Medium','Avenir Next Condensed Ultra Light',
+			'Brill Roman Bold','Brill Roman Medium','Brill Roman Semibold',
+			// weighted/styled: all these ones have no regular/normal
+			'Apple LiGothic Medium','Apple LiSung Light',
+			'Brill Italic Bold Italic','Brill Italic Medium Italic','Brill Italic Semibold Italic', //'Brill Italic Italic',
+			'Klee Demibold','Klee Medium',
+			'Hiragino Sans CNS W3','Hiragino Sans CNS W6',
+			'Hiragino Sans TC W3','Hiragino Sans TC W6',
+			'Lantinghei SC Demibold','Lantinghei SC Extralight','Lantinghei SC Heavy',
+			'Lantinghei TC Demibold','Lantinghei TC Heavy',
+			'LingWai SC Medium','LingWai TC Medium',
+			'Publico Headline Black','Publico Headline Bold', //'Publico Headline Black Italic','Publico Headline Bold Italic','Publico Headline Italic',
+			'Publico Text Bold','Publico Text Semibold', //'Publico Text Bold Italic','Publico Text Italic','Publico Text Semibold Italic',
+			'Toppan Bunkyu Midashi Gothic Extrabold','Toppan Bunkyu Midashi Mincho Extrabold',
+			'Weibei SC Bold','Weibei TC Bold',
+			'Xingkai SC Bold','Xingkai SC Light',
+			'Xingkai TC Bold','Xingkai TC Light',
+			'YuGothic Bold','YuGothic Medium',
+			'YuKyokasho Bold','YuKyokasho Medium',
+			'YuKyokasho Yoko Bold','YuKyokasho Yoko Medium',
+			'YuMincho Demibold','YuMincho Extrabold','YuMincho Medium',
+			// SyntaxError: An invalid or illegal string was specified
+				// 'YuMincho +36p Kana Demibold','YuMincho +36p Kana Extrabold','YuMincho +36p Kana Medium',
 		],
 		windows: [
 			'Arial Nova','Georgia Pro','Gill Sans Nova','Ink Free','Neue Haas Grotesk Text Pro','Rockwell Nova',
 			'Segoe Fluent Icons','Segoe UI Variable Display','Segoe UI Variable Small','Segoe UI Variable Text',
 			'Simplified Arabic Fixed','Verdana Pro',
-			// win11
-			'Sans Serif Collection',
-			// MS products
-			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
-			// MS downloads
-			'Cascadia Code','Cascadia Mono', // 11
+			// other
+			'Sans Serif Collection', // win11
+			'Cascadia Code','Cascadia Mono', // MS downloads 11
+			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT', // MS products
+			'OpenSymbol', // openoffice
+			'Amiri', // libreoffice
 		],
 		windowsfaces: [
 			'Arial Nova Cond','Arial Nova Light',
@@ -586,19 +658,28 @@ function set_fntList() {
 	if (build) {
 		isFontSizesPrevious = isFontSizesMore
 		fntData = {
-			bundled: [], base: [], baselang: [],
-			control: [], 'control_name': [],
+			all: {},
 			faces: {base: [], baselang: [], fpp: [], full: [], unexpected: []},
-			fpp: [], full: [],
-			generic: [], 'generic_name': [],
+			family: {
+				base: [], baselang: [], bundled: [], control: [], 'control_name': [],
+				fpp: [], full: [], generic: [], 'generic_name': [], system: [], unexpected: []
+			},
 			offscreen: {base: [], baselang: [], fpp: [], full: [], unexpected: []},
-			system: [], unexpected: [],
+		}
+
+		if (isVer > 135 && !isBB && 'windows' == isOS) {
+			// removed from base in FF136+ 1942883
+			// ToDo: check if backported e.g. to ESR
+			let tmpArray = fntMaster.base.windows
+			tmpArray = tmpArray.filter(x => !['HoloLens MDL2 Assets'].includes(x))
+			fntMaster.base.windows = tmpArray
+			fntMaster.system.windows.push('HoloLens MDL2 Assets')
 		}
 
 		// fntString
-		if (isTB || 'android' == isOS || 'linux' == isOS) {
-			//  isTB: all maxed: linux: 120/140 | windows 131/183 | mac 135/150
-			// nonTB: seems to work well so far
+		if (isBB || 'android' == isOS || 'linux' == isOS) {
+			//  isBB: all maxed: linux: 120/140 | windows 131/183 | mac 135/150
+			// nonBB: seems to work well so far
 			fntString = '-'
 		} else {
 			if ('windows' == isOS) {fntString = 'MōΩ' // 158/190 = max
@@ -615,7 +696,7 @@ function set_fntList() {
 		fntPlatformFont = undefined // reset
 		if ('windows' == isOS) {
 			if (!isFontSizesMore) {fntPlatformFont = 'MS Shell Dlg \\32'}
-			if (isTB) {fntPlatformFont = undefined} // force TB to detect all fonts for health
+			if (isBB) {fntPlatformFont = undefined} // force BB to detect all fonts for health
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
 				'sans-serif, Arial',
@@ -634,18 +715,18 @@ function set_fntList() {
 		}
 
 		// control: 1-pass or 3-pass | control_name: remove fallbacks e.g. 'serif, X' -> 'serif'
-		fntData.control = fntPlatformFont == undefined ? baseSize : [fntPlatformFont]
-		fntData.control.forEach(function(name) {fntData['control_name'].push(name.split(',')[0])})
+		fntData.family.control = fntPlatformFont == undefined ? baseSize : [fntPlatformFont]
+		fntData.family.control.forEach(function(name) {fntData.family['control_name'].push(name.split(',')[0])})
 		
 		// generic: expand baseSize
 			//'ui-monospace','ui-rounded','ui-serif','math','emoji','none' // redundant
 		baseSize = baseSize.concat(['cursive','fantasy','fangsong','system-ui'])
 		baseSize = baseSize.concat(isSystemFont)
 		if (fntPlatformFont !== undefined) {baseSize.push(fntPlatformFont)}
-		fntData.generic = baseSize.sort()
-		baseSize.forEach(function(name) {fntData['generic_name'].push(name.split(',')[0])})
+		fntData.family.generic = baseSize.sort()
+		baseSize.forEach(function(name) {fntData.family['generic_name'].push(name.split(',')[0])})
 
-		// lists
+		// font-family
 		if (isOS !== undefined) {
 			fntFake = '--00'+ rnd_string()
 			let array = [], aExtraTests = ['faces','offscreen']
@@ -656,24 +737,24 @@ function set_fntList() {
 				fntMaster.android.notoserif.forEach(function(fnt) {array.push('Noto Serif '+ fnt)})
 				// +extras
 				array = array.concat(fntMaster.system[isOS])
-				fntData.full = array
-				fntData.full.push(fntFake)
-			} else if (isTB) {
-				// desktop TB
+				fntData.family.full = array
+				fntData.family.full.push(fntFake)
+			} else if (isBB) {
+				// desktop BB
 				let aBundled = []
 				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
 				fntMaster.bundled.notosans.forEach(function(fnt) {aBundled.push('Noto Sans '+ fnt)})
 				fntMaster.bundled.notoserif.forEach(function(fnt) {aBundled.push('Noto Serif '+ fnt)})
 				aBundled = aBundled.concat(fntMaster.bundled[isOS])
 				array = array.concat(aBundled)
-				fntData.bundled = array
-				fntData.system = fntMaster.allowlist[isOS]
+				fntData.family.bundled = array
+				fntData.family.system = fntMaster.allowlist[isOS]
 				array = array.concat(fntMaster.allowlist[isOS])
-				fntData.base = array
+				fntData.family.base = array
 				fntMaster.blocklist[isOS].push(fntFake)
-				fntData.unexpected = fntMaster.blocklist[isOS]
+				fntData.family.unexpected = fntMaster.blocklist[isOS]
 				array = array.concat(fntMaster.blocklist[isOS])
-				fntData.full = array
+				fntData.family.full = array
 				// faces.offscreen
 				aExtraTests.forEach(function(item) {
 					let key = isOS + item
@@ -688,25 +769,27 @@ function set_fntList() {
 			} else {
 				// desktop FF
 				array = fntMaster.base[isOS]
-				fntData.base = array
+				fntData.family.base = array
 				array = array.concat(fntMaster.baselang[isOS])
-				fntData.fpp = array // windows FPP (mac FPP = same as base)
-				fntData.baselang = fntMaster.baselang[isOS]
+				fntData.family.fpp = array // windows FPP (mac FPP = same as base)
+				fntData.family.baselang = fntMaster.baselang[isOS]
 				fntMaster.system[isOS].push(fntFake)
 				array = array.concat(fntMaster.system[isOS])
-				fntData.unexpected = fntMaster.system[isOS]
-				fntData.full = array
+				fntData.family.unexpected = fntMaster.system[isOS]
+				fntData.family.full = array
 				// faces/offscreen
 				aExtraTests.forEach(function(item) {
-					let key = isOS + item
+					let key = isOS + item, 
 					array = fntMaster.base[key]
 					if (undefined !== array) {
 						let aBaseLang = fntMaster.baselang[key]
-						let aFPP = array.concat(aBaseLang)
+						let aFPP = undefined == aBaseLang ? array : array.concat(aBaseLang)
 						let aUnexpected = fntMaster.system[key]
 						fntData[item].base = array.sort()
-						fntData[item].baselang = aBaseLang.sort()
-						fntData[item].fpp = aFPP.sort()
+						if (undefined !== aBaseLang) {
+							fntData[item].baselang = aBaseLang.sort()
+						}
+						if (undefined !== aBaseLang) {fntData[item].fpp = aFPP.sort()}
 						fntData[item].unexpected = aUnexpected.sort()
 						fntData[item].full = aFPP.concat(aUnexpected).sort()
 					}
@@ -716,64 +799,69 @@ function set_fntList() {
 			if (fntPlatformFont !== undefined) {
 				let fntKeys = ['base','full','fpp','system','bundled']
 				fntKeys.forEach(function(key) {
-					if (fntData[key] !== undefined) {
-					let array = fntData[key]
-					 fntData[key] = array.filter(x => ![fntPlatformFont].includes(x))
+					if (fntData.family[key] !== undefined) {
+					let array = fntData.family[key]
+					 fntData.family[key] = array.filter(x => ![fntPlatformFont].includes(x))
 					}
 				})
 			}
 			// dupes
 			if (gLoad) {
-				let aCheck = fntData.full
+				let aCheck = fntData.family.full
 				aCheck = aCheck.filter(function(item, position) {return aCheck.indexOf(item) === position})
-				if (aCheck.length !== fntData.full.length) {
+				if (aCheck.length !== fntData.family.full.length) {
 					log_alert(12, 'set_fntList', 'dupes in '+ isOS, isScope, true) // persist since we only do this once
-					fntData.full = aCheck
+					fntData.family.full = aCheck
 				}
 			}
 			// sort
-			fntData.bundled.sort()
-			fntData.system.sort()
-			fntData.unexpected.sort()
-			fntData.base.sort()
-			fntData.baselang.sort()
-			fntData.fpp.sort()
-			fntData.full.sort()
+			fntData.family.bundled.sort()
+			fntData.family.system.sort()
+			fntData.family.unexpected.sort()
+			fntData.family.base.sort()
+			fntData.family.baselang.sort()
+			fntData.family.fpp.sort()
+			fntData.family.full.sort()
 
 			// fntBtn
-			let fntobj = {}
-			if ('android' == isOS || !isTB && 'linux' == isOS) {
-				fntobj = fntData.full
-			} else if (isTB || 'windows' == isOS) {
-				if (isTB) {
-					fntobj = {'1. system': {count: fntData.system.length, 'fonts': fntData.system},
-						'2. bundled': {count: fntData.bundled.length, 'fonts': fntData.bundled},
-						'3. allowlist': {count: fntData.base.length, 'fonts': fntData.base},
+			let fntobj = {}, obj = fntData.family
+			if ('android' == isOS || !isBB && 'linux' == isOS) {
+				fntobj = fntData.family.full
+			} else if (isBB || 'windows' == isOS) {
+				if (isBB) {
+					fntobj = {'1. system': {count: obj.system.length, 'fonts': obj.system},
+						'2. bundled': {count: obj.bundled.length, 'fonts': obj.bundled},
+						'3. allowlist': {count: obj.base.length, 'fonts': obj.base},
 					}
 				} else {
-					fntobj = {'1. kBaseFonts': {count: fntData.base.length, 'fonts': fntData.base},
-					'2. kLangPackFonts': {count: fntData.baselang.length, 'fonts': fntData.baselang},
-					'3. FPP': {count: fntData.fpp.length, 'fonts': fntData.fpp},
+					fntobj = {'1. kBaseFonts': {count: obj.base.length, 'fonts': obj.base},
+					'2. kLangPackFonts': {count: obj.baselang.length, 'fonts': obj.baselang},
+					'3. FPP': {count: obj.fpp.length, 'fonts': obj.fpp},
 					}
 				}
-				fntobj['4. unexpected'] = {count: fntData.unexpected.length, 'fonts': fntData.unexpected}
-				fntobj['5. tested'] = {count: fntData.full.length, 'fonts': fntData.full}
+				fntobj['4. unexpected'] = {count: obj.unexpected.length, 'fonts': obj.unexpected}
+				fntobj['5. tested'] = {count: obj.full.length, 'fonts': obj.full}
 			} else {
 				//mac
-				fntobj = {'1. kBaseFonts': {count: fntData.base.length, 'fonts': fntData.base},
-					'2. unexpected': {count: fntData.unexpected.length, 'fonts': fntData.unexpected},
-					'3. tested': {count: fntData.full.length, 'fonts': fntData.full},
+				fntobj = {'1. kBaseFonts': {count: obj.base.length, 'fonts': obj.base},
+					'2. unexpected': {count: obj.unexpected.length, 'fonts': obj.unexpected},
+					'3. tested': {count: obj.full.length, 'fonts': obj.full},
 				}
 			}
-			fntData['summary'] = fntobj
-			fntBtn = addButton(12, 'fonts_'+ isOS, fntData.full.length +' fonts', 'btnc', 'lists')
+			fntData.family['summary'] = fntobj
+			fntBtn = addButton(12, 'fonts_'+ isOS, fntData.family.full.length +' fonts', 'btnc', 'lists')
 
 			// faces/offscreen
 			aExtraTests.forEach(function(item) {
 				let obj = fntData[item]
 				if (obj.full.length) {
-					if (isTB) {
+					if (isBB) {
 						fntobj = {'1. allowlist': {count: obj.base.length, 'fonts': obj.base},
+							'2. unexpected': {count: obj.unexpected.length, 'fonts': obj.unexpected},
+							'3. tested': {count: obj.full.length, 'fonts': obj.full}
+						}
+					} else if ('mac' == isOS) {
+						fntobj = {'1. kBaseFonts': {count: obj.base.length, 'fonts': obj.base},
 							'2. unexpected': {count: obj.unexpected.length, 'fonts': obj.unexpected},
 							'3. tested': {count: obj.full.length, 'fonts': obj.full}
 						}
@@ -789,6 +877,38 @@ function set_fntList() {
 					fntBtn = addButton(12, 'font_' + item +'_'+ isOS, fntData[item].full.length +' '+ item, 'btnc', 'lists') + fntBtn 
 				}
 			})
+			// all
+			if (fntData.faces.full.length) {
+				let total
+				for (const k of Object.keys(fntData.faces.summary)) {
+					let array = [], aFace = fntData.faces.summary[k].fonts
+					aFace.forEach(function(font){
+						// strip out regular and other text needed for font face
+						if (' Regular' == font.slice(-8)) {font = font.slice(0,-8)}
+						array.push(font)
+					})
+					// dedupe
+					array = array.filter(function(item, position) {return array.indexOf(item) === position})
+					let newkey = k
+					if (isBB) {
+						newkey = ((k.slice(0,1)) * 1) + 2
+						newkey += k.slice(1)
+					}
+					array = array.concat(fntData.family.summary[newkey].fonts)
+					try {array = array.concat(fntData.offscreen.summary[k].fonts)} catch {}
+					array = array.filter(function(item, position) {return array.indexOf(item) === position})
+
+					// remove unexpected if they're in the allow/expected lot
+					if (k.includes('unexpected')) {
+						let ignore = isBB ? '1. allowlist' : ('mac' == isOS ? '1. kBaseFonts'  :'3. FPP')
+						array = array.filter(x => !fntData.all[ignore].fonts.includes(x))
+					} else if (k.includes('tested')) {
+						total = array.length
+					}
+					fntData.all[k] = {count: array.length, 'fonts': array.sort()}
+				}
+				fntBtn = addButton(12, 'total_fonts_'+ isOS, total +' total', 'btnc', 'lists') + fntBtn 
+			}
 		}
 	}
 	// bail
@@ -796,9 +916,10 @@ function set_fntList() {
 
 	// fnt*Btn data
 	if (gRun || build) {
-		addDetail('fonts_'+ isOS, fntData.summary, 'lists')
+		addDetail('fonts_'+ isOS, fntData.family.summary, 'lists')
 		addDetail('font_faces_'+ isOS, fntData.faces.summary, 'lists')
 		addDetail('font_offscreen_'+ isOS, fntData.offscreen.summary, 'lists')
+		addDetail('total_fonts_'+ isOS, fntData.all, 'lists')
 	}
 }
 
@@ -826,19 +947,19 @@ function get_document_fonts(METRIC) {
 }
 
 function get_font_notation(METRIC, data) {
-	let badnotation = isTB ? tb_red : rfp_red
-	let goodnotation = isTB ? tb_green : rfp_green
+	let badnotation = isBB ? bb_red : rfp_red
+	let goodnotation = isBB ? bb_green : rfp_green
 	let isSizes = 'font_sizes' == METRIC
-	let obj = isSizes ? fntData : ('font_faces' == METRIC ? fntData.faces : fntData.offscreen)
+	let obj = isSizes ? fntData.family : ('font_faces' == METRIC ? fntData.faces : fntData.offscreen)
 	let notation = goodnotation
 
 	let aNotInBase = data, aMissing = [], aMissingSystem = []
 	aNotInBase = aNotInBase.filter(x => !obj.base.includes(x))
-	if (isTB) {
+	if (isBB) {
 		aMissing = isSizes ? obj.bundled : obj.base
 		aMissing = aMissing.filter(x => !data.includes(x))
-		if (isSizes && fntData.system.length) {
-			aMissingSystem = fntData.system
+		if (isSizes && obj.system.length) {
+			aMissingSystem = obj.system
 			aMissingSystem = aMissingSystem.filter(x => !data.includes(x))
 		}
 	}
@@ -849,7 +970,7 @@ function get_font_notation(METRIC, data) {
 		if (aMissing.length) {tmpobj['missing' + suffix] = aMissing}
 		if (aMissingSystem.length) {tmpobj['missing_system'] = aMissingSystem}
 		if (aNotInBase.length) {
-			if (isTB) {
+			if (isBB) {
 				tmpobj['unexpected'] = aNotInBase
 			} else {
 				// FF: break into FPP vs non FPP
@@ -861,7 +982,7 @@ function get_font_notation(METRIC, data) {
 			}
 		}
 		addDetail(tmpName, tmpobj)
-		let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
+		let brand = isTB ? (isMB ? 'MB' : 'TB') : 'RFP'
 		notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
 		// FFP if all unexpected are in baselang then we're fpp_green
 		if (obj.baselang.length) {
@@ -918,7 +1039,7 @@ function get_fonts_base(METRICB, selected) {
 		if (undefined == hashBase[tmphash]) {hashBase[tmphash] = {'bases': [base], 'data': newBase[base]}
 		} else {hashBase[tmphash].bases.push(base)}
 	}
-	// use base as keys | bases are already sorted since fntData.generic is too
+	// use base as keys | bases are already sorted since fntData.family.generic is too
 	for (const oldhash in hashBase) {
 		let newhash = mini(hashBase[oldhash].data)
 		finalBase[hashBase[oldhash].bases.join(' ')] = {'hash': newhash, 'metrics': hashBase[oldhash].data}
@@ -932,7 +1053,7 @@ function get_fonts_base(METRICB, selected) {
 
 	// display all that hard work!!
 		// unless we had an error which means we never end up here, we will have fntBase data
-	let btnAll = addButton(12, METRICB +'_reported', Object.keys(finalBase).length +'/'+ fntData.generic_name.length)
+	let btnAll = addButton(12, METRICB +'_reported', Object.keys(finalBase).length +'/'+ fntData.family.generic_name.length)
 	addDetail(METRICB +'_reported', finalBase)
 	addDisplay(12, METRICB+ '_reported', mini(finalBase), btnAll)
 
@@ -941,7 +1062,7 @@ function get_fonts_base(METRICB, selected) {
 		let newobj = {}
 		newobj[selected] = selectBase
 		let hash = mini(newobj)
-		let btn = addButton(12, METRICB, Object.keys(selectBase).length +'/'+ fntData.generic_name.length)
+		let btn = addButton(12, METRICB, Object.keys(selectBase).length +'/'+ fntData.family.generic_name.length)
 		addBoth(12, METRICB, hash, btn,'', newobj)
 	} else {
 		addBoth(12, METRICB, selected)
@@ -990,8 +1111,8 @@ const get_fonts_faces = (METRIC) => new Promise(resolve => {
 		let fntList = fntData.faces.full
 		let isNotate = fntList.length > 0
 		// only notate if we're testing it
-		let badnotation = !isNotate ? '' : isTB ? tb_red : rfp_red
-		let goodnotation = !isNotate ? '' : isTB ? tb_green : rfp_green
+		let badnotation = !isNotate ? '' : isBB ? bb_red : rfp_red
+		let goodnotation = !isNotate ? '' : isBB ? bb_green : rfp_green
 
 		try {
 			let test = res[0]
@@ -1006,8 +1127,8 @@ const get_fonts_faces = (METRIC) => new Promise(resolve => {
 						btn = addButton(12, METRIC, results.length)
 						if (fntData.faces.base.length) {notation = get_font_notation(METRIC, data)}
 					} else {
-						// ToDo: once we allow fontFace in TB this will always be badnotation
-						notation = isTB ? goodnotation : badnotation
+						// ToDo: once we allow fontFace in BB this will always be badnotation
+						notation = isBB ? goodnotation : badnotation
 						value = 'none'
 					}
 					exit(value, btn, notation, data)
@@ -1041,8 +1162,8 @@ function get_fonts_offscreen(METRIC) {
 	}
 
 	let value = '', data ='', btn='', notation = rfp_red
-	let badnotation = isTB ? tb_red : rfp_red
-	let goodnotation = isTB ? tb_green : rfp_green
+	let badnotation = isBB ? bb_red : rfp_red
+	let goodnotation = isBB ? bb_green : rfp_green
 	try {
 		// set canvas
 		let canvas = new OffscreenCanvas(0,0)
@@ -1071,14 +1192,14 @@ function get_fonts_offscreen(METRIC) {
 			btn = addButton(12, METRIC, data.length)
 			if (fntData.offscreen.base.length) {notation = get_font_notation(METRIC, data)}
 		} else {
-			// ToDo: once we allow fontFace in TB this will always be badnotation
-			notation = isTB ? goodnotation : badnotation
+			// ToDo: once we allow fontFace in BB this will always be badnotation
+			notation = isBB ? goodnotation : badnotation
 			value = 'none'
 		}
 	} catch(e) {
 		value = e; data = zErrLog
-		// tmp until we enable offscreen canvas in TB
-		if (isTB && 'ReferenceError: OffscreenCanvas is not defined' == value) {notation = ''}
+		// tmp until we enable offscreen canvas in BB
+		if (isBB && 'ReferenceError: OffscreenCanvas is not defined' == value) {notation = ''}
 	}
 	addBoth(12, METRIC, value, btn, notation, data)
 	log_perf(12, METRIC, t0)
@@ -1208,13 +1329,13 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		// set parameters
 		let fntGeneric = [], fntTest = [], fntControl = [], fntControlObj = {}, oTests = {}, aTests = []
 		if (isMain) {
-			fntData.control.forEach(function(item) {
+			fntData.family.control.forEach(function(item) {
 				let key = item.split(',')[0]
 				fntControl.push(key)
 				fntControlObj[key] = item
 			})
-			fntGeneric = fntData.generic
-			fntTest = fntData.full
+			fntGeneric = fntData.family.generic
+			fntTest = fntData.family.full
 			// match display order so btn links = first of each hash
 			oTests = {
 				'client': {},
@@ -1330,7 +1451,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				objcount = Object.keys(obj).length
 			try {
 				if (0 == objcount) {throw zErrInvalid +'none'
-				} else if (objcount == fntData.full.length) {throw zErrInvalid +'all'
+				} else if (objcount == fntData.family.full.length) {throw zErrInvalid +'all'
 				} else if (obj.hasOwnProperty(fntFake)) {throw zErrInvalid +'fake font detected'}
 			} catch(e) {
 				// we don't have to emmpty it
@@ -1377,8 +1498,8 @@ function get_fonts(METRIC) {
 	const METRICM = METRIC +'_methods'
 	const METRICB = METRIC +'_base'
 	const METRICN = 'font_names'
-	let badnotation = isTB ? tb_red : rfp_red
-	let goodnotation = isTB ? tb_green : rfp_green
+	let badnotation = isBB ? bb_red : rfp_red
+	let goodnotation = isBB ? bb_green : rfp_green
 
 	// functions
 	function exit(value) {
@@ -1522,7 +1643,7 @@ function get_fonts(METRIC) {
 					isLies = fntBaseInvalid.hasOwnProperty(method)
 					if (isLies) {
 						// we don't need to record domrect lie data: just that its a lie
-						log_known(12, fntmethod, '')
+						log_known(12, fntmethod, zLIE)
 					}
 				}
 				//add btn to first of each hash
@@ -1539,7 +1660,7 @@ function get_fonts(METRIC) {
 				// FP data: not lies
 				if (method == selected) {
 					let notation =''
-					if (fntData.base.length) {notation = get_font_notation(METRIC, oData[k].datafonts)}
+					if (fntData.family.base.length) {notation = get_font_notation(METRIC, oData[k].datafonts)}
 					// names
 					let btn = addButton(12, METRICN, oData[k].datacount)
 					sDetail.document[METRICN] = oData[k].datafonts
@@ -1732,7 +1853,7 @@ function get_glyphs(METRIC) {
 }
 
 function get_graphite(METRIC) {
-	let hash, data ='', notation = isTB ? tb_red : ''
+	let hash, data ='', notation = isBB ? bb_red : ''
 	try {
 		if (!fntDocEnabled) {throw zErrInvalid + 'document fonts disabled'}
 		// ToDo: handle when font face is blocked
@@ -1743,7 +1864,7 @@ function get_graphite(METRIC) {
 		let wType = typeFn(test), hType = typeFn(control)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
 		hash = (control == test ? zF : zS)
-		if (isTB) {notation = hash == zS ? tb_standard : tb_safer}
+		if (isBB) {notation = hash == zS ? bb_standard : bb_safer}
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -1875,8 +1996,8 @@ function get_system_fonts(METRIC) {
 				13px normal 400 -apple-system: [caption, menu]
 				*/
 			} else if ('linux' == isOS) {
-				if (isTB) {
-					// TB14: due to font config aliases
+				if (isBB) {
+					// BB14: due to font config aliases
 					if ('ea0ea5d7' == hash) {notation = rfp_green} // 15px normal 400 Arimo
 				} else {
 					if ('48e3d1b4' == hash) {notation = rfp_green} // 15px normal 400 sans-serif
@@ -2018,7 +2139,7 @@ function get_textmetrics(METRIC) {
 		}
 	}
 	log_perf(12, METRIC, t0)
-	try {dom.tzpTextmetrics.height = 0} catch(e) {} // hide the fixed canvas after use
+	try {dom.tzpTextmetrics.height = 0} catch {} // hide the fixed canvas after use
 	return
 }
 
@@ -2065,8 +2186,8 @@ function get_widget_fonts(METRIC) {
 			monospace 13px: [textarea],
 			sans-serif 13px: [image] */
 		} else if ('linux' == isOS) {
-			if (isTB) {
-			// TB14: due to font config aliases
+			if (isBB) {
+			// BB14: due to font config aliases
 			/*Arimo 13.3333px: [19 items],
 				monospace 12px: [textarea],
 				monospace 13.3333px: [date, datetime-local, time],

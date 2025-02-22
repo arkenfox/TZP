@@ -103,7 +103,7 @@ function get_scr_fs_measure() {
 					nochange++
 					if (nochange > 25) {check_size()} // exit
 				}
-			} catch(e) {
+			} catch {
 				check_size()
 			}
 		}
@@ -252,8 +252,8 @@ const get_scr_measure = () => new Promise(resolve => {
 		// window.inner on android is dynamic and also redudnant with document + small viewport units
 		if ('android' == isOS) {delete oList.inner}
 		let iTarget, target
-		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
-		try {target = iTarget.screen} catch(e) {} // initial iframe target
+		try {iTarget = dom.tzpIframe.contentWindow} catch {}
+		try {target = iTarget.screen} catch {} // initial iframe target
 		aList.forEach(function(name) {
 			if ('iframe' !== name) {target = screen; name = 'screen'} // initial target post iframe
 			for (const k of Object.keys(oList)) {
@@ -281,7 +281,7 @@ const get_scr_measure = () => new Promise(resolve => {
 							// only matchmedia can be non Integer
 							if (!Number.isInteger(x)) {throw zErrInvalid + 'expected Integer: got '+ typeCheck}
 						}
-					} catch (e) {
+					} catch(e) {
 						log_error(1, 'sizes_'+ k +'_'+ axis +'_'+ name, e)
 						x = zErr
 					}
@@ -344,7 +344,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		let notation ='', initData = zNA, initHash =''
 		let innerw = oData.inner.width.window, innerh = oData.inner.height.window
 		let screenw = oData.screen.width.screen, screenh = oData.screen.height.screen
-		let isNew = (isTB || isVer > 132) // 1556002 newWin & LB step alignment
+		let isNew = (isBB || isVer > 132) // 1556002 newWin & LB step alignment
 
 		// controls: we want integers so we know what to match to
 		let controlw = innerw, controlh = innerh
@@ -365,7 +365,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			try {
 				controlw = window.innerWidth
 				if ('number' !== typeFn(controlw)) {controlw = zErr} else if (!Number.isInteger(controlw)) {control = zErr}
-			} catch(e) {
+			} catch {
 				controlw = zErr
 			}
 			// initial_sizes
@@ -734,6 +734,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 
 	// https://searchfox.org/mozilla-central/source/testing/web-platform/tests/screen-orientation/orientation-reading.html
 	// see expectedAnglesLandscape + expectedAnglesPortrait
+
 	// display, data
 	for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k]['value'],'','', oDisplay[k]['lies'])}
 	for (const k of Object.keys(oData)) {
@@ -764,7 +765,6 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			addDisplay(1, METRIC +'_'+ k,'','', (undefined !== oGood[hash] ? rfp_green : rfp_red))
 		}
 	}
-
 	return resolve()
 })
 
@@ -805,7 +805,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 			if (value > 0) {
 				value = 1/value
 				display = value
-				varDPR = value // use this over window.dpr
+				varDPR = value
 			} else {
 				throw zErrInvalid + 'got '+ (1/value) // negative/Infinity
 			}
@@ -955,7 +955,7 @@ function get_scr_viewport_units() {
 	aList.forEach(function(k) {
 		let METRIC = 'L' == k ? 'sizes_viewport' : 'sizes_inner'
 		let target
-		try {target = dom['tzp'+ k +'V']} catch(e) {}
+		try {target = dom['tzp'+ k +'V']} catch {}
 		let range, method
 		let prefix = k.toLowerCase() + 'v'
 		for (const p of Object.keys(data)) {
@@ -1222,6 +1222,7 @@ function goNW() {
 		// was: tests/newwin.html
 		// use about:blank (same as forcing a delay with a non-existant website)
 	let newWin = window.open('about:blank','width=9000,height=9000')
+	//let newWin = window.open('tests/newwin.html','width=9000,height=9000')
 	let iw = newWin.innerWidth,
 		ih = newWin.innerHeight,
 		ow = newWin.outerWidth,
@@ -1268,10 +1269,12 @@ function goNW() {
 			try {
 				sizesi.push(newWin.innerWidth +' x '+ newWin.innerHeight)
 				sizeso.push(newWin.outerWidth +' x '+ newWin.outerHeight)
-			} catch(e) {
+			} catch {
 				clearInterval(checking)
 				// if not 'permission denied', eventually we always get
 				// NS_ERROR_UNEXPECTED which we can ignore. Always output
+				//console.log(e)
+				//console.log(n, sizesi, sizeso)
 				check_newwin()
 			}
 		}
@@ -1447,7 +1450,7 @@ const outputFD = () => new Promise(resolve => {
 	}
 
 	// logo
-	let wType, hType, w, h, isLogo, isLogoData =''
+	let wType, hType, w, h, isLogo, isLogoData ='', isWordmark, isWordData =''
 	try {
 		w = dom.tzpAbout.width, h = dom.tzpAbout.height
 		if (runST) {w += '', h = null}
@@ -1457,11 +1460,9 @@ const outputFD = () => new Promise(resolve => {
 	} catch(e) {
 		isLogo = e; isLogoData = zErrShort
 	}
-	addBoth(3, 'logo', isLogo,'','', isLogoData)
-	
+
 	// about-wordmark.svg
 		// record both: if missing = 0x0 (hidden) | = image placeholder size (offscreen)
-	let isWordmark, isWordData =''
 	try {
 		let isHidden, isOffscreen
 		// hidden
@@ -1472,28 +1473,30 @@ const outputFD = () => new Promise(resolve => {
 		isHidden = w +' x '+ h
 		// offscreen
 		isOffscreen = dom.tzpBrand.width +' x '+ dom.tzpBrand.height
-		if (isHidden !== isOffscreen) {isHidden += ' | ' + isOffscreen}
+		if (isHidden !== isOffscreen) {isHidden += ', ' + isOffscreen}
 		isWordmark = isHidden
 	} catch(e) {
 		isWordmark = e; isWordData = zErrShort
 	}
-	addBoth(3, 'wordmark', isWordmark,'','', isWordData)
 
-	// set isMullvad for diffs between TB vs MB; otherwise it _is_ TB in tests
-	if (gLoad && !isTB && 'android' !== isOS) {
+	// set isMB: legacy
+	if (gLoad && !isBB && 'android' !== isOS) {
 		let aMBVersions = [115, 128]
 		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
-			isMullvad = true
-			isTB = true
-			tb_green = sgtick+'MB]'+sc
-			tb_red = sbx+'MB]'+sc
-			tb_slider_red = sbx+'MB Slider]'+sc
-			tb_standard = sg+'[MB Standard]'+sc
-			tb_safer = sg+'[MB Safer]'+sc
+			isMB = true
+			isBB = true
+			bb_green = sgtick+'MB]'+sc
+			bb_red = sbx+'MB]'+sc
+			bb_slider_red = sbx+'MB Slider]'+sc
+			bb_standard = sg+'[MB Standard]'+sc
+			bb_safer = sg+'[MB Safer]'+sc
 		}
 	}
 	// browser
-	addBoth(3, 'browser', (isMullvad ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
+	let notation = isBB ? bb_red : ''
+	addBoth(3, 'browser', (isMB ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
+	addBoth(3, 'logo', isLogo,'', (isBB && '24 x 24' == isLogo ? bb_green : notation), isLogoData)
+	addBoth(3, 'wordmark', isWordmark,'', (isBB && '0 x 0, 24 x 24' == isWordmark ? bb_green : notation), isWordData)
 
 	// eval
 	METRIC = 'eval.toString'
@@ -1509,7 +1512,7 @@ const outputFD = () => new Promise(resolve => {
 	addBoth(3, 'version', isVer + isVerExtra)
 	// set metricsPrefix
 	if (isGecko && isSmart) {
-		metricsPrefix = (isMullvad ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'
+		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'
 	}
 	// arch: FF110+ pref removed: error means 32bit
 	let str = '64bit'; data = 64

@@ -4,6 +4,10 @@ dom = getUniqueElements();
 /*** GENERIC ***/
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
+function nowFn() {
+	try {return performance.now()
+	} catch(e) {return}
+}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function count_decimals(value) {if(Math.floor(value) === value) return 0;return value.toString().split(".")[1].length || 0}
@@ -228,26 +232,9 @@ function sha1(str1){
 
 /*** GLOBAL VARS ***/
 
-function get_canPerf() {
-	// check performance.now
-	try {
-		let testPerf = performance.now()
-		canPerf = true
-	} catch(e) {
-		canPerf = false
-	}
-}
-
 const get_globals = () => new Promise(resolve => {
 	// immutables: do once but promise from each test page if used
-	// might as well
-	if ((location.protocol) == "https:") {isSecure = true}
-	// always check canPerf
-	get_canPerf()
-	let tstart
-
-	// engine
-	if (canPerf) {tstart = performance.now()}
+	let tstart = nowFn()
 	// we use > not >= which means 50% or more to break an engine check
 		// e.g always use odd
 			// 9 all same: to get under/over 4.5 you would need to lie about 5/9 = 56%
@@ -304,7 +291,7 @@ const get_globals = () => new Promise(resolve => {
 	}
 	if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
 	// perf
-	let tend; if (canPerf) {tend = performance.now()}
+	let tend = nowFn()
 	// re-tidy vars
 	if (isEngine == "gecko") {
 		isFF = true
@@ -322,11 +309,11 @@ const get_globals = () => new Promise(resolve => {
 		})
 		displayAll.push(displayE.join(""))
 	}
-	isEnginePretty = (canPerf ? (Math.round(tend-tstart)) +" ms |" : "") + displayAll.join(" |")
+	isEnginePretty = Math.round(tend-tstart) +" ms |" + displayAll.join(" |")
 			+ " | " + (isEngine == "" ? "UNKNOWN" : isEngine.toUpperCase())
 
 	// isFF: gecko 10 more tests
-	if (canPerf) {tstart = performance.now()}
+	tstart = nowFn()
 	try {
 		let list = [
 			[DataTransfer, "DataTransfer", "mozSourceNode"],
@@ -350,7 +337,7 @@ const get_globals = () => new Promise(resolve => {
 				aNo.push(array[1])
 			}
 		})
-		let tend; if (canPerf) {tend = performance.now()}
+		let tend = nowFn()
 		let found = (list.length - aNo.length)
 		if (found > 5) {
 			isFF = true
@@ -370,8 +357,7 @@ const get_globals = () => new Promise(resolve => {
 		let strYou = " | are you " + (isEngine == "goanna" ? "goanna" : "gecko") + "? "
 			+ (isFF ? sg.trim() + "YES" : sb.trim() + "NO") + sc
 
-		isFFpretty = (canPerf ? (Math.round(tend-tstart)) +" ms |" : "")
-			+ display.join("") + strYou
+		isFFpretty = Math.round(tend-tstart) +" ms |"+ display.join("") + strYou
 	} catch(e) {
 		isFFvalid = false
 		isFFpretty = sb.trim() + e.name +": "+ sc + e.message
@@ -403,134 +389,6 @@ function get_is95() {
 	})
 }
 
-const get_isOS = () => new Promise(resolve => {
-	if (!isFF) {return resolve()}
-	function exit() {
-		// linux-panel not added until FF89, but we're not expecting widgets to fail until 102 minimum
-		if (isOS == "") {isOS = "android"}
-		return resolve()
-	}
-
-	// FF121+: 1855861
-	let count = 0
-	const get_event = (css, item) => new Promise(resolve => {
-		css.onload = function() {
-			isOS = item == "win" ? "windows" : item
-			count++
-			document.head.removeChild(css)
-			exit() // we can only have one
-			return resolve()
-		}
-		css.onerror = function() {
-			count++
-			document.head.removeChild(css)
-			if (count == 3) {exit()}
-			return resolve()
-		}
-	})
-
-	// try harder
-	function tryharder() {
-		try {
-			let path = "chrome://browser/content/extension-", suffix = "-panel.css"
-			// 1280128: FF51+ win/mac
-			// 1701257: FF89+ linux
-			let list = ["win","mac","linux"]
-			list.forEach(function(item) {
-				let css = document.createElement("link")
-				css.href = path + item + suffix
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				document.head.appendChild(css)
-				get_event(css, item)
-			})
-		} catch(e) {
-			console.error(e.name, e.emssage)
-			return resolve()
-		}
-	}
-
-	// widget font
-	// requires widgetradio on dom
-	/*
-	<div class="hidden"><input type="radio" id="widgetradio"></div>
-	*/
-	let aIgnore = [
-		'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
-		'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
-	]
-	try {
-		let font = getComputedStyle(dom.widgetradio).getPropertyValue("font-family")
-		if (aIgnore.includes(font)) {
-			// returns generic font-family if #41116 or eventually 1787790
-				// mac should still return -apple-system
-				// https://gitlab.torproject.org/tpo/applications/tor-browser/-/merge_requests/358
-			tryharder()
-		} else {
-			if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-			} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
-			} else if (font == "-apple-system") {isOS = "mac"
-			} else if (font == "Roboto") {isOS = "android" // fallback or do some linux use Roboto?
-			} else {isOS = "linux"}
-			return resolve()
-		}
-	} catch(e) {
-		console.error(e.name, e.emssage)
-		tryharder()
-	}
-})
-
-const get_isRFP = () => new Promise(resolve => {
-	// FF65+: not worth promising isVer to check FF64 or lower
-	isRFP = false
-	if (!isFF) {return resolve()}
-	let isPerf2 = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		isRFP = (r == 0)
-		if (!isPerf2) {isRFP = false}
-		return resolve()
-	} catch(e) {
-		return resolve()
-	}
-})
-
-const get_isTB = () => new Promise(resolve => {
-	if (!isFF) {return resolve()}
-	try {
-		// extensions can block resources://
-			// FF ~5ms, TB ~20ms
-		setTimeout(() => resolve(false), 100)
-
-		let source = "resource://torbutton-assets/aboutTor.css"
-		// FF115+ change source: ToDo: TB13+: does not work on android
-		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) {
-			source = "chrome://browser/content/abouttor/aboutTor.css"
-		}
-		let css = document.createElement("link")
-		css.href = source
-		css.type = "text/css"
-		css.rel = "stylesheet"
-		document.head.appendChild(css)
-		css.onload = function() {
-			isTB = true
-			return resolve()
-		}
-		css.onerror = function() {
-			return resolve()
-		}
-		document.head.removeChild(css)
-	} catch(e) {
-		return resolve()
-	}
-})
-
 const get_isVer = () => new Promise(resolve => {
 	// NOTE: requires dom for 95 and 76, and a promised is95
 	if (!isFF) {return resolve()}
@@ -554,18 +412,17 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 136
+		isVerMax = 137
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 137 fast-path: javascript.options.experimental.math_sumprecise
+			if ('function' == typeof Math.sumPrecise) return 137 // 1943120
 			try {
 				// fastpath: FF132+: javascript.options.experimental.regexp_modifiers
-				if (eval("/(?i:[A-Z]{4})/.test('abcd')")) return 136 // 1939533
+				if ((new RegExp("(?i:[A-Z]{4})")).test('abcd')) return 136 // 1939533
 			} catch(e) {}
-			try {
-				let test135 = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
-				if (0 == test135.resolvedOptions().minimumFractionDigits) return 135 // 1930464
-			} catch(e) {}
+			if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) return 135 // 1905706
 			try {
 				if ('lij' == Intl.PluralRules.supportedLocalesOf('lij').join()) return 134 // 1927706
 			} catch(e) {}
