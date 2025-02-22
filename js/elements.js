@@ -1,5 +1,7 @@
 'use strict';
 
+// element results always in this order: width, height, x, y
+
 function get_domrect(METRIC) {
 	// quick exits
 	let hash, data = {}
@@ -83,7 +85,7 @@ function get_domrect(METRIC) {
 
 function get_element_keys(METRIC) {
 	const id = 'element-key'
-	let hash, btn ='', data = [], notation = isTB ? tb_red : '', isLies = false
+	let hash, btn ='', data = [], notation = isBB ? bb_red : '', isLies = false
 	try {
 		if (runSE) {foo++}
 		const element = document.createElement('a')
@@ -96,19 +98,19 @@ function get_element_keys(METRIC) {
 			// ToDo: use post constructor when we enumerate all elements
 		const aExpected = ['scrollWidth','scrollHeight','clientWidth','clientHeight']
 		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
-		if (isTB) {
+		if (isBB) {
 			// NS 12.1.1 only exposes all the set/value tampering on safer
 			if ('android' == isOS) {
 				// 7db91b52: standard
 				// 7766b529: safer (including webgl click-to-play)
-				if ('7db91b52' == hash || '7766b529' == hash) {notation = tb_green}
+				if ('7db91b52' == hash || '7766b529' == hash) {notation = bb_green}
 			} else {
 				// 1817fdbe: 340 standard
 				// eb81553d: 353 safer (including webgl click-to-play)
-				if ('1817fdbe' == hash || 'eb81553d' == hash) {notation = tb_green}
+				if ('1817fdbe' == hash || 'eb81553d' == hash) {notation = bb_green}
 			}
 		}
-	} catch (e) {
+	} catch(e) {
 		hash = e; data = zErrLog
 	}
 	removeElementFn(id)
@@ -300,7 +302,7 @@ function get_element_mathml(METRIC) {
 	let t0 = nowFn()
 	const id = 'element-fp'
 	const sizetype = 'px', sizes = [33,99,111], sizectl = sizes[0]
-	let hash, btn ='', data = {}, notation = isTB ? tb_slider_red : '', isLies = isDomRect == -1
+	let hash, btn ='', data = {}, notation = isBB ? bb_slider_red : '', isLies = isDomRect == -1
 	try {
 		// create element
 		const doc = document
@@ -376,7 +378,7 @@ function get_element_mathml(METRIC) {
 			data['enabled'] = isEnabled
 			displayEnabled = ' ['+ (isEnabled ? zE : zD) +']'
 		}
-		if (isTB) {notation = isEnabled ? tb_standard : tb_safer}
+		if (isBB) {notation = isEnabled ? bb_standard : bb_safer}
 		hash = mini(data); btn = addButton(15, METRIC) + displayEnabled
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -470,7 +472,7 @@ function get_element_other(METRIC) {
 
 function get_element_scrollbars(METRIC) {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
-		// ui.useOverlayScrollbars: 0 = no, 1 = yes
+		// ui.useOverlayScrollbars: 0 = yes, 1 = no
 		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only in css pixels at full zoom (default 0)
 			// this bypasses TB and changes auto + thin
 		// widget.non-native-theme.scrollbar.style = values 0 to 5 (default, mac, gtk, android, win10, win11)
@@ -541,14 +543,8 @@ function get_element_scrollbars(METRIC) {
 		})
 	}
 
-	function tidySB(array) {
-		let str = array.join(', ')
-		array = array.filter(function(item, position) {return array.indexOf(item) === position})
-		if (1 == array.length) {str = array[0]}
-		return str
-	}
 	get_scroll()
-	addDisplay(15, METRIC, tidySB(aAuto) +' | '+ tidySB(aThin))
+	addDisplay(15, METRIC, dedupeArrayToString(aAuto) +' | '+ dedupeArrayToString(aThin))
 	addData(15, METRIC, oData, mini(oData))
 	return
 }
