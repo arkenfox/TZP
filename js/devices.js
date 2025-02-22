@@ -128,13 +128,13 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 	function set_notation(value ='') {
 		// 1528042: FF115+ media.devices.enumerate.legacy.enabled
 		let notation =''
-		if (isTB && !isMullvad) {
-			return value == 'TypeError: navigator.mediaDevices is undefined' ? tb_green : tb_red
+		if (isTB) {
+			return value == 'TypeError: navigator.mediaDevices is undefined' ? bb_green : bb_red
 		} else {
 			let rfplegacy = '54a59537', rfpnew = '75e77887'
-			if (isMullvad) {
+			if (isMB) {
 				// tor-browser#42043
-				notation = value == rfpnew ? tb_green : tb_red
+				notation = value == rfpnew ? bb_green : bb_red
 			} else if (isVer > 131) {
 				// 1916993: FF132+ default false
 				notation = value == rfpnew ? rfp_green : rfp_red
