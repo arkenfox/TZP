@@ -95,8 +95,8 @@ function get_filesystem(METRIC) {
 		display = log_error(6, METRIC, isFileSystemError)
 	}
 	// PBmode: SecurityError: Security error when calling GetDirectory
-	if (isTB) {
-		notation = ('SecurityError: Security error when calling GetDirectory' == isFileSystemError ? tb_green : tb_red)
+	if (isBB) {
+		notation = ('SecurityError: Security error when calling GetDirectory' == isFileSystemError ? bb_green : bb_red)
 	} else {
 		// FF111: 1811001: dom.fs.enabled = true
 		if (isFileSystem == zD) {notation = default_red}
@@ -130,7 +130,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	// note: delay = 0 = silent run if permission granted
 	const METRIC = 'storage_manager'
 	dom[METRIC] = ''
-	let notation = isTB ? tb_red : ''
+	let notation = isBB ? bb_red : ''
 
 	function exit(value) {
 		dom[METRIC].innerHTML = value + notation
@@ -148,8 +148,8 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 						value += 'GB ['+ bytes +' bytes]'
 						if (isProxyLie('StorageManager.estimate')) {
 							value = log_known(6, METRIC, value)
-						} else if (isTB && 10737418240 == bytes) { // not a lie, exact match
-							notation = tb_green
+						} else if (isBB && 10737418240 == bytes) { // not a lie, exact match
+							notation = bb_green
 						}
 						exit(value)
 					} else {
@@ -162,7 +162,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 })
 
 const get_storage_quota = (METRIC) => new Promise(resolve => {
-	let isLies = false, notation = isTB ? tb_red : ''
+	let isLies = false, notation = isBB ? bb_red : ''
 	function exit(display, value) {
 		addBoth(6, METRIC, display,'', notation, value, isLies)
 		return resolve()
@@ -176,7 +176,7 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 			let value = Math.floor(bytes/(1073741824) * 10)/10 // round down so even 1 byte less !== 10
 			let display = value +'GB ['+ bytes +' bytes]'
 			if (isProxyLie('StorageManager.estimate')) {isLies = true}
-			if (isTB && 10737418240 == bytes) {notation = tb_green}
+			if (isBB && 10737418240 == bytes) {notation = bb_green}
 			sDetail.document.lookup[METRIC] = display
 			exit(display, value)
 		}).catch(function(e){
@@ -249,7 +249,7 @@ function test_idb(log = false) {
 			dbTx.oncomplete = function() {dbObject.close()}
 		}
 		openIDB.onerror = function(event) {exit(zF)}
-	} catch(e) {
+	} catch {
 		exit(zErr)
 	}
 }
@@ -269,7 +269,7 @@ const test_worker_service = (log = false) => new Promise(resolve => {
     .catch((error) => {
 			exit(zErr)
 		})
-	} catch(e) {exit(zErr)}
+	} catch {exit(zErr)}
 })
 
 const test_worker_shared = (log = false) => new Promise(resolve => {
@@ -291,7 +291,7 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 		shared.onerror = function (err) {exit(zErr)}
 		shared.port.start()
 		shared.port.postMessage(rndStr2)
-	} catch(e) {
+	} catch {
 		exit(zErr)
 	}
 })
@@ -317,7 +317,7 @@ const test_worker_web = (log = false) => new Promise(resolve => {
 			}, false)
 			worker.onerror = function (e) {exit(zErr)}
 			worker.postMessage(rndStr1)
-		} catch(e) {
+		} catch {
 			exit(zErr)
 		}
 	}
