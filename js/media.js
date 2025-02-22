@@ -26,9 +26,9 @@ function get_autoplay(METRIC) {
 	try {
 		let atest, mtest
 		let ares = navigator.getAutoplayPolicy('audiocontext')
-		try {atest = navigator.getAutoplayPolicy(dom.tzpAudio)} catch(e) {atest = zErr}
+		try {atest = navigator.getAutoplayPolicy(dom.tzpAudio)} catch {atest = zErr}
 		let mres = navigator.getAutoplayPolicy('mediaelement')
-		try {mtest = navigator.getAutoplayPolicy(dom.tzpMedia)} catch(e) {mtest = zErr}
+		try {mtest = navigator.getAutoplayPolicy(dom.tzpMedia)} catch {mtest = zErr}
 		let display = (ares === atest ? ares : ares +', '+ atest) +' | '+ (mres === mtest ? mres : mres +', '+ mtest)
 		addDisplay(13, METRICuser, display)
 	} catch(e) {
@@ -41,7 +41,7 @@ const get_clearkey = (METRIC) => new Promise(resolve => {
 	let isDone = false
 	setTimeout(function() {
 		if (!isDone) {
-			notation = isTB ? tb_red : default_red 
+			notation = isBB ? bb_red : default_red 
 			exit(zErrTime)
 		}
 	}, 150)
@@ -66,7 +66,7 @@ const get_clearkey = (METRIC) => new Promise(resolve => {
 	note: media.gmp-gmpopenh264.enabled = no effect even after a restart
 	*/
 
-	let notation = isTB ? tb_red: ''
+	let notation = isBB ? bb_red: ''
 	if (!runTE) {
 		try {
 			const config = {
@@ -84,7 +84,7 @@ const get_clearkey = (METRIC) => new Promise(resolve => {
 				exit(zS)
 			}).catch(function(e){
 			/* expected
-					isTB   : "NotSupportedError: CDM is not installed"
+					isBB   : "NotSupportedError: CDM is not installed"
 					Android: "NotSupportedError: CDM is not installed"
 					FF PB  : "NotSupportedError: Key system configuration is not supported"
 						^ 1706121: PB mode
@@ -94,8 +94,8 @@ const get_clearkey = (METRIC) => new Promise(resolve => {
 						^ little lies I think does this about 12.5% of the time: we pick up on little lies in canPlayType anyway
 				*/
 				// ToDo: FF128 1706121 PB mode fix landed
-				if (isTB) {
-					notation = e+'' === 'NotSupportedError: CDM is not installed' ? tb_green: tb_red
+				if (isBB) {
+					notation = e+'' === 'NotSupportedError: CDM is not installed' ? bb_green: bb_red
 				} else if ('android' == isOS) {
 					notation = e+'' === 'NotSupportedError: CDM is not installed' ? default_green: default_red
 				} else {
