@@ -154,39 +154,28 @@ function run_checks(max) {
 	if (isFF && !is96) {
 		aBypass.push("this is not Firefox 96+, as per the test description")
 	}
-	// always recheck isRFP
-	Promise.all([
-		get_isRFP(),
-	]).then(function(){
-		if (isFF && !isRFP) {
-			// needs a new (slower) test in FF111+: temporarily ignore
-			if (!HTMLElement.prototype.hasOwnProperty("translate")) {
-				aBypass.push("RFP is not enabled")
+	// isFile
+	if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
+	// heh
+	if (runningTotal >= 500000) {dom.results = "that's enough tests for now... go take a break"; return}
+	// create canvas once per run
+	try {
+		let canvas = document.getElementById("canvas")
+		canvas.width = sizeW
+		canvas.height = sizeH // always reset canvas size since width+height are variable via console
+		let ctx = canvas.getContext('2d')
+		for (let x=0; x < sizeW; x++) {
+			for (let y=0; y < sizeH; y++) {
+				ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
+				ctx.fillRect(x, y, 1, 1)
 			}
 		}
-		// isFile
-		if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
-		// heh
-		if (runningTotal >= 500000) {dom.results = "that's enough tests for now... go take a break"; return}
-		// create canvas once per run
-		try {
-			let canvas = document.getElementById("canvas")
-			canvas.width = sizeW
-			canvas.height = sizeH // always reset canvas size since width+height are variable via console
-			let ctx = canvas.getContext('2d')
-			for (let x=0; x < sizeW; x++) {
-				for (let y=0; y < sizeH; y++) {
-					ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
-					ctx.fillRect(x, y, 1, 1)
-				}
-			}
-		} catch(e) {
-			dom.results.innerHTML = e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message
-			return
-		}
-		// looks good
-		get_rawdata()
-	})
+	} catch(e) {
+		dom.results.innerHTML = e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message
+		return
+	}
+	// looks good
+	get_rawdata()
 }
 
 function get_rawdata() {
