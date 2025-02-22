@@ -15,7 +15,7 @@ const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function nowFn() {if (isPerf) {return performance.now()}; return}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
-function removeElementFn(id) {try {dom[id].remove()} catch(e) {}}
+function removeElementFn(id) {try {dom[id].remove()} catch {}}
 function addProxyLie(value) {sData[SECT99].push(value)}
 function isProxyLie(value) {return sData[SECT99].includes(value)}
 
@@ -35,7 +35,7 @@ function typeFn(item, isSimple = false) {
 		} else if (null === item) {type = 'null'
 		} else {
 			if (!isSimple) {
-				try {if (0 === Object.keys(item).length) {type = 'empty object'}} catch(e) {}
+				try {if (0 === Object.keys(item).length) {type = 'empty object'}} catch {}
 			}
 		}
 	}
@@ -45,10 +45,17 @@ function typeFn(item, isSimple = false) {
 
 function testtypeFn(isSimple = false) {
 	let bigint = 9007199254740991
-	try {bigint = BigInt(9007199254740991)} catch(e) {}
+	try {bigint = BigInt(9007199254740991)} catch {}
 	let data = ['a','','  ', 1, 1.2, Infinity, NaN, [], [1], {}, {a: 1}, null,
 		true, false, bigint, undefined, function foobar() {},]
 	data.forEach(function(item) {console.log(item, typeFn(item, isSimple))})
+}
+
+function dedupeArrayToString(array) {
+	let str = array.join(', ')
+	array = array.filter(function(item, position) {return array.indexOf(item) === position})
+	if (1 == array.length) {str = array[0]}
+	return str
 }
 
 function run_block() {
@@ -62,7 +69,7 @@ function run_block() {
 	} catch(e) {}
 }
 
-function run_basic() {
+function run_basic(str = 'basic') {
 	log_perf(SECTG, 'isBasic','')
 	for (let i=1; i < 19; i++) {
 		document.body.style.setProperty('--test'+i, '#d4c1b3')
@@ -71,7 +78,7 @@ function run_basic() {
 	document.body.style.setProperty('--testbad', '#d4c1b3')
 	let items = document.getElementsByClassName('nav-down')
 	for (let i=0; i < items.length; i++) {
-		items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>basic mode</span> <")
+		items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>"+ str +' mode</span> <')
 	}
 }
 
@@ -283,7 +290,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
 				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
 			fntEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
-		} catch(e) {}
+		} catch {}
 		if (!fntEnabled) {trysomethingelse(); return}
 
 		// check fonts
@@ -322,7 +329,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			} else if (font == '-apple-system') {exit('mac')
 			} else {throw zErr}
 		}
-	} catch(e) {
+	} catch {
 		tryfonts()
 	}
 })
@@ -333,7 +340,7 @@ const get_isRecursion = () => new Promise(resolve => {
 	let t0 = nowFn()
 	let level = 0
 	function recurse() {level++; recurse()}
-	try {recurse()} catch(e) {}
+	try {recurse()} catch {}
 	level = 0
 	try {
 		recurse()
@@ -380,48 +387,73 @@ const get_isSystemFont = () => new Promise(resolve => {
 	}
 })
 
-const get_isTB = (METRIC) => new Promise(resolve => {
-	if (!isGecko) {
-		return resolve(false)
-	}
+const get_isBB = (METRIC) => new Promise(resolve => {
+	if (!isGecko) {return resolve()}
+
 	let t0 = nowFn(), isDone = false
-	setTimeout(function() {
+	setTimeout(() => {
 		if (!isDone) {
 			log_error(3, METRIC, zErrTime, isScope, true) // persist sect3
 			log_alert(SECTG, METRIC, zErrTime, isScope, true)
-			exit(zErrTime)
+			log_perf(SECTG, METRIC, t0,'', zErrTime)
+			resolve()
 		}
 	}, 150)
 
-	let el
-	function exit(value) {
-		isDone = true
-		try {el.remove()} catch(e) {}
-		if ('boolean' == typeFn(value)) {isTB = value}
-		log_perf(SECTG, METRIC, t0,'', value)
-		return resolve(value)
+	let count = 0, expected = 1
+	function exit(value, id) {
+		count++
+		if ('aboutTor' == id) {removeElementFn(id)}
+		//console.log(`${count} of ${expected}: ${value}, ${id}`)
+		// return on first true
+		if (!isDone && true === value) {
+			isDone = true
+			//console.log('resolving after first success: test return no.', count, id)
+			isBB = true
+			if (id.includes('mullvad')) {isMB = true} else {isTB = true}
+			log_perf(SECTG, METRIC, t0,'', (isMB ? 'mullvad': 'tor') +' browser | '+ id)
+			resolve()
+		}
+		// otherwise if !isBB we exit false after expected number of test(s)
+		if (!isBB && count == expected || zErr == value) {
+			isDone = true
+			log_perf(SECTG, METRIC, t0,'', (zErr == value ? zErr : false))
+			resolve()
+		}
 	}
 	// FF121+: 1855861
-	const get_event = () => new Promise(resolve => {
-		el.onload = function() {exit(true)}
-		el.onerror = function() {exit(false)}
-	})
+	const get_event = (el, id) => {
+		el.onload = function() {exit(true, id)}
+		el.onerror = function() {exit(false, id)}
+	}
 	if (!runSG) {
 		try {
 			if (isVer > 127) {
-				el = new Image();
-				el.src = 'chrome://global/content/torconnect/tor-connect.svg' // TB13.5
-				document.body.appendChild(el)
+				let list = [
+					'content/torconnect/tor-connect.svg', // TB13.5
+					'skin/icons/torbrowser.png', // TB14.5
+					'skin/icons/mullvadbrowser.png', // MB14.5
+				]
+				expected = list.length
+				list.forEach(function(image) {
+					let parts = (image.slice(0,-4)).split('/')
+					let id = parts[parts.length - 1]
+					let el = new Image()
+					el.src = 'chrome://global/' + image
+					get_event(el, id)
+				})
 			} else {
 				// support TB13 until we raise minVer next ESR
-				el = document.createElement('link')
+				let el = document.createElement('link')
 				el.href = 'chrome://browser/content/abouttor/aboutTor.css';
 				el.type = 'text/css'
 				el.rel = 'stylesheet'
+				el.setAttribute('id', 'aboutTor')
 				document.head.appendChild(el)
+				get_event(el, 'aboutTor')
 			}
-			get_event()
 		} catch(e) {
+			// catch any unexpected extension fuckery
 			log_error(3, METRIC, e, isScope, true) // persist sect3
 			log_alert(SECTG, METRIC, e.name, isScope, true)
 			exit(zErr)
@@ -434,13 +466,13 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 136) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 137) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
 	if (isBlock) {run_block(); return}
-	// set basic mode
-	if (isVer >= isSmartMin) {isSmart = true} else {run_basic()}
+	// set basic/maintenance mode
+	if (isVer >= isSmartMin) {if (isMaintenance) {isSmart = true} else {run_basic('non-maintenance')}} else {run_basic()}
 	return
 
 	function cascade() {
@@ -449,34 +481,34 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
-			try {
-				// fastpath: FF132+: javascript.options.experimental.regexp_modifiers
-				if (eval("/(?i:[A-Z]{4})/.test('abcd')")) return 136 // 1939533
-			} catch(e) {}
-			try {
-				test = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
-				if (0 == test.resolvedOptions().minimumFractionDigits) return 135 // 1930464
-			} catch(e) {}
+
+			// 137 fast-path: javascript.options.experimental.math_sumprecise
+			if ('function' == typeof Math.sumPrecise) return 137 // 1943120
+			// 136 fast-path: FF132+ pref enabled javascript.options.experimental.regexp_modifiers
+			try {if ((new RegExp("(?i:[A-Z]{4})")).test('abcd')) return 136} catch {} // 1939533
+			if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) return 135 // 1905706
+			// 134: may be affected by --with-system-icu
+				// ToDo: replace, fallbacks?
 			if ('lij' == Intl.PluralRules.supportedLocalesOf('lij').join()) return 134 // 1927706
 			try {
 				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
 				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
-			} catch(e) {}
+			} catch {}
 			try {
 				const re = new RegExp('(?:)', 'gv');
 				test = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
 				for (let i=0; i < 3; i++) {if (true == test.next().done) return 132} // 1899413
-			} catch(e) {}
+			} catch {}
 			try {
 				test = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
 				if ('2033' == test.slice(0,4)) return 131 // 1900196
-			} catch(e) {}
+			} catch {}
 			try {new RegExp('[\\00]','u')} catch(e) {if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130} // 1907236
 			if (CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
-			try {let test128 = (new Blob()).bytes(); return 128} catch(e) {} // 1896509
-			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
+			try {let test128 = (new Blob()).bytes(); return 128} catch {} // 1896509
+			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch {} // 1894248
 			if ('function' === typeof URL.parse) {return 126}
-			try {if ('Invalid Date' == new Date('Sep 26 Thurs 1995 10:00')) return 125} catch(e) {} // 1872793
+			try {if ('Invalid Date' == new Date('Sep 26 Thurs 1995 10:00')) return 125} catch {} // 1872793
 			let el = document.documentElement
 			if (!CSS2Properties.prototype.hasOwnProperty('MozUserFocus')) {
 				try {
@@ -484,7 +516,7 @@ function get_isVer(METRIC) {
 					test = getComputedStyle(el).zIndex
 					el.style.zIndex = 'auto'
 					if (test > 0) {return 124} // 1867569
-				} catch(e) {}
+				} catch {}
 				return 123 // 1871745
 			}
 			if ('function' === typeof Promise.withResolvers) {
@@ -493,7 +525,7 @@ function get_isVer(METRIC) {
 					test = getComputedStyle(el).zIndex
 					el.style.zIndex = 'auto'
 					if (test > 0) {return 122} // 1867558
-				} catch(e) {}
+				} catch {}
 				return 121 // 1845586
 			}
 			if (window.hasOwnProperty('UserActivation')) return 120 // 1791079
@@ -598,6 +630,7 @@ function get_isDomRect() {
 			}
 			props.forEach(function(prop){
 				let value = obj[prop]
+				if (runSL) {value += 0.1}
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				tmpobj[prop] = value
@@ -617,7 +650,6 @@ function get_isDomRect() {
 		}
 	}
 	//aDomRect = [false, false, false, false]
-	if (runSL) {aDomRect = [false, false, false, false]}
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
 	log_perf(SECTP, 'isDomRect', t0,'', aDomRect.join(', '))
@@ -630,7 +662,7 @@ function get_isPerf() {
 		try {
 			let value = Math.trunc(performance.now() - performance.now())
 			if (0 !== value && -1 !== value) {return}
-		} catch(e) {return}
+		} catch {return}
 	}
 	isPerf = true
 }
@@ -653,7 +685,7 @@ function copyclip(element) {
 			}, function() {
 				// clipboard write failed
 			})
-		} catch(e) {}
+		} catch {}
 	}
 }
 
@@ -671,7 +703,7 @@ function togglerows(id, word) {
 	} else {
 		word = ('none' == style ? '&#9660; show ' : '&#9650; hide ') + ('' == word || word === undefined ? 'details' : word)
 	}
-	try {dom['label'+ id].innerHTML = word} catch(e) {}
+	try {dom['label'+ id].innerHTML = word} catch {}
 }
 
 /*** METRICS DISPLAY ***/
@@ -714,8 +746,6 @@ function json_highlight(json, clrValues = false) {
 function json_stringify(passedObj, options = {}) {
 	/* https://github.com/lydell/json-stringify-pretty-compact */
 	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
-	// overlay: (425-50 margin) 375 vs 675 (725-50) = 56%: 88->50, but this seems too low
-	const osMaxLength = 'android' == isOS ? 68 : 88
 	const indent = JSON.stringify(
 		[1],
 		undefined,
@@ -725,7 +755,7 @@ function json_stringify(passedObj, options = {}) {
 		indent === ''
 			? Infinity
 			: options.maxLength === undefined
-			? osMaxLength
+			? overlayMaxLength
 			: options.maxLength;
 	let { replacer } = options;
 
@@ -900,7 +930,7 @@ function metricsShow(name, scope) {
 	//add btn, show/hide options, display
 	let hash = mini(data)
 	metricsTitle = (scope == undefined ? '' : scope.toUpperCase() +': ') + target + filter +': '+ hash
-	dom.metricsTitle.innerHTML = metricsTitle + (isHealth ? overlayHealthCount : '')
+	dom.metricsTitle.innerHTML = metricsTitle + (isHealth && 'android' !== isOS ? overlayHealthCount : '')
 	if (isVisible) {
 		// avoid reflow
 		dom.metricsDisplay.innerHTML = display
@@ -956,9 +986,9 @@ function lookup_health(sect, metric, scope, isPass) {
 	if ('window.caches' == metric) {metric = 'caches'}
 	let data ='', hash =''
 	// error?
-	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
+	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch {}
 	// lie?
-	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, zLIE])}} catch(e) {}
+	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, zLIE])}} catch {}
 	// nested, lookups, FP|detail data
 	try {
 		let nested ='', tmpdata, sDetailTemp
@@ -997,7 +1027,7 @@ function lookup_health(sect, metric, scope, isPass) {
 				}
 			}
 			if ('object' === typeCheck) {
-				try {hash = gData[zFP][scope][sect]['metrics'][metric].hash} catch(e) {}
+				try {hash = gData[zFP][scope][sect]['metrics'][metric].hash} catch {}
 			}
 			return([hash, data])
 		}
@@ -1319,7 +1349,7 @@ function addData(section, metric, data, hash ='', isLies = false, donotuse ='x')
 	sDataTemp[zFP][isScope][section][metric] = isLies ? zLIE : value
 	if (isLies) {
 		// don't add spoofed domrect data
-		let aIgnore = ['element_font','element_forms','element_mathml','glyphs']
+		let aIgnore = ['element_font','element_forms','element_mathml','element_other','glyphs']
 		if (aIgnore.includes(metric)) {value = zLIE}
 		log_known(section, metric, value)
 	}
@@ -1362,7 +1392,7 @@ function addTiming(metric) {
 	let remainder = gCountTiming % 9, key, value
 	if (0 == gCountTiming % 5) {
 		// get extra dates
-		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
 	}
 	try {
 		if (0 == remainder) {
@@ -1398,6 +1428,25 @@ function addTiming(metric) {
 		gData.timing[key] = e+''
 	}
 	gCountTiming++
+}
+
+function addTimings() {
+	// get first and final values for each to ensure a max diff
+	try {gData.timing['now'].push(performance.now())} catch {}
+	try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch {}
+	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
+	try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch {}
+	try {
+		if (0 == gCountTiming) {gTimeline = new DocumentTimeline()}
+		gData.timing['currenttime'].push(gTimeline.currentTime)
+	} catch {}
+	try {
+		if (0 == gCountTiming) {performance.clearMarks('a')}
+		performance.mark('a')
+	} catch {}
+	if (0 == gCountTiming) {
+		addTiming('start') // adds first exslt
+	}
 }
 
 function log_alert(section, metric, alert, scope = isScope, isOnce = false) {
@@ -1570,8 +1619,8 @@ function countJS(item) {
 			if (isAllowNonGecko) {run_basic()} else {run_block(); return}
 		}
 		// help ensure/force images are loaded in time
-		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch(e) {}
-		try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch(e) {}
+		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
+		try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch {}
 		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
@@ -1581,7 +1630,7 @@ function countJS(item) {
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 
 		Promise.all([
-			get_isTB('isTB'),
+			get_isBB('isBB'),
 			get_isFileSystem('isFileSystem'),
 			get_isAutoplay('getAutoplayPolicy'),
 		]).then(function(){
@@ -1596,8 +1645,9 @@ function countJS(item) {
 							items[i].classList.add('monobigger')
 							items[i].classList.remove('mono')
 						}
-					} catch(e) {}
+					} catch {}
 				}
+				overlayMaxLength = 'android' == isOS ? 68 : 'windows' == isOS ? 95 : 88
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
 				if ('android' == isOS) {
@@ -1613,6 +1663,8 @@ function countJS(item) {
 						items[i].classList.remove('togS')
 						items[i].classList.add('hidden')
 					}
+					// hide console button in overlay: width is a premium
+					dom.metricsConsole.classList.add('hidden')
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
@@ -1747,12 +1799,12 @@ function outputSection(id, isResize = false) {
 	} else {
 		// clear section data
 		let name = sectionMap[id]
-		try {sData[zFP][isScope][name] = {}} catch(e) {}
-		try {sDataTemp[zFP][isScope][id] = {}} catch(e) {}
-		try {sDataTemp['display'][isScope][id] = {}} catch(e) {}
+		try {sData[zFP][isScope][name] = {}} catch {}
+		try {sDataTemp[zFP][isScope][id] = {}} catch {}
+		try {sDataTemp['display'][isScope][id] = {}} catch {}
 		btnList.forEach(function(item){
-			try {sData[item][isScope][name] = {}} catch(e) {}
-			try {sDataTemp[item][isScope][name] = {}} catch(e) {}
+			try {sData[item][isScope][name] = {}} catch {}
+			try {sDataTemp[item][isScope][name] = {}} catch {}
 		})
 		if (!isResize) {
 			let tbl = dom['tb'+ id]
@@ -1784,25 +1836,12 @@ function outputSection(id, isResize = false) {
 
 	function output() {
 		if ('all' == id) {
-			// get a first value for each to ensure a max diff
-			try {gData.timing['now'].push(performance.now())} catch(e) {}
-			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
-			try {
-				gTimeline = new DocumentTimeline()
-				gData.timing['currenttime'].push(gTimeline.currentTime)
-			} catch(e) {}
-			try {
-				performance.clearMarks('a')
-				performance.mark('a')
-			} catch(e) {}
-			try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch {}
-			gCountTiming = 0
-			addTiming('start') // adds first exslt
-
+			gCountTiming = 0 // reset
+			addTimings()
 			// run sequentially awaiting each before running the next
 			// order: use number or section name
 			let order = [
-				3, // first: sets isMullvad
+				3, // first: sets isMB (legacy method)
 				2, 1, 5, 14, 13, // fast
 				'canvas',
 				'storage', // little slow: cache + permissions
@@ -1832,13 +1871,18 @@ function outputSection(id, isResize = false) {
 		}
 	}
 
-	// TB + fontvis at least on windows seems to require **LOTS**
-	// more time for font async fallback
-		// 1: see if adding bundled to the fontvis list helps
-		// 2: see if upstream can fix the perf cliff
+	// BB: font.vis + bundled fonts
+		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
+		// not the case when using font.system.whitelist
+		// we should see if we can get this fixed upstream
+		// ToDo: isBB test for FontFace and apply delay/notation automagically
 	/*
-	if (gLoad && isTB && isVer > 127) {
-		if ('windows' == isOS || 'mac' == isOS) {delay = 1000}
+	if (gLoad && isBB && isSmart) {
+		if ('windows' == isOS || 'mac' == isOS) {
+			delay = 1500 // using fontasync PoC on my machine this is around 990+ ms
+			dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
+			dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
+		}
 	}
 	//*/
 	setTimeout(function() {
@@ -1849,7 +1893,7 @@ function outputSection(id, isResize = false) {
 			get_isDomRect(),
 			outputPrototypeLies(isResize),
 		]).then(function(){
-			if (isTB && gClear && 'all' == id) {console.clear()}
+			if (isBB && gClear && 'all' == id) {console.clear()}
 			if (isSmart) {log_section(SECTP, gt0)}
 			output()
 		})
@@ -1869,21 +1913,21 @@ function run_immediate() {
 		isFile = 'file:' == location.protocol
 		get_isRecursion()
 		// storage warm ups
-		try {navigator.storage.getDirectory()} catch(e) {}
-		try {window.caches.keys()} catch(e) {}
+		try {navigator.storage.getDirectory()} catch {}
+		try {window.caches.keys()} catch {}
 		// other warm ups
 		get_isDevices()
-		try {let w = speechSynthesis.getVoices()} catch(e) {}
+		try {let w = speechSynthesis.getVoices()} catch {}
 		try {
 			const config = {initDataTypes: ['cenc'], videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}]}
 			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {}).catch(function(e){})
-		} catch(e) {}
+		} catch {}
 		try {
 			let warm = Intl.DateTimeFormat().resolvedOptions()
 			warm = Intl.DateTimeFormat(undefined, {timeZone: 'Europe/London', timeZoneName: 'shortGeneric'}).format(new Date)
 			warm = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
 			warm = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
-		} catch(e) {}
+		} catch {}
 		get_isXML()
 		get_isArch('isArch')
 	})
