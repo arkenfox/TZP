@@ -1179,10 +1179,11 @@ function get_moz_objects(num, name) {
 			if (isVer < 71 && name === "MathMLElement") {bool = zNA, hash = zNA +": FF71+ required"}
 			if (name === "OfflineResourceList") {bool = zNA, hash = zNA +": assuming Beta/Dev/Nightly pref"}
 			if (name === "Navigator") {
-				// TB/PM build without WebRTC
-				if (isEngine == "goanna" || isTB) {
+				// TB/PM build without WebRTC: mozGetUserMedia
+					// and because of that also disable gUM (or code on sites suffer)
+				if (undefined == window.RTCPeerConnection) {
 					bool = zNA
-					hash = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon")
+					hash = zNA +": --disable-webrtc"+ s3 +" ["+ hash +"]"+ sc
 				} else if (isFF) {
 					// behind prefs: both media.peerconnection.enabled + media.navigator.enabled
 					bool = zNA
@@ -1413,10 +1414,10 @@ function get_nav_values(num1, num2, num3) {
 				if (isCheck) {
 					if (!isNaN(resX * 1)) {boolX = true}
 				}
-			} else if (isRFP) {
-				// luckily RFP only alters buildID starting FF56
+			} else {
 				// RFP FF56-63 = 20100101
-				if (resX == "20100101") {boolX = true}
+					// note: not worth checking if RFP is enabled based on old-timey settings
+				if (resX == "20100101") {boolX = true}				
 			}
 		}
 		fnRecord(num3, strX, resX, boolX, "skip", t0X)
@@ -1731,9 +1732,9 @@ function get_window_moz(num) {
 		let boolM = "function" === typeof mozRTCPeerConnection
 		if (!boolM && isFF && "undefined" === resM) {
 			// TB/PM build without WebRTC
-			if (isEngine == "goanna" || isTB) {
+			if (undefined == window.RTCPeerConnection) {
 				boolM = zNA
-				resM = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon") + s3 +" ["+ resM +"]"+ sc
+				resM = zNA +": --disable-webrtc"+ s3 +" ["+ resM +"]"+ sc
 			} else if (isVer > 112) { // 1531812
 				boolM = zNA
 				resM = zNA +": FF112 or lower"+ s3 +" ["+ resM +"]"+ sc
@@ -1744,7 +1745,6 @@ function get_window_moz(num) {
 		}
 		fnRecord(num+1, strM, resM, boolM, "skip", t0M)
 	} catch(e) {
-console.log(e)
 		fnRecord(num+1, strM, e.name, zErr, e.message)
 	}
 
@@ -2001,9 +2001,7 @@ setTimeout(function() {
 		get_globals()
 	]).then(function(){
 		Promise.all([
-			get_isRFP(),
 			get_is95(),
-			get_isTB(),
 			get_isVer(),
 		]).then(function(){
 			run()
