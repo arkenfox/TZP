@@ -215,7 +215,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 87, maxVer = 136, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 88, maxVer = 137, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -277,13 +277,22 @@ function outputVersion() {
 			}
 		}
 
+		// 137: 1943120
+			// javascript.options.experimental.math_sumprecise
+			// fast-path 136 ifdef NIGHTLY_BUILD false | 137 true all releases
+		let t137 = performance.now(), ver137
+		try {
+			ver137 = 'function' == typeof Math.sumPrecise
+		} catch(e) {}
+		rec(137, 137, "1943120", ver137, performance.now()-t137, "PREF") // 0.002ms
+
 		// 136: 1939533
 			// fast-path: FF132+ pref enabled javascript.options.experimental.regexp_modifiers
 			// note: TB slider's `javascript.options.native_regexp` (requires restart) has no effect
 		let t136 = performance.now(), ver136
 		try {
 			ver136 = (new RegExp("(?i:[A-Z]{4})")).test('abcd')
-		} catch {} // FF131 or lower: SyntaxError: invalid regexp group
+		} catch(e) {} // FF131 or lower: SyntaxError: invalid regexp group
 		rec(136, 136, "1939533", ver136, performance.now()-t136, "PREF") // 0.02ms
 
 		// 135: 1905706
@@ -294,7 +303,7 @@ function outputVersion() {
 		// 134: 1927706 : ie, lij, oc, st, szl, tn, za
 		// packages that use --with-system-icu can cause issues
 		let t134 = performance.now(), ver134
-		try {ver134 = ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join())} catch {}
+		try {ver134 = ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join())} catch(e) {}
 		rec(134, 134, "1927706", ver134, performance.now()-t134, "INTL") // 0.125ms
 
 		// 133: 1837773
@@ -302,7 +311,7 @@ function outputVersion() {
 		try {
 			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
 			ver133 = null === parser.body.firstChild.namedItem('')
-		} catch {}
+		} catch(e) {}
 		rec(133, 133, "1837773", ver133, performance.now()-t133) // 0.2ms
 
 		// 132: 1899413
@@ -311,7 +320,7 @@ function outputVersion() {
 			const re = new RegExp('(?:)', 'gv');
 			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
 			for (let i=0; i < 3; i++) {ver132 = test132.next().done}
-		} catch {}
+		} catch(e) {}
 		rec(132, 132, "1899413", ver132, performance.now()-t132) // 0.08ms | 0.03 if error
 
 		// 131: 1900196
@@ -321,7 +330,7 @@ function outputVersion() {
 			try {
 				let test131 = new Intl.DateTimeFormat('zh', { calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
 				ver131 = '2033' == test131.slice(0,4)
-			} catch {}
+			} catch(e) {}
 		}
 		rec(131, 131, "1900196", ver131, performance.now()-t131, 'INTL') // slow AF
 
@@ -347,24 +356,24 @@ function outputVersion() {
 		try {
 			let test128 = (new Blob()).bytes()
 			ver128 = true
-		} catch {}
+		} catch(e) {}
 		rec(128, 128, "1896509", ver128, performance.now()-t128) // 0.03ms
 
 		// 127: 1894248
 		let t127 = performance.now(), ver127 = false
-		try {ver127 = (new Date('15Jan0024')).getYear() > 0} catch {}
+		try {ver127 = (new Date('15Jan0024')).getYear() > 0} catch(e) {}
 		rec(127, 127, "1894248", ver127, performance.now()-t127, "DATE") // 0.07ms
 
 		// 126: 1887611
 		let t126 = performance.now(), ver126 = false
-		try {ver126 = "function" === typeof URL.parse} catch {}
+		try {ver126 = "function" === typeof URL.parse} catch(e) {}
 		rec(126, 126, "1887611", ver126, performance.now()-t126) // 0.25ms
 
 		// 125: 1872793
 		let t125 = performance.now(), ver125 = false
 		try {
 			ver125 = "Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")
-		} catch {}
+		} catch(e) {}
 		rec(125, 125, "1872793", ver125, performance.now()-t125, "DATE") // 0.05ms when invalid, 0.2+ when valid
 
 		// 124: 1867569 (slow, like 122)
@@ -376,7 +385,7 @@ function outputVersion() {
 			debug.push("124 1867569 : "+ test124)
 			if (test124 > 0) {ver124 = true}
 			el124.style.zIndex = "auto"
-		} catch {}
+		} catch(e) {}
 		rec(124, 124, "1867569", ver124, performance.now()-t124) //
 
 		// 123: 1871745
@@ -393,7 +402,7 @@ function outputVersion() {
 			debug.push("122 1867558 : "+ test122)
 			if (test122 > 0) {ver122 = true}
 			el122.style.zIndex = "auto"
-		} catch {}
+		} catch(e) {}
 		rec(122, 122, "1867558", ver122, performance.now()-t122) // 0.73ms
 
 		// 121: 1845586
@@ -537,7 +546,7 @@ function outputVersion() {
 		// 96: 1738422: legacy check + perf: toSource (74+): FF68- very slow: FF57- Intl.PluralRules
 		let t96 = performance.now(), ver96
 		try {ver96 = ("undefined" === typeof Object.toSource
-			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch {ver96 = xB}
+			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
 		rec(96, 96, "1738422", ver96, performance.now()-t96, "INTL")
 
 		// 95: 1723674: fast path: dom.crypto.randomUUID.enabled = true (default)
@@ -555,7 +564,7 @@ function outputVersion() {
 			let test95 = w95/h95
 			debug.push(" 95 1674204 : "+ w95 +"/"+ h95 +" = " +test95)
 			ver95 = (test95 > 0.4 && test95 < 0.6)
-		} catch {
+		} catch(e) {
 			ver95 = xB
 		}
 		rec(95, 95, "1674204", ver95, performance.now()-t95, "DOM")
@@ -579,7 +588,7 @@ function outputVersion() {
 		// 91: 1714933: legacy perf: toSource (74+): FF70- very slow
 		let t91 = performance.now(), ver91
 		try {ver91 = ("undefined" === typeof Object.toSource
-			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch {ver91 = xB}
+			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 		rec(91, 91, "1714933", ver91, performance.now()-t91, "INTL")
 
 		// 90: 1681371 shipped
@@ -626,7 +635,7 @@ function outputVersion() {
 		// 82: 1655947
 			// ext fuckery: cydec
 		let t82 = performance.now(), ver82
-		try {ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT"))} catch {ver82 = xB}
+		try {ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT"))} catch(e) {ver82 = xB}
 		rec(82, 82, "1655947", ver82, performance.now()-t82, "DATE")
 
 		// 81: 1650607: legacy check: toSource (74+): 52 false positive
@@ -685,7 +694,7 @@ function outputVersion() {
 
 		// 70: 1435818: fallback
 		let t70 = performance.now(), ver70
-		try {newFn("let t = 1_050"); ver70 = true} catch {}
+		try {newFn("let t = 1_050"); ver70 = true} catch(e) {}
 		rec(70, 70, "1435818", ver70, performance.now()-t70, "EVAL")
 
 		// 69: 1557121
@@ -786,7 +795,7 @@ function outputVersion() {
 				let test136 = new Date('July 2, 2025 0:00:00 UTC').toLocaleString('en', {timeZone: 'America/Asuncion'})
 				ver136 = '7/1/2025, 9:00:00 PM' == test136 // was -4, now -3
 			}
-		} catch {}
+		} catch(e) {}
 		rec(136, 136, "1945535", ver136, performance.now()-t136, 'DATE') // 0.25ms
 
 		// 135: 1935198: pref `layout.css.moz-user-input.enabled` added as false
@@ -804,18 +813,18 @@ function outputVersion() {
 				let test135b = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
 				ver135b = 0 == test135b.resolvedOptions().minimumFractionDigits
 			}
-		} catch {}
+		} catch(e) {}
 		rec(135.2, 135, "1930464", ver135b, performance.now()-t135b, 'INTL') // 0.2ms
 
 		// 135: 1775215
 		let t135a = performance.now(), ver135a
 		try {
-			eval('var else')
+			newFn('var else')
 		} catch(e) {
 			// SyntaxError: missing variable name, got keyword 'else'
 			ver135a = (e+'').includes('else')
 		}
-		rec(135.1, 135, "1775215", ver135a, performance.now()-t135a) // 0.05ms
+		rec(135.1, 135, "1775215", ver135a, performance.now()-t135a, "EVAL") // 0.05ms
 
 		// 135: 1930466
 		let t135 = performance.now(), ver135 = false
@@ -834,7 +843,7 @@ function outputVersion() {
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) { // FF115+
 				ver134 = '$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})
 			}
-		} catch {}
+		} catch(e) {}
 		rec(134, 134, "1927706", ver134, performance.now()-t134, "INTL") // 0.2ms
 
 		// 133: 1922503
@@ -842,7 +851,7 @@ function outputVersion() {
 		try {
 			let date133 = new Date('jan 15 2000')
 			ver133 = date133.toLocaleString("en", {timeZone: "Asia/Choibalsan"}) == date133.toLocaleString("en", {timeZone: "Asia/Ulaanbaatar"})
-		} catch {}
+		} catch(e) {}
 		rec(133, 133, "1922503", ver133, performance.now()-t133) // 0.3ms
 
 		// 130: 1907369
@@ -852,13 +861,13 @@ function outputVersion() {
 		} catch(e) {
 			if (e+'' == 'SyntaxError: a class cannot have more than one constructor definition') {ver130 = true}
 		}
-		rec(130, 130, "1907369", ver130, performance.now()-t130) // 0.09ms
+		rec(130, 130, "1907369", ver130, performance.now()-t130, "EVAL") // 0.09ms
 
 		// 129: 1796785
 		let t129 = performance.now(), ver129 = false
 		try {
 			ver129 = ("function" === typeof PerformanceResourceTiming && PerformanceResourceTiming.prototype.hasOwnProperty("responseStatus"))
-		} catch {}
+		} catch(e) {}
 		rec(129, 129, "1796785", ver129, performance.now()-t129) // 0.04ms
 
 		// 128: 1887817
@@ -871,7 +880,7 @@ function outputVersion() {
 		try {
 			let test128 = Document.parseHTMLUnsafe('<p></p>').lastModified
 			ver128 = true
-		} catch {}
+		} catch(e) {}
 		rec(128, 128, "1887817", ver128, performance.now()-t128) // 0.08ms
 
 		// 122: 1862910
@@ -909,7 +918,7 @@ function outputVersion() {
 			try {
 				dom.test107.options.length = -1
 				ver107 = true
-			} catch {} // NotSupportedError Operation is not supported
+			} catch(e) {} // NotSupportedError Operation is not supported
 		}
 		rec(107, 107, "344060", ver107, performance.now()-t107, "DOM")
 
@@ -917,7 +926,7 @@ function outputVersion() {
 		let t101a = performance.now(), ver101a
 		try {
 			ver101a = Intl.supportedValuesOf("currency").includes("SLE")
-		} catch {}
+		} catch(e) {}
 		rec(101.1, 101, "1764050", ver101a, performance.now()-t101a, "INTL")
 
 		// 101: 1752808
@@ -929,9 +938,8 @@ function outputVersion() {
 				ver101 = (test101 == "$1.77M")
 				debug.push("101 1752808 : "+ test101)
 			}
-		} catch {}
+		} catch(e) {}
 		rec(101, 101, "1752808", ver101, performance.now()-t101, 'INTL')
-
 		// 99: 1720353
 			// ext fuckery possible/likely due to mimeTypes/plugins
 		let t99 = performance.now(), ver99 = ("pdfViewerEnabled" in navigator)
@@ -962,7 +970,7 @@ function outputVersion() {
 		let t93a = performance.now(), ver93a
 		try {
 			ver93a = (!isNaN(new Date("1997-03-08 11:19:10-07").getTime()))
-		} catch {
+		} catch(e) {
 			ver93a = xB
 		}
 		rec(93, 93, "1328672", ver93a, performance.now()-t93a)
@@ -973,7 +981,7 @@ function outputVersion() {
 		try {
 			let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
 			ver91b = ("07" == test91b.format(new Date('2016/06/06 15:05:07')))
-		} catch {
+		} catch(e) {
 			ver91b = xB
 		}
 		rec(91.1, 91, "1284868", ver91b, performance.now()-t91b, "DATE")
@@ -983,7 +991,7 @@ function outputVersion() {
 		try {
 			let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
 			ver91a = true
-		} catch {}
+		} catch(e) {}
 		rec(91, 91, "1710429", ver91a, performance.now()-t91a)
 
 		// 90b: 1520434
@@ -995,14 +1003,14 @@ function outputVersion() {
 
 		// 90a: 1537689
 		let t90a = performance.now(), ver90a
-		try {ver90a = (dom.test90a.defaultValue == "a")} catch {}
+		try {ver90a = (dom.test90a.defaultValue == "a")} catch(e) {}
 		rec(90, 90, "1537689", ver90a, performance.now()-t90a, "DOM")
 
 		// 89: 1703213
 		let t89 = performance.now(), ver89
 		try {
 			ver89 = ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85)
-		} catch {
+		} catch(e) {
 			ver89 = xB
 		}
 		rec(89, 89, "1703213", ver89, performance.now()-t89, "DOM")
@@ -1011,12 +1019,12 @@ function outputVersion() {
 			// FF88+: the escapes \8 and \9 can't be used...
 			// FF87-: no error
 		let t88 = performance.now(), ver88
-		try {newFn('"use strict" \n"\\8"')} catch {ver88 = true}
+		try {newFn('"use strict" \n"\\8"')} catch(e) {ver88 = true}
 		rec(88, 88, "1670124", ver88, performance.now()-t88, "EVAL")
 
 		// 87b: 944846
 		let t87b = performance.now(), ver87b
-		try {ver87b = ((12345).toExponential(3) == 1.235e+4)} catch {}
+		try {ver87b = ((12345).toExponential(3) == 1.235e+4)} catch(e) {}
 		rec(87.1, 87, "944846", ver87b, performance.now()-t87b)
 
 		// 87a: 1676708
@@ -1024,7 +1032,7 @@ function outputVersion() {
 		try {
 			let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
 			ver87a = (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT")
-		} catch {}
+		} catch(e) {}
 		rec(87, 87, "1676708", ver87a, performance.now()-t87a)
 
 		// 86: 1685482
@@ -1048,7 +1056,7 @@ function outputVersion() {
 		try {
 			let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')
 			ver83 = true
-		} catch {}
+		} catch(e) {}
 		rec(83.2, 83, "1667094", ver83, performance.now()-t83)
 
 		// 83a: 1665746: legacy check: toSource (74+): 52 false postive
@@ -1073,7 +1081,7 @@ function outputVersion() {
 			dom.test81b.textContent = ""
 			//console.debug(w81a, w81b)
 			ver81a = ("undefined" === typeof Object.toSource && w81a < w81b)
-		} catch {
+		} catch(e) {
 			ver81a = xB
 		}
 		rec(81, 81, "1657437", ver81a, performance.now()-t81a, "DOM")
@@ -1086,9 +1094,9 @@ function outputVersion() {
 			try {
 				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
 				ver80 = ("undefined" === typeof Object.toSource)
-			} catch {}
+			} catch(e) {}
 			rec(80.1, 80, "1651732", ver80, performance.now()-t80)
-		} catch {
+		} catch(e) {
 			rec(80.1,80, "1651732", xB, performance.now()-t80)
 		}
 
@@ -1108,14 +1116,14 @@ function outputVersion() {
 		let t79b = performance.now(), ver79b
 		try {
 			ver79b = (new Intl.DateTimeFormat("en", {timeStyle: "short"}).format(new Date()).includes(':'))
-		} catch {ver79b = xB}
+		} catch(e) {ver79b = xB}
 		rec(79.2, 79, "1557718", ver79b, performance.now()-t79b, "INTL")
 
 		// 79: 1413504
 		let t79c = performance.now(), ver79c
 		try {
 			ver79c = ("1" !== new Intl.NumberFormat("en", {numberingSystem: "gong"}).format(1))
-		} catch {ver79c = xB}
+		} catch(e) {ver79c = xB}
 		rec(79.1, 79, "1413504", ver79c, performance.now()-t79c, "INTL")
 
 		// 79: 1644878: legacy check: toSource (74+): 52 false positive
@@ -1132,17 +1140,17 @@ function outputVersion() {
 		try {
 			let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
 			ver78a = true
-		} catch {}
+		} catch(e) {}
 		rec(78.2, 78, "1589095", ver78a, performance.now()-t78a)
 
 		// 78b: 1634135
 		let t78b = performance.now(), ver78b
-		try {let regex78b = new RegExp('b'); ver78b = (regex78b.dotAll == false)} catch {ver78b = xB}
+		try {let regex78b = new RegExp('b'); ver78b = (regex78b.dotAll == false)} catch(e) {ver78b = xB}
 		rec(78.1, 78, "1634135", ver78b, performance.now()-t78b)
 
 		// 78c: 1633836
 		let t78c = performance.now(), ver78c
-		try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = true} catch {}
+		try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = true} catch(e) {}
 		rec(78, 78, "1633836", ver78c, performance.now()-t78c)
 
 		// 77: 1627285
@@ -1151,7 +1159,7 @@ function outputVersion() {
 
 		// 77a: 1608168
 		let t77a = performance.now(), ver77a
-		try {("aa").replaceAll("a","b"); ver77a = true} catch {}
+		try {("aa").replaceAll("a","b"); ver77a = true} catch(e) {}
 		rec(77, 77, "1608168", ver77a, performance.now()-t77a)
 
 		// 75: 1615600
@@ -1163,22 +1171,22 @@ function outputVersion() {
 
 		// 74: 1605835
 		let t74 = performance.now(), ver74
-		try {newFn("let t = ({ 1n: 1 })"); ver74 = true} catch {}
+		try {newFn("let t = ({ 1n: 1 })"); ver74 = true} catch(e) {}
 		rec(74, 74, "1605835", ver74, performance.now()-t74, "EVAL")
 
 		// 73: 1605803
 		let t73 = performance.now(), ver73
-		try {ver73 = (getComputedStyle(dom.test73).content == "normal")} catch {}
+		try {ver73 = (getComputedStyle(dom.test73).content == "normal")} catch(e) {}
 		rec(73, 73, "1605803", ver73, performance.now()-t73, "DOM")
 
 		// 72a: 1441976
 		let t72a = performance.now(), ver72a
-		try {if (BatteryManager in window) {}} catch {ver72a = true}
+		try {if (BatteryManager in window) {}} catch(e) {ver72a = true}
 		rec(72.2, 72, "1441976", ver72a, performance.now()-t72a)
 
 		// 72b: 1566141
 		let t72b = performance.now(), ver72b
-		try {let test72 = (newFn("null ?? 'foo'")); ver72b = true} catch {}
+		try {let test72 = (newFn("null ?? 'foo'")); ver72b = true} catch(e) {}
 		rec(72.1, 72, "1566141", ver72b, performance.now()-t72b, "EVAL")
 
 		// 72c: 1589072
@@ -1208,7 +1216,7 @@ function outputVersion() {
 
 		// 68: 1550949
 		let t68 = performance.now(), ver68
-		try {ver68 = isNaN(Date.parse("T00:00:00Z"))} catch {ver68 = xB}
+		try {ver68 = isNaN(Date.parse("T00:00:00Z"))} catch(e) {ver68 = xB}
 		rec(68, 68, "1550949", ver68, performance.now()-t68, "DATE")
 
 		// 66: 1514664
@@ -1217,7 +1225,7 @@ function outputVersion() {
 
 		// 65b: 1499026
 		let t65b = performance.now(), ver65b
-		try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch {ver65b = xB}
+		try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
 		rec(65.1, 65, "1499026", ver65b, performance.now()-t65b, "INTL")
 
 		// 65a: 1504334
@@ -1226,12 +1234,12 @@ function outputVersion() {
 		
 		// 61: 1434007
 		let t61 = performance.now(), ver61
-		try {let test61a = (' a').trimStart(); ver61 = true} catch {}
+		try {let test61a = (' a').trimStart(); ver61 = true} catch(e) {}
 		rec(61, 61, "1434007", ver61, performance.now()-t61)
 
 		// 59: 1405993
 		let t59 = performance.now(), ver59
-		try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch {ver59 = xB}
+		try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
 		rec(59, 59, "1405993", ver59, performance.now()-t59, "INTL")
 
 		// 55: 1354974: isFF check: this test hangs blink
@@ -1248,7 +1256,7 @@ function outputVersion() {
 				} else {
 					ver55 = true
 				}
-			} catch {}
+			} catch(e) {}
 			rec(55, 55, "1354974", ver55, performance.now()-t55)
 		} else {
 			rec(55, 55, "1354974", xNA, 0)
@@ -1259,7 +1267,7 @@ function outputVersion() {
 		try {
 			let test54 = [Date.UTC(), Date.UTC(1)]
 			ver54 = (isNaN(test54[1]) == false)
-		} catch {}
+		} catch(e) {}
 		rec(54, 54, "1050755", ver54, performance.now()-t54)
 
 		// 53: 1317307
@@ -1269,7 +1277,7 @@ function outputVersion() {
 
 		// 52: 837961
 		let t52 = performance.now(), ver52
-		try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = true} catch {}
+		try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = true} catch(e) {}
 		rec(52, 52, "837961", ver52, performance.now()-t52)
 	}
 	run_other()
@@ -1303,7 +1311,7 @@ function outputVersion() {
 			let lf4 = new Intl.ListFormat("en")
 			let test4 = "~"+ lf4.format(["", "B"]) +"~"
 			if (test4 !== "~ and B~") {ver4 = xOMG}
-		} catch {
+		} catch(e) {
 			ver4 = " "+ zNA + " error "
 		}
 		rec(4,"\" and B\"", "1742592", ver4, performance.now()-t4, "DATE")
