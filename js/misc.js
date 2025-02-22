@@ -25,7 +25,7 @@ function check_timing(type) {
 			// we're subtracting the second measurement from the first so any value !== 0/-0 would be negative
 			if (!aIgnore.includes(value)) {result = false}
 			setTiming.add(value)
-		} catch(e) {
+		} catch {
 			// we would have already captured errors
 			return true
 		}
@@ -212,13 +212,7 @@ function get_timing(METRIC) {
 		// check isPerf again
 		if (isPerf) {get_isPerf()}
 		// get a last value for each to ensure a max diff
-		try {gData.timing['now'].push(performance.now())} catch {}
-		try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch {}
-		try {performance.mark('a')} catch {}
-		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
-		try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch {}
-		try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch {}
-
+		addTimings()
 		// poulate some data
 		get_timing_mark()
 		get_timing_navigation()
@@ -453,12 +447,12 @@ function check_mathLies() {
 }
 
 function get_component_shims(METRIC) {
-	let hash, btn ='', data, notation = isTB ? tb_red: ''
+	let hash, btn ='', data, notation = isBB ? bb_red: ''
 	try {
 		data = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		hash = mini(data); btn = addButton(18, METRIC, data.length)
 	} catch(e) {
-		if (isTB && e+'' == 'ReferenceError: Components is not defined') {notation = tb_green}
+		if (isBB && e+'' == 'ReferenceError: Components is not defined') {notation = bb_green}
 		hash = e; data = zErrLog
 	}
 	addBoth(18, METRIC, hash, btn, notation, data)
@@ -517,7 +511,7 @@ function get_math(METRIC, isLies) {
 }
 
 function get_navigator_keys(METRIC) {
-	let hash, btn='', data, notation = isTB ? tb_red : '', isLies = false
+	let hash, btn='', data, notation = isBB ? bb_red : '', isLies = false
 	try {
 		if (runST) {foo++}
 		data = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -569,17 +563,15 @@ function get_navigator_keys(METRIC) {
 			}
 		}
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
-		// health: 115+ only do TB/MB as ESR is stable
-		if (isTB) {
-			if (isMullvad) {
-				// MB has mediaDevices, mediaSession
-				if ('17ad3a75' == hash) {notation = tb_green} // 14 42
+		// health: BB only as ESR is stable
+		if (isMB) {
+			// MB has mediaDevices, mediaSession
+			if ('17ad3a75' == hash) {notation = bb_green} // 14 42
+		} else if (isTB) {
+			if ('android' == isOS) {
+				if ('adc88f1f' == hash) {notation = bb_green} // 14 42
 			} else {
-				if ('android' == isOS) {
-					if ('adc88f1f' == hash) {notation = tb_green} // 14 42
-				} else {
-					if ('b9ee3d3d' == hash) {notation = tb_green} // 14 40
-				}
+				if ('b9ee3d3d' == hash) {notation = bb_green} // 14 40
 			}
 		}
 	} catch(e) {
@@ -648,7 +640,7 @@ function get_pdf(METRIC) {
 			try {
 				let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 				if (keys.indexOf('pdfViewerEnabled') > keys.indexOf('constructor')) {isLies = true}
-			} catch(e) {}
+			} catch {}
 		}
 		if ('91073152' == hash) {notation = default_green}
 		addBoth(18, METRIC, hash, addButton(18, METRIC), notation, data, isLies)
@@ -672,21 +664,21 @@ function get_svg(METRIC) {
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	try {target.innerHTML =''} catch(e){}
+	try {target.innerHTML =''} catch {}
 	addBoth(18, METRIC, hash,'','', data)
 	return
 }
 
 function get_window_prop(METRIC) {
-	// TB: display only: wasm
-	let str, notation = isTB ? tb_slider_red : ''
+	// BB: display only: wasm
+	let str, notation = isBB ? bb_slider_red : ''
 	try {
 		str = window.WebAssembly
 		if (runST) {str = null}
 		let typeCheck = typeFn(str)
 		if ('undefined' !== typeCheck && 'object' !== typeCheck) {throw zErrType + typeCheck}
 		str = ('object' === typeCheck) ? zE : zD
-		if (isTB) {notation = str == zE ? tb_standard : tb_safer}
+		if (isBB) {notation = str == zE ? bb_standard : bb_safer}
 	} catch(e) {
 		str = log_error(18, METRIC, e)
 	}
@@ -712,7 +704,7 @@ function get_webdriver(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, notation = isTB ? tb_red : '', isLies = false
+	let hash, btn='', data, notation = isBB ? bb_red : '', isLies = false
 	let id = 'iframe-window-version'
 
 	try {
@@ -757,7 +749,7 @@ function get_window_props(METRIC) {
 					same as e530ee88 but without OffscreenCanvas
 				*/
 				let aGood = ['e530ee88','18d6b7c6','78e565db']
-				if (isTB) {aGood.push('97f1edb8')} // ToDo: remove once offscreencanvas is enabled in TB
+				if (isBB) {aGood.push('97f1edb8')} // ToDo: remove once offscreencanvas is enabled in TB
 				if (!aGood.includes(mini(aTampered))) {
 					isLies = true
 					//console.log(mini(aTampered), aTampered.join(","))
@@ -767,7 +759,7 @@ function get_window_props(METRIC) {
 			if (!isLies && isOS !== 'android' && isOS !== undefined) {
 				/* safer closed: Performance ... more items then Event
 				standard closed: Performance + no Event...
-				 TB/FF/ALL open: Performance then Event...
+				BB/FF/ALL open: Performance then Event...
 				*/
 				let indexPerf = data.indexOf('Performance'), indexEvent = data.indexOf('Event')
 				let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
@@ -795,16 +787,16 @@ function get_window_props(METRIC) {
 			// on touch devices: 0 (all false) 1 or 2 (all true)
 
 		// hashes are standard | safer | safer with click to play webgl
-		if (isMullvad) {
+		if (isMB) {
 			// MB14: #42767 offScreenCanvas disabled
-			if ('5508d87e' == hash || '6002b356' == hash || '948272e4' == hash) {notation = tb_green}
+			if ('5508d87e' == hash || '6002b356' == hash || '948272e4' == hash) {notation = bb_green}
 		} else if (isTB) {
-			if (isOS == 'android') {
+			if ('android' == isOS) {
 				// TB14: #42767 offScreenCanvas disabled
-				if ('1059445d' == hash || '077a3df7' == hash || '8fc6eaf7' == hash) {notation = tb_green}
+				if ('1059445d' == hash || '077a3df7' == hash || '8fc6eaf7' == hash) {notation = bb_green}
 			} else {
 				// TB14: #42767 offScreenCanvas disabled
-				if ('62b9b2e9' == hash || '759e94b7' == hash || 'be2132e3' == hash) {notation = tb_green}
+				if ('62b9b2e9' == hash || '759e94b7' == hash || 'be2132e3' == hash) {notation = bb_green}
 			}
 		}
 	} catch(e) {
@@ -838,7 +830,7 @@ const outputMisc = () => new Promise(resolve => {
 	let isMathLies = check_mathLies()
 	try {null.bar} catch(e) {
 		let notation = ''
-		if (isTB) {notation = (e+'' == 'TypeError: null has no properties' ? tb_green : tb_red)}
+		if (isBB) {notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)}
 		addBoth(18, 'error_message_fix', e.message,'', notation) // FF74+: 1259822
 	}
 	Promise.all([
