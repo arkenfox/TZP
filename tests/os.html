@@ -359,8 +359,6 @@ function try_somethingelse() {
 
 
 setTimeout(function() {
-	// do not call the global get_isOS
-	// don't even use isOS
 	Promise.all([
 		get_globals()
 	]).then(function(){
