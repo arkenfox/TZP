@@ -21,14 +21,22 @@ const get_canvas = () => new Promise(resolve => {
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = '93bd94c5'
 	// FF95+: compression 1724331 / 1737038 
 	const oKnown = {
-		'ge_white': 'd5f8f171',
-		'isPointInPath': 'db0e3f08',
-		'isPointInStroke': 'a77e328a',
-		'to_white': '35e41537',
-		'toBlob': '3afc375a',
-		'toBlob_solid': '56ea6104',
-		'toDataURL': '3afc375a',
-		'toDataURL_solid': '56ea6104',
+		'ge_white': ['d5f8f171'],
+		'isPointInPath': ['db0e3f08'],
+		'isPointInStroke': ['a77e328a'],
+		'to_white': ['35e41537'],
+		'toBlob': ['3afc375a'],
+		'toBlob_solid': ['56ea6104'],
+		'toDataURL': ['3afc375a'],
+		'toDataURL_solid': ['56ea6104'],
+	}
+	// FF137nightly: 1918690: Enable libz-rs on nightly: this changes our known hashes
+	if (isVer > 136) {
+		oKnown['toBlob'].push('e328ec8e')
+		oKnown['toBlob_solid'].push('9d0b9932')
+		oKnown['toDataURL'].push('e328ec8e')
+		oKnown['toDataURL_solid'].push('9d0b9932')
+		oKnown['to_white'].push('3e72d1fd')
 	}
 	let isCanvasGet ='', isCanvasGetChannels ='', isGetStealth = false
 
@@ -526,7 +534,7 @@ const get_canvas = () => new Promise(resolve => {
 						countFake++
 					}
 				} else {
-					if (oKnown[name] == value) {
+					if (oKnown[name].includes(value)) {
 						aSkip.push(name)
 						notation = rfp_red
 					} else {
@@ -583,7 +591,7 @@ const get_canvas = () => new Promise(resolve => {
 							notation = rfp_red
 							// all white: e.g. perps stupidly being told to flip
 								// privacy.resistFingerprinting.randomDataOnCanvasExtract
-							if (oKnown[key +'_white'] == value) {isWhite = true}
+							if (oKnown[key +'_white'].includes(value)) {isWhite = true}
 							// FPP: 119+ and no proxy lies and no getImageData stealth
 							// exclude solids: FPP does not tamper with those
 							// exclude if all white | exclude if proxy lies
