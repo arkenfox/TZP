@@ -93,11 +93,24 @@ function run() {
 	}
 	// vars
 	let oKnown = {
-		getImageData: "749d6141",
-		toDataURL: "bdcce913", // FF96+ 1724331
-		toBlob: "bdcce913",
-		isPointInPath: "e5b3726b",
-		isPointInStroke: "e262d7f1",
+		// also FF137nightly: 1918690: Enable libz-rs on nightly: this changes our known hashes
+		getImageData: [
+			'c7f2099a',
+		],
+		toDataURL: [
+			'a8d0bd06',
+			'ef03b7d0', // 137+ libz-rs
+		],
+		toBlob: [
+			'a8d0bd06',
+			'ef03b7d0', // 137+ libz-rs
+		],
+		isPointInPath: [
+			'2f4eafe2',
+		],
+		isPointInStroke: [
+			'8722c710',
+		],
 	}
 	let oSuccess = {
 		getImageData: false,
@@ -261,7 +274,7 @@ function run() {
 				let value = data.displayValue
 				if (oSuccess[name] == true) {
 					if (isVer > 101) {
-						value += (value == oKnown[name] ? green_tick : red_cross)
+						value += (oKnown[name].includes(value) ? green_tick : red_cross)
 					}
 				}
 				dom[name].innerHTML = value
