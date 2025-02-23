@@ -568,7 +568,6 @@ let fntMaster = {
 				'October Meetei Mayek','October Odia','October Ol Chiki','October Tamil','October Telugu',
 			'Osaka','Osaka-Mono',
 			'Padyakke Expanded One','Party LET','PCMyungjo','PilGi','PingFang MO','Produkt','Proxima Nova','PSL Ornanong Pro',
-				'Publico Headline Roman',
 			'Quotes Caps','Quotes Script',
 			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script',
 				'Shobhika','SimSong','Spot Mono','Srisakdi','STFangsong','STHeiti','STIX Two Text','STKaiti','STXihei',
@@ -587,7 +586,7 @@ let fntMaster = {
 				'Avenir Next Condensed Heavy','Avenir Next Condensed Medium','Avenir Next Condensed Ultra Light',
 			'Brill Roman Bold','Brill Roman Medium','Brill Roman Semibold',
 			// works in font-family if we drop 'roman'
-			'Avenir Roman','Brill Roman','Publico Text Roman',
+			'Avenir Roman','Brill Roman','Publico Headline Roman','Publico Text Roman',
 			// weighted/styled: all these ones have no regular/normal
 			'Apple LiGothic Medium','Apple LiSung Light',
 			'Brill Italic Bold Italic','Brill Italic Medium Italic','Brill Italic Semibold Italic', //'Brill Italic Italic',
