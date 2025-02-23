@@ -691,8 +691,6 @@ function run() {
 		rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
 		rec(typeof cookieStore, "cookieStore", code, "object") // FF132 nightly 1918643
 		rec(typeof external, "external", code, "object")
-		rec(typeof onauxclick, "onauxclick", code, "object")
-		rec(typeof onbeforeinput, "onbeforeinput", code, "object")
 		rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
 		rec(typeof ondragexit, "ondragexit", code, "object") // touch
 		rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet
@@ -717,7 +715,6 @@ function run() {
 		rec(typeof styleMedia, "styleMedia", code, "object")
 		rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame", code, "function")
 		rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame", code, "function")
-		rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
 
 		// gecko + webkit (not seen in blink)
 		code = 54
@@ -783,6 +780,8 @@ function run() {
 		rec(typeof onanimationend, "onanimationend", code, "object")
 		rec(typeof onanimationiteration, "onanimationiteration", code, "object")
 		rec(typeof onanimationstart, "onanimationstart", code, "object")
+		rec(typeof onauxclick, "onauxclick", code, "object")
+		rec(typeof onbeforeinput, "onbeforeinput", code, "object")
 		rec(typeof onbeforeprint, "onbeforeprint", code, "object")
 		rec(typeof onbeforetoggle, "onbeforetoggle", code, "object") // FF122+ 1867326 (and 1823359)
 		rec(typeof onbeforeunload, "onbeforeunload", code, "object")
@@ -793,6 +792,7 @@ function run() {
 		rec(typeof onchange, "onchange", code, "object")
 		rec(typeof onclick, "onclick", code, "object")
 		rec(typeof onclose, "onclose", code, "object")
+		rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
 		rec(typeof oncontextmenu, "oncontextmenu", code, "object")
 		rec(typeof oncuechange, "oncuechange", code, "object")
 		rec(typeof ondblclick, "ondblclick", code, "object")
