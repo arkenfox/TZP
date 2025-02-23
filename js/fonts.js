@@ -331,8 +331,8 @@ let fntMaster = {
 			'Arial Black','Arial Rounded MT Bold','Arial Narrow','PT Sans Narrow',
 			// without the weight W* it loads W3
 			'Hiragino Sans W4',
-			// works in font-family if we drop 'book'
-			'ITF Devanagari Book','ITF Devanagari Marathi Book',
+			// works in font-family if we drop 'book'/'roman'
+			'Avenir Book','Avenir Book Oblique','Avenir Roman','ITF Devanagari Book','ITF Devanagari Marathi Book',
 			// legacy
 			'Courier','Courier Bold','Courier Bold Oblique','Courier Oblique',
 			'Times','Times Bold','Times Bold Italic','Times Italic','Times Roman',
@@ -582,11 +582,11 @@ let fntMaster = {
 			'Iowan Old Style',
 		],
 		macfaces: [
-			'Avenir Book','Avenir Book Oblique','Avenir Next Condensed Bold','Avenir Next Condensed Demi Bold',
+			'Avenir Next Condensed Bold','Avenir Next Condensed Demi Bold',
 				'Avenir Next Condensed Heavy','Avenir Next Condensed Medium','Avenir Next Condensed Ultra Light',
 			'Brill Roman Bold','Brill Roman Medium','Brill Roman Semibold',
 			// works in font-family if we drop 'roman'
-			'Avenir Roman','Brill Roman','Publico Headline Roman','Publico Text Roman',
+			'Brill Roman','Publico Headline Roman','Publico Text Roman',
 			// weighted/styled: all these ones have no regular/normal
 			'Apple LiGothic Medium','Apple LiSung Light',
 			'Brill Italic Bold Italic','Brill Italic Medium Italic','Brill Italic Semibold Italic', //'Brill Italic Italic',
