@@ -1127,8 +1127,8 @@ function get_timezone_offset(METRIC) {
 		+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
 		+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
 	const doc = (new DOMParser).parseFromString(xslText, 'text/xml')
-	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tzControl, zOffset
-	let methods = ['control','date','exslt','iframe','plain','string','unsafe','zoned']
+	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tzControl, zOffset, tsOffset
+	let methods = ['control','date','exslt','iframe','plain','string','timestring','unsafe','zoned']
 	let notation = tz_red
 
 	function checkValidDate(method, value) {
@@ -1150,6 +1150,7 @@ function get_timezone_offset(METRIC) {
 				}
 				if ('exslt' == k) {extra = ' ['+ xOffset +']'
 				} else if ('zoned' == k) {extra = ' ['+ zOffset +']'
+				} else if ('timestring' == k) {extra = ' ['+ tsOffset +']'
 				} else if ('control' == k) {extra = ' ['+ tzControl +']'}
 				value = oData.format[k] + extra
 			} else {
@@ -1258,6 +1259,14 @@ function get_timezone_offset(METRIC) {
 		} catch(e) {
 			oErr['isostring'] = e+''
 		}
+		try {
+			let testDate = new Date()
+			let test = testDate.toLocaleDateString('en', {day: '2-digit', month: '2-digit', year: 'numeric'})
+			test = test.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
+			oData.raw['timestring'] = test +' '+ testDate.toTimeString()
+		} catch(e) {
+			oErr['timestring'] = e+''
+		}
 		//console.log(oData.raw)
 
 		// test
@@ -1287,13 +1296,15 @@ function get_timezone_offset(METRIC) {
 						let xSign = (xOffset[0] == '+' ? (xMinutes == 0 ? '': '-') : '')
 						xMinutes = xSign + xMinutes
 						formatted = ((oData.raw[k]).slice(0,-10)).replace('T',' ')
-					} else if ('zoned' == k || 'plain' == k) {
+					} else if ('zoned' == k || 'plain' == k || 'timestring' == k) {
 						// we only want the first 19 chars
 						formatted = ((oData.raw[k]).slice(0,19)).replace('T',' ')
-						// set zOffset
+						// remember offsets
 						if ('zoned' == k) {
 							let end = (oData.raw[k]).indexOf('[')
 							zOffset = (oData.raw[k]).slice(end - 6, end)
+						} else if ('timestring' == k) {
+							tsOffset = (oData.raw[k]).slice(23,26) +':' + (oData.raw[k]).slice(26,28)
 						}
 					} else {
 						formatted = (oData.raw[k]).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
