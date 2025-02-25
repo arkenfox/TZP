@@ -1637,8 +1637,12 @@ function countJS(item) {
 			Promise.all([
 				get_isOS('isOS')
 			]).then(function(){
+				// adjust overlayMaxLength
+				if ('linux' == isOS) {overlayMaxLength = 88
+				} else if ('android' == isOS) {overlayMaxLength = 68
+				}
 				// tweak monospace size: ToDo: this is bad design
-				if ('windows' == isOS || 'abdroid' == isOS) {
+				if ('windows' == isOS) {
 					try {
 						let items = document.querySelectorAll('.mono')
 						for (let i=0; i < items.length; i++) {
@@ -1647,7 +1651,6 @@ function countJS(item) {
 						}
 					} catch {}
 				}
-				overlayMaxLength = 'android' == isOS ? 68 : 'windows' == isOS ? 95 : 88
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
 				if ('android' == isOS) {
