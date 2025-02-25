@@ -178,7 +178,7 @@ let overlayScope = 'document',
 	overlayHealthCount = '',
 	overlaySection = '',
 	overlayName = '',
-	overlayMaxLength = 88,
+	overlayMaxLength = 95, // win/mac incl. BB
 	metricsData,
 	metricsTitle,
 	metricsPrefix = ''
