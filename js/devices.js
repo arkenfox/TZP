@@ -15,6 +15,35 @@ function get_device_integer(METRIC, proxyCheck) {
 	return
 }
 
+const get_device_permissions = (item) => new Promise(resolve => {
+	const METRIC = 'permission_'+ item
+	const aGood = ['denied','granted','prompt']
+	function exit(display, value) {
+		if (value == undefined) {value = display}
+		let notation = ''
+		// enabled in FF132+
+			// TypeError: 'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
+		if (isVer > 131) {notation = value == 'prompt' ? default_green : default_red}
+		addBoth(7, METRIC, display,'', notation, value)
+		return resolve()
+	}
+	try {
+		navigator.permissions.query({name:item}).then(function(r) {
+			let rstate = r.state
+			if (runST) {rstate = undefined} else if (runSI) {rstate = 'allowed'}
+			// checks
+			let typeCheck = typeFn(rstate)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			if (!aGood.includes(rstate)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ rstate}
+			exit(rstate)
+		}).catch(e => {
+			exit(e, zErrShort)
+		})
+	} catch(e) {
+		exit(e, zErrShort)
+	}
+})
+
 function get_maxtouch(METRIC) {
 	// https://www.w3.org/TR/pointerevents/#extensions-to-the-navigator-interface
 	// FF64+: RFP 1363508
@@ -320,6 +349,8 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 const outputDevices = () => new Promise(resolve => {
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 	Promise.all([
+		get_device_permissions('camera'),
+		get_device_permissions('microphone'),
 		get_media_devices('mediaDevices'),
 		get_speech_engines('speech_engines'),
 		get_maxtouch('maxTouchPoints'),
