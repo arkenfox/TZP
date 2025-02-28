@@ -80,7 +80,8 @@
 
 let fntList = [],
 	tofu = '\uffff',
-	baseFonts = ['cursive','fangsong','monospace','sans-serif','serif','system-ui'],
+	baseFonts = ['monospace','sans-serif','serif','system-ui','cursive','fangsong'],
+	ctrlFonts = ['monospace','sans-serif','serif'],
 	fntString = "Mō-"+ tofu,
 	fntStringUsed,
 	fntStyle,
@@ -94,6 +95,10 @@ let aFaces = [] // history
 let fntSystem = ['caption','icon','menu','message-box','small-caption','status-bar',
 	'-moz-window', '-moz-desktop', '-moz-document', '-moz-workspace', '-moz-info',
 	'-moz-pull-down-menu', '-moz-dialog', '-moz-button', '-moz-list', '-moz-field',
+]
+let fntFamilies = [
+	'monospace','sans-serif','serif','system-ui','cursive','fangsong',
+	'emoji','math','ui-rounded','ui-monospsce','ui-sans-serif','ui-serif',
 ]
 
 function get_fontFace(font) {
@@ -131,7 +136,9 @@ function get_fontFamily(font) {
 	if (fntSystem.includes(font)) {
 		dom.visual.style.font = font
 	} else {
-		dom.visual.style.fontFamily = "'"+ font +"'"
+		// if a generic font family, we don't wrap in quotes
+		let fontString = fntFamilies.includes(font) ? font : '\''+ font + '\''
+		dom.visual.style.fontFamily = fontString
 	}
 	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font
 	dom.visual.innerHTML = "<br><span>"+ fntStringUsed +"  </span><span style ='font-weight: "
@@ -308,8 +315,10 @@ function getFonts() {
 		const base = baseFonts.reduce((acc, font) => {
 			span.style.font =''
 			span.style.setProperty('--font', font)
+			// if a generic font family, we don't wrap in quotes
+			let fontString = fntFamilies.includes(font) ? font : '\''+ font + '\''
 			baseDisplay[font] = '<span style="white-space: nowrap; font-size: 24px; font-weight: ' + fntWeight
-			+ '; font-style: ' + fntStyle + '; font-family: \''+ font + '\';">'+ fntStringBase +'<span>'
+				+ '; font-style: ' + fntStyle + '; font-family: '+ fontString + ';">'+ fntStringBase +'<span>'
 			const dimensions = getDimensions(span, style)
 			acc[font.split(',')[0]] = dimensions // use only first name, i.e w/o fallback
 			return acc
@@ -332,12 +341,14 @@ function getFonts() {
 		let results = {}
 		fntList.forEach(font => {
 			// we're only testing a single font, we don't need a font key
-			baseFonts.forEach(basefont => {
+			ctrlFonts.forEach(basefont => {
 				if (fntSystem.includes(font)) {
 					span.style.setProperty('--font', "")
 					span.style.font = font
 				} else {
-					const family = "'"+ font +"', '"+ basefont +"'"
+					// if a generic font family, we don't wrap in quotes
+					let baseString = fntFamilies.includes(basefont) ? basefont : '\''+ basefont + '\''
+					const family = "'"+ font +"', "+ basefont
 					span.style.font = ""
 					span.style.setProperty('--font', family)
 				}
@@ -354,7 +365,7 @@ function getFonts() {
 		//console.debug('base', mini(base), base)
 		//console.debug('results', mini(results), results)
 		display = []
-		for (const k of Object.keys(base).sort()) {
+		for (const k of Object.keys(results).sort()) {
 			let aCtrl = base[k], aTest = results[k]
 			let isDetected = mini(aCtrl) !== mini(aTest)
 			let strResult = (aTest.width+'').padStart(20) +' x ' + aTest.height
