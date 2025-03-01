@@ -482,7 +482,7 @@ let fntMaster = {
 			// +me android 12
 			'Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
 			// me android 14
-			'New SEC Num Fixed VF','New SEC Num VF','SEC Benagli','SEC Bangali UI','SEC CJK Regular Extra',
+			'New SEC Num Fixed VF','New SEC Num VF','SEC Bengali','SEC Bengali UI','SEC CJK Regular Extra',
 			'SEC Devanagari','SEC Devanagari UI','SEC Lao','SEC Lao UI','SEC Malayalam','SEC Malayalam UI',
 			'SEC Myanmar UI','SEC Naskh Arabic','SEC Naskh Arabic UI','SEC Serif Tibetan','SEC Tamil','SEC Tamil UI',
 			'SECFallback','SECGujarati','SECGujarati UI','SECGurmukhi','SECGurmukhi UI','SECKannada','SECKannada UI',
