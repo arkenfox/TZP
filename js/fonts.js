@@ -462,36 +462,34 @@ let fntMaster = {
 	// NOT kBase/LangPack
 	system: {
 		android: [
+			// all but never found: //'AndroidClock',
 			// all
-			'AndroidClock Regular','Carrois Gothic SC','Cutive Mono','Dancing Script','Droid Sans Mono',
-			'Noto Color Emoji','Noto Naskh Arabic', // ignore 'Coming Soon Regular', see 'Coming Soon'
+			'Carrois Gothic SC','Cutive Mono','Dancing Script','Droid Sans Mono',
+			'Noto Color Emoji','Noto Naskh Arabic',
 			// 9+
 			'Coming Soon','Noto Naskh Arabic UI','Roboto',
 			// 12+
-			'Noto Color Emoji Flags','Source Sans Pro Regular',
+			'Noto Color Emoji Flags','Source Sans Pro',
 			// +common +self
-			'Droid Sans','Droid Serif','Noto Sans','Noto Serif','Roboto Condensed',
-			// +vendor: ToDo: SamsungOneUI*, SamsungNeo*, vendor specific
+			'Droid Sans','Droid Serif','Noto Sans','Noto Serif',
+			// +vendor: ToDo: SamsungNeo*, vendor specific
 			'SamsungKorean_v2.0', // 1674683
 			'SamsungKorean_v3.0',
 			'SamsungColorEmoji', // 1872510
+			'SamsungKhmerUI','SamsungMyanmarZawgyiUI',
 			'One UI Sans KR VF', // 1865238
-			// +me
+			'One UI Sans APP VF',
+			// +me android 12
 			'Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
+			// me android 14
+			'New SEC Num Fixed VF','New SEC Num VF','SEC Benagli','SEC Bangali UI','SEC CJK Regular Extra',
+			'SEC Devanagari','SEC Devanagari UI','SEC Lao','SEC Lao UI','SEC Malayalam','SEC Malayalam UI',
+			'SEC Myanmar UI','SEC Naskh Arabic','SEC Naskh Arabic UI','SEC Serif Tibetan','SEC Tamil','SEC Tamil UI',
+			'SECFallback','SECGujarati','SECGujarati UI','SECGurmukhi','SECGurmukhi UI','SECKannada','SECKannada UI',
+			'SECTelugu','SECTelugu UI',
 			// +defaults
 			'SEC CJK JP','SEC CJK KR','SEC CJK SC','SEC CJK TC','SEC Mono CJK JP','SEC Mono CJK KR','SEC Mono CJK SC',
 			'SEC Mono CJK TC',
-			/* defaults
-				// https://searchfox.org/mozilla-central/source/modules/libpref/init/all.js#3041
-				// ToDo: check names are correct
-					'HYSerif','MotoyaLCedar','MotoyaLMaru','NanumGothic','SmartGothic',
-				// ToDo: possibles: but I don't have them (Android 11), they seem out of date
-					'Arial','Asana Math','Cambria Math','Charis SIL Compact','DejaVu Math TeX Gyre','DejaVu Sans',
-					'DejaVu Serif','Droid Sans Fallback','Droid Sans Hebrew','Droid Sans Japanese','Droid Sans Thai',
-					'Google Sans','Latin Modern Math','Libertinus Math','Noto Sans Mono CJK JP','Noto Sans Mono CJK KR',
-					'Noto Sans Mono CJK SC','Noto Sans Mono CJK TC','STIX Math','STIX Two Math','STIXGeneral',
-					'TeX Gyre Bonum Math','TeX Gyre Pagella Math','TeX Gyre Schola','TeX Gyre Termes Math','XITS Math',
-			*/
 		],
 		linux: [
 			// self
