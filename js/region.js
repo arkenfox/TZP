@@ -272,6 +272,12 @@ function set_oIntlTests() {
 				'short': [{weekday: 'short'}, [dates.Fri]],
 			},
 		},
+		durationformat: {
+			'digital': {'milliseconds': 1},
+			'long': {'years': 0, 'seconds': 2, 'microseconds': 1000},
+			'narrow': {'years': 1, 'months': 2, 'microseconds': 1},
+			'short': {'days': 2, 'seconds': 2, 'nanoseconds': 2},
+		},
 		listformat: {
 			'narrow': ['conjunction','disjunction','unit'],
 			'short': ['conjunction','unit']
@@ -590,6 +596,13 @@ function get_locale_intl() {
 					tests[key].forEach(function(item) {data.push(formatter.format(dayperiods[item]))})
 					obj[key] = data
 				}
+			} else if ('durationformat' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let yearformat = 'long' == key ? 'always' : 'auto' // long we want to force 0 for years
+					let formatter = new Intl.DurationFormat(code, {style: key, yearsDisplay: yearformat})
+					obj[key] = formatter.format(tests[key]) // there's only one test per style
+				}
 			} else if ('listformat' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i], data = []
@@ -716,8 +729,8 @@ function get_locale_intl() {
 	}
 	const oMetrics = {
 		intl : [
-			'collation','compact', 'currency', 'datetimeformat','dayperiod', 'listformat','notation','numberformat_ftp',
-			'pluralrules','relativetimeformat','relativetimeformat_ftp','sign','timezonename','unit'
+			'collation','compact','currency','durationformat','datetimeformat','dayperiod','listformat','notation',
+			'numberformat_ftp','pluralrules','relativetimeformat','relativetimeformat_ftp','sign','timezonename','unit'
 		],
 		tolocalestring: ['compact','currency','datetimeformat','notation','sign','timezonename','unit'],
 	}
