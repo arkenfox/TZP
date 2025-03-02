@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>durationformat</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px"><col>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">durationformat
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy in Intl.DurationFormat</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false,
+	localesHashAll = "" // to compare min to
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let	header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method) {
+	if (!isSupported) {return}
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/DurationFormat
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+
+	let styles = ['digital','long','narrow','short']
+	let options = {
+		'0000': {'years': 0, 'months': 0,'weeks': 0,'days': 0,'hours': 0,'minutes': 0,'seconds': 0,'milliseconds': 0,'microseconds': 0,'nanoseconds': 0},
+		'0001': {'years': 1, 'months': 1,'weeks': 1,'days': 1,'hours': 1,'minutes': 1,'seconds': 1,'milliseconds': 1,'microseconds': 1,'nanoseconds': 1},
+		'0002': {'years': 2, 'months': 2,'weeks': 2,'days': 2,'hours': 2,'minutes': 2,'seconds': 2,'milliseconds': 2,'microseconds': 2,'nanoseconds': 2},
+		'1k': {'years': 1000, 'months': 1000,'weeks': 1000,'hours': 1000,'minutes': 1000,'seconds': 1000,'milliseconds': 1000,'microseconds': 1000,'nanoseconds': 1000},
+		//'10k': {'years': 10000, 'months': 10000,'weeks': 10000,'hours': 10000,'minutes': 10000,'seconds': 10000,'milliseconds': 10000,'microseconds': 10000,'nanoseconds': 10000},
+		'mixed': {'years': 0, 'months': 1,'weeks': 2,'days': 3,'hours': 4,'minutes': 5,'seconds': 6,'milliseconds': 7,'microseconds': 8,'nanoseconds': 9},
+		'split': {'years': 1, 'nanoseconds': 1},
+		// there's also how things are joined e.g. "0 y e 1 ns" (zero years and 1 nanosecond)
+	}
+	let digitaloptions = {
+		'0000': {'hours': 0,'minutes': 0,'seconds': 0,'milliseconds': 0,'microseconds': 0,'nanoseconds': 0},
+		'0001': {'hours': 1,'minutes': 1,'seconds': 1,'milliseconds': 1,'microseconds': 1,'nanoseconds': 1},
+		'0002': {'hours': 2,'minutes': 2,'seconds': 2,'milliseconds': 2,'microseconds': 2,'nanoseconds': 2},
+	}
+	let tests = {}
+
+	if ('all' == method) {
+		styles.forEach(function(s) {
+			if ('digital' == s) {tests[s] = digitaloptions} else {tests[s] = options}
+		})
+	} else if (method == "min") {
+		// all styles add entropy: digital: 13 | long: 4 | narrow: 5 | short: 2
+		tests = {
+			'digital': {
+				'test': {'milliseconds': 1},
+			},
+			'long': {
+				'test': {
+					'years': 0,
+					//'months': 2,
+					//'weeks': 2,
+					//'days': 2,
+					//'hours': 2,
+					//'minutes': 2,
+					'seconds': 2,
+					//'milliseconds': 2,
+					'microseconds': 1000,
+				},
+			},
+			'narrow': {
+				'test': {
+					'years': 1,
+					'months': 2,
+					//'weeks': 2,
+					//'days': 2,
+					//'hours': 2,
+					//'minutes': 2,
+					//'seconds': 2,
+					//'milliseconds': 2,
+					'microseconds': 1,
+					//'nanoseconds': 2
+				},
+			},
+			'short': {
+				'test': {
+					//'years': 2,
+					//'months': 2,
+					//'weeks': 2,
+					'days': 2,
+					//'hours': 2,
+					//'minutes': 2,
+					'seconds': 2,
+					//'milliseconds': 2,
+					//'microseconds': 2,
+					'nanoseconds': 2
+				},
+			}
+		}
+		if (!isFF) {
+			tests['long']['test']['nanoseconds'] = 1 // blink
+		}
+	}
+
+	// when numberingSystem is undefined, what does it use?
+		// undefined = 205
+		//       all = 200
+		//      latn = 199
+		// I don't quite understand this: why doesn't all match or exceed undefined?
+	// changing app locale doesn't change results: just stick with undefined
+
+	let numsys = [
+		'adlm','ahom','arab','arabext','bali','beng','bhks','brah','cakm','cham','deva','diak','fullwide','gara',
+		'gong','gonm','gujr','gukh','guru','hanidec','hmng','hmnp','java','kali','kawi','khmr','knda','krai',
+		'lana','lanatham','laoo','latn','lepc','limb','mathbold','mathdbl','mathmono','mathsanb','mathsans',
+		'mlym','modi','mong','mroo','mtei','mymr','mymrepka','mymrpao','mymrshan','mymrtlng','nagm','newa','nkoo',
+		'olck','onao','orya','osma','outlined','rohg','saur','segment','shrd','sind','sinh','sora','sund','sunu',
+		'takr','talu','tamldec','telu','thai','tibt','tirh','tnsa','vaii','wara','wcho'
+	]
+	numsys = ['undefined']
+	numsys.sort()
+
+	//numsys = ['latn']
+	try {
+		aLocales.forEach(function(code) {
+			let oStyles = {}
+			Object.keys(tests).forEach(function(s){ // each style
+				oStyles[s] = {}
+				numsys.forEach(function(ns){ // each numberingsystem
+					oStyles[s][ns] = {}
+					// set formatter once per code + style
+					// always display so we catch 0's
+					let nsvalue = ns
+					if (numsys.length == 1 && 'undefined' == ns) {
+						nsvalue = undefined
+					}
+
+					let formatoptions, splitoptions
+					if ('digital' == s) {
+						formatoptions = {
+							'style': s, 
+							'numberingSystem': nsvalue,
+						}
+					} else {
+						splitoptions = {
+							'style': s, 
+							'numberingSystem': nsvalue,
+						}						
+						formatoptions = {
+							'style': s, 
+							'numberingSystem': nsvalue,
+							'yearsDisplay': 'always',
+							'monthsDisplay': 'always',
+							'weeksDisplay': 'always',
+							'daysDisplay': 'always',
+							'hoursDisplay': 'always',
+							'minutesDisplay': 'always',
+							'secondsDisplay': 'always',
+							'millisecondsDisplay': 'always',
+							'microsecondsDisplay':'always',
+							'nanosecondsDisplay': 'always',
+						}
+						if ('min' == method) {
+							// we only seem to need one lot of zero
+							formatoptions = {
+								'style': s, 
+								'numberingSystem': nsvalue,
+								'yearsDisplay': 'always',
+							}
+						}
+					}
+					let formatter = new Intl.DurationFormat(code, formatoptions)
+					let splitformatter = new Intl.DurationFormat(code, splitoptions)
+					// for each test
+					Object.keys(tests[s]).sort().forEach(function(t){
+						if ('split' == t) {
+							oStyles[s][ns][t] = splitformatter.format(tests[s][t])
+						} else {
+							oStyles[s][ns][t] = formatter.format(tests[s][t])
+						}
+					})
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				numsys.forEach(function(ns){ // each numberingsystem
+					oTempData[hash][ns] = {}
+					Object.keys(tests).sort().forEach(function(s){
+						oTempData[hash][ns][s] = {}
+						Object.keys(tests[s]).sort().forEach(function(t){
+							oTempData[hash][ns][s][t] = oStyles[s][ns][t]
+						})
+					})
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
+		}
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+			let displayData = []
+			for (const ns of Object.keys(oData[k])) {
+				if ('locales' !== ns) {
+					displayData.push(s14 + 'numberingSystem: '+ns + sc)
+					for (const s of Object.keys(oData[k][ns])) {
+						if ('min' == method) {
+							let sInitial = s.slice(0,1).toUpperCase()
+							let aTests = []
+							for (const t of Object.keys(oData[k][ns][s])) {
+								aTests.push(oData[k][ns][s][t])
+							}
+							displayData.push('<li>'+ s16 + sInitial +": "+ sc + aTests.join(' | ') +"</li>")
+						} else {
+							displayData.push('<li>'+ s16 + s +": "+ sc)
+							for (const t of Object.keys(oData[k][ns][s])) {
+								let x = parseInt(t)
+								if (isNaN(x)) {x = t}
+								if ('1k' == t) (x = t)
+								displayData.push('<li>'+ s6 + x +": "+ sc + oData[k][ns][s][t] +"</li>")
+							}
+							displayData.push('</li>')
+						}
+					}
+				}
+			}
+			let strData = displayData.join('')
+			if ('all' == method) {strData = '<details>' + strData +'</details>'}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul class='main'>"+ strData
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+			)
+		}
+
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// notate new if 128+
+			if (isVer > 127) {
+				// results
+				if (resultsHash == 'f38cff8b') { // FF136+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == 'cffbac6d') { // FF136+
+				} else if (isFF) {localesHash += ' '+ zNEW
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_isVer()
+	// add additional locales to core locales for this test
+	let aListExtra = [
+
+"ar-bh,arabic (bahrain)",
+"ar-dz,arabic (algeria)",
+"ar-sa,arabic (saudi arabia)",
+"bs-cyrl,bosnian (cyrillic)",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"en-001,english",
+"en-at,english (austria)",
+"en-ca,english (canada)",
+"en-ch,english (switzerland)",
+"en-dk,english (denmark)",
+"en-fi,english (finland)",
+"en-se,english (sweden)",
+"es-419,spanish (latin america and the caribbean)",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-do,spanish (dominican republic)",
+"es-mx,spanish (mexico)",
+"es-py,spanish (paraguay)",
+"es-us,spanish (united states)",
+"ff-adlm,fulah (adlam)",
+"fr-ca,french (canada)",
+"fr-lu,french (luxembourg)",
+"hi-latn,hindi (latin)",
+"it-ch,italian (switzerland)",
+"kok-latn,konkani (latin)",
+"ks-deva,kashmiri (devanagari)",
+"ms-bn,malay (brunei)",
+"ms-id,malay (indonesia)",
+"ps-pk,pashto (pakistan)",
+"pt-ao,portuguese (angola)",
+"pt-ch,portuguese (switzerland)",
+"pt-pt,portuguese (portugal)",
+"qu-bo,quechua (bolivia)",
+"ro-md,romanian (moldova)",
+"ru-ua,russian (ukraine)",
+"sr-ba,serbian (bosnia & herzegovina)",
+"sr-cyrl-me,serbian (cyrillic montenegro)",
+"sr-latn,serbian (latin)",
+"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+"sv-fi,swedish (finland)",
+"sw-cd,swahili (congo kinshasa)",
+"sw-ke,swahili (kenya)",
+"ur-in,urdu (india)",
+"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+"yo-bj,yoruba (benin)",
+"yue-cn,cantonese (china)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en,english','fr,french','de,german']
+	//list = ['en,english']
+	//list = ['wo,wolof','tg,tajik','ie,interlingue','ln,lingala'] // example of split durations adding 'and"
+	list.sort()
+
+	legend()
+	// check supported
+	try {
+		let test = new Intl.DurationFormat('en').resolvedOptions()
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	// check bigint support: FF68+
+	try {
+		let y = BigInt("9999999999999999")
+		isBigIntSupported = true
+	} catch(e) {}
+	setBtn("all")
+	setTimeout(function() {
+		run_main("all")
+	}, 100)
+})
+
+</script>
+</body>
+</html>
