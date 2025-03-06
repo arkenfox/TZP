@@ -57,6 +57,10 @@
 			padding: 0px;
 			z-index: -1; 
 		}
+		#tzpFS::backdrop {
+			background-color: #161b22;
+			opacity: 0;
+		}
 	</style>
 </head>
 
@@ -320,8 +324,6 @@
 			<td class="mono border-top"><span id="cssDM"></span> | <span class="c" id="display-mode"></span>
 				| <span class="c" id="windowfullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span>
-			<div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span> &nbsp; </div>
 			fullscreenElement <sup>4</sup></td><td class="c mono" id="fsElement"></td></tr>
 		<tr><td><span class="mono no_color">[F11]</span> fullscreen</td><td class="c mono" id="fsSize"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click ]</span>
