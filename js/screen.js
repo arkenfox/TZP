@@ -83,7 +83,7 @@ function get_scr_fs_measure() {
 			size = size + s1 +' &#9654 '+ sc + lastSize + s1 +' <b>[~'+ timeTaken +' ms]</b> '+ sc + diff
 		}
 		output.innerHTML = size
-		if (isElementFS) {document.exitFullscreen()}
+		if (isElementFS && !isStickyFullScreen) {document.exitFullscreen()}
 		gFS = false // reset
 	}
 
