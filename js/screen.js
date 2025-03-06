@@ -21,8 +21,8 @@ function return_nw(w,h, isNew) {
 }
 
 function get_scr_fs_measure() {
-	// triggered by resize events if in FS
-	// called by goFS
+	// F11: triggered by resize events if in FS
+	// fullscreenElement: called on android by goFS
 	if (gFS) {return} // don't run if already running
 	gFS = true // set running state
 	let delay = 25, max = 40, n = 1 // 40 x 25 = 1sec
@@ -83,7 +83,7 @@ function get_scr_fs_measure() {
 			size = size + s1 +' &#9654 '+ sc + lastSize + s1 +' <b>[~'+ timeTaken +' ms]</b> '+ sc + diff
 		}
 		output.innerHTML = size
-		if (isElementFS && !isStickyFullScreen) {document.exitFullscreen()}
+		if (isElementFS) {document.exitFullscreen()} // only android can be isElementFS
 		gFS = false // reset
 	}
 
@@ -376,6 +376,13 @@ const get_scr_measure = () => new Promise(resolve => {
 			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh, isNew))
 		}
 		let isCompareValid = 'number' == typeFn(controlw) && 'number' == typeFn(controlh)
+
+		// desktop: if in fullscreenElement mode, use the svh element to measure
+			// we don't have a resize event in android
+		let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
+		if (isElementFS && 'android' !== isOS) {
+			addDisplay(1, 'fsElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
+		}
 
 		// RFP/match
 		for (const k of Object.keys(oData)) {
@@ -1201,14 +1208,22 @@ function get_ua_workers() {
 function goFS() {
 	gFS = false
 	try {
-		let element = dom.tzpFS
-		element.style.opacity = 0
-		Promise.all([
-			element.requestFullscreen()
-		]).then(function(){
-			get_scr_fs_measure()
-		})
-	} catch(e) {dom.fsSize.innerHTML = e+''}
+		if ('android' == isOS) {
+			let element = dom.tzpFS
+			Promise.all([
+				element.requestFullscreen()
+			]).then(function(){
+				get_scr_fs_measure()
+			})
+		} else {
+			// desktop: use documentElement
+				// we can scroll, click, view everything
+				// let the resize event trigger running the section
+				// let get_scr_measure check for document.fullscreen and fill in the display
+				// use svh because otherwise the height is the full document height
+			document.documentElement.requestFullscreen()
+		}
+	} catch(e) {dom.fsElement.innerHTML = e+''}
 }
 
 function goNW() {
