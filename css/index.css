@@ -110,7 +110,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	cursor: pointer;
 }
 .btn0, .s0 {border-color: var(--test0); color: var(--test0);}
-.btn1, .s1 {border-color: var(--test1); color: var(--test1);}
+.btn1, .s1 {border-color: var(--test1); color: var(--test1); cursor: pointer;}
 .btn2, .s2 {border-color: var(--test2); color: var(--test2);}
 .btn3, .s3 {border-color: var(--test3); color: var(--test3);}
 .btn4, .s4 {border-color: var(--test4); color: var(--test4);}
@@ -269,7 +269,7 @@ tr td.border-top {
 #tbperf th {background-color: var(--bg99);}
 #tbblock th {background-color: var(--bg99);}
 
-.togA, .togP, /* android, perf */
+.togA, .togP, #btnFS, /* android, perf, fullscreen element */
 .togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO, .togUAI, .togUAW {display: none;}
 
 
