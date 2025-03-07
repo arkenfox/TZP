@@ -379,9 +379,12 @@ const get_scr_measure = () => new Promise(resolve => {
 
 		// desktop: if in fullscreenElement mode, use the svh element to measure
 			// we don't have a resize event in android
-		let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
-		if (isElementFS && 'android' !== isOS) {
-			addDisplay(1, 'fsElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
+		if ('android' !== isOS) {
+			let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
+			if (isElementFS) {
+				addDisplay(1, 'fsElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
+			}
+			try {dom.btnFS.style.display = (isElementFS ? 'block' : 'none')} catch {}
 		}
 
 		// RFP/match
@@ -1204,6 +1207,13 @@ function get_ua_workers() {
 }
 
 /* USER TESTS */
+
+function exitFS() {
+	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
+	if (isElementFS) {
+		try {document.exitFullscreen()} catch {}
+	}
+}
 
 function goFS() {
 	gFS = false

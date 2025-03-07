@@ -1712,6 +1712,7 @@ function outputUser(fn) {
 	// user initiated
 	if (isBlock) {return}
 	if ('goFS' == fn) { goFS()
+	} else if ("exitFS" == fn) { exitFS()
 	} else if ("goNW" == fn) { goNW()
 	} else if ('goNW_UA' == fn) { goNW_UA()
 	} else if ('outputAudioUser' == fn) {outputAudioUser()
