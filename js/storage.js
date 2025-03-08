@@ -91,32 +91,33 @@ const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 	} catch(e) {
 		log_error(6, METRIC, e); value = zErr
 	}
-	// use a different suffix than cookies
-	let aTests = ['_session_store','_persistent_store']
-	aTests.forEach(function(k){
-		try {
-			let options = {name: rndStr + k, value: rndStr}
-			if ('_persistent_store' == k) {
-				options['expires'] = Date.now() + 172800000 // 2 days
-			}
-			cookieStore.set(options)
-			Promise.all([
-				lookup_cookiestore(rndStr, k),
-			]).then(function(res){
-				// WTF! if the page is not already open somewhere e.g. another tab, it fails on first load
-					// rerun, F5, etc all work
-				// even if I wait 1 second after setting and then check it's always an empty string
-				//console.log(res[0])
-				value += ' | ' + (res[0] == rndStr ? zS : zF)
+	if (isFile) {
+		value += ' | '+ zSKIP + ' | '+ zSKIP
+		exit()
+	} else {
+		// use a different suffix than cookies
+		let aTests = ['_session_store','_persistent_store']
+		aTests.forEach(function(k){
+			try {
+				let options = {name: rndStr + k, value: rndStr}
+				if ('_persistent_store' == k) {
+					options['expires'] = Date.now() + 172800000 // 2 days
+				}
+				cookieStore.set(options)
+				Promise.all([
+					lookup_cookiestore(rndStr, k),
+				]).then(function(res){
+					value += ' | ' + (res[0] == rndStr ? zS : zF)
+					if ('_persistent_store' == k) {exit()}
+				})
+			} catch(e) {
+				// slice "_store": consistent style to match cookies
+				// redundant to use "cookieStore_session_store"
+				log_error(6, METRIC + k.slice(0,-6), e); value += ' | '+ zErr
 				if ('_persistent_store' == k) {exit()}
-			})
-		} catch(e) {
-			// slice "_store": consistent style to match cookies
-			// redundant to use "cookieStore_session_store"
-			log_error(6, METRIC + k.slice(0,-6), e); value += ' | '+ zErr
-			if ('_persistent_store' == k) {exit()}
-		}
-	})
+			}
+		})
+	}
 })
 
 function get_filesystem(METRIC) {
