@@ -1,15 +1,27 @@
 'use strict';
 
 function lookup_cookie(name) {
-	name += '='
-	let decodedCookie = decodeURIComponent(document.cookie)
-	let ca = decodedCookie.split(';')
-	for (let i=0; i < ca.length; i++) {
-		let c = ca[i]
-		while (c.charAt(0) == ' ') {c = c.substring(1)}
-		if (c.indexOf(name) == 0) {return c.substring(name.length, c.length)}
-	}
+	try {
+		name += '='
+		let decodedCookie = decodeURIComponent(document.cookie)
+		let ca = decodedCookie.split(';')
+		for (let i=0; i < ca.length; i++) {
+			let c = ca[i]
+			while (c.charAt(0) == ' ') {c = c.substring(1)}
+			if (c.indexOf(name) == 0) {return c.substring(name.length, c.length)}
+		}
+	} catch {}
 	return ''
+}
+
+const lookup_cookiestore = async function(rndStr, k) {
+	try {
+		let cookie = await cookieStore.get(rndStr + k)
+		return cookie.value
+	} catch(e) {
+		console.log(k, +'')
+		return ''
+	}
 }
 
 const get_caches = (METRIC) => new Promise(resolve => {
@@ -38,7 +50,7 @@ function get_cookies(METRIC, rndStr) {
 		if (runST) {test = undefined}
 		let typeCheck = typeFn(test)
 		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-		value = navigator.cookieEnabled ? zE : zD
+		value = test ? zE : zD
 	} catch(e) {
 		log_error(6, METRIC, e); value = zErr
 	}
@@ -66,6 +78,13 @@ function get_cookies(METRIC, rndStr) {
 
 const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/CookieStore
+	function exit() {
+		// don't use cookie in element names == adblockers might block display
+		addDisplay(6, 'cstest', value)
+		addData(6, METRIC, value)
+		return resolve()
+	}
+
 	let value, obj = window[METRIC]
 	try {
 		value = 'object' == typeFn(obj, true) ? zE : zD
@@ -76,17 +95,28 @@ const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 	let aTests = ['_session_store','_persistent_store']
 	aTests.forEach(function(k){
 		try {
-			value += ' | ' + 'TBA'
+			let options = {name: rndStr + k, value: rndStr}
+			if ('_persistent_store' == k) {
+				options['expires'] = Date.now() + 172800000 // 2 days
+			}
+			cookieStore.set(options)
+			Promise.all([
+				lookup_cookiestore(rndStr, k),
+			]).then(function(res){
+				// WTF! if the page is not already open somewhere e.g. another tab, it fails on first load
+					// rerun, F5, etc all work
+				// even if I wait 1 second after setting and then check it's always an empty string
+				//console.log(res[0])
+				value += ' | ' + (res[0] == rndStr ? zS : zF)
+				if ('_persistent_store' == k) {exit()}
+			})
 		} catch(e) {
 			// slice "_store": consistent style to match cookies
 			// redundant to use "cookieStore_session_store"
 			log_error(6, METRIC + k.slice(0,-6), e); value += ' | '+ zErr
+			if ('_persistent_store' == k) {exit()}
 		}
 	})
-	// don't use cookie in element names == adblockers might block display
-	addDisplay(6, 'cstest', value)
-	addData(6, METRIC, value)
-	return resolve()
 })
 
 function get_filesystem(METRIC) {
