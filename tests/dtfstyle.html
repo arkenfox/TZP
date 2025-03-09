@@ -328,7 +328,8 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
 						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
-						cal += '-'+ oConst.DaF.resolvedOptions().calendar
+						// add calendar default name for visual info: not required for entropy
+						//cal += '-'+ oConst.DaF.resolvedOptions().calendar
 						/* 
 							th = buddhist
 							ar-sa = islamic-umalqura
@@ -345,7 +346,8 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 						try {oConst.DaFM = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						try {oConst.DaML = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
 						try {oConst.DaSF = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
-						cal += '-'+ oConst.DaFM.resolvedOptions().calendar
+						// add calendar default name for visual info: not required for entropy
+						//cal += '-'+ oConst.DaFM.resolvedOptions().calendar
 					} else {
 						try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						if ('japanese' == cal) {
