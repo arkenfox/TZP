@@ -154,6 +154,7 @@ function set_currency_lists() {
 		'SZL', // nyn
 		'USD', // bo, dua, haw, ii, lkt, sah
 		'XAF', // kkj, mgo, nnh, rw
+		'ZAR', // st
 		'ZMW', // bem
 		// FF121+ 1859752 ICU 74
 		'PLN', 
@@ -175,7 +176,7 @@ function set_currency_lists() {
 		'LUF','MDL','MGA','MKD','MMK','MOP','MRU','MUR','MWK','MYR',
 		'NAD','NGN','NIO','NOK','NZD','PAB','PGK','PKR','RWF','SBD','SCR','SDG',
 		'SGD','SHP','SLE','SOS','SRD','SSP','STN','SYP','TND','TOP',
-		'TTD','TZS','XCD','UGX','VUV','WST','ZAR',
+		'TTD','TZS','XCD','UGX','VUV','WST',
 	]
 	
 	expanded = expanded.concat(min)
@@ -265,6 +266,7 @@ function run_main(method) {
 				"SZL": curN,
 				"USD": curB,
 				"XAF": curN,
+				"ZAR": curS,
 				"ZMW": curS,
 				// FF121+ 1859752 ICU 74
 				"PLN": curS,
@@ -285,6 +287,7 @@ function run_main(method) {
 				"SZL": curB,
 				"USD": curB,
 				"XAF": curN,
+				"ZAR": curS,
 				"ZMW": curS,
 				// FF121+ 1859752 ICU 74
 				"PLN": curS, 
@@ -519,12 +522,12 @@ function run_main(method) {
 					}
 				} else {
 					// results
-					if (resultsHash == "dfb8aa9d") { //[FF134+
-					} else if (resultsHash == "0455c360") { // FF128-133
+					if (resultsHash == "881cd751") { //[FF134+
+					} else if (resultsHash == "cdbb4813") { // FF128-133
 					} else {resultsHash += ' '+ zNEW
 					}
 					// locales
-					if (localesHash == "5d72c66f") { // FF134+: 218
+					if (localesHash == "aa586dff") { // FF134+: 219
 					} else if (localesHash == "32e62521") { // FF128-133: 213
 					} else if (isFF) {localesHash += ' '+ zNEW
 					}
@@ -832,6 +835,7 @@ Promise.all([
 	expanded = expanded.filter(function(item, position) {return expanded.indexOf(item) === position})
 	expanded.sort()
 	oLists["expanded"] = expanded
+
 	legend()
 	set_currency_lists()
 	if (isSupported) {
