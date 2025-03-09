@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 152
+	expectedMetrics = 153
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -115,6 +115,8 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	lang_red = sbx+' languages]'+sc,
 	locale_green = sgtick+' locale]'+sc,
 	locale_red = sbx+' locale]'+sc,
+	localetz_green = sgtick+' locale + timezone]'+sc,
+	localetz_red = sbx+' locale + timezone]'+sc,
 	intl_green = sgtick+' intl]'+sc,
 	intl_red = sbx+' intl]'+sc,
 	tz_green = sgtick+' timezone]'+sc,
@@ -162,7 +164,9 @@ let languagesSupported = {},
 	isTimeZoneValid,
 	isTimeZoneValue,
 	oIntlTests = {},
-	oIntlKeys = {}
+	oIntlKeys = {},
+	oIntlDateTests = {},
+	oIntlDateKeys = {}
 
 // other
 let aDomRect = [true, true, true, true],
