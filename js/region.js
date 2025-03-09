@@ -207,6 +207,42 @@ function set_isLanguageSmart() {
 	return
 }
 
+function set_oIntlDateTests() {
+	// all dates must be timezone resistent: we do not want the noise: we are checking locales
+	// and want to maintain max entropy checks: timezone entropy == timezonename
+	let dates = {
+		// cover the seasons, key weekdays, am/pm
+		Jan: new Date("January 5, 2024 13:12:34"), // jan, fri pm
+		May: new Date("May 9, 2024 01:12:34"), // thur <-- adds something
+		Jul: new Date("July 5, 2024 01:12:34"), // july, fri am
+		Sep: new Date("September 6, 2024 01:12:34"), // sep, wed
+		Nov: new Date("November 6, 2024 01:12:34"), // nov wed am
+	}
+
+	oIntlDateTests = {
+		date_timestyle : {
+			"default": {
+				'full_medium': [dates.May, dates.Sep, dates.Nov],
+				'medium_long': [dates.Jan, dates.Jul],
+				'short_full': [dates.Jan, dates.Sep]
+			},
+			'ethiopic': {
+				'full_medium': [dates.Jan]
+			},
+			'japanese': {
+				'full_medium': [dates.Jan],
+				'medium_long': [dates.Sep]
+			}
+		},
+	}
+
+	// build keys
+	for (const k of Object.keys(oIntlDateTests)) {
+		oIntlDateKeys[k] = []
+		for (const j of Object.keys(oIntlDateTests[k]).sort()) {oIntlDateKeys[k].push(j)}
+	}
+}
+
 function set_oIntlTests() {
 
 	let unitN = {'narrow': [1]}, unitL = {'long': [1]}, unitB = {'long': [1], 'narrow': [1]}
@@ -544,6 +580,64 @@ function get_language_system(METRIC) {
 	log_perf(4, METRIC, t0)
 }
 
+function get_dates_intl() {
+	function get_metric(m, code, tz, isIntl) {
+		try {
+			let obj = {}, tests = oIntlDateTests[m], testkeys = oIntlDateKeys[m], value
+			if ('date_timestyle' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					obj[key] = {}
+					Object.keys(tests[key]).forEach(function(s) {
+						let data = [], styles = s.split('_'), cal = 'default' == key ? undefined : key
+						let formatter = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: styles[0], timeStyle: styles[1], timeZone: tz})
+						tests[key][s].forEach(function(n) {value = formatter.format(n); data.push(value)})
+						obj[key][s] = data
+					})
+				}
+			}
+			return {'hash': mini(obj), 'metrics': obj}
+		} catch(e) {
+			log_error(4, METRIC +'_'+ m, e)
+			return zErr
+		}
+	}
+	const oMetrics = {
+		intl : ['date_timestyle',],
+		'to*string': [],
+	}
+	let METRIC, oString = {}
+	Object.keys(oMetrics).forEach(function(list){
+		METRIC = 'dates_'+ list
+		let t0 = nowFn(), isIntl = 'intl' == list, notation = localetz_red
+		let oData = {}, oCheck = {}
+		oMetrics[list].forEach(function(m) {
+			let value = get_metric(m, undefined, undefined, isIntl) 
+			oData[m] = value
+			if (isIntl && oMetrics['to*string'].includes(m)) {oString[m] = value} // intl version of to*string
+		})
+		let hash = mini(oData), btnDiff =''
+		if (!isIntl && oMetrics[list].length) {
+			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oString) ? intl_green : intl_red))
+		}
+		if (isLocaleValid && isTimeZoneValid) {
+			oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isTimeZoneValue, isIntl)})
+			//oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, 'fr', 'Asia/Brunei', isIntl)}) // test
+			if (hash == mini(oCheck)) {
+				notation = localetz_green
+			} else {
+				addDetail(METRIC +'_check', oCheck)
+				btnDiff = addButton(4, METRIC +'_check', 'check')
+			}
+		}
+		if (oMetrics[list].length) { // temp check until we start building string tests
+			addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
+			log_perf(4, METRIC, t0)
+		}
+		if (!isIntl) {return}
+	})
+}
+
 function get_locale_intl() {
 	function get_metric(m, code, isIntl) {
 		try {
@@ -734,7 +828,6 @@ function get_locale_intl() {
 		],
 		tolocalestring: ['compact','currency','datetimeformat','notation','sign','timezonename','unit'],
 	}
-	let t0 = nowFn()
 	let METRIC, oString = {}
 	Object.keys(oMetrics).forEach(function(list){
 		METRIC = 'locale_'+ list
@@ -755,7 +848,7 @@ function get_locale_intl() {
 				notation = locale_green
 			} else {
 				addDetail(METRIC +'_check', oCheck)
-				btnDiff = addButton(4, METRIC +'_check', isLocaleValue +' check')
+				btnDiff = addButton(4, METRIC +'_check', 'check')
 			}
 		}
 		addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
@@ -1464,7 +1557,8 @@ const outputRegion = () => new Promise(resolve => {
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
-				get_dates(), // will use isTimeZoneValid/Value + isLocaleValid/Value
+				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
+				get_dates(), // to migrate to get_dates_intl
 				get_messages_media('messages_media'),
 			]).then(function(){
 				return resolve()
@@ -1483,5 +1577,6 @@ const outputHeaders = () => new Promise(resolve => {
 	})
 })
 
+set_oIntlDateTests()
 set_oIntlTests()
 countJS(4)
