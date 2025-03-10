@@ -616,7 +616,7 @@ function get_dates_intl() {
 			oData[m] = value
 			if (isIntl && oMetrics['to*string'].includes(m)) {oString[m] = value} // intl version of to*string
 		})
-		let hash = mini(oData), btnDiff =''
+		let hash = mini(oData)
 		if (!isIntl && oMetrics[list].length) {
 			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oString) ? intl_green : intl_red))
 		}
@@ -627,11 +627,11 @@ function get_dates_intl() {
 				notation = localetz_green
 			} else {
 				addDetail(METRIC +'_check', oCheck)
-				btnDiff = addButton(4, METRIC +'_check', 'check')
+				notation = addButton('bad', METRIC +'_check', "<span class='health'>✗</span> locale + timezone")
 			}
 		}
 		if (oMetrics[list].length) { // temp check until we start building string tests
-			addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
+			addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
 			log_perf(4, METRIC, t0)
 		}
 		if (!isIntl) {return}
@@ -838,20 +838,21 @@ function get_locale_intl() {
 			oData[m] = value
 			if (isIntl && oMetrics['tolocalestring'].includes(m)) {oString[m] = value} // intl version of tolocalestring
 		})
-		let hash = mini(oData), btnDiff =''
+		let hash = mini(oData)
 		if (!isIntl) {
 			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oString) ? intl_green : intl_red))
 		}
 		if (isLocaleValid) {
 			oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isIntl)})
+			//oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, 'fr', isIntl)}) // test
 			if (hash == mini(oCheck)) {
 				notation = locale_green
 			} else {
 				addDetail(METRIC +'_check', oCheck)
-				btnDiff = addButton(4, METRIC +'_check', 'check')
+				notation = addButton('bad', METRIC +'_check', "<span class='health'>✗</span> locale")
 			}
 		}
-		addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
+		addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
 		log_perf(4, METRIC, t0)
 		if (!isIntl) {return}
 	})
@@ -902,17 +903,18 @@ function get_locale_resolvedoptions(METRIC) {
 	}
 
 	let oData = get_metrics(undefined), oCheck = {}, notation = locale_red
-	if (isLocaleValid) {oCheck = get_metrics(isLocaleValue)}
-	let hash = mini(oData), btnDiff =''
+	let hash = mini(oData)
 	if (isLocaleValid) {
+		oCheck = get_metrics(isLocaleValue)
+		//oCheck = get_metrics('et') // test
 		if (hash == mini(oCheck)) {
 			notation = locale_green
 		} else {
 			addDetail(METRIC +'_check', oCheck)
-			btnDiff = addButton(4, METRIC +'_check', isLocaleValue +' check')
+			notation = addButton('bad', METRIC +'_check', "<span class='health'>✗</span> locale")
 		}
 	}
-	addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
+	addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
 	return
 }
 
