@@ -72,9 +72,15 @@ let fntMaster = {
 		linux: [
 			'Arimo','Cousine','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR',
 			'Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai',
-			'STIX Two Math','Tinos','Twemoji Mozilla'],
-		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Two Math',],
-		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla'],
+			'STIX Two Math','Tinos','Twemoji Mozilla',
+			//'Pyidaungsu', // ToDo: will replace Noto Sans Myanmar: we keep Noto Serif Myanmar
+		],
+		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Two Math',
+			//'Pyidaungsu', // ToDo: will replace Noto Sans Myanmar: we keep Noto Serif Myanmar
+		],
+		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',
+			//'Pyidaungsu', // ToDo: will replace Noto Sans Myanmar: we keep Noto Serif Myanmar
+		],
 	},
 	// BB whitelist system
 	allowlist: {
@@ -197,6 +203,8 @@ let fntMaster = {
 			'Bitstream Charter','C059','Nimbus Sans','P052','Quicksand', // debian
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // BB12 fontnames
+			//'Noto Sans Myanmar', // ToDo: BB14 bundled replaced by Pyidaungsu
+			'Pyidaungsu', // temp
 		],
 		linuxfaces: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
@@ -216,6 +224,8 @@ let fntMaster = {
 		mac: [
 			'Apple Symbols','Impact','Palatino','Rockwell', // system
 			'Noto Serif Hmong Nyiakeng','STIX Math', // BB12 fontnames
+			//'Noto Sans Myanmar', // ToDo: BB14 bundled replaced by Pyidaungsu
+			'Pyidaungsu', // temp
 			'Noto Sans Symbols2', // BB12 bundled: ToDo: in faces: maybe remove when that lands in TB
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
@@ -232,6 +242,8 @@ let fntMaster = {
 			'Gill Sans','Gill Sans MT', // MS bundled
 			// other
 			'Noto Sans Symbols2', // BB12 bundled
+			//'Noto Sans Myanmar', // ToDo: BB14 bundled replaced by Pyidaungsu
+			'Pyidaungsu', // temp
 			'Helv', // ToDo: this might need to move with font.vis
 		],
 		windowsfaces: [
@@ -472,11 +484,11 @@ let fntMaster = {
 			'Noto Color Emoji Flags','Source Sans Pro',
 			// +common +self
 			'Droid Sans','Droid Serif','Noto Sans','Noto Serif',
-			// +vendor: ToDo: SamsungNeo*, vendor specific
+			// +vendor
 			'SamsungKorean_v2.0', // 1674683
 			'SamsungKorean_v3.0',
 			'SamsungColorEmoji', // 1872510
-			'SamsungKhmerUI','SamsungMyanmarZawgyiUI',
+			'SamsungKhmerUI','SamsungMyanmarZawgyiUI','SamsungMyanmarShan',
 			'One UI Sans KR VF', // 1865238
 			'One UI Sans APP VF',
 			// +me android 12
@@ -613,6 +625,7 @@ let fntMaster = {
 			'Simplified Arabic Fixed','Verdana Pro',
 			// other
 			'Sans Serif Collection', // win11
+			'SimSun-ExtG', // win11 24H2 see 1947960
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT', // MS products
 			'OpenSymbol', // openoffice
