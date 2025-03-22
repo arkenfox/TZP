@@ -474,32 +474,38 @@ let fntMaster = {
 	// NOT kBase/LangPack
 	system: {
 		android: [
-			// all but never found: //'AndroidClock',
-			// all
-			'Carrois Gothic SC','Cutive Mono','Dancing Script','Droid Sans Mono',
-			'Noto Color Emoji','Noto Naskh Arabic',
-			// 9+
-			'Coming Soon','Noto Naskh Arabic UI','Roboto',
-			// 12+
-			'Noto Color Emoji Flags','Source Sans Pro',
-			// +common +self
-			'Droid Sans','Droid Serif','Noto Sans','Noto Serif',
-			// +vendor
-			'SamsungKorean_v2.0', // 1674683
-			'SamsungKorean_v3.0',
+			// common: note 'AndroidClock' ignored
+			'Carrois Gothic SC','Cutive Mono','Dancing Script','Droid Sans Mono','Noto Color Emoji','Noto Naskh Arabic', // all
+			'Coming Soon','Noto Naskh Arabic UI','Roboto', // 9+
+			'Noto Color Emoji Flags','Source Sans Pro', // 12+
+			// other
+			'Droid Sans','Droid Sans Fallback','Droid Serif',
+			'Noto Sans','Noto Sans CJK KR','Noto Sans CJK SC','Noto Sans CJK TC','Noto Sans SC','Noto Sans TC',
+			'Noto Serif','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC','Noto Serif SC','Noto Serif TC',
+			// +samsung
+			'One UI Sans APP VF','One UI Sans KR VF', // 1865238
 			'SamsungColorEmoji', // 1872510
-			'SamsungKhmerUI','SamsungMyanmarZawgyiUI','SamsungMyanmarShan',
-			'One UI Sans KR VF', // 1865238
-			'One UI Sans APP VF',
-			// +me android 12
-			'Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
-			// me android 14
+			'SamsungKorean_v2.0','SamsungKorean_v3.0', // 1674683
+			'SamsungKhmerUI','SamsungMyanmarShan','SamsungMyanmarZawgyiUI',
+			// +xiaomi: https://hyperos.mi.com/font/en/
+			'MiSans','MiSans VF','MiSans TC','MiSans TC VF', // 1933410, 1954947
+			'MiSans Arabic', // for all these maybe append VF as more likely? or both?
+			'MiSans Devanagari',
+			'MiSans Khmer',
+			'MiSans Latin',
+			'MiSans Lao',
+			'MiSans Gujarati',
+			'MiSans Gurmukhi',
+			'MiSans Myanmar',
+			'MiSans Thai',
+			'MiSans Tibetan',
+			// +SEC
 			'New SEC Num Fixed VF','New SEC Num VF','SEC Bengali','SEC Bengali UI','SEC CJK Regular Extra',
 			'SEC Devanagari','SEC Devanagari UI','SEC Lao','SEC Lao UI','SEC Malayalam','SEC Malayalam UI',
 			'SEC Myanmar UI','SEC Naskh Arabic','SEC Naskh Arabic UI','SEC Serif Tibetan','SEC Tamil','SEC Tamil UI',
 			'SECFallback','SECGujarati','SECGujarati UI','SECGurmukhi','SECGurmukhi UI','SECKannada','SECKannada UI',
 			'SECTelugu','SECTelugu UI',
-			// +defaults
+			// +SEC CJK
 			'SEC CJK JP','SEC CJK KR','SEC CJK SC','SEC CJK TC','SEC Mono CJK JP','SEC Mono CJK KR','SEC Mono CJK SC',
 			'SEC Mono CJK TC',
 		],
