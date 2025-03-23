@@ -586,7 +586,6 @@ function run() {
 		rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
 		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
 		rec(typeof openDatabase, "openDatabase", code, "function")
-		rec(typeof originAgentCluster, "originAgentCluster", code, "boolean")
 		rec(typeof trustedTypes, "trustedTypes", code, "object")
 		rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code, "function")
 		rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL", code, "function")
@@ -704,6 +703,7 @@ function run() {
 		rec(typeof scheduler, "scheduler", code, "object")
 		rec(typeof oncontextlost, "oncontextlost", code, "object")
 		rec(typeof oncontextrestored, "oncontextrestored", code, "object")
+		rec(typeof originAgentCluster, "originAgentCluster", code, "boolean") // FF138+ 1665474
 
 		// blink + webkit (not seen in gecko)
 		code = 52
@@ -1066,11 +1066,12 @@ function get_miniEngine() {
 	let oEngines = {
 		"blink": [
 			"number" === typeof TEMPORARY,
+			"number" === typeof PERSISTENT,
 			"object" === typeof onappinstalled,
 			"object" === typeof onbeforeinstallprompt,
 			"object" === typeof onpointerrawupdate,
 			//"object" === typeof onsearch,
-			"boolean" === typeof originAgentCluster,
+			//"boolean" === typeof originAgentCluster,
 			"object" === typeof trustedTypes,
 			"function" === typeof webkitResolveLocalFileSystemURL,
 		],
