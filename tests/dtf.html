@@ -356,7 +356,6 @@ function run_main(method = "all") {
 		console.log(localeGroups)
 		console.log(resultsHash)
 		console.log(oData)
-		console.log(oTempData)
 		//*/
 
 		// notations
@@ -367,7 +366,8 @@ function run_main(method = "all") {
 			if (isVer > 127) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "b33bb78b") { // FF134+
+				if (resultsHash == "442e160e") { // FF138+ IUC77 (hi: short/long october)
+				} else if (resultsHash == "b33bb78b") { // FF134+
 				} else if (resultsHash == "0095da8a") { // FF128-133
 				} else {resultsHash += ' '+ zNEW
 				}
