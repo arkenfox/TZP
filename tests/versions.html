@@ -215,7 +215,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 88, maxVer = 137, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 91, maxVer = 138, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -267,7 +267,7 @@ function outputVersion() {
 						myVer = "52 or lower"
 						myPerf = totalPerf +" ms"
 					}
-					if (myVer == maxVer) {myVer += "+"}
+					if (myVer > (maxVer - 1)) {myVer += "+"}
 					strSuccess = " "+ s14 + " [result: FF"+ myVer +" | "+ myPerf +"]"+ sc
 				}
 				dom.perftzp.innerHTML = "".padStart(3) + expectTZP +" tests | "+ totalPerf +" ms" + strSuccess
@@ -276,6 +276,30 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 138: 1525241
+			// fast-path: requires webrtc
+			// e.g. media.peerconnection.enabled | --disable-webrtc
+		let t138b = performance.now(), ver138b
+		try {
+			ver138b = RTCCertificate.prototype.hasOwnProperty('getFingerprints')
+		} catch(e) {}
+		rec(138.2, 138, "1525241", ver138b, performance.now()-t138b, "PREF") // 0.004ms
+
+		// 138: fast-path: dom.origin_agent_cluster.enabled
+		let t138a = performance.now()
+		let ver138a = 'boolean' == typeof originAgentCluster
+		rec(138.1, 138, "1665474", ver138b, performance.now()-t138b, "PREF") // 0.002ms
+
+		// 138: 1954425: must be FF134 or higher
+		let t138 = performance.now(), ver138, test138
+		try {
+			if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) { // FF135+
+				test138 = Intl.NumberFormat('yo-bj', {style: 'unit', unit: 'year', unitDisplay: 'narrow'}).format(1)
+				ver138 = '606d1046' == mini(test138)
+			}
+		} catch(e) {}
+		rec(138, 138, "1954425", ver138, performance.now()-t138, "INTL") // 6ms cold, 0.3ms with TZP's NumberFormat warmup
 
 		// 137: 1943120
 			// javascript.options.experimental.math_sumprecise
