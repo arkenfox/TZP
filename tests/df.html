@@ -254,6 +254,8 @@ function run_main(method) {
 				})
 			})
 			let hash = mini(oStyles) +" " // make numbers sort like strings
+			//if (code == 'yo-bj') {console.log(code, hash, oStyles)}
+
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
@@ -349,7 +351,8 @@ function run_main(method) {
 			// notate new if 128+
 			if (isVer > 127) {
 				// results
-				if (resultsHash == 'f38cff8b') { // FF136+
+				if (resultsHash == '1cbc46dd') { // FF138+ IUC77 (yo-bj in long/narrow first letter of "year"/"y" etc changes)
+				} else if (resultsHash == 'f38cff8b') { // FF136+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales

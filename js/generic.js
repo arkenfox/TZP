@@ -466,7 +466,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 137) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 138) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -482,6 +482,17 @@ function get_isVer(METRIC) {
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
 
+			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
+			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
+			// 138: fast-path: dom.origin_agent_cluster.enabled
+			if ('boolean' == typeof originAgentCluster) return 138 // 1665474
+			// 138: must be FF134 or higher
+			try {
+				if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) { // FF135+
+					test = Intl.NumberFormat('yo-bj', {style: 'unit', unit: 'year', unitDisplay: 'narrow'}).format(1)
+					if ('606d1046' == mini(test)) return 138 // 1954425
+				}
+			} catch(e) {}
 			// 137 fast-path: javascript.options.experimental.math_sumprecise
 			if ('function' == typeof Math.sumPrecise) return 137 // 1943120
 			// 136 fast-path: FF132+ pref enabled javascript.options.experimental.regexp_modifiers

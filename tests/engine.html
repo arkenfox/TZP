@@ -1854,7 +1854,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof onsearch, "onsearch")
 		rec(num2, typeof openDatabase, "openDatabase")
 		rec(num2, typeof opr, "opr") // OPERA desktop at least
-		rec(num2, typeof originAgentCluster, "originAgentCluster")
+		rec(num2, typeof originAgentCluster, "originAgentCluster") // FF138+ 1665474
 		rec(num2, typeof queryLocalFonts, "queryLocalFonts")
 		rec(num2, typeof showDirectoryPicker, "showDirectoryPicker")
 		rec(num2, typeof showOpenFilePicker, "showOpenFilePicker")
@@ -1876,6 +1876,9 @@ function get_window_props(num1, num2, title) {
 			if (isVer > 131) {
 				// FF132 nightly 1918643
 				resU = resU.filter(x => !["cookieStore"].includes(x))
+			}
+			if (isVer > 137) {
+				resU = resU.filter(x => !["originAgentCluster"].includes(x))
 			}
 		}
 
