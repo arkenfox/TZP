@@ -244,11 +244,12 @@ const get_globals = () => new Promise(resolve => {
 	let oEngines = {
 		"blink": [
 			"number" === typeof TEMPORARY,
+			"number" === typeof PERSISTENT,
 			"object" === typeof onappinstalled,
 			"object" === typeof onbeforeinstallprompt,
 			"object" === typeof onpointerrawupdate,
 			//"object" === typeof onsearch,
-			"boolean" === typeof originAgentCluster,
+			//"boolean" === typeof originAgentCluster,
 			"object" === typeof trustedTypes,
 			"function" === typeof webkitResolveLocalFileSystemURL,
 		],
@@ -412,10 +413,21 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 137
+		isVerMax = 138
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
+			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
+			// 138: fast-path: dom.origin_agent_cluster.enabled
+			if ('boolean' == typeof originAgentCluster) return 138 // 1665474
+			// 138: must be FF134 or higher
+			try {
+				if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) { // FF135+
+					let test138 = Intl.NumberFormat('yo-bj', {style: 'unit', unit: 'year', unitDisplay: 'narrow'}).format(1)
+					if ('606d1046' == mini(test138)) return 138 // 1954425
+				}
+			} catch(e) {}
 			// 137 fast-path: javascript.options.experimental.math_sumprecise
 			if ('function' == typeof Math.sumPrecise) return 137 // 1943120
 			try {
