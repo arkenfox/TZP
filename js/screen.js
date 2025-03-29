@@ -1378,18 +1378,30 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		}
 	}
 	if (os !== undefined) {
-		let uaVer = isVer, isDroid = isOS == 'android'
-		let uaRFP = 'Mozilla/5.0 (' + oRFP[os].ua_os +'; rv:' // base
-		let uaNext = uaRFP // only used if ver+
+		// important: only add next version to array if we are open ended ('+')
+		let uaVer = isVer, isDroid = isOS == 'android', nxtVer = uaVer + 1
+		// userAgent
+		let uaRFP = 'Mozilla/5.0 (' + oRFP[os].ua_os +'; rv:', uaNext = uaRFP // base
 		uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
-		// next
+		oRFP[os].userAgent = [uaRFP]
+		// next userAgent
 		if ('+' == isVerExtra) {
-			let nxtVer = uaVer + 1
 			uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
-			oRFP[os]['userAgentNext'] = uaNext
+			oRFP[os].userAgent.push(uaNext)
 		}
-		oRFP[os]['userAgent'] = uaRFP
+		// desktop mode: 1727775
+		if (isDroid) {
+			uaRFP = 'Mozilla/5.0 (' + oRFP.linux.ua_os +'; rv:', uaNext = uaRFP // base
+			uaRFP += uaVer +'.0) Gecko/20100101 Firefox/'+ uaVer +'.0'
+			oRFP[os].userAgent.push(uaRFP)
+			if ('+' == isVerExtra) {
+				uaNext += nxtVer +'.0) Gecko/20100101 Firefox/'+ nxtVer +'.0'
+				oRFP[os].userAgent.push(uaNext)
+			}
+		}
 	}
+	//console.log(oRFP)
+
 	let list = {
 		// static
 		appCodeName: ['Mozilla', true],
@@ -1439,12 +1451,13 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		let isLies = isProxyLie('Navigator.'+ k)
 		let notation = isLies ? rfp_red : '' // in case os is undefined
 		if (os !== undefined) {
-			let rfpvalue = oRFP[os][k]
-			let isMatch = rfpvalue === reported
-			if (k == 'userAgent' && !isMatch && isVerExtra == '+') {
-				isMatch = oRFP[os][k +'Next'] == reported
-			}
+			let rfpvalue = oRFP[os][k], isMatch = false
+			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
 			notation = isMatch ? rfp_green : rfp_red
+			// notate good desktopmode
+			if (k == 'userAgent' && isMatch && 'android' == isOS) {
+				if (reported.includes('Linux')) {notation = desktopmode_green}
+			}
 		}
 		addBoth(2, k, reported,'', notation, (isErr ? zErr : reported), isLies)
 	}
