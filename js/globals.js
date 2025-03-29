@@ -122,7 +122,8 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	tz_green = sgtick+' timezone]'+sc,
 	tz_red = sbx+' timezone]'+sc,
 	position_green = sgtick+'RFP positions]'+sc,
-	position_red = sbx+'RFP positions]'+sc
+	position_red = sbx+'RFP positions]'+sc,
+	desktopmode_green = sgtick+'RFP desktop mode]'+sc
 
 // dynamic BB notation
 let bb_green = sgtick+'TB]'+sc,
