@@ -223,7 +223,8 @@ function get_css() {
 		// e.g. chrome://global/skin/richlistbox.css
 	const parent = dom.elementsdiv
 	let oList = {
-		"quote-fr": "<q id='X' lang='fr'></q>",
+		"parsererror": "<parsererror></parsererror>",
+		"quote-fr": "<q lang='fr'></q>",
 	}
 	try {
 		let oData = {}, target
@@ -233,8 +234,12 @@ function get_css() {
 			let data = []
 			try {
 				parent.innerHTML = oList[k] //+" "+ k
-				target = document.getElementById("X")
-				oData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+				if ('parsererror' == k) {
+					oData[k] = getComputedStyle(document.querySelector(k)).direction
+				} else {
+					target = parent.children[0]
+					oData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+				}
 			} catch(e) {
 				console.log(e)
 				oData[k] = zErr
