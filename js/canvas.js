@@ -30,12 +30,14 @@ const get_canvas = () => new Promise(resolve => {
 		'toDataURL': ['3afc375a'],
 		'toDataURL_solid': ['56ea6104'],
 	}
-	// FF137nightly: 1918690: Enable libz-rs on nightly: this changes our known hashes
+	// libz-rs
+  	// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
+  	// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
 	if (isVer > 136) {
 		oKnown['toBlob'].push('e328ec8e')
-		oKnown['toBlob_solid'].push('9d0b9932')
+		oKnown['toBlob_solid'].push('9d0b9932','cfd52a1f')
 		oKnown['toDataURL'].push('e328ec8e')
-		oKnown['toDataURL_solid'].push('9d0b9932')
+		oKnown['toDataURL_solid'].push('9d0b9932','cfd52a1f')
 		oKnown['to_white'].push('3e72d1fd')
 	}
 	let isCanvasGet ='', isCanvasGetChannels ='', isGetStealth = false
@@ -657,6 +659,5 @@ const outputCanvas = () => new Promise(resolve => {
 		return resolve()
 	})
 })
-
 
 countJS(9)
