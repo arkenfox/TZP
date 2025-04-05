@@ -2,7 +2,7 @@
 
 function get_device_integer(METRIC, proxyCheck) {
 	// concurrency: 1630089: macOS reports physical cores instead of logical
-		// capped at dom.maxHardwareConcurrency e.g 1728741
+		// capped at 16 dom.maxHardwareConcurrency e.g 1728741
 	let value, data ='', expected = 'hardwareConcurrency' == METRIC ? 2 : 24
 	try {
 		value = 2 == expected ? navigator[METRIC] : screen[METRIC]
@@ -21,9 +21,10 @@ const get_device_permissions = (item) => new Promise(resolve => {
 	function exit(display, value) {
 		if (value == undefined) {value = display}
 		let notation = ''
-		// enabled in FF132+
+		// camera/mic: enabled in FF132+
 			// TypeError: 'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
-		if (isVer > 131) {notation = value == 'prompt' ? default_green : default_red}
+		if (isVer > 131 && 'screen-wake-lock' !== item) {notation = value == 'prompt' ? default_green : default_red}
+		// not sure what screen-wake-lock is meant to be, so no notation
 		addBoth(7, METRIC, display,'', notation, value)
 		return resolve()
 	}
@@ -58,6 +59,7 @@ function get_maxtouch(METRIC) {
 		value = e; data = zErrLog
 	}
 	// 1826051: FF132+ 10 except mac
+	// 1957658: FF139+ ?
 	let rfpvalue = (isVer > 131 && 'mac' !== isOS) ? 10 : 0
 	addBoth(7, METRIC, value,'', (rfpvalue == value ? rfp_green : rfp_red), data, isProxyLie('Navigator.'+ METRIC))
 	return
@@ -351,6 +353,7 @@ const outputDevices = () => new Promise(resolve => {
 	Promise.all([
 		get_device_permissions('camera'),
 		get_device_permissions('microphone'),
+		get_device_permissions('screen-wake-lock'),
 		get_media_devices('mediaDevices'),
 		get_speech_engines('speech_engines'),
 		get_maxtouch('maxTouchPoints'),
