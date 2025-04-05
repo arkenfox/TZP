@@ -599,7 +599,6 @@ function run() {
 		rec(typeof getScreenDetails, "getScreenDetails", code, "function")
 		rec(typeof launchQueue, "launchQueue", code, "object") // + not in Brave (or android)
 		rec(typeof navigation, "navigation", code, "object")
-		rec(typeof onbeforematch, "onbeforematch", code, "object")
 		rec(typeof onbeforexrselect, "onbeforexrselect", code, "object")
 		rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
 		rec(typeof sharedStorage, "sharedStorage", code, "object")
@@ -690,6 +689,7 @@ function run() {
 		rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
 		rec(typeof cookieStore, "cookieStore", code, "object") // FF132 nightly 1918643
 		rec(typeof external, "external", code, "object")
+		rec(typeof onbeforematch, "onbeforematch", code, "object") // FF139+ 1761043
 		rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
 		rec(typeof ondragexit, "ondragexit", code, "object") // touch
 		rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet

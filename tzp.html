@@ -143,7 +143,7 @@
 
 	<table>
 		<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
-		<tr><td class="blurb" id="index"><a id="link" class="return" href="index.html">return to TZP index</a></td></tr>
+		<tr><td class="blurb" id="index"><a id="tzpLink" class="return" href="index.html">return to TZP index</a></td></tr>
 	</table>
 
 	<span id="tzpContent">
@@ -638,13 +638,16 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp; hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
-		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span><span class="cssc" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
-		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="cssc" id="hover_css"></span> | <span class="c" id="hover"></span></td></tr>
+		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span>
+			<span class="cssc" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
+		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="cssc" id="hover_css"></span>
+			| <span class="c" id="hover"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
-		<tr><td>[camera | mic] permissions</td><td class="mono"><span class="c" id="permission_camera"></span>
+		<tr><td>[camera | mic | wake-lock] permissions</td><td class="mono"><span class="c" id="permission_camera"></span>
 			| <span class="c" id="permission_microphone"></span>
+			| <span class="c" id="permission_screen-wake-lock"></span>
 			</td></tr>
 		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
 			<span class="cssc" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
@@ -783,8 +786,8 @@
 			&nbsp; font-format | font-tech</td><td class="mono"><span class="c" id="font-format"></span> | <span class="c" id="font-tech"></span>
 		</td></tr>
 		<!--fonts-->
-		<tr><td>[faces] fonts</td><td class="mono" id="font_faces"></td></tr>
-		<!--<tr><td>[offscreen] fonts</td><td class="mono" id="font_offscreen"></td></tr>-->
+		<tr><td>[faces] fonts</td><td class="mono c" id="font_faces"></td></tr>
+		<!--<tr><td>[offscreen] fonts</td><td class="mono c" id="font_offscreen"></td></tr>-->
 		<tr><td><span id="labelFS" class="btn btn0" onClick="togglerows('FS','btn')">[+]</span>
 			[sizes | names] fonts <sup>1</sup></td>
 			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
