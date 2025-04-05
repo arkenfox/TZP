@@ -1846,7 +1846,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof offscreenBuffering, "offscreenBuffering")
 		rec(num2, typeof onappinstalled, "onappinstalled")
 		rec(num2, typeof onbeforeinstallprompt, "onbeforeinstallprompt")
-		rec(num2, typeof onbeforematch, "onbeforematch")
+		rec(num2, typeof onbeforematch, "onbeforematch") // FF139 1761043 dom.hidden_until_found.enabled
 		rec(num2, typeof onbeforexrselect, "onbeforexrselect")
 		rec(num2, typeof oncontextlost, "oncontextlost")
 		rec(num2, typeof oncontextrestored, "oncontextrestored")
@@ -1879,6 +1879,9 @@ function get_window_props(num1, num2, title) {
 			}
 			if (isVer > 137) {
 				resU = resU.filter(x => !["originAgentCluster"].includes(x))
+			}
+			if (isVer > 138) {
+				resU = resU.filter(x => !["onbeforematch"].includes(x))
 			}
 		}
 
