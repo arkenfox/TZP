@@ -316,7 +316,7 @@ function get_link(METRIC) {
 		value = zNA
 	} else {
 		try {
-			let property = getComputedStyle(dom.link).textDecoration
+			let property = getComputedStyle(dom.tzpLink).textDecoration
 			if (runST) {property = null} else if (runSI) {property = 'x'}
 			let typeCheck = typeFn(property)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
