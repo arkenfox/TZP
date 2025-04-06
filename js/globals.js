@@ -200,6 +200,7 @@ let gt0, gt1,
 	isBlockMin = 115,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 
+	isPixelLog = false, // console.log isPixelMatch results
 	isScreenLog = false, // console log screen/window/taskbar/chrome
 	isSmart = false,
 	isSmartMin = 128,
