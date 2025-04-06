@@ -931,106 +931,109 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		let newobj = {}
 		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
 		addData(1, METRIC, newobj, mini(newobj))
-
 		// pixel matches
-		if (isSmart) {
-			let isPixelMatch = true, oPixels = {}
-			let oSummary = {'false': [], 'true': []}
-			// remove items we don't compare
-			let aIgnore = ['devicePixelRatio_border','dpi_div','visualViewport_scale']
-			aIgnore.forEach(function(item){delete oData[item]})
-			try {
-				// typecheck
-				for (const k of Object.keys(oData).sort()) {
-					let typeCheck = typeFn(oData[k])
-					if ('number' !== typeCheck) {
-						// ignore out-of-range css
-						if ('dpi_css' == k && '?' == oData[k]) {} else {throw zErrInvalid + k +' expected number: got '+ typeCheck}
-					}
-				}
-				let ctrlDPR = oData.devicePixelRatio
-				let oControls = {
-					'-moz-device-pixel-ratio': oData['-moz-device-pixel-ratio'],
-					'-webkit-min-device-pixel-ratio': ctrlDPR,
-					'devicePixelRatio': ctrlDPR,
-					'dpcm': ctrlDPR * 96 / 2.54,
-					'dpi': ctrlDPR * 96,
-					'dpi_css': ctrlDPR * 96,
-				}
-				// b3e9e3c6 200% zoom dpr 1 === 100% zoom drp 1 with RFP
-				//console.log(mini(oData), oData)
-				for (const k of Object.keys(oData).sort()) {
-					// always use devicePixelRatio (or -moz-device-pixel-ratio') as the basis for our control
-					// there's no point using the oData[k] value because that was computed from matchmedia
-					let controlPx = oControls[k], testPx 
-					oPixels[k] = {}
-					if ('devicePixelRatio' == k || '-moz-device-pixel-ratio' == k) {
-						oPixels[k].control = [controlPx, k]
-						// we test both so it we catch if over or under by too much
-						// ToDo: am I doing this right? especially -moz which never fails despite being lower, and a lot at some zoom levels
-						let aList = ['max-resolution','resolution']
-						aList.forEach(function(item){
-							testPx = window.matchMedia('('+ item +':'+ controlPx +'dppx)').matches
-							let mmstr = "window.matchMedia('("+ item +": "+ controlPx +"dppx)').matches"
-							oPixels[k]['match '+item] = testPx
-							oPixels[k]['match '+item + '_test'] = mmstr
-							if (false === testPx) {isPixelMatch = false}
-							oSummary[testPx].push(k +'_'+ item)
-						})
-					} else if ('dpcm' == k || 'dpi' == k) {
-						oPixels[k].control = [controlPx, 'devicePixelRatio * 96' + ('dpcm' == k ? ' / 2.54': '')]
-						let diff = Math.abs(oData[k] - controlPx)
-						oPixels[k].diff = diff
-						let testPx = diff < 0.0001
-						oPixels[k].match = testPx
-						if (false === testPx) {isPixelMatch = false}
-						oSummary[testPx].push(k)
-					} else if ('dpi_css' == k) {
-						// ignore out-of-range dpi_css
-						if ('?' !== oData[k]) {
-							oPixels[k].control = [controlPx,'devicePixelRatio * 96']
-							testPx = oData[k] == Math.floor(controlPx) // css is min-resolution
-							oPixels[k]['match'] = testPx
-							if (false === testPx) {isPixelMatch = false}
-							oSummary[testPx].push(k)
-						}
-					} else if ('-webkit-min-device-pixel-ratio' == k) {
-						// == dpr rounded down to 0.25, 0.5, 1, 2, 4
-						// we have already checked these are the only valid values
-						oPixels[k].control = [controlPx,'devicePixelRatio']
-						let webkitControl = 4
-						if (controlPx < 0.5) {webkitControl = 0.25
-						} else if (controlPx < 1) {webkitControl = 0.5
-						} else if (controlPx < 2) {webkitControl = 1
-						} else if (controlPx < 4) {webkitControl = 2
-						}
-						testPx = webkitControl == oData[k]
-						oPixels[k]['match'] = testPx
-						if (false === testPx) {isPixelMatch = false}
-						oSummary[testPx].push(k)
-					}
-					oPixels[k].value = oData[k]
-				}
-				if (isPixelLog) {
-					console.log(oPixels)
-					let strJSON = isPixelMatch ? ' ' : '\n'+ JSON.stringify(oSummary, null, 2)
-					console.log(isPixelMatch, oData.devicePixelRatio, strJSON)
-				}
-				// make the notification clickable
-				sDetail[isScope]['pixels_match'] = oPixels
-				let btncolor = isPixelMatch ? 'good' : 'bad'
-				let btnsymbol = isPixelMatch ? tick : cross
-				addDisplay(1, 'pixels_match','','', addButton(btncolor, 'pixels_match', "<span class='health'>"+ btnsymbol +"</span> RFP pixels"))
-
-			} catch(e) {
-				sDetail[isScope]['pixels_match'] = e+''
-				addDisplay(1, 'pixels_match','','', sbx+' RFP pixels]'+sc)
-			}
-		}
+		if (isSmart) {get_scr_pixels_match('pixels_match', oData)}
 
 		return resolve()
 	})
 })
+
+function get_scr_pixels_match(METRIC, oData) {
+	// media pixels vs window devicePixelRatio
+	let isPixelMatch = true, oPixels = {}, oSummary = {'false': [], 'true': []}, controlPx, testPx
+	// remove items we don't compare
+	let aIgnore = ['devicePixelRatio_border','dpi_div','visualViewport_scale']
+	aIgnore.forEach(function(item){delete oData[item]})
+
+	try {
+		// typecheck
+		for (const k of Object.keys(oData).sort()) {
+			let typeCheck = typeFn(oData[k])
+			if ('number' !== typeCheck) {
+				// ignore out-of-range css
+				if ('dpi_css' == k && '?' == oData[k]) {} else {throw zErrInvalid + k +' expected number: got '+ typeCheck}
+			}
+		}
+		let dprValue = oData.devicePixelRatio, dprStr = 'devicePixelRatio'
+		let oControls = {
+			//'-moz-device-pixel-ratio': [dprValue, dprStr], // ToDo
+			'-webkit-min-device-pixel-ratio': [dprValue, dprStr],
+			//'devicePixelRatio': it's the control
+			'dpcm': [dprValue * 96 / 2.54, dprStr +' * 96 / 2.54'],
+			'dpi': [dprValue * 96, dprStr +' * 96'],
+			'dpi_css': [dprValue * 96, dprStr +' * 96'],
+			'dppx': [dprValue, dprStr],
+		}
+		
+		// b3e9e3c6 200% zoom dpr 1 === 100% zoom drp 1 with RFP
+		//console.log(mini(oData), oData)
+		for (const k of Object.keys(oData).sort()) {
+			oPixels[k] = {}
+			if (undefined !== oControls[k]) {
+				controlPx = oControls[k][0]
+				oPixels[k].control = oControls[k]
+			}
+			if ('-webkit-min-device-pixel-ratio' == k) {
+				// == dpr rounded down to 0.25, 0.5, 1, 2, 4
+				// we have already checked these are the only valid values
+				let webkitControl = 4
+				if (controlPx < 0.5) {webkitControl = 0.25
+				} else if (controlPx < 1) {webkitControl = 0.5
+				} else if (controlPx < 2) {webkitControl = 1
+				} else if (controlPx < 4) {webkitControl = 2
+				}
+				testPx = webkitControl == oData[k]
+				oPixels[k]['match'] = testPx
+				if (false === testPx) {isPixelMatch = false}
+				oSummary[testPx].push(k)
+			} else if ('dpcm' == k || 'dpi' == k) {
+				let diff = Math.abs(oData[k] - controlPx)
+				oPixels[k].diff = diff
+				let testPx = diff < 0.0001
+				oPixels[k].match = testPx
+				if (false === testPx) {isPixelMatch = false}
+				oSummary[testPx].push(k)
+			} else if ('dpi_css' == k) {
+				// ignore out-of-range dpi_css
+				if ('?' !== oData[k]) {
+					testPx = oData[k] == Math.floor(controlPx) // css is min-resolution
+					oPixels[k]['match'] = testPx
+					if (false === testPx) {isPixelMatch = false}
+					oSummary[testPx].push(k)
+				}
+			} else if ('dppx' == k) {
+				// we test both so it we catch if over or under by too much
+				// ToDo: is max actually needed
+				let aList = ['max-resolution','resolution']
+				aList.forEach(function(item){
+					testPx = window.matchMedia('('+ item +':'+ controlPx +'dppx)').matches
+					let mmstr = "window.matchMedia('("+ item +": "+ controlPx +"dppx)').matches"
+					oPixels[k]['match '+item] = testPx
+					oPixels[k]['match '+item + '_test'] = mmstr
+					if (false === testPx) {isPixelMatch = false}
+					oSummary[testPx].push(k +'_'+ item)
+				})
+			}
+
+
+			oPixels[k].value = oData[k]
+		}
+		if (isPixelLog) {
+			console.log(oPixels)
+			let strJSON = isPixelMatch ? ' ' : '\n'+ JSON.stringify(oSummary, null, 2)
+			console.log(isPixelMatch, oData.devicePixelRatio, strJSON)
+		}
+		// make the notification clickable
+		sDetail[isScope][METRIC] = oPixels
+		let btncolor = isPixelMatch ? 'good' : 'bad'
+		let btnsymbol = isPixelMatch ? tick : cross
+		addDisplay(1, METRIC,'','', addButton(btncolor, METRIC, "<span class='health'>"+ btnsymbol +"</span> RFP pixels"))
+	} catch(e) {
+console.log(e)
+		sDetail[isScope][METRIC] = e+''
+		addDisplay(1, METRIC,'','', sbx+' RFP pixels]'+sc)
+	}
+}
 
 const get_scr_positions = (METRIC) => new Promise(resolve => {
 	let methods = {
