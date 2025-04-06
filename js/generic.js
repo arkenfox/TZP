@@ -998,17 +998,21 @@ function lookup_health(sect, metric, scope, isPass) {
 	let data ='', hash =''
 	// error?
 	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch {}
+	if ('pixels_match' == metric) {
+		data = sDetail[scope][metric]
+		if ('string' == typeof data) {return([zErr, data])}
+	}
 	// lie?
 	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, zLIE])}} catch {}
 	// nested, lookups, FP|detail data
 	try {
 		let nested ='', tmpdata, sDetailTemp
-		if ('pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
+		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
 		if ('' !== nested) {
 			data = gData[zFP][scope][sect]['metrics'][nested]['metrics'][metric]
 		} else if (sDetail[scope].lookup[metric] !== undefined) {
 			data = sDetail[scope].lookup[metric]
-		} else if ('font_names' == metric) {
+		} else if ('font_names' == metric || 'pixels_match' == metric) {
 			// special case font names: not in FP / hash = full enumeration
 			data = sDetail[scope][metric]
 			hash = mini(data)
@@ -1890,7 +1894,6 @@ function outputSection(id, isResize = false) {
 		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
 		// not the case when using font.system.whitelist
 		// we should see if we can get this fixed upstream
-		// ToDo: isBB test for FontFace and apply delay/notation automagically
 	/*
 	if (gLoad && isBB && isSmart) {
 		if ('windows' == isOS || 'mac' == isOS) {

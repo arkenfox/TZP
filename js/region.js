@@ -627,7 +627,7 @@ function get_dates_intl() {
 				notation = localetz_green
 			} else {
 				addDetail(METRIC +'_check', oCheck)
-				notation = addButton('bad', METRIC +'_check', "<span class='health'>✗</span> locale + timezone")
+				notation = addButton('bad', METRIC +'_check', "<span class='health'>"+ cross +"</span> locale + timezone")
 			}
 		}
 		if (oMetrics[list].length) { // temp check until we start building string tests
@@ -849,7 +849,7 @@ function get_locale_intl() {
 				notation = locale_green
 			} else {
 				addDetail(METRIC +'_check', oCheck)
-				notation = addButton('bad', METRIC +'_check', "<span class='health'>✗</span> locale")
+				notation = addButton('bad', METRIC +'_check', "<span class='health'>"+ cross +"</span> locale")
 			}
 		}
 		addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
@@ -911,7 +911,7 @@ function get_locale_resolvedoptions(METRIC) {
 			notation = locale_green
 		} else {
 			addDetail(METRIC +'_check', oCheck)
-			notation = addButton('bad', METRIC +'_check', "<span class='health'>✗</span> locale")
+			notation = addButton('bad', METRIC +'_check', "<span class='health'>"+ cross +"</span> locale")
 		}
 	}
 	addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
