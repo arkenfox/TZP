@@ -478,7 +478,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			// on android there is no dock and we set a minimum width which means chrome is non-sensical
 			// and can be negative: e.g. outer 427 - inner 500, also display space is at a premium
 		if ('android' !== isOS) {
-			let dockStr = ('windows' == isOS ? 'taskbar' : 'dock')
+			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'dock'))
 			let dockH = oData.screen.height.screen - oData.available.height.screen,
 				dockW = oData.screen.width.screen - oData.available.width.screen,
 				chromeW = oData.outer.width.window - oData.inner.width.window,
