@@ -474,6 +474,19 @@ const get_scr_measure = () => new Promise(resolve => {
 			about the only one we really can't tell is outer
 		*/
 
+		// display only: taskbar/dock + chrome
+			// on android there is no dock and we set a minimum width which means chrome is non-sensical
+			// and can be negative: e.g. outer 427 - inner 500, also display space is at a premium
+		if ('android' !== isOS) {
+			let dockStr = ('windows' == isOS ? 'taskbar' : 'dock')
+			let dockH = oData.screen.height.screen - oData.available.height.screen,
+				dockW = oData.screen.width.screen - oData.available.width.screen,
+				chromeW = oData.outer.width.window - oData.inner.width.window,
+				chromeH = oData.outer.height.window - oData.inner.height.window
+			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
+			oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'
+		}
+
 		// data
 		for (const k of Object.keys(oData)) {addData(1, 'sizes_'+ k, oData[k], mini(oData[k]))}
 		addData(1, 'sizes_initial', initData, initHash)
@@ -486,21 +499,17 @@ const get_scr_measure = () => new Promise(resolve => {
 			let dpr = window.devicePixelRatio
 			dpr = Math.round((dpr + Number.EPSILON) * 100)
 			if (109 == dpr) {dpr = 110} else if (171 == dpr) {dpr = 175}
-			let tbHorizontal = oData.screen.height.screen - oData.available.height.screen
-			let tbVertical = oData.screen.width.screen - oData.available.width.screen
-			let chromewidth = oData.outer.width.window - oData.inner.width.window
-			let chromeheight = oData.outer.height.window - oData.inner.height.window
 			console.log(
 				'zoom', dpr,
 				'\nscreen', oData.screen.width.screen, 'x', oData.screen.height.screen,
 				'| available', oData.available.width.screen, 'x', oData.available.height.screen,
-				'| taskbar', tbVertical, 'x', tbHorizontal,
+				'| taskbar', dockW, 'x', dockH,
 				'\nouter', oData.outer.width.window, 'x', oData.outer.height.window,
 				'| inner', oData.inner.width.window, 'x', oData.inner.height.window,
-				'| chrome', chromewidth, 'x', chromeheight
+				'| chrome', chromeW, 'x', chromeH
 			)
 		}
-		if (isScreenLog) {log_screen_details()}
+		if (isScreenLog && 'android' !== isOS) {log_screen_details()}
 		return resolve()
 	})
 })
@@ -1014,8 +1023,6 @@ function get_scr_pixels_match(METRIC, oData) {
 					oSummary[testPx].push(k +'_'+ item)
 				})
 			}
-
-
 			oPixels[k].value = oData[k]
 		}
 		if (isPixelLog) {
@@ -1029,7 +1036,6 @@ function get_scr_pixels_match(METRIC, oData) {
 		let btnsymbol = isPixelMatch ? tick : cross
 		addDisplay(1, METRIC,'','', addButton(btncolor, METRIC, "<span class='health'>"+ btnsymbol +"</span> RFP pixels"))
 	} catch(e) {
-console.log(e)
 		sDetail[isScope][METRIC] = e+''
 		addDisplay(1, METRIC,'','', sbx+' RFP pixels]'+sc)
 	}
