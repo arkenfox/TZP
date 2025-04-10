@@ -931,8 +931,12 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
 		addData(1, METRIC, newobj, mini(newobj))
 		// pixel matches
-		if (isSmart) {get_scr_pixels_match('pixels_match', oData)}
-
+		if (isSmart) {
+			// ignore BB14 until ESR140
+			if (isBB && isVer < 129) {} else {
+				get_scr_pixels_match('pixels_match', oData)
+			}
+		}
 		return resolve()
 	})
 })
