@@ -477,12 +477,12 @@ const get_scr_measure = () => new Promise(resolve => {
 		// display only: taskbar/dock + chrome
 			// on android there is no dock and we set a minimum width which means chrome is non-sensical
 			// and can be negative: e.g. outer 427 - inner 500, also display space is at a premium
+		let dockH = oData.screen.height.screen - oData.available.height.screen,
+			dockW = oData.screen.width.screen - oData.available.width.screen,
+			chromeW = oData.outer.width.window - oData.inner.width.window,
+			chromeH = oData.outer.height.window - oData.inner.height.window
 		if ('android' !== isOS) {
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
-			let dockH = oData.screen.height.screen - oData.available.height.screen,
-				dockW = oData.screen.width.screen - oData.available.width.screen,
-				chromeW = oData.outer.width.window - oData.inner.width.window,
-				chromeH = oData.outer.height.window - oData.inner.height.window
 			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
 			oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'
 		}
@@ -982,7 +982,7 @@ function get_scr_pixels_match(METRIC, oData) {
 				oPixels[k].diff = diff
 				let testPx = diff < 0.0001
 				oPixels[k].match = testPx
-				oPixels[k]['match_test'] = 'Math.abs('+ oData[k] +' - '+ controlPx +') < 0.0001'
+				if (isScreenLog) {oPixels[k]['match_test'] = 'Math.abs('+ oData[k] +' - '+ controlPx +') < 0.0001'}
 				if (false === testPx) {isPixelMatch = false}
 				oSummary[testPx].push(k)
 			} else if ('dpi_css' == k) {
@@ -990,7 +990,7 @@ function get_scr_pixels_match(METRIC, oData) {
 				if ('?' !== oData[k]) {
 					testPx = oData[k] == Math.floor(controlPx) // css is min-resolution
 					oPixels[k]['match'] = testPx
-					oPixels[k]['match_test'] = 'Math.floor('+ controlPx +') == '+ oData[k]
+					if (isScreenLog) {oPixels[k]['match_test'] = 'Math.floor('+ controlPx +') == '+ oData[k]}
 					if (false === testPx) {isPixelMatch = false}
 					oSummary[testPx].push(k)
 				}
@@ -999,9 +999,8 @@ function get_scr_pixels_match(METRIC, oData) {
 				let unit = 'dppx' == k ? 'dppx' : ''
 				oLists[k].forEach(function(item){
 					testPx = window.matchMedia('('+ item +':'+ controlPx + unit +')').matches
-					let mmstr = "window.matchMedia('("+ item +": "+ controlPx + unit + ")').matches"
 					oPixels[k]['match '+item] = testPx
-					oPixels[k]['match '+item + '_test'] = mmstr
+					if (isScreenLog) {oPixels[k]['match '+item + '_test'] = "window.matchMedia('("+ item +": "+ controlPx + unit + ")').matches"}
 					if (false === testPx) {isPixelMatch = false}
 					oSummary[testPx].push(k +'_'+ item)
 				})
