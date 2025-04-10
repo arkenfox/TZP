@@ -478,7 +478,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			// on android there is no dock and we set a minimum width which means chrome is non-sensical
 			// and can be negative: e.g. outer 427 - inner 500, also display space is at a premium
 		if ('android' !== isOS) {
-			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'dock'))
+			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
 			let dockH = oData.screen.height.screen - oData.available.height.screen,
 				dockW = oData.screen.width.screen - oData.available.width.screen,
 				chromeW = oData.outer.width.window - oData.inner.width.window,
@@ -525,8 +525,7 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		],
 		pixels: [
 			['pixels', '-moz-device-pixel-ratio', '-moz-device-pixel-ratio', 'max--moz-device-pixel-ratio', '', 4, 0.0000001],
-			['pixels', '-webkit-min-device-pixel-ratio', '-webkit-min-device-pixel-ratio', '-webkit-max-device-pixel-ratio', '', 4, 0.01],
-				// ^ webkit seems limited to and rounds down to 0.25, 0.5, 1, 2, 4
+			['pixels', '-webkit-device-pixel-ratio', '-webkit-device-pixel-ratio', '-webkit-max-device-pixel-ratio', '', 4, 0.01],
 			['pixels', 'dpcm', 'resolution', 'max-resolution', 'dpcm', 1e-5, 0.0000001],
 			['pixels', 'dpi', 'resolution', 'max-resolution', 'dpi', 1e-5, 0.0000001],
 			['pixels', 'dppx', 'resolution', 'max-resolution', 'dppx', 1e-5, 0.0000001],
@@ -538,7 +537,7 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		width: 'sizes_inner_width',
 		height: 'sizes_inner_height',
 		'-moz-device-pixel-ratio': 'pixels',
-		'-webkit-min-device-pixel-ratio': 'pixels',
+		'-webkit-device-pixel-ratio': 'pixels',
 		dpcm: 'pixels',
 		dpi: 'pixels',
 		dppx: 'pixels',
@@ -904,20 +903,11 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm('pixels')
 	]).then(function(results){
-		// harden -webkit-min-device-pixel-ratio in gecko
-		let webkitCheck = results[0]['-webkit-min-device-pixel-ratio'] //+ 0.1 // test invalid gecko value
-		if (isSmart && zErr !== webkitCheck) {
-			let aGood = [0.25, 0.5, 1, 2, 4]
-			if (!aGood.includes(webkitCheck)) {
-				results[0]['-webkit-min-device-pixel-ratio'] = zErr
-				log_error(1, 'pixels_-webkit-min-device-pixel-ratio', zErrInvalid + 'expected '+ aGood.join(', ') +': got '+ webkitCheck)
-			}
-		}
 		for (const k of Object.keys(results[0])) {
 			// expected 100% zoom values
 			let oMatch = {
 				'-moz-device-pixel-ratio': 1,
-				'-webkit-min-device-pixel-ratio': 1,
+				'-webkit-device-pixel-ratio': 1,
 				'dpcm': 37.79527499999999,
 				'dpi': 96.00000000000003,
 				'dppx': 1,
@@ -965,13 +955,18 @@ function get_scr_pixels_match(METRIC, oData) {
 		}
 		let dprValue = oData.devicePixelRatio, dprStr = 'devicePixelRatio'
 		let oControls = {
-			//'-moz-device-pixel-ratio': [dprValue, dprStr], // ToDo
-			'-webkit-min-device-pixel-ratio': [dprValue, dprStr],
+			'-moz-device-pixel-ratio': [dprValue, dprStr],
+			'-webkit-device-pixel-ratio': [dprValue, dprStr],
 			//'devicePixelRatio': it's the control
 			'dpcm': [dprValue * 96 / 2.54, dprStr +' * 96 / 2.54'],
 			'dpi': [dprValue * 96, dprStr +' * 96'],
 			'dpi_css': [dprValue * 96, dprStr +' * 96'],
 			'dppx': [dprValue, dprStr],
+		}
+		let oLists = {
+			'-moz-device-pixel-ratio': ['max--moz-device-pixel-ratio','-moz-device-pixel-ratio'],
+			'-webkit-device-pixel-ratio': ['-webkit-device-pixel-ratio','-webkit-max-device-pixel-ratio'],
+			'dppx': ['max-resolution','resolution'],
 		}
 		
 		// b3e9e3c6 200% zoom dpr 1 === 100% zoom drp 1 with RFP
@@ -982,24 +977,12 @@ function get_scr_pixels_match(METRIC, oData) {
 				controlPx = oControls[k][0]
 				oPixels[k].control = oControls[k]
 			}
-			if ('-webkit-min-device-pixel-ratio' == k) {
-				// == dpr rounded down to 0.25, 0.5, 1, 2, 4
-				// we have already checked these are the only valid values
-				let webkitControl = 4
-				if (controlPx < 0.5) {webkitControl = 0.25
-				} else if (controlPx < 1) {webkitControl = 0.5
-				} else if (controlPx < 2) {webkitControl = 1
-				} else if (controlPx < 4) {webkitControl = 2
-				}
-				testPx = webkitControl == oData[k]
-				oPixels[k]['match'] = testPx
-				if (false === testPx) {isPixelMatch = false}
-				oSummary[testPx].push(k)
-			} else if ('dpcm' == k || 'dpi' == k) {
+			if ('dpcm' == k || 'dpi' == k) {
 				let diff = Math.abs(oData[k] - controlPx)
 				oPixels[k].diff = diff
 				let testPx = diff < 0.0001
 				oPixels[k].match = testPx
+				oPixels[k]['match_test'] = 'Math.abs('+ oData[k] +' - '+ controlPx +') < 0.0001'
 				if (false === testPx) {isPixelMatch = false}
 				oSummary[testPx].push(k)
 			} else if ('dpi_css' == k) {
@@ -1007,16 +990,16 @@ function get_scr_pixels_match(METRIC, oData) {
 				if ('?' !== oData[k]) {
 					testPx = oData[k] == Math.floor(controlPx) // css is min-resolution
 					oPixels[k]['match'] = testPx
+					oPixels[k]['match_test'] = 'Math.floor('+ controlPx +') == '+ oData[k]
 					if (false === testPx) {isPixelMatch = false}
 					oSummary[testPx].push(k)
 				}
-			} else if ('dppx' == k) {
-				// we test both so it we catch if over or under by too much
-				// ToDo: is max actually needed
-				let aList = ['max-resolution','resolution']
-				aList.forEach(function(item){
-					testPx = window.matchMedia('('+ item +':'+ controlPx +'dppx)').matches
-					let mmstr = "window.matchMedia('("+ item +": "+ controlPx +"dppx)').matches"
+			} else if (oLists[k] !== undefined) {
+				// ToDo: is max actually needed, so we need min?
+				let unit = 'dppx' == k ? 'dppx' : ''
+				oLists[k].forEach(function(item){
+					testPx = window.matchMedia('('+ item +':'+ controlPx + unit +')').matches
+					let mmstr = "window.matchMedia('("+ item +": "+ controlPx + unit + ")').matches"
 					oPixels[k]['match '+item] = testPx
 					oPixels[k]['match '+item + '_test'] = mmstr
 					if (false === testPx) {isPixelMatch = false}
@@ -1043,7 +1026,7 @@ function get_scr_pixels_match(METRIC, oData) {
 
 const get_scr_positions = (METRIC) => new Promise(resolve => {
 	let methods = {
-		// left/top = 0 depends on secondary monitor | availLeft/availTop = 0 depends on docker/taskbar
+		// left/top = 0 depends on secondary monitor | availLeft/availTop = 0 depends on dock/taskbar
 		'screen': ['availLeft','availTop','left','top'],
 		// FS = all 0 except sometimes mozInnerScreenY | maximized can include negatives for screenX/Y
 		'window': ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']
