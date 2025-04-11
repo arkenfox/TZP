@@ -968,9 +968,9 @@ function get_scr_pixels_match(METRIC, oData) {
 			'dppx': [dprValue, dprStr],
 		}
 		let oLists = {
-			'-moz-device-pixel-ratio': ['max--moz-device-pixel-ratio','-moz-device-pixel-ratio'],
-			'-webkit-device-pixel-ratio': ['-webkit-device-pixel-ratio','-webkit-max-device-pixel-ratio'],
-			'dppx': ['max-resolution','resolution'],
+			'-moz-device-pixel-ratio': ['max--moz-device-pixel-ratio','min--moz-device-pixel-ratio','-moz-device-pixel-ratio'],
+			'-webkit-device-pixel-ratio': ['-webkit-device-pixel-ratio','-webkit-max-device-pixel-ratio','-webkit-min-device-pixel-ratio'],
+			'dppx': ['max-resolution','min-resolution','resolution'],
 		}
 		
 		// b3e9e3c6 200% zoom dpr 1 === 100% zoom drp 1 with RFP
