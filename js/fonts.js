@@ -386,6 +386,8 @@ let fntMaster = {
 			// 10
 			'Bahnschrift','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			'HoloLens MDL2 Assets', // removed FF136+ 1942883
+			// 11
+			'SimSun-ExtG', // win11 24H2 see 1947960 | 1954265 FF139 adeed to base
 			// localized: kBase: detected FF119+: 1850672
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体','游ゴシック', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun, Yu Gothic 
 			// fntPlatformFont
@@ -444,6 +446,9 @@ let fntMaster = {
 			'Vrinda','Yu Mincho',
 			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-R', // original -R regular -B bold
 			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // late 2024 update
+			// 1954265: FF139+ win 1123H2 / win1022H2
+			'Noto Sans HK','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC',
+			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC', 
 			// localized from ^
 			'바탕', // Batang
 			'BIZ UDPゴシック', // BIZ UDPGothic
@@ -631,7 +636,6 @@ let fntMaster = {
 			'Simplified Arabic Fixed','Verdana Pro',
 			// other
 			'Sans Serif Collection', // win11
-			'SimSun-ExtG', // win11 24H2 see 1947960
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT', // MS products
 			'OpenSymbol', // openoffice
@@ -2270,7 +2274,7 @@ const outputFonts = () => new Promise(resolve => {
 			get_fonts_faces('font_faces'),
 			get_glyphs('glyphs'),
 			get_textmetrics('textmetrics'),
-			//get_fonts_offscreen('font_offscreen'),
+			get_fonts_offscreen('font_offscreen'),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()
