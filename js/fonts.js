@@ -55,7 +55,7 @@ let fntMaster = {
 		// all: win/mac/linux: 80sans-only 4serif-only 17both: total 118, sorted hash: 8949a424
 		notoboth: [
 			'Balinese','Bengali','Devanagari','Ethiopic','Georgian','Grantha','Gujarati','Gurmukhi','Kannada','Khmer',
-			'Khojki','Lao','Malayalam','Myanmar','Sinhala','Tamil','Telugu'],
+			'Khojki','Lao','Malayalam','Sinhala','Tamil','Telugu'],
 		notosans: [
 			'Adlam','Bamum','Bassa Vah','Batak','Buginese','Buhid','Canadian Aboriginal','Chakma','Cham','Cherokee',
 			'Coptic','Deseret','Elbasan','Gunjala Gondi','Hanifi Rohingya','Hanunoo','Javanese','Kayah Li','Khudawadi',
@@ -66,21 +66,16 @@ let fntMaster = {
 			'Tai Viet','Takri','Thaana','Tifinagh','Tifinagh APT','Tifinagh Adrar','Tifinagh Agraw Imazighen',
 			'Tifinagh Ahaggar','Tifinagh Air','Tifinagh Azawagh','Tifinagh Ghat','Tifinagh Hawad','Tifinagh Rhissa Ixa',
 			'Tifinagh SIL','Tifinagh Tawellemmet','Tirhuta','Vai','Wancho','Warang Citi','Yi','Zanabazar Square'],
-		notoserif: ['Dogra','NP Hmong','Tibetan','Yezidi'],
+		notoserif: ['Dogra','Myanmar','NP Hmong','Tibetan','Yezidi'],
 		android: [],
 		// notos then linux +16, mac +5, win +4
 		linux: [
 			'Arimo','Cousine','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR',
 			'Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai',
-			'STIX Two Math','Tinos','Twemoji Mozilla',
-			//'Pyidaungsu', // ToDo: will replace Noto Sans Myanmar: we keep Noto Serif Myanmar
+			'Pyidaungsu','STIX Two Math','Tinos','Twemoji Mozilla',
 		],
-		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Two Math',
-			//'Pyidaungsu', // ToDo: will replace Noto Sans Myanmar: we keep Noto Serif Myanmar
-		],
-		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',
-			//'Pyidaungsu', // ToDo: will replace Noto Sans Myanmar: we keep Noto Serif Myanmar
-		],
+		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','Pyidaungsu','STIX Two Math'],
+		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Pyidaungsu','Twemoji Mozilla'],
 	},
 	// BB whitelist system
 	allowlist: {
@@ -203,8 +198,7 @@ let fntMaster = {
 			'Bitstream Charter','C059','Nimbus Sans','P052','Quicksand', // debian
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // BB12 fontnames
-			//'Noto Sans Myanmar', // ToDo: BB14 bundled replaced by Pyidaungsu
-			'Pyidaungsu', // temp
+			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
 		],
 		linuxfaces: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
@@ -224,9 +218,8 @@ let fntMaster = {
 		mac: [
 			'Apple Symbols','Impact','Palatino','Rockwell', // system
 			'Noto Serif Hmong Nyiakeng','STIX Math', // BB12 fontnames
-			//'Noto Sans Myanmar', // ToDo: BB14 bundled replaced by Pyidaungsu
-			'Pyidaungsu', // temp
 			'Noto Sans Symbols2', // BB12 bundled: ToDo: in faces: maybe remove when that lands in TB
+			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
 		macfaces: [
@@ -242,8 +235,7 @@ let fntMaster = {
 			'Gill Sans','Gill Sans MT', // MS bundled
 			// other
 			'Noto Sans Symbols2', // BB12 bundled
-			//'Noto Sans Myanmar', // ToDo: BB14 bundled replaced by Pyidaungsu
-			'Pyidaungsu', // temp
+			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
 			'Helv', // ToDo: this might need to move with font.vis
 		],
 		windowsfaces: [
@@ -446,7 +438,7 @@ let fntMaster = {
 			'Vrinda','Yu Mincho',
 			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-R', // original -R regular -B bold
 			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // late 2024 update
-			// 1954265: FF139+ win 1123H2 / win1022H2
+			// 1954265: FF139+ win11 23H2 / win1022H2
 			'Noto Sans HK','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC',
 			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC', 
 			// localized from ^
@@ -717,7 +709,10 @@ function set_fntList() {
 		let baseSize = ['monospace','sans-serif','serif']
 		fntPlatformFont = undefined // reset
 		if ('windows' == isOS) {
-			if (!isFontSizesMore) {fntPlatformFont = 'MS Shell Dlg \\32'}
+			if (!isFontSizesMore) {
+				// blink doesn't allow MS Shell Dlg \\32
+				fntPlatformFont = isGecko ? 'MS Shell Dlg \\32' : 'Tahoma'
+			}
 			if (isBB) {fntPlatformFont = undefined} // force BB to detect all fonts for health
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
@@ -725,7 +720,7 @@ function set_fntList() {
 				'serif, Times, Roman'
 			]
 		} else if ('mac' == isOS) {
-			if (!isFontSizesMore) {fntPlatformFont = '-apple-system'}
+			if (isGecko && !isFontSizesMore) {fntPlatformFont = '-apple-system'}
 			baseSize = [
 				'monospace, Menlo, \"Courier New\", Monaco',
 				'sans-serif',
@@ -847,7 +842,7 @@ function set_fntList() {
 
 			// fntBtn
 			let fntobj = {}, obj = fntData.family
-			if ('android' == isOS || !isBB && 'linux' == isOS) {
+			if (!isGecko || 'android' == isOS || !isBB && 'linux' == isOS) {
 				fntobj = fntData.family.full
 			} else if (isBB || 'windows' == isOS) {
 				if (isBB) {
@@ -877,7 +872,9 @@ function set_fntList() {
 			aExtraTests.forEach(function(item) {
 				let obj = fntData[item]
 				if (obj.full.length) {
-					if (isBB) {
+					if (!isGecko) {
+						fntobj = obj.full
+					} else if (isBB) {
 						fntobj = {'1. allowlist': {count: obj.base.length, 'fonts': obj.base},
 							'2. unexpected': {count: obj.unexpected.length, 'fonts': obj.unexpected},
 							'3. tested': {count: obj.full.length, 'fonts': obj.full}
@@ -899,8 +896,8 @@ function set_fntList() {
 					fntBtn = addButton(12, 'font_' + item +'_'+ isOS, fntData[item].full.length +' '+ item, 'btnc', 'lists') + fntBtn 
 				}
 			})
-			// all
-			if (fntData.faces.full.length) {
+			// all: gecko only since non-gecko is an array and gecko is an object
+			if (isGecko && fntData.faces.full.length) {
 				let total
 				for (const k of Object.keys(fntData.faces.summary)) {
 					let array = [], aFace = fntData.faces.summary[k].fonts
@@ -969,6 +966,8 @@ function get_document_fonts(METRIC) {
 }
 
 function get_font_notation(METRIC, data) {
+	if (!isGecko) {return ''}
+
 	let badnotation = isBB ? bb_red : rfp_red
 	let goodnotation = isBB ? bb_green : rfp_green
 	let isSizes = 'font_sizes' == METRIC
