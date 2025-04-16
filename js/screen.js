@@ -483,8 +483,10 @@ const get_scr_measure = () => new Promise(resolve => {
 			chromeH = oData.outer.height.window - oData.inner.height.window
 		if ('android' !== isOS) {
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
+			if (isOS == undefined) {dockStr = 'taskbar/dock/panel'}
 			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
-			oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'
+			// non-gecko does not resize non-inner (e.g. outer) when zooming, so ignore chrome
+			if (isGecko) {oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'}
 		}
 
 		// data
@@ -968,7 +970,7 @@ function get_scr_pixels_match(METRIC, oData) {
 			'dppx': [dprValue, dprStr],
 		}
 		let oLists = {
-			'-moz-device-pixel-ratio': ['max--moz-device-pixel-ratio','min--moz-device-pixel-ratio','-moz-device-pixel-ratio'],
+			'-moz-device-pixel-ratio': ['-moz-device-pixel-ratio','max--moz-device-pixel-ratio','min--moz-device-pixel-ratio'],
 			'-webkit-device-pixel-ratio': ['-webkit-device-pixel-ratio','-webkit-max-device-pixel-ratio','-webkit-min-device-pixel-ratio'],
 			'dppx': ['max-resolution','min-resolution','resolution'],
 		}
