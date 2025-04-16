@@ -402,11 +402,11 @@ function get_timing(METRIC) {
 		let isProtected = countProtected == aLoop.length
 		let rtvalue
 		notation = silent_green
-		if (isProtected && isDecimal) {
-			// if RFP which is also isDecimal, then we can't tell
+		if (isProtected && isDecimal || !isGecko) {
+			// non-Gecko || if RFP which is also isDecimal, then we can't tell
 			rtvalue = zNA
 			// RFP with decimals looks silly
-			isDecimal = false
+			if (isGecko) {isDecimal = false}
 		} else {
 			rtvalue = !isDecimal
 			if (isDecimal) {countFail++; notation = silent_red}
