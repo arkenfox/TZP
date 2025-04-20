@@ -764,6 +764,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				'sendBeacon',
 				'serviceWorker',
 				'userAgent',
+				'userAgentData',
 				'vendor',
 				'vendorSub',
 				'webdriver',
