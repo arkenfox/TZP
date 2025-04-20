@@ -889,8 +889,10 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		let navTamper = [], navObj = navigator
 		for (const k of Object.keys(navObj)) {navTamper.push(k)}
 		navTamper.forEach(function(item) {
-			if (lieDetail['Navigator.'+ item] == undefined) {lieDetail['Navigator.'+ item] = []}
-			lieDetail['Navigator.'+ item].push('z: failed getOwnPropertyDescriptors')
+			item = 'Navigator.'+ item
+			if (lieDetail[item] == undefined) {lieDetail[item] = []}
+			lieDetail[item].push('z: failed getOwnPropertyDescriptors')
+			if (!tamperingList.includes(item)) {tamperingList.push(item)}
 		})
 	} catch(e) {console.log(e)}
 
