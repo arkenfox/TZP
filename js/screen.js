@@ -1481,25 +1481,27 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		}
 	}
 	if (os !== undefined) {
-		// important: only add next version to array if we are open ended ('+')
-		let uaVer = isVer, isDroid = isOS == 'android', nxtVer = uaVer + 1
-		// userAgent
-		let uaRFP = 'Mozilla/5.0 (' + oRFP[os].ua_os +'; rv:', uaNext = uaRFP // base
-		uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
-		oRFP[os].userAgent = [uaRFP]
-		// next userAgent
-		if ('+' == isVerExtra) {
-			uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
-			oRFP[os].userAgent.push(uaNext)
-		}
-		// desktop mode: 1727775
-		if (isDroid) {
-			uaRFP = 'Mozilla/5.0 (' + oRFP.linux.ua_os +'; rv:', uaNext = uaRFP // base
-			uaRFP += uaVer +'.0) Gecko/20100101 Firefox/'+ uaVer +'.0'
-			oRFP[os].userAgent.push(uaRFP)
+		for (const k of Object.keys(oRFP)) {
+			// important: only add next version to array if we are open ended ('+')
+			let uaVer = isVer, isDroid = 'android' == k, nxtVer = uaVer + 1
+			// userAgent
+			let uaRFP = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:', uaNext = uaRFP // base
+			uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
+			oRFP[k].userAgent = [uaRFP]
+			// next userAgent
 			if ('+' == isVerExtra) {
-				uaNext += nxtVer +'.0) Gecko/20100101 Firefox/'+ nxtVer +'.0'
-				oRFP[os].userAgent.push(uaNext)
+				uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
+				oRFP[k].userAgent.push(uaNext)
+			}
+			// desktop mode: 1727775
+			if (isDroid) {
+				uaRFP = 'Mozilla/5.0 (' + oRFP.linux.ua_os +'; rv:', uaNext = uaRFP // base
+				uaRFP += uaVer +'.0) Gecko/20100101 Firefox/'+ uaVer +'.0'
+				oRFP[k].userAgent.push(uaRFP)
+				if ('+' == isVerExtra) {
+					uaNext += nxtVer +'.0) Gecko/20100101 Firefox/'+ nxtVer +'.0'
+					oRFP[k].userAgent.push(uaNext)
+				}
 			}
 		}
 	}
@@ -1552,6 +1554,24 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		let reported = oComplex[k][0], isErr = oComplex[k][1]
 		oReported[k] = (isErr ? zErr : reported) // for uaDoc
 		let isLies = isProxyLie('Navigator.'+ k)
+		if (!isLies && 'userAgent' == k) {
+			// prototypeLies doesn't pick this up: add some basic checks
+				// note: may be valid, e.g. a fork uses a custom userAgent string
+			let aFlags = [' like','Chrome','WebKit','KHTML','Apple','Safari']
+			for (let i=0; i < aFlags.length; i++) {
+				if (reported.includes(aFlags[i])) {isLies = true; break}
+			}
+			// check version: all platforms contain '; rv:' + version + '.0)'
+			if (!isLies) {
+				aFlags = [isVer]
+				if ('+' == isVerExtra) {aFlags.push(isVer + 1)}
+				let isVerCheck = false
+				aFlags.forEach(function(item) {
+					if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
+				})
+				if (!isVerCheck) {isLies = true}
+			}
+		}
 		let notation = isLies ? rfp_red : '' // in case os is undefined
 		if (os !== undefined) {
 			let rfpvalue = oRFP[os][k], isMatch = false
