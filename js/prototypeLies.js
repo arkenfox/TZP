@@ -883,6 +883,17 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		iframeContainerDiv.parentNode.removeChild(iframeContainerDiv)
 	}
 
+	// navigator
+	try {
+		let navData = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		let navTamper = [], navObj = navigator
+		for (const k of Object.keys(navObj)) {navTamper.push(k)}
+		navTamper.forEach(function(item) {
+			if (lieDetail['Navigator'+ item]) {lieDetail['Navigator'+ item] == []}
+			lieDetail['Navigator'+ item].push('z: failed getOwnPropertyDescriptors')
+		})
+	} catch(e) {console.log(e)}
+
 	// sData
 	sData[SECT98] = {}
 	for (const k of Object.keys(lieDetail).sort()) {sData[SECT98][k] = lieDetail[k]}
