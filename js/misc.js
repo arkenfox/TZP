@@ -517,13 +517,8 @@ function get_navigator_keys(METRIC) {
 		data = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		let typeCheck = typeFn(data)
 		if ('array' !== typeCheck) {throw zErrType + typeCheck}
-
-		//* these should match
-		let keysB = []
-		for (const key in navigator) {keysB.push(key)}
-		keysB.push('constructor')
-		console.log(mini(data), mini(keysB))
-		// User-Agent Switcher and Manager
+		/* interesting
+			// User-Agent Switcher and Manager
 		let navTamper = []
 		try {
 			let navObj = navigator
@@ -534,7 +529,12 @@ function get_navigator_keys(METRIC) {
 
 		let tamperBtn = ''
 		if (isSmart) {
-			let fake = [], missing = [], moved = [], oKeys = {}
+			let fake = [], missing = [], moved = [], descriptor = [], oKeys = {}
+			// detect added items not reported in data: e.g. userAgentData in User-Agent Switcher and Manager
+			let dataCheck = []
+			for (const key in navigator) {dataCheck.push(key)}
+			dataCheck.push('constructor')
+
 			// ToDo: check/expand these: e.g. javaEnabled?
 			let expected = [
 				'appCodeName','appName','appVersion','buildID','oscpu','platform','product',
@@ -547,19 +547,35 @@ function get_navigator_keys(METRIC) {
 			]
 			if (runSL) {
 				data.push('iamfake','anotherfake') // +fake
+				dataCheck.push('iamfake','anotherfake')
 				data = data.filter(x => !['buildID'].includes(x)) // +missing
+				dataCheck = dataCheck.filter(x => !['buildID'].includes(x)) // +missing
 				data = data.filter(x => !['appName'].includes(x)); data.push('appName') // +move
+				dataCheck = dataCheck.filter(x => !['appName'].includes(x)); dataCheck.push('appName') // +move
+				data = data.filter(x => !['userAgentData'].includes(x)) // remove in case FF has added it since
+				dataCheck = dataCheck.filter(x => !['userAgentData'].includes(x)) // remove in case FF has added it since
+				dataCheck = ['userAgentData'].concat(dataCheck)
+				//dataCheck.push('userAgentData')
 			}
-			fake = data.slice(data.indexOf('constructor')+1) // post constructor
+			let position = data.indexOf('constructor')
+			fake = data.slice(position +1) // post constructor
+			let preconstructor = data[position - 1]
 			missing = expected.filter(x => !data.includes(x)) // use data so we don't dupe moved
 			moved = fake.filter(x => expected.includes(x)) // moved: expected after contructor
 			fake = fake.filter(x => !moved.includes(x)) // fake minus moved
-
-			if (missing.length) {oKeys['missing'] = missing.sort()}
+			if (mini(data) !== mini(dataCheck)) {
+				// e.g. fake userAgentData in dataCheck but not in data
+				descriptor = dataCheck.filter(x => !data.includes(x))
+				descriptor = descriptor.filter(x => !missing.includes(x)) // exclude expected that is missing
+				descriptor = descriptor.filter(x => !fake.includes(x)) // don't dupe
+				descriptor = descriptor.filter(x => !moved.includes(x)) // don't dupe
+			}
+			if (missing.length) {oKeys['missing_expected'] = missing.sort()}
+			if (descriptor.length) {oKeys['no_prototype'] = descriptor.sort()}
 			if (moved.length) {oKeys['post-constructor'] = moved.sort()}
-			if (fake.length) {oKeys['unexpected'] = fake.sort()}
-
-			let lieCount = missing.length + fake.length,
+			if (fake.length) {oKeys['post-constructor_fake'] = fake.sort()}
+			
+			let lieCount = missing.length + fake.length + descriptor.length,
 				moveCount = moved.length
 			// tampered
 			if ((lieCount + moveCount) > 0) {
