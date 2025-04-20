@@ -517,12 +517,21 @@ function get_navigator_keys(METRIC) {
 		data = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		let typeCheck = typeFn(data)
 		if ('array' !== typeCheck) {throw zErrType + typeCheck}
-		/* these should match
+
+		//* these should match
 		let keysB = []
 		for (const key in navigator) {keysB.push(key)}
 		keysB.push('constructor')
-		console.log(mini(keys), mini(keysB))
+		console.log(mini(data), mini(keysB))
+		// User-Agent Switcher and Manager
+		let navTamper = []
+		try {
+			let navObj = navigator
+			for (const k of Object.keys(navObj)) {navTamper.push(k)}
+		} catch(e) {}
+		console.log('navTamper', navTamper)
 		//*/
+
 		let tamperBtn = ''
 		if (isSmart) {
 			let fake = [], missing = [], moved = [], oKeys = {}
