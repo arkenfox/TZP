@@ -1545,31 +1545,52 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 
 	function outputStatic(property, reported, expected, isErr) {
 		oReported[property] = (isErr ? zErr : reported) // for uaDoc
-		let isLies = isProxyLie('Navigator.'+ property)
-		let notation = reported !== expected || isLies ? default_red : ''
-		addBoth(2, property, reported,'', notation, (isErr ? zErr : reported), isLies)
+		//let isLies = isProxyLie('Navigator.'+ property)
+		// prototypeLies doesn't pick everything up all the time: instead use expected
+			// and because non-expected is lies, no notation is required
+		let isLies = reported !== expected
+		addBoth(2, property, reported,'', '', (isErr ? zErr : reported), isLies)
 	}
 
 	for (const k of Object.keys(oComplex)) {
 		let reported = oComplex[k][0], isErr = oComplex[k][1]
 		oReported[k] = (isErr ? zErr : reported) // for uaDoc
 		let isLies = isProxyLie('Navigator.'+ k)
-		if (!isLies && 'userAgent' == k) {
-			// prototypeLies doesn't pick this up: add some basic checks
-				// note: may be valid, e.g. a fork uses a custom userAgent string
-			let aFlags = [' like','Chrome','WebKit','KHTML','Apple','Safari']
-			for (let i=0; i < aFlags.length; i++) {
-				if (reported.includes(aFlags[i])) {isLies = true; break}
+		if (!isLies) {
+			let aFlags = []
+			// prototypeLies doesn't pick everything up all the time: add some basic checks
+				// note: may be valid, e.g. a fork uses a custom values
+			if ('userAgent' == k | 'appVersion' == k) {
+				// userAgent: e.g. Chameleon, Chrome Mask
+				// appVersion: User-Agent Switcher
+				aFlags = [' like','Chrome','WebKit','KHTML','Apple','Safari']
+				for (let i=0; i < aFlags.length; i++) {
+					if (reported.includes(aFlags[i])) {isLies = true; break}
+				}
 			}
-			// check version: all platforms contain '; rv:' + version + '.0)'
 			if (!isLies) {
-				aFlags = [isVer]
-				if ('+' == isVerExtra) {aFlags.push(isVer + 1)}
-				let isVerCheck = false
-				aFlags.forEach(function(item) {
-					if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
-				})
-				if (!isVerCheck) {isLies = true}
+				if ('userAgent' == k) {
+					// check version: all platforms contain '; rv:' + version + '.0)'
+					aFlags = [isVer]
+					if ('+' == isVerExtra) {aFlags.push(isVer + 1)}
+					let isVerCheck = false
+					aFlags.forEach(function(item) {
+						if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
+					})
+					if (!isVerCheck) {isLies = true}
+				} else if ('appVersion' == k) {
+					// User-Agent Switcher
+					if ('windows' == os) {isLies = reported !== '5.0 (Windows)'
+					}
+				} else if ('platform' == k) {
+					// User-Agent Switcher
+					if ('windows' == os) {isLies = reported !== 'Win32'
+					}
+				} else if ('oscpu' == k) {
+					// User-Agent Switcher
+					if ('windows' == os) {isLies = !reported.includes('Windows NT 10.0')
+					}
+				}
 			}
 		}
 		let notation = isLies ? rfp_red : '' // in case os is undefined
