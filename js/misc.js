@@ -555,7 +555,10 @@ function get_navigator_keys(METRIC) {
 			post = aProto.slice(position +1)
 			// aNav: pre javaEnabled
 			position = aNav.indexOf('javaEnabled')
-			if (position > 0) {pre = aNav.slice(0, position)}
+			if (position > 0) {
+				pre = aNav.slice(0, position)
+				if (isVer < 129) {pre = pre.filter(x => !['vibrate'].includes(x))} // ignore vibrate in 128 or lower
+			}
 			// missing
 			let missingNav = expected.filter(x => !aNav.includes(x))
 			let missingProto = expected.filter(x => !aProto.includes(x))
@@ -584,12 +587,13 @@ function get_navigator_keys(METRIC) {
 		// health: BB only as ESR is stable
 		if (isMB) {
 			// MB has mediaDevices, mediaSession
-			if ('17ad3a75' == hash) {notation = bb_green} // 14 42
+			if ('05cfe113' == hash) {notation = bb_green} // 14 41
 		} else if (isTB) {
 			if ('android' == isOS) {
-				if ('adc88f1f' == hash) {notation = bb_green} // 14 42
+				// android has share, canShare
+				if ('e416473d' == hash) {notation = bb_green} // 14 41
 			} else {
-				if ('b9ee3d3d' == hash) {notation = bb_green} // 14 40
+				if ('8325e1db' == hash) {notation = bb_green} // 14 39
 			}
 		}
 		// if tampered use notation to fail health
