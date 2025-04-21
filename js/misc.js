@@ -511,83 +511,76 @@ function get_math(METRIC, isLies) {
 }
 
 function get_navigator_keys(METRIC) {
-	let hash, btn='', data, notation = isBB ? bb_red : '', isLies = false
+	let hash, btn='', aNav = [], notation = isBB ? bb_red : '', isLies = false
 	try {
 		if (runST) {foo++}
-		data = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		let typeCheck = typeFn(data)
+		// navigator
+		for (const key in navigator) {aNav.push(key)}
+		let typeCheck = typeFn(aNav)
 		if ('array' !== typeCheck) {throw zErrType + typeCheck}
-		/* interesting
-			// User-Agent Switcher and Manager
-		let navTamper = []
-		try {
-			let navObj = navigator
-			for (const k of Object.keys(navObj)) {navTamper.push(k)}
-		} catch(e) {}
-		console.log('navTamper', navTamper)
-		//*/
 
-		let tamperBtn = ''
 		if (isSmart) {
-			let fake = [], missing = [], moved = [], descriptor = [], oKeys = {}
-			// detect added items not reported in data: e.g. userAgentData in User-Agent Switcher and Manager
-			let dataCheck = []
-			for (const key in navigator) {dataCheck.push(key)}
-			dataCheck.push('constructor')
-
-			// ToDo: check/expand these: e.g. javaEnabled?
+			// navigator.prototype: should match navigator
+			let aProto = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+			let typeCheck = typeFn(aProto)
+			if ('array' !== typeCheck) {throw zErrType + typeCheck}
+			// ToDo: check/expand these
 			let expected = [
-				'appCodeName','appName','appVersion','buildID','oscpu','platform','product',
-				'productSub','userAgent','vendor','vendorSub','hardwareConcurrency','language',
-				'languages','mimeTypes','onLine','plugins','taintEnabled','doNotTrack',
-				'cookieEnabled','pdfViewerEnabled','requestMediaKeySystemAccess',
-				'webdriver', // FF60+
+				'appCodeName','appName','appVersion','buildID','oscpu','platform','product','productSub','userAgent','cookieEnabled',
+				'vendor','vendorSub','hardwareConcurrency','language','languages','mimeTypes','onLine','plugins','webdriver',
+				'taintEnabled','javaEnabled','doNotTrack','cookieEnabled','pdfViewerEnabled','requestMediaKeySystemAccess',
 				'locks', // 1851539
 				'userActivation', // 1791079
 			]
+			// test
 			if (runSL) {
-				data.push('iamfake','anotherfake') // +fake
-				dataCheck.push('iamfake','anotherfake')
-				data = data.filter(x => !['buildID'].includes(x)) // +missing
-				dataCheck = dataCheck.filter(x => !['buildID'].includes(x)) // +missing
-				data = data.filter(x => !['appName'].includes(x)); data.push('appName') // +move
-				dataCheck = dataCheck.filter(x => !['appName'].includes(x)); dataCheck.push('appName') // +move
-				data = data.filter(x => !['userAgentData'].includes(x)) // remove in case FF has added it since
-				dataCheck = dataCheck.filter(x => !['userAgentData'].includes(x)) // remove in case FF has added it since
-				dataCheck = ['userAgentData'].concat(dataCheck)
-				//dataCheck.push('userAgentData')
+				expected = ['a','b','javaEnabled']
+				aNav = ['a','javaEnabled','c','d','f','g'] // pre a, missing b, a+d not-in-proto
+				aProto = ['javaEnabled','b','c','e','constructor','f','g'] // missing a, post f+g, e not in nav
+				/*
+				{
+					"missing_expected": {"navigator": ["b"], "prototype": ["a"]},
+					"post_constructor": ["f", "g"],
+					"pre_javaEnabled": ["a"],
+					"prototype_vs_navigator": {"not_in_navigator": ["b", "e"], "not_in_prototype": ["a", "d"]}
+				}
+				*/
 			}
-			let position = data.indexOf('constructor')
-			fake = data.slice(position +1) // post constructor
-			let preconstructor = data[position - 1]
-			missing = expected.filter(x => !data.includes(x)) // use data so we don't dupe moved
-			moved = fake.filter(x => expected.includes(x)) // moved: expected after contructor
-			fake = fake.filter(x => !moved.includes(x)) // fake minus moved
-			if (mini(data) !== mini(dataCheck)) {
-				// e.g. fake userAgentData in dataCheck but not in data
-				descriptor = dataCheck.filter(x => !data.includes(x))
-				descriptor = descriptor.filter(x => !missing.includes(x)) // exclude expected that is missing
-				descriptor = descriptor.filter(x => !fake.includes(x)) // don't dupe
-				descriptor = descriptor.filter(x => !moved.includes(x)) // don't dupe
-			}
-			if (missing.length) {oKeys['missing_expected'] = missing.sort()}
-			if (descriptor.length) {oKeys['no_prototype'] = descriptor.sort()}
-			if (moved.length) {oKeys['post-constructor'] = moved.sort()}
-			if (fake.length) {oKeys['post-constructor_fake'] = fake.sort()}
-			
-			let lieCount = missing.length + fake.length + descriptor.length,
-				moveCount = moved.length
-			// tampered
-			if ((lieCount + moveCount) > 0) {
-				isLies = true
-				let tmp = []
-				if (lieCount > 0) {tmp.push(lieCount +' lie'+ (lieCount > 1 ? 's' : ''))}
-				if (moveCount > 0) {tmp.push(moveCount + ' tampered')}
-				addDetail(METRIC +'_tampered', oKeys)
-				tamperBtn = addButton(18, METRIC +'_tampered', tmp.join('/'))
+			// compare hashes
+			let navhash = mini(aNav.concat('constructor')), protohash = mini(aProto) // do I need this
+			// tampering: don't dedupe, just collect
+			let missing = {}, post = [], pre = [], diffs = {}, oTampered = {}
+			// aProto: post constructor
+			let position = aProto.indexOf('constructor')
+			post = aProto.slice(position +1)
+			// aNav: pre javaEnabled
+			position = aNav.indexOf('javaEnabled')
+			if (position > 0) {pre = aNav.slice(0, position)}
+			// missing
+			let missingNav = expected.filter(x => !aNav.includes(x))
+			let missingProto = expected.filter(x => !aProto.includes(x))
+			if (missingNav.length) {missing['navigator'] = missingNav.sort()}
+			if (missingProto.length) {missing['prototype'] = missingProto.sort()}
+			// diffs
+			// in prototype but not in nav
+			let notNav = aProto.filter(x => !aNav.includes(x))
+			notNav = notNav.filter(x => !['constructor'].includes(x)) // ignore constructor
+			if (notNav.length) {diffs['not_in_navigator'] = notNav.sort()}
+			// in nav but not in prototype
+			let notProto = aNav.filter(x => !aProto.includes(x))
+			if (notProto.length) {diffs['not_in_prototype'] = notProto.sort()}
+			// 
+			isLies = (post.length + pre.length + Object.keys(missing).length + Object.keys(diffs).length) > 0
+			if (isLies) {
+				if (Object.keys(missing).length) {oTampered['missing_expected'] = missing}
+				if (post.length) {oTampered['post_constructor'] = post.sort()}
+				if (pre.length) {oTampered['pre_javaEnabled'] = pre.sort()}
+				if (Object.keys(diffs).length) {oTampered['prototype_vs_navigator'] = diffs}
+				addDetail(METRIC +'_tampered', oTampered)
 			}
 		}
-		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
+		// always return aNav
+		hash = mini(aNav); btn = addButton(18, METRIC, aNav.length)
 		// health: BB only as ESR is stable
 		if (isMB) {
 			// MB has mediaDevices, mediaSession
@@ -599,10 +592,12 @@ function get_navigator_keys(METRIC) {
 				if ('b9ee3d3d' == hash) {notation = bb_green} // 14 40
 			}
 		}
+		// if tampered use notation to fail health
+		if (isLies) {notation += addButton('bad', METRIC +'_tampered', "<span class='health'>"+ cross + '</span> tampered')}
 	} catch(e) {
-		hash = e; data = zErrLog
+		hash = e; aNav = zErrLog
 	}
-	addBoth(18, METRIC, hash, btn, notation, data, isLies)
+	addBoth(18, METRIC, hash, btn, notation, aNav, isLies)
 	return
 }
 
