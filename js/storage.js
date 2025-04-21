@@ -139,7 +139,7 @@ function get_filesystem(METRIC) {
 function get_storage(METRIC, rndStr) {
 	// dom.storage.enabled
 	let value, type = ('localStorage' == METRIC ? 'local' : 'session')
-	let obj = window[type +'Storage']
+	let obj
 	try {
 		obj = window[type +'Storage']
 		value = 'object' == typeFn(obj, true) ? zE : zD
