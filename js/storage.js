@@ -141,6 +141,7 @@ function get_storage(METRIC, rndStr) {
 	let value, type = ('localStorage' == METRIC ? 'local' : 'session')
 	let obj = window[type +'Storage']
 	try {
+		obj = window[type +'Storage']
 		value = 'object' == typeFn(obj, true) ? zE : zD
 	} catch(e) {
 		log_error(6, METRIC, e); value = zErr
