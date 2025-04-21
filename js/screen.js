@@ -1676,8 +1676,7 @@ const outputFD = () => new Promise(resolve => {
 	}
 	// browser
 	let notation = isBB ? bb_red : ''
-	let isNightly = undefined == window.Controllers ? ' Nightly' : '' // 960392
-	addBoth(3, 'browser', (isMB ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox'+ isNightly)))
+	addBoth(3, 'browser', (isMB ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
 	addBoth(3, 'logo', isLogo,'', (isBB && '24 x 24' == isLogo ? bb_green : notation), isLogoData)
 	addBoth(3, 'wordmark', isWordmark,'', (isBB && '0 x 0, 24 x 24' == isWordmark ? bb_green : notation), isWordData)
 
