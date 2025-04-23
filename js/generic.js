@@ -259,7 +259,7 @@ function get_isGecko(METRIC) {
 }
 
 const get_isOS = (METRIC) => new Promise(resolve => {
-	if (!isGecko) {return resolve()	}
+	if (!isGecko) {return resolve()}
 
 	let t0 = nowFn()
 	function exit(value) {
@@ -466,7 +466,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 138) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 139) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -482,6 +482,7 @@ function get_isVer(METRIC) {
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
 
+			try {if (Intl.supportedValuesOf('timeZone').includes('America/Coyhaique')) return 139} catch(e) {} // 1960049
 			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
 			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
 			// 138: fast-path: dom.origin_agent_cluster.enabled
