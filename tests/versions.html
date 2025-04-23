@@ -215,7 +215,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 91, maxVer = 138, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 92, maxVer = 139, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -276,6 +276,13 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 139: 1960049
+		let t139 = performance.now(), ver139
+		try {
+			ver139 = Intl.supportedValuesOf("timeZone").includes("America/Coyhaique")
+		} catch(e) {}
+		rec(139, 139, "1960049", ver139, performance.now()-t139, "INTL") // 
 
 		// 138: 1525241
 			// fast-path: requires webrtc
@@ -967,7 +974,7 @@ function outputVersion() {
 		// 99: 1720353
 			// ext fuckery possible/likely due to mimeTypes/plugins
 		let t99 = performance.now(), ver99 = ("pdfViewerEnabled" in navigator)
-		rec(99, 99, "1720353", ver99, performance.now()-t99, "NAV")
+		rec(99, 99, "1720353", ver99, performance.now()-t99, "PREF")
 
 		// 96: 1738422
 			// ext fuckery: chameleon, cydec
