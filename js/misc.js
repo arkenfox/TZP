@@ -447,6 +447,7 @@ function check_mathLies() {
 }
 
 function get_component_shims(METRIC) {
+	// 960392: dom.use_components_shim
 	let hash, btn ='', data, notation = isBB ? bb_red: ''
 	try {
 		data = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
@@ -537,14 +538,6 @@ function get_navigator_keys(METRIC) {
 				expected = ['a','b','javaEnabled']
 				aNav = ['a','javaEnabled','c','d','f','g'] // pre a, missing b, a+d not-in-proto
 				aProto = ['javaEnabled','b','c','e','constructor','f','g'] // missing a, post f+g, e not in nav
-				/*
-				{
-					"missing_expected": {"navigator": ["b"], "prototype": ["a"]},
-					"post_constructor": ["f", "g"],
-					"pre_javaEnabled": ["a"],
-					"prototype_vs_navigator": {"not_in_navigator": ["b", "e"], "not_in_prototype": ["a", "d"]}
-				}
-				*/
 			}
 			// compare hashes
 			let navhash = mini(aNav.concat('constructor')), protohash = mini(aProto) // do I need this

@@ -413,10 +413,12 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 138
+		isVerMax = 139
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 139: 1960049
+			try {if (Intl.supportedValuesOf('timeZone').includes('America/Coyhaique')) return 139} catch(e) {}
 			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
 			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
 			// 138: fast-path: dom.origin_agent_cluster.enabled

@@ -72,7 +72,9 @@ function run() {
 			// only hash notate if 115+
 			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
 			if (is115) {
-				if (hash == "2a128964") {code = s14 +" [FF135+]"+ sc
+				if (hash == "db8d9901") {code = s14 +" [FF139+]"+ sc
+					/* timezone" + America/Coyhaique */
+				} else if (hash == "2a128964") {code = s14 +" [FF135+]"+ sc
 					/* 1930466
 					-35 timezones
 						Africa/Timbuktu, America/Argentina/ComodRivadavia, America/Coral_Harbour, America/Ensenada, America/Montreal,
@@ -89,7 +91,7 @@ function run() {
 					// +2 currency: adds XCG, ZWG
 					// +8 numberingSystem: adds gara, gukh, krai, mymrepka, mymrpao, onao, outlined, sunu
 				} else if (hash == "59e3994e") {code = s14 +" [FF133]"+ sc
-					// -1 timezone: Asia/Choibalsan dropped -> alias Asia/Ulaanbaatar
+					// 1922503: -1 timezone: Asia/Choibalsan dropped -> alias Asia/Ulaanbaatar
 				} else if (hash == "deb2f155") {code = s14 +" [FF115-132]"+ sc
 				} else {code = ' '+ zNEW
 				}
