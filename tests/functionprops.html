@@ -342,6 +342,8 @@ let oList = {
 				items: [
 					'Button',
 						// future: popoverTargetElement, popoverTargetAction
+					'Dialog', // new 98
+						// 139: requestClose (1960556)
 					'Details',
 						// 130n: name (1856460: dom.details_group.enabled)
 					'Frame',
@@ -424,7 +426,6 @@ let oList = {
 				ignore: ['HTMLCollection','HTMLFormControlsCollection','HTMLOptionsCollection'], // 'Option', // = same as HTMLOptionElement
 				items: [
 					'Anchor','Area','Audio','BR','Base','DList','Data','DataList',
-					'Dialog', // new 98 but not changed since
 					'Directory','Div','Embed','FieldSet','Font','HR','Head','Heading',
 					'Html','Label','LI','Legend','Map',
 					'Mod','OList','OptGroup','Option',
@@ -755,13 +756,7 @@ function run() {
 						if (k == "6" && isVer > 110) { notation = (hash == "b0cb1af2") ? green_tick : ' '+ zNEW
 						} else if (k == "7" && isVer > 91) { notation = (hash == "642e531a") ? green_tick : ' '+ zNEW
 						} else if (k == "8" && isVer > 69) { notation = hash == "eb335cf8" ? green_tick : ' '+ zNEW
-						} else if (k == "9") {
-							// we have 2 hashes since we added stable items since they were added
-							let good = [
-								"e4a773bb", // FF98+ dialog added
-								"1be9c8dc", // FF52-64 
-							]//3f38465a
-							notation = good.includes(hash) ? green_tick : ' '+ zNEW
+						} else if (k == "9") { notation = hash == "1be9c8dc" ? green_tick : ' '+ zNEW
 						}
 					}
 				}

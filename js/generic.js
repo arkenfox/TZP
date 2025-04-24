@@ -481,8 +481,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
-
-			try {if (Intl.supportedValuesOf('timeZone').includes('America/Coyhaique')) return 139} catch(e) {} // 1960049
+			if (HTMLDialogElement.prototype.hasOwnProperty('requestClose')) return 139 // 1960556
 			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
 			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
 			// 138: fast-path: dom.origin_agent_cluster.enabled
