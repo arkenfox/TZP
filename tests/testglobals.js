@@ -726,6 +726,7 @@ let gLocalesExpand = [
 'zh-hans-hk,chinese (simplified hong kong)',
 'zh-hans-mo,chinese (simplified macau)',
 'zh-hant-mo,chinese (traditional macau)',
+'zh-my,chinese (malaysia)',
 //*/
 
 // unlikely
@@ -1314,7 +1315,6 @@ let gLocalesExpand = [
 'zh-id,chinese (indonesia)',
 'zh-latn,chinese (latin)',
 'zh-mo,chinese (macau)',
-'zh-my,chinese (malaysia)',
 'zh-pa,chinese (panama)',
 'zh-pf,chinese',
 'zh-ph,chinese (philippines)',
