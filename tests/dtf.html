@@ -366,7 +366,8 @@ function run_main(method = "all") {
 			if (isVer > 127) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "442e160e") { // FF138+ IUC77 (hi: short/long october)
+				if (resultsHash == "0ba63114") { // FF139+ ICU4X-based calendar
+				} else if (resultsHash == "442e160e") { // FF138+ IUC77 (hi: short/long october)
 				} else if (resultsHash == "b33bb78b") { // FF134+
 				} else if (resultsHash == "0095da8a") { // FF128-133
 				} else {resultsHash += ' '+ zNEW
