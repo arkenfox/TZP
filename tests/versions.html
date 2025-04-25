@@ -279,8 +279,8 @@ function outputVersion() {
 		}
 
 		// 139: 1960556
-		let t139 = performance.now() 
-		let ver139 = HTMLDialogElement.prototype.hasOwnProperty('requestClose')
+		let t139 = performance.now() , ver139
+		try {ver139 = HTMLDialogElement.prototype.hasOwnProperty('requestClose')} catch(e) {}
 		rec(139, 139, "1960556", ver139, performance.now()-t139) // 0.005ms
 
 		// 138: 1525241
