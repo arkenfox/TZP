@@ -22,7 +22,6 @@
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90a">a</output>
 		<select id="test107"></select>
-		<span id="test139"><a b="<>"></a></span>
 	</div>
 	<div class="offscreen">
 		<div id="test89" style="width:1em">a &#x3000; b</div>
@@ -799,7 +798,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 67, oOther = {}
+	let countOther = 0, expectOther = 66, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -818,18 +817,11 @@ function outputVersion() {
 		}
 
 		// 139: 1960049
-		let t139b = performance.now(), ver139b
-		try {
-			ver139b = Intl.supportedValuesOf("timeZone").includes("America/Coyhaique")
-		} catch(e) {}
-		rec(139.2, 139, "1960049", ver139b, performance.now()-t139b, "INTL") // 0.3ms with warmup | 2ms cold
-
-		// 139: 1941347
 		let t139 = performance.now(), ver139
 		try {
-			ver139 = mini(document.getElementById('test139').innerHTML) == '1cb3faae'
+			ver139 = Intl.supportedValuesOf("timeZone").includes("America/Coyhaique")
 		} catch(e) {}
-		rec(139.1, 139, "1941347", ver139, performance.now()-t139, "DOM") // 0.1ms
+		rec(139, 139, "1960049", ver139, performance.now()-t139, "INTL") // 0.3ms with warmup | 2ms cold
 
 		// 136: 1945535: backported to 136 and ESR128
 		let t136 = performance.now(), ver136
