@@ -139,12 +139,9 @@ let fntMaster = {
 		],
 		windows: [
 			// 7
-			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli',
-			'Malgun Gothic','Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen',
-			'Tahoma','Times New Roman','Verdana',
-			// localized
-			'微軟正黑體','微软雅黑', // Microsoft JhengHei, Microsoft YaHei 
-			'ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // MS Gothic, MS PGothic, SimSun
+			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','ＭＳ ゴシック',
+			'MS PGothic','ＭＳ Ｐゴシック','MV Boli','Malgun Gothic','맑은 고딕','Microsoft Himalaya','Microsoft JhengHei','微軟正黑體',
+			'Microsoft YaHei','微软雅黑','Segoe UI','SimSun','宋体','Sylfaen','Tahoma','Times New Roman','Verdana',
 			// system aliases
 				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
 				// should always be the same but lets test everything in BB
@@ -251,7 +248,6 @@ let fntMaster = {
 			'Noto Serif Hmong Nyiakeng Regular', // BB12 bundled
 			'Arabic Transparent', // fontSubstitutes
 			'Courier','MS Serif','Roman', // aliases
-			'微软雅黑','ＭＳ ゴシック', // localized
 		],
 		windowsoffscreen: [
 			// proportional only: in BB we test once against monospace + fallbacks
@@ -365,26 +361,24 @@ let fntMaster = {
 		],
 		windows: [
 			// 7
-			'Arial','Calibri','Cambria','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New','Ebrima',
-			'Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','MS PGothic','MS UI Gothic','MV Boli',
-			'Malgun Gothic','Marlett','Microsoft Himalaya','Microsoft JhengHei','Microsoft New Tai Lue','Microsoft PhagsPa',
-			'Microsoft Sans Serif','Microsoft Tai Le','Microsoft YaHei','Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB',
-			'Mongolian Baiti','NSimSun','PMingLiU-ExtB','Palatino Linotype','Segoe Print','Segoe Script','Segoe UI','Segoe UI Symbol',
-			'SimSun','SimSun-ExtB','Sylfaen','Symbol','Tahoma','Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
+			'Arial','Calibri','Cambria','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New',
+			'Ebrima','Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','ＭＳ ゴシック',
+			'MS PGothic','ＭＳ Ｐゴシック','MS UI Gothic','MV Boli','Malgun Gothic','맑은 고딕','Marlett','Microsoft Himalaya',
+			'Microsoft JhengHei','微軟正黑體','Microsoft New Tai Lue','Microsoft PhagsPa','Microsoft Sans Serif',
+			'Microsoft Tai Le','Microsoft YaHei','微软雅黑','Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB',
+			'Mongolian Baiti','NSimSun','新宋体','PMingLiU-ExtB','新細明體-ExtB','Palatino Linotype','Segoe Print',
+			'Segoe Script','Segoe UI','Segoe UI Symbol','SimSun','宋体','SimSun-ExtB','Sylfaen','Symbol','Tahoma',
+			'Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
 			// 8
 			'Gadugi','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text',
 			// 8.1
 			'Javanese Text','Leelawadee UI','Segoe UI Emoji','Sitka Banner','Sitka Display',
-			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
+			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic','游ゴシック',
 			// 10
 			'Bahnschrift','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			'HoloLens MDL2 Assets', // removed FF136+ 1942883
 			// 11
 			'SimSun-ExtG', // win11 24H2 see 1947960 | 1954265 FF139 adeed to base
-			// localized: kBase: detected FF119+: 1850672
-			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック', // Microsoft YaHei, MS Gothic, MS PGothic,
-			'新宋体','宋体','游ゴシック', // NSimsun, SimSun, Yu Gothic
-			'微軟正黑體', // Microsoft JhengHei
 			// fntPlatformFont
 			'MS Shell Dlg \\32',
 			// common FontSubstitutes that point to kBase fonts
@@ -430,33 +424,23 @@ let fntMaster = {
 	baselang: {
 		android: [], linux: [], mac: [],
 		windows: [
-			'Aharoni','Aldhabi','Andalus','Angsana New','AngsanaUPC','Aparajita','Arabic Typesetting','BIZ UDGothic','BIZ UDMincho',
-			'BIZ UDPGothic','BIZ UDPMincho','Batang','BatangChe','Browallia New','BrowalliaUPC','Cordia New','CordiaUPC','DFKai-SB',
-			'DaunPenh','David','DengXian','DilleniaUPC','DokChampa','Dotum','DotumChe','Estrangelo Edessa','EucrosiaUPC','Euphemia',
-			'FangSong','FrankRuehl','FreesiaUPC','Gautami','Gisha','Gulim','GulimChe','Gungsuh','GungsuhChe','IrisUPC','Iskoola Pota',
-			'JasmineUPC','KaiTi','Kalinga','Kartika','Khmer UI','KodchiangUPC','Kokila','Lao UI','Latha','Leelawadee','Levenim MT',
-			'LilyUPC','MS Mincho','MS PMincho','Mangal','Meiryo','Meiryo UI','Microsoft Uighur','MingLiU','MingLiU_HKSCS','Miriam',
-			'Miriam Fixed','MoolBoran','Narkisim','Nyala','PMingLiU','Plantagenet Cherokee','Raavi','Rod','Sakkal Majalla','Sanskrit Text',
-			'Shonar Bangla','Shruti','SimHei','Simplified Arabic','Traditional Arabic','Tunga','Urdu Typesetting','Utsaah','Vani','Vijaya',
-			'Vrinda','Yu Mincho',
+			'Aharoni','Aldhabi','Andalus','Angsana New','AngsanaUPC','Aparajita','Arabic Typesetting','BIZ UDGothic','BIZ UDゴシック',
+			'BIZ UDMincho','BIZ UD明朝','BIZ UDPGothic','BIZ UDPゴシック','BIZ UDPMincho','BIZ UDP明朝','Batang','바탕','BatangChe','바탕체',
+			'Browallia New','BrowalliaUPC','Cordia New','CordiaUPC','DFKai-SB','DaunPenh','David','DengXian','等线','DilleniaUPC',
+			'DokChampa','Dotum','돋움','DotumChe','돋움체','Estrangelo Edessa','EucrosiaUPC','Euphemia','FangSong','仿宋','FrankRuehl',
+			'FreesiaUPC','Gautami','Gisha','Gulim','굴림','GulimChe','굴림체','Gungsuh','궁서','GungsuhChe','궁서체','IrisUPC','Iskoola Pota',
+			'JasmineUPC','KaiTi','楷体','Kalinga','Kartika','Khmer UI','KodchiangUPC','Kokila','Lao UI','Latha','Leelawadee','Levenim MT',
+			'LilyUPC','MS Mincho','ＭＳ 明朝','MS PMincho','ＭＳ Ｐ明朝','Mangal','Meiryo','メイリオ','Meiryo UI','Microsoft Uighur',
+			'MingLiU','細明體','MingLiU_HKSCS','細明體_HKSCS','Miriam','Miriam Fixed','MoolBoran','Narkisim','Nyala','PMingLiU','新細明體',
+			'Plantagenet Cherokee','Raavi','Rod','Sakkal Majalla','Sanskrit Text','Shonar Bangla','Shruti','SimHei','黑体',
+			'Simplified Arabic','Traditional Arabic','Tunga','Urdu Typesetting','Utsaah','Vani','Vijaya','Vrinda','Yu Mincho','游明朝',
 			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-R', // original -R regular -B bold
 			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // late 2024 update
 			// 1954265: FF139+ win11 23H2 / win1022H2
 			'Noto Sans HK','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC',
 			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC', 
-			// localized from ^
-			'바탕','바탕체', // Batang, BatangChe
-			'BIZ UDPゴシック', // BIZ UDPGothic
-			'等线', // DengXian
-			'돋움','돋움체', // Dotum, DotumChe
-			'仿宋', // FangSong
-			'굴림','굴림체', // Gulim, GulimChe
-			'細明體','細明體_HKSCS', // MingLiU, MingLiU_HKSCS
-			'ＭＳ 明朝','ＭＳ Ｐ明朝', // MS Mincho, MS PMincho
-			'新細明體', // PMingLiU
-			'黑体', // SimHei
 			// fontSubs
-			'KaiTi_GB2312', // simplified chinese
+			'KaiTi_GB2312','楷体_GB2312', // simplified chinese
 			// fontSubs redundant
 				// '標準明朝', // ＭＳ 明朝 -> MS Mincho
 				// 'FangSong_GB2312',
