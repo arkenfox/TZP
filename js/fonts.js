@@ -365,10 +365,10 @@ let fntMaster = {
 			'Ebrima','Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','ＭＳ ゴシック',
 			'MS PGothic','ＭＳ Ｐゴシック','MS UI Gothic','MV Boli','Malgun Gothic','맑은 고딕','Marlett','Microsoft Himalaya',
 			'Microsoft JhengHei','微軟正黑體','Microsoft New Tai Lue','Microsoft PhagsPa','Microsoft Sans Serif',
-			'Microsoft Tai Le','Microsoft YaHei','微软雅黑','Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB',
-			'Mongolian Baiti','NSimSun','新宋体','PMingLiU-ExtB','新細明體-ExtB','Palatino Linotype','Segoe Print',
-			'Segoe Script','Segoe UI','Segoe UI Symbol','SimSun','宋体','SimSun-ExtB','Sylfaen','Symbol','Tahoma',
-			'Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
+			'Microsoft Tai Le','Microsoft YaHei','微软雅黑','Microsoft Yi Baiti','MingLiU-ExtB','細明體-ExtB',
+			'MingLiU_HKSCS-ExtB','細明體_HKSCS-ExtB','Mongolian Baiti','NSimSun','新宋体','PMingLiU-ExtB','新細明體-ExtB',
+			'Palatino Linotype','Segoe Print','Segoe Script','Segoe UI','Segoe UI Symbol','SimSun','宋体','SimSun-ExtB',
+			'Sylfaen','Symbol','Tahoma','Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
 			// 8
 			'Gadugi','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text',
 			// 8.1
@@ -2261,7 +2261,7 @@ const outputFonts = () => new Promise(resolve => {
 			get_fonts_faces('font_faces'),
 			get_glyphs('glyphs'),
 			get_textmetrics('textmetrics'),
-			get_fonts_offscreen('font_offscreen'),
+			//get_fonts_offscreen('font_offscreen'),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()
