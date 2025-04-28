@@ -143,7 +143,8 @@ let fntMaster = {
 			'Malgun Gothic','Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen',
 			'Tahoma','Times New Roman','Verdana',
 			// localized
-			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
+			'微軟正黑體','微软雅黑', // Microsoft JhengHei, Microsoft YaHei 
+			'ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // MS Gothic, MS PGothic, SimSun
 			// system aliases
 				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
 				// should always be the same but lets test everything in BB
@@ -381,7 +382,9 @@ let fntMaster = {
 			// 11
 			'SimSun-ExtG', // win11 24H2 see 1947960 | 1954265 FF139 adeed to base
 			// localized: kBase: detected FF119+: 1850672
-			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体','游ゴシック', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun, Yu Gothic 
+			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック', // Microsoft YaHei, MS Gothic, MS PGothic,
+			'新宋体','宋体','游ゴシック', // NSimsun, SimSun, Yu Gothic
+			'微軟正黑體', // Microsoft JhengHei
 			// fntPlatformFont
 			'MS Shell Dlg \\32',
 			// common FontSubstitutes that point to kBase fonts
@@ -442,15 +445,16 @@ let fntMaster = {
 			'Noto Sans HK','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC',
 			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC', 
 			// localized from ^
-			'바탕', // Batang
+			'바탕','바탕체', // Batang, BatangChe
 			'BIZ UDPゴシック', // BIZ UDPGothic
-			'굴림', // Gulim
-			'굴림체', // GulimChe
-			'細明體', // MingLiU
-			'細明體_HKSCS', // MingLiU_HKSCS
-			'ＭＳ 明朝', // MS Mincho
-			'ＭＳ Ｐ明朝', // MS PMincho
+			'等线', // DengXian
+			'돋움','돋움체', // Dotum, DotumChe
+			'仿宋', // FangSong
+			'굴림','굴림체', // Gulim, GulimChe
+			'細明體','細明體_HKSCS', // MingLiU, MingLiU_HKSCS
+			'ＭＳ 明朝','ＭＳ Ｐ明朝', // MS Mincho, MS PMincho
 			'新細明體', // PMingLiU
+			'黑体', // SimHei
 			// fontSubs
 			'KaiTi_GB2312', // simplified chinese
 			// fontSubs redundant
@@ -2273,7 +2277,7 @@ const outputFonts = () => new Promise(resolve => {
 			get_fonts_faces('font_faces'),
 			get_glyphs('glyphs'),
 			get_textmetrics('textmetrics'),
-			//get_fonts_offscreen('font_offscreen'),
+			get_fonts_offscreen('font_offscreen'),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()
