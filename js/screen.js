@@ -1691,7 +1691,7 @@ const outputFD = () => new Promise(resolve => {
 	}
 	// os, version
 	addBoth(3, 'os', (isOS == undefined ? (isOSErr !== undefined ? isOSErr : zErr) : isOS))
-	addBoth(3, 'version', isVer + isVerExtra)
+	addBoth(3, 'version', (isVerExtra == '+' ? isVer + isVerExtra : isVer))
 	// set metricsPrefix
 	if (isGecko && isSmart) {
 		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'
