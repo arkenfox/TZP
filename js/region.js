@@ -524,11 +524,11 @@ function get_language_locale() {
 	if (isLanguageSmart && isBB) { // only notate BB
 		notation = bb_red
 		let errHash = mini(oErr)
-		//61a9b098: { durationformat: "TypeError: Intl.DurationFormat is not a constructor" }
-		// we only expect 1 exact error for BB14
-		if ('61a9b098' == errHash) {
-			let key = oData.language
+		if (isVer > 135 && Object.keys(oErr).length == 0 || isVer < 136 && '61a9b098' == errHash) {
+			// BB15: no errors (durationformat default enabled 136+)
+			// BB14: 1 exact error: 61a9b098: { durationformat: "TypeError: Intl.DurationFormat is not a constructor" }
 			// only green if BB supported
+			let key = oData.language
 			if (languagesSupported[key] !== undefined) {
 				let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
 				if (value === expected) {notation = bb_green}
