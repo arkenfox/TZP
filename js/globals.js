@@ -204,7 +204,7 @@ let gt0, gt1,
 	isScreenLog = false, // console log screen/window/taskbar/chrome
 	isSmart = false,
 	isSmartMin = 128,
-	isMaintenance = true // if not maintaining TZP we do not want to potentially give off false health signals
+	isMaintenance = false // if not maintaining TZP we do not want to potentially give off false health signals
 
 /** DEV **/
 // simulate errors
