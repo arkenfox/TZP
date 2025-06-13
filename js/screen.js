@@ -1624,10 +1624,12 @@ const outputFD = () => new Promise(resolve => {
 	addBoth(3, METRIC, value,'','', data)
 
 	if (!isGecko) {
-		let aList = ['browser','logo','wordmark','browser_architecture','os','version']
+		let aList = ['logo','wordmark','browser_architecture','os','version']
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
+		// browser
+		addBoth(3, 'browser', (undefined == isEngine ? zNA : isEngine))
 		return resolve()
 	}
 

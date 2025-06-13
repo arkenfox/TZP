@@ -63,8 +63,10 @@ function run_block() {
 	try {
 		dom.tzpContent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
-		let msg = "<center><br><span style='font-size: 14px;'><b>" + (isGecko ? 'Gah.' : 'Aw, Snap!')
-			+"<br><br>TZP requires Firefox " + isBlockMin +'+<b></span></center>'
+		let browserString = "Firefox "+ isBlockMin +"+"
+		if (!isGecko) {browserString += ", " + isAllowNonGeckoString}
+		let msg = "<center><br><span style='font-size: 14px;'><b>"+ (isGecko ? 'Gah.' : 'Aw, Snap!')
+			+"<br><br>TZP requires " + browserString +'<b></span></center>'
 		dom.blockmsg.innerHTML = msg
 	} catch(e) {}
 }
@@ -200,6 +202,57 @@ function get_isDevices() {
 			if (gLoad) {log_perf(SECTG, 'isDevices', t0,'', nowFn())}
 		}
 	)} catch(e) {}
+}
+
+function get_isEngine(METRIC) {
+	if (isGecko) {return}
+	let t0 = nowFn()
+	try {
+		let oEngines = {
+			blink: [
+				'number' === typeof TEMPORARY,
+				'number' === typeof PERSISTENT,
+				'object' === typeof onappinstalled,
+				'object' === typeof onbeforeinstallprompt,
+				'object' === typeof trustedTypes,
+				'function' === typeof webkitResolveLocalFileSystemURL,
+			],
+			webkit: [
+				'object' === typeof browser,
+				'object' === typeof safari,
+				'function' === typeof webkitConvertPointFromNodeToPage,
+				'function' === typeof webkitCancelRequestAnimationFrame,
+				'"object' === typeof webkitIndexedDB,
+			],
+			/* ignore edgeHTML
+			edgeHTML: [
+				'function' === typeof clearImmediate,
+				'function' === typeof msWriteProfilerMark,
+				'object' === typeof oncompassneedscalibration,
+				'object' === typeof onmsgesturechange,
+				'object' === typeof onmsinertiastart,
+				'object' === typeof onreadystatechange,
+				'function' === typeof setImmediate,
+			]
+			//*/
+		}
+		// array engine matches, so subsequent results doesn't override prev
+		let aEngine = [], aAllowed = []
+		for (const engine of Object.keys(oEngines).sort()) {
+			aAllowed.push(engine)
+			let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
+			if (sumE > (oEngines[engine].length/2)) {aEngine.push(engine)}
+		}
+		aAllowed.sort()
+		isAllowNonGeckoString = aAllowed.join(', ')
+		if (aAllowed.length > 1) {
+			isAllowNonGeckoString = ' or '+ aAllowed[aAllowed.length - 1]
+			aAllowed = aAllowed.slice(0,-1)
+			isAllowNonGeckoString = aAllowed.join(',') + isAllowNonGeckoString
+		}
+		if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
+	} catch(e) {}
+	log_perf(SECTG, METRIC, t0,'', isEngine)
 }
 
 const get_isFileSystem = (METRIC) => new Promise(resolve => {
@@ -629,7 +682,7 @@ const get_isXML = () => new Promise(resolve => {
 	} catch(e) {
 		isXML = e+''
 	}
-	if (gClear) {console.clear()}
+	if (isGecko && gClear) {console.clear()}
 	log_perf(SECTG, 'isXML', t0,'', ('string' == typeof isXML ? zErr : ''))
 	return resolve()
 })
@@ -1655,7 +1708,7 @@ function countJS(item) {
 	if (1 == jsFiles) {
 		// non-gecko
 		if (!isGecko) {
-			if (isAllowNonGecko) {run_basic()} else {run_block(); return}
+			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(); return}
 		}
 		// help ensure/force images are loaded in time
 		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
@@ -1951,7 +2004,11 @@ function run_immediate() {
 	Promise.all([
 		get_isGecko('isGecko')
 	]).then(function(){
-		if (!isGecko && !isAllowNonGecko) {return}
+		if (!isGecko) {
+			if (!isAllowNonGecko) {return}
+			get_isEngine('isEngine')
+			if (undefined === isEngine) {return}
+		}
 		isFile = 'file:' == location.protocol
 		get_isRecursion()
 		// storage warm ups
