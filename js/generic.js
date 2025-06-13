@@ -70,15 +70,21 @@ function run_block() {
 }
 
 function run_basic(str = 'basic') {
-	log_perf(SECTG, 'isBasic','')
-	for (let i=1; i < 19; i++) {
-		document.body.style.setProperty('--test'+i, '#d4c1b3')
-		document.body.style.setProperty('--bg'+i, '#808080')
+	// basic mode: colors
+	if ('basic' == str) {
+		log_perf(SECTG, 'isBasic','')
+		for (let i=1; i < 19; i++) {
+			document.body.style.setProperty('--test'+i, '#d4c1b3')
+			document.body.style.setProperty('--bg'+i, '#808080')
+		}
+		document.body.style.setProperty('--testbad', '#d4c1b3')
 	}
-	document.body.style.setProperty('--testbad', '#d4c1b3')
-	let items = document.getElementsByClassName('nav-down')
-	for (let i=0; i < items.length; i++) {
-		items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>"+ str +' mode</span> <')
+	// basic/other modes: notation
+	if (str.length) {
+		let items = document.getElementsByClassName('nav-down')
+		for (let i=0; i < items.length; i++) {
+			items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>"+ str +' mode</span> <')
+		}
 	}
 }
 
@@ -169,7 +175,7 @@ function get_isAutoplay(METRIC) {
 		let mPolicy = navigator.getAutoplayPolicy('mediaelement')
 		try {
 			if (runSG) {bar++}
-			mTest = navigator.getAutoplayPolicy(dom.tzpMedia)
+			mTest = navigator.getAutoplayPolicy(dom.tzpVideo)
 		} catch(e) {
 			log_error(13, METRIC +'_media', e, isScope, true) // persist sect13
 			mTest = zErr
@@ -466,13 +472,21 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 139) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 141) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
 	if (isBlock) {run_block(); return}
-	// set basic/maintenance mode
-	if (isVer >= isSmartMin) {if (isMaintenance) {isSmart = true} else {run_basic('non-maintenance')}} else {run_basic()}
+	// set isSmart / modes
+	if (isVer >= isSmartMin) {
+		if (isSmartAllowed || isFile) {
+			isSmart = true
+		} else {
+			run_basic('data-only')
+		}
+	} else {
+		run_basic()
+	}
 	return
 
 	function cascade() {
@@ -481,6 +495,16 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
+			// 141: fast-path: requires temporal default enabled FF139+ javascript.options.experimental.temporal
+			try {if (undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear) return 141} catch(e) {} // 1950162
+			// 141: fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
+			try {if (window["IntersectionObserver"].prototype.hasOwnProperty('scrollMargin')) return 141} catch(e) {} // 1860030
+			// 140: fast-path: pref: dom.event.pointer.rawupdate.enabled : default true 140+
+			try {ver140b = "object" === typeof onpointerrawupdate} catch(e) {} // 1550462
+			// 140: if < 141 there is only one paint entry "PerformancePaintTiming"
+			try {if (undefined !== performance.getEntriesByType("paint")[0].presentationTime) return 140} catch(e) {} // 1963464
+			try {if ('' !== dom.tzpAudio.preload) return 140} catch(e) {} // 929890
+			// 139
 			if (HTMLDialogElement.prototype.hasOwnProperty('requestClose')) return 139 // 1960556
 			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
 			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
