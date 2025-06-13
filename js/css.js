@@ -122,6 +122,9 @@ function get_computed_styles(METRIC) {
 					prototypeProperties = Object.getOwnPropertyNames(prototype),
 					ownEnumerablePropertyNames = [],
 					cssVar = /^--.*$/
+				// chrome getComputedStyle prepends "-" to some webkit* keys which it doesn't do in the other methods
+				if (type == 2 && 'blink' === isEngine) {cssVar = /^-.*$/}
+
 				Object.keys(cssStyleDeclaration).forEach(key => {
 					let numericKey = !isNaN(key),
 						value = cssStyleDeclaration[key],
@@ -245,7 +248,7 @@ function get_computed_styles(METRIC) {
 					typeCheck = typeFn(obj.keys)
 					if ('array' !== typeCheck) {throw zErrType + 'keys: '+ typeCheck}
 					let data = obj.keys
-					if (!isGecko) {data.sort()} // sort for blink
+					if ('blink' == isEngine) {data.sort()} // sort for blink
 					let hash = mini(data)
 					aHashes.push(hash)
 					intHashes.push(i)
