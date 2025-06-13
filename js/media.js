@@ -28,7 +28,7 @@ function get_autoplay(METRIC) {
 		let ares = navigator.getAutoplayPolicy('audiocontext')
 		try {atest = navigator.getAutoplayPolicy(dom.tzpAudio)} catch {atest = zErr}
 		let mres = navigator.getAutoplayPolicy('mediaelement')
-		try {mtest = navigator.getAutoplayPolicy(dom.tzpMedia)} catch {mtest = zErr}
+		try {mtest = navigator.getAutoplayPolicy(dom.tzpVideo)} catch {mtest = zErr}
 		let display = (ares === atest ? ares : ares +', '+ atest) +' | '+ (mres === mtest ? mres : mres +', '+ mtest)
 		addDisplay(13, METRICuser, display)
 	} catch(e) {
@@ -371,6 +371,24 @@ function get_media(type) {
 	}
 }
 
+function get_media_preload(METRIC) {
+	// ToDo: 1969210 when landed
+	let value, data = ''
+	try {
+		value = dom.tzpAudio.preload
+		if (runST) {value = 99} else if (runSI) {value = 'banana'}
+		if ('string' !== typeFn(value, true)) {throw zErrType + typeFn(value)}
+		if ('' == value) {value = typeFn(value)}
+		let aValid = ['auto','metadata','none']
+		if (isVer < 140) {aValid.push('empty string')} // 929890
+		if (!aValid.includes(value)) {aValid.sort(); throw zErrInvalid +'expected ' + aValid.join(', ') + ': got '+ value}
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(13, METRIC, value,'','', data)
+	return
+}
+
 const get_midi = () => new Promise(resolve => {
 	// prompt, granted, denied
 	let count = 0
@@ -405,6 +423,7 @@ const outputMedia = () => new Promise(resolve => {
 		get_clearkey('clearkey'),
 		get_media('audio'),
 		get_media('video'),
+		get_media_preload('media_preload'),
 		get_midi('midi'),
 		get_autoplay('getAutoplayPolicy'),
 	]).then(function(){
