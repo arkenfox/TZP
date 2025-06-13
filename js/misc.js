@@ -845,6 +845,8 @@ const outputTiming = () => new Promise(resolve => {
 const outputMisc = () => new Promise(resolve => {
 	if (runSL) {addProxyLie('Math.sin')}
 	let isMathLies = check_mathLies()
+
+	// 1965165: javascript.options.property_error_message_fix FF140+ default enabled
 	try {null.bar} catch(e) {
 		let notation = ''
 		if (isBB) {notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)}

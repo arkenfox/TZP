@@ -671,7 +671,6 @@ function set_fntList() {
 
 		if (isVer > 135 && !isBB && 'windows' == isOS) {
 			// removed from base in FF136+ 1942883
-			// ToDo: check if backported e.g. to ESR
 			let tmpArray = fntMaster.base.windows
 			tmpArray = tmpArray.filter(x => !['HoloLens MDL2 Assets'].includes(x))
 			fntMaster.base.windows = tmpArray
@@ -2261,7 +2260,7 @@ const outputFonts = () => new Promise(resolve => {
 			get_fonts_faces('font_faces'),
 			get_glyphs('glyphs'),
 			get_textmetrics('textmetrics'),
-			//get_fonts_offscreen('font_offscreen'),
+			get_fonts_offscreen('font_offscreen'),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()

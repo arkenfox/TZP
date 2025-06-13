@@ -356,7 +356,8 @@ function get_mm_css() {
 		'prefers-reduced-transparency': { // FF95+: 1736914
 			id: 'PRT', test: ['no-preference','reduce'],
 			// ^ layout.css.prefers-reduced-transparency.enabled
-			// ^ 1822176: default disabled: 
+			// ^ 1822176: default disabled
+			// ToDo: notation when pref flipped: RFP = "no-preference"
 		},
 		'inverted-colors': { // FF114+
 			id: 'IC', test: ['none','inverted'], rfp: 'none', rfpver: 999,

@@ -247,7 +247,7 @@ const get_globals = () => new Promise(resolve => {
 			"number" === typeof PERSISTENT,
 			"object" === typeof onappinstalled,
 			"object" === typeof onbeforeinstallprompt,
-			"object" === typeof onpointerrawupdate,
+			//"object" === typeof onpointerrawupdate,
 			//"object" === typeof onsearch,
 			//"boolean" === typeof originAgentCluster,
 			"object" === typeof trustedTypes,
@@ -413,10 +413,20 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 139
+		isVerMax = 141
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 141: fast-path: requires temporal default enabled FF139+ javascript.options.experimental.temporal
+			try {if (undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear) return 141} catch(e) {} // 1950162
+			// 141: fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
+			try {if (window["IntersectionObserver"].prototype.hasOwnProperty('scrollMargin')) return 141} catch(e) {} // 1860030
+			// 140: fast-path: pref: dom.event.pointer.rawupdate.enabled : default true 140+
+			try {ver140b = "object" === typeof onpointerrawupdate} catch(e) {} // 1550462
+			// 140: if < 141 there is only one paint entry "PerformancePaintTiming"
+			try {if (undefined !== performance.getEntriesByType("paint")[0].presentationTime) return 140} catch(e) {} // 1963464
+			try {if ('' !== dom.tzpAudio.preload) return 140} catch(e) {} // 929890
+			// 139
 			try {if (HTMLDialogElement.prototype.hasOwnProperty('requestClose')) return 139} catch(e) {} // 1960556
 			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
 			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241

@@ -584,7 +584,6 @@ function run() {
 		rec(typeof chrome, "chrome", code, "object") // edgeHTML
 		rec(typeof onappinstalled, "onappinstalled", code, "object")
 		rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
-		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
 		rec(typeof openDatabase, "openDatabase", code, "function")
 		rec(typeof trustedTypes, "trustedTypes", code, "object")
 		rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code, "function")
@@ -671,7 +670,7 @@ function run() {
 		rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate", code, "object") // (+ not in FF52)
 		rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code, "object")
 		rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code, "object")
-		rec(typeof u2f, "u2f", code, "object") // security.webauth.u2f
+		rec(typeof u2f, "u2f", code, "object") // security.webauth.u2f | pref removed in FF114
 
 		// webkit only
 		code = 14
@@ -704,6 +703,7 @@ function run() {
 		rec(typeof oncontextlost, "oncontextlost", code, "object")
 		rec(typeof oncontextrestored, "oncontextrestored", code, "object")
 		rec(typeof originAgentCluster, "originAgentCluster", code, "boolean") // FF138+ 1665474
+		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object") // FF140+ 1550462
 
 		// blink + webkit (not seen in gecko)
 		code = 52
@@ -1069,7 +1069,7 @@ function get_miniEngine() {
 			"number" === typeof PERSISTENT,
 			"object" === typeof onappinstalled,
 			"object" === typeof onbeforeinstallprompt,
-			"object" === typeof onpointerrawupdate,
+			//"object" === typeof onpointerrawupdate,
 			//"object" === typeof onsearch,
 			//"boolean" === typeof originAgentCluster,
 			"object" === typeof trustedTypes,
