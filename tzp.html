@@ -2,15 +2,15 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="max-width=800; width=500">
+	<meta name="viewport" content="max-width=800, width=500">
 	<title>TZP</title>
 	<link rel="preload" href="images/InvalidImage.png" as="image">
 	<link rel="preload" href="images/ScaledImage.png" as="image">
-	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<link rel="stylesheet" type="text/css" href="css/media.css">
 	<link rel="stylesheet" type="text/css" href="css/window_size.css">
 	<link rel="stylesheet" type="text/css" href="css/screen_size.css">
+	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
 	<script src="js/globals.js"></script>
 	<script src="js/generic.js"></script>
 	<style>
@@ -75,7 +75,7 @@
 		<iframe id="tzpInvalidImage" width="100" height="30" src="images/InvalidImage.png"></iframe>
 		<iframe id="tzpScaledImage" width="100" height="30" src="images/ScaledImage.png"></iframe>
 		<iframe id="tzpIframe" width="0" height="0"></iframe>
-		<audio id="tzpAudio"></audio><video id="tzpMedia" width="20px"></video>
+		<audio id="tzpAudio"></audio><video id="tzpVideo" width="20px"></video>
 		<div id="tzpDiv"></div>
 		<div id="tzpDocFont" style="font-family: 'test font name'"></div>
 		<div id="tzpSVG"></div>
@@ -790,7 +790,7 @@
 		</td></tr>
 		<!--fonts-->
 		<tr><td>[faces] fonts</td><td class="mono c" id="font_faces"></td></tr>
-		<!--<tr><td>[offscreen] fonts</td><td class="mono c" id="font_offscreen"></td></tr>-->
+		<tr><td>[offscreen] fonts</td><td class="mono c" id="font_offscreen"></td></tr>
 		<tr><td><span id="labelFS" class="btn btn0" onClick="togglerows('FS','btn')">[+]</span>
 			[sizes | names] fonts <sup>1</sup></td>
 			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
@@ -865,6 +865,7 @@
 			<span class="c" id="audiotype"></span> | <span class="c" id="videotype"></span></td></tr>
 		<tr><td>[midi] permissions</td><td class="mono"><span class="c" id="permission_midi"></span>
 			| <span class="c" id="permission_midi_sysex"></span></td></tr>
+		<tr><td>[HTMLMediaElement] preload</td><td class="c mono" id="media_preload"></td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
 
@@ -994,7 +995,7 @@
 		<tr class="togTP"><td>currenttime</td><td class="c mono" id="timing_precision_currenttime"></td></tr>
 		<tr class="togTP"><td>date</td><td class="c mono" id="timing_precision_date"></td></tr>
 		<tr class="togTP"><td>EXSLT</td><td class="c mono" id="timing_precision_exslt"></td></tr>
-		<tr class="togTP"><td>instant</td><td class="c mono" id="timing_precision_instant"></td></tr>
+		<tr class="togTP"><td> [temporal] instant</td><td class="c mono" id="timing_precision_instant"></td></tr>
 		<tr class="togTP"><td>mark</td><td class="c mono" id="timing_precision_mark"></td></tr>
 		<tr class="togTP"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">dom.enable_performance_navigation_timing</span></div>
