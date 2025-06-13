@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 154
+	expectedMetrics = 156
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -204,7 +204,7 @@ let gt0, gt1,
 	isScreenLog = false, // console log screen/window/taskbar/chrome
 	isSmart = false,
 	isSmartMin = 128,
-	isMaintenance = false // if not maintaining TZP we do not want to potentially give off false health signals
+	isSmartAllowed = false // do not give off false health signals if not maintained
 
 /** DEV **/
 // simulate errors
