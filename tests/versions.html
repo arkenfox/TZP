@@ -29,6 +29,7 @@
 		<span id="test81a"></span><span id="test81b"></span>
 		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
 		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+		<div><audio id="tzpPreload"></audio></div>
 	</div>
 
 	<table>
@@ -215,7 +216,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 92, maxVer = 139, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 97, maxVer = 141, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -276,6 +277,43 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 141: 1860030
+			// fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
+		let t141a = performance.now(), ver141a
+		try {ver141a = window["IntersectionObserver"].prototype.hasOwnProperty('scrollMargin')} catch(e) {}
+		rec(141.1, 141, "1860030", ver141a, performance.now()-t141a, "PREF") // 0.005ms
+
+		// 141: 1950162
+			// fast-path: requires temporal which is default enabled FF139+
+			// javascript.options.experimental.temporal
+		let t141 = performance.now(), ver141
+		try {ver141 = undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear} catch(e) {}
+		rec(141, 141, "1950162", ver141, performance.now()-t141, "PREF") // 0.06ms (0.02 if error)
+
+		// 140: 1550462
+			// fast-path: pref: dom.event.pointer.rawupdate.enabled : default true 140+
+		let t140b = performance.now(), ver140b
+		try {ver140b = "object" === typeof onpointerrawupdate} catch(e) {}
+		rec(140.2, 140, "1550462", ver140b, performance.now()-t140b, "PREF") // 0.003ms
+
+		// 140: 1963464
+			// can't find any prefs that disable paint: added FF84+: https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
+		let t140a = performance.now(), ver140a
+		try {
+			let entries140 = performance.getEntriesByType("paint")
+			for (let i=0; i < entries140.length; i++) {
+				if ('[object PerformancePaintTiming]' === entries140[i] +'') {
+					ver140a = undefined !== entries140[i].presentationTime
+				}
+			}
+		} catch(e) {}
+		rec(140.1, 140, "1963464", ver140a, performance.now()-t140a) // 0.04ms
+
+		// 140: 929890: 139 = "", 140+ = "auto" : also see 1969210
+		let t140 = performance.now(), ver140
+		try {ver140 = '' !== dom.tzpPreload.preload} catch(e) {}
+		rec(140, 140, "929890", ver140, performance.now()-t140, "DOM") // 0.04ms
 
 		// 139: 1960556
 		let t139 = performance.now() , ver139
@@ -798,7 +836,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 66, oOther = {}
+	let countOther = 0, expectOther = 67, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -815,6 +853,15 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 140: 1965802 SLOW
+		let t140 = performance.now(), ver140
+		try {
+			document.body.style.zIndex = 'calc(1 + 0.01)'
+			ver140 = 'calc(1.01)' == document.body.style.zIndex
+			document.body.style.zIndex = ''
+		} catch(e) {}
+		rec(140, 140, "1965802", ver140, performance.now()-t140) // 0.6ms
 
 		// 139: 1960049
 		let t139 = performance.now(), ver139
