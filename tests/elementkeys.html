@@ -51,7 +51,7 @@ let oListIgnore = {
 		'input|password','input|radio','input|range','input|reset','input|search',
 		'input|submit','input|tel','input|text','input|time','input|url','input|week',
 	],
-	"STABLE": [
+	"STABLE B": [
 		'caption','h1','h2','h3','h4','h5','h6','p', // = div
 		'ins', // = del
 		'xmp', // = pre
@@ -82,6 +82,9 @@ let oList = {
 			// 137n	allowedToPlay
 		'details',
 			// 130	name
+		'dialog',
+			// first added in 98 (show, showModal, close, open, returnValue)
+			// 139	requestClose
 		'template',
 			// 123	shadowRootMode, shadowRootDelegatesFocus
 			// 125	shadowRootClonable
@@ -100,9 +103,9 @@ let oList = {
 			// 132	fetchPriority
 			// 135	innerText, textContent
 	],
-	"CHECK B": [
-	// changes since FF115: added or (removed)
-		// fast since the pasrer is already created
+	"STABLE A": [
+	// no changes since FF126
+		// fast since the parser is already created
 		// cold: 0.7 | rerun 0.7
 		'button',
 			// 125	popoverTargetElement, popoverTargetAction
@@ -119,10 +122,10 @@ let oList = {
 			// 116	dirName
 	],
 	// no changes since FF111
-	"STABLE": [
+	"STABLE B": [
+		//*
 		'source', // 108 (width, height)
 		'meta', // 106 (media)
-		'dialog', // first added in 98 (show, showModal, close, open, returnValue)
 		'form', // 75, 111 (rel, relList)
 		'canvas', // 74, 105
 		'object', // 68
@@ -132,7 +135,7 @@ let oList = {
 		'meter', // 56 (labels)
 		'progress', // 56 (labels)
 		'style', // disabled, media, type, sheet (scoped removed in 55)
-		// super boring
+		//* super boring
 		// FF52-130+
 		'a',
 		'area',
@@ -170,6 +173,7 @@ let oList = {
 		'tr',
 		'track',
 		'ul', // compact, type
+		//*/
 	],
 	//*/
 }
@@ -187,7 +191,6 @@ let aNoParser = [
 ]
 
 function run() {
-
 	// set/reset
 	let t0 = performance.now()
 	oData = {}
@@ -198,7 +201,6 @@ function run() {
 	let tmpPreHash = {}
 	let oOrder = {}
 	let perfA, perfB
-
 
 	let splitValue = isFF ? "click" : "title" // title works for chrome + safari
 	/* interesting (without extension fuckery which I have not tested)
@@ -252,9 +254,9 @@ function run() {
 
 		// loop elements
 		for (const k of Object.keys(tmpList).sort()) {
-			if (k == 'CHECK B') {
+			if (k == 'STABLE A') {
 				perfA = performance.now() - t0
-			} else if (k =="STABLE") {
+			} else if (k =="STABLE B") {
 				perfB = (performance.now() - t0) - perfA
 			}
 
@@ -429,19 +431,22 @@ function run() {
 			// display pre
 			toggle = "pre"+ m
 			let notation = '', hash = mini(oPreHash[m])
+
 			if (isFF && !dom.optAll.checked) {
-				if ('STABLE' == m) {
+				let is111 = HTMLElement.prototype.hasOwnProperty("translate")
+				let is126 = false
+				try {is126 = "function" === typeof URL.parse} catch(e) {}
+				if ('STABLE B' == m && is111) {
 					/*
 						111 'form'			(rel, relList)
 						108 'source'		(width, height)
 						106 'meta'			(media)
 						105 'canvas'
-						98 'dialog', 		(show, showModal, close, open, returnValue)
 						92 'slot' 			assign
 						89 'body' + frameset
 						75 'form'
 						74 'canvas'
-						69 'body' + 'frameset'
+						69 'body' + frameset
 						68 'object',
 						66 'slot' 			assignedElements
 						63 'slot' 			assignedNodes + name
@@ -450,27 +455,27 @@ function run() {
 						56 'progress'		labels
 						55 'style'			disabled, media, type, sheet (scoped removed)
 					*/
-					let aOld = [
-						'a488bcc2', // 52-54
-						'af10529e', // 55
-						"6eec601a", // 56
-						"41d93fcb", // 57-62
-						"78f06620", // 63-65
-						"18ab13c8", // 66-67
-						"e814e712", // 68
-						"4b789ebc", // 69-73
-						"32f32119", // 74
-						"4f0ebd4c", // 75-88
-						"9bbc22ad", // 89-91
-						"5a242cc8", // 92-97
-						"8ecb0dbe", // 98-104
-						'1306147e', // 105
-						'bedac0de', // 106-107
-						'28bef477', // 108-110
-						'cc0e42c9', // TB128 without NoScript tampering (offscreencanvas)
-					]
-					if (hash == "93802989") {notation = sg +' ['+ green_tick +' FF111+]'+ sc
-					} else if (aOld.includes(hash)) {notation = sg +' ['+ green_tick +' FF114 or lower]'+ sc
+					if (hash == "1471d575") {notation = sg +' ['+ green_tick +' FF111+]'+ sc
+					} else {notation = ' '+ zNEW
+					}
+				} else if ('STABLE A' == m && is126) {
+					/*
+					'button',
+						// 125	popoverTargetElement, popoverTargetAction
+					'iframe',
+						// 121	(loading)
+					'input',
+						// 116	dirName
+						// 125	popoverTargetElement, popoverTargetAction
+					'marquee',
+						// 126	(onbounce, onfinish, onstart)
+					'select',
+						// 122	showPicker
+					'textarea',
+						// 116	dirName
+					*/
+					// bba6c822 125
+					if (hash == "17e4f55c") {notation = sg +' ['+ green_tick +' FF126+]'+ sc
 					} else {notation = ' '+ zNEW
 					}
 				}
@@ -509,7 +514,7 @@ function run() {
 }
 
 Promise.all([
-	get_globals()
+	get_globals(),
 ]).then(function(){
 	dom.optAll.checked = false
 	run()
