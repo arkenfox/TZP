@@ -22,6 +22,7 @@
 	--test18: #dc9db2;
 	--test99: #808080;
 	--testbad: #ff8787; /* sat 120 */
+	--testred: #ff8787; /* to use in basic mode */
 	/* sat 90 */
 	--bg0: #161b22;
 	--bg1: #f09b9b;
@@ -66,6 +67,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .basic {color: #d4c1b3;}
 .good {color: var(--test7);}
 .bad {color: var(--testbad);}
+.red {color: var(--testred);} /* use in basic mode to enforce showing an issue e.g. mismatched metric counts */
 .faint {color: var(--test99);}
 .hidden {display: none;}
 .health, .healthsilent {font-size: 10px;}
@@ -131,6 +133,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .btn99, .s99 {border-color: var(--test99); color: var(--test99);}
 .btngood, .sgood {border-color: var(--test7); color: var(--test7);}
 .btnbad, .sbad {border-color: var(--testbad); color: var(--testbad);}
+.btnred, .sred {border-color: var(--testred); color: var(--testred);}
 .btn-left {float: left; position: relative; left: -15px; top: 0px;}
 .btn-right {float: right; position: relative; top: 0px; text-align: right;}
 
@@ -171,7 +174,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	display: none;
 	width: 95%;
 	max-width: 725px;
-	min-width: 425px;
+	min-width: 225px;
 	height: 85%;
 	overflow-y:scroll;
 	border: 2px solid var(--test0);
