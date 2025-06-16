@@ -447,6 +447,8 @@ function check_mathLies() {
 }
 
 function get_component_shims(METRIC) {
+	if (!isGecko) {addBoth(18, METRIC, zNA); return}
+
 	// 960392: dom.use_components_shim
 	let hash, btn ='', data, notation = isBB ? bb_red: ''
 	try {
@@ -846,12 +848,16 @@ const outputMisc = () => new Promise(resolve => {
 	if (runSL) {addProxyLie('Math.sin')}
 	let isMathLies = check_mathLies()
 
-	// 1965165: javascript.options.property_error_message_fix FF140+ default enabled
-	try {null.bar} catch(e) {
-		let notation = ''
-		if (isBB) {notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)}
-		addBoth(18, 'error_message_fix', e.message,'', notation) // FF74+: 1259822
+	let notation = '', value = zNA
+	if (isGecko) {
+		// 1259822: FF74+ | 1965165: javascript.options.property_error_message_fix FF140+ default enabled
+		try {null.bar} catch(e) {
+			if (isBB) {notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)}
+			value = e.message
+		}
 	}
+	addBoth(18, 'error_message_fix', value,'', notation)
+
 	Promise.all([
 		get_svg('svg_enabled'),
 		get_math('math_trig', isMathLies),
