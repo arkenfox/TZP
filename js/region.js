@@ -26,7 +26,15 @@ function get_nav_connection(METRIC) {
 				let keyValue = navigator.connection[key]
 				let keyType = typeof keyValue
 				if ('function' === keyType) {oTemp[key] = keyType} else {
-					if ('downlink' == key) {keyValue = Math.floor(keyValue)} // non-gecko stability
+					// stability
+					if ('downlink' == key.slice(0,8)) {
+						// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
+						// downlinkMax (chromeOS)
+						keyValue = Math.floor(keyValue)
+					} else if ('rtt' == key) {
+						// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
+						keyValue = zNA
+					}
 					oTemp[key] = keyValue
 				}
 			}
