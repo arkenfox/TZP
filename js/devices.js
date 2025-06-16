@@ -185,7 +185,7 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 			if (devices.length > 0) {
 				// tampered
 				let aSplit = (devices +'').split(',')
-				let expected = '[object MediaDeviceInfo]'
+				let expected = 'webkit' == isEngine ? '[object InputDeviceInfo]' : '[object MediaDeviceInfo]'
 				for (let i=0; i < aSplit.length; i++) {
 					if (aSplit[i] !== expected ) {throw zErrInvalid +'expected '+ expected +': got '+ aSplit[i]}
 				}

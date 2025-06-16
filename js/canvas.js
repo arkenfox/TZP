@@ -548,9 +548,9 @@ const get_canvas = () => new Promise(resolve => {
 			oFP[name] = {'value': value, 'notation': notation, 'data': data}
 		})
 
-		// we're testing for protection so always do two passes, including basic mode
-			//if (!isSmart || countFake == 0) {
-		if (countFake == 0) {
+		// we're testing for protection so always do two passes, including gecko basic mode
+			// ToDo: handle canvas spoofing in nonGecko: e.g. we can easily test getImageData: for now just exit
+		if (countFake == 0 || !isGecko) {
 			exit()
 			return
 		}

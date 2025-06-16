@@ -1632,6 +1632,7 @@ function log_section(name, time, scope = isScope) {
 
 	// GLOBAL
 	gCount++
+
 	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
 	if (gCount == gSectionsExpected) {
 		gt1 = gt0
@@ -1641,7 +1642,7 @@ function log_section(name, time, scope = isScope) {
 		// FP
 		try {
 			let metricCount = Object.keys(gData[zFP][scope +"_flat"]).length
-			let color = metricCount == expectedMetrics ? 0 : 'bad'
+			let color = metricCount == expectedMetrics ? 0 : 'red' // use red to override color in basic mode
 			dom[scope + "hash"].innerHTML = mini(gData[zFP][scope]) + addButton(color, zFP, metricCount +" metrics")
 		} catch(e) {
 			console.log(e)

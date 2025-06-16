@@ -152,6 +152,8 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 		}
 	}
 
+	// nonGecko boolean vs undefined: i.e a string of "undefined" will be an error
+	let expectedType = isGecko ? 'boolean' : 'undefined'
 	// fullScreen
 	function get_fullScreen(item) {
 		let data, isLies = false
@@ -159,7 +161,8 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 			data = window.fullScreen
 			if (runST) {data = undefined}
 			let typeCheck = typeFn(data)
-			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+			if ('undefined' == typeCheck) {data += ''}
 			// lies
 			let boolCss = 'fullscreen' == cssvalue ? true : false
 			if (runSL) {data = !boolCss}
@@ -174,7 +177,6 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 		addDisplay(1, 'window'+ item, data,'','', isLies)
 		oRes[item] = isLies ? zLIE : data
 	}
-
 	// full-screen-api.enabled
 	function get_mozFullScreenEnabled(item) {
 		let data
@@ -182,7 +184,8 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 			data = document.mozFullScreenEnabled
 			if (runST) {data = undefined}
 			let typeCheck = typeFn(data)
-			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+			if ('undefined' == typeCheck) {data += ''}
 		} catch(e) {
 			log_error(1, METRIC +'_'+ item, e); data = zErr
 		}
@@ -485,8 +488,8 @@ const get_scr_measure = () => new Promise(resolve => {
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
 			if (isOS == undefined) {dockStr = 'taskbar/dock/panel'}
 			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
-			// non-gecko does not resize non-inner (e.g. outer) when zooming, so ignore chrome
-			if (isGecko) {oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'}
+			// note: non-gecko does not resize non-inner (e.g. outer) when zooming, so chrome sizes can get ridiculous, display anyway
+			oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'
 		}
 
 		// data
@@ -687,7 +690,13 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 					if (window.matchMedia(q + l +')').matches) value = l
 				}
 				if (runST) {value = undefined} else if (runSL) {value += '_fake'}
-				if (value == undefined) {throw zErrType +'undefined'} // we expect values (in gecko)
+				// can only be undefined (default) or a string (which we set)
+				if (!isGecko && '-moz-device-orientation' == item) {
+					if (value !== undefined) {throw zErrType + typeFn(value)} // undefined in nonGecko
+					value += ''
+				} else {
+					if (value == undefined) {throw zErrType +'undefined'} // we expect values (in gecko)
+				}
 			} catch(e) {
 				log_error(1, METRIC +'_'+ type +'_'+ item, e)
 				value = zErr
@@ -698,7 +707,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			let cssvalue = getElementProp(1, cssID, METRIC +'_'+ cssitem)
 			let isErrCss = cssvalue == zErr
 			let isLies = (!isErr && !isErrCss && value !== cssvalue)
-			oDisplay[METRIC +'_'+ item] = {'value': value, 'lies': isLies}
+			oDisplay[METRIC +'_'+ item] = {'value': value +'', 'lies': isLies}
 			if (isSmart && isLies) {
 				log_known(1, METRIC +'_'+ type +'_'+ item, value)
 				value = zLIE
@@ -716,11 +725,14 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 	// screen
 	let items = ['mozOrientation', 'orientation.angle', 'orientation.type']
 	items.forEach(function(item) {
-		let value, expected = 'string', isAngle = 'orientation.angle' == item, isLies = false
+		let value, expectedType = 'string', isAngle = 'orientation.angle' == item, isLies = false
 		try {
-			if ('mozOrientation' == item) {value = screen.mozOrientation
+			if ('mozOrientation' == item) {
+				value = screen.mozOrientation
+				// gecko: undefined throws an error, 'undefined' returns the string (or a lie if isSmart)
+				if (!isGecko) {expectedType = 'undefined'}
 			} else if (isAngle) {
-				value = screen.orientation.angle; expected = 'number'
+				value = screen.orientation.angle; expectedType = 'number'
 			} else {value = screen.orientation.type
 			}
 			if (runST) {value = isAngle ? value +'' : true
@@ -728,7 +740,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			} else if (runSL) {value = isAngle ? 90 : 'portrait-primary'
 			}
 			let typeCheck = typeFn(value)
-			if (expected !== typeCheck) {throw zErrType + typeCheck}
+			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
 			if (isAngle) {
 				let aGood = [0, 90, 180, 270]
 				if (!aGood.includes(Math.abs(value))) {
@@ -739,7 +751,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			if (isSmart && zErr !== check) {
 				// check mozOrientation + .type matches css
 				// note: we can't check the angle, it could be anything - see Piero tablet tests
-				if ('string' == expected && value.split('-')[0] !== check) {
+				if ('string' == expectedType && value.split('-')[0] !== check) {
 					log_known(1, METRIC +'_device_'+ item, value)
 					isLies = true
 				}
@@ -748,12 +760,37 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			log_error(1, METRIC +'_device_'+ item, e)
 			value = zErr
 		}
+		if ('mozOrientation' == item && undefined == value) {value += ''} // only nonGecko mozOrientation can be undefined
 		oDisplay[METRIC +'_'+ item] = {'value': value, 'lies': isLies}
 		oData['device'][item] = isLies ? zLIE : value
 	})
 
 	// https://searchfox.org/mozilla-central/source/testing/web-platform/tests/screen-orientation/orientation-reading.html
 	// see expectedAnglesLandscape + expectedAnglesPortrait
+
+	/*
+	let zUndefined = 'undefined'
+	let test = {
+		'-moz-device-orientation': zUndefined,
+		'-moz-device-orientation_css': zNA,
+		'device-aspect-ratio': 'square',
+		'device-aspect-ratio_css': 'square',
+		'mozOrientation': zUndefined,
+		'orientation.angle': 0,
+		'orientation.type':"portrait-primary",
+	}
+	let moztest = {
+		'-moz-device-orientation': 'portrait',
+		'-moz-device-orientation_css': 'portrait',
+		'device-aspect-ratio': 'square',
+		'device-aspect-ratio_css': 'square',
+		'mozOrientation': 'portrait-primary',
+		'orientation.angle': 0,
+		'orientation.type':"portrait-primary",
+	}
+	console.log('chrometest', mini(test))
+	console.log('moztest', mini(moztest))
+	//*/
 
 	// display, data
 	for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k]['value'],'','', oDisplay[k]['lies'])}
@@ -763,21 +800,37 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 		let hash = mini(data)
 		addData(1, METRIC +'_'+ k, oData[k], hash)
 		if ('device' == k) {
-			// device health check
-			// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to BB
-			// RFP is always primary | on android the angle of 0 vs 90 is reversed
-
-			// type | angle | orientation (css) + aspect ratio (css)
-			let oGood = {
-				'a1de035c': 'landscape-primary | 0 | landscape',
-				'ccc8dc6d': 'portrait-primary | 90 | portrait',
-				'fb6084ad': 'portrait-primary | 90 | portrait | square',
-			}
-			if ('android' == isOS) {
+			//console.log(hash, k, oData[k])
+			let oGood = {}
+			if (isGecko) {
+				// device health check
+				// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to BB
+				// RFP is always primary | on android the angle of 0 vs 90 is reversed
+				// type | angle | orientation (css) + aspect ratio (css)
 				oGood = {
+					'a1de035c': 'landscape-primary | 0 | landscape',
+					'ccc8dc6d': 'portrait-primary | 90 | portrait',
+					'fb6084ad': 'portrait-primary | 90 | portrait | square',
+				}
+				if ('android' == isOS) {
+					oGood = {
+						'813838a9': 'landscape-primary | 90 | landscape',
+						'360dd99a': 'portrait-primary | 0 | portrait',
+						'fdc0295a': 'portrait-primary | 0 | portrait | square',
+					}
+				}
+			} else {
+				// nonGecko with undefined + n/a for moz* properties
+				// basic mode, ignore OS
+				oGood = {
+					// desktop
+					'68510616': 'landscape-primary | 0 | landscape',
+					'ca467d33': 'portrait-primary | 90 | portrait',
+					'ebce91f3': 'portrait-primary | 90 | portrait | square',
+					// android
 					'813838a9': 'landscape-primary | 90 | landscape',
-					'360dd99a': 'portrait-primary | 0 | portrait',
-					'fdc0295a': 'portrait-primary | 0 | portrait | square',
+					'a9960814': 'portrait-primary | 0 | portrait',
+					'60585b54': 'portrait-primary | 0 | portrait | square',
 				}
 			}
 			let display = undefined !== oGood[hash] ? oGood[hash] : hash
@@ -944,6 +997,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 })
 
 function get_scr_pixels_match(METRIC, oData) {
+	if (!isSmart) {return}
 	// media pixels vs window devicePixelRatio
 	let isPixelMatch = true, oPixels = {}, oSummary = {'false': [], 'true': []}, controlPx, testPx
 	// remove items we don't compare
@@ -1037,14 +1091,18 @@ const get_scr_positions = (METRIC) => new Promise(resolve => {
 		'window': ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']
 	}
 	let oData = {'screen': {}, 'window': {}}
+	// nonGecko: number vs undefined: i.e a string of "undefined" will be an error
+	let aNonGecko = ['left','top','mozInnerScreenX','mozInnerScreenY']
 	for (const m of Object.keys(methods)){
 		let display = [], x
 		methods[m].forEach(function(k){
 			try {
 				x = 'screen' == m ? screen[k] : window[k]
-				if (runST) {x = undefined}
-				let typeCheck = typeFn(x)
-				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				if (runST) {x = 'undefined'}
+				let typeCheck = typeFn(x), expectedType = 'number'
+				if (!isGecko && aNonGecko.includes(k)) {expectedType = 'undefined'}
+				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+				if (undefined == x) {x += ''}
 			} catch(e) {
 				log_error(1, METRIC +'_'+ k, e); x = zErr
 			}

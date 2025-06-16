@@ -1895,7 +1895,7 @@ function get_script_defaults(METRIC) {
 	}
 
 	let hash = zNA, btn ='', data ='', notation = default_red
-	if (isGecko) {
+	//if (isGecko) {
 		data = {}
 		try {
 			const el = dom.tzpScript
@@ -1934,7 +1934,8 @@ function get_script_defaults(METRIC) {
 				let key = tmp.join('-')
 				if (tmpdata[key] == undefined) {tmpdata[key] = [k]} else {tmpdata[key].push(k)}
 			}
-			for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]} // sort obj
+			let singleKey
+			for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]; singleKey = k} // sort obj
 			hash = mini(data); btn = addButton(12, METRIC)
 			// notation
 			if ('windows' == isOS && 'e5179dbb' == hash) {notation = default_green
@@ -1942,10 +1943,13 @@ function get_script_defaults(METRIC) {
 			} else if ('mac' == isOS && '884ca29d' == hash) {notation = default_green
 			} else if ('android' == isOS && '632e080a' == hash) {notation = default_green
 			}
+			// single value
+			if (1 === Object.keys(data).length) {hash = singleKey; btn = ''}
+
 		} catch(e) {
 			hash = e; data = zErrLog
 		}
-	}
+	//}
 	addBoth(12, METRIC, hash, btn, notation, data)
 	return
 }
