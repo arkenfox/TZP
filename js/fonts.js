@@ -383,21 +383,22 @@ let fntMaster = {
 			'MS Shell Dlg \\32',
 			// common FontSubstitutes that point to kBase fonts
 			'MS Shell Dlg','MS Shell Dlg 2', // can differ
-			// non-common FontSubstitutes
-			'Arial (Arabic)','Arial (Hebrew)','MS Serif Greek','ﾍﾙﾍﾞﾁｶ', // ja = arial
+			// FontSubstitutes which can be or are aliased to kBaseFonts
+				// 1845105: FF141+
+			'Arial (Arabic)','Arial (Hebrew)','Arabic Transparent','Arial Baltic','Arial CE','Arial CYR','Arial Greek','Arial TUR',
+			'Courier','Courier New (Arabic)','Courier New (Hebrew)','Courier New Baltic','Courier New CE','Courier New CYR',
+			'Courier New Greek','Courier New TUR','Helv','Helvetica','MS Serif Greek','MS Sans Serif Greek','Small Fonts Greek',
+			'Tahoma Armenian','Times','Times New Roman (Arabic)','Times New Roman (Hebrew)','Times New Roman Baltic',
+			'Times New Roman CE','Times New Roman CYR','Times New Roman Greek','Times New Roman TUR','Tms Rmn',
+				// jap
+			'ﾍﾙﾍﾞﾁｶ', // arial
+			'ｸｰﾘｴ', // Courier New
+			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
+			'ﾀｲﾑｽﾞﾛﾏﾝ', // TNR
 			/* ignore
-			// common subs
-				'Arabic Transparent','Arial Baltic','Arial CE','Arial CYR','Arial Greek','Arial TUR',
-				'Courier New Baltic','Courier New CE','Courier New CYR','Courier New Greek','Courier New TUR',
-				'Helv','Helvetica','Tahoma Armenian','Times','Times New Roman Baltic','Times New Roman CE',
-				'Times New Roman CYR','Times New Roman Greek','Times New Roman TUR','Tms Rmn',
-			// non-common subs: redundant
-				'Courier New (Hebrew)','Times New Roman (Hebrew)','Small Fonts Greek',
-				'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
-				'ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // TNR, Courier -> Courier New
 			// system aliases: should always be the same AFAICT
 				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman', // Microsoft Sans Serif, TNR, Courier New, Arial, TNR
+				'MS Sans Serif','MS Serif','Small Fonts','Roman', // Microsoft Sans Serif, TNR, Arial, TNR
 			//'Franklin Gothic Medium', // 7 not detected if font-vis < 3: 1720408
 			//*/
 		],
@@ -438,12 +439,23 @@ let fntMaster = {
 			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // late 2024 update
 			// 1954265: FF139+ win11 23H2 / win1022H2
 			'Noto Sans HK','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC',
-			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC', 
-			// fontSubs
-			'KaiTi_GB2312','楷体_GB2312', // simplified chinese
-			// fontSubs redundant
-				// '標準明朝', // ＭＳ 明朝 -> MS Mincho
-				// 'FangSong_GB2312',
+			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC',
+			// FontSubstitutes which can be or are aliased to kLangPackFonts
+				// 1845105: FF141+
+				// hebrew
+			'David Transparent', // David
+			'Fixed Miriam Transparent', // Miriam Fixed
+			'Miriam Transparent', // Miriam
+			'Rod Transparent', // Rod
+				// japanese
+			'標準明朝', // ＭＳ 明朝 -> MS Mincho,
+				// simplified chinese
+			'FangSong_GB2312', // FangSong
+			'KaiTi_GB2312','楷体_GB2312' // KaiTi + localized
+				/* Fixedsys and system do not seem to be available to web content
+			'Fixedsys Greek', // Fixedsys
+			'System Greek', // System
+				//*/
 		],
 		windowsfaces: [
 			'BIZ UDMincho Medium','BIZ UDPMincho Medium','DengXian Light','Yu Mincho Demibold','Yu Mincho Light'
