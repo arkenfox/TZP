@@ -1489,6 +1489,7 @@ function addTiming(metric) {
 	try {
 		if (0 == remainder) {
 			key = 'exslt'
+			if (!isGecko) {throw zSKIP}
 			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
 				+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
 				+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
