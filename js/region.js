@@ -14,28 +14,50 @@ function get_nav_connection(METRIC) {
 			if ('object' !== typeCheck) {throw zErrType + typeFn(hash)}
 			let expected = '[object NetworkInformation]'
 			if (hash+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ hash}
-			/* https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
-			// not worth leveraging type checks in gecko
+			// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
 			let keyTypes = {
-				'addEventListener': 'function', 'dispatchEvent': 'function',
-				'ontypechange': 'object', 'removeEventListener': 'function', 'type': 'string',
+				addEventListener: 'function',
+				dispatchEvent: 'function',
+				downlink: 'number',
+				downlinkMax: 'number',
+				effectiveType: 'string',
+				onchange: 'null',
+				ontypechange: 'object',
+				removeEventListener: 'function',
+				rtt: 'number',
+				saveData: 'boolean',
+				type: 'string',
+				when: 'function',
 			}
-			//*/
+			if (isGecko) {keyTypes.ontypechange = 'null'}
 			let oTemp = {}
 			for (let key in navigator.connection) {
-				let keyValue = navigator.connection[key]
-				let keyType = typeof keyValue
-				if ('function' === keyType) {oTemp[key] = keyType} else {
+				try {
+					let keyValue = navigator.connection[key]
+					if (runSI) {keyValue = undefined}
+					let typeCheck = typeFn(keyValue), expectedType = keyTypes[key]
+					if (typeCheck !== expectedType) {throw zErrInvalid +'expected '+ typeCheck +': got '+ typeCheck}
+					//
+					if ('function' === typeCheck) {keyValue += ''}
 					// stability
 					if ('downlink' == key.slice(0,8)) {
-						// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
-						// downlinkMax (chromeOS)
+						// downlinkMax (chromeOS), downlink
 						keyValue = Math.floor(keyValue)
 					} else if ('rtt' == key) {
-						// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
 						keyValue = zNA
+					} else if ('effectiveType' == key) {
+						if (runSI) {keyValue = '1g'}
+						let aGood = ['slow-2g','2g','3g','4g']
+						if (!aGood.includes(keyValue)) {throw zErrInvalid + ': got ' + keyValue}
+						if ('slow-2g' == keyValue) {keyValue = '2g'} // treat slow-2g as 2g
+					} else if ('onchange' == key || 'ontypechange' == key) {
+						// record null as a string | note: 'null' is caught as an error
+						if (null == keyValue) {keyValue += ''}
 					}
 					oTemp[key] = keyValue
+				} catch(e) {
+					oTemp[key] = zErr
+					log_error(5, METRIC +'_'+ key, e)
 				}
 			}
 			data = {}
