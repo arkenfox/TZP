@@ -405,7 +405,8 @@ function set_oIntlTests() {
 	}
 }
 
-const get_geo = (METRIC) => new Promise(resolve => {
+function get_geo(METRIC) {
+	// nav/window are redundant: display only
 	let res = [], value, notation = default_red, isLies = false
 	// nav
 	try {
@@ -425,7 +426,6 @@ const get_geo = (METRIC) => new Promise(resolve => {
 	}
 	addDisplay(4, METRIC +'_navigator', value,'','', isLies) // display separate for notating lies
 	res.push(isLies? zLIE : value)
-
 	// window
 	try {
 		value = 'Geolocation' in window ? true : false
@@ -438,27 +438,18 @@ const get_geo = (METRIC) => new Promise(resolve => {
 		log_error(4, METRIC +'_window', e); value = zErr
 	}
 	res.push(value)
-
-	function exit(state) {
-		res.push(state)
-		let hash = mini(res)
-		if (isBB && hash == '5ce0a555') {
-			notation = default_green // BB ESR78+: disabled, true, prompt
-		} else if (!isBB && hash == 'e36e1742') {
-			notation = default_green // FF72+: enabled, true, prompt
-		}
-		addBoth(4, METRIC, res[1] +' | '+ res[2],'', notation, res.join(' | '))
-		return resolve()
+	// summary
+	let hash = mini(res)
+	if (isBB && hash == 'feacff5d') {
+		notation = default_green // BB ESR78+: disabled, true
+	} else if (!isBB && hash == '23d43ed0') {
+		notation = default_green // FF72+: enabled, true
 	}
-
-	try {
-		if (runSE) {foo++}
-		navigator.permissions.query({name:'geolocation'}).then(e => exit(e.state))
-	} catch(e) {
-		log_error(4, METRIC +'_permission', e)
-		exit(zErr)
-	}
-})
+	// health lookup
+	if (gRun) {sDetail[isScope].lookup[METRIC] = res.join(' | ')}
+	addDisplay(4, METRIC, res[1],'', notation)
+	return
+}
 
 function get_language_locale() {
 	// reset
@@ -560,7 +551,7 @@ function get_language_locale() {
 	if (isLanguageSmart && isBB) { // only notate BB
 		notation = bb_red
 		let errHash = mini(oErr)
-		if (isVer > 135 && Object.keys(oErr).length == 0 || isVer < 136 && '61a9b098' == errHash) {
+		if (isVer > 139 && Object.keys(oErr).length == 0 || isVer == 128 && '61a9b098' == errHash) {
 			// BB15: no errors (durationformat default enabled 136+)
 			// BB14: 1 exact error: 61a9b098: { durationformat: "TypeError: Intl.DurationFormat is not a constructor" }
 			// only green if BB supported
