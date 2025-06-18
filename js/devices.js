@@ -299,14 +299,10 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		// sort object
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k]}
 		let hash = mini(data), isGreen = false
-		// add notation
-		if (isBB) {
-			if (isVer == 128 && 'd34d3764' == hash) {isGreen = true
-			} else if (isVer == 140 && 'd417aea2' == hash) {isGreen = true
-			}
-		} else {
-			if (isVer < 131 && 'd34d3764' == hash) {isGreen = true
-			} else if (isVer < 150 && 'd417aea2' == hash) {isGreen = true // camera + microphone no longer an error
+		if (isGecko) {
+			// add notation: both TB/FF are identical
+			if (isVer < 132 && 'd34d3764' == hash) {isGreen = true
+			} else if (isVer > 131 && 'd417aea2' == hash) {isGreen = true // FF132+: camera + microphone added
 			}
 		}
 		let notation = isGreen ? default_green : default_red
