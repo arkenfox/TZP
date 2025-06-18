@@ -389,42 +389,12 @@ function get_media_preload(METRIC) {
 	return
 }
 
-const get_midi = () => new Promise(resolve => {
-	// prompt, granted, denied
-	let count = 0
-	function exit(metric, value, data ='') {
-		count++
-		let notation = 'prompt' == value ? default_green : default_red
-		addBoth(13, metric, value,'', notation, data)
-		if (count == 2) {return resolve()}
-	}
-	[false, true].forEach(function(isSysex) {
-		let METRIC = 'permission_midi' + (isSysex ? '_sysex' : '')
-		try {
-			navigator.permissions.query({name: 'midi', sysex: isSysex}).then(function(r) {
-				let value = r.state
-				if (runST) {value = true} else if (runSI) {value = 'allowed'}
-				let typeCheck = typeFn(value)
-				if ('string' !== typeCheck) {throw zErrType + typeCheck}
-				let aValid = ['prompt','granted','denied']
-				if (!aValid.includes(value)) {throw zErrInvalid +'got '+ value}
-				exit(METRIC, r.state)
-			}).catch(e => {
-				exit(METRIC, e, zErrShort)
-			})
-		} catch(e) {
-			exit(METRIC, e, zErrShort)
-		}
-	})
-})
-
 const outputMedia = () => new Promise(resolve => {
 	Promise.all([
 		get_clearkey('clearkey'),
 		get_media('audio'),
 		get_media('video'),
 		get_media_preload('media_preload'),
-		get_midi('midi'),
 		get_autoplay('getAutoplayPolicy'),
 	]).then(function(){
 		return resolve()
