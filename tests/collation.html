@@ -172,7 +172,8 @@ var compareExamples = [
 var aLegend = [],
 	aLocales = [],
 	counter = 0,
-	oSortvsSearch = {}
+	oSortvsSearch = {},
+	oRaw = {}
 
 function legend() {
 	// build once
@@ -359,9 +360,9 @@ function collator() {
 
 	// good to go
 	if (goSort == true && goSearch == true) {
-		oSortvsSearch = {
-			"search_is_nonenglish": [],
-		} // reset
+		// reset
+		oSortvsSearch = {"search_is_nonenglish": [],} 
+		oRaw = {}
 
 		// delay so user can see changes
 		setTimeout(function() {
@@ -406,7 +407,6 @@ function collator() {
 				legendnew = [],
 				codes = []
 			let oTempData = {}
-
 			for (let i = 0 ; i < list.length; i++) {
 				// important: reset to original order
 				let str = list[i].toLowerCase()
@@ -428,6 +428,7 @@ function collator() {
 					"sort": sortdata,
 				}
 				let combinedhash = mini(tmpobj)
+				if (undefined == oRaw[combinedhash]) {oRaw[combinedhash] = tmpobj}
 
 				if (searchhash !== ensearchhash) {
 					oSortvsSearch["search_is_nonenglish"].push(code + ": " + searchhash +", " + sorthash)
@@ -494,16 +495,21 @@ function collator() {
 				newArr.sort()
 				let lineItems = []
 				tmpH = "", tmpL = "", tmpStr = ""
-				let len = 0
+				let len = 0, tmpCH = ""
+				let isDetails = charsSort.join(', ').length > 50
 				// newArr
 				for (let i = 0 ; i < newArr.length; i++) {
 					tmpStr = newArr[i]
 					len = tmpStr.length
 					tmpL = tmpStr.split(":")[0]
-					tmpH = tmpStr.split(":")[1]
+					tmpH = tmpStr.split(":")[1] // hashes
+					tmpCH = tmpH.split(" | ")[2] // combined hash for data lookup
 					tmpStr = s12 + (i + 1).toString().padStart(3) +": "+ sc
-					// counter then hash then locales
-					lineItems.push (tmpStr + tmpH +"<br><ul><li>"+ tmpL +"</li></ul>")
+					// counter then hash then details then locales
+					let strDetails = "<li>"+ s14 +"search: "+ sc + oRaw[tmpCH]['search'].join(', ') +"</li>"
+							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[tmpCH]['sort'].join(', ') +"</li>"
+					if (isDetails) {strDetails = "<li><details><summary>"+ s14 +"data"+ sc +"</summary><ul>"+ strDetails +"</ul></details></li>"}
+					lineItems.push (tmpStr + tmpH +"<br><ul>"+ strDetails +"<li>"+ tmpL +"</li></ul>")
 				}
 
 				// results output
