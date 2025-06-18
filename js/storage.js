@@ -24,6 +24,18 @@ const lookup_cookiestore = async function(rndStr, k) {
 	}
 }
 
+const lookup_permission = (item) => new Promise(resolve => {
+	try {
+		navigator.permissions.query({name: item}).then(function(r) {
+			return resolve(r.state)
+		}).catch(e => {
+			return resolve()
+		})
+	} catch(e) {
+		return resolve()
+	}
+})
+
 const get_caches = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 	// PB mode: DOMException: The operation is insecure.
@@ -197,7 +209,16 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 	let isLies = false, notation = isBB ? bb_red : ''
 	function exit(display, value) {
 		addBoth(6, METRIC, display,'', notation, value, isLies)
-		return resolve()
+		// silent run manager to force granted quota when run
+		Promise.all([
+			lookup_permission('persistent-storage')
+		]).then(function(res){
+			if ('granted' == res[0]) {
+				Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
+			} else {
+				return resolve()
+			}
+		})
 	}
 	try {
 		navigator.storage.estimate().then(estimate => {
@@ -216,37 +237,6 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 		})
 	} catch(e) {
 		exit(log_error(6, METRIC, e), zErr)
-	}
-})
-
-const get_permissions = (item) => new Promise(resolve => {
-	const METRIC = 'permission_'+ item
-	const aGood = ['denied','granted','prompt']
-	function exit(display, value) {
-		if (value == undefined) {value = display}
-		let notation = value == 'prompt' ? default_green : default_red
-		addBoth(6, METRIC, display,'', notation, value)
-		// silent run manager to force granted quota when run
-		if ('persistent-storage' == item && 'granted' == value) {
-			Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
-		} else {
-			return resolve()
-		}
-	}
-	try {
-		navigator.permissions.query({name:item}).then(function(r) {
-			let rstate = r.state
-			if (runST) {rstate = undefined} else if (runSI) {rstate = 'allowed'}
-			// checks
-			let typeCheck = typeFn(rstate)
-			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if (!aGood.includes(rstate)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ rstate}
-			exit(rstate)
-		}).catch(e => {
-			exit(e, zErrShort)
-		})
-	} catch(e) {
-		exit(e, zErrShort)
 	}
 })
 
@@ -367,11 +357,8 @@ const outputStorage = () => new Promise(resolve => {
 		get_storage('sessionStorage', rndStr),
 		get_cookiestore('cookieStore', rndStr),
 		get_caches('caches'),
-		get_permissions('notifications'),
-		get_permissions('persistent-storage'),
-		get_permissions('push'),
 		get_filesystem('filesystem'),
-		get_storage_quota('storage_quota')
+		get_storage_quota('storage_quota'),
 	]).then(function(){
 		return resolve()
 	})
