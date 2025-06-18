@@ -460,7 +460,7 @@
 		</td></tr>
 	</table>
 
-	<!--language-->
+	<!--region-->
 	<table id="tb4">
 		<col width="31%"><col width="69%">
 		<thead><tr><th colspan="2"><a name="region"></a>
@@ -476,7 +476,7 @@
 		</td></tr>
 		<!--geo-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">navigator<br>window<br>permission</span></div>
+			<span class="ttxt">navigator<br>window</span></div>
 			&nbsp; geolocation</td><td class="mono"><span class="c" id="geolocation_navigator"></span> | <span class="c" id="geolocation"></span>
 			</td></tr>
 		<!--lang-->
@@ -604,12 +604,6 @@
 			| <span class="c" id="shared_worker_test"></span>
 			| <span class="c" id="service_worker_test"></span>
 		</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">notifications | persistent-storage | push</span></div>
-			&nbsp; permissions</td><td class="mono"><span class="c" id="permission_notifications"></span>
-			| <span class="c" id="permission_persistent-storage"></span>
-			| <span class="c" id="permission_push"></span>
-			</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.fs.enabled</span></div>
 			&nbsp; file system</td><td class="c mono" id="filesystem"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('get_storage_manager')">[ click ]</span>
@@ -645,13 +639,11 @@
 			<span class="cssc" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
 		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="cssc" id="hover_css"></span>
 			| <span class="c" id="hover"></span></td></tr>
+		<tr><td>keyboard</td><td class="c mono" id="keyboard"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
-		<tr><td>[camera | mic | wake-lock] permissions</td><td class="mono"><span class="c" id="permission_camera"></span>
-			| <span class="c" id="permission_microphone"></span>
-			| <span class="c" id="permission_screen-wake-lock"></span>
-			</td></tr>
+		<tr><td>permissions</td><td class="c mono" id="permissions"></td></tr>
 		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
 			<span class="cssc" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
 		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="cssc" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
@@ -863,8 +855,6 @@
 			<span class="c" id="audiocan"></span> | <span class="c" id="videocan"></span></td></tr>
 		<tr><td>[audio | video] isTypeSupported</td><td class="mono">
 			<span class="c" id="audiotype"></span> | <span class="c" id="videotype"></span></td></tr>
-		<tr><td>[midi] permissions</td><td class="mono"><span class="c" id="permission_midi"></span>
-			| <span class="c" id="permission_midi_sysex"></span></td></tr>
 		<tr><td>[HTMLMediaElement] preload</td><td class="c mono" id="media_preload"></td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
