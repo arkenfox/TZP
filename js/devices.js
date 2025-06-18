@@ -15,33 +15,39 @@ function get_device_integer(METRIC, proxyCheck) {
 	return
 }
 
-const get_device_permissions = (item) => new Promise(resolve => {
-	const METRIC = 'permission_'+ item
-	const aGood = ['denied','granted','prompt']
-	function exit(display, value) {
-		if (value == undefined) {value = display}
-		let notation = ''
-		// camera/mic: enabled in FF132+
-			// TypeError: 'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
-		if (isVer > 131 && 'screen-wake-lock' !== item) {notation = value == 'prompt' ? default_green : default_red}
-		// not sure what screen-wake-lock is meant to be, so no notation
-		addBoth(7, METRIC, display,'', notation, value)
+const get_keyboard = (METRIC) => new Promise(resolve => {
+	let hash, data ='', btn=''
+	function exit(hash, data) {
+		addBoth(7, METRIC, hash, btn,'', data)
 		return resolve()
 	}
 	try {
-		navigator.permissions.query({name:item}).then(function(r) {
-			let rstate = r.state
-			if (runST) {rstate = undefined} else if (runSI) {rstate = 'allowed'}
-			// checks
-			let typeCheck = typeFn(rstate)
-			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if (!aGood.includes(rstate)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ rstate}
-			exit(rstate)
-		}).catch(e => {
-			exit(e, zErrShort)
-		})
+		let k = navigator.keyboard
+		let typeCheck = typeFn(k)
+		if ('undefined' == typeCheck) {
+			exit(typeCheck, data)
+		} else {
+			let expected = '[object Keyboard]'
+			if (k+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ k+''}
+			// https://wicg.github.io/keyboard-map/
+			// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
+			let aKeys = [
+				'Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma','Digit0',
+				'Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9',
+				'Equal','IntlBackslash','IntlRo','IntlYen','KeyA','KeyB','KeyC','KeyD','KeyE','KeyF',
+				'KeyG','KeyH','KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR',
+				'KeyS','KeyT','KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote',
+				'Semicolon','Slash'
+			]
+			let data = {}
+			k.getLayoutMap().then(keyboardLayoutMap => {
+				aKeys.forEach(function(key) {data[key] = keyboardLayoutMap.get(key)})
+				btn = addButton(7, METRIC)
+				exit(mini(data), data)
+			})
+		}
 	} catch(e) {
-		exit(e, zErrShort)
+		exit(e, zErrLog)
 	}
 })
 
@@ -242,6 +248,68 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 	}
 })
 
+const get_permissions = (METRIC) => new Promise(resolve => {
+	let tmpData = {}, data = {}, count = 0
+	let aList = [
+		// sorted
+		'camera','geolocation','microphone','midi','midi_sysex','notifications','persistent-storage','push','screen-wake-lock',
+	]
+	if (!isGecko) {
+		aList.push(
+			'accelerometer','ambient-light-sensor','gyroscope','magnetometer','background-fetch','background-sync',
+			'bluetooth','clipboard','device-info','display-capture','gamepad','nfc','speaker','speaker-selection',
+		)
+		aList.sort()
+	}
+	for (let i=0; i < aList.length; i++) {
+		let k = aList[i], key = k
+		// so far all follow the same allowed values
+		let aGood = ['denied','granted','prompt']
+		function accrue(k, value) {
+			count++
+			if (undefined ==tmpData[value]) {tmpData[value] = [k]} else {tmpData[value].push(k)}
+			if (count == (aList.length)) {exit()}
+		}
+		try {
+			//if (runSE) {foo++}
+			let isSysex = k.includes('sysex')
+			if (isSysex) {key = 'midi'}
+			navigator.permissions.query({name: key, sysex: isSysex}).then(function(r) {
+				let state = r.state
+				if (runST) {state = undefined} else if (runSI) {state = 'allowed'}
+				// checks
+				let typeCheck = typeFn(state)
+				if ('string' !== typeCheck) {throw zErrType + typeCheck}
+				if (!aGood.includes(state)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ state}
+				accrue(k, state)
+			}).catch(err => {
+				if (isGecko) {log_error(7, METRIC +'_'+ k, err)} // don't log nonGecko
+				accrue(k, zErr)
+			})
+		} catch(e) {
+			if (isGecko) {log_error(7, METRIC +'_'+ k, e)} // don't log nonGecko
+			accrue(k, zErr)
+		}
+	}
+	function exit() {
+		// sort object
+		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k]}
+		let hash = mini(data), isGreen = false
+		// add notation
+		if (isBB) {
+			if (isVer == 128 && 'd34d3764' == hash) {isGreen = true}
+		} else {
+			if (isVer < 131 && 'd34d3764' == hash) {isGreen = true
+			} else if (isVer < 150 && 'd417aea2' == hash) {isGreen = true // camera + microphone no longer an error
+			}
+		}
+		let notation = isGreen ? default_green : default_red
+		// record
+		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
+		return resolve()
+	}
+})
+
 function get_pointer_event(event) {
 	// ToDo: also look at radiusX/Y, screenX/Y, clientX/Y
 	/* https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/28535#note_2906361
@@ -351,9 +419,6 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 const outputDevices = () => new Promise(resolve => {
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 	Promise.all([
-		get_device_permissions('camera'),
-		get_device_permissions('microphone'),
-		get_device_permissions('screen-wake-lock'),
 		get_media_devices('mediaDevices'),
 		get_speech_engines('speech_engines'),
 		get_maxtouch('maxTouchPoints'),
@@ -366,6 +431,8 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_integer('pixelDepth','Screen.'),
 		get_device_integer('colorDepth','Screen.'),
 		get_device_integer('hardwareConcurrency','Navigator.'),
+		get_permissions('permissions'),
+		get_keyboard('keyboard'),
 	]).then(function(){
 		return resolve()
 	})
