@@ -367,6 +367,7 @@ function collator() {
 		// delay so user can see changes
 		setTimeout(function() {
 			let output = []
+			let isDetails = charsSort.join(', ').length > 50
 			// reset
 			charsSort.sort()
 			charsSearch.sort()
@@ -393,11 +394,16 @@ function collator() {
 				"sort": ensortdata,
 			}
 			let control = mini(entmpobj)
+			if (undefined == oRaw[control]) {oRaw[control] = entmpobj}
 			let control_display = ensearchhash +" | "+ ensorthash +" | "+ control
-
 			strItem = s4.trim() +"CONTROL: "+ sc + sg + "en"+ sc +"<br><br>"
 				+ s12 +"   hash: "+ sc + control_display + s12 +" [search | sort | both]"+ sc +"<br>"
-			output.push(strItem)
+
+			let ctlDetails = "<li>"+ s14 +"search: "+ sc + oRaw[control]['search'].join(', ') +"</li>"
+							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[control]['sort'].join(', ') +"</li>"
+			if (isDetails) {ctlDetails = "<li><details><summary>"+ s14 +"data"+ sc +"</summary><ul>"+ ctlDetails +"</ul></details></li>"}
+
+			output.push(strItem +"<ul>"+ ctlDetails +"</ul>")
 			// results header
 			strItem = s4.trim() +"RESULTS"+ sc +"<br>"
 			output.push(strItem)
@@ -496,7 +502,6 @@ function collator() {
 				let lineItems = []
 				tmpH = "", tmpL = "", tmpStr = ""
 				let len = 0, tmpCH = ""
-				let isDetails = charsSort.join(', ').length > 50
 				// newArr
 				for (let i = 0 ; i < newArr.length; i++) {
 					tmpStr = newArr[i]
