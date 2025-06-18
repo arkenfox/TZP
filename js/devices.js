@@ -166,7 +166,11 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 		// 1528042: FF115+ media.devices.enumerate.legacy.enabled
 		let notation =''
 		if (isTB) {
-			return value == 'TypeError: navigator.mediaDevices is undefined' ? bb_green : bb_red
+			// TB128: 9fc627cf : TypeError: navigator.mediaDevices is undefined
+			// TB140: 98f4cd1a : TypeError: can't access property \"enumerateDevices\", navigator.mediaDevices is undefined (message fix)
+			let errhash = mini(value)
+			let expectedhash = isVer == 128 ? '9fc627cf' : '98f4cd1a'
+			return expectedhash == errhash ? bb_green : bb_red
 		} else {
 			let rfplegacy = '54a59537', rfpnew = '75e77887'
 			if (isMB) {
@@ -297,7 +301,9 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		let hash = mini(data), isGreen = false
 		// add notation
 		if (isBB) {
-			if (isVer == 128 && 'd34d3764' == hash) {isGreen = true}
+			if (isVer == 128 && 'd34d3764' == hash) {isGreen = true
+			} else if (isVer == 140 && 'd417aea2' == hash) {isGreen = true
+			}
 		} else {
 			if (isVer < 131 && 'd34d3764' == hash) {isGreen = true
 			} else if (isVer < 150 && 'd417aea2' == hash) {isGreen = true // camera + microphone no longer an error
