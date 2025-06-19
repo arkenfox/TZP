@@ -315,6 +315,8 @@ function get_timing(METRIC) {
 			let aDiffs = Array.from(setDiffs)
 			//if ('navigation' == k) {console.log(aDiffs, aTotal)}
 
+			// don't assume 10 or 100 if only 1 sample size
+			if (aDiffs.length == 1) {is10 = false; is100 = false}
 			// test intervals
 			for (let i=0; i < aDiffs.length; i++) {
 				if (isMatch && !aGood.includes(aDiffs[i])) {isMatch = false}
