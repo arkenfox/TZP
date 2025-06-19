@@ -138,6 +138,8 @@ let isArch = true,
 	isAutoPlayError,
 	isDevices,
 	isEngine,
+	isEngineBlocked = true,
+	isEngineStr = '',
 	isFile = false,
 	isFileSystem,
 	isFileSystemError,
@@ -197,7 +199,6 @@ let gt0, gt1,
 	gFS = false, // don't run FS measurements if already tiggered
 	gClear = true, // clear console of xml and BB's prototype/proxy errors
 	isAllowNonGecko = true, // not supported
-	isAllowNonGeckoString = '',
 	isBlock = true,
 	isBlockMin = 115,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family

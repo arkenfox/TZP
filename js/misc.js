@@ -854,7 +854,14 @@ const outputMisc = () => new Promise(resolve => {
 	if (isGecko) {
 		// 1259822: FF74+ | 1965165: javascript.options.property_error_message_fix FF140+ default enabled
 		try {null.bar} catch(e) {
-			if (isBB) {notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)}
+			if (isBB) {
+				if (128 == isVer) {
+					notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)
+				} else {
+					// FF140+
+					notation = (e+'' == 'TypeError: can\'t access property "bar" of null' ? bb_green : bb_red)
+				}
+			}
 			value = e.message
 		}
 	}

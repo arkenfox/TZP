@@ -18,16 +18,18 @@ function get_colors() {
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
 		moz: [
-			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
-			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
-			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-menubarhovertext',
-			'-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
+			'-moz-buttonhoverface','-moz-buttonhovertext', // both removed FF141: 1968925 ?
+			'-moz-cellhighlight',
+			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
+			'-moz-eventreerow', // removed FF140: 1965343 ?
+			'-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext',
+			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
 		],
 	}
 	if (!isGecko) {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
-	} else if (isVer < 122) {
+	} else if (isVer < 128) { // soon we'll only go as low as 127
 		let aTmp = oList.moz
 		aTmp.push (
 			// removed FF122: 1867854
@@ -83,7 +85,9 @@ function get_colors() {
 			for (const k of Object.keys(tmpobj).sort()) {data[k] = tmpobj[k]; count += data[k].length} // sort/count
 			hash = mini(data); btn = addButton(14, METRIC, Object.keys(data).length +'/'+ count)
 			if ('moz' == type) {
-				notation = '283089dc' == hash ? rfp_green : rfp_red
+				let expectedhash = isVer == 140 ? 'c04857b2' : '2439d123' // FF140 + FF141+
+				if (isVer < 140) {expectedhash = '283089dc'} // FF128-FF139 (smart min is 128)
+				notation = expectedhash == hash ? rfp_green : rfp_red
 			}
 		} catch(e) {
 			hash = e; data = zErrLog

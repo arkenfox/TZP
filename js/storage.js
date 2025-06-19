@@ -19,7 +19,6 @@ const lookup_cookiestore = async function(rndStr, k) {
 		let cookie = await cookieStore.get(rndStr + k)
 		return cookie.value
 	} catch(e) {
-		console.log(k, +'')
 		return ''
 	}
 }

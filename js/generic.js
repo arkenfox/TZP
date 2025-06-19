@@ -58,16 +58,22 @@ function dedupeArrayToString(array) {
 	return str
 }
 
-function run_block() {
+function run_block(trace) {
+	console.log(trace, 'blocking')
 	log_perf(SECTG, 'isBlock','')
 	try {
 		dom.tzpContent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
-		let browserString = "Firefox "+ isBlockMin +"+"
-		if (!isGecko) {browserString += ", " + isAllowNonGeckoString}
-		let msg = "<center><br><span style='font-size: 14px;'><b>"+ (isGecko ? 'Gah.' : 'Aw, Snap!')
-			+"<br><br>TZP requires " + browserString +'<b></span></center>'
-		dom.blockmsg.innerHTML = msg
+		let msg = 'TZP requires gecko '+ isBlockMin +'+'
+		if (isAllowNonGecko) {
+			if (undefined !== isEngine) {
+				msg = 'update your '+ isEngine +' browser'
+			} else if (!isGecko) {
+				msg = 'TZP requires gecko '+ (isEngineStr.includes(' or ') ? ', ' : ' or ') + isEngineStr
+			}
+		}
+		dom.blockmsg.innerHTML = "<center><br><span style='font-size: 14px;'><b>"+ (isGecko ? 'Gah.' : 'Aw, Snap!')
+			+"<br><br>" + msg +'<b></span></center>'
 	} catch(e) {}
 }
 
@@ -217,6 +223,7 @@ function get_isEngine(METRIC) {
 				'object' === typeof trustedTypes,
 				'function' === typeof webkitResolveLocalFileSystemURL,
 			],
+			//*
 			webkit: [
 				'object' === typeof browser,
 				'object' === typeof safari,
@@ -244,13 +251,26 @@ function get_isEngine(METRIC) {
 			if (sumE > (oEngines[engine].length/2)) {aEngine.push(engine)}
 		}
 		aAllowed.sort()
-		isAllowNonGeckoString = aAllowed.join(', ')
+		isEngineStr = aAllowed.join(', ')
 		if (aAllowed.length > 1) {
-			isAllowNonGeckoString = ' or '+ aAllowed[aAllowed.length - 1]
+			isEngineStr = ' or '+ aAllowed[aAllowed.length - 1]
 			aAllowed = aAllowed.slice(0,-1)
-			isAllowNonGeckoString = aAllowed.join(',') + isAllowNonGeckoString
+			isEngineStr = aAllowed.join(',') + isEngineStr
 		}
 		if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
+		// set minimum
+		if (undefined !== isEngine) {
+			try {
+				if ('blink' == isEngine) {
+					if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117
+					//if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124
+					//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129
+				} else if ('webkit' == isEngine) {
+					if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4
+					//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4
+				}
+			} catch(e) {}
+		}
 	} catch(e) {}
 	log_perf(SECTG, METRIC, t0,'', isEngine)
 }
@@ -529,7 +549,7 @@ function get_isVer(METRIC) {
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
-	if (isBlock) {run_block(); return}
+	if (isBlock) {run_block('gecko'); return}
 	// set isSmart / modes
 	if (isVer >= isSmartMin) {
 		if (isSmartAllowed || isFile) {
@@ -1710,7 +1730,7 @@ function countJS(item) {
 	if (1 == jsFiles) {
 		// non-gecko
 		if (!isGecko) {
-			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(); return}
+			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
 		// help ensure/force images are loaded in time
 		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
@@ -1719,8 +1739,18 @@ function countJS(item) {
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
-		if (!isGecko && !isAllowNonGecko || isGecko && isBlock) {return}
+		// block: gecko (we promised/set isBlock in isVer above)
+		if (isGecko && isBlock) {return}
+		// block: nongecko
+		if (!isGecko) {
+			// not allowed or engine is undefined
+			if (!isAllowNonGecko || undefined == isEngine) {return}
+			// allowed but engine fails a minimum standard
+			if (isEngineBlocked) {run_block('upgrade'); return}
+		}
+		// otherwise not blocked
 		isBlock = false
+
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 
 		Promise.all([
@@ -2007,9 +2037,10 @@ function run_immediate() {
 		get_isGecko('isGecko')
 	]).then(function(){
 		if (!isGecko) {
-			if (!isAllowNonGecko) {return}
+			// get engine regardless
 			get_isEngine('isEngine')
-			if (undefined === isEngine) {return}
+			// return if not supported
+			if (!isAllowNonGecko || undefined === isEngine) {return}
 		}
 		isFile = 'file:' == location.protocol
 		get_isRecursion()
