@@ -223,13 +223,12 @@ function get_isEngine(METRIC) {
 				'object' === typeof trustedTypes,
 				'function' === typeof webkitResolveLocalFileSystemURL,
 			],
-			//*
 			webkit: [
 				'object' === typeof browser,
 				'object' === typeof safari,
 				'function' === typeof webkitConvertPointFromNodeToPage,
 				'function' === typeof webkitCancelRequestAnimationFrame,
-				'"object' === typeof webkitIndexedDB,
+				'object' === typeof webkitIndexedDB,
 			],
 			/* ignore edgeHTML
 			edgeHTML: [
@@ -260,16 +259,24 @@ function get_isEngine(METRIC) {
 		if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
 		// set minimum
 		if (undefined !== isEngine) {
-			try {
-				if ('blink' == isEngine) {
-					if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117
-					//if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124
-					//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129
-				} else if ('webkit' == isEngine) {
-					if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4
-					//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4
-				}
-			} catch(e) {}
+			// approved engine detected, if not enforcing min, disable block
+			isEngineBlocked = isAllowNonGeckoMin
+			// if enforcing min, check
+			if (isAllowNonGeckoMin) {
+				try {
+					if ('blink' == isEngine) {
+						// 109 is the last version supported on win7
+						if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
+						//if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
+						//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129 2024-Sep
+					} else if ('webkit' == isEngine) {
+						// https://en.wikipedia.org/wiki/Safari_(web_browser)#Version_compatibility
+						// 15.6.1 2022-Aug = last version supported on macOS 10.15?
+						if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar
+						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4 2024-Mar
+					}
+				} catch(e) {}
+			}
 		}
 	} catch(e) {}
 	log_perf(SECTG, METRIC, t0,'', isEngine)
@@ -490,6 +497,14 @@ const get_isBB = (METRIC) => new Promise(resolve => {
 			//console.log('resolving after first success: test return no.', count, id)
 			isBB = true
 			if (id.includes('mullvad')) {isMB = true} else {isTB = true}
+			// tidy notation
+			if (isMB) {
+				bb_green = sgtick+'MB]'+sc
+				bb_red = sbx+'MB]'+sc
+				bb_slider_red = sbx+'MB Slider]'+sc
+				bb_standard = sg+'[MB Standard]'+sc
+				bb_safer = sg+'[MB Safer]'+sc
+			}
 			log_perf(SECTG, METRIC, t0,'', (isMB ? 'mullvad': 'tor') +' browser | '+ id)
 			resolve()
 		}

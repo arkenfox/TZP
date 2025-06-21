@@ -626,6 +626,7 @@ let fntMaster = {
 			'Arial Nova','Georgia Pro','Gill Sans Nova','Ink Free','Neue Haas Grotesk Text Pro','Rockwell Nova',
 			'Segoe Fluent Icons','Segoe UI Variable Display','Segoe UI Variable Small','Segoe UI Variable Text',
 			'Simplified Arabic Fixed','Verdana Pro',
+			// 1957317: Noto Sans CJK HK/JP/KR/SC/TC and Noto Serif CJK HK/JP/KR/SC/TC not added even though in prefs
 			// other
 			'Sans Serif Collection', // win11
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
