@@ -61,7 +61,8 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 			let typeMatch = numberExclude.includes(k) ? ('ac-sinkId' == k ? 'empty string' : 'string') : 'number'
 			if (typeMatch !== typeCheck) {
 				log_error(11, METRIC +'_'+ k, zErrType + typeCheck)
-				isLies = true
+				if (!isSmart) {data[k] = zErr} // non smart reflect error in data
+				isLies = true // otherwise isSmart uses isLies and returns untrustworthy
 			}
 		}
 		if (mini(oHardcoded) !== 'dfda7813') {isLies = true}
@@ -75,7 +76,10 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 			} else if ('android' == isOS && '2b9d44b0' == hash) {notation = rfp_green // 0.02
 			} else if ('9b69969b' == hash) {notation = rfp_green} // 0.025 catchall incl linux
 		}
-		if (isGecko && notation !== rfp_green) {data['ac-outputLatency'] = zNA; hash = mini(data)}
+		if (isGecko && notation !== rfp_green) {
+			notation += ' [latency: '+ data['ac-outputLatency'] +']'
+			data['ac-outputLatency'] = zNA; hash = mini(data)
+		}
 		
 	} catch(e) {
 		hash = log_error(11, METRIC, e); data = zErr
