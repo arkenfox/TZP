@@ -18,6 +18,15 @@ function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function removeElementFn(id) {try {dom[id].remove()} catch {}}
 function addProxyLie(value) {sData[SECT99].push(value)}
 function isProxyLie(value) {return sData[SECT99].includes(value)}
+function smartFn() {
+	// reset
+	isFile = 'file:' == location.protocol
+	isSmartDataMode = false
+	isSmart = false
+	if (isGecko && isVer >= isSmartMin) {
+		if (isSmartAllowed || isFile) {isSmart = true} else {isSmartDataMode = true}
+	}
+}
 
 function typeFn(item, isSimple = false) {
 	// return a more detailed result
@@ -565,16 +574,9 @@ function get_isVer(METRIC) {
 	// gecko block mode
 	isBlock = isVer < isBlockMin
 	if (isBlock) {run_block('gecko'); return}
-	// set isSmart / modes
-	if (isVer >= isSmartMin) {
-		if (isSmartAllowed || isFile) {
-			isSmart = true
-		} else {
-			run_basic('data-only')
-		}
-	} else {
-		run_basic()
-	}
+	// set smarts / modes
+	smartFn()
+	if (!isSmart) {run_basic((isVer >= isSmartMin ? 'data-only' : 'basic'))}
 	return
 
 	function cascade() {
@@ -1716,7 +1718,7 @@ function log_section(name, time, scope = isScope) {
 
 		// prototype/proxy
 			// ToDo: isTB health
-		if (isSmart) {
+		if (isSmart || isSmartDataMode) {
 			let protoCount = (Object.keys(gData[SECT98]).length)
 			let proxyCount = gData[SECT99].length
 			if (protoCount + proxyCount == 0) {
@@ -2014,6 +2016,8 @@ function outputSection(id, isResize = false) {
 		}
 	}
 
+	// reset smarts
+	smartFn()
 	// BB: font.vis + bundled fonts
 		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
 		// not the case when using font.system.whitelist

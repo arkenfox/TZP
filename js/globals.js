@@ -208,7 +208,8 @@ let gt0, gt1,
 	isScreenLog = false, // console log screen/window/taskbar/chrome
 	isSmart = false,
 	isSmartMin = 128,
-	isSmartAllowed = false // do not give off false health signals if not maintained
+	isSmartDataMode = false, // when in data-only mode we still want to run proxy/prototype lies
+	isSmartAllowed = false // data-only mode - do not give off false health signals if not maintained
 
 /** DEV **/
 // simulate errors
