@@ -198,7 +198,8 @@ let gt0, gt1,
 	gClick = true,
 	gFS = false, // don't run FS measurements if already tiggered
 	gClear = true, // clear console of xml and BB's prototype/proxy errors
-	isAllowNonGecko = true, // not supported
+	isAllowNonGecko = true, // allow some other engines
+	isAllowNonGeckoMin = true, // enforce min requirements on those other engines
 	isBlock = true,
 	isBlockMin = 115,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
