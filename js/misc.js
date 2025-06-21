@@ -584,15 +584,30 @@ function get_navigator_keys(METRIC) {
 		// always return aNav
 		hash = mini(aNav); btn = addButton(18, METRIC, aNav.length)
 		// health: BB only as ESR is stable
-		if (isMB) {
-			// MB has mediaDevices, mediaSession
-			if ('05cfe113' == hash) {notation = bb_green} // 14 41
-		} else if (isTB) {
-			if ('android' == isOS) {
-				// android has share, canShare
-				if ('e416473d' == hash) {notation = bb_green} // 14 41
-			} else {
-				if ('8325e1db' == hash) {notation = bb_green} // 14 39
+		if (isBB) {
+			// MB diffs: has mediaDevices, mediaSession
+			if (128 == isVer) {
+				if (isMB) {
+					if ('05cfe113' == hash) {notation = bb_green} // MB14 41
+				} else if (isTB) {
+					if ('android' == isOS) {
+						// android has share, canShare
+						if ('e416473d' == hash) {notation = bb_green} // TB14 41
+					} else {
+						if ('8325e1db' == hash) {notation = bb_green} // TB14 39
+					}
+				}
+			} else if (140 == isVer) {
+				// changes: vibrate gone, added share, canShare, login, gpu
+				if (isMB) {
+					if ('8c9bf1a5' == hash) {notation = bb_green} // MB15 44
+				} else if (isTB) {
+					if ('android' == isOS) {
+						if ('' == hash) {notation = bb_green} // no builds yet
+					} else {
+						if ('16011d09' == hash) {notation = bb_green} // MB15 42
+					}
+				}
 			}
 		}
 		// if tampered use notation to fail health
@@ -811,14 +826,14 @@ function get_window_props(METRIC) {
 
 		// hashes are standard | safer | safer with click to play webgl
 		if (isMB) {
-			// MB14: #42767 offScreenCanvas disabled
+			// MB14
 			if ('5508d87e' == hash || '6002b356' == hash || '948272e4' == hash) {notation = bb_green}
 		} else if (isTB) {
 			if ('android' == isOS) {
-				// TB14: #42767 offScreenCanvas disabled
+				// TB14
 				if ('1059445d' == hash || '077a3df7' == hash || '8fc6eaf7' == hash) {notation = bb_green}
 			} else {
-				// TB14: #42767 offScreenCanvas disabled
+				// TB14
 				if ('62b9b2e9' == hash || '759e94b7' == hash || 'be2132e3' == hash) {notation = bb_green}
 			}
 		}
