@@ -47,7 +47,7 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 			// if persistent-storage is granted
 			// if gecko and under 10GB
 			// if blink which doesn't protect this | webkit IDK it seems to provide precise values
-		if (isGecko && value < 10 || !isGecko) {isBucket = true}
+		let isBucket = (isGecko && value < 10 || !isGecko)
 		if (granted) {isBucket = true}
 		if (isBucket) {
 			if (value < 10) {
