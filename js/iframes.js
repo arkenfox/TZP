@@ -41,12 +41,17 @@ function getDynamicIframeWindow({
 			list.forEach(function(p) {
 				try {
 					r = navigator[p]
-					if ('string' !== typeof r) {throw zErr}
+					let typeCheck = typeFn(r, true), expectedType = 'string'
+					if (!isGecko) {
+						// type check will throw an error for a string "undefined"
+						if ('buildID' == p || 'oscpu' == p) {expectedType = 'undefined'}
+					}
+					if (expectedType !== typeCheck) {throw zErr}
 					if ('' == r) {r = 'empty string'}
 				} catch(e) {
 					r = e
 				}
-				data[p] = r
+				data[p] = r+''
 			})
 		}
 		document.body.removeChild(element)
