@@ -2023,7 +2023,7 @@ function outputSection(id, isResize = false) {
 		// not the case when using font.system.whitelist
 		// we should see if we can get this fixed upstream
 	//*
-	if (gLoad && isBB && isSmart && isVer > 139) {
+	if (gLoad && isBB && isVer > 139) {
 		if ('windows' == isOS || 'mac' == isOS) {
 			delay = 2000 // using fontasync PoC on my machine this is around 990+ ms
 			dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
