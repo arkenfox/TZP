@@ -42,13 +42,12 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 	// 1073741824 = (1024 * 1024 * 1024)/10
 		// round down so even 1 byte less !== 10
 	let value = Math.floor(bytes/(1073741824) * 10)/10
-		if ('quota' == type) {
+	if ('quota' == type) {
 		// bucketize quota more if } manager always return non-bucketized
 			// if persistent-storage is granted
 			// if gecko and under 10GB
 			// if blink which doesn't protect this | webkit IDK it seems to provide precise values
-		let isBucket = (isGecko && value < 10 || !isGecko)
-		if (granted) {isBucket = true}
+		let isBucket = (isGecko && value < 10 || !isGecko || granted)
 		if (isBucket) {
 			if (value < 10) {
 				// more precision
@@ -61,6 +60,9 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 			}
 		}
 	}
+	// webkit private window returns 1048576000 bytes = 1000MB
+	if ('webkit' == isEngine && 1048576000 == bytes) {value = '1000 MB'} else {value += ' GB'}
+	// blink incognito returns 1819735497 bytes = some reduced calculation?
 	return value
 }
 
@@ -217,7 +219,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 					let typeCheck = typeFn(bytes)
 					if ('number' === typeCheck && Number.isInteger(bytes)) {
 						let value = lookup_storage_bucket('manager', bytes)
-						value += 'GB ['+ bytes +' bytes]'
+						value += ' ['+ bytes +' bytes]'
 						if (isProxyLie('StorageManager.estimate')) {
 							value = log_known(6, METRIC, value)
 						} else if (isBB && 10737418240 == bytes) { // not a lie, exact match
@@ -247,7 +249,7 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 				let typeCheck = typeFn(bytes)
 				if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
 				let value = lookup_storage_bucket('quota', bytes, isGranted)
-				let display = value +'GB ['+ bytes +' bytes]'
+				let display = value +' ['+ bytes +' bytes]'
 				if (isProxyLie('StorageManager.estimate')) {isLies = true}
 				if (isBB && 10737418240 == bytes) {notation = bb_green}
 				sDetail.document.lookup[METRIC] = display
