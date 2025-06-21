@@ -76,16 +76,21 @@ function get_nav_dnt(METRIC) {
 	// nonGecko
 		// blink: string vs null: i.e a string of "null" will be an error
 		// webkit: undefined vs null: i.e a string of "undefined" will be an error
-	let hash, data ='', expectedType = isGecko ? 'string' : ('blink' == isEngine ? 'null' : 'undefined')
+	let hash, data ='', expectedType = isGecko ? 'string' : 'undefined'
 	try {
 		hash = navigator[METRIC]
 		if (runST) {hash = 1} else if (runSI) {hash = '2'}
 		let typeCheck = typeFn(hash)
-		if (expectedType !== typeCheck) {throw zErrType + typeCheck}
-		if (isGecko) {
-			if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid + 'expected 1 or unspecified: got ' + hash}
+		if ('blink' == isEngine) {
+			// blink can be pnly be "1" or null
+			if ('1' !== hash && null !== hash) {throw zErrInvalid + 'expected 1 or null: got ' + hash}
+		} else {
+			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+			if (isGecko) {
+				if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid + 'expected 1 or unspecified: got ' + hash}
+			}
 		}
-		hash += '' // gecko is a string, otherwise we can only be null/undefined, so coonvert to a string
+		hash += '' // gecko is a string, otherwise we can only be null/undefined, so convert to a string
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
