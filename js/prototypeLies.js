@@ -7,7 +7,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 	if (isResize) {return resolve()}
 	sData[SECT98] = {}
 	sData[SECT99] = []
-	if (!isSmart) {
+	if (!isSmart && !isSmartDataMode) { // both reset to default false in smartFn
 		dom.protohash = zNA
 		return resolve()
 	}
