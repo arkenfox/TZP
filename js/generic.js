@@ -272,7 +272,7 @@ function get_isEngine(METRIC) {
 					} else if ('webkit' == isEngine) {
 						// https://en.wikipedia.org/wiki/Safari_(web_browser)#Version_compatibility
 						// 15.6.1 2022-Aug = last version supported on macOS 10.15?
-						if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar
+						if ('function' == typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4 2024-Mar
 					}
 				} catch(e) {}
