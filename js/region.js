@@ -127,7 +127,7 @@ function get_nav_gpc(METRIC) {
 
 function set_isLanguageSmart() {
 	// set once: ignore android for now
-	if (!gLoad || !isSmart || 'android' == isOS) {return}
+	if (!gLoad || !isSmart && !isSmartDataMode || 'android' == isOS) {return}
 
 	// BB always or FF if locale matches
 		// resource://gre/res/multilocale.txt
