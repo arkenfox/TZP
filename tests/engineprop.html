@@ -686,7 +686,6 @@ function run() {
 		// blink + gecko (not seen in webkit)
 		code = 50
 		rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
-		rec(typeof cookieStore, "cookieStore", code, "object") // FF132 nightly 1918643
 		rec(typeof external, "external", code, "object")
 		rec(typeof onbeforematch, "onbeforematch", code, "object") // FF139+ 1761043
 		rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
@@ -744,6 +743,7 @@ function run() {
 		rec(typeof close, "close", code, "function")
 		rec(typeof closed, "closed", code, "boolean")
 		rec(typeof confirm, "confirm", code, "function")
+		rec(typeof cookieStore, "cookieStore", code, "object") // FF132 nightly 1918643
 		rec(typeof createImageBitmap, "createImageBitmap", code, "function")
 		rec(typeof crossOriginIsolated, "crossOriginIsolated", code, "boolean")
 		rec(typeof crypto, "crypto", code, "object")
