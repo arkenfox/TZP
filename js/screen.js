@@ -551,10 +551,14 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 	let list = oList[datatype], maxCount = oList[datatype].length, count = 0, oData = {}
 	function exit(id, value) {
 		if (value == unable) {
-			let suffix = (id.includes('width') || id.includes('height')) ? 'media' : id
-			let metric = oPrefixes[id] +'_'+ suffix
-			log_error(1, metric, unable)
-			value = zErr
+			if (!isGecko && '-moz-device-pixel-ratio' == id) {
+				value = zNA
+			} else {
+				let suffix = (id.includes('width') || id.includes('height')) ? 'media' : id
+				let metric = oPrefixes[id] +'_'+ suffix
+				log_error(1, metric, unable)
+				value = zErr
+			}
 		}
 		oData[id] = value
 		count++
@@ -1587,17 +1591,21 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		try {
 			str = navigator[p]
 			if (runST) {str = sim} else if (runSL) {addProxyLie('Navigator.'+ p)}
-			let typeCheck = typeFn(str, true)
-			if ('string' !== typeCheck) {throw zErrType + typeFn(str)}
+			let typeCheck = typeFn(str, true), expectedType = 'string'
+			if (!isGecko) {
+				// type check will throw an error for a string "undefined"
+				if ('buildID' == p || 'oscpu' == p) {expectedType = 'undefined'}
+			}
+			if (expectedType !== typeCheck) {throw zErrType + typeFn(str)}
 			if ('' == str) {str = 'empty string'}
 		} catch(e) {
 			isErr = true
 			str = log_error(2, p, e)
 		}
 		if ('skip' !== expected) {
-			outputStatic(p, str, expected, isErr)
+			outputStatic(p, str+'', expected, isErr)
 		} else {
-			oComplex[p] = [str, isErr]
+			oComplex[p] = [str+'', isErr]
 		}
 	}
 
@@ -1721,7 +1729,7 @@ const outputFD = () => new Promise(resolve => {
 		isWordmark = e; isWordData = zErrShort
 	}
 
-	// set isMB: legacy
+	// set isMB: legacy: 115 + older 128's still need detection
 	if (gLoad && !isBB && 'android' !== isOS) {
 		let aMBVersions = [115, 128]
 		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
