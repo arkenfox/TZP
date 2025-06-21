@@ -35,6 +35,35 @@ const lookup_permission = (item) => new Promise(resolve => {
 	}
 })
 
+function lookup_storage_bucket(type, bytes, granted = false) {
+	// test
+		// bytes = 5368709120 // 5GB exactly = 5-6GB
+		// bytes = 5368709119 // 5GB minus 1 byte = 4-5GB
+	// 1073741824 = (1024 * 1024 * 1024)/10
+		// round down so even 1 byte less !== 10
+	let value = Math.floor(bytes/(1073741824) * 10)/10
+		if ('quota' == type) {
+		// bucketize quota more if } manager always return non-bucketized
+			// if persistent-storage is granted
+			// if gecko and under 10GB
+			// if blink which doesn't protect this | webkit IDK it seems to provide precise values
+		if (isGecko && value < 10 || !isGecko) {isBucket = true}
+		if (granted) {isBucket = true}
+		if (isBucket) {
+			if (value < 10) {
+				// more precision
+				value = Math.floor(value)
+				value = value +'-'+ (value + 1)
+			} else {
+				// round to next 100, return range
+				value = Math.ceil(value/100) * 100
+				value = value-100 +'-'+ value
+			}
+		}
+	}
+	return value
+}
+
 const get_caches = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 	// PB mode: DOMException: The operation is insecure.
@@ -187,7 +216,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 					let bytes = estimate.quota
 					let typeCheck = typeFn(bytes)
 					if ('number' === typeCheck && Number.isInteger(bytes)) {
-						let value = Math.floor(bytes/(1073741824) * 10)/10 // round down
+						let value = lookup_storage_bucket('manager', bytes)
 						value += 'GB ['+ bytes +' bytes]'
 						if (isProxyLie('StorageManager.estimate')) {
 							value = log_known(6, METRIC, value)
@@ -206,36 +235,38 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 
 const get_storage_quota = (METRIC) => new Promise(resolve => {
 	let isLies = false, notation = isBB ? bb_red : ''
+	let isGranted = false
+	Promise.all([
+		lookup_permission('persistent-storage')
+	]).then(function(res){
+		if ('granted' == res[0]) {isGranted = true}
+		try {
+			navigator.storage.estimate().then(estimate => {
+				let bytes = estimate.quota
+				if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
+				let typeCheck = typeFn(bytes)
+				if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
+				let value = lookup_storage_bucket('quota', bytes, isGranted)
+				let display = value +'GB ['+ bytes +' bytes]'
+				if (isProxyLie('StorageManager.estimate')) {isLies = true}
+				if (isBB && 10737418240 == bytes) {notation = bb_green}
+				sDetail.document.lookup[METRIC] = display
+				exit(display, value)
+			}).catch(function(e){
+				exit(log_error(6, METRIC, e), zErr)
+			})
+		} catch(e) {
+			exit(log_error(6, METRIC, e), zErr)
+		}
+	})
 	function exit(display, value) {
 		addBoth(6, METRIC, display,'', notation, value, isLies)
 		// silent run manager to force granted quota when run
-		Promise.all([
-			lookup_permission('persistent-storage')
-		]).then(function(res){
-			if ('granted' == res[0]) {
-				Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
-			} else {
-				return resolve()
-			}
-		})
-	}
-	try {
-		navigator.storage.estimate().then(estimate => {
-			let bytes = estimate.quota
-			if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
-			let typeCheck = typeFn(bytes)
-			if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
-			let value = Math.floor(bytes/(1073741824) * 10)/10 // round down so even 1 byte less !== 10
-			let display = value +'GB ['+ bytes +' bytes]'
-			if (isProxyLie('StorageManager.estimate')) {isLies = true}
-			if (isBB && 10737418240 == bytes) {notation = bb_green}
-			sDetail.document.lookup[METRIC] = display
-			exit(display, value)
-		}).catch(function(e){
-			exit(log_error(6, METRIC, e), zErr)
-		})
-	} catch(e) {
-		exit(log_error(6, METRIC, e), zErr)
+		if (isGranted) {
+			Promise.all([get_storage_manager(0, true)]).then(function(){return resolve()})
+		} else {
+			return resolve()
+		}
 	}
 })
 
