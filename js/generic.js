@@ -1688,7 +1688,7 @@ function log_section(name, time, scope = isScope) {
 	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
 	if (gCount == gSectionsExpected) {
 		// tmp
-		if (gLoad) {console.log(isIframe)}
+		if (gLoad) {console.log(isLocation)}
 
 		gt1 = gt0
 		if (isPerf) {dom.perfAll = " "+ (performance.now()-gt0).toFixed(isDecimal ? 2 : 0) +" ms"}
@@ -1769,19 +1769,27 @@ function countJS(item) {
 		// get location info
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Property_access_denied
 		// Uncaught DOMException: Permission denied to access property Symbol.toPrimitive on cross-origin object
-		let aList = ['location','parent','self','top']
+		let aList = ['location','parent','self','top'], setLocation = new Set()
 		aList.forEach(function(item){
 			let x
 			try {
 				if ('location' == item) {x= window[item]} else {x = window[item].location}
-				isIframe[item] = x+''
+				isLocation[item] = x+''
+				setLocation.add(x+'')
 			} catch(e) {
-				isIframe[item] = e+''
+				isLocation[item] = e+''
+				setLocation.add(e+'')
 			}
 		})
-		// block if parent is insecure as this produces different results (but allow file:///)
-			// e.g. some APIs require secure contexts
-			// or maybe just block if iframe
+
+		console.log(setLocation)
+		/* block if insecure as this produces very different results (but allow file:///)
+			e.g. some APIs require secure contexts and the iframe size can't be controlled
+			FP diffs include 14 navigator keys, 100+ window props, and 7 permissions
+		//*/
+		// notes:
+			// secure parent and iframe is viewport width then we get the same FP
+			// but because we don't know the iframe is sized correctly then we should just block iframes
 		/*
 		if (window.location !== window.parent.location) {
 			// iframe
