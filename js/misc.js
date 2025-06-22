@@ -191,8 +191,11 @@ function get_timing_resource() {
 						// fix to 3 decimal places: otherwise e.g.
 						// 33.33399999999999, 33.333999999999996 has a diff of 7.105427357601002e-15
 						// and diff (calc1) becomes 7.1 instead of basically 0
-						value = value.toFixed(3) * 1
-						tmpSet.add(value)
+						// don't allow huge drift
+						if (value < 200000) {
+							value = value.toFixed(3) * 1
+							tmpSet.add(value)
+						}
 					}
 				})
 			})
@@ -223,7 +226,6 @@ function get_timing(METRIC) {
 		gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
 		gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
 		//*/
-
 		// isDecimal
 		isDecimal = false
 		if (isPerf) {
@@ -237,6 +239,7 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
 		'instant': [0, 1, 16, 17, 33, 34],
+		'resource': [0, 1, 2, 3, 16, 17, 18, 19, 33, 34, 35, 36], // resource can have large drift, use integers: e.g. wait ages then rerun
 		'performance': [0, 1, 16, 17, 33, 34],
 		'exslt': [0], // 1912129: exslt diffs must be 1000, and all end in .000
 		'other': [
@@ -265,10 +268,10 @@ function get_timing(METRIC) {
 			let aTimes = gData.timing[k]
 			if ('string' == typeof aTimes) {throw aTimes}
 			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
-			if (aTimes.length) {sDetail.document[METRIC +'_data'][k] = aTimes}
+			if (aTimes.length) {sDetail.document[METRIC +'_data'][k] = {'data': aTimes}}
 			// type check
-			let setDiffs = new Set(), aTotal = []
-			let start = aTimes[0], expected = ('exslt' == k || 'instant' == k) ? 'string' : 'number'
+			let start = aTimes[0]
+			let expected = ('exslt' == k || 'instant' == k) ? 'string' : 'number'
 			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
 			// check noise
@@ -286,9 +289,14 @@ function get_timing(METRIC) {
 			} else if ('instant' == k) {
 				start = start.slice(0,-1) // remove trailing Z
 				start = (new Date(start))[Symbol.toPrimitive]('number')
+			} else if ('resource' == k) {
+				start = Math.floor(start)
 			}
+			let startIncremental = start
+
 			// get diffs
 			let isZero = false, is10 = true, is100 = true
+			let setDiffs = new Set(), setIncremental = new Set(), aTotal = []
 			if (1 == aTimes.length) {
 				aTotal.push(0) // make sure we display something
 				if ('exslt' !== k) {isMatch = false} // all non-exslt we expect multiple values
@@ -296,8 +304,10 @@ function get_timing(METRIC) {
 			}
 			for (let i=1; i < aTimes.length ; i++) {
 				let end = aTimes[i]
+				// type check
 				typeCheck = typeFn(end)
 				if (expected !== typeCheck) {throw zErrType + typeCheck}
+				// clean up
 				if ('exslt' == k) {
 					if ('.000' !== end.slice(-4)) {isMatch = false}
 					end = end.slice(0,20) + end.slice(-2)+ '0'
@@ -305,23 +315,37 @@ function get_timing(METRIC) {
 				} else if ('instant' == k) {
 					end = end.slice(0,-1) // remove trailing Z
 					end = (new Date(end))[Symbol.toPrimitive]('number')
+				} else if ('resource' == k) {
+					end = Math.floor(end)
 				}
 				// truncate to 1 decimal place
+				// diffs since start
 				let totaldiff = ((end - start).toString().match(calc1)[0]) * 1
 				aTotal.push(totaldiff)
 				let diff = (totaldiff % 50).toFixed(2) * 1 // drop 50s
 				setDiffs.add(diff)
+				// incremental diffs: helps reduce drift
+				totaldiff = ((end - startIncremental).toString().match(calc1)[0]) * 1
+				diff = (totaldiff % 50).toFixed(2) * 1 // drop 50s
+				setIncremental.add(diff)
+				startIncremental = end // set this end value for the next incremental start value
 			}
+			// diff arrays
 			let aDiffs = Array.from(setDiffs)
-			//if ('navigation' == k) {console.log(aDiffs, aTotal)}
+			let aIncremental = Array.from(setIncremental)
+			sDetail.document[METRIC +'_data'][k]['diffs'] = aDiffs
+			sDetail.document[METRIC +'_data'][k]['incremental'] = aIncremental
 
-			// don't assume 10 or 100 if only 1 sample size
-			if (aDiffs.length == 1) {is10 = false; is100 = false}
-			// test intervals
-			for (let i=0; i < aDiffs.length; i++) {
-				if (isMatch && !aGood.includes(aDiffs[i])) {isMatch = false}
-				if (is10 && !oGood.ten.includes(aDiffs[i])) {is10 = false}
-				if (is100 && 0 !== aDiffs[i]) {is100 = false}
+			// using diffs since start:  don't assume 10 or 100 if only 1 sample size
+			// ToDo: I do not like this: rare? and a false positive is ok when you look at the rest of the data
+				// we could analayse and cleanup data afterwards
+			//if (aDiffs.length == 1) {is10 = false; is100 = false}
+
+			// using incremental diffs: test intervals
+			for (let i=0; i < aIncremental.length; i++) {
+				if (isMatch && !aGood.includes(aIncremental[i])) {isMatch = false}
+				if (is10 && !oGood.ten.includes(aIncremental[i])) {is10 = false}
+				if (is100 && 0 !== aIncremental[i]) {is100 = false}
 			}
 			// some tests we can rely on non-integer
 				// but others we measure enough to not all land on 0's (or 50's and 100s)
@@ -372,8 +396,8 @@ function get_timing(METRIC) {
 				if ((newTotal.join(', ') + lasttwo).length > 60) {newTotal = newTotal.slice(0, len - (reduce + 3))}
 				str = newTotal.join(', ') + lasttwo
 			}
-			data = aDiffs
-			//console.log(k, data, is10, is100, aDiffs, aTotal)
+			//console.log(k, is10, is100, data, aTotal)
+			//console.log(k, '\naDiffs', aDiffs, '\naIncremental', aIncremental)
 		} catch(e) {
 			oData[k] = ''
 			if ('reducetimer' !== k) {
@@ -382,7 +406,6 @@ function get_timing(METRIC) {
 				}
 				str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
 				oData[k] = (zD == e || zSKIP == e) ? e : zErr
-				data = str
 				if (zSKIP !== e) {countFail++} else {notation = ''}
 			}
 		}
