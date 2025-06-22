@@ -84,7 +84,11 @@ function run_block(trace) {
 		dom.tzpContent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
 		let msg = 'TZP requires gecko '+ isBlockMin +'+'
-		if (isAllowNonGecko) {
+		if ('iframe' == trace) {
+			msg = 'i\'m in an insecure iframe'
+		} else if ('insecure' == trace) {
+			msg = 'i\'m in an insecure context'
+		} else if (isAllowNonGecko) {
 			if (undefined !== isEngine) {
 				msg = 'update your '+ isEngine +' browser'
 			} else if (!isGecko) {
@@ -1759,6 +1763,23 @@ function countJS(item) {
 		if (!isGecko) {
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
+		// get iframe info
+		let aList = ['location','parent','self','top']
+		aList.forEach(function(item){
+			let x
+			try {
+				if ('location' == item) {x= window[item]} else {x = window[item].location}
+			} catch(e) {
+				x = e+''
+			}
+			isIframe[item] = x+''
+		})
+		// block if parent is insecure (but allow file:///)
+		if (window.location !== window.parent.location) {
+			// iframe
+			//run_block('iframe'); return
+		}
+
 		// help ensure/force images are loaded in time
 		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
 		try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch {}
@@ -1829,6 +1850,9 @@ function countJS(item) {
 }
 
 function outputPostSection(id) {
+	// tmp
+	console.log(isIframe)
+
 	if ("all" !== id) {
 		output_perf(id)
 	}
@@ -2033,6 +2057,7 @@ function outputSection(id, isResize = false) {
 		// not the case when using font.system.whitelist
 		// we should see if we can get this fixed upstream
 	//*
+	// ToDo: alpha128 is using this so we can't use isVer, we need to promise if fontface is working
 	if (gLoad && isBB && isVer > 139) {
 		if ('windows' == isOS || 'mac' == isOS) {
 			delay = 2000 // using fontasync PoC on my machine this is around 990+ ms
