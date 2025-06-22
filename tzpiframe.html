@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>TZP iframed</title>
+<style>
+body {background-color: white; color: black;}
+.vwh {
+	height: 100vh;
+	width: 100vw;
+	position: fixed;
+	top: 0;
+	left: 0;
+	border: 0px;
+}
+</style>
+</head>
+<body>
+
+<iframe id="iframe" class="vwh"></iframe>
+
+<script>
+'use strict';
+try {
+	let iframe = document.getElementById('iframe')
+	iframe.src='tzp.html'
+} catch(e) {console.log(e)}
+</script>
+</body>
+</html>
