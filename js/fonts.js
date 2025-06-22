@@ -99,7 +99,7 @@ let fntMaster = {
 				// https://searchfox.org/mozilla-central/rev/f53c09a22edc700ab1a9eaaf4da0f0dd9f11bff3/gfx/thebes/CoreTextFontList.cpp#38-44
 			'Courier','Times',
 			// ToDo: document-supported only
-			'Hiragino Kaku Gothic ProN',
+			'Hiragino Kaku Gothic ProN','ヒラギノ角ゴ',
 			// ToDo: in faces: maybe remove when that lands in TB
 			'Arial Black','Arial Narrow',
 		],
@@ -267,8 +267,8 @@ let fntMaster = {
 			'-apple-system',
 			//kBaseFonts
 			'Al Bayan','Al Nile','Al Tarikh','American Typewriter','Andale Mono','Apple Braille','Apple Chancery',
-				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo','Arial','Arial Hebrew',
-				'Arial Hebrew Scholar','Arial Unicode MS','Avenir Next','Ayuthaya',
+				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','애플고딕','AppleMyungjo','애플명조',
+				'Arial','Arial Hebrew','Arial Hebrew Scholar','Arial Unicode MS','Avenir Next','Ayuthaya',
 			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Bodoni Ornaments',
 				'Bodoni 72','Bodoni 72 Oldstyle','Bodoni 72 Smallcaps', // bodoni 72 font-family we drop 'book'
 			'Catamaran','Chalkboard','Chalkboard SE','Chalkduster','Cochin','Comic Sans MS','Copperplate',
@@ -278,7 +278,7 @@ let fntMaster = {
 			'Farah','Farisi',
 			'GB18030 Bitmap','Galvji','Geeza Pro','Geneva','Georgia','Gill Sans','Gujarati MT','Gujarati Sangam MN',
 				'Gurmukhi MN','Gurmukhi MT','Gurmukhi Sangam MN',
-			'Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN',
+			'Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN','ヒラギノ丸ゴ',
 			'Impact','InaiMathi',
 			'Kailasa','Kannada MN','Kannada Sangam MN','Kefa','Khmer MN','Khmer Sangam MN','Kohinoor Bangla',
 				'Kohinoor Devanagari','Kohinoor Gujarati','Kohinoor Telugu','Kokonor','Krungthep','KufiStandardGK',
@@ -572,7 +572,8 @@ let fntMaster = {
 			'Lahore Gurmukhi','Lava Devanagari','Lava Kannada','Lava Telugu',
 				'LiHei Pro','LiSong Pro','Libian SC','Libian TC',
 			'Maku','Mali','Modak','Mukta','Mukta Malar','Mukta Vaani','Myriad Arabic',
-			'Nanum Brush Script','Nanum Gothic','Nanum Myeongjo','Nanum Pen Script','Niramit','Nom Na Tong','Noto Serif Kannada','November Bangla Traditional',
+			'Nanum Brush Script','Nanum Gothic','Nanum Myeongjo','나눔명조','Nanum Pen Script','Niramit','Nom Na Tong',
+				'Noto Serif Kannada','November Bangla Traditional',
 			'October Compressed Devanagari','October Compressed Gujarati','October Compressed Gurmukhi','October Compressed Kannada',
 				'October Compressed Meetei Mayek','October Compressed Odia','October Compressed Ol Chiki','October Compressed Tamil','October Compressed Telugu',
 			'October Condensed Devanagari','October Condensed Gujarati','October Condensed Gurmukhi','October Condensed Kannada',
@@ -583,7 +584,7 @@ let fntMaster = {
 			'Padyakke Expanded One','Party LET','PCMyungjo','PilGi','PingFang MO','Produkt','Proxima Nova','PSL Ornanong Pro',
 			'Quotes Caps','Quotes Script',
 			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script',
-				'Shobhika','SimSong','Spot Mono','Srisakdi','STFangsong','STHeiti','STIX Two Text','STKaiti','STXihei',
+				'Shobhika','SimSong','Spot Mono','Srisakdi','STFangsong','STHeiti','STIX Two Text','STKaiti','华文楷体','STXihei',
 			'Tiro Bangla','Tiro Devanagari Hindi','Tiro Devanagari Marathi','Tiro Devanagari Sanskrit','Tiro Gurmukhi','Tiro Kannada','Tiro Tamil',
 				'Tiro Telugu','Toppan Bunkyu Gothic','Toppan Bunkyu Mincho','Tsukushi A Round Gothic','Tsukushi B Round Gothic',
 			'Wawati SC','Wawati TC',
