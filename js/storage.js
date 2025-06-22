@@ -72,22 +72,14 @@ const get_caches = (METRIC) => new Promise(resolve => {
 		// FF122: 1864684: dom.cache.privatebrowsing.enabled
 		// also see 1742344 / 1714354
 
-	// use .self so we don't error in an iframe
-	try {
-		if (undefined == window.self.caches) {
-			throw zErrType + 'undefined'
-		} else {
-			Promise.all([
-				window.self.caches.keys()
-			]).then(function(){
-				exit(zE)
-			}).catch(function(e){
-				exit(log_error(6, METRIC, e))
-			})
-		}
-	} catch(err) {
-		exit(log_error(6, METRIC, err))
-	}
+	// use self in case of iframe
+	Promise.all([
+		window.self.caches.keys()
+	]).then(function(){
+		exit(zE)
+	}).catch(function(e){
+		exit(log_error(6, METRIC, e))
+	})
 
 	function exit(str) {
 		addBoth(6, METRIC, str,'','', (str = zE ? str : zErr))
