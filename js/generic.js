@@ -18,13 +18,23 @@ function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function removeElementFn(id) {try {dom[id].remove()} catch {}}
 function addProxyLie(value) {sData[SECT99].push(value)}
 function isProxyLie(value) {return sData[SECT99].includes(value)}
-function smartFn() {
+function smartFn(type) {
 	// reset
 	isFile = 'file:' == location.protocol
 	isSmartDataMode = false
 	isSmart = false
+	// calculate
 	if (isGecko && isVer >= isSmartMin) {
-		if (isSmartAllowed || isFile) {isSmart = true} else {isSmartDataMode = true}
+		if ('early' == type) {
+			// we do not know isBB yet
+			if (isSmartAllowed || isFile) {isSmart = true}
+		} else {
+			// now we know isBB 128.5+ and 140+
+			// block BB15 for now, too much noise
+			if (isSmartAllowed || isFile || !isBB || (isBB && 128 == isVer)) {isSmart = true}
+		}
+		isSmartDataMode = !isSmart // isSmartDataMode must be the opposite
+		if ('final' == type && isSmartDataMode) {run_basic('data-only')}
 	}
 }
 
@@ -575,8 +585,8 @@ function get_isVer(METRIC) {
 	isBlock = isVer < isBlockMin
 	if (isBlock) {run_block('gecko'); return}
 	// set smarts / modes
-	smartFn()
-	if (!isSmart) {run_basic((isVer >= isSmartMin ? 'data-only' : 'basic'))}
+	smartFn('early')
+	if (!isSmart && isVer < isSmartMin) {run_basic()}
 	return
 
 	function cascade() {
@@ -2017,7 +2027,7 @@ function outputSection(id, isResize = false) {
 	}
 
 	// reset smarts
-	smartFn()
+	smartFn('final')
 	// BB: font.vis + bundled fonts
 		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
 		// not the case when using font.system.whitelist
