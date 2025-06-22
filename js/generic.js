@@ -1687,6 +1687,9 @@ function log_section(name, time, scope = isScope) {
 
 	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
 	if (gCount == gSectionsExpected) {
+		// tmp
+		if (gLoad) {console.log(isIframe)}
+
 		gt1 = gt0
 		if (isPerf) {dom.perfAll = " "+ (performance.now()-gt0).toFixed(isDecimal ? 2 : 0) +" ms"}
 		output_section("all", scope)
@@ -1763,7 +1766,7 @@ function countJS(item) {
 		if (!isGecko) {
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
-		// get iframe info
+		// get location info
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Property_access_denied
 		// Uncaught DOMException: Permission denied to access property Symbol.toPrimitive on cross-origin object
 		let aList = ['location','parent','self','top']
@@ -1776,11 +1779,15 @@ function countJS(item) {
 				isIframe[item] = e+''
 			}
 		})
-		// block if parent is insecure (but allow file:///)
+		// block if parent is insecure as this produces different results (but allow file:///)
+			// e.g. some APIs require secure contexts
+			// or maybe just block if iframe
+		/*
 		if (window.location !== window.parent.location) {
 			// iframe
-			//run_block('iframe'); return
+			run_block('iframe'); return
 		}
+		//*/
 
 		// help ensure/force images are loaded in time
 		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
@@ -1852,9 +1859,6 @@ function countJS(item) {
 }
 
 function outputPostSection(id) {
-	// tmp
-	console.log(isIframe)
-
 	if ("all" !== id) {
 		output_perf(id)
 	}
