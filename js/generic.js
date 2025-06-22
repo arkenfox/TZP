@@ -1764,15 +1764,17 @@ function countJS(item) {
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
 		// get iframe info
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Property_access_denied
+		// Uncaught DOMException: Permission denied to access property Symbol.toPrimitive on cross-origin object
 		let aList = ['location','parent','self','top']
 		aList.forEach(function(item){
 			let x
 			try {
 				if ('location' == item) {x= window[item]} else {x = window[item].location}
+				isIframe[item] = x+''
 			} catch(e) {
-				x = e+''
+				isIframe[item] = e+''
 			}
-			isIframe[item] = x+''
 		})
 		// block if parent is insecure (but allow file:///)
 		if (window.location !== window.parent.location) {
