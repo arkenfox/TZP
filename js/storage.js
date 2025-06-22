@@ -71,13 +71,24 @@ const get_caches = (METRIC) => new Promise(resolve => {
 	// PB mode: DOMException: The operation is insecure.
 		// FF122: 1864684: dom.cache.privatebrowsing.enabled
 		// also see 1742344 / 1714354
-	Promise.all([
-		window.caches.keys()
-	]).then(function(){
-		exit(zE)
-	}).catch(function(e){
-		exit(log_error(6, METRIC, e))
-	})
+
+	// use .self so we don't error in an iframe
+	try {
+		if (undefined == window.self.caches) {
+			throw zErrType + 'undefined'
+		} else {
+			Promise.all([
+				window.self.caches.keys()
+			]).then(function(){
+				exit(zE)
+			}).catch(function(e){
+				exit(log_error(6, METRIC, e))
+			})
+		}
+	} catch(err) {
+		exit(log_error(6, METRIC, err))
+	}
+
 	function exit(str) {
 		addBoth(6, METRIC, str,'','', (str = zE ? str : zErr))
 		log_perf(6, METRIC, t0)
