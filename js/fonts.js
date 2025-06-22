@@ -99,7 +99,7 @@ let fntMaster = {
 				// https://searchfox.org/mozilla-central/rev/f53c09a22edc700ab1a9eaaf4da0f0dd9f11bff3/gfx/thebes/CoreTextFontList.cpp#38-44
 			'Courier','Times',
 			// ToDo: document-supported only
-			'Hiragino Kaku Gothic ProN','ヒラギノ角ゴ',
+			'Hiragino Kaku Gothic ProN', //'ヒラギノ角ゴ', // mac doesn't seem to do localized
 			// ToDo: in faces: maybe remove when that lands in TB
 			'Arial Black','Arial Narrow',
 		],
@@ -267,7 +267,7 @@ let fntMaster = {
 			'-apple-system',
 			//kBaseFonts
 			'Al Bayan','Al Nile','Al Tarikh','American Typewriter','Andale Mono','Apple Braille','Apple Chancery',
-				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','애플고딕','AppleMyungjo','애플명조',
+				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo',
 				'Arial','Arial Hebrew','Arial Hebrew Scholar','Arial Unicode MS','Avenir Next','Ayuthaya',
 			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Bodoni Ornaments',
 				'Bodoni 72','Bodoni 72 Oldstyle','Bodoni 72 Smallcaps', // bodoni 72 font-family we drop 'book'
@@ -278,7 +278,7 @@ let fntMaster = {
 			'Farah','Farisi',
 			'GB18030 Bitmap','Galvji','Geeza Pro','Geneva','Georgia','Gill Sans','Gujarati MT','Gujarati Sangam MN',
 				'Gurmukhi MN','Gurmukhi MT','Gurmukhi Sangam MN',
-			'Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN','ヒラギノ丸ゴ',
+			'Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN',
 			'Impact','InaiMathi',
 			'Kailasa','Kannada MN','Kannada Sangam MN','Kefa','Khmer MN','Khmer Sangam MN','Kohinoor Bangla',
 				'Kohinoor Devanagari','Kohinoor Gujarati','Kohinoor Telugu','Kokonor','Krungthep','KufiStandardGK',
@@ -326,6 +326,10 @@ let fntMaster = {
 			'Zapf Dingbats','Zapfino',
 			// 11- | legacy
 			'Courier','Times',
+			// localized: just in case: ToDo: test JAP install
+			'애플고딕', // AppleGothic
+			'애플명조', // AppleMyungjo
+			'ヒラギノ丸ゴ', // Hiragino Maru Gothic ProN
 		],
 		macfaces: [
 			// weighted/styled
