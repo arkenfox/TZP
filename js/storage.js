@@ -72,15 +72,24 @@ const get_caches = (METRIC) => new Promise(resolve => {
 		// FF122: 1864684: dom.cache.privatebrowsing.enabled
 		// also see 1742344 / 1714354
 
-	// use self in case of iframe
-	Promise.all([
-		window.self.caches.keys()
-	]).then(function(){
-		exit(zE)
-	}).catch(function(e){
-		exit(log_error(6, METRIC, e))
-	})
-
+	// type check first
+		// e.g. insecure parent on http://www.raymondhill.net/ublock/pageloadspeed.html
+	let typeCheck = typeFn(window.self.caches, true)
+	try {
+		if ('object' !== typeCheck) {
+			throw zErrType + typeCheck
+		} else {
+			Promise.all([
+				window.self.caches.keys()
+			]).then(function(){
+				exit(zE)
+			}).catch(function(e){
+				exit(log_error(6, METRIC, e))
+			})
+		}
+	} catch(err) {
+		exit(log_error(6, METRIC, err))
+	}
 	function exit(str) {
 		addBoth(6, METRIC, str,'','', (str = zE ? str : zErr))
 		log_perf(6, METRIC, t0)
