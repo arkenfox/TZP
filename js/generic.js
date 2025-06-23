@@ -85,7 +85,7 @@ function run_block(trace) {
 		dom.blockmsg.style.display = 'block'
 		let msg = 'TZP requires gecko '+ isBlockMin +'+'
 		if ('iframe' == trace) {
-			msg = 'i\'m in an insecure iframe'
+			msg = 'i\'m in an iframe'
 		} else if ('insecure' == trace) {
 			msg = 'i\'m in an insecure context'
 		} else if (isAllowNonGecko) {
@@ -1687,9 +1687,6 @@ function log_section(name, time, scope = isScope) {
 
 	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
 	if (gCount == gSectionsExpected) {
-		// tmp
-		if (gLoad) {console.log(isLocation)}
-
 		gt1 = gt0
 		if (isPerf) {dom.perfAll = " "+ (performance.now()-gt0).toFixed(isDecimal ? 2 : 0) +" ms"}
 		output_section("all", scope)
@@ -1762,40 +1759,15 @@ function log_section(name, time, scope = isScope) {
 function countJS(item) {
 	jsFiles++
 	if (1 == jsFiles) {
+		// block if iframed
+		if (window.location !== window.parent.location) {run_block('iframe'); return}
+		// block if insecure as this produces very different results e.g. some APIs require secure
+			// gecko diffs include 14 navigator keys, 100+ window props, and 7 permissions
+		if (!isFile && 'https:' !== window.protocol) {run_block('insecure'); return}
 		// non-gecko
 		if (!isGecko) {
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
-		// get location info
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Property_access_denied
-		// Uncaught DOMException: Permission denied to access property Symbol.toPrimitive on cross-origin object
-		let aList = ['location','parent','self','top'], setLocation = new Set()
-		aList.forEach(function(item){
-			let x
-			try {
-				if ('location' == item) {x= window[item]} else {x = window[item].location}
-				isLocation[item] = x+''
-				setLocation.add(x+'')
-			} catch(e) {
-				isLocation[item] = e+''
-				setLocation.add(e+'')
-			}
-		})
-
-		console.log(setLocation)
-		/* block if insecure as this produces very different results (but allow file:///)
-			e.g. some APIs require secure contexts and the iframe size can't be controlled
-			FP diffs include 14 navigator keys, 100+ window props, and 7 permissions
-		//*/
-		// notes:
-			// secure parent and iframe is viewport width then we get the same FP
-			// but because we don't know the iframe is sized correctly then we should just block iframes
-		/*
-		if (window.location !== window.parent.location) {
-			// iframe
-			run_block('iframe'); return
-		}
-		//*/
 
 		// help ensure/force images are loaded in time
 		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
