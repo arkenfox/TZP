@@ -1763,7 +1763,7 @@ function countJS(item) {
 		if (window.location !== window.parent.location) {run_block('iframe'); return}
 		// block if insecure as this produces very different results e.g. some APIs require secure
 			// gecko diffs include 14 navigator keys, 100+ window props, and 7 permissions
-		if (!['file:','https:'].includes(window.protocol)) {run_block('insecure'); return}
+		if (!isFile && 'https:' !== location.protocol) {run_block('insecure'); return}
 		// non-gecko
 		if (!isGecko) {
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
