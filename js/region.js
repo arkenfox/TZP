@@ -952,10 +952,10 @@ function get_locale_resolvedoptions(METRIC) {
 
 const get_messages_media = (METRIC) => new Promise(resolve => {
 	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ''
-	try {
-		let aList = ['InvalidImage','ScaledImage']
-		for (const k of aList) {
-			let target = dom['tzp'+ k], title =''
+	let aList = ['InvalidImage','ScaledImage']
+	for (const k of aList) {
+		let target = dom['tzp'+ k], title =''
+		try {
 			if ('ScaledImage' == k) {
 				title = target.contentWindow.document.title
 				title = title.replace(k +'.png', '') // strip image name to reduce noise
@@ -965,15 +965,16 @@ const get_messages_media = (METRIC) => new Promise(resolve => {
 				title = title.replace(target.src, '') // remove noise
 			}
 			data[k] = title.trim()
+		} catch(err) {
+			log_error(4, METRIC +'_'+ k, err)
+			data[k] = zErr
 		}
-		hash = mini(data); btn = addButton(4, METRIC)
-		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
-			}
+	}
+	hash = mini(data); btn = addButton(4, METRIC)
+	if (isLanguageSmart) {
+		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+			if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
 		}
-	} catch(e) {
-		hash = e; data = zErrLog
 	}
 	addBoth(4, METRIC, hash, btn, notation, data)
 	return resolve()
