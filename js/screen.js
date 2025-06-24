@@ -1694,8 +1694,22 @@ const outputFD = () => new Promise(resolve => {
   }
 	addBoth(3, METRIC, value,'','', data)
 
+	// arch: FF110+ pref removed: error means 32bit
+	if (isGecko || 'webkit' == isEngine) {
+		let str = '64bit'; data = 64
+		if (isArch !== true) {
+			if ('RangeError: invalid array length' == isArch) {
+				str = '32bit'; data = 32
+			} else {
+				str = isArch; data = zErr
+			}
+		}
+		addBoth(3, 'browser_architecture', str,'','', data)
+	}
+
 	if (!isGecko) {
-		let aList = ['logo','wordmark','browser_architecture','os','version']
+		let aList = ['logo','wordmark','os','version']
+		if ('blink' == isEngine) {aList.push('browser_architecture')}
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
@@ -1769,16 +1783,6 @@ const outputFD = () => new Promise(resolve => {
 	if (isGecko && isSmart) {
 		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'
 	}
-	// arch: FF110+ pref removed: error means 32bit
-	let str = '64bit'; data = 64
-	if (isArch !== true) {
-		if ('RangeError: invalid array length' == isArch) {
-			str = '32bit'; data = 32
-		} else {
-			str = isArch; data = zErr
-		}
-	}
-	addBoth(3, 'browser_architecture', str,'','', data)
 	return resolve()
 })
 
