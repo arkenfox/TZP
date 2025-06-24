@@ -177,11 +177,12 @@ const promiseRaceFulfilled = async ({
 /*** GLOBAL ONCE ***/
 
 function get_isArch(METRIC) {
-	if (!isGecko) {return}
+	// chrome limits ArrayBuffer to 2145386496: https://issues.chromium.org/issues/40055619
+	if ('blink' == engine) {return}
 	let t0 = nowFn(), value
 	try {
 		if (runSG) {foo++}
-		let test = new ArrayBuffer(Math.pow(2,32))
+		let test = new ArrayBuffer(Math.pow(2,32)) // 4294967296
 		value = 64
 	} catch(e) {
 		isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist sect3
@@ -407,11 +408,15 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			if ('object' == typeFn(res, true)) {
 				let aDetected = []
 				for (const k of Object.keys(res)) {aDetected.push(k)}
-				let expected = aDetected[0]
+				let found = aDetected[0]
 				if (aDetected.length == 1) {
-					if (expected == 'MS Shell Dlg \\32') {exit('windows')
-					} else if (expected == '-apple-system') {exit('mac')
-					} else {exit('android')}
+					if (found == 'MS Shell Dlg \\32') {exit('windows')
+					} else if (found == '-apple-system') {exit('mac')
+					} else if (found == 'Dancing Script') { exit('android')
+					} else {
+						trysomethingelse()
+					}
+					//console.log('isOS font check', found, isOS)
 				} else if (aDetected.length == 0) {
 					exit('linux')
 				} else {
@@ -430,13 +435,23 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
 			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
 		]
-		let font = getComputedStyle(dom.tzpWidget.children[0]).getPropertyValue('font-family')
+		let font = getComputedStyle(dom.tzpbutton).getPropertyValue('font-family')
 		if ('string' !== typeFn(font) || aIgnore.includes(font)) {
 			throw zErr
 		} else {
-			if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
-			} else if (font == '-apple-system') {exit('mac')
-			} else {throw zErr}
+			if (isGecko) {
+				// button
+				if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
+				} else if (font == '-apple-system') {exit('mac')
+				} else {throw zErr}
+			}
+			// mac webkit
+				// search and select return -apple-system
+				// mozfonts (e.g. mozbutton) return webkit-standard
+				// status-bar returns -apple-status-bar
+				// menu returns -apple-menu
+
+
 		}
 	} catch {
 		tryfonts()
