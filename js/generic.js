@@ -178,7 +178,7 @@ const promiseRaceFulfilled = async ({
 
 function get_isArch(METRIC) {
 	// chrome limits ArrayBuffer to 2145386496: https://issues.chromium.org/issues/40055619
-	if ('blink' == engine) {return}
+	if ('blink' == isEngine) {return}
 	let t0 = nowFn(), value
 	try {
 		if (runSG) {foo++}
@@ -450,8 +450,6 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 				// mozfonts (e.g. mozbutton) return webkit-standard
 				// status-bar returns -apple-status-bar
 				// menu returns -apple-menu
-
-
 		}
 	} catch {
 		tryfonts()
