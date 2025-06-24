@@ -664,12 +664,27 @@ let fntMaster = {
 			'Cascadia Code','Cascadia Mono', // 11
 		],
 	},
-	// isOS
+	// isOS gecko
+		// smaller list so it works with BB
 	mini: [
+		// note: '-apple-menu','-apple-status-bar' not detected in gecko
 		'-apple-system',
 		'Dancing Script', // android fallback // 'Roboto'
 		'MS Shell Dlg \\32',
 	],
+	// isOS for non gecko
+	miniother: {
+		// all expected fonts that wouldn't likely be found on other platforms
+		android: ['Dancing Script'],
+		mac: [
+			'-apple-menu','-apple-status-bar','-apple-system', // wekbit detects these 3, blink doesn't
+			'Apple Color Emoji','Apple Symbols','AppleGothic','AppleMyungjo',
+		],
+		windows: [
+			'MS Gothic','MS PGothic','MS UI Gothic','Microsoft JhengHei','Microsoft New Tai Lue',
+			'Microsoft PhagsPa','Microsoft Tai Le','Microsoft YaHei','Microsoft Yi Baiti',
+		],
+	}
 }
 
 function set_fntList() {
@@ -2175,22 +2190,24 @@ function get_textmetrics(METRIC) {
 
 function get_widget_fonts(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+/*
 	let aList = [
 		'button','checkbox','color','date','datetime-local','email','file','hidden','image','month','number',
 		'password','radio','range','reset','search','select','submit','tel','text','textarea','time','url','week',
 	]
+*/
 	let aProps = ['font-family','font-size']
 	let hash, btn='', data = {}, notation = rfp_red
 	try {
 		let tmpdata = {}
 		let target = dom.tzpWidget
-		for (let i=0; i < aList.length; i++) {
-			let el = target.children[i], name = aList[i]
+		for (let i=0; i < target.childElementCount; i++) {
+			let el = target.children[i], name = '' !== el.id ? el.id.slice(3) : el.type
 			let aKeys = []
 			for (const j of aProps) {
 				let value = getComputedStyle(el)[j]
 				// type check first item
-				if (name == aList[0]) {
+				if (0 == i) {
 					if (runST) {value =''}
 					let typeCheck = typeFn(value)
 					if ('string' !== typeCheck) {throw zErrType + j +': '+ typeCheck}
