@@ -216,7 +216,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 97, maxVer = 141, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 98, maxVer = 142, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -278,21 +278,30 @@ function outputVersion() {
 			}
 		}
 
+		// 142: 1960300
+			// note: intl.icu4x.segmenter.enabled has no effect on this test
+		let t142 = performance.now(), ver142
+		try {
+			let segmenter = new Intl.Segmenter('en', {granularity:'word'})
+			let test142 = Array.from(segmenter.segment('a:b')).map(({ segment }) => segment)
+			if (3 == test142.length) {ver142 = true}
+		} catch(e) {}
+		rec(142, 142, "1960300", ver142, performance.now()-t142, 'INTL') // 0.15ms
+
 		// 141: 1860030
-			// fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
+			// fast-path: pref: dom.intersection_observer.scroll_margin.enabled (added + default true FF141+)
 		let t141a = performance.now(), ver141a
 		try {ver141a = window["IntersectionObserver"].prototype.hasOwnProperty('scrollMargin')} catch(e) {}
 		rec(141.1, 141, "1860030", ver141a, performance.now()-t141a, "PREF") // 0.005ms
 
-		// 141: 1950162
-			// fast-path: requires temporal which is default enabled FF139+
-			// javascript.options.experimental.temporal
+		// 141: 1950162: 
+			// fast-path: requires temporal (default enabled FF139+) javascript.options.experimental.temporal
 		let t141 = performance.now(), ver141
 		try {ver141 = undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear} catch(e) {}
 		rec(141, 141, "1950162", ver141, performance.now()-t141, "PREF") // 0.06ms (0.02 if error)
 
 		// 140: 1550462
-			// fast-path: pref: dom.event.pointer.rawupdate.enabled : default true 140+
+			// fast-path: pref: dom.event.pointer.rawupdate.enabled  (added + default true FF140+)
 		let t140b = performance.now(), ver140b
 		try {ver140b = "object" === typeof onpointerrawupdate} catch(e) {}
 		rec(140.2, 140, "1550462", ver140b, performance.now()-t140b, "PREF") // 0.003ms
