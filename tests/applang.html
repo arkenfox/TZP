@@ -591,13 +591,13 @@ function get_xslt_sort(aSource = []) {
 		aChars.reverse() // let's go backwards so it's radically different
 
 		let oData = {}
-		oData['chars'] = {'hash': mini(aChars.join(', ')), 'data': aChars.join(', ')}
+		oData['chars'] = {'hash': mini(aChars.join(' , ')), 'data': aChars.join(' , ')}
 		// build xslt
 		aChars.forEach(function(item){aData.push('<a>'+ item +'</a>')})
 		const xData = '<doc>'+ aData.join('') +'</doc>'
 
 		let control = aChars.sort(Intl.Collator(isLocale).compare)
-		oData['collator'] = {'hash': mini(control.join(', ')), 'data': control.join(', ')}
+		oData['collator'] = {'hash': mini(control.join(' , ')), 'data': control.join(' , ')}
 
 		//console.log(xData)
 		const xslText = '<?xml version="1.0" encoding="UTF-8"?>'
@@ -614,7 +614,7 @@ function get_xslt_sort(aSource = []) {
 		//console.log(styledDoc)
 		let aTest = styledDoc.firstChild.textContent.split(/[\s,\n]+/);
 		data = aTest.slice(0, -1)
-		oData['xslt'] = {'hash': mini(data.join(', ')), 'data': data.join(', ')}
+		oData['xslt'] = {'hash': mini(data.join(' , ')), 'data': data.join(' , ')}
 		console.log(oData)
 		let isMatch = oData.collator.hash == oData.xslt.hash
 		if (isFF) {notation = isMatch ? collatormatch_green : collatormatch_red}
