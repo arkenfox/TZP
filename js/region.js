@@ -678,7 +678,7 @@ function get_locale_intl() {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
 					let testdata = tests[key].sort() // always resort
-					obj[key] = [testdata.sort(Intl.Collator(code, {usage: key}).compare).join(', ')]
+					obj[key] = testdata.sort(Intl.Collator(code, {usage: key}).compare).join(' , ').trim() // spaces before and to help LTR/RTL
 				}
 			} else if ('compact' == m) {
 				for (let i=0; i < testkeys.length; i++) {
