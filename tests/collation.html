@@ -327,7 +327,7 @@ function collator() {
 		})
 		if (charsSort.length > 1) {
 			goSort = true
-			dom.valueC.value = charsSort.join(", ")
+			dom.valueC.value = charsSort.join(" , ")
 		}
 	} else {
 		// use example
@@ -350,7 +350,7 @@ function collator() {
 		})
 		if (charsSearch.length > 1) {
 			goSearch = true
-			dom.valueD.value = charsSearch.join(", ")
+			dom.valueD.value = charsSearch.join(" , ")
 		}
 	} else {
 		// use example
@@ -378,16 +378,16 @@ function collator() {
 			// display chars used
 			let strItem = s4.trim() +"ITEMS: "+ sc + charsSort.length
 				+ (thisHash == exampleHash ? s12 +" [example]"+ sc : "") +"<br><br>"
-				+ s12 +"sort: "+ sc + charsSort.join(", ") +"<br><br>"
-				+ s12 +"search: "+ sc + charsSearch.join(", ") +"<br>"
+				+ s12 +"sort: "+ mini(charsSort.join(" , ").trim()) +': '+ sc + charsSort.join(" , ").trim() +"<br><br>"
+				+ s12 +"search: "+ sc + charsSearch.join(" , ").trim() +"<br>"
 			output.push(strItem)
 
 			// set control
 			charsSort = charsSort.sort(Intl.Collator("en").compare)
-			let ensortdata = [charsSort.join(", ")]
+			let ensortdata = charsSort.join(" , ").trim()
 			let ensorthash = mini(ensortdata)
 			charsSearch.sort(Intl.Collator("en", {usage: "search"}).compare)
-			let ensearchdata = [charsSearch.join(", ")]
+			let ensearchdata = charsSearch.join(" , ").trim()
 			let ensearchhash = mini(ensearchdata)
 			let entmpobj = {
 				"search": ensearchdata,
@@ -398,9 +398,8 @@ function collator() {
 			let control_display = ensearchhash +" | "+ ensorthash +" | "+ control
 			strItem = s4.trim() +"CONTROL: "+ sc + sg + "en"+ sc +"<br><br>"
 				+ s12 +"   hash: "+ sc + control_display + s12 +" [search | sort | both]"+ sc +"<br>"
-
-			let ctlDetails = "<li>"+ s14 +"search: "+ sc + oRaw[control]['search'].join(', ') +"</li>"
-							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[control]['sort'].join(', ') +"</li>"
+			let ctlDetails = "<li>"+ s14 +"search: "+ sc + oRaw[control] +"</li>"
+							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[control]['sort'] +"</li>"
 			if (isDetails) {ctlDetails = "<li><details><summary>"+ s14 +"data"+ sc +"</summary><ul>"+ ctlDetails +"</ul></details></li>"}
 
 			output.push(strItem +"<ul>"+ ctlDetails +"</ul>")
@@ -421,12 +420,12 @@ function collator() {
 
 				charsSearch.sort()
 				charsSearch.sort(Intl.Collator(code, {usage: "search"}).compare)
-				let searchdata = [charsSearch.join(", ")]
+				let searchdata = charsSearch.join(" , ").trim()
 				let searchhash = mini(searchdata)
 
 				charsSort.sort()
 				charsSort.sort(Intl.Collator(code, {usage: "sort"}).compare)
-				let sortdata = [charsSort.join(", ")]
+				let sortdata = charsSort.join(" , ").trim()
 				let sorthash = mini(sortdata)
 
 				let tmpobj = {
@@ -511,8 +510,8 @@ function collator() {
 					tmpCH = tmpH.split(" | ")[2] // combined hash for data lookup
 					tmpStr = s12 + (i + 1).toString().padStart(3) +": "+ sc
 					// counter then hash then details then locales
-					let strDetails = "<li>"+ s14 +"search: "+ sc + oRaw[tmpCH]['search'].join(', ') +"</li>"
-							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[tmpCH]['sort'].join(', ') +"</li>"
+					let strDetails = "<li>"+ s14 +"search: "+ sc + oRaw[tmpCH]['search'] +"</li>"
+							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[tmpCH]['sort'] +"</li>"
 					if (isDetails) {strDetails = "<li><details><summary>"+ s14 +"data"+ sc +"</summary><ul>"+ strDetails +"</ul></details></li>"}
 					lineItems.push (tmpStr + tmpH +"<br><ul>"+ strDetails +"<li>"+ tmpL +"</li></ul>")
 				}
