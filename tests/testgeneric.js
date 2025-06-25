@@ -413,10 +413,16 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 141
+		isVerMax = 142
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 142
+			try {
+				let segmenter = new Intl.Segmenter('en', {granularity:'word'})
+				let test142 = Array.from(segmenter.segment('a:b')).map(({ segment }) => segment)
+				if (3 == test142.length) return 142 // 1960300
+			} catch(e) {}
 			// 141: fast-path: requires temporal default enabled FF139+ javascript.options.experimental.temporal
 			try {if (undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear) return 141} catch(e) {} // 1950162
 			// 141: fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
