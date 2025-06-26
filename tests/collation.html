@@ -56,6 +56,8 @@
 <script>
 'use strict';
 
+let isReverse = false
+
 var list = []
 gLocales.forEach(function(str) {
 	let code = str.split(",")[0]
@@ -371,9 +373,25 @@ function collator() {
 			// reset
 			charsSort.sort()
 			charsSearch.sort()
+			// what if we reverse sorted, does that change anything
+			if (isReverse) {
+				//console.log('reversed chars arrays')
+				charsSort.reverse()
+				charsSearch.reverse()
+			}
 			//console.log(mini(charsSort), mini(charsSearch))
-			let exampleHash = mini(collatorSort.sort()) +" | "+ mini(collatorSearch.sort())
-			let thisHash = mini(charsSort.sort()) +" | "+ mini(charsSearch.sort())
+			collatorSort.sort()
+			collatorSearch.sort()
+			let exampleHash = mini(collatorSort) +" | "+ mini(collatorSearch)
+			let thisHash = mini(charsSort) +" | "+ mini(charsSearch)
+
+			if (isReverse) {
+				//console.log('reversed collator arrays')
+				collatorSort.reverse()
+				collatorSearch.reverse()
+				exampleHash = mini(collatorSort) +" | "+ mini(collatorSearch)
+				thisHash = mini(charsSort) +" | "+ mini(charsSearch)
+			}
 
 			// display chars used
 			let strItem = s4.trim() +"ITEMS: "+ sc + charsSort.length
@@ -393,12 +411,14 @@ function collator() {
 				"search": ensearchdata,
 				"sort": ensortdata,
 			}
+
 			let control = mini(entmpobj)
 			if (undefined == oRaw[control]) {oRaw[control] = entmpobj}
-			let control_display = ensearchhash +" | "+ ensorthash +" | "+ control
+
+			let control_display = s12 +'search: '+ sc + ensearchhash + s12 + " | sort: "+ sc + ensorthash + s12 + " | both: "+ sc + control
 			strItem = s4.trim() +"CONTROL: "+ sc + sg + "en"+ sc +"<br><br>"
-				+ s12 +"   hash: "+ sc + control_display + s12 +" [search | sort | both]"+ sc +"<br>"
-			let ctlDetails = "<li>"+ s14 +"search: "+ sc + oRaw[control] +"</li>"
+				+ s12 +"   hash: "+ sc + control_display + "<br>"
+			let ctlDetails = "<li>"+ s14 +"search: "+ sc + oRaw[control]['search'] +"</li>"
 							+ "<li>"+ s14 +"  sort: "+ sc + oRaw[control]['sort'] +"</li>"
 			if (isDetails) {ctlDetails = "<li><details><summary>"+ s14 +"data"+ sc +"</summary><ul>"+ ctlDetails +"</ul></details></li>"}
 
@@ -418,12 +438,19 @@ function collator() {
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
 
+				// always reset order
 				charsSearch.sort()
+				charsSort.sort()
+				if (isReverse) {
+					//console.log('reversed test data', str)
+					charsSearch.reverse()
+					charsSort.reverse()
+				}
+
 				charsSearch.sort(Intl.Collator(code, {usage: "search"}).compare)
 				let searchdata = charsSearch.join(" , ").trim()
 				let searchhash = mini(searchdata)
 
-				charsSort.sort()
 				charsSort.sort(Intl.Collator(code, {usage: "sort"}).compare)
 				let sortdata = charsSort.join(" , ").trim()
 				let sorthash = mini(sortdata)
