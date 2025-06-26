@@ -16,54 +16,51 @@ function get_nav_connection(METRIC) {
 			if (hash+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ hash}
 			// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
 			let keyTypes = {
+				// gecko only
 				addEventListener: 'function',
 				dispatchEvent: 'function',
-				downlink: 'number',
-				downlinkMax: 'number',
-				effectiveType: 'string',
-				onchange: 'null',
 				ontypechange: 'null',
 				removeEventListener: 'function',
+				type: 'string',
+				// also in blink
+				downlink: 'number',
+				downlinkMax: 'null',
+				effectiveType: 'string',
+				onchange: 'null',
 				rtt: 'number',
 				saveData: 'boolean',
-				type: 'string',
 				when: 'function',
 			}
+			let oGood = {
+				effectiveType: ['slow-2g','2g','3g','4g'],
+				type: ['bluetooth','cellular','ethernet','none','wifi','wimax','other','unknown']
+			}
 			let oTemp = {}
-			for (let key in navigator.connection) {
+			for (let k in hash) {
 				try {
-					let keyValue = navigator.connection[key]
-					if (runSI) {keyValue = undefined}
-					let typeCheck = typeFn(keyValue), expectedType = keyTypes[key]
+					let x = navigator.connection[k]
+					if (runSI) {x = undefined}
+					// type check
+					let typeCheck = typeFn(x), expectedType = keyTypes[k]
 					if (typeCheck !== expectedType) {
-						let isInvalid = true
-						if ('blink' == isEngine) {
-							if ('downlinkMax' == key && 'Infinity' == typeCheck) {isInvalid = false}
-						}
-						if (isInvalid) {
-							throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck
-						}
+						throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck
 					}
-					//
-					if ('function' === typeCheck) {keyValue += ''}
+					// valid string
+					if ('type' == k || 'effectiveType' == k) {
+						if (runSI) {x = '1g'}
+						let aGood = oGood[k]
+						if (!aGood.includes(x)) {throw zErrInvalid + ': got ' + x}
+						if ('slow-2g' == x) {x = '2g'} // treat slow-2g as 2g
+					}
+					// cleanup
+					if ('function' === typeCheck) {x = typeCheck}
+					if (null == x) {x += ''} // record null as a string | note: 'null' is caught as an error
 					// stability
-					if (Infinity !== keyValue && 'downlink' == key.slice(0,8)) {
-						keyValue = Math.floor(keyValue)
-					} else if ('rtt' == key) {
-						keyValue = zNA
-					} else if ('effectiveType' == key) {
-						if (runSI) {keyValue = '1g'}
-						let aGood = ['slow-2g','2g','3g','4g']
-						if (!aGood.includes(keyValue)) {throw zErrInvalid + ': got ' + keyValue}
-						if ('slow-2g' == keyValue) {keyValue = '2g'} // treat slow-2g as 2g
-					} else if ('onchange' == key || 'ontypechange' == key) {
-						// record null as a string | note: 'null' is caught as an error
-						if (null == keyValue) {keyValue += ''}
-					}
-					oTemp[key] = keyValue
+					if ('rtt' == k) {x = zNA} else if ('downlink' == k) {	x = Math.floor(x)}
+					oTemp[k] = x
 				} catch(e) {
-					oTemp[key] = zErr
-					log_error(5, METRIC +'_'+ key, e)
+					oTemp[k] = zErr
+					log_error(5, METRIC +'_'+ k, e)
 				}
 			}
 			data = {}
