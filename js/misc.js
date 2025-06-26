@@ -210,6 +210,7 @@ function get_timing_resource() {
 
 function get_timing(METRIC) {
 	let aLoop = ['contexttime','performancetime']
+	let strZero = 'not enough data'
 	if ('timing_precision' == METRIC) {
 		aLoop = gTiming
 		// check isPerf again
@@ -225,7 +226,10 @@ function get_timing(METRIC) {
 		gData.timing.date = [1723240561321]
 		gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
 		gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
+		gData.timing.currenttime = [966.686] // only a single RFP entry
+		gData.timing.currenttime = [962.486] // only a single non-RFP entry
 		//*/
+
 		// isDecimal
 		isDecimal = false
 		if (isPerf) {
@@ -299,7 +303,8 @@ function get_timing(METRIC) {
 			let setDiffs = new Set(), setIncremental = new Set(), aTotal = []
 			if (1 == aTimes.length) {
 				aTotal.push(0) // make sure we display something
-				if ('exslt' !== k) {isMatch = false} // all non-exslt we expect multiple values
+				// all non-exslt we expect multiple values
+				if ('exslt' !== k) {isMatch = false}
 				isZero = true
 			}
 			for (let i=1; i < aTimes.length ; i++) {
@@ -336,17 +341,22 @@ function get_timing(METRIC) {
 			sDetail.document[METRIC +'_data'][k]['diffs'] = aDiffs
 			sDetail.document[METRIC +'_data'][k]['incremental'] = aIncremental
 
-			// using diffs since start:  don't assume 10 or 100 if only 1 sample size
-			// ToDo: I do not like this: rare? and a false positive is ok when you look at the rest of the data
-				// we could analayse and cleanup data afterwards
-			//if (aDiffs.length == 1) {is10 = false; is100 = false}
+			// using incremental: test intervals
+			if (aIncremental.length) {
+				for (let i=0; i < aIncremental.length; i++) {
+					if (isMatch && !aGood.includes(aIncremental[i])) {isMatch = false}
+					if (is10 && !oGood.ten.includes(aIncremental[i])) {is10 = false}
+					if (is100 && 0 !== aIncremental[i]) {is100 = false}
+				}
+			} else {
+				// a single data entry means zero diffs/incremental == so we can never get isMatch
+					// and is10/is100 can be false positives (we can ignore - seems rare)
 
-			// using incremental diffs: test intervals
-			for (let i=0; i < aIncremental.length; i++) {
-				if (isMatch && !aGood.includes(aIncremental[i])) {isMatch = false}
-				if (is10 && !oGood.ten.includes(aIncremental[i])) {is10 = false}
-				if (is100 && 0 !== aIncremental[i]) {is100 = false}
+				// don't assume 10 or 100 if only 1 sample size
+				// ToDo: I do not like this: rare? and a false positive is ok when you look at the rest of the data
+					// we could analayse and cleanup data afterwards
 			}
+
 			// some tests we can rely on non-integer
 				// but others we measure enough to not all land on 0's (or 50's and 100s)
 			let a100 = ['date','performance','contexttime','performancetime']
@@ -376,7 +386,7 @@ function get_timing(METRIC) {
 				// order is 100+, 100, 10, noise, nothing
 				// isZero could be is100: sometimes we just don't get enough data
 				// so it can be a little unstable with e.g. extension fuckery - that's OK
-				if (isZero) {value = 'not enough data'
+				if (isZero) {value = strZero
 				} else if (is100) {value = '100ms'
 				} else if (is10) {value = '10ms'
 				} else if (isNoise) {value = 'noise'
@@ -418,17 +428,33 @@ function get_timing(METRIC) {
 			dom[METRIC +'_'+ k].innerHTML = str + (isSmart ? notation : '')
 		}
 	})
+
 	// display
 	let btn = ''
-	let countProtected = aLoop.length - countFail
-
 	// data
 	if ('timing_precision' == METRIC) {
-		// reducetimer: privacy.reduceTimerPrecision
 		// we didn't countFail reducetimer or skipped Temporal so RFP will have zero fails
-		let isProtected = countProtected == aLoop.length
-		let rtvalue
+
+		let rtvalue // reducetimer: privacy.reduceTimerPrecision
 		notation = silent_green
+		let isProtected = (aLoop.length - countFail) == aLoop.length
+
+		// currenttime: handle a single data entry
+		if (1 == countFail && oData.currenttime == strZero) {
+			rtvalue = zNA
+			// with RFP is always oGood
+			try {
+				let singledata = (gData.timing.currenttime[0].toString().match(calc1)[0]) * 1
+				let singletest = (singledata % 50).toFixed(2) * 1
+				if (oGood.other.includes(singletest)) {
+					oData.currenttime = 'RFP'
+					addDisplay(17, METRIC +'_currenttime', singledata,'', notation)
+					countFail = countFail - 1
+					isProtected = (aLoop.length - countFail) == aLoop.length // recalc
+				}
+			} catch(e) {}
+		}
+
 		if (isProtected && isDecimal || !isGecko) {
 			// non-Gecko || if RFP which is also isDecimal, then we can't tell
 			rtvalue = zNA
@@ -441,17 +467,17 @@ function get_timing(METRIC) {
 		// reducetimer data/display
 		addDisplay(17, METRIC +'_reducetimer', rtvalue,'', notation)
 		oData['reducetimer'] = rtvalue
-		// update counts
-		countProtected = aLoop.length - countFail
-		isProtected = countProtected == aLoop.length
+
+		// recalc
+		isProtected = (aLoop.length - countFail) == aLoop.length
 		notation = isProtected ? rfp_green : rfp_red
-		str = countProtected +'/' + aLoop.length
+		str = (aLoop.length - countFail) +'/' + aLoop.length
 		// add
 		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 		addBoth(17, METRIC, mini(oData), btn, notation, oData)
 	} else {
-		notation = countProtected == aLoop.length ? rfp_green : rfp_red
-		str = countProtected +'/' + aLoop.length
+		notation = (aLoop.length - countFail) == aLoop.length ? rfp_green : rfp_red
+		str = (aLoop.length - countFail) +'/' + aLoop.length
 		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 		sDetail.document[METRIC] = oData
 		dom[METRIC].innerHTML = mini(oData) + btn + (isSmart ? notation : '')
