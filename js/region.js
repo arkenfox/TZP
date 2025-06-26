@@ -22,26 +22,32 @@ function get_nav_connection(METRIC) {
 				downlinkMax: 'number',
 				effectiveType: 'string',
 				onchange: 'null',
-				ontypechange: 'object',
+				ontypechange: 'null',
 				removeEventListener: 'function',
 				rtt: 'number',
 				saveData: 'boolean',
 				type: 'string',
 				when: 'function',
 			}
-			if (isGecko) {keyTypes.ontypechange = 'null'}
 			let oTemp = {}
 			for (let key in navigator.connection) {
 				try {
 					let keyValue = navigator.connection[key]
 					if (runSI) {keyValue = undefined}
 					let typeCheck = typeFn(keyValue), expectedType = keyTypes[key]
-					if (typeCheck !== expectedType) {throw zErrInvalid +'expected '+ typeCheck +': got '+ typeCheck}
+					if (typeCheck !== expectedType) {
+						let isInvalid = true
+						if ('blink' == isEngine) {
+							if ('downlinkMax' == key && 'Infinity' == typeCheck) {isInvalid = false}
+						}
+						if (isInvalid) {
+							throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck
+						}
+					}
 					//
 					if ('function' === typeCheck) {keyValue += ''}
 					// stability
-					if ('downlink' == key.slice(0,8)) {
-						// downlinkMax (chromeOS), downlink
+					if (Infinity !== keyValue && 'downlink' == key.slice(0,8)) {
 						keyValue = Math.floor(keyValue)
 					} else if ('rtt' == key) {
 						keyValue = zNA
