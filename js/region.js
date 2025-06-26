@@ -43,7 +43,11 @@ function get_nav_connection(METRIC) {
 					// type check
 					let typeCheck = typeFn(x), expectedType = keyTypes[k]
 					if (typeCheck !== expectedType) {
-						throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck
+						let isInvalid = true
+						// https://groups.google.com/a/chromium.org/g/blink-dev/c/tU_Hqqytx8g/m/HTJebzVHBAAJ
+						// "WiFi on Android reports Infinity for downlinkMax as Chrome recently dropped the required permission to get Wifi linkSpeed
+						if ('blink' == isEngine && 'downlinkMax' == k && 'Infinity' == typeCheck) {isInvalid = false}
+						if (isInvalid) {throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck}
 					}
 					// valid string
 					if ('type' == k || 'effectiveType' == k) {
@@ -54,7 +58,7 @@ function get_nav_connection(METRIC) {
 					}
 					// cleanup
 					if ('function' === typeCheck) {x = typeCheck}
-					if (null == x) {x += ''} // record null as a string | note: 'null' is caught as an error
+					if (null == x || Infinity == x) {x += ''} // record null/Infinity as strings | note: 'null'/'Infinity' are caught as errors
 					// stability
 					if ('rtt' == k) {x = zNA} else if ('downlink' == k) {	x = Math.floor(x)}
 					oTemp[k] = x
