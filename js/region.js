@@ -187,50 +187,56 @@ function set_isLanguageSmart() {
 	}
 	// these are current stable BB hashes since last checked
 		// note: upstream ESR seems to pick up stable l10n changes
-	// last checked 13.5.1
+	// last checked 15 nightly
+	let xsEN = '6cc5a8b4'
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		'ar': {m: '1f9a06e3', v: '1dfb5b8c', x: '71982b47'},
-		'be': {m: '076d68e6', v: '4edeafab', x: '42583d22'},
-		'bg': {m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98'},
-		'ca': {m: 'd856d812', v: '6b3bb3d8', x: '77a62a49'},
-		'cs': {m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49'},
-		'da': {m: '39169214', v: '479797a1', x: 'a30818e8'},
-		'de': {m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571'},
-		'el': {m: '7053311d', v: 'b1a88a13', x: '493f7225'},
-		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8'},
-		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70'},
-		'fa': {m: '6648d919', v: '8ef57409', x: '1ed34bca'},
-		'fi': {m: '82d079c7', v: '3e29e6e7', x: '859efc32'},
-		'fr': {m: '024d0fce', v: '34e28fa2', x: '1d2050d3'},
-		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8'},
-		'he': {m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e'},
-		'hu': {m: 'db7366e6', v: 'dad6d689', x: 'e4f85168'},
-		'id': {m: '1e275882', v: '71224946', x: 'a70cd23c'},
-		'is': {m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212'},
-		'it': {m: '716e7242', v: '3b781f09', x: 'c567f479'},
-		'ja': {m: 'ab56d7cb', v: '48645d06', x: 'a58f6165'},
-		'ka': {m: '6961b7e4', v: '40feb44f', x: 'bfbc28c2'},
-		'ko': {m: 'c758b027', v: 'd3b54047', x: '1235e26d'},
-		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc'},
-		'mk': {m: '78274f1b', v: '333aae58', x: 'b6020ec1'},
-		'ms': {m: '3e26c6be', v: '9dadbc64', x: '15e6148f'},
-		'my': {m: '939f2013', v: '43cc3aa3', x: 'a6571ec7'},
-		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04'},
-		'nl': {m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc'},
-		'pl': {m: '0bd88e98', v: '95ad4851', x: '2a45177d'},
-		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66'},
-		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309'},
-		'ro': {m: '3e321768', v: 'd72a350b', x: 'a9da3416'},
-		'ru': {m: '8e9b7945', v: '2391fbec', x: '26f663da'},
-		'sq': {m: '91943e67', v: 'e0259277', x: '4e0bbdcd'},
-		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f'},
-		'th': {m: 'a32d70a7', v: '07358a87', x: '2a04071a'},
-		'tr': {m: '4217ef80', v: '5048d312', x: '55daef93'},
-		'uk': {m: '3e2b3e39', v: '0163f51d', x: '4f817ea3'},
-		'vi': {m: 'bba6c980', v: 'b8137d59', x: '80da1efb'},
-		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '536abb21'},
-		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c'},
+		'ar': {m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '352c4e34'},
+		'be': {m: '076d68e6', v: '4edeafab', x: '42583d22', xs: '74053574'},
+		'bg': {m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: '7d747674'},
+		'ca': {m: 'd856d812', v: '6b3bb3d8', x: '77a62a49', xs: xsEN},
+		'cs': {m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: 'a7ddfef4'},
+		'da': {m: '39169214', v: '479797a1', x: 'a30818e8', xs: '88f55cfa'},
+		'de': {m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: xsEN},
+		'el': {m: '7053311d', v: 'fb391308', x: '493f7225', xs: 'cae41bf4'},
+		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: xsEN},
+		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: '32fce55a'},
+		'fa': {m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: 'ff0f7334'},
+		'fi': {m: '82d079c7', v: '3e29e6e7', x: '859efc32', xs: '26f7a3f8'},
+		'fr': {m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: xsEN},
+		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: xsEN},
+		'he': {m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: 'a0fcc2b4'},
+		'hu': {m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: '2fe650b4'},
+		'id': {m: '1e275882', v: '71224946', x: 'a70cd23c', xs: xsEN},
+		'is': {m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '93b575f8'},
+		'it': {m: '716e7242', v: '3b781f09', x: 'c567f479', xs: xsEN},
+		'ja': {m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: '22ec9486'},
+		'ka': {m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '7a65b6b4'},
+		'ko': {m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '9c39494c'},
+		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'f26c6ff4'},
+		'mk': {m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: 'f9e81474'},
+		'ms': {m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: xsEN},
+		'my': {m: '939f2013', v: '43cc3aa3', x: 'a6571ec7', xs: 'fbfb1d8c'},
+		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '88f55cfa'},
+		'nl': {m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: xsEN},
+		'pl': {m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '01902794'},
+		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: xsEN},
+		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: xsEN},
+		'ro': {m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '2a01a4d8'},
+		'ru': {m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '7d747674'},
+		'sq': {m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: 'f45c6af8'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '1ca25322'},
+		'th': {m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: 'a0bff3b4'},
+		'tr': {m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'e9fda72a'},
+		'uk': {m: '3e2b3e39', v: '0163f51d', x: '4f817ea3', xs: 'ae65fe74'},
+		'vi': {m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '2a01a4d8'},
+		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '536abb21', xs: '42d5bac6'},
+		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '6d106412'},
+	}
+	// 128 old values
+	if (128 == isVer) {
+		localesSupported['ar'].v = '1dfb5b8c'
+		localesSupported['el'].v = 'b1a88a13'
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
@@ -1030,7 +1036,7 @@ function get_messages_validation(METRIC) {
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	addBoth(4, METRIC, hash ,btn, notation, data)
+	addBoth(4, METRIC, hash, btn, notation, data)
 	return
 }
 
@@ -1487,6 +1493,48 @@ function get_timezone_offset(METRIC) {
 	return
 }
 
+function get_xslt_sort(METRIC) {
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+
+	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
+	try {
+		if (runSE) {foo++}
+		// get characters
+		let aSource = oIntlTests.collation.sort, aChars = [], aData = []
+		aSource.forEach(function(item){aChars.push(item)})
+		aChars.sort() // always sort to match char array same as collation poc
+		// build xslt
+		aChars.forEach(function(item){aData.push('<a>'+ item +'</a>')})
+		const xData = '<?xml version="1.0" encoding="UTF-8"?><doc>'+ aData.join('') +'</doc>'
+		const xslText = '<?xml version="1.0" encoding="UTF-8"?>'
+			+'<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">'
+			+'<xsl:template match="/"><xsl:for-each select="doc/a"><xsl:sort select="text()"/>'
+			+'<xsl:value-of select="text()"/>,</xsl:for-each></xsl:template></xsl:stylesheet>'
+		// run xslt
+		const parser = new DOMParser()
+		const xsltProcessor = new XSLTProcessor()
+		const xslStylesheet = parser.parseFromString(xslText, "application/xml")
+		xsltProcessor.importStylesheet(xslStylesheet)
+		const xmlDoc = parser.parseFromString(xData, "application/xml")
+		const styledDoc = xsltProcessor.transformToDocument(xmlDoc)
+		let aTmp = styledDoc.firstChild.textContent.split(/[\s,\n]+/);
+		aTmp = aTmp.slice(0, -1)
+		let dataStr = (aTmp.join(' , ')).trim()
+		data = {'sort': dataStr}
+		hash = mini(data); btn = addButton(4, METRIC)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				// compare the string hash
+				if (mini(dataStr) === localesSupported[isLocaleAlt].xs) {notation = locale_green}
+			}
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return
+}
+
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
 	let o = {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric',
@@ -1596,6 +1644,7 @@ const outputRegion = () => new Promise(resolve => {
 			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
 			get_messages_validation('messages_validation'),
 			get_messages_xml('messages_xml'),
+			get_xslt_sort('xslt_sort'),
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
