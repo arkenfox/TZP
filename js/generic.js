@@ -2062,6 +2062,7 @@ function outputSection(id, isResize = false) {
 		// we should see if we can get this fixed upstream
 	//*
 	// ToDo: alpha128 is using this so we can't use isVer, we need to promise if fontface is working
+
 	if (gLoad && isBB && isVer > 139) {
 		if ('windows' == isOS || 'mac' == isOS) {
 			delay = 2000 // using fontasync PoC on my machine this is around 990+ ms
@@ -2120,6 +2121,13 @@ function run_immediate() {
 		} catch {}
 		get_isXML()
 		get_isArch('isArch')
+		try {
+			// FF142+ in windows at least: reproducible always. STR: open FF (cold session) then open TZP. On 1st load
+			// hev/hvc video codecs are false positives in canPlayType + isTypeSupported. A rerun, reload etc fixes it
+			let vCodecs = ['"hev1.1.6.L93.B0"','"hev1.2.4.L120.B0"','"hvc1.1.6.L93.B0"','"hvc1.2.4.L120.B0"']
+			let vObj = document.createElement('video')
+			vCodecs.forEach(function(item) {let vTest = vObj.canPlayType('video/mp4; codecs='+ item)})
+		} catch(e) {}
 	})
 }
 
