@@ -699,9 +699,14 @@ function get_isVer(METRIC) {
 }
 
 const get_isXML = () => new Promise(resolve => {
-	if (!isGecko) {isXML = zNA; return resolve()}
+	//if (!isGecko) {isXML = zNA; return resolve()}
+
 	// get once ASAP +clear console: not going to change between tests
-		// e.g. change app lang and it requires closing and a new tab
+		// e.g. gecko change app lang and it requires closing and a new tab
+		// e.g. blink changing app lang alaso asks for a relaunch
+			// note: blink doesn't seem to translate these, or it's not tied to either app or web-content language
+	//ToDo: check webkit
+
 	let t0 = nowFn(), delimiter = ':'
 	const list = {
 		n02: 'a', n03: '', n04: '<>', n05: '<', n07: '<x></X>', n08: '<x x:x="" x:x="">',
@@ -712,41 +717,67 @@ const get_isXML = () => new Promise(resolve => {
 		let parser = new DOMParser
 		for (const k of Object.keys(list)) {
 			let doc = parser.parseFromString(list[k], 'application/xml')
-			let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+			let target = doc.getElementsByTagName('parsererror')[0]
+//debug
+if ('n02' == k && !isGecko) {console.log(doc.getElementsByTagName('parsererror')[0])}
+			let str, value, parts
+			if (isGecko) {
+				str = target.firstChild.textContent
+			} else {
+				// blink
+				str = target.innerText
+				value = str
+			}
 			if (runST) {str =''}
 			let typeCheck = typeFn(str)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			//split into parts: works back to FF52 and works with LTR
-			let parts = str.split('\n')
-			if ('n02' == k) {
-				// ensure 3 parts: e.g. hebrew only has 2 lines
-				let tmpStr = parts[1]
-				let loc = window.location+'', locLen = loc.length, locStart = tmpStr.indexOf(loc)
-				if (undefined == parts[2]) {
-					let position = locLen+ locStart
-					parts[1] = (tmpStr.slice(0, position)).trim()
-					parts.push((tmpStr.slice(-(tmpStr.length - position))).trim())
+
+			if ('blink' == isEngine) {
+				let newtarget = target.children
+				// [0] "This page contains the following errors:"
+				// [1] "error on line X at column Y: " + actual error
+				// [2] "Below is a rendering of the page up to the first error."
+				value = newtarget[1].textContent
+				if ('n02' == k) {
+					isXML['n00'] = {0: newtarget[0].textContent, 2: newtarget[2].textContent}
 				}
-				// set delimiter: should aways be the last item in parts[1] after we strip location
-					// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = " -"
-				let strLoc = (parts[1].slice(0, locStart)).trim() // trim
-				delimiter = strLoc.slice(-1) // last char
-				// concat some bits
-					// don't trim strName prior to +delimiter (which is length 1)
-					// e.g. 'fr','my' have a preceeding space, so capture that
-				let strName = parts[0].split(delimiter)[0] + delimiter
-				// use an object as joining for a string can get weird with RTL
-				let oData = {
-					'delimiter': delimiter +' (' + delimiter.charCodeAt(0) +')', // redundant but record it for debugging
-					'error': strName,
-					'line': parts[2].trim(),
-					'location': strLoc,
+//debug
+if ('n02' == k) {console.log(str, '\n', newtarget)}
+			} else if (isGecko) {
+				//split into parts: works back to FF52 and works with LTR
+				parts = str.split('\n')
+				if ('n02' == k) {
+					// ensure 3 parts: e.g. hebrew only has 2 lines
+					let tmpStr = parts[1]
+					let loc = window.location+'', locLen = loc.length, locStart = tmpStr.indexOf(loc)
+					if (undefined == parts[2]) {
+						let position = locLen+ locStart
+						parts[1] = (tmpStr.slice(0, position)).trim()
+						parts.push((tmpStr.slice(-(tmpStr.length - position))).trim())
+					}
+					// set delimiter: should aways be the last item in parts[1] after we strip location
+						// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = " -"
+					let strLoc = (parts[1].slice(0, locStart)).trim() // trim
+					delimiter = strLoc.slice(-1) // last char
+					// concat some bits
+						// don't trim strName prior to +delimiter (which is length 1)
+						// e.g. 'fr','my' have a preceeding space, so capture that
+					let strName = parts[0].split(delimiter)[0] + delimiter
+					// use an object as joining for a string can get weird with RTL
+					let oData = {
+						'delimiter': delimiter +' (' + delimiter.charCodeAt(0) +')', // redundant but record it for debugging
+						'error': strName,
+						'line': parts[2].trim(),
+						'location': strLoc,
+					}
+					isXML['n00'] = oData
 				}
- 				isXML['n00'] = oData
+				// parts[0] is always the error message
+				value = parts[0]
+				let trimLen = parts[0].split(delimiter)[0].length + 1
+				value = value.slice(trimLen).trim()
 			}
-			// parts[0] is always the error message
-			let value = parts[0], trimLen = parts[0].split(delimiter)[0].length + 1
-			isXML[k] = value.slice(trimLen).trim()
+			isXML[k] = value
 		}
 	} catch(e) {
 		isXML = e+''
