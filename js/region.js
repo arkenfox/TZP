@@ -1270,11 +1270,6 @@ function get_timezone(METRIC) {
 }
 
 function get_timezone_offset(METRIC) {
-	if (!isGecko) {
-		addBoth(4, METRIC, zNA)
-		return
-	}
-
 	let t0 = nowFn()
 	// setup
 	const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
@@ -1284,6 +1279,11 @@ function get_timezone_offset(METRIC) {
 	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tzControl, zOffset, tsOffset
 	let methods = ['control','date','exslt','iframe','plain','string','timestring','unsafe','zoned']
 	let notation = tz_red
+	// non-gecko: skip exslt
+	if (!isGecko) {
+		methods = methods.filter(x => !['exslt'].includes(x))
+		addDisplay(4, METRIC +'_exslt', zNA)
+	}
 
 	function checkValidDate(method, value) {
 		try {if (new Date(value) +'' == 'Invalid Date') {oErr[method] = 'Invalid Date: ' + value; return false}; return true
@@ -1308,9 +1308,10 @@ function get_timezone_offset(METRIC) {
 				} else if ('control' == k) {extra = ' ['+ tzControl +']'}
 				value = oData.format[k] + extra
 			} else {
-				// if exslt then we log as the metric error and final result
-				value = log_error(4, METRIC + ('exslt' == k ? '': '_'+ k), oErr[k])
-				if ('exslt' == k) {addBoth(4, METRIC, value,'', notation, zErr)}
+				let finalkey = isGecko ? 'exslt' : 'timestring'
+				// if gecko-exslt and non-gecko-timestring then we log that the metric error and final result
+				value = log_error(4, METRIC + (finalkey == k ? '': '_'+ k), oErr[k])
+				if (finalkey == k) {addBoth(4, METRIC, value,'', notation, zErr)}
 			}
 			addDisplay(4, n, value,'','', isLies)
 		})
@@ -1319,17 +1320,22 @@ function get_timezone_offset(METRIC) {
 	function checkMatch(runNo) {
 		oLies = {}
 		// are they all the same
-		let aTmp = []
+		let aTmp = [], xMod, xParts, xTime
 		for (const k of Object.keys(oData.format)) {aTmp.push(oData.format[k])}
 		aTmp = aTmp.filter(function(item, position) {return aTmp.indexOf(item) === position})
 		if (aTmp.length == 1) {return true}
 		// get exslt parts
-		let xMod = oData.format.exslt
-		let xParts = xMod.split(' '), xTime = xParts[1].split(':')
-		// diff xMod vs the rest
-		let isSame = true
+		if (isGecko) {
+			xMod = oData.format.exslt
+			xParts = xMod.split(' ')
+			xTime = xParts[1].split(':')
+		}
+		// gecko: diff xMod vs the rest: we treat exslt as truthy
+		// non-gecko: should only be one
+		let isSame = true, setFormats = new Set()
 		for (const k of Object.keys(oData.format)) {
-			if ('exslt' !== k) {
+			setFormats.add(oData.format[k])
+			if (isGecko && 'exslt' !== k) {
 				let mod = oData.format[k]
 				let mParts = mod.split(' '), mTime = mParts[1].split(':')
 				if (mParts[0] == xParts[0]) {
@@ -1348,6 +1354,7 @@ function get_timezone_offset(METRIC) {
 				}
 			}
 		}
+		if (!isGecko) {isSame = 1 == setFormats.size}
 		return isSame
 	}
 
@@ -1367,14 +1374,20 @@ function get_timezone_offset(METRIC) {
 			oErr['iframe'] = e+''
 		}
 		removeElementFn(id)
-		try {
-			let xsltProcessor = new XSLTProcessor
-			xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
-			let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
-			oData.raw['string'] = doc.lastModified // quickly grab lastMod since it updates each time we call it
-			oData.raw['exslt'] = fragment.childNodes[0].nodeValue
-		} catch(e) {
-			oErr['exslt'] = e+''
+		if (isGecko) {
+			try {
+				let xsltProcessor = new XSLTProcessor
+				xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
+				let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
+				oData.raw['string'] = doc.lastModified // quickly grab lastMod since it updates each time we call it
+				oData.raw['exslt'] = fragment.childNodes[0].nodeValue
+			} catch(e) {
+				oErr['exslt'] = e+''
+				try {
+					oData.raw['string'] = (new DOMParser).parseFromString('','text/html').lastModified
+				} catch(e) {oErr['string'] = e+''}
+			}
+		} else {
 			try {
 				oData.raw['string'] = (new DOMParser).parseFromString('','text/html').lastModified
 			} catch(e) {oErr['string'] = e+''}
@@ -1431,7 +1444,10 @@ function get_timezone_offset(METRIC) {
 			oData.raw['plain'] = ''
 			oData.raw['unsafe'] = '99-99-99' // invalid
 			oData.raw['zoned'] = 4
+		} else if (runSL) {
+			oData.raw['date'] = '06/29/2025 09:04:17' // mixed
 		}
+
 		// type check/format
 		methods.forEach(function(k){
 			if (oErr[k] == undefined) {
@@ -1458,7 +1474,13 @@ function get_timezone_offset(METRIC) {
 							let end = (oData.raw[k]).indexOf('[')
 							zOffset = (oData.raw[k]).slice(end - 6, end)
 						} else if ('timestring' == k) {
+							// formats the time part in English. It always uses the format of HH:mm:ss GMT±xxxx (TZ)
 							tsOffset = (oData.raw[k]).slice(23,26) +':' + (oData.raw[k]).slice(26,28)
+							if (!isGecko) {
+								xMinutes = ((tsOffset.slice(1,3) * 1)*60) + (tsOffset.slice(4,6)*1)
+								let xSign = (tsOffset[0] == '+' ? (xMinutes == 0 ? '': '-') : '')
+								xMinutes = xSign + xMinutes
+							}
 						}
 					} else {
 						formatted = (oData.raw[k]).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
@@ -1471,23 +1493,41 @@ function get_timezone_offset(METRIC) {
 
 	// run
 	get_mods()
-	if (undefined !== oData.format.exslt) {
-		let xValue = xMinutes + (xOffset == '+00:00' ? '' : ' ['+ xOffset +']')
-		let isMatch = checkMatch(1)
-		if (!isMatch) {
-			// ~0.3 ms to grab our mods: 1 in 86,400 seconds tick over a day
-			// so we'd have to be really unlucky to hit this: try again
-			get_mods()
-			isMatch = checkMatch(2)
+	//console.log(oData)
+	// gecko: relies on exslt else returns an error
+	if (isGecko) {
+		if (undefined !== oData.format.exslt) {
+			let xValue = xMinutes + (xOffset == '+00:00' ? '' : ' ['+ xOffset +']')
+			let isMatch = checkMatch(1)
+			if (!isMatch) {
+				// ~0.3 ms to grab our mods: 1 in 86,400 seconds tick over a day
+				// so we'd have to be really unlucky to hit this: try again
+				get_mods()
+				isMatch = checkMatch(2)
+			}
+			// ignore temporal not defined errors for notation
+			let errLen = Object.keys(oErr).length
+			if ('ReferenceError: Temporal is not defined' == oErr['zoned']) {errLen = errLen - 1}
+			if ('ReferenceError: Temporal is not defined' == oErr['plain']) {errLen = errLen - 1}
+			// no lies + no errors: includes control even though we ignore it for display/recording
+			if (0 == Object.keys(oLies).length && 0 == errLen) {notation = tz_green}
+			addBoth(4, METRIC, xValue,'', notation)
 		}
-		// ignore temporal not defined errors for notation
-		let errLen = Object.keys(oErr).length
-		if ('ReferenceError: Temporal is not defined' == oErr['zoned']) {errLen = errLen - 1}
-		if ('ReferenceError: Temporal is not defined' == oErr['plain']) {errLen = errLen - 1}
-		// no lies + no errors: includes control even though we ignore it for display/recording
-		if (0 == Object.keys(oLies).length && 0 == errLen) {notation = tz_green}
-		addBoth(4, METRIC, xValue,'', notation)
 	}
+	// non gecko: relies on timestring + isMatch
+		// we can look at Temporal when it lands
+	if (!isGecko) {
+		if (undefined !== oData.format.timestring) {
+			let tsValue = xMinutes + (tsOffset == '+00:00' ? '' : ' ['+ tsOffset +']')
+			let isMatch = checkMatch(1)
+			if (!isMatch) {
+				get_mods()
+				isMatch = checkMatch(2)
+			}
+			addBoth(4, METRIC, (isMatch ? tsValue : 'mixed'))
+		}
+	}
+
 	display_detail()
 	log_perf(4, METRIC, t0)
 	return
