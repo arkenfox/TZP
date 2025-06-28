@@ -702,10 +702,10 @@ const get_isXML = () => new Promise(resolve => {
 	//if (!isGecko) {isXML = zNA; return resolve()}
 
 	// get once ASAP +clear console: not going to change between tests
-		// e.g. gecko change app lang and it requires closing and a new tab
-		// e.g. blink changing app lang alaso asks for a relaunch
+		// gecko change app lang and it requires closing and a new tab
+		// blink changing app lang also asks for a relaunch
 			// note: blink doesn't seem to translate these, or it's not tied to either app or web-content language
-	//ToDo: check webkit
+		// assume webkit requires an app restart
 
 	let t0 = nowFn(), delimiter = ':'
 	const list = {
@@ -724,7 +724,6 @@ if ('n02' == k && !isGecko) {console.log(doc.getElementsByTagName('parsererror')
 			if (isGecko) {
 				str = target.firstChild.textContent
 			} else {
-				// blink
 				str = target.innerText
 				value = str
 			}
@@ -732,12 +731,14 @@ if ('n02' == k && !isGecko) {console.log(doc.getElementsByTagName('parsererror')
 			let typeCheck = typeFn(str)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 
-			if ('blink' == isEngine) {
+			if (undefined !== isEngine) {
 				let newtarget = target.children
+				// blink + webkit
 				// [0] "This page contains the following errors:"
 				// [1] "error on line X at column Y: " + actual error
 				// [2] "Below is a rendering of the page up to the first error."
 				value = newtarget[1].textContent
+				value = value.replace(/\n/g,'')
 				if ('n02' == k) {
 					isXML['n00'] = {0: newtarget[0].textContent, 2: newtarget[2].textContent}
 				}
