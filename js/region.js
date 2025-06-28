@@ -228,12 +228,12 @@ function set_isLanguageSmart() {
 		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '1ca25322'},
 		'th': {m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: 'a0bff3b4'},
 		'tr': {m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'e9fda72a'},
-		'uk': {m: '3e2b3e39', v: '0163f51d', x: '4f817ea3', xs: 'ae65fe74'},
+		'uk': {m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: 'ae65fe74'},
 		'vi': {m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '2a01a4d8'},
 		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '536abb21', xs: '42d5bac6'},
 		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '6d106412'},
 	}
-	// 128 old values
+	// 128 values
 	if (128 == isVer) {
 		localesSupported['ar'].v = '1dfb5b8c'
 		localesSupported['el'].v = 'b1a88a13'
