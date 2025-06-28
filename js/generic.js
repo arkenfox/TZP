@@ -718,33 +718,42 @@ const get_isXML = () => new Promise(resolve => {
 		for (const k of Object.keys(list)) {
 			let doc = parser.parseFromString(list[k], 'application/xml')
 			let target = doc.getElementsByTagName('parsererror')[0]
-//debug
-if ('n02' == k && !isGecko) {console.log(doc.getElementsByTagName('parsererror')[0])}
+			//if ('n02' == k && !isGecko) {console.log(doc.getElementsByTagName('parsererror')[0])} //debug
+
 			let str, value, parts
-			if (isGecko) {
-				str = target.firstChild.textContent
-			} else {
-				str = target.innerText
-				value = str
-			}
+			if (isGecko) {str = target.firstChild.textContent} else {str = target.innerText}
 			if (runST) {str =''}
 			let typeCheck = typeFn(str)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 
+			// blink + webkit
 			if (undefined !== isEngine) {
 				let newtarget = target.children
-				// blink + webkit
 				// [0] "This page contains the following errors:"
 				// [1] "error on line X at column Y: " + actual error
 				// [2] "Below is a rendering of the page up to the first error."
-				value = newtarget[1].textContent
-				value = value.replace(/\n/g,'')
-				if ('n02' == k) {
-					isXML['n00'] = {0: newtarget[0].textContent, 2: newtarget[2].textContent}
+				str = newtarget[1].textContent
+				// cleanup english XML messages: I don't think blink or webkit translate these
+				let isErrorStr = '', isError = 'error on line' == str.slice(0,13)
+				if (isError) {
+					let position = str.indexOf(": ")
+					if (position > 0) {
+						isErrorStr = str.slice(0,28)
+						str = str.slice(position + 2)
+					}
 				}
-//debug
-if ('n02' == k) {console.log(str, '\n', newtarget)}
-			} else if (isGecko) {
+				value = str.replace(/\n/g,'')
+				if ('n02' == k) {
+					if (isError) {
+						isXML['n00'] = {0: newtarget[0].textContent, 1: isErrorStr, 2: newtarget[2].textContent}
+					} else {
+						isXML['n00'] = {0: newtarget[0].textContent, 2: newtarget[2].textContent}
+					}
+				}
+				//if ('n02' == k) {console.log(str, '\n', newtarget)} //debug
+			}
+
+			if (isGecko) {
 				//split into parts: works back to FF52 and works with LTR
 				parts = str.split('\n')
 				if ('n02' == k) {
