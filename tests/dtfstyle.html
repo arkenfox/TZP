@@ -144,7 +144,7 @@ function legend() {
 			let name = str.split(",")[1].trim()
 			let go = true
 			if (isSupported) {
-				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
 			}
 			if (go) {
 				aLocales.push(code)
@@ -724,6 +724,7 @@ Promise.all([
 "ko-kp,korean (north korea)",
 'kok-latn,konkani (latin)',
 "ks-deva,kashmiri (devanagari)",
+'kxv-telu,kuvi (telugu)',
 "lrc-iq,northern luri (iraq)",
 "ms-bn,malay (brunei)",
 "ms-id,malay (indonesia)",
@@ -750,6 +751,7 @@ Promise.all([
 "sr-latn-ba,serbian (latin bosnia & herzegovina)",
 "sr-latn-me,serbian (latin montenegro)",
 "sr-latn-xk,serbian (latin kosovo)",
+'st-ls,southern sotho',
 "sw-ke,swahili (kenya)",
 "ta-lk,tamil (sri lanka)",
 "ta-my,tamil (malaysia)",

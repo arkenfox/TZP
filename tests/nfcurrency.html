@@ -507,28 +507,24 @@ function run_main(method) {
 			} else {
 				localesHashAll = localesHash
 			}
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				if (optExpanded) {
 					// expanded results
-					if (resultsHash == "d0c0d1cb") { // FF134+
-					} else if (resultsHash == "73a88357") { // FF128-133
+					if (resultsHash == "adb4141c") { // FF140+
 					} else {resultsHash += ' '+ zNEW
 					}
 					// expanded locales
-					if (localesHash == "f5dd6740") { // FF134+: 414
-					} else if (localesHash == "30f39f6e") { // FF128-133: 407
+					if (localesHash == "aaaf66c2") { // FF140+: 424
 					} else if (isFF) {localesHash += ' '+ zNEW
 					}
 				} else {
 					// results
-					if (resultsHash == "881cd751") { //[FF134+
-					} else if (resultsHash == "cdbb4813") { // FF128-133
+					if (resultsHash == "9b0bdbf4") { //[FF140+
 					} else {resultsHash += ' '+ zNEW
 					}
 					// locales
-					if (localesHash == "aa586dff") { // FF134+: 219
-					} else if (localesHash == "32e62521") { // FF128-133: 213
+					if (localesHash == "3442bb3f") { // FF140+: 227
 					} else if (isFF) {localesHash += ' '+ zNEW
 					}
 				}
@@ -765,6 +761,7 @@ Promise.all([
 		"it-ch,italian (switzerland)",
 		"kea-cv,kabuverdianu (cape verde)",
 		"ks-deva,kashmiri (devanagari)",
+		"kxv-telu,kuvi (telugu)",
 		"ln-ao,lingala (angola)",
 		"mas-tz,masia (tanzania)",
 		"ms-bn,malay (brunei)",
@@ -812,6 +809,7 @@ Promise.all([
 		"ta-sg,tamil (singapore)",
 		"teo-ke,teso (kenya)",
 		"ti-er,tigrinya (eritrea)",
+		'tn-bw,tswana (botswana)',
 		"tr-tr,turkish (turkey)",
 		"ur-in,urdu (india)",
 		"uz-af,uzbek (afghanistan)",

@@ -134,22 +134,20 @@ function run_main(method, isLoopy) {
 		// hash
 		function getNotation(hash, method) {
 			if (!isFF || isExpanded) return ""
-			// only hash notate if 115+
-			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-			if (!is115) {return ""}
+			// only hash notate if 140+
 			let notation = ""
-			if (method == "C") {
-				if (hash == "7f97af66") {notation = " [FF134+]" // 122 (added lij, st, tn)
-				} else if (hash == "51bba16a") {notation = " [FF115-133]" // 119
-				} else { notation = " "+ zNEW
+			if (isVer > 139) {
+				if (method == "C") {
+					if (hash == "5c8aa708") {notation = " [FF134+]" // 123
+					} else { notation = " "+ zNEW
+					}
+				} else {
+					if (hash == "f092f744") {notation = " [FF134+]" // 234
+					} else { notation = " "+ zNEW
+					}
 				}
-			} else {
-				if (hash == "23fb2f50") {notation = " [FF134+]" // 233 (added ie, lij, oc, st, szl, tn, za)
-				} else if (hash == "2f20e446") {notation = " [FF115-133]" // 226
-				} else { notation = " "+ zNEW
-				}
+				if (notation !== zNEW) notation = s14 + notation + sc
 			}
-			if (notation !== zNEW) notation = s14 + notation + sc
 			return notation
 		}
 		// get data
@@ -417,6 +415,7 @@ legend()
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	list = gLocales
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	listExpanded = gLocales = gLocales.concat(gLocalesExpand)

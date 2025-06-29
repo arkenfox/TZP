@@ -355,16 +355,14 @@ function run_main(method) {
 		if (method == "all") {
 			localesHashAll = localesHash
 			// notate new if 128+
-			if (isVer > 127) {
+			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "3c9b24da") { // FF134+
-				} else if (resultsHash == "d928a063") { // FF128-133
+				if (resultsHash == "f9a41bdf") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "59849c68") { // FF134+: 242
-				} else if (localesHash == "9d09c1ea") { // FF128-133: 238
+				if (localesHash == "30fa8f32") { // FF140+: 250
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -443,6 +441,7 @@ Promise.all([
 			"hi-latn,hindi (latin)",
 			"kok-latn,konkani (latin)",
 			"ks-deva,kashmiri (devanagari)",
+			"kxv-telu,kuvi (telugu)",
 			"pa-pk,punjabi (pakistan)",
 			"ps-pk,pashto (pakistan)",
 			"pt-gw,portuguese (guinea-bissau)",
