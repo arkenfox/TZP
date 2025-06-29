@@ -226,20 +226,9 @@ function run_main(method) {
 		})
 	} else if (method == "min") {
 		if (optExpanded) {
-			// 138+ we only get 320 on the min expanded test instead of 321
-			// en-bm is no longer unique and now matches en-au
-			/* diffs possible are
-			- shortGeneric: America/Marigot, America/St_Barthelemy, America/St_Kitts, America/St_Lucia, America/St_Vincent
-				- "St. " vs "St " abbreviation
-			- short + shortGeneric
-				- Antarctica/Casey, Antarctica/Macquarie, Antarctica/McMurdo
-				- Australia/Adelaide Brisbane Broken_Hill Darwin Eucla Hobart Lindeman Lord_Howe Melbourne Perth Sydney
-					- moved from longnames and GMT to aussie acronyms e.g. ACST/ACT, AEST/AET
-				- Pacific/Auckland 
-			*/
-
 			// expanded
 			tests = {
+				"Africa/Dakar": tzLG,
 				"Africa/Douala": tzLG,
 				"Africa/Lusaka": tzSG,
 				"Africa/Nairobi": tzSG,
@@ -262,7 +251,6 @@ function run_main(method) {
 				"Asia/Kuching": tzSG,
 				"Asia/Muscat": tzSG,
 				"Asia/Nicosia": tzLG,
-				"Asia/Phnom_Penh": tzLG,
 				"Asia/Seoul": tzLG,
 				"Asia/Shanghai": tzSG,
 				"Asia/Singapore": tzSG,
@@ -271,29 +259,27 @@ function run_main(method) {
 				"Atlantic/Azores": tzSG,
 				"Atlantic/Bermuda": both,
 				"Atlantic/South_Georgia": tzSG,
-				"Australia/Lord_Howe": tzSG, // 138+ see above
+				"Australia/Lord_Howe": tzSG,
 				"Europe/Isle_of_Man": tzSG,
 				"Europe/London": tzSG,
 				"Europe/Minsk": tzSG,
 				"Europe/Sarajevo": both,
-				"Indian/Chagos": tzLG,
 				"Indian/Cocos": tzS,
 				"Pacific/Pago_Pago": tzLG,
 				"Pacific/Saipan": tzSG,
 			}
 		} else {
 			tests = {
+				"Africa/Dakar": tzLG,
 				"Africa/Douala": tzLG,
 				"Africa/Lusaka": tzSG,
 				"Africa/Nairobi": tzSG,
 				"America/La_Paz": tzSG,
-				"Asia/Phnom_Penh": tzSG,
 				"Asia/Seoul": tzLG,
 				"Asia/Shanghai": tzSG,
 				"Asia/Yerevan": tzSG,
 				"Europe/Isle_of_Man": tzSG,
 				"Europe/London": tzSG,
-				"Indian/Chagos": tzLG,
 				"Pacific/Pago_Pago": tzLG,
 				"Pacific/Saipan": tzSG,
 			}
@@ -698,6 +684,8 @@ Promise.all([
 	]
 	let expanded = listExtra.concat(list)
 	expanded = expanded.filter(function(item, position) {return expanded.indexOf(item) === position})
+	// testing
+	//expanded =['nso,northern sotho','tn,tswana','lmo,lombard','kl,greenlandic',]
 	expanded.sort()
 	oLists["expanded"] = expanded
 
