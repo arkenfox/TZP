@@ -250,16 +250,14 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				// results
-				if (resultsHash == "6daf8610") { // FF134+ ICU76 1927706
-				} else if (resultsHash == "71f7ad5a") { // FF128-133
+				if (resultsHash == "dcd632f1") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "1ecbef17") { // FF134+: 164
-				} else if (localesHash == "b97a506b") { // FF128-133: 158
+				if (localesHash == "3327c351") { // FF140+: 170
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -329,6 +327,7 @@ Promise.all([
 		"hi-latn,hindi (latin)",
 		"it-ch,italian (switzerland)",
 		"kok-latn,konkani (latin)",
+		"kxv-telu,kuvi (telugu)",
 		"ms-bn,malay (brunei)",
 		"pt-pt,portuguese (portugal)",
 		"se-fi,northern sami (finland)",
