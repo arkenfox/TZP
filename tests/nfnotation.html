@@ -238,17 +238,15 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				// results
-				if (resultsHash == "7f536f4e") { // FF134+
-				} else if (resultsHash == "0f7f07b9") { // FF128-133
+				if (resultsHash == "4559ce6d") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "827736eb") { // FF134+: 77
-				} else if (localesHash == "f1dcf731") { // FF128-133: 74
-				} else if (isFF) {localesHash += ' '+ zNEW
+				if (localesHash == "a6d04167") { // FF140+: 80
+				} else {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
