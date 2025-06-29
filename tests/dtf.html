@@ -362,19 +362,15 @@ function run_main(method = "all") {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "0ba63114") { // FF139+ ICU4X-based calendar
-				} else if (resultsHash == "442e160e") { // FF138+ IUC77 (hi: short/long october)
-				} else if (resultsHash == "b33bb78b") { // FF134+
-				} else if (resultsHash == "0095da8a") { // FF128-133
+				if (resultsHash == "5a835eb0") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "eef79c58") { // FF134+: 310
-				} else if (localesHash == "0c9d407a") { // FF128-133: 301
+				if (localesHash == "e6c0c793") { // FF140+: 326
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -486,6 +482,7 @@ Promise.all([
 		"it-ch,italian (switzerland)",
 		"kok-latn,konkani (latin)",
 		"ks-deva,kashmiri (devanagari)",
+		"kxv-telu,kuvi (telugu)",
 		"lrc-iq,northern luri (iraq)",
 		"ms-bn,malay (brunei)",
 		"ms-id,malay (indonesia)",
@@ -509,6 +506,7 @@ Promise.all([
 		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
 		"sr-latn-me,serbian (latin montenegro)",
 		"sr-latn-xk,serbian (latin kosovo)",
+		'st-ls,southern sotho',
 		"sv-fi,swedish (finland)",
 		"sw-cd,swahili (congo kinshasa)",
 		"ta-lk,tamil (sri lanka)",
