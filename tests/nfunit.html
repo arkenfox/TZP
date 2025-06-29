@@ -202,7 +202,7 @@ function run_main(method) {
 		let optN = {"narrow": [1]},
 			optL = {"long": [1]},
 			both = {"long": [1], "narrow": [1],},
-			everything = {"long": [1], "narrow": [1], "short": [987654],}
+			everything = {"long": [1], "narrow": [1], "short": [987654]}
 
 		tests = {
 			// FF115+
@@ -213,7 +213,7 @@ function run_main(method) {
 			"millimeter": optN,
 			"month": both,
 			"nanosecond": optN,
-			"percent": both,
+			"percent": everything,
 			"second": {"long": [1], "narrow": [1], "short": [987654]},
 			"terabyte": optL,
 			// FF121+ ICU 74
@@ -366,18 +366,15 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				// results
-				if (resultsHash == "47b3e1d1") { // FF138+ ICU77 (yo-bj + year)
-				} else if (resultsHash == "2f469dbb") { // FF134+
-				} else if (resultsHash == "847276c0") { // FF128-133
+				if (resultsHash == "649fcbdb") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "0f49d109") { // FF134+: 198
-				} else if (localesHash == "a150fbff") { // FF128-133: 191
-				} else if (isFF) {localesHash += ' '+ zNEW
+				if (localesHash == "2f2c55e7") { // FF140+ 206
+				} else {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
