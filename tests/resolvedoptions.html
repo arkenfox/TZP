@@ -246,18 +246,15 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				// results
-				if (resultsHash == "5d643afe") { // FF134+ with Intl.DurationFormat enabled
-				} else if (resultsHash == "4e1cb92a") { // FF134+ without Intl.DurationFormat
-				} else if (resultsHash == "d39ce60e") { // FF128-133
+				if (resultsHash == "de4f2dc1") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "17e099a0") { // FF134+: 57
-				} else if (localesHash == "706f17d6") { // FF128-133: 58
-				} else if (isFF) {localesHash += ' '+ zNEW
+				if (localesHash == "d0cbfcae") { // FF140+: 59
+				} else {localesHash += ' '+ zNEW
 				}
 			}
 		} else {
