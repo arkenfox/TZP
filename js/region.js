@@ -363,10 +363,10 @@ function set_oIntlTests() {
 			},
 		},
 		durationformat: {
-			'digital': {'milliseconds': 1},
-			'long': {'years': 0, 'seconds': 2, 'microseconds': 1000},
-			'narrow': {'years': 1, 'months': 2, 'microseconds': 1},
-			'short': {'days': 2, 'seconds': 2, 'nanoseconds': 2},
+			'digital': [{'milliseconds': 1}],
+			'long': [{'years': 1, 'microseconds': 1}, {'seconds': 2}],
+			'narrow': [{'years': 1, 'months': 2, 'microseconds': 1000}],
+			'short': [{'days': 2, 'seconds': 2, 'nanoseconds': 2}],
 		},
 		listformat: {
 			'narrow': ['conjunction','disjunction','unit'],
@@ -407,7 +407,7 @@ function set_oIntlTests() {
 			'millimeter': unitN,
 			'month': unitB,
 			'nanosecond': unitN,
-			'percent': unitB,
+			'percent': {"long": [1], "narrow": [1], "short": [987654]},
 			'second': {'long': [1], 'narrow': [1], 'short': [987654]},
 			'terabyte': unitL,
 		}
@@ -738,9 +738,13 @@ function get_locale_intl() {
 			} else if ('durationformat' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					let yearformat = 'long' == key ? 'always' : 'auto' // long we want to force 0 for years
+					let yearformat = ('long' == key || 'short' == key) ? 'always' : 'auto' // long we want to force 0 for years
 					let formatter = new Intl.DurationFormat(code, {style: key, yearsDisplay: yearformat})
-					obj[key] = formatter.format(tests[key]) // there's only one test per style
+					let tmpArray = []
+					for (let i=0; i < Object.keys(tests[key]).length; i++) {
+						tmpArray.push(formatter.format(tests[key][i]))
+					}
+					obj[key] = tmpArray.join(' | ')
 				}
 			} else if ('listformat' == m) {
 				for (let i=0; i < testkeys.length; i++) {
