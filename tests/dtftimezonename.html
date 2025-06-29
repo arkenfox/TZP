@@ -488,37 +488,16 @@ function run_main(method) {
 			} else {
 				localesHashAll = localesHash
 			}
-			// notate new if 128+
-			if (isVer > 127) {
+			// notate new if 140+
+			if (isVer > 139) {
 				if (optExpanded) {
 					// expanded results
-					if (resultsHash == "e3b9743f") { // FF139+
-					} else if (resultsHash == "27033407") { // FF138+
-					} else if (resultsHash == "42d65b14") { // FF135+
-					} else if (resultsHash == "47586fc8") { // FF134+
-					} else if (resultsHash == "8194bdd4") { // FF133/ESR128
-					} else if (resultsHash == "c75c23bb") { // FF128-132
+					if (resultsHash == "946f3eff") { // FF140+
 					} else {resultsHash += ' '+ zNEW
 					}
 					// expanded locales
-					if (localesHash == "5202321d") { // FF133: 321
-					} else if (localesHash == "97fc8c69") { // FF128-133: 311
-					} else if (isFF) {localesHash += ' '+ zNEW
-					}
-				} else {
-					// results
-					if (resultsHash == "8b150e5d") { // FF139+
-					} else if (resultsHash == "a55d7aea") { // FF138+
-					} else if (resultsHash == "5cf44ed4") { // FF135+
-					} else if (resultsHash == "67286a15") { // FF134
-					} else if (resultsHash == "63c222e7") { // FF133/ESR128
-					} else if (resultsHash == "746d3f7f") { // FF128-132
-					} else {resultsHash += ' '+ zNEW
-					}
-					// locales
-					if (localesHash == "3d661dc5") { // FF134+: 221
-					} else if (localesHash == "2b77fc8d") { // FF128-133: 213
-					} else if (isFF) {localesHash += ' '+ zNEW
+					if (localesHash == "fcd39b5d") { // FF40+: 336
+					} else {localesHash += ' '+ zNEW
 					}
 				}
 			}
@@ -679,6 +658,7 @@ Promise.all([
 		"ko-kp,korean (north korea)",
 		"kok-latn,konkani (latin)",
 		"ks-deva,kashmiri (devanagari)",
+		"kxv-telu,kuvi (telugu)",
 		"lrc-iq,northern luri (iraq)",
 		"ms-id,malay (indonesia)",
 		"ne-in,nepali (india)",
