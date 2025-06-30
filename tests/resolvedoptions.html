@@ -249,11 +249,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "de4f2dc1") { // FF140+
+				if (resultsHash == "4d4d3ad8") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "d0cbfcae") { // FF140+: 59
+				if (localesHash == "99338bc7") { // FF140+: 59
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -314,6 +314,13 @@ Promise.all([
 		"fr-dz,french (algeria)",
 		"lrc-iq,northern luri (iraq)",
 		"ps-pk,pashto (pakistan)",
+		// blink
+		'ar-bh,arabic (bahrain)',
+		'ar-ma,arabic (morocco)',
+		'pa-arab,punjabi (arabic)',
+		'ur-in,urdu (india)',
+		'uz-af,uzbek (afghanistan)',
+		'yo-bj,yoruba (benin)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
