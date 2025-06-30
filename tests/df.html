@@ -107,7 +107,7 @@ function run_main(method) {
 		'1k': {'years': 1000, 'months': 1000,'weeks': 1000,'hours': 1000,'minutes': 1000,'seconds': 1000,'milliseconds': 1000,'microseconds': 1000,'nanoseconds': 1000},
 		//'10k': {'years': 10000, 'months': 10000,'weeks': 10000,'hours': 10000,'minutes': 10000,'seconds': 10000,'milliseconds': 10000,'microseconds': 10000,'nanoseconds': 10000},
 		'mixed': {'years': 0, 'months': 1,'weeks': 2,'days': 3,'hours': 4,'minutes': 5,'seconds': 6,'milliseconds': 7,'microseconds': 8,'nanoseconds': 9},
-		'split': {'years': 1, 'microseconds': 1},
+		'split': {'years': 1, 'nanoseconds': 1},
 		// there's also how things are joined e.g. "0 y e 1 ns" (zero years and 1 nanosecond)
 	}
 	let digitaloptions = {
@@ -121,55 +121,14 @@ function run_main(method) {
 		styles.forEach(function(s) {
 			if ('digital' == s) {tests[s] = digitaloptions} else {tests[s] = options}
 		})
+		//console.log(tests)
 	} else if (method == "min") {
 		// all styles add entropy: digital: 13 | long: 4 | narrow: 5 | short: 2
 		tests = {
-			'digital': {
-				'test': {'milliseconds': 1},
-			},
-			'long': {
-				'test1': {
-					'years': 1,
-					'microseconds': 1,
-				},
-				'test2': {
-					//'years': 0,
-					//'months': 2,
-					//'weeks': 2,
-					//'days': 2,
-					//'hours': 2,
-					//'minutes': 2,
-					'seconds': 2,
-					//'milliseconds': 2,
-					//'microseconds': 1,
-				},
-			},
-			'narrow': {
-				'test': {
-					'years': 1,
-					'months': 2,
-					//'weeks': 2,
-					//'days': 2,
-					//'hours': 2,
-					//'minutes': 2,
-					//'seconds': 2,
-					//'milliseconds': 2,
-					'microseconds': 1000,
-				},
-			},
-			'short': {
-				'test': {
-					//'years': 2,
-					//'months': 2,
-					//'weeks': 2,
-					'days': 2,
-					//'hours': 2,
-					//'minutes': 2,
-					'seconds': 2,
-					//'milliseconds': 2,
-					'microseconds': 2,
-				},
-			}
+			'digital': {'a': {'milliseconds': 1}},
+			'long': {'a': {'years': 1, 'microseconds': 1}, 'b': {'seconds': 2}},
+			'narrow': {'a': {'years': 1, 'months': 2, 'seconds': 1, 'microseconds': 1000}},
+			'short': {'a': {'days': 2, 'seconds': 2, 'nanoseconds': 1}},
 		}
 	}
 
@@ -361,11 +320,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == '44142a9e') { // FF140+
+				if (resultsHash == '3462f263') { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == '7a7a8329') { // FF140+: 216
+				if (localesHash == 'fdcef8a5') { // FF140+: 216
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -467,6 +426,11 @@ Promise.all([
 "uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 "yo-bj,yoruba (benin)",
 "yue-cn,cantonese (china)",
+
+// blink
+'az-cyrl,azerbaijani (cyrillic)',
+'en-au,english (australia)',
+'pa-arab,punjabi (arabic)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
