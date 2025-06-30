@@ -297,7 +297,7 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 		"default": [
 			[dates.Jan, ["ML","SF"]],
 			[dates.May, ["FM"]],
-			[dates.Jul, ["ML"]],
+			[dates.Jul, ["LS","ML"]],
 			[dates.Sep, ["FM","SF"]],
 			[dates.Nov, ["FM"]],
 		],
@@ -343,16 +343,23 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 					}
 				} else {
 					if ('default' == cal) {
+						/* debugging
+						try {oConst.DaF = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
+						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
+						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+						//*/
 						try {oConst.DaFM = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
+						try {oConst.DaLS = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "short", timeZone: tz})} catch(e) {}
 						try {oConst.DaML = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
 						try {oConst.DaSF = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
 						// add calendar default name for visual info: not required for entropy
 						//cal += '-'+ oConst.DaFM.resolvedOptions().calendar
 					} else {
+						try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						if ('japanese' == cal) {
-							try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
-						}
+						try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
 					}
 				}
 				oTempData[cal] = {}
@@ -398,9 +405,10 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			"M": "medium",
 			"L": "long",
 			"S": "short",
-			"FM": "full-medium",
-			"ML": "medium-long",
-			"SF": "short-full",
+			"FM": "full_medium",
+			"LS": "long_short",
+			"ML": "medium_long",
+			"SF": "short_full",
 		}
 
 		let localeGroups = [], displaylist = []
@@ -766,10 +774,13 @@ Promise.all([
 "zh-hans-hk,chinese (simplified hong kong)",
 "zh-hans-mo,chinese (simplified macau)",
 'zh-my,chinese (malaysia)',
+		// blink
+		'ar-bh,arabic (bahrain)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	//list = ['ar-sa,arabic (saudi arabia)','en,english','fa,persian','th,thai',]
+	//list = ['en-US,english (united states)']
 	legend()
 	if (isSupported) {
 		setBtn("all")

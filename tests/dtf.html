@@ -228,29 +228,122 @@ function run_main(method = "all") {
 		},
 	}
 	let testsMin = {
+//* MIN
 		"era": [
 			// to match TZP we will add controlling the year-month-day part (in TZP this is needed to get toLocaleString to match)
 			[dateEra, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
 		],
+//*/
+/* MAX
+		"era": [
+			[dateEra, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
+			[dateEra, {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
+			[dateEra, {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
+			[new Date("January 01, 0001 1:00:00"), {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
+			[new Date("January 01, 0001 1:00:00"), {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
+			[new Date("January 01, 0001 1:00:00"), {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
+		],
+//*/
+//* MIN
 		"fractionalSecondDigits": [
 			[dateFSD, {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}]
 		],
+//*/
+/* MAX
+		"fractionalSecondDigits": [
+			[dateFSD, {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}],
+			[dateFSD, {"2": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2}}],
+			[dateFSD, {"3": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 3}}],
+		],
+//*/
 		"hour": [
 			[dateA, {"numeric": {hour: "numeric"}}],
 		],
 		"hourCycle": [
 			[dateA, {"h112": {hour: "2-digit", hourCycle: "h11"}}], // adds like 2 items
 		],
+//* MIN
 		"month": [
 			[new Date("2023-01-15"), {"short": {month: "short"}}],
 			[new Date("2023-06-15"), {"short": {month: "short"}}],
 			[new Date("2023-09-15"), {"short": {month: "short"}}],
 			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
 		],
+//*/
+/* MAX
+		"month": [
+			[new Date("2023-01-15"), {"long": {month: "long"}}],
+			[new Date("2023-02-15"), {"long": {month: "long"}}],
+			[new Date("2023-03-15"), {"long": {month: "long"}}],
+			[new Date("2023-04-15"), {"long": {month: "long"}}],
+			[new Date("2023-05-15"), {"long": {month: "long"}}],
+			[new Date("2023-06-15"), {"long": {month: "long"}}],
+			[new Date("2023-07-15"), {"long": {month: "long"}}],
+			[new Date("2023-08-15"), {"long": {month: "long"}}],
+			[new Date("2023-09-15"), {"long": {month: "long"}}],
+			[new Date("2023-10-15"), {"long": {month: "long"}}],
+			[new Date("2023-11-15"), {"long": {month: "long"}}],
+			[new Date("2023-12-15"), {"long": {month: "long"}}],
+			[new Date("2023-01-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-02-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-03-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-04-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-05-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-06-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-07-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-08-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-09-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-10-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-12-15"), {"narrow": {month: "narrow"}}],
+			[new Date("2023-01-15"), {"short": {month: "short"}}],
+			[new Date("2023-02-15"), {"short": {month: "short"}}],
+			[new Date("2023-03-15"), {"short": {month: "short"}}],
+			[new Date("2023-04-15"), {"short": {month: "short"}}],
+			[new Date("2023-05-15"), {"short": {month: "short"}}],
+			[new Date("2023-06-15"), {"short": {month: "short"}}],
+			[new Date("2023-07-15"), {"short": {month: "short"}}],
+			[new Date("2023-08-15"), {"short": {month: "short"}}],
+			[new Date("2023-09-15"), {"short": {month: "short"}}],
+			[new Date("2023-10-15"), {"short": {month: "short"}}],
+			[new Date("2023-11-15"), {"short": {month: "short"}}],
+			[new Date("2023-12-15"), {"short": {month: "short"}}],
+		],
+//*/
+/* MAX
+		"second": [
+			[dateFSD, {"2-digit": {second: "2-digit"}}],
+			[dateFSD, {"numeric": {second: "numeric"}}],
+		],
+//*/
+//* MIN
 		"weekday": [
 			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
 			[dateB, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
 		],
+//*/
+/* MAX
+		"weekday": [
+			[new Date("January 16, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[new Date("January 17, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[new Date("January 19, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[dateB, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[new Date("January 21, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[new Date("January 22, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+		],
+//*/
+//* MIN
+		"year": [ // needed for blink
+			[dateA, {"2-digit": {year: "2-digit"}}],
+		],
+//*/
+/* MAX
+		"year": [
+			[dateA, {"2-digit": {year: "2-digit"}}],
+			[dateA, {"numeric": {year: "numeric"}}],
+		],
+//*/
 	}
 
 	let tests = method == "all" ? testsAll : testsMin
@@ -279,11 +372,23 @@ function run_main(method = "all") {
 					try {oConst.WeL = new Intl.DateTimeFormat(code, {weekday: "long"})} catch(e) {}
 					try {oConst.MoS = new Intl.DateTimeFormat(code, {month: "short"})} catch(e) {}
 					try {oConst.MoN = new Intl.DateTimeFormat(code, {month: "narrow"})} catch(e) {}
-					//try {oConst.MoL = new Intl.DateTimeFormat(code, {month: "long"})} catch(e) {}
 					try {oConst.HoN = new Intl.DateTimeFormat(code, {hour: "numeric"})} catch(e) {}
 					try {oConst.HoH = new Intl.DateTimeFormat(code, {hour: "2-digit", hourCycle: "h11"})} catch(e) {}
 					try {oConst.ErL = new Intl.DateTimeFormat(code, {era: "long"})} catch(e) {}
 					try {oConst.Fr1 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1})} catch(e) {}
+					try {oConst.Fr2 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2})} catch(e) {}
+					try {oConst.Fr3 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 3})} catch(e) {}
+					try {oConst.Ye2 = new Intl.DateTimeFormat(code, {year: "2-digit"})} catch(e) {}
+
+					/* only maybe used if trying to test other values outside of current min
+					try {oConst.ErN = new Intl.DateTimeFormat(code, {era: "narrow"})} catch(e) {}
+					try {oConst.ErS = new Intl.DateTimeFormat(code, {era: "short"})} catch(e) {}
+					try {oConst.MoL = new Intl.DateTimeFormat(code, {month: "long"})} catch(e) {}
+					try {oConst.Se2 = new Intl.DateTimeFormat(code, {second: "2-digit"})} catch(e) {}
+					try {oConst.SeN = new Intl.DateTimeFormat(code, {second: "numeric"})} catch(e) {}
+					try {oConst.YeN = new Intl.DateTimeFormat(code, {year: "numeric"})} catch(e) {}
+					//*/
+
 					let array = tests[test]
 					array.forEach(function(item) {
 						let date = item[0]
@@ -293,6 +398,7 @@ function run_main(method = "all") {
 								oTempData[test][opt] = []
 							}
 							let constructor = test.slice(0,1).toUpperCase() + test.slice(1,2) + opt.slice(0,1).toUpperCase()
+							//console.log(test.slice(0,1).toUpperCase() + test.slice(1,2) + opt.slice(0,1).toUpperCase())
 							let formatter = oConst[constructor]
 							oTempData[test][opt].push(formatter.format(date))
 						})
@@ -366,11 +472,11 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "5a835eb0") { // FF140+
+				if (resultsHash == "ce9c8128") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "e6c0c793") { // FF140+: 326
+				if (localesHash == "db7ab167") { // FF140+: 326
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -519,6 +625,9 @@ Promise.all([
 		"yo-bj,yoruba (benin)",
 		"yue-hans,cantonese (simplified)",
 		"zh-hans-hk,chinese (simplified hong kong)",
+		// blink
+		'ar-bh,arabic (bahrain)',
+		'uz-arab,uzbek (arabic)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})

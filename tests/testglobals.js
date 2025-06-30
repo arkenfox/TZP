@@ -399,6 +399,7 @@ var gLocales = [
 	// other alpha-3
 'agq,aghem',
 'asa,asu',
+'bal,baluchi',
 'bcg,haryanvi',
 'bez,bena',
 'bgc,haryanvi',
@@ -1363,4 +1364,3 @@ function expand_locales() {
 }
 // expand once in a while to see if entropy counts change
 //expand_locales()
-

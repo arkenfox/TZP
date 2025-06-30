@@ -187,7 +187,7 @@ function legend() {
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
 			let test = Intl.Collator.supportedLocalesOf([code])
-			if (test.length) {
+			if (test.length == 1) {
 				aLocales.push(code)
 				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
 				if (name.includes("(")) {
@@ -560,9 +560,9 @@ function collator() {
 				let ff = ""
 				// don't notate unless it's our own preset
 				if (isFF && thisHash == exampleHash) {
-					// notate new if 128+
-					if (isVer > 127) {
-						if (localesHash == "a7d80e7c") { // FF128+
+					// notate new if 140+
+					if (isVer > 139) {
+						if (localesHash == "bbe811d0") { // FF140+
 						} else {localesHash += ' '+ zNEW}
 					}
 				}
@@ -593,6 +593,8 @@ Promise.all([
 	let aListExtra = [
 		"bs-cyrl,bosnian (cyrillic)",
 		"fr-ca,french (canada)",
+		// blink
+		'fa-af,persian (afghanistan)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})

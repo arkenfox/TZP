@@ -277,6 +277,7 @@ function set_oIntlDateTests() {
 		date_timestyle : {
 			"default": {
 				'full_medium': [dates.May, dates.Sep, dates.Nov],
+				'long_short': [dates.Jul],
 				'medium_long': [dates.Jan, dates.Jul],
 				'short_full': [dates.Jan, dates.Sep]
 			},
@@ -361,13 +362,15 @@ function set_oIntlTests() {
 				'narrow': [{weekday: 'narrow'}, [dates.Wed, dates.Fri]],
 				'short': [{weekday: 'short'}, [dates.Fri]],
 			},
+			year: {
+				'2-digit': [{year: "2-digit"}, [dates.Jan]]
+			},
 		},
 		durationformat: {
-			// note: blink doesn't support nanoseconds
-			'digital': [{'milliseconds': 1}],
-			'long': [{'years': 1, 'microseconds': 1}, {'seconds': 2}],
-			'narrow': [{'years': 1, 'months': 2, 'microseconds': 1000}],
-			'short': [{'days': 2, 'seconds': 2, 'microseconds': 2}],
+			'digital': {'a': {'milliseconds': 1}},
+			'long': {'a': {'years': 1, 'microseconds': 1}, 'b': {'seconds': 2}},
+			'narrow': {'a': {'years': 1, 'months': 2, 'seconds': 1, 'microseconds': 1000}},
+			'short': {'a': {'days': 2, 'seconds': 2, 'nanoseconds': 1}},
 		},
 		listformat: {
 			'narrow': ['conjunction','disjunction','unit'],
@@ -381,8 +384,8 @@ function set_oIntlTests() {
 			'decimal': [1.2],'group': [1000, 99999],'infinity': [Infinity],'minusSign': [-5],'nan': ['a']
 		},
 		pluralrules: {
-			cardinal: [0, 1, 2, 3, 7, 21, 100], // 1859752 ICU 74: add ordinal 81 to keep lij unique from it,sc
-			ordinal: [1, 2, 3, 5, 8, 10, 81]
+			cardinal: [0, 1, 2, 3, 7, 21, 100],
+			ordinal: [1, 2, 3, 4, 5, 8, 10, 81]
 		},
 		relativetimeformat: { // 8 of 12
 			always: {'narrow': [[1, 'day'], [0, 'year']]},
@@ -742,9 +745,7 @@ function get_locale_intl() {
 					let yearformat = ('long' == key || 'short' == key) ? 'always' : 'auto' // long we want to force 0 for years
 					let formatter = new Intl.DurationFormat(code, {style: key, yearsDisplay: yearformat})
 					let tmpArray = []
-					for (let i=0; i < Object.keys(tests[key]).length; i++) {
-						tmpArray.push(formatter.format(tests[key][i]))
-					}
+					for (const item of Object.keys(tests[key])) {tmpArray.push(formatter.format(tests[key][item]))}
 					obj[key] = tmpArray.join(' | ')
 				}
 			} else if ('listformat' == m) {

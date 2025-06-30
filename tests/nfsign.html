@@ -195,11 +195,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "3e46f12a") { // FF140+
+				if (resultsHash == "5bbeb6ab") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "0c877403") { // FF140+: 40
+				if (localesHash == "5361b78a") { // FF140+: 40
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -280,6 +280,8 @@ Promise.all([
 		"ff-adlm,fulah (adlam)",
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 		"yue-hans,cantonese (simplified)",
+		// blink
+		'pa-pk,punjabi (pakistan)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
