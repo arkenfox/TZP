@@ -363,10 +363,11 @@ function set_oIntlTests() {
 			},
 		},
 		durationformat: {
+			// note: blink doesn't support nanoseconds
 			'digital': [{'milliseconds': 1}],
 			'long': [{'years': 1, 'microseconds': 1}, {'seconds': 2}],
 			'narrow': [{'years': 1, 'months': 2, 'microseconds': 1000}],
-			'short': [{'days': 2, 'seconds': 2, 'nanoseconds': 2}],
+			'short': [{'days': 2, 'seconds': 2, 'microseconds': 2}],
 		},
 		listformat: {
 			'narrow': ['conjunction','disjunction','unit'],
