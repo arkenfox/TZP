@@ -49,7 +49,9 @@ var list = gLocales,
 	aLocales = [],
 	isSupported = false,
 	localesHashAll = "", // to compare min to
-	oData = {}
+	oData = {},
+	oCompare = {'false': [], 'true': []}, // check to*String matches INTL
+	checkLocaleStrings = false
 
 function log_console(name) {
 	let hash = mini(sDetail[name])
@@ -174,7 +176,7 @@ function run_main(method = "all") {
 	let tests = method == "all" ? testsAll : testsMin
 
 	oData = {}
-	let oCompare = {'false': [], 'true': []}
+	oCompare = {'false': [], 'true': []}
 	//aLocales = ['en']
 	try {
 		aLocales.forEach(function(code) {
@@ -187,14 +189,13 @@ function run_main(method = "all") {
 					let formatter = Intl.DateTimeFormat(code, {calendar: cal, relatedYear: style})
 					tests[cal][style].forEach(function(d) {
 						oTempData[cal][style].push(formatter.format(d))
-						// test toString = perfect!!
-/*
-						let intlvalue = formatter.format(d)
-						let strlocale = (d).toLocaleString(code, {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'})
-						let isMatch = intlvalue == strlocale
-						oCompare[isMatch].push([intlvalue, strlocale])
-*/
-
+						if (checkLocaleStrings) {
+							//* test toLocaleString
+							let intlvalue = formatter.format(d)
+							let strlocale = (d).toLocaleString(code, {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'})
+							let isMatch = intlvalue == strlocale
+							oCompare[isMatch].push([intlvalue, strlocale])
+						}
 					})
 				})
 			})
@@ -212,11 +213,10 @@ function run_main(method = "all") {
 				oData[hash]["locales"].push(code)
 			}
 		})
-		//console.log(oCompare)
-		//console.log(oData)
+		if (checkLocaleStrings) {console.log(oCompare)}
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
-
+		//console.log(oData)
 
 		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oData)) {
