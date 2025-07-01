@@ -286,27 +286,6 @@ function run_main(method) {
 		}
 	} else if (method == "tiny") {
 		// wee fast test with bang for buck
-		/* 
-		EXPANDED LOCALES
-			FF128: max entropy = 311
-			- Seoul 223 + Douala 234 + London 242 + Hong Kong 248 + Muscat 254 | after that it's small pickups of < 3
-			- 254 (5 tests) out of 311 max (40 tests) = 82%
-			- the remaining 35 tests would pickup 57 more buckets
-				- not worth it overall - and some of this may be equivalency of other tests
-				- althought we are trying to test as much as possible for regressions and lies and custom formatting etc
-			FF135: max entropy = 321
-			- Seoul 223 + Douala 243 + London 250 + Hong Kong 255 + Muscat 261
-			- 261 (5 tests) out of 321 max (40 tests) = 81%
-			- the remaining 35 tests would pickup 60 more buckets
-
-		BASE locales
-			FF128: max entropy = 213
-			- Seoul 191 + Douala 199 + London 205 + Muscat 206
-			- 206 (5 tests) out of 213 max (13 tests) = 97% = pretty good for base locales
-			FF135: max entropy = 221
-			- Seoul 201 + Douala 209 + London 213 + Muscat 214
-			- 214 (5 tests) out of 221 max (13 tests) = 97%
-		*/
 		tests = {
 			"Africa/Douala": tzLG,
 			'Asia/Hong_Kong': tzSG, // useful in expanded
