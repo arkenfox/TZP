@@ -498,23 +498,6 @@ const get_scr_measure = () => new Promise(resolve => {
 		// display
 		for (const k of Object.keys(oSummary)) {oDisplay[k +'_summary'] = oSummary[k].width +' x '+ oSummary[k].height}
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
-
-		// temp dev logging
-		function log_screen_details() {
-			let dpr = window.devicePixelRatio
-			dpr = Math.round((dpr + Number.EPSILON) * 100)
-			if (109 == dpr) {dpr = 110} else if (171 == dpr) {dpr = 175}
-			console.log(
-				'zoom', dpr,
-				'\nscreen', oData.screen.width.screen, 'x', oData.screen.height.screen,
-				'| available', oData.available.width.screen, 'x', oData.available.height.screen,
-				'| taskbar', dockW, 'x', dockH,
-				'\nouter', oData.outer.width.window, 'x', oData.outer.height.window,
-				'| inner', oData.inner.width.window, 'x', oData.inner.height.window,
-				'| chrome', chromeW, 'x', chromeH
-			)
-		}
-		if (isScreenLog && 'android' !== isOS) {log_screen_details()}
 		return resolve()
 	})
 })
@@ -1046,7 +1029,6 @@ function get_scr_pixels_match(METRIC, oData) {
 				oPixels[k].diff = diff
 				let testPx = diff < 0.0001
 				oPixels[k].match = testPx
-				if (isScreenLog) {oPixels[k]['match_test'] = 'Math.abs('+ oData[k] +' - '+ controlPx +') < 0.0001'}
 				if (false === testPx) {isPixelMatch = false}
 				oSummary[testPx].push(k)
 			} else if ('dpi_css' == k) {
@@ -1054,7 +1036,6 @@ function get_scr_pixels_match(METRIC, oData) {
 				if ('?' !== oData[k]) {
 					testPx = oData[k] == Math.floor(controlPx) // css is min-resolution
 					oPixels[k]['match'] = testPx
-					if (isScreenLog) {oPixels[k]['match_test'] = 'Math.floor('+ controlPx +') == '+ oData[k]}
 					if (false === testPx) {isPixelMatch = false}
 					oSummary[testPx].push(k)
 				}
@@ -1064,17 +1045,11 @@ function get_scr_pixels_match(METRIC, oData) {
 				oLists[k].forEach(function(item){
 					testPx = window.matchMedia('('+ item +':'+ controlPx + unit +')').matches
 					oPixels[k]['match '+item] = testPx
-					if (isScreenLog) {oPixels[k]['match '+item + '_test'] = "window.matchMedia('("+ item +": "+ controlPx + unit + ")').matches"}
 					if (false === testPx) {isPixelMatch = false}
 					oSummary[testPx].push(k +'_'+ item)
 				})
 			}
 			oPixels[k].value = oData[k]
-		}
-		if (isPixelLog) {
-			console.log(oPixels)
-			let strJSON = isPixelMatch ? ' ' : '\n'+ JSON.stringify(oSummary, null, 2)
-			console.log(isPixelMatch, oData.devicePixelRatio, strJSON)
 		}
 		// make the notification clickable
 		sDetail[isScope][METRIC] = oPixels

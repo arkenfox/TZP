@@ -349,27 +349,31 @@ function get_mm_css() {
 		},
 		'prefers-contrast': { // FF65+
 			id: 'PC', test: ['no-preference','high','low'], rfp: 'no-preference', rfpver: 1
-			// ^ 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
-			// ^ 1656363^ enabled by default in FF101
+			// 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
+			// FF101: 1656363 enabled
+			// FF132: 1917034 pref removed
 		},
 		'prefers-color-scheme': {// FF67+: 1494034
 			id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1
-			// ^ FF79+: 1643656: no-preference obsolete
+			// FF79+: 1643656: no-preference obsolete
 		},
-		'forced-colors': { // FF89+: 1659511
+		'forced-colors': {
+			// layout.css.forced-color-adjust.enabled
+			// FF89+: 1659511 enabled
+			// FF132: 1917034 prefs removed
 			id: 'FC', test: ['none','active'], rfpver: 1
 		},
 		// not expected
 		'prefers-reduced-transparency': { // FF95+: 1736914
 			id: 'PRT', test: ['no-preference','reduce'],
-			// ^ layout.css.prefers-reduced-transparency.enabled
-			// ^ 1822176: default disabled
+			// layout.css.prefers-reduced-transparency.enabled
+			// 1822176: issue to enable it - currently default disabled
 			// ToDo: notation when pref flipped: RFP = "no-preference"
 		},
 		'inverted-colors': { // FF114+
 			id: 'IC', test: ['none','inverted'], rfp: 'none', rfpver: 999,
-			// ^ 1794628: layout.css.inverted-colors.enabled (default disabled)
-			// ^ ToDo: notation when pref flips: RFP = 'none'
+			// 1794628: layout.css.inverted-colors.enabled (default disabled)
+			// ToDo: notation when pref flips: RFP = 'none'
 		},
 		'prefers-reduced-data': {
 			id: 'PRD', test: ['no-preference','reduce'],

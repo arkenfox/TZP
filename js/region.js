@@ -320,6 +320,7 @@ function set_oIntlTests() {
 		Nov: new Date('2023-11-15'),
 		Wed: new Date('January 18, 2023 1:00:00'), // doubles as hour 1
 		Fri: new Date('January 20, 2023 13:00:00'), // doubles as hour 13
+		RY: new Date(-1,12,5,1),
 	}
 
 	oIntlTests = {
@@ -386,6 +387,18 @@ function set_oIntlTests() {
 		pluralrules: {
 			cardinal: [0, 1, 2, 3, 7, 21, 100],
 			ordinal: [1, 2, 3, 4, 5, 8, 10, 81]
+		},
+		relatedyear: {
+			// these are all long
+			buddhist: [dates.RY],
+			chinese: [dates.RY],
+			'default': [dates.RY],
+			gregory: [dates.RY],
+			hebrew: [dates.RY],
+			indian: [dates.RY],
+			islamic: [dates.RY],
+			japanese: [new Date("January 5, 2023 1:00:00")],
+			roc: [dates.RY],
 		},
 		relativetimeformat: { // 8 of 12
 			always: {'narrow': [[1, 'day'], [0, 'year']]},
@@ -791,6 +804,17 @@ function get_locale_intl() {
 					})
 					obj[key] = data
 				}
+			} else if ('relatedyear' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let cal = 'default' == key ? undefined : key
+					let formatter = Intl.DateTimeFormat(code, {calendar: cal, relatedYear: 'long'}), data = []
+					tests[key].forEach(function(d) {
+						let stroptions = {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'}
+						value = (isIntl ? formatter.format(d) : (d).toLocaleString(code, stroptions)); data.push(value)
+					})
+					obj[key] = data
+				}
 			} else if ('relativetimeformat' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
@@ -874,10 +898,13 @@ function get_locale_intl() {
 	}
 	const oMetrics = {
 		intl : [
-			'collation','compact','currency','durationformat','datetimeformat','dayperiod','listformat','notation',
-			'numberformat_ftp','pluralrules','relativetimeformat','relativetimeformat_ftp','sign','timezonename','unit'
+			'collation','compact','currency','durationformat','datetimeformat','dayperiod',
+			'listformat','notation','numberformat_ftp','pluralrules','relatedyear',
+			'relativetimeformat','relativetimeformat_ftp','sign','timezonename','unit'
 		],
-		tolocalestring: ['compact','currency','datetimeformat','notation','sign','timezonename','unit'],
+		tolocalestring: [
+			'compact','currency','datetimeformat','notation','relatedyear','sign','timezonename','unit'
+		],
 	}
 	let METRIC, oString = {}
 	Object.keys(oMetrics).forEach(function(list){
@@ -1611,13 +1638,6 @@ const get_dates = () => new Promise(resolve => {
 				return temp.map(function(entry){return entry.value}).join('')
 			} else if (item == 12) {return Intl.DateTimeFormat().format(d)
 			} else if (item == 13) {
-				// relatedYear, yearName
-				let tmp = Intl.DateTimeFormat(localecode, {relatedYear: 'long'}).formatToParts(d)
-					tmp = tmp.map(function(entry){return entry.value}).join('')
-				let tmpb = Intl.DateTimeFormat(localecode, {year: 'numeric', yearName: 'long'}).formatToParts(d)
-					tmpb = tmpb.map(function(entry){return entry.value}).join('')
-				return tmp += ' | '+ tmpb
-			} else if (item == 14) {
 				// FF91+: 1710429
 				// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 				// FF91: extended TZNs are type "unknown"
@@ -1646,7 +1666,7 @@ const get_dates = () => new Promise(resolve => {
 					log_error(4, itemPad +': timeZoneName', e)
 					return zErr
 				}
-			} else if (item == 15) {
+			} else if (item == 14) {
 				// FF91+: 1653024: formatRange
 				let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
 					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
