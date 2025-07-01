@@ -70,7 +70,7 @@ function legend() {
 			let name = str.split(",")[1].trim()
 			let go = true
 			if (isSupported) {
-				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
 			}
 			if (go) {
 				aLocales.push(code)
@@ -631,6 +631,7 @@ Promise.all([
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en,english','fr,french']
 	legend()
 	if (isSupported) {
 		setBtn("all")
