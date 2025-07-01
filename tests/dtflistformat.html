@@ -110,7 +110,7 @@ function legend() {
 			let name = str.split(",")[1].trim()
 			let go = true
 			if (isSupported) {
-				go = Intl.ListFormat.supportedLocalesOf([code]).length > 0
+				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
 			}
 			if (go) {
 				aLocales.push(code)
