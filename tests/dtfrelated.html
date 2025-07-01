@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>relatedyear</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px"><col>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">datetimeformat: relatedyear
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy with DateTimeFormat relatedYear</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false,
+	localesHashAll = "", // to compare min to
+	oData = {}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = true
+			if (isSupported) {
+				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method = "all") {
+	let t0 = performance.now()
+	let spacer = "<br><br>"
+	/*
+	Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
+
+ 	new Date("January 14, 2023 1:00:00") vs Date.UTC(2023, 0, 14, 1)
+	- a string e.g. "January 14, 2023 1:00:00" is not affected by your timezone
+	- Date.UTC is a number e.g. Date.UTC(2023, 0, 14, 1) and is affected by your timezone
+
+	so for this test we want universal hashes so we will use a string, so e.g.
+	AM/PM will be in order, and we get the correct two weekdays
+	*/
+
+//e8454121 + d49cb2ac 
+
+	let dateA = new Date("January 5, 2023 1:00:00"),
+		dateB = new Date(-1,12,5,1)
+	let datesAll = [dateA, dateB]
+
+	let dateEra = new Date(-1, -11, -30)
+
+
+
+	let testsAll = {}
+	let testsAllMini = {
+		'2-digit': datesAll,
+		'long': datesAll,
+		'narrow': datesAll,
+		'numeric': datesAll,
+		'short': datesAll,
+	}
+	let aSupportedCal = []
+	try {
+		aSupportedCal = Intl.supportedValuesOf('calendar')
+	} catch(e) {}
+	// which calendars don't do much
+	let aCalendars = [
+		'buddhist', // yes
+		'chinese', // yes
+		//'coptic',
+		//'dangi',
+		//'ethioaa',
+		//'ethiopic',
+		'gregory', // yes
+		'hebrew', // yes
+		'indian', // yes
+		'islamic', // yes
+		//'islamic-civil',
+		//'islamic-rgsa',
+		//'islamic-tbla',
+		//'islamic-umalqura',
+		//'iso8601',
+		'japanese',
+		//'persian',
+		'roc', // blink
+	]
+	aCalendars = aCalendars.filter(x => aSupportedCal.includes(x))
+	testsAll = {'default': testsAllMini}
+	if (aCalendars.length) {
+		aCalendars.forEach(function(cal) {testsAll[cal] = testsAllMini})
+	}
+
+	let testsMin = {
+		'buddhist': {'long': [dateB]},
+		'chinese': {'long': [dateB]},
+		'default': {'long': [dateB]},
+		'gregory': {'long': [dateB]},
+		'hebrew': {'long': [dateB]},
+		'indian': {'long': [dateB]},
+		'islamic': {'long': [dateB]},
+		'japanese': {'long': [dateA]}, // only one to use dateA
+		'roc': {'long': [dateB]},
+	}
+	let tests = method == "all" ? testsAll : testsMin
+
+	oData = {}
+	let oCompare = {'false': [], 'true': []}
+	//aLocales = ['en']
+	try {
+		aLocales.forEach(function(code) {
+			let oTempData = {}
+			Object.keys(tests).sort().forEach(function(cal) {
+				oTempData[cal] = {}
+				Object.keys(tests[cal]).forEach(function(style) {
+					oTempData[cal][style] = []
+					let calname = 'default' == cal ? undefined : cal
+					let formatter = Intl.DateTimeFormat(code, {calendar: cal, relatedYear: style})
+					tests[cal][style].forEach(function(d) {
+						oTempData[cal][style].push(formatter.format(d))
+						// test toString = perfect!!
+/*
+						let intlvalue = formatter.format(d)
+						let strlocale = (d).toLocaleString(code, {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'})
+						let isMatch = intlvalue == strlocale
+						oCompare[isMatch].push([intlvalue, strlocale])
+*/
+
+					})
+				})
+			})
+			//console.log(oTempData)
+
+			let hash = mini(oTempData)
+			if (oData[hash] == undefined) {
+				oData[hash] = {}
+				oData[hash]["locales"] = [code]
+				oData[hash]["data"] = {}
+				for (const k of Object.keys(oTempData).sort()) {
+					oData[hash]["data"][k] = oTempData[k]
+				}
+			} else {
+				oData[hash]["locales"].push(code)
+			}
+		})
+		//console.log(oCompare)
+		//console.log(oData)
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].length
+			let str = ''
+			for (const cal of Object.keys(oData[k]["data"])) {
+				if ('min' == method) {str += '<ul class="main"><li>'}
+				str += s14 + cal +": "+ sc
+				for (const style of Object.keys(oData[k]["data"][cal]).sort()) {
+
+					let shortstyle
+					if (style == "numeric") {shortstyle = "Num"} else {shortstyle = style.slice(0,1).toUpperCase()}
+					let tmpStr = s16 + shortstyle +": "+ sc + oData[k]["data"][cal][style].join(", ")
+					if ('all' == method) {
+						str += '<ul class="main"><li>'+ tmpStr +"</li>"
+					} else {
+						str += ' '+ tmpStr
+					}
+					if ('min' == method) {str += '</li>'}
+					str += '</ul>'
+				}
+			}
+			if (method == 'all') {str = '<details>'+ str +'</details>'}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul class='main'>"+ str
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"].join(", ") +"</li></ul>"
+			)
+		}
+
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// notate new if 140+
+			if (isVer > 139) {
+				// ignore if non-supported used, which return same as undefined = user's resolved options
+				// results
+				if (resultsHash == "af55e7fc") { // FF140+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "78d26ff1") { // FF140+: 171
+				} else {localesHash += ' '+ zNEW
+				}
+			}
+		} else {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+
+		// display
+		let display = s4 + localeGroups.length + sc +" from "+ s4 + aLocales.length + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		let msg = method == 'all' ? 'running... it takes a few seconds' : ''
+		dom.results = msg
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_isVer()
+	try {
+		// pointless if we can't use the feature being tested: FF58+
+		let test = new Intl.DateTimeFormat("en").formatToParts(new Date)
+		isSupported = true
+		dom.results = 'running... it takes a few seconds'
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		'ar-bh,arabic (bahrain)',
+		'bs-cyrl,bosnian (cyrillic)',
+		'ckb-ir,central kurdish (iran)',
+		'en-001,english',
+		'en-ae,english (united arab emirates)',
+		'en-au,english (australia)',
+		'en-be,english (belgium)',
+		'en-bw,english (botswana)',
+		'en-ca,english (canada)',
+		'en-ch,english (switzerland)',
+		'en-hk,english (hong kong)',
+		'en-in,english (india)',
+		'en-nz,english (new zealand)',
+		'en-se,english (sweden)',
+		'en-za,english (south africa)',
+		'es-ar,spanish (argentina)',
+		'es-cl,spanish (chile)',
+		'es-pa,spanish (panama)',
+		'es-pr,spanish (puerto rico)',
+		'fa-af,persian (afghanistan)',
+		'ff-adlm,fulah (adlam)',
+		'fr-ca,french (canada)',
+		'fr-ch,french (switzerland)',
+		'hi-latn,hindi (latin)',
+		'kok-latn,konkani (latin)',
+		'lrc-iq,northern luri (iraq)',
+		'nl-be,dutch (belgium)',
+		'ps-pk,pashto (pakistan)',
+		'pt-ao,portuguese (angola)',
+		'se-fi,northern sami (finland)',
+		'sr-latn,serbian (latin)',
+		'ur-in,urdu (india)',
+		'yue-cn,cantonese (china)',
+		'zh-hans-hk,chinese (simplified hong kong)',
+
+		// blink: we should add blink extras after we max gecko
+		//*
+		'ar-sa,arabic (saudi arabia)',
+		'az-cyrl,azerbaijani (cyrillic)',
+		'pa-arab,punjabi (arabic)',
+		'sd-deva,sindhi (devanagari)',
+		'uz-af,uzbek (afghanistan)',
+		'uz-arab,uzbek (arabic)',
+		'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
+		//*/
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en,english']
+	//list = ['en-NZ,english']
+	legend()
+	if (isSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>
