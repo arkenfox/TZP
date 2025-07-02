@@ -253,15 +253,23 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 })
 
 const get_permissions = (METRIC) => new Promise(resolve => {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API#permission-aware_apis
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
 	let tmpData = {}, data = {}, count = 0
 	let aList = [
 		// sorted
-		'camera','geolocation','microphone','midi','midi_sysex','notifications','persistent-storage','push','screen-wake-lock',
+		'camera','geolocation','microphone','midi','midi_sysex','notifications',
+		'persistent-storage','push','screen-wake-lock',
 	]
 	if (!isGecko) {
 		aList.push(
-			'accelerometer','ambient-light-sensor','gyroscope','magnetometer','background-fetch','background-sync',
-			'bluetooth','clipboard','device-info','display-capture','gamepad','nfc','speaker','speaker-selection',
+			'accelerometer','ambient-light-sensor','background-fetch','background-sync','clipboard-read',
+			'clipboard-write','compute-pressure','gyroscope','local-fonts','magnetometer','payment-handler',
+			'storage-access','top-level-storage-access','window-management',
+			// not listed on mdn: but confirmed in blink as a non error
+			'display-capture','nfc',
+			// other
+			'bluetooth','device-info','gamepad','speaker','speaker-selection',
 		)
 		aList.sort()
 	}
@@ -420,6 +428,18 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 
 const outputDevices = () => new Promise(resolve => {
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
+
+	let METRIC = 'isExtended', value, data=''
+	try {
+		value = screen.isExtended
+		if (runST) {value = 'true'}
+		let typeCheck = typeFn(value)
+		if ('boolean' !== typeCheck && 'undefined' !== typeCheck) {throw zErrType + typeCheck}
+	} catch(e) {
+		data = zErr; value = log_error(7, METRIC, e)
+	}
+	addBoth(7, METRIC, value,'','', data)
+
 	Promise.all([
 		get_media_devices('mediaDevices'),
 		get_speech_engines('speech_engines'),
