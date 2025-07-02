@@ -210,9 +210,11 @@ function run_main(method) {
 	tzDays = [new Date("August 1, 2019 0:00:00 UTC")]
 	let tzSG = {"shortGeneric": tzDays},
 		tzLG = {"longGeneric": tzDays},
-		tzS = {"short": tzDays}
-	let both = {"shortGeneric": tzDays, "longGeneric": tzDays},
-		everything = {
+		tzS = {"short": tzDays},
+		tzSSG = {"short": tzDays, "shortGeneric": tzDays}
+
+	let both = {"shortGeneric": tzDays, "longGeneric": tzDays}
+	let everything = {
 			"short": tzDays,
 			"shortGeneric": tzDays,
 			"longGeneric": tzDays,
@@ -228,11 +230,11 @@ function run_main(method) {
 		if (optExpanded) {
 			// expanded
 			tests = {
+				'Africa/Brazzaville': tzSG,
 				"Africa/Dakar": tzLG,
 				"Africa/Douala": tzLG,
 				"Africa/Lusaka": tzSG,
 				"Africa/Nairobi": tzSG,
-				"Africa/Windhoek": tzSG,
 				"America/Argentina/Cordoba": tzSG,
 				"America/Bogota": tzSG,
 				"America/Caracas": tzSG,
@@ -241,6 +243,7 @@ function run_main(method) {
 				"America/Guyana": tzSG,
 				"America/La_Paz": tzSG,
 				"America/Lima": tzSG,
+				'America/Mendoza': tzSG, // for blink
 				"America/Montevideo": tzSG,
 				"America/Paramaribo": tzSG,
 				"America/Toronto": tzLG,
@@ -251,6 +254,7 @@ function run_main(method) {
 				"Asia/Kuching": tzSG,
 				"Asia/Muscat": tzSG,
 				"Asia/Nicosia": tzLG,
+				'Asia/Rangoon': tzSG, // for blink
 				"Asia/Seoul": tzLG,
 				"Asia/Shanghai": tzSG,
 				"Asia/Singapore": tzSG,
@@ -261,13 +265,18 @@ function run_main(method) {
 				"Atlantic/South_Georgia": tzSG,
 				"Australia/Lord_Howe": tzSG,
 				"Europe/Isle_of_Man": tzSG,
-				"Europe/London": tzSG,
-				"Europe/Minsk": tzSG,
+				"Europe/London": tzSSG, // tzS part for blink
+				"Europe/Minsk": tzSG, // for blink
 				"Europe/Sarajevo": both,
 				"Indian/Cocos": tzS,
 				"Pacific/Pago_Pago": tzLG,
 				"Pacific/Saipan": tzSG,
 			}
+			// test
+			let aMore = []
+			aMore.forEach(function(tz) {
+				if (undefined == tests[tz]) {tests[tz] = both}
+			})
 		} else {
 			tests = {
 				"Africa/Dakar": tzLG,
@@ -287,11 +296,14 @@ function run_main(method) {
 	} else if (method == "tiny") {
 		// wee fast test with bang for buck
 		tests = {
-			"Africa/Douala": tzLG,
-			'Asia/Hong_Kong': tzSG, // useful in expanded
-			"Asia/Seoul": tzLG,
-			"Europe/London": tzSG,
-			"Asia/Muscat": tzSG,
+			// gecko non-expanded 226 | expanded 280
+			"Africa/Douala": tzLG, // +4
+			"America/Montevideo": tzSG, // +4
+			"America/Winnipeg": tzLG, // +3
+			'Asia/Hong_Kong': tzSG, // +4
+			"Asia/Seoul": tzLG, // +3
+			"Europe/London": tzSG, // +4
+			"Asia/Muscat": tzSG, // +4
 		}
 	} else {
 		// test valid timezone
@@ -314,6 +326,7 @@ function run_main(method) {
 		tests = {}
 		tests[method] = both
 	}
+
 	if ('all' == method || 'min' == method || 'tiny' == method) {
 		// remove unsupported: e.g. from tiny/min lists
 		for (const k of Object.keys(tests)) {
@@ -453,17 +466,15 @@ function run_main(method) {
 			} else {
 				localesHashAll = localesHash
 			}
-			// notate new if 140+
-			if (isVer > 139) {
-				if (optExpanded) {
-					// expanded results
-					if (resultsHash == "946f3eff") { // FF140+
-					} else {resultsHash += ' '+ zNEW
-					}
-					// expanded locales
-					if (localesHash == "fcd39b5d") { // FF40+: 336
-					} else {localesHash += ' '+ zNEW
-					}
+			// notate new if expanded and 140+
+			if (isVer > 139 && optExpanded) {
+				// expanded results
+				if (resultsHash == "8020b869") { // FF140+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// expanded locales
+				if (localesHash == "6e1f3483") { // FF40+: 336
+				} else {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
@@ -660,6 +671,10 @@ Promise.all([
 		"yue-hans,cantonese (simplified)",
 		"zh-hans-hk,chinese (simplified hong kong)",
 		"zh-hans-mo,chinese (simplified macau)",
+
+		// blink
+		'ee-tg,éwé (togo)',
+		'uz-arab,uzbek (arabic)',
 	]
 	let expanded = listExtra.concat(list)
 	expanded = expanded.filter(function(item, position) {return expanded.indexOf(item) === position})

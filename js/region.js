@@ -409,11 +409,13 @@ function set_oIntlTests() {
 		},
 		sign: {always: [-1, 0/0]},
 		timezonename: {
-			'Africa/Douala': tzLG,
+			"Africa/Douala": tzLG,
+			"America/Montevideo": tzSG,
+			"America/Winnipeg": tzLG,
 			'Asia/Hong_Kong': tzSG,
-			'Asia/Muscat': tzSG,
-			'Asia/Seoul': tzLG,
-			'Europe/London': tzSG,
+			"Asia/Seoul": tzLG,
+			"Europe/London": tzSG,
+			"Asia/Muscat": tzSG,
 		},
 		unit: {
 			'byte': unitN, // ICU 74
