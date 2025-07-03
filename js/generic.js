@@ -101,8 +101,8 @@ function run_block(trace) {
 }
 
 function run_basic(str = 'basic') {
-	// basic mode: colors
-	if ('basic' == str) {
+	// basic mode: colors: gecko only, let other engines have some color
+	if (isGecko && 'basic' == str) {
 		log_perf(SECTG, 'isBasic','')
 		for (let i=1; i < 19; i++) {
 			document.body.style.setProperty('--test'+i, '#d4c1b3')
