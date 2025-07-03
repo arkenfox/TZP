@@ -185,26 +185,10 @@ function run_main(method) {
 	let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
 	// Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
 
-	/* FULL TEST
-		207/219 base languages
-    298/725 all locales
-		298/310 expanded locales
-
-		NAMES ONLY
-		205/219 base languages
-    276/725 all locales
-		276/290 expanded locales: saves two shortG checks x 29 locales: not worth the perf
-
-	*/
-
-	// perf: tzNames: drop some styles
-	/*
-		tested FF121: 1070 locales
-		- 315: all 6
-		- 313: shortGeneric + longGeneric
-		- 315: short
-	*/
+	// tested july 2025: long, longOffset, shortOffset add nothing
+		// short only adds one unique hash
 	tzNames = ["short","shortGeneric","longGeneric"]
+
 	//tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
 	// use a date not a number (Date.UTC) so we're compat with toLocaleString etc
 	tzDays = [new Date("August 1, 2019 0:00:00 UTC")]
@@ -265,7 +249,7 @@ function run_main(method) {
 				"Atlantic/South_Georgia": tzSG,
 				"Australia/Lord_Howe": tzSG,
 				"Europe/Isle_of_Man": tzSG,
-				"Europe/London": tzSSG, // tzS part for blink
+				"Europe/London": tzSSG,
 				"Europe/Minsk": tzSG, // for blink
 				"Europe/Sarajevo": both,
 				"Indian/Cocos": tzS,
@@ -565,6 +549,7 @@ Promise.all([
 	let list = gLocales
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	//list = ["en-au,english (australia)","en-bm,english (bermuda)"]
+	//list = ["en,english"]
 
 	list.sort()
 	oLists["list"] = list
