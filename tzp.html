@@ -8,6 +8,7 @@
 	<link rel="preload" href="images/ScaledImage.png" as="image">
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<link rel="stylesheet" type="text/css" href="css/media.css">
+	<link rel="stylesheet" href="chrome://global/locale/intl.css">
 	<link rel="stylesheet" type="text/css" href="css/window_size.css">
 	<link rel="stylesheet" type="text/css" href="css/screen_size.css">
 	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
@@ -478,40 +479,56 @@
 		<!--geo-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">navigator<br>window</span></div>
-			&nbsp; geolocation</td><td class="mono"><span class="c" id="geolocation_navigator"></span> | <span class="c" id="geolocation"></span>
+			&nbsp; geolocation</td><td class="mono border-bottom">
+				<span class="c" id="geolocation_navigator"></span> | <span class="c" id="geolocation"></span>
+				<div class="btn-right s99">geo</div></td></tr>
 			</td></tr>
 		<!--lang-->
 		<tr><td>language</td><td class="c mono" id="language"></td></tr>
-		<tr><td>languages</td><td class="c mono" id="languages"></td></tr>
+		<tr><td>languages</td><td class="mono">
+			<span class="c" id="languages"></span>
+			<div class="btn-right s99">languages</div></td></tr>
+		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">lowercase + sorted</span></div> &nbsp; [system] languages</td><td class="c mono" id="languages_system"></td></tr>
+			<span class="ttxt">lowercase + sorted</span></div> &nbsp; [system] languages</td>
+			<td class="mono border-bottom"><span clas="c" id="languages_system"></span></td></tr>
 		<!--locale-->
 		<tr><td>locale</td><td class="c mono" id="locale"></td></tr>
-		<tr><td>[intl] locale</td><td class="c mono" id="locale_intl"></td></tr>
+		<tr><td>[intl] locale</td><td class="mono">
+			<span class="c" id="locale_intl"></span>
+			<div class="btn-right s99">locale</div>
+		</td></tr>
 		<tr><td>[resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
 		<tr><td>[tolocalstring] locale</td><td class="mono">
 			<span class="c" id="locale_tolocalestring"></span><span class="c" id="locale_tolocalestring_matches_intl"></span>
 		</td></tr>
-		<!--dt-->
 		<tr><td>[intl] dates</td><td class="c mono" id="dates_intl"></td></tr>
-		<tr><td>[to*string] dates</td><td class="mono">
+		<tr><td>[to*string] dates</td><td class="mono border-bottom">
 			<span class="c" id="dates_to*string"></span><span class="c" id="dates_to*string_matches_intl"></span>
 		</td></tr>
-		<!--messages-->
-		<tr><td>media messages</td><td class="c mono" id="messages_media"></td></tr>
-		<tr><td>validation messages</td><td class="c mono" id="messages_validation"></td></tr>
-		<tr><td>XML messages</td><td class="c mono" id="messages_xml"></td></tr>
-		<tr><td>XSLT messages</td><td class="c mono" id="messages_xslt"></td></tr>
-		<tr><td>XSLT sort</td><td class="c mono" id="xslt_sort"></td></tr>
+		<!--l10n-->
+		<tr><td>[parsererror] direction</td>
+			<td class="c mono" id="l10n_parsererror_direction">
+		</td></tr>
+		<tr><td>media messages</td><td class="mono">
+			<span class="c" id="l10n_media_messages"></span>
+			<div class="btn-right s99">l10n</div>
+		</td></tr>
+		<tr><td>validation messages</td><td class="c mono" id="l10n_validation_messages"></td></tr>
+		<tr><td>XML messages</td><td class="c mono" id="l10n_xml_messages"></td></tr>
+		<!--<tr><td>XSLT messages</td><td class="c mono" id="l10n_xslt"></td></tr>-->
+		<tr><td>XSLT sort</td><td class="mono border-bottom"><span class="c" id="l10n_xslt_sort"></sort></td></tr>
 		<!--tz-->
 		<tr><td><span id="labelTT" class="btn btn0" onClick="togglerows('TT','btn')">[+]</span>
 			timezone</td><td class="c mono" id="timezone"></td></tr>
 		<tr class="togTT"><td>timeZone</td><td class="c mono" id="timezone_timeZone"></td></tr>
 		<tr class="togTT"><td>timeZoneId</td><td class="c mono" id="timezone_timeZoneId"></td></tr>
 		<tr class="togTT"><td>zonedDateTime</td><td class="c mono" id="timezone_zonedDateTime"></td></tr>
-
 		<tr><td><span id="labelTL" class="btn btn0" onClick="togglerows('TL','btn')">[+]</span>
-			[offset] timezone</td><td class="c mono" id="timezone_offset"></td></tr>
+			[offset] timezone</td>
+			<td class="mono"><span class="c" id="timezone_offset"></span>
+			<div class="btn-right s99">timezone</div>
+		</td></tr>
 		<tr class="togTL"><td>date</td><td class="c mono" id="timezone_offset_date"></td></tr>
 		<tr class="togTL"><td>control date</td><td class="c mono" id="timezone_offset_control"></td></tr>
 		<tr class="togTL"><td>iframe</td><td class="c mono" id="timezone_offset_iframe"></td></tr>
