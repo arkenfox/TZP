@@ -1,7 +1,6 @@
 'use strict';
 
 /* HEADERS */
-
 function get_nav_connection(METRIC) {
 	let hash, btn ='', data ='', notation = default_red
 	try {
@@ -666,11 +665,13 @@ function get_dates_intl() {
 			return zErr
 		}
 	}
+
 	const oMetrics = {
 		intl : ['date_timestyle',],
 		'to*string': [],
 	}
 	let METRIC, oString = {}
+	let oIntlDateTemp = {}
 	Object.keys(oMetrics).forEach(function(list){
 		METRIC = 'dates_'+ list
 		let t0 = nowFn(), isIntl = 'intl' == list, notation = localetz_red
@@ -995,99 +996,6 @@ function get_locale_resolvedoptions(METRIC) {
 		}
 	}
 	addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
-	return
-}
-
-const get_messages_media = (METRIC) => new Promise(resolve => {
-	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ''
-	let aList = ['InvalidImage','ScaledImage']
-	for (const k of aList) {
-		let target = dom['tzp'+ k], title =''
-		try {
-			if ('ScaledImage' == k) {
-				title = target.contentWindow.document.title
-				title = title.replace(k +'.png', '') // strip image name to reduce noise
-			} else {
-				const image = target.contentWindow.document.querySelector('img')
-				title = image.alt
-				title = title.replace(target.src, '') // remove noise
-			}
-			data[k] = title.trim()
-		} catch(err) {
-			log_error(4, METRIC +'_'+ k, err)
-			data[k] = zErr
-		}
-	}
-	hash = mini(data); btn = addButton(4, METRIC)
-	if (isLanguageSmart) {
-		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-			if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
-		}
-	}
-	addBoth(4, METRIC, hash, btn, notation, data)
-	return resolve()
-})
-
-function get_messages_validation(METRIC) {
-	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
-		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
-		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
-	const input = "<input type='number' required>"
-		+ "<input type='checkbox' required>"
-		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
-		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
-		+ "<input type='file' required>"
-		+ "<input type='email' value='a'>"
-		+ "<input type='url' value='a'>"
-		+ "<input type='number' max='1974.3' value='2000'>"
-		+ "<input type='number' min='8026.5' value='1'>"
-		+ "<input type='tel' pattern='[0-9]{1}' value='a'>"
-		+ "<input type='radio' required name='radiogroup'>"
-		+ "<select required><option></option></select>"
-		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
-		+ "<input type='text' required>"
-
-	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
-	try {
-		let collection = ((new DOMParser).parseFromString(input, 'text/html')).body.children
-		let cType = typeFn(collection)
-		if ('object' !== cType) {throw zErrType + cType}
-		for (const k of Object.keys(collection)) {
-			let msg = collection[k].validationMessage
-			if (runST) {msg = undefined}
-			let typeCheck = typeFn(msg)
-			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			data[aNames[k]] = msg
-		}
-		hash = mini(data)
-		let count = Object.keys(data).length
-		let details = count === aNames.length ? 'details' : count +'/' + aNames.length
-		btn = addButton(4, METRIC, details)
-		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].v) {notation = locale_green}
-			}
-		}
-	} catch(e) {
-		hash = e; data = zErrLog
-	}
-	addBoth(4, METRIC, hash, btn, notation, data)
-	return
-}
-
-function get_messages_xml(METRIC) {
-	let hash, btn ='', data = isXML, notation = isLanguageSmart ? locale_red : ''
-	if ('string' == typeof isXML) {
-		hash = isXML; data = isXML == zNA ? '' : zErrLog
-	} else {
-		hash = mini(isXML); btn = addButton(4, METRIC)
-		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].x) {notation = locale_green}
-			}
-		}
-	}
-	addBoth(4, METRIC, hash, btn, notation, data)
 	return
 }
 
@@ -1568,7 +1476,130 @@ function get_timezone_offset(METRIC) {
 	return
 }
 
-function get_xslt_sort(METRIC) {
+const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
+	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ''
+	let aList = ['InvalidImage','ScaledImage']
+	for (const k of aList) {
+		let target = dom['tzp'+ k], title =''
+		try {
+			if ('ScaledImage' == k) {
+				title = target.contentWindow.document.title
+				title = title.replace(k +'.png', '') // strip image name to reduce noise
+			} else {
+				const image = target.contentWindow.document.querySelector('img')
+				title = image.alt
+				title = title.replace(target.src, '') // remove noise
+			}
+			data[k] = title.trim()
+		} catch(err) {
+			log_error(4, METRIC +'_'+ k, err)
+			data[k] = zErr
+		}
+	}
+	hash = mini(data); btn = addButton(4, METRIC)
+	if (isLanguageSmart) {
+		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+			if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
+		}
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return resolve()
+})
+
+function get_l10n_validation_messages(METRIC) {
+	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
+		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
+		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
+	const input = "<input type='number' required>"
+		+ "<input type='checkbox' required>"
+		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
+		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
+		+ "<input type='file' required>"
+		+ "<input type='email' value='a'>"
+		+ "<input type='url' value='a'>"
+		+ "<input type='number' max='1974.3' value='2000'>"
+		+ "<input type='number' min='8026.5' value='1'>"
+		+ "<input type='tel' pattern='[0-9]{1}' value='a'>"
+		+ "<input type='radio' required name='radiogroup'>"
+		+ "<select required><option></option></select>"
+		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
+		+ "<input type='text' required>"
+
+	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
+	try {
+		let collection = ((new DOMParser).parseFromString(input, 'text/html')).body.children
+		let cType = typeFn(collection)
+		if ('object' !== cType) {throw zErrType + cType}
+		for (const k of Object.keys(collection)) {
+			let msg = collection[k].validationMessage
+			if (runST) {msg = undefined}
+			let typeCheck = typeFn(msg)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			data[aNames[k]] = msg
+		}
+		hash = mini(data)
+		let count = Object.keys(data).length
+		let details = count === aNames.length ? 'details' : count +'/' + aNames.length
+		btn = addButton(4, METRIC, details)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].v) {notation = locale_green}
+			}
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return
+}
+
+function get_l10n_parsererror_direction(METRIC) {
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString#error_handling
+		// 1954813: 
+		// 1666613: currently relies on chrome://global/locale/intl.css
+	let value, data = '', notation = isLanguageSmart ? locale_red : ''
+	try {
+		let target = dom.tzpDirection
+		target.innerHTML = '<parsererror></parsererror>'
+		value = getComputedStyle(target.children[0]).direction
+		// check
+		if (runST) {value = ''} else if (runSI) {value = 'upsidedown'}
+		let typeCheck = typeFn(value)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		let aGood = ['ltr','rtl']
+		if (!aGood.includes(value)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ value}
+		// notation
+			// since this is just BB (or FF en-US), we know only three locales are rtl: ar, fa, he
+		if (isLanguageSmart && isLocaleValid) {
+			let aRTL = ['ar','fa','he']
+			let expected = aRTL.includes(isLocaleValue) ? 'rtl' : 'ltr'
+			if (expected == value) {notation = locale_green}
+		}
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(4, METRIC, value,'', notation, data)
+	return
+}
+
+function get_l10n_xml_messages(METRIC) {
+	let hash, btn ='', data = isXML, notation = isLanguageSmart ? locale_red : ''
+	if ('string' == typeof isXML) {
+		hash = isXML; data = isXML == zNA ? '' : zErrLog
+	} else {
+		hash = mini(isXML); btn = addButton(4, METRIC)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].x) {notation = locale_green}
+			}
+		}
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return
+}
+
+function get_l10n_xslt_sort(METRIC) {
 	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
 	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
@@ -1612,8 +1643,30 @@ function get_xslt_sort(METRIC) {
 
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
-	let o = {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric',
-			minute: 'numeric', second: 'numeric', hour12: true, timeZoneName: 'long'}
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
+	// locale options
+	let o = {
+		// numeric or 2-digit: always use numeric
+		year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric',
+		// true or false: true override hourCycle and forces h11 or h12 (locale dependent) == AM/PM
+		hour12: true,
+		// long short narrow
+		era: 'long',
+		month: 'long', // also numeric or 2-digit but we already have that covered
+		weekday: 'long',
+		// long short
+			// NOTE: FF91+ longGeneric, longOffset, shortGeneric, shortOffset
+			// see timezonename PoC: tested july 2025: long, longOffset, shortOffset add nothing
+			// short vs shortGeneric is a single extra unique hash
+			// long matches longGeneric in terms of entropy
+			// use long/short for old-timey support
+		timeZoneName: 'long' 
+	}
+	// max option combos would be 3 x 3 x 3 x 2 = 54
+	// then x dates and x calendars
+	// that's a lot of tests
+
 	let localecode = undefined
 	let DTFo
 	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch {}
@@ -1710,15 +1763,16 @@ const outputRegion = () => new Promise(resolve => {
 			get_locale_resolvedoptions('locale_resolvedoptions'),
 			get_locale_intl(),
 			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
-			get_messages_validation('messages_validation'),
-			get_messages_xml('messages_xml'),
-			get_xslt_sort('xslt_sort'),
+			get_l10n_validation_messages('l10n_validation_messages'),
+			get_l10n_xml_messages('l10n_xml_messages'),
+			get_l10n_parsererror_direction('l10n_parsererror_direction'),
+			get_l10n_xslt_sort('l10n_xslt_sort'),
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
-				get_messages_media('messages_media'),
+				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
 				return resolve()
 			})
