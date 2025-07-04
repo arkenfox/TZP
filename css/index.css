@@ -280,7 +280,7 @@ tr td.border-top {
 #tb1 td:first-child {color: var(--test1);}
 	#tb1 .togS td:first-child {color: var(--test99);} /* screen/window/viewport */
 #tb2 td:first-child {color: var(--test2);}
-	#tb2 .togAU td:first-child {color: var(--test99);} /* useragent */
+	#tb2 .togUA td:first-child {color: var(--test99);} /* useragent */
 	#tb2 .togUAD td:first-child {color: var(--test99);} /* useragentdata */
 	#tb2 .togAI td:first-child {color: var(--test99);} /* agent iframes */
 	#tb2 .togAW td:first-child {color: var(--test99);} /* agent workers */
