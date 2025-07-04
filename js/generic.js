@@ -1670,10 +1670,10 @@ function log_alert(section, metric, alert, scope = isScope, isOnce = false) {
 function log_error(section, metric, error = zErr, scope = isScope, isOnce = false) {
 	if ('string' !== typeof section) {section = sectionMap[section]}
 	if ('' == error || null == error || undefined == error) {error = zErr} else {error += ''}
-	let len = 50
 	let aLen25 = [
 		'canPlayType','isTypeSuppo','font-format','font-tech','textmetrics',
 	]
+	let len = 'android' == isOS ? 25 : 50
 	if (aLen25.includes(metric.slice(0,11))) {len = 25}
 	let key = 'errors'
 	// collect
@@ -1688,7 +1688,12 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 		sDataTemp[key][scope][section][metric] = error
 	}
 	// trim if required + return
-	if (error.length > len) {error = error.slice(0,len-3) + "..."}
+	// is aLen25 and android, just display zErr
+	if ('android' == isOS && aLen25.includes(metric.slice(0,11))) {
+		error = zErr
+	} else if (error.length > len) {
+		error = error.slice(0,len-3) + "..."
+	}
 	return error
 }
 
@@ -1911,17 +1916,17 @@ function outputPostSection(id) {
 		test_worker_web(isLog)
 		test_worker_shared(isLog)
 		test_idb(isLog)
-	} else if (id == "ua") {
-		get_ua_iframes(isLog)
-		get_ua_workers()
+	} else if (id == "agent") {
+		get_agent_iframes(isLog)
+		get_agent_workers()
 	} else if (id == "all") {
 		test_worker_service(isLog) // doesn't return
 		Promise.all([
 			test_worker_web(isLog),
 			test_worker_shared(isLog),
 			test_idb(isLog),
-			get_ua_iframes(isLog),
-			get_ua_workers(),
+			get_agent_iframes(isLog),
+			get_agent_workers(),
 		]).then(function(){
 			output_perf(id)
 		})
@@ -1934,7 +1939,7 @@ function outputUser(fn) {
 	if ('goFS' == fn) { goFS()
 	} else if ("exitFS" == fn) { exitFS()
 	} else if ("goNW" == fn) { goNW()
-	} else if ('goNW_UA' == fn) { goNW_UA()
+	} else if ('goNW_AGENT' == fn) { goNW_AGENT()
 	} else if ('outputAudioUser' == fn) {outputAudioUser()
 	} else if ('get_storage_manager' == fn) { get_storage_manager()
 	} else if ('get_pointer_event' == fn) { get_pointer_event()
@@ -2041,7 +2046,7 @@ function outputSection(id, isResize = false) {
 	var promiseSection = async function(x) {
 		let n = Number.isInteger(x) ? x : sectionNos[x]
 		if (n == 1) { return(outputScreen(isResize))}
-		if (n == 2) { return(outputUA())}
+		if (n == 2) { return(outputAgent())}
 		if (n == 3) { return(outputFD())}
 		if (n == 4) { return(outputRegion())}
 		if (n == 5) { return(outputHeaders())}
