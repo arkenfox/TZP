@@ -16,8 +16,9 @@ function get_device_integer(METRIC, proxyCheck) {
 }
 
 const get_keyboard = (METRIC) => new Promise(resolve => {
-	let hash, data ='', btn=''
-	function exit(hash, data) {
+	// https://wicg.github.io/keyboard-map/
+	// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
+	function exit(hash, data='', btn ='') {
 		addBoth(7, METRIC, hash, btn,'', data)
 		return resolve()
 	}
@@ -25,12 +26,10 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 		let k = navigator.keyboard
 		let typeCheck = typeFn(k)
 		if ('undefined' == typeCheck) {
-			exit(typeCheck, data)
+			exit(typeCheck)
 		} else {
 			let expected = '[object Keyboard]'
 			if (k+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ k+''}
-			// https://wicg.github.io/keyboard-map/
-			// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
 			let aKeys = [
 				'Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma','Digit0',
 				'Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9',
@@ -39,11 +38,18 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 				'KeyS','KeyT','KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote',
 				'Semicolon','Slash'
 			]
-			let data = {}
 			k.getLayoutMap().then(keyboardLayoutMap => {
-				aKeys.forEach(function(key) {data[key] = keyboardLayoutMap.get(key)})
-				btn = addButton(7, METRIC)
-				exit(mini(data), data)
+				// check size
+				if (keyboardLayoutMap.size > 0) {
+					let data = {}
+					aKeys.forEach(function(key) {data[key] = keyboardLayoutMap.get(key)})
+					exit(mini(data), data, addButton(7, METRIC))
+				} else {
+					// e.g. vivalid : is it this? https://wicg.github.io/keyboard-map/#permissions-policy
+					exit('keyboardLayoutMap.size: 0')
+				}
+			}).catch(function(err){
+				exit(err, zErrLog)
 			})
 		}
 	} catch(e) {

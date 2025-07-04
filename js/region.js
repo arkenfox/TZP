@@ -1676,23 +1676,28 @@ const get_dates = () => new Promise(resolve => {
 		try {
 // STRINGS
 			if (item == 1) {return d.toTimeString()
-			} else if (item == 2) {return d // a date object
+			} else if (item == 2) {return d // a date object: default format
 			} else if (item == 3) {return d.toString() // redundant?
+
+			// options
 			} else if (item == 4) {return d.toLocaleString(localecode, o)
 			} else if (item == 5) {return d.toLocaleDateString(localecode, o)
 			} else if (item == 6) {return d.toLocaleTimeString(localecode, o)
-			} else if (item == 7) {return d.toLocaleTimeString(localecode)
-			} else if (item == 8) {return d.toLocaleString(localecode)
-			} else if (item == 9) {return [d].toLocaleString(localecode)
+			// no options
+			} else if (item == 7) {return d.toLocaleString(localecode)
+			} else if (item == 8) {return [d].toLocaleString(localecode) // typed array
+			} else if (item == 9) {return d.toLocaleDateString(localecode)
+			} else if (item == 10) {return d.toLocaleTimeString(localecode)
+
 // DTF
-			} else if (item == 10) {return DTFo.format(d)
-			} else if (item == 11) {
+			} else if (item == 11) {return DTFo.format(d)
+			} else if (item == 12) {
 				let f = Intl.DateTimeFormat(localecode, o)
 
 				let temp = f.formatToParts(d)
 				return temp.map(function(entry){return entry.value}).join('')
-			} else if (item == 12) {return Intl.DateTimeFormat().format(d)
-			} else if (item == 13) {
+			} else if (item == 13) {return Intl.DateTimeFormat().format(d)
+			} else if (item == 14) {
 				// FF91+: 1710429
 				// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 				// FF91: extended TZNs are type "unknown"
@@ -1721,7 +1726,7 @@ const get_dates = () => new Promise(resolve => {
 					log_error(4, itemPad +': timeZoneName', e)
 					return zErr
 				}
-			} else if (item == 14) {
+			} else if (item == 15) {
 				// FF91+: 1653024: formatRange
 				let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
 					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),

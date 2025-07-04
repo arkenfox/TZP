@@ -1443,41 +1443,39 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 })
 
 const get_agent_data = (METRIC, os = isOS) => new Promise(resolve => {
-	let hash, typeCheck, data = {}, btn='', notation=''
+
+	function exit(hash, data ='', btn ='') {
+		addBoth(2, METRIC, hash, btn,'', data)
+		return resolve()
+	}
 	try {
-		hash = navigator.userAgentData
-		if (runSE) {foo++} else if (runST) {hash = 1} else if (runSI) {hash = {}}
-		let typeCheck = typeFn(hash, true)
+		let k = navigator.userAgentData
+		if (runSE) {foo++} else if (runST) {k = 1} else if (runSI) {k = {}}
+		let typeCheck = typeFn(k, true)
 		if ('undefined' == typeCheck) {
-			// undefined
-			addBoth(2, METRIC, 'undefined')
-			return resolve()
+			exit(typeCheck)
 		} else {
 			// type check
 			if ('object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = '[object NavigatorUAData]'
-			if (expected !== hash+'') {throw zErrInvalid +'expected '+ expected +' got '+ hash+''}
+			if (expected !== k+'') {throw zErrInvalid +'expected '+ expected +' got '+ k+''}
 			// https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData/getHighEntropyValues
 			navigator.userAgentData.getHighEntropyValues([
 				'architecture','bitness','brands','formFactor','fullVersionList','mobile',
 				'model','platform','platformVersion','uaFullVersion','wow64'
 			]).then(res => {
+				//let data = res
 				// new object: merge versions + check for mismatches
 					// e.g. brands, fullVersionList, uaFullVersion
 				// keep order: e.g. opera vs chrome differs in order of array items
-
 				// only blink so no smarts, for now just add the object
-				hash = mini(res); data = res; btn = addButton(2, METRIC)
-				addBoth(2, METRIC, hash, btn, notation, data)
-				console.log(res)
-				return resolve()
+ 				exit(mini(res), res, addButton(2, METRIC))
+			}).catch(function(err){
+				exit(err, zErrLog)
 			})
-			// catch uncaught in promise error
 		}
 	} catch(e) {
-		hash = e; data = zErrLog
-		addBoth(2, METRIC, hash, btn, notation, data)
-		return resolve()
+		exit(e, zErrLog)
 	}
 })
 
