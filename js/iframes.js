@@ -34,7 +34,7 @@ function getDynamicIframeWindow({
 		}
 		const iframeWindow = contentWindow ? element.contentWindow : context[length]
 		let data = {}, r
-		if ('ua' == test) {
+		if ('agent' == test) {
 			let navigator = iframeWindow.navigator
 			let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 				'platform','product','productSub','userAgent','vendor','vendorSub']
@@ -61,24 +61,25 @@ function getDynamicIframeWindow({
 	}
 }
 
-function get_ua_iframes(log = false) {
+function get_agent_iframes(log = false) {
 	// runs post FP
 	let t0 = nowFn()
 
 	let aNames = ['content_docroot', 'content_with_url', 'window_docroot',
 		'window_with_url', 'iframe_access', 'nested', 'window_access']
 
+	let METRIC = 'agent'
 	// get data
 	Promise.all([
-		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: 'ua'}), // docroot contentWindow
-		getDynamicIframeWindow({context: window, contentWindow: true, source: '?', violateSOP: false, test: 'ua'}), // with URL contentWindow
-		getDynamicIframeWindow({context: window, violateSOP: false, test: 'ua'}), // docroot
-		getDynamicIframeWindow({context: window, source: '?', violateSOP: false, test: 'ua'}), // with URL
-		getDynamicIframeWindow({context: frames, test: 'ua'}), // iframe access
-		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: 'ua'}), // nested
-		getDynamicIframeWindow({context: window, test: 'ua'}), // window access
+		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: METRIC}), // docroot contentWindow
+		getDynamicIframeWindow({context: window, contentWindow: true, source: '?', violateSOP: false, test: METRIC}), // with URL contentWindow
+		getDynamicIframeWindow({context: window, violateSOP: false, test: METRIC}), // docroot
+		getDynamicIframeWindow({context: window, source: '?', violateSOP: false, test: METRIC}), // with URL
+		getDynamicIframeWindow({context: frames, test: METRIC}), // iframe access
+		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: METRIC}), // nested
+		getDynamicIframeWindow({context: window, test: METRIC}), // window access
 	]).then(function(results){
-		const ctrlHash = mini(sDetail.document.ua_reported)
+		const ctrlHash = mini(sDetail.document.agent_reported)
 		/* test some errors
 		results[0] = 'i am not groot'
 		results[2] = 'i am groot'
@@ -95,7 +96,7 @@ function get_ua_iframes(log = false) {
 		let oData = {}, oDisplay = {}, oHashes = {}, countErrors = 0
 		for (let i=0; i < results.length; i++) {
 			let item = results[i]
-			let name = 'ua_'+ aNames[i]
+			let name = 'agent_'+ aNames[i]
 			if ('string' == typeof item) {
 				dom[name].innerHTML = item
 				countErrors++
@@ -122,8 +123,8 @@ function get_ua_iframes(log = false) {
 				singleHash = k
 				if (k !== ctrlHash) {
 					notation = match_red
-					btn = addButton(2, 'ua_iframe', 'details', 'btnc', zIFRAME)
-					addDetail('ua_iframe', oHashes[k].data, zIFRAME)
+					btn = addButton(2, 'agent_iframe', 'details', 'btnc', zIFRAME)
+					addDetail('agent_iframe', oHashes[k].data, zIFRAME)
 				}
 				let items = oHashes[k].group
 				items.forEach(function(item) {oDisplay[item] = k})
@@ -149,7 +150,7 @@ function get_ua_iframes(log = false) {
 		}
 		for (const k of Object.keys(oDisplay)) {dom[k].innerHTML = oDisplay[k]}
 		dom.uaIframes.innerHTML = summary + errString
-		if (log) {log_perf(SECTNF, 'ua iframes', t0)}
+		if (log) {log_perf(SECTNF, 'agent iframes', t0)}
 	})
 }
 
