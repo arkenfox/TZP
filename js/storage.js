@@ -42,8 +42,9 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 	// 1073741824 = (1024 * 1024 * 1024)/10
 		// round down so even 1 byte less !== 10
 	let value = Math.floor(bytes/(1073741824) * 10)/10
-	if ('quota' == type) {
-		// bucketize quota more if } manager always return non-bucketized
+	let isExact = (10737418240 == bytes || 53687091200 == bytes)
+	if ('quota' == type && !isExact) {
+		// bucketize quota more
 			// if persistent-storage is granted
 			// if gecko and under 10GB
 			// if blink which doesn't protect this | webkit IDK it seems to provide precise values
@@ -216,7 +217,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	// note: delay = 0 = silent run if permission granted
 	const METRIC = 'storage_manager'
 	dom[METRIC] = ''
-	let notation = isBB ? bb_red : ''
+	let notation = rfp_red
 
 	function exit(value) {
 		dom[METRIC].innerHTML = value + notation
@@ -234,8 +235,9 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 						value += ' ['+ bytes +' bytes]'
 						if (isProxyLie('StorageManager.estimate')) {
 							value = log_known(6, METRIC, value)
-						} else if (isBB && 10737418240 == bytes) { // not a lie, exact match
-							notation = bb_green
+						} else {
+							// 1781277 RFP can only be exactly 10GB or 50GB
+							if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
 						}
 						exit(value)
 					} else {
@@ -248,7 +250,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 })
 
 const get_storage_quota = (METRIC) => new Promise(resolve => {
-	let isLies = false, notation = isBB ? bb_red : ''
+	let isLies = false, notation = rfp_red
 	let isGranted = false
 	Promise.all([
 		lookup_permission('persistent-storage')
@@ -263,7 +265,8 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 				let value = lookup_storage_bucket('quota', bytes, isGranted)
 				let display = value +' ['+ bytes +' bytes]'
 				if (isProxyLie('StorageManager.estimate')) {isLies = true}
-				if (isBB && 10737418240 == bytes) {notation = bb_green}
+				// 1781277 RFP can only be exactly 10GB or 50GB
+				if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
 				sDetail.document.lookup[METRIC] = display
 				exit(display, value)
 			}).catch(function(e){
