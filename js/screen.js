@@ -1258,7 +1258,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 /* AGENT */
 
 const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
-	let oReported = {}, oComplex = {}, oData = {}
+	let oReported = {}, oComplex = {}, oData = {}, countFail = 0
 	/*
 	windows:
 	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
@@ -1424,6 +1424,8 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			if (k == 'userAgent' && isMatch && 'android' == isOS) {
 				if (reported.includes('Linux')) {notation = desktopmode_green}
 			}
+			// catch non-errors and non-lies health failures
+			if (notation.includes(cross)) {countFail++}
 		}
 		addDisplay(2, 'ua_'+ k, reported, '', notation, (isErr ? false : isLies))
 		// record value in oData
@@ -1433,7 +1435,6 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 	// add lookup
 	addDetail('agent_reported', oReported) // add reported for non-match lookup
 	// add metric
-	let countFail = 0
 	for (const k of Object.keys(oData)) {if (zLIE == oData[k] || zErr == oData[k]) {countFail++}} // count failures
 	let strFail = (0 == countFail ? '' : sb +'['+ countFail +']'+ sc)
 	let agentnotation = (0 == countFail ? rfp_green : rfp_red)
