@@ -186,7 +186,7 @@
 		<thead><tr><th colspan="2"><a name="screen"></a>
 			<div class="nav-title"><a href="#screen">screen</a>
 			<div class="nav-up"><a href="#finger">&#9650;</a> <span class="c perf" id="perfscreen"></span></div>
-			<div class="nav-down"><a href="#useragentd">&#9660;</a></div>
+			<div class="nav-down"><a href="#uad">&#9660;</a></div>
 			<div class="nav-right"><a name="screend"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
@@ -373,48 +373,54 @@
 	<!--ua-->
 	<table id="tb2">
 		<col width="31%"><col width="69%">
-		<thead><tr><th colspan="2"><a name="useragent"></a>
-			<div class="nav-title"><a href="#useragent">user agent</a>
-			<div class="nav-up"><a href="#screen">&#9650;</a> <span class="c perf" id="perfua"></span></div>
+		<thead><tr><th colspan="2"><a name="ua"></a>
+			<div class="nav-title"><a href="#ua">agent</a>
+			<div class="nav-up"><a href="#screen">&#9650;</a> <span class="c perf" id="perfagent"></span></div>
 			<div class="nav-down"><a href="#featured">&#9660;</a></div>
-			<div class="nav-right"><a name="useragentd"></a></div></div>
+			<div class="nav-right"><a name="uad"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(2)">[ re-run ]</span></div>
-			<span class="c" id="uahash"></span>
+			<span class="c" id="agenthash"></span>
 			<div class="btn-right"></div>
 		</td></tr>
-		<tr><td>hash</td><td class="c mono" id="ua_reported"></td></tr>
-		<tr><td id="lappCodeName">appCodeName</td><td class="c mono spaces" id="appCodeName"></td></tr>
-		<tr><td id="lappName">appName</td><td class="c mono spaces" id="appName"></td></tr>
-		<tr><td id="lappVersion">appVersion</td><td class="c mono spaces" id="appVersion"></td></tr>
-		<tr><td id="lbuildID">buildID</td><td class="c mono spaces" id="buildID"></td></tr>
-		<tr><td id="loscpu">oscpu</td><td class="c mono spaces" id="oscpu"></td></tr>
-		<tr><td id="lplatform">platform</td><td class="c mono spaces" id="platform"></td></tr>
-		<tr><td id="lproduct">product</td><td class="c mono spaces" id="product"></td></tr>
-		<tr><td id="lproductSub">productSub</td><td class="c mono spaces" id="productSub"></td></tr>
-		<tr><td id="luserAgent">userAgent</td><td class="c spaces" id="userAgent"></td></tr>
-		<tr><td id="lvendor">vendor</td><td class="c mono spaces" id="vendor"></td></tr>
-		<tr><td id="lvendorSub">vendorSub</td><td class="c mono spaces" id="vendorSub"></td></tr>
-		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
-		<tr><td><span id="labelUAI" class="btn btn0" onClick="togglerows('UAI','btn')">[+]</span>
+		<!--agent*-->
+		<tr><td><span id="labelUA" class="btn btn0" onClick="togglerows('UA','btn')">[+]</span>
+			userAgent</td><td class="c mono" id="useragent"></td></tr>
+		<tr class="togUA"><td>appCodeName</td><td class="c mono spaces" id="ua_appCodeName"></td></tr>
+		<tr class="togUA"><td>appName</td><td class="c mono spaces" id="ua_appName"></td></tr>
+		<tr class="togUA"><td>appVersion</td><td class="c mono spaces" id="ua_appVersion"></td></tr>
+		<tr class="togUA"><td>buildID</td><td class="c mono spaces" id="ua_buildID"></td></tr>
+		<tr class="togUA"><td>oscpu</td><td class="c mono spaces" id="ua_oscpu"></td></tr>
+		<tr class="togUA"><td>platform</td><td class="c mono spaces" id="ua_platform"></td></tr>
+		<tr class="togUA"><td>product</td><td class="c mono spaces" id="ua_product"></td></tr>
+		<tr class="togUA"><td>productSub</td><td class="c mono spaces" id="ua_productSub"></td></tr>
+		<tr class="togUA"><td>userAgent</td><td class="c spaces" id="ua_userAgent"></td></tr>
+		<tr class="togUA"><td>vendor</td><td class="c mono spaces" id="ua_vendor"></td></tr>
+		<tr class="togUA"><td>vendorSub</td><td class="c mono spaces" id="ua_vendorSub"></td></tr>
+		<tr><td><span id="labelUAD" class="btn btn0" onClick="togglerows('UAD','btn')">[+]</span>
+			userAgentData</td><td class="c mono" id="useragentdata"></td></tr>
+		<tr class="togUAD"><td>coming soon</td><td class="c mono" id="uad_item1"></td></tr>
+
+		<tr><td colspan="2" class="center">------</td></tr>
+		<tr><td><span id="labelAI" class="btn btn0" onClick="togglerows('AI','btn')">[+]</span>
 			iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
-			<tr class="togUAI"><td>[contentWindow] document root</td><td class="c mono" id="ua_content_docroot"></td></tr>
-			<tr class="togUAI"><td>[contentWindow] with URL</td><td class="c mono" id="ua_content_with_url"></td></tr>
-			<tr class="togUAI"><td>[window] document root</td><td class="c mono" id="ua_window_docroot"></td></tr>
-			<tr class="togUAI"><td>[window] with URL</td><td class="c mono" id="ua_window_with_url"></td></tr>
-			<tr class="togUAI"><td>iframe access</td><td class="c mono" id="ua_iframe_access"></td></tr>
-			<tr class="togUAI"><td>nested</td><td class="c mono" id="ua_nested"></td></tr>
-			<tr class="togUAI"><td>window access</td><td class="c mono" id="ua_window_access"></td></tr>
-		<tr><td><span id="labelUAW" class="btn btn0" onClick="togglerows('UAW','btn')">[+]</span>
+			<tr class="togAI"><td>[contentWindow] document root</td><td class="c mono" id="agent_content_docroot"></td></tr>
+			<tr class="togAI"><td>[contentWindow] with URL</td><td class="c mono" id="agent_content_with_url"></td></tr>
+			<tr class="togAI"><td>[window] document root</td><td class="c mono" id="agent_window_docroot"></td></tr>
+			<tr class="togAI"><td>[window] with URL</td><td class="c mono" id="agent_window_with_url"></td></tr>
+			<tr class="togAI"><td>iframe access</td><td class="c mono" id="agent_iframe_access"></td></tr>
+			<tr class="togAI"><td>nested</td><td class="c mono" id="agent_nested"></td></tr>
+			<tr class="togAI"><td>window access</td><td class="c mono" id="agent_window_access"></td></tr>
+		<tr><td><span id="labelAW" class="btn btn0" onClick="togglerows('AW','btn')">[+]</span>
 			workers</td><td class="mono s99" id="uaWorkers">summary not coded</td></tr>
-			<tr class="togUAW"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
-			<tr class="togUAW"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
-			<tr class="togUAW"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
-			<tr class="togUAW"><td>nested worker</td><td class="mono s99" id="uaWorker3">test to come</td></tr>
-			<tr class="togUAW"><td>worker from blob</td><td class="mono s99" id="uaWorker4">test to come</td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goNW_UA')">[ click ]</span>
-			window.open</td><td class="c mono" id="uaHashOpen"></td></tr>
+			<tr class="togAW"><td>worker</td><td class="c mono" id="agent_worker"></td></tr>
+			<tr class="togAW"><td>shared worker</td><td class="c mono" id="agent_worker_shared"></td></tr>
+			<tr class="togAW"><td>service worker</td><td class="c mono" id="agent_worker_service"></td></tr>
+			<tr class="togAW"><td>nested worker</td><td class="mono s99" id="agent_worker_nested">test to come</td></tr>
+			<tr class="togAW"><td>worker from blob</td><td class="mono s99" id="agent_worker_blob">test to come</td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('goNW_AGENT')">[ click ]</span>
+			window.open</td><td class="c mono" id="agent_open"></td></tr>
 		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup></td></tr>
@@ -425,7 +431,7 @@
 		<col width="31%"><col width="69%">
 		<thead><tr><th colspan="2"><a name="feature"></a>
 			<div class="nav-title"><a href="#feature">feature detection</a>
-			<div class="nav-up"><a href="#useragent">&#9650;</a> <span class="c perf" id="perffeature"></span></div>
+			<div class="nav-up"><a href="#ua">&#9650;</a> <span class="c perf" id="perffeature"></span></div>
 			<div class="nav-down"><a href="#regiond">&#9660;</a></div>
 			<div class="nav-right"><a name="featured"></a></div></div>
 		</th></tr></thead>

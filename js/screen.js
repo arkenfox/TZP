@@ -1255,9 +1255,232 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 	return resolve(oData) // for scrollbar
 })
 
-/* UA */
+/* AGENT */
 
-function get_ua_workers() {
+const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
+	let oReported = {}, oComplex = {}, oData = {}
+	/*
+	windows:
+	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
+	mac:
+	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
+	android:
+	- FF122+ 1865766: hardcod to 10.0 - partially backed out
+	- FF123+ 1861847: hardcod oscpu/platform to 'Linux armv81'
+	- FF126+ [pending: they shipped an intervention instead] 1860417: Linux added to appVersion + ua_os
+	linux:
+	- FF123+ 1861847: hardcode oscpu/platform to "Linux x86_64" (backed out? on hold? these are RFP's values anyway)
+	- FF127+ 1873273: report non-x86_64 CPUs (including 32-bit x86) as "x86_64"
+	*/
+
+	/*
+	- FF132+ 1711835 SPOOFED_PLATFORM dropped, is now hardcoded for all
+	*/
+
+	// RFP notation: nsRFPService.h
+	let oRFP = {
+		android: {
+			appVersion: '5.0 (Android 10)', oscpu: 'Linux armv81', platform: 'Linux armv81', ua_os: 'Android 10; Mobile'
+		},
+		linux: {
+			appVersion: '5.0 (X11)', oscpu: 'Linux x86_64', platform: 'Linux x86_64', ua_os: 'X11; Linux x86_64'
+		},
+		mac: {
+			appVersion: '5.0 (Macintosh)', oscpu: 'Intel Mac OS X 10.15', platform: 'MacIntel', ua_os: 'Macintosh; Intel Mac OS X 10.15'
+		},
+		windows: {
+			appVersion: '5.0 (Windows)', oscpu: 'Windows NT 10.0; Win64; x64', platform: 'Win32', ua_os: 'Windows NT 10.0; Win64; x64'
+		}
+	}
+	if (os !== undefined) {
+		for (const k of Object.keys(oRFP)) {
+			// important: only add next version to array if we are open ended ('+')
+			let uaVer = isVer, isDroid = 'android' == k, nxtVer = uaVer + 1
+			// userAgent
+			let uaRFP = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:', uaNext = uaRFP // base
+			uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
+			oRFP[k].userAgent = [uaRFP]
+			// next userAgent
+			if ('+' == isVerExtra) {
+				uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
+				oRFP[k].userAgent.push(uaNext)
+			}
+			// desktop mode: 1727775
+			if (isDroid) {
+				uaRFP = 'Mozilla/5.0 (' + oRFP.linux.ua_os +'; rv:', uaNext = uaRFP // base
+				uaRFP += uaVer +'.0) Gecko/20100101 Firefox/'+ uaVer +'.0'
+				oRFP[k].userAgent.push(uaRFP)
+				if ('+' == isVerExtra) {
+					uaNext += nxtVer +'.0) Gecko/20100101 Firefox/'+ nxtVer +'.0'
+					oRFP[k].userAgent.push(uaNext)
+				}
+			}
+		}
+	}
+	//console.log(oRFP)
+
+	let list = {
+		// static
+		appCodeName: ['Mozilla', true],
+		appName: ['Netscape', [1]],
+		product: ['Gecko', null],
+		buildID: ['20181001000000', 1],
+		productSub: ['20100101', 1/0],
+		vendor: ['empty string', {1:1}],
+		vendorSub: ['empty string'],
+		// more complex
+		appVersion: ['skip', []],
+		platform: ['skip', {}],
+		oscpu: ['skip', NaN],
+		userAgent: ['skip'],
+	}
+
+	for (const p of Object.keys(list).sort()) {
+		oData[p] = ''; oReported[p] = '' // preset ordered objects
+		let expected = list[p][0], sim = list[p][1]
+		let isErr = false, str =''
+		try {
+			str = navigator[p]
+			if (runST) {str = sim} else if (runSL) {addProxyLie('Navigator.'+ p)}
+			let typeCheck = typeFn(str, true), expectedType = 'string'
+			if (!isGecko) {
+				// type check will throw an error for a string "undefined"
+				if ('buildID' == p || 'oscpu' == p) {expectedType = 'undefined'}
+			}
+			if (expectedType !== typeCheck) {throw zErrType + typeFn(str)}
+			if ('' == str) {str = 'empty string'}
+		} catch(e) {
+			isErr = true
+			str = log_error(2, METRIC +'_'+ p, e)
+		}
+		if ('skip' !== expected) {
+			outputStatic(p, str+'', expected, isErr)
+		} else {
+			oComplex[p] = [str+'', isErr]
+		}
+	}
+
+	function outputStatic(property, reported, expected, isErr) {
+		oReported[property] = (isErr ? zErr : reported)
+		//let isLies = isProxyLie('Navigator.'+ property)
+		// prototypeLies doesn't pick everything up all the time: instead use expected
+			// and because non-expected is lies
+		// still notate slent fails so our count makes sense
+		let isLies = reported !== expected
+		let notation = (isErr || isLies) ? silent_red : ''
+		addDisplay(2, 'ua_'+ property, reported, '', notation, (isErr ? false : isLies))
+		// record value in oData
+		let fpvalue = isErr ? zErr : (isSmart && isLies ? zLIE : reported)
+		oData[property] = fpvalue
+	}
+
+	for (const k of Object.keys(oComplex)) {
+		let reported = oComplex[k][0], isErr = oComplex[k][1]
+		oReported[k] = (isErr ? zErr : reported)
+		let isLies = isProxyLie('Navigator.'+ k)
+		if (!isLies) {
+			let aFlags = []
+			// prototypeLies doesn't pick everything up all the time: add some basic checks
+				// note: may be valid, e.g. a fork uses a custom values
+			if ('userAgent' == k | 'appVersion' == k) {
+				// userAgent: e.g. Chameleon, Chrome Mask
+				// appVersion: User-Agent Switcher
+				aFlags = [' like','Chrome','WebKit','KHTML','Apple','Safari']
+				for (let i=0; i < aFlags.length; i++) {
+					if (reported.includes(aFlags[i])) {isLies = true; break}
+				}
+			}
+			if (!isLies) {
+				if ('userAgent' == k) {
+					// check version: all platforms contain '; rv:' + version + '.0)'
+					aFlags = [isVer]
+					if ('+' == isVerExtra) {aFlags.push(isVer + 1)}
+					let isVerCheck = false
+					aFlags.forEach(function(item) {
+						if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
+					})
+					if (!isVerCheck) {isLies = true}
+				} else if ('appVersion' == k) {
+					// User-Agent Switcher
+					if ('windows' == os) {isLies = reported !== '5.0 (Windows)'
+					}
+				} else if ('platform' == k) {
+					// User-Agent Switcher
+					if ('windows' == os) {isLies = reported !== 'Win32'
+					}
+				} else if ('oscpu' == k) {
+					// User-Agent Switcher
+					if ('windows' == os) {isLies = !reported.includes('Windows NT 10.0')
+					}
+				}
+			}
+		}
+		let notation = isLies ? silent_red : '' // in case os is undefined
+		if (os !== undefined) {
+			let rfpvalue = oRFP[os][k], isMatch = false
+			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
+			notation = isMatch ? silent_green : silent_red
+			// notate good desktopmode
+			if (k == 'userAgent' && isMatch && 'android' == isOS) {
+				if (reported.includes('Linux')) {notation = desktopmode_green}
+			}
+		}
+		addDisplay(2, 'ua_'+ k, reported, '', notation, (isErr ? false : isLies))
+		// record value in oData
+		let fpvalue = isErr ? zErr : (isSmart && isLies ? zLIE : reported)
+		oData[k] = fpvalue
+	}
+	// add lookup
+	addDetail('agent_reported', oReported) // add reported for non-match lookup
+	// add metric
+	let countFail = 0
+	for (const k of Object.keys(oData)) {if (zLIE == oData[k] || zErr == oData[k]) {countFail++}} // count failures
+	let strFail = (0 == countFail ? '' : sb +'['+ countFail +']'+ sc)
+	let agentnotation = (0 == countFail ? rfp_green : rfp_red)
+	addBoth(2, METRIC, mini(oData), addButton(2, METRIC), agentnotation + strFail, oData)
+	return resolve()
+})
+
+const get_agent_data = (METRIC, os = isOS) => new Promise(resolve => {
+	let hash, typeCheck, data = {}, btn='', notation=''
+	try {
+		hash = navigator.userAgentData
+		if (runSE) {foo++} else if (runST) {hash = 1} else if (runSI) {hash = {}}
+		let typeCheck = typeFn(hash, true)
+		if ('undefined' == typeCheck) {
+			// undefined
+			addBoth(2, METRIC, 'undefined')
+			return resolve()
+		} else {
+			// type check
+			if ('object' !== typeCheck) {throw zErrType + typeCheck}
+			let expected = '[object NavigatorUAData]'
+			if (expected !== hash+'') {throw zErrInvalid +'expected '+ expected +' got '+ hash+''}
+			// https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData/getHighEntropyValues
+			navigator.userAgentData.getHighEntropyValues([
+				'architecture','bitness','brands','formFactor','fullVersionList','mobile',
+				'model','platform','platformVersion','uaFullVersion','wow64'
+			]).then(res => {
+				// new object: merge versions + check for mismatches
+					// e.g. brands, fullVersionList, uaFullVersion
+				// keep order: e.g. opera vs chrome differs in order of array items
+
+				// only blink so no smarts, for now just add the object
+				hash = mini(res); data = res; btn = addButton(2, METRIC)
+				addBoth(2, METRIC, hash, btn, notation, data)
+				console.log(res)
+				return resolve()
+			})
+			// catch uncaught in promise error
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+		addBoth(2, METRIC, hash, btn, notation, data)
+		return resolve()
+	}
+})
+
+function get_agent_workers() {
 	// control
 	let list = ['appCodeName','appName','appVersion','platform','product','userAgent']
 	let oCtrl = {}, r
@@ -1274,46 +1497,46 @@ function get_ua_workers() {
 	let control = mini(oCtrl)
 
 	// web
-	let el0 = dom.uaWorker0, test0 =''
+	let scope0 = 'worker', metric0 = 'agent_'+ scope0, target0 = dom[metric0], test0 =''
 	if (isFile) {
-		el0.innerHTML = zSKIP
+		target0.innerHTML = zSKIP
 	} else {
 		try {
-			let workernav = new Worker('js/worker_ua.js')
-			el0.innerHTML = zF
+			let workernav = new Worker('js/'+ scope0 +'_agent.js')
+			target0.innerHTML = zF
 			workernav.addEventListener('message', function(e) {
-				//console.log('ua worker', e.data)
+				//console.log(scope0, e.data)
 				test0 = mini(e.data)
-				el0.innerHTML = test0 + (test0 == control ? match_green : match_red)
+				target0.innerHTML = test0 + (test0 == control ? match_green : match_red)
 				workernav.terminate
 			}, false)
 			workernav.postMessage('')
 		} catch(e) {
-			el0.innerHTML = log_error(1, 'worker', e, 'worker')
+			target0.innerHTML = log_error(2, metric0, e, scope0)
 		}
 	}
 	// shared
-	let el1 = dom.uaWorker1, test1 =''
+	let scope1 = 'worker_shared', metric1 = 'agent_'+ scope1, target1 = dom[metric1], test1 =''
 	try {
-		let sharednav = new SharedWorker('js/workershared_ua.js')
-		el1.innerHTML = zF
+		let sharednav = new SharedWorker('js/'+ metric1 +'_agent.js')
+		target1.innerHTML = zF
 		sharednav.port.addEventListener('message', function(e) {
-			//console.log('ua shared', e.data)
+			//console.log('scope1', e.data)
 			test1 = mini(e.data)
-			el1.innerHTML = test1 + (test1 == control ? match_green : match_red)
+			target1.innerHTML = test1 + (test1 == control ? match_green : match_red)
 			sharednav.port.close()
 		}, false)
 		sharednav.port.start()
 		sharednav.port.postMessage('')
 	} catch(e) {
-		el1.innerHTML = log_error(1, 'shared worker', e, 'shared_worker')
+		target1.innerHTML = log_error(2, metric1, e, scope1)
 	}
 	// service
-	let el2 = dom.uaWorker2, test2 =''
-	el2.innerHTML = zF // assume failure
+	let scope2 = 'worker_service', metric2 = 'agent_'+ scope2, target2 = dom[metric2], test2 =''
+	target2.innerHTML = zF // assume failure
 	try {
 		// register
-		navigator.serviceWorker.register('js/workerservice_ua.js').then(function(swr) {
+		navigator.serviceWorker.register('js/'+ metric2 +'_agent.js').then(function(swr) {
 			let sw
 			if (swr.installing) {sw = swr.installing}
 			else if (swr.waiting) {sw = swr.waiting}
@@ -1325,24 +1548,24 @@ function get_ua_workers() {
 			})
 			if (sw) {
 				// listen
-				let channel = new BroadcastChannel('sw-ua')
+				let channel = new BroadcastChannel('sw-agent')
 				channel.addEventListener('message', event => {
-					//console.log('ua service', event.data.msg)
+					//console.log('agent service', event.data.msg)
 					test2 = mini(event.data.msg)
-					el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
+					target2.innerHTML = test2 + (test2 == control ? match_green : match_red)
 					// unregister & close
 					swr.unregister().then(function(boolean) {})
 					channel.close()
 				})
 			} else {
-				el2.innerHTML = zF +' ['+ sw +']'
+				target2.innerHTML = zF +' ['+ sw +']'
 			}
 		},
 		function(e) {
-			el2.innerHTML = log_error(1, 'service worker', e, 'service_worker')
+			target2.innerHTML = log_error(2, metric2, e, scope2)
 		})
 	} catch(e) {
-		el2.innerHTML = log_error(1, 'service worker', e, 'service_worker')
+		target2.innerHTML = log_error(2, metric2, e, scope2)
 	}
 }
 
@@ -1448,8 +1671,8 @@ function goNW() {
 	let checking = setInterval(build_newwin, 3)
 }
 
-function goNW_UA() {
-	dom.uaHashOpen =''
+function goNW_AGENT(METRIC = 'agent_open') {
+	dom[METRIC].innerHTML =''
 	let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 		'platform','product','productSub','userAgent','vendor','vendorSub']
 	let data = {}, r
@@ -1474,190 +1697,18 @@ function goNW_UA() {
 
 	// hash
 	let hash = mini(data)
-	const ctrlHash = mini(sDetail.document.ua_reported)
+	const ctrlHash = mini(sDetail.document.agent_reported)
 	// output
 	if (hash == ctrlHash) {
 		hash += match_green
 	} else {
-		addDetail('ua_newwin', data)
-		hash += addButton(2, 'ua_newwin') + match_red
+		addDetail(METRIC, data)
+		hash += addButton(2, METRIC) + match_red
 	}
-	dom.uaHashOpen.innerHTML = hash
+	dom[METRIC].innerHTML = hash
 }
 
 /* OUTPUT */
-
-const outputUA = (os = isOS) => new Promise(resolve => {
-	let oReported = {}, oComplex = {}
-	/*
-	windows:
-	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
-	mac:
-	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
-	android:
-	- FF122+ 1865766: hardcod to 10.0 - partially backed out
-	- FF123+ 1861847: hardcod oscpu/platform to 'Linux armv81'
-	- FF126+ [pending: they shipped an intervention instead] 1860417: Linux added to appVersion + ua_os
-	linux:
-	- FF123+ 1861847: hardcode oscpu/platform to "Linux x86_64" (backed out? on hold? these are RFP's values anyway)
-	- FF127+ 1873273: report non-x86_64 CPUs (including 32-bit x86) as "x86_64"
-	*/
-
-	/*
-	- FF132+ 1711835 SPOOFED_PLATFORM dropped, is now hardcoded for all
-	*/
-
-	// RFP notation: nsRFPService.h
-	let oRFP = {
-		android: {
-			appVersion: '5.0 (Android 10)', oscpu: 'Linux armv81', platform: 'Linux armv81', ua_os: 'Android 10; Mobile'
-		},
-		linux: {
-			appVersion: '5.0 (X11)', oscpu: 'Linux x86_64', platform: 'Linux x86_64', ua_os: 'X11; Linux x86_64'
-		},
-		mac: {
-			appVersion: '5.0 (Macintosh)', oscpu: 'Intel Mac OS X 10.15', platform: 'MacIntel', ua_os: 'Macintosh; Intel Mac OS X 10.15'
-		},
-		windows: {
-			appVersion: '5.0 (Windows)', oscpu: 'Windows NT 10.0; Win64; x64', platform: 'Win32', ua_os: 'Windows NT 10.0; Win64; x64'
-		}
-	}
-	if (os !== undefined) {
-		for (const k of Object.keys(oRFP)) {
-			// important: only add next version to array if we are open ended ('+')
-			let uaVer = isVer, isDroid = 'android' == k, nxtVer = uaVer + 1
-			// userAgent
-			let uaRFP = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:', uaNext = uaRFP // base
-			uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
-			oRFP[k].userAgent = [uaRFP]
-			// next userAgent
-			if ('+' == isVerExtra) {
-				uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
-				oRFP[k].userAgent.push(uaNext)
-			}
-			// desktop mode: 1727775
-			if (isDroid) {
-				uaRFP = 'Mozilla/5.0 (' + oRFP.linux.ua_os +'; rv:', uaNext = uaRFP // base
-				uaRFP += uaVer +'.0) Gecko/20100101 Firefox/'+ uaVer +'.0'
-				oRFP[k].userAgent.push(uaRFP)
-				if ('+' == isVerExtra) {
-					uaNext += nxtVer +'.0) Gecko/20100101 Firefox/'+ nxtVer +'.0'
-					oRFP[k].userAgent.push(uaNext)
-				}
-			}
-		}
-	}
-	//console.log(oRFP)
-
-	let list = {
-		// static
-		appCodeName: ['Mozilla', true],
-		appName: ['Netscape', [1]],
-		product: ['Gecko', null],
-		buildID: ['20181001000000', 1],
-		productSub: ['20100101', 1/0],
-		vendor: ['empty string', {1:1}],
-		vendorSub: ['empty string'],
-		// more complex
-		appVersion: ['skip', []],
-		platform: ['skip', {}],
-		oscpu: ['skip', NaN],
-		userAgent: ['skip'],
-	}
-
-	for (const p of Object.keys(list)) {
-		let expected = list[p][0], sim = list[p][1]
-		let isErr = false, str =''
-		try {
-			str = navigator[p]
-			if (runST) {str = sim} else if (runSL) {addProxyLie('Navigator.'+ p)}
-			let typeCheck = typeFn(str, true), expectedType = 'string'
-			if (!isGecko) {
-				// type check will throw an error for a string "undefined"
-				if ('buildID' == p || 'oscpu' == p) {expectedType = 'undefined'}
-			}
-			if (expectedType !== typeCheck) {throw zErrType + typeFn(str)}
-			if ('' == str) {str = 'empty string'}
-		} catch(e) {
-			isErr = true
-			str = log_error(2, p, e)
-		}
-		if ('skip' !== expected) {
-			outputStatic(p, str+'', expected, isErr)
-		} else {
-			oComplex[p] = [str+'', isErr]
-		}
-	}
-
-	function outputStatic(property, reported, expected, isErr) {
-		oReported[property] = (isErr ? zErr : reported) // for uaDoc
-		//let isLies = isProxyLie('Navigator.'+ property)
-		// prototypeLies doesn't pick everything up all the time: instead use expected
-			// and because non-expected is lies, no notation is required
-		let isLies = reported !== expected
-		addBoth(2, property, reported,'', '', (isErr ? zErr : reported), isLies)
-	}
-
-	for (const k of Object.keys(oComplex)) {
-		let reported = oComplex[k][0], isErr = oComplex[k][1]
-		oReported[k] = (isErr ? zErr : reported) // for uaDoc
-		let isLies = isProxyLie('Navigator.'+ k)
-		if (!isLies) {
-			let aFlags = []
-			// prototypeLies doesn't pick everything up all the time: add some basic checks
-				// note: may be valid, e.g. a fork uses a custom values
-			if ('userAgent' == k | 'appVersion' == k) {
-				// userAgent: e.g. Chameleon, Chrome Mask
-				// appVersion: User-Agent Switcher
-				aFlags = [' like','Chrome','WebKit','KHTML','Apple','Safari']
-				for (let i=0; i < aFlags.length; i++) {
-					if (reported.includes(aFlags[i])) {isLies = true; break}
-				}
-			}
-			if (!isLies) {
-				if ('userAgent' == k) {
-					// check version: all platforms contain '; rv:' + version + '.0)'
-					aFlags = [isVer]
-					if ('+' == isVerExtra) {aFlags.push(isVer + 1)}
-					let isVerCheck = false
-					aFlags.forEach(function(item) {
-						if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
-					})
-					if (!isVerCheck) {isLies = true}
-				} else if ('appVersion' == k) {
-					// User-Agent Switcher
-					if ('windows' == os) {isLies = reported !== '5.0 (Windows)'
-					}
-				} else if ('platform' == k) {
-					// User-Agent Switcher
-					if ('windows' == os) {isLies = reported !== 'Win32'
-					}
-				} else if ('oscpu' == k) {
-					// User-Agent Switcher
-					if ('windows' == os) {isLies = !reported.includes('Windows NT 10.0')
-					}
-				}
-			}
-		}
-		let notation = isLies ? rfp_red : '' // in case os is undefined
-		if (os !== undefined) {
-			let rfpvalue = oRFP[os][k], isMatch = false
-			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
-			notation = isMatch ? rfp_green : rfp_red
-			// notate good desktopmode
-			if (k == 'userAgent' && isMatch && 'android' == isOS) {
-				if (reported.includes('Linux')) {notation = desktopmode_green}
-			}
-		}
-		addBoth(2, k, reported,'', notation, (isErr ? zErr : reported), isLies)
-	}
-	// add reported for non-matches lookup
-	let newobj = {}
-	for (const k of Object.keys(oReported).sort()) {newobj[k] = oReported[k]}
-	addDetail('ua_reported', newobj)
-	addDisplay(2, 'ua_reported', mini(newobj) + addButton(2, 'ua_reported'))
-	return resolve()
-})
 
 const outputFD = () => new Promise(resolve => {
 	let METRIC = 'infinity_architecture', value, data =''
@@ -1777,6 +1828,15 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 				window.addEventListener('resize', function(){outputSection(1, true)})
 			}
 		}
+		return resolve()
+	})
+})
+
+const outputAgent = () => new Promise(resolve => {
+	Promise.all([
+		get_agent('useragent'),
+		get_agent_data('useragentdata'),
+	]).then(function(){
 		return resolve()
 	})
 })

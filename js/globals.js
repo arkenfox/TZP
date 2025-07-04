@@ -5,7 +5,7 @@ var dom;
 const SECTG = '_global', SECTP = '_prereq', SECTNF = 'NON-FP', SECT98 = 'prototype', SECT99 = 'proxy'
 
 const sectionMap = {
-	1: 'screen', 2: 'ua', 3: 'feature', 4: 'region', 5: 'headers', 6: 'storage',
+	1: 'screen', 2: 'agent', 3: 'feature', 4: 'region', 5: 'headers', 6: 'storage',
 	7: 'devices', 9: 'canvas', 10: 'webgl', 11: 'audio', 12: 'fonts', 13: 'media',
 	14: 'css', 15: 'elements', 17: 'timing', 18: 'misc',
 }
@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 152
+	expectedMetrics = 143
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
