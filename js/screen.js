@@ -1517,7 +1517,7 @@ function get_agent_workers() {
 	// shared
 	let scope1 = 'worker_shared', metric1 = 'agent_'+ scope1, target1 = dom[metric1], test1 =''
 	try {
-		let sharednav = new SharedWorker('js/'+ metric1 +'_agent.js')
+		let sharednav = new SharedWorker('js/'+ scope1 +'_agent.js')
 		target1.innerHTML = zF
 		sharednav.port.addEventListener('message', function(e) {
 			//console.log('scope1', e.data)
@@ -1535,7 +1535,7 @@ function get_agent_workers() {
 	target2.innerHTML = zF // assume failure
 	try {
 		// register
-		navigator.serviceWorker.register('js/'+ metric2 +'_agent.js').then(function(swr) {
+		navigator.serviceWorker.register('js/'+ scope2 +'_agent.js').then(function(swr) {
 			let sw
 			if (swr.installing) {sw = swr.installing}
 			else if (swr.waiting) {sw = swr.waiting}
