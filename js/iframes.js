@@ -1,6 +1,6 @@
 'use strict';
 
-function getDynamicIframeWindow({
+const getDynamicIframeWindow = ({
 	context,
 	source ='',
 	test ='',
@@ -8,7 +8,8 @@ function getDynamicIframeWindow({
 	nestIframeInContainerDiv = false,
 	violateSOP = true, // SameOriginPolicy
 	display = false
-}) {
+}) => new Promise(resolve => {
+
 	try {
 		if (runSE) {foo++}
 		const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
@@ -33,14 +34,24 @@ function getDynamicIframeWindow({
 			element.setAttribute('src', source)
 		}
 		const iframeWindow = contentWindow ? element.contentWindow : context[length]
-		let data = {}, r
+
 		if ('agent' == test) {
-			let navigator = iframeWindow.navigator
+			let newNav = iframeWindow.navigator
+			let data = {}
+
+			function exit(value) {
+				try {document.body.removeChild(element)} catch(e) {}
+				data['useragentdata'] = value
+				return resolve({'data': data, 'hash': mini(data)})
+			}
+
+			// useragent
 			let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 				'platform','product','productSub','userAgent','vendor','vendorSub']
+			let tmpData = {}, r
 			list.forEach(function(p) {
 				try {
-					r = navigator[p]
+					r = newNav[p]
 					let typeCheck = typeFn(r, true), expectedType = 'string'
 					if (!isGecko) {
 						// type check will throw an error for a string "undefined"
@@ -51,15 +62,39 @@ function getDynamicIframeWindow({
 				} catch(e) {
 					r = e
 				}
-				data[p] = r+''
+				tmpData[p] = r+''
 			})
+			data['useragent'] = {'hash': mini(tmpData), 'metrics': tmpData}
+
+			// useragentdata
+			try {
+				let k = newNav.userAgentData
+				let typeCheck = typeFn(k, true)
+				if ('undefined' == typeCheck) {
+					exit(typeCheck)
+				} else {
+					if ('object' !== typeCheck) {throw zErr}
+					if ('[object NavigatorUAData]' !== k+'') {throw zErr}
+					navigator.userAgentData.getHighEntropyValues([
+						'architecture','bitness','brands','formFactor','fullVersionList','mobile',
+						'model','platform','platformVersion','uaFullVersion','wow64'
+					]).then(res => {
+						exit({'hash': mini(res), 'metrics': res})
+					}).catch(function(err){
+						exit(zErr)
+					})
+				}
+			} catch(e) {
+				exit(zErr)
+			}
+		} else {
+			try {document.body.removeChild(element)} catch(e) {}
+			return resolve('not supported')
 		}
-		document.body.removeChild(element)
-		return {'data': data, 'hash': mini(data)}
 	} catch(e) {
-		return e+''
+		return resolve(e+'')
 	}
-}
+})
 
 function get_agent_iframes(log = false) {
 	// runs post FP
