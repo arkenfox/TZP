@@ -395,12 +395,13 @@
 		<tr class="togUA"><td>platform</td><td class="c mono spaces" id="ua_platform"></td></tr>
 		<tr class="togUA"><td>product</td><td class="c mono spaces" id="ua_product"></td></tr>
 		<tr class="togUA"><td>productSub</td><td class="c mono spaces" id="ua_productSub"></td></tr>
-		<tr class="togUA"><td>userAgent</td><td class="c spaces" id="ua_userAgent"></td></tr>
+		<tr class="togUA"><td>userAgent</td><td class="c mono spaces" id="ua_userAgent"></td></tr>
 		<tr class="togUA"><td>vendor</td><td class="c mono spaces" id="ua_vendor"></td></tr>
 		<tr class="togUA"><td>vendorSub</td><td class="c mono spaces" id="ua_vendorSub"></td></tr>
-		<tr><td><span id="labelUAD" class="btn btn0" onClick="togglerows('UAD','btn')">[+]</span>
+		<tr><td>
+			<!--<span id="labelUAD" class="btn btn0" onClick="togglerows('UAD','btn')">[+]</span>-->
 			userAgentData</td><td class="c mono" id="useragentdata"></td></tr>
-		<tr class="togUAD"><td>coming soon</td><td class="c mono" id="uad_item1"></td></tr>
+		<!--<tr class="togUAD"><td>coming soon</td><td class="c mono" id="uad_item1"></td></tr>-->
 
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td><span id="labelAI" class="btn btn0" onClick="togglerows('AI','btn')">[+]</span>
@@ -599,6 +600,7 @@
 		<tr><td>connection</td><td class="c mono" id="connection"></td></tr>
 		<tr><td>doNotTrack</td><td class="c mono" id="doNotTrack"></td></tr>
 		<tr><td>globalPrivacyControl</td><td class="c mono" id="globalPrivacyControl"></td></tr>
+		<tr><td>onLine</td><td class="c mono" id="onLine"></td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
 
@@ -655,12 +657,16 @@
 			<span class="c" id="deviceshash"></span>
 			<div class="btn-right"></div>
 		</td></tr>
+		<tr><td>battery charging</td><td class="c mono" id="battery_charging"></td></tr>
 		<tr><td>color</td>
 				<td class="mono"><span id="cssC"></span><span class="cssc" id="color_css"></span> | <span class="c" id="color"></span></td></tr>
 		<tr><td>pixel depth | color depth</td>
 			<td class="mono"><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
 		<tr><td>color gamut</td>
 			<td class="mono"><span id="cssCG"></span><span class="cssc" id="color-gamut_css"></span> | <span class="c" id="color-gamut"></span></td></tr>
+		<tr><td>deviceMemory | devicePosture</td><td class="mono">
+			<span class="c" id="deviceMemory"></span> | <span class="c" id="devicePosture"></span>
+		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp; hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
@@ -668,7 +674,7 @@
 			<span class="cssc" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
 		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="cssc" id="hover_css"></span>
 			| <span class="c" id="hover"></span></td></tr>
-		<tr><td>isExtended</td><td class="c mono" id="isExtended"></td></tr>
+		<tr><td>[screen] isExtended</td><td class="c mono" id="isExtended"></td></tr>
 		<tr><td>keyboard</td><td class="c mono" id="keyboard"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>

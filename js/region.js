@@ -104,6 +104,22 @@ function get_nav_dnt(METRIC) {
 	return
 }
 
+function get_nav_online(METRIC) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/onLine
+	let value, data =''
+	try {
+		value = navigator.onLine
+		if (runST) {value = undefined}
+		let typeCheck = typeFn(value)
+		// we expect blink, gecko, webkit to return a boolean
+		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(5, METRIC, value,'','', data)
+	return
+}
+
 function get_nav_gpc(METRIC) {
 	// GPC: 1670058
 		// privacy.globalprivacycontrol.functionality.enabled = navigator
@@ -1676,7 +1692,7 @@ const get_dates = () => new Promise(resolve => {
 		try {
 // STRINGS
 			if (item == 1) {return d.toTimeString()
-			} else if (item == 2) {return d // a date object: default format
+			} else if (item == 2) {return d // a date object: default format?
 			} else if (item == 3) {return d.toString() // redundant?
 
 			// options
@@ -1790,6 +1806,7 @@ const outputHeaders = () => new Promise(resolve => {
 		get_nav_dnt('doNotTrack'),
 		get_nav_gpc('globalPrivacyControl'),
 		get_nav_connection('connection'),
+		get_nav_online('onLine'),
 	]).then(function(){
 		return resolve()
 	})

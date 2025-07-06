@@ -631,7 +631,8 @@ let fntMaster = {
 			'Arial Nova','Georgia Pro','Gill Sans Nova','Ink Free','Neue Haas Grotesk Text Pro','Rockwell Nova',
 			'Segoe Fluent Icons','Segoe UI Variable Display','Segoe UI Variable Small','Segoe UI Variable Text',
 			'Simplified Arabic Fixed','Verdana Pro',
-			// 1957317: Noto Sans CJK HK/JP/KR/SC/TC and Noto Serif CJK HK/JP/KR/SC/TC not added even though in prefs
+			// 1957317: Noto Sans CJK HK/JP/KR/SC/TC and Noto Serif CJK HK/JP/KR/SC/TC
+				// ^ not added: windows only installs region-specific e.g. Noto Sans TC, not language-specific e.g. Noto Sans CJK TC
 			// other
 			'Sans Serif Collection', // win11
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
@@ -1148,7 +1149,7 @@ const get_fonts_faces = (METRIC) => new Promise(resolve => {
 	Promise.all([
 		testLocalFontFamily(fntFaceFake),
 	]).then(function(res){
-		let value ='', data = '', btn='', notation = ''
+		let value ='', data ='', btn='', notation =''
 		let fntList = fntData.faces.full
 		let isNotate = fntList.length > 0
 		// only notate if we're testing it
