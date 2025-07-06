@@ -1258,7 +1258,8 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 /* AGENT */
 
 const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
-	let oReported = {}, oComplex = {}, oData = {}, countFail = 0
+	let oReported = {'useragent': {}, 'useragentdata': {}}
+	let oComplex = {}, oData = {}, countFail = 0
 	/*
 	windows:
 	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
@@ -1334,14 +1335,21 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 		oscpu: ['skip', NaN],
 		userAgent: ['skip'],
 	}
-
 	for (const p of Object.keys(list).sort()) {
-		oData[p] = ''; oReported[p] = '' // preset ordered objects
+		oData[p] = ''; oReported[METRIC][p] = '' // preset ordered objects
 		let expected = list[p][0], sim = list[p][1]
 		let isErr = false, str =''
 		try {
 			str = navigator[p]
-			if (runST) {str = sim} else if (runSL) {addProxyLie('Navigator.'+ p)}
+			if (runST) {str = sim} else if (runSL) {
+				// note: proxy lies are is only used on complex
+				addProxyLie('Navigator.'+ p)
+				// static we only check against expected: tampering is already recorded in
+				// prototype lies and there is no need to record untrustworthy if it's expected
+				if ('skip' !== expected) {
+					str = ('FAKE '+ str).trim()
+				}
+			}
 			let typeCheck = typeFn(str, true), expectedType = 'string'
 			if (!isGecko) {
 				// type check will throw an error for a string "undefined"
@@ -1361,7 +1369,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 	}
 
 	function outputStatic(property, reported, expected, isErr) {
-		oReported[property] = (isErr ? zErr : reported)
+		oReported[METRIC][property] = (isErr ? zErr : reported)
 		//let isLies = isProxyLie('Navigator.'+ property)
 		// prototypeLies doesn't pick everything up all the time: instead use expected
 			// and because non-expected is lies
@@ -1376,7 +1384,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 
 	for (const k of Object.keys(oComplex)) {
 		let reported = oComplex[k][0], isErr = oComplex[k][1]
-		oReported[k] = (isErr ? zErr : reported)
+		oReported[METRIC][k] = (isErr ? zErr : reported)
 		let isLies = isProxyLie('Navigator.'+ k)
 		if (!isLies) {
 			let aFlags = []
@@ -1433,7 +1441,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 		oData[k] = fpvalue
 	}
 	// add lookup
-	addDetail('agent_reported', oReported) // add reported for non-match lookup
+	addDetail('agent_reported', oReported) // add reported for matching/compares: e.g. iframes
 	// add metric
 	for (const k of Object.keys(oData)) {if (zLIE == oData[k] || zErr == oData[k]) {countFail++}} // count failures
 	let strFail = (0 == countFail ? '' : sb +'['+ countFail +']'+ sc)
@@ -1445,6 +1453,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 const get_agent_data = (METRIC, os = isOS) => new Promise(resolve => {
 
 	function exit(hash, data ='', btn ='') {
+		sDetail.document['agent_reported'][METRIC] = ('object' == typeof data ? data : hash)
 		addBoth(2, METRIC, hash, btn,'', data)
 		return resolve()
 	}
@@ -1489,7 +1498,7 @@ function get_agent_workers() {
 			if ('string' !== typeof r) {throw zErr}
 			if ('' ==r) {r = 'empty string'}
 		} catch(e) {
-			r = e
+			r = zErr
 		}
 		oCtrl[prop] = r
 	})
@@ -1670,13 +1679,39 @@ function goNW() {
 	let checking = setInterval(build_newwin, 3)
 }
 
-function goNW_AGENT(METRIC = 'agent_open') {
+function goNW_AGENT() {
+	const METRIC = 'agent_open'
 	dom[METRIC].innerHTML =''
 	let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 		'platform','product','productSub','userAgent','vendor','vendorSub']
-	let data = {}, r
+	
+	let data = {'useragent': {}, 'useragentdata': {}}, r
 	let newWin = window.open()
 	let newNavigator = newWin.navigator
+
+	function exit(value) {
+		newWin.close()
+		data['useragentdata'] = value
+		// make agent_reported same structure as section
+		let newobj = {}
+		for (const k of Object.keys(data).sort()) {
+			if ('object' == typeof data[k]) {newobj[k] = {'hash': mini(data[k]), 'metrics': data[k]}} else {newobj[k] = data[k]}
+		}
+		data = newobj
+		// hash
+		let hash = mini(data)
+		const ctrlHash = mini(sDetail.document.agent_reported)
+		// output
+		if (hash == ctrlHash) {
+			hash += match_green
+		} else {
+			addDetail(METRIC, data)
+			hash += addButton(2, METRIC) + match_red
+		}
+		dom[METRIC].innerHTML = hash
+	}
+
+	// useragent
 	list.forEach(function(p) {
 		try {
 			r = newNavigator[p]
@@ -1690,21 +1725,29 @@ function goNW_AGENT(METRIC = 'agent_open') {
 		} catch(e) {
 			r = e
 		}
-		data[p] = r+''
+		data['useragent'][p] = r+''
 	})
-	newWin.close()
-
-	// hash
-	let hash = mini(data)
-	const ctrlHash = mini(sDetail.document.agent_reported)
-	// output
-	if (hash == ctrlHash) {
-		hash += match_green
-	} else {
-		addDetail(METRIC, data)
-		hash += addButton(2, METRIC) + match_red
+	// useragentdata
+	try {
+		let k = navigator.userAgentData
+		let typeCheck = typeFn(k, true)
+		if ('undefined' == typeCheck) {
+			exit(typeCheck)
+		} else {
+			if ('object' !== typeCheck) {throw zErr}
+			if ('[object NavigatorUAData]' !== k+'') {throw zErr}
+			navigator.userAgentData.getHighEntropyValues([
+				'architecture','bitness','brands','formFactor','fullVersionList','mobile',
+				'model','platform','platformVersion','uaFullVersion','wow64'
+			]).then(res => {
+ 				exit(res)
+			}).catch(function(err){
+				exit(zErr)
+			})
+		}
+	} catch(e) {
+		exit(zErr)
 	}
-	dom[METRIC].innerHTML = hash
 }
 
 /* OUTPUT */
@@ -1833,9 +1876,16 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 
 const outputAgent = () => new Promise(resolve => {
 	Promise.all([
-		get_agent('useragent'),
+		// keep order: useragent creates agent_reported lookup, and the others add to it
+		get_agent('useragent'), // 
 		get_agent_data('useragentdata'),
 	]).then(function(){
+		// make agent_reported same structure as section
+		let newobj = {}, data = sDetail.document.agent_reported
+		for (const k of Object.keys(data).sort()) {
+			if ('object' == typeof data[k]) {newobj[k] = {'hash': mini(data[k]), 'metrics': data[k]}} else {newobj[k] = data[k]}
+		}
+		sDetail.document.agent_reported = newobj
 		return resolve()
 	})
 })
