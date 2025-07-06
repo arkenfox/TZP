@@ -1,5 +1,33 @@
 'use strict';
 
+const get_battery = (METRIC) => new Promise(resolve => {
+	//https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getBattery
+	function exit(value, data ='') {
+		addBoth(7, METRIC, value,'','', data)
+		return resolve()
+	}
+	try {
+		let value = navigator.getBattery
+		if (runST) {value = ''}
+		let typeCheck = typeFn(value)
+		if ('undefined' == typeCheck) {
+			exit(typeCheck)
+		} else {
+			if ('function' !== typeCheck) {throw zErrType +'getBattery: '+ typeCheck}
+			navigator.getBattery().then((battery) => {
+				let isCharging = battery.charging
+				typeCheck = typeFn(isCharging)
+				if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+				exit(isCharging)
+			}).catch(e => {
+				exit(e, zErrLog)
+			})
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+})
+
 function get_device_integer(METRIC, proxyCheck) {
 	// concurrency: 1630089: macOS reports physical cores instead of logical
 		// capped at 16 dom.maxHardwareConcurrency e.g 1728741
@@ -12,6 +40,61 @@ function get_device_integer(METRIC, proxyCheck) {
 		value = e; data = ('hardwareConcurrency' == METRIC ? zErrLog : zErrShort)
 	}
 	addBoth(7, METRIC, value,'', (value == expected ? rfp_green : rfp_red), data, isProxyLie(proxyCheck + METRIC))
+	return
+}
+
+function get_device_memory(METRIC) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/deviceMemory
+	let value, data =''
+	try {
+		value = navigator.deviceMemory
+		if (runST) {value += ''} else if (runSI) {value = 6}
+		let typeCheck = typeFn(value)
+		if ('undefined' == typeCheck) {
+			value = typeCheck
+		} else {
+			if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			// https://www.w3.org/TR/device-memory/#sec-device-memory-js-api
+				// "While implementations may choose different values, the recommended upper bound
+				// is 8GiB and the recommended lower bound is 0.25GiB (or 256MiB)"
+			// https://webkit.org/b/233381 : webkit is clamped to 4 or 8
+			let aValid = 'webkit' == isEngine ? [4, 8] : [0.25, 0.5, 1, 2, 4, 8]
+			if (!aValid.includes(value)) {
+				throw zErrInvalid +'expected: '+ aValid.join(', ') +': got '+ value
+			}
+		}
+	} catch(e) {
+		value = e; data = zErrShort
+	}
+	addBoth(7, METRIC, value,'','', data)
+	return
+}
+
+function get_device_posture(METRIC) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/devicePosture
+	let value, data =''
+	try {
+		value = navigator.devicePosture
+		if (runST) {value = false} else if (runSI) {value = {}}
+		let typeCheck = typeFn(value, true)
+		if ('undefined' == typeCheck) {
+			value = typeCheck
+		} else {
+			if ('object' !== typeCheck) {throw zErrType + 'devicePosture: '+ typeCheck}
+			let expected = '[object DevicePosture]'
+			if (value+'' !== expected) {throw zErrInvalid + 'devicePosture expected '+ expected +': got '+ value+''}
+			value = value.type
+			typeCheck = typeFn(value)
+			if ('string' !== typeCheck) {throw zErrType + 'devicePosture.type: '+ typeCheck}
+			let aValid = ['continuous','folder']
+			if (!aValid.includes(value)) {
+				throw zErrInvalid +'expected: '+ aValid.join(', ') +': got '+ value
+			}
+		}
+	} catch(e) {
+		value = e; data = zErrShort
+	}
+	addBoth(7, METRIC, value,'','', data)
 	return
 }
 
@@ -459,8 +542,11 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_integer('pixelDepth','Screen.'),
 		get_device_integer('colorDepth','Screen.'),
 		get_device_integer('hardwareConcurrency','Navigator.'),
+		get_device_memory('deviceMemory'),
+		get_device_posture('devicePosture'),
 		get_permissions('permissions'),
 		get_keyboard('keyboard'),
+		get_battery('battery_charging')
 	]).then(function(){
 		return resolve()
 	})
