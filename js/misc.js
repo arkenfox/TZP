@@ -39,6 +39,9 @@ function check_timing(type) {
 function get_timing_audio() {
 	if (!gClick) {return}
 	gClick = false
+	// contexttime: geckoview
+		// TypeError: undefined (with and with and w/out RFP)) on first run sometimes (and sometimes subsequent runs)
+		// seen in FF139 stable, 141 beta, 142 nightly
 
 	const METRIC = 'timing_audio'
 	let aList = ['contexttime','performancetime'], oTime = {}, audioCtx, source, rAF 
@@ -228,6 +231,8 @@ function get_timing(METRIC) {
 		gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
 		gData.timing.currenttime = [966.686] // only a single RFP entry
 		gData.timing.currenttime = [962.486] // only a single non-RFP entry
+		//ToDo: cleanup rogue is10's and is100's
+		gData.timing.currenttime = [86.4, 136.44, 236.48] // real world example that causes a 100ms entry
 		//*/
 
 		// isDecimal
