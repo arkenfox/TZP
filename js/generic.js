@@ -192,6 +192,7 @@ function get_isArch(METRIC) {
 }
 
 function get_isAutoplay(METRIC) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getAutoplayPolicy
 	// get non-user-gesture values once
 	let t0 = nowFn()
 	try {
