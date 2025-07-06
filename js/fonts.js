@@ -1061,43 +1061,71 @@ function get_fonts_base(METRICB, selected) {
 
 	// rebuild base fonts sizes: fntBase is already ordered: do first so hashes are correct
 	// for each base combine w + h, replace with fntBaseInvalid errors (but not lies)
-	let newBase = {}, hashBase = {}, finalBase = {}, selectBase = {}
-	for (const base in fntBase) {
-		newBase[base] = {}
-		for (const m of Object.keys(fntBase[base])) {
+	// note: reported (non FP data) is grouped with all method data (and extensions can cause mayhem)
+		// but select (a FP metric) should be grouped with only the method used, so we build them seperately
+	let reportedTemp = {}, reportedHash = {}, reportedBase = {}
+	let selectTemp = {}, selectHash = {}, selectBase = {}
+
+	for (const base in fntBase) { // for each base e.g. serif
+		reportedTemp[base] = {}
+		for (const m of Object.keys(fntBase[base])) { // for each method e.g. domrectbounding
 			if ('Width' == m.slice(-5)) { // for each pair
 				let method = m.slice(0,-5), value
 				if(zLIE !== fntBaseInvalid[method]) {value = fntBaseInvalid[method]}
 				if (undefined == value) {value = [fntBase[base][m], fntBase[base][method +'Height']]}
 				if (useMin && fntBaseMin.includes(method) || !useMin) {
-					newBase[base][method] = value
+					reportedTemp[base][method] = value
+					if (isSelected && method == selected) {selectTemp[base] = value}
 				}
 			}
 		}
 	}
 	// group by hash
-	for (const base in newBase) {
-		let tmphash = mini(newBase[base])
-		if (undefined == hashBase[tmphash]) {hashBase[tmphash] = {'bases': [base], 'data': newBase[base]}
-		} else {hashBase[tmphash].bases.push(base)}
+	for (const base in reportedTemp) { // reported and selected have the same object keys
+		// reported
+		let tmphash = mini(reportedTemp[base])
+		if (undefined == reportedHash[tmphash]) {
+			reportedHash[tmphash] = {'bases': [base], 'data': reportedTemp[base]}
+		} else {
+			reportedHash[tmphash].bases.push(base)
+		}
+		// select
+		if (isSelected) {
+			tmphash = mini(selectTemp[base])
+			if (undefined == selectHash[tmphash]) {
+				selectHash[tmphash] = {'bases': [base], 'data': selectTemp[base]}
+			} else {
+				selectHash[tmphash].bases.push(base)
+			}
+		}
 	}
 	// use base as keys | bases are already sorted since fntData.family.generic is too
-	for (const oldhash in hashBase) {
-		let newhash = mini(hashBase[oldhash].data)
-		finalBase[hashBase[oldhash].bases.join(' ')] = {'hash': newhash, 'metrics': hashBase[oldhash].data}
-		// build selected
-		if (isSelected) {selectBase[hashBase[oldhash].bases.join(' ')] = hashBase[oldhash].data[selected]}
+	for (const h in reportedHash) {
+		let newhash = mini(reportedHash[h].data)
+		reportedBase[reportedHash[h].bases.join(' ')] = {'hash': newhash, 'metrics': reportedHash[h].data}
 	}
-	//console.log('newBase', newBase)
-	//console.log('hashBase', hashBase)
-	//console.log('finalBase', finalBase)
+	if (isSelected) {
+		for (const h in selectHash) {
+			let newhash = mini(selectHash[h].data)
+			selectBase[selectHash[h].bases.join(' ')] = selectHash[h].data
+		}
+	}
+	//* reported
+	//console.log('reportedTemp', reportedTemp)
+	//console.log('reportedHash', reportedHash)
+	//console.log('reportedBase', reportedBase)
+	//*/
+	//* select
+	//console.log('selectTemp', selectTemp)
+	//console.log('selectHash', selectHash)
 	//console.log('selectBase', selectBase)
+	//*/
 
 	// display all that hard work!!
 		// unless we had an error which means we never end up here, we will have fntBase data
-	let btnAll = addButton(12, METRICB +'_reported', Object.keys(finalBase).length +'/'+ fntData.family.generic_name.length)
-	addDetail(METRICB +'_reported', finalBase)
-	addDisplay(12, METRICB+ '_reported', mini(finalBase), btnAll)
+	let btnAll = addButton(12, METRICB +'_reported', Object.keys(reportedBase).length +'/'+ fntData.family.generic_name.length)
+	addDetail(METRICB +'_reported', reportedBase)
+	addDisplay(12, METRICB+ '_reported', mini(reportedBase), btnAll)
 
 	// add selected/unknown/n/a
 	if (isSelected) {
