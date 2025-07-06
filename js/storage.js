@@ -220,7 +220,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	let notation = rfp_red
 
 	function exit(value) {
-		dom[METRIC].innerHTML = value + notation
+		dom[METRIC].innerHTML = value + (isSmart ? notation : '') // manual test so !isSmart notation not handled
 		return resolve()
 	}
 	setTimeout(function() {
