@@ -602,7 +602,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_posture('devicePosture'),
 		get_permissions('permissions'),
 		get_keyboard('keyboard'),
-		get_battery('battery_charging')
+		get_battery('battery')
 	]).then(function(){
 		return resolve()
 	})
