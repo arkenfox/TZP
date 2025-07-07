@@ -2,8 +2,8 @@
 
 const get_battery = (METRIC) => new Promise(resolve => {
 	//https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getBattery
-	function exit(value, data ='') {
-		addBoth(7, METRIC, value,'','', data)
+	function exit(value) {
+		addBoth(7, METRIC, value)
 		return resolve()
 	}
 	try {
@@ -15,10 +15,66 @@ const get_battery = (METRIC) => new Promise(resolve => {
 		} else {
 			if ('function' !== typeCheck) {throw zErrType +'getBattery: '+ typeCheck}
 			navigator.getBattery().then((battery) => {
-				let isCharging = battery.charging
-				typeCheck = typeFn(isCharging)
-				if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-				exit(isCharging)
+				// console.log(battery)
+				let data = {}, aTimes = []
+				let oItems = {
+					charging: 'boolean',
+					chargingTime: 'Infinity', // integer seconds, 0 if full | Infinity if discharging
+					dischargingTime: 'Infinity', // integer seconds | Infinity if charging 
+					level: 'number', // 0.0 to 1
+				}
+				// *Time: seconds are not precise: we should check the interval returned in chrome
+				for (const k of Object.keys(oItems)) {
+					let x = battery[k]
+					// type check
+					let typeCheck = typeFn(x), typeExpected = oItems[k]
+					let isTime = 'Time' == k.slice(-4)
+					let isTimeCheck = ('number' == typeCheck && isTime)
+					if (typeCheck !== typeExpected) {
+						let isThrow = true
+						if (isTimeCheck) {isThrow = false}
+						if (isThrow) {throw zErrType + k +': '+ typeCheck}
+					}
+					// validity
+					if (isTimeCheck) {
+						if (!Number.isInteger(x) || x < 0) {throw zErrInvalid + k + ': expected a positive integer: got '+ x}
+					} else if ('level' == k) {
+						if (x < 0 || x > 1) {throw zErrInvalid + k + ': expected 0 to 1: got '+ x}
+					}
+					// record time types
+					if (isTime) {aTimes.push(typeCheck)}
+					// record values
+					if (Infinity == x) (x += '')
+					data[k] = x
+				}
+				// chargingTime + dischargingTime: should be 1 x Infinity + 1 x integer
+				// we can use number because we have already type checked
+				if (aTimes[0] == aTimes[1]) {
+					let strType = aTimes[0] + ('number' == aTimes[0] ? 's': '')
+					throw zErrInvalid + 'chargingTime and dischargingTime can\'t both be '+ strType
+				}
+				// we could do more checks: e.g. charging is true if no battery or being charged,
+				// so if true then if chargingTime is Infinity or 0 that may be weird - I need to
+				// check a 100% charged phone/laptop being charged at the same time
+
+				// return a string
+					// ToDo: clean up and make as stable as possible: we can return
+					// has a battery or don't know
+					// is fully charged (meaning battery would be known)
+				let aParts = [data.charging]
+				aParts.push('Infinity' == data.chargingTime ? 'Infinity' : (0 == data.chargingTime ? 0 : '> 0'))
+				aParts.push('Infinity' == data.dischargingTime ? 'Infinity' : (0 == data.dischargingTime ? 0 : '> 0'))
+				aParts.push(Number.isInteger(data.level) ? data.level : '> 0 and < 1')
+				let str = aParts.join(', ')
+				let hash = mini(aParts)
+				//if (data.charging && 1 !== data.level && data.chargingTime > 0) {str = 'charging'} // meaning you have a battery
+
+				// record object for clicking
+				let btn = addButton(7, METRIC +'_reported') +' ['+ hash+']'
+				sDetail.document[METRIC +'_reported'] = data
+				addDisplay(7, METRIC +'_reported', btn)
+				// exit
+				exit(str)
 			}).catch(e => {
 				exit(e, zErrLog)
 			})

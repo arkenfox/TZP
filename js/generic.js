@@ -46,7 +46,7 @@ function typeFn(item, isSimple = false) {
 			if ('' === item) {type = 'empty string'} else if ('' === item.trim()) {type = 'whitespace'}
 		}
 	} else if ('number' === type) {
-		if (Number.isNaN(item)) {type = 'NaN'} else if (Infinity === item) {type = Infinity}
+		if (Number.isNaN(item)) {type = 'NaN'} else if (Infinity === item) {type = 'Infinity'}
 	} else if ('object' === type) {
 		if (Array.isArray(item)) {
 			type = 'array'
@@ -59,15 +59,18 @@ function typeFn(item, isSimple = false) {
 		}
 	}
 	// do nothing: undefined, bigint, boolean, function
-	return type
+	return type +'' // make sure we return a string
 }
 
 function testtypeFn(isSimple = false) {
 	let bigint = 9007199254740991
-	try {bigint = BigInt(9007199254740991)} catch {}
+	try {bigint = BigInt(9007199254740991)} catch(e) {}
 	let data = ['a','','  ', 1, 1.2, Infinity, NaN, [], [1], {}, {a: 1}, null,
 		true, false, bigint, undefined, function foobar() {},]
-	data.forEach(function(item) {console.log(item, typeFn(item, isSimple))})
+	data.forEach(function(item) {
+		let type = typeFn(item, isSimple)
+		console.log(typeof type, item, type)
+	})
 }
 
 function dedupeArrayToString(array) {
