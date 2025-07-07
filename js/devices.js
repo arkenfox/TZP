@@ -39,8 +39,6 @@ const get_battery = (METRIC) => new Promise(resolve => {
 					} else if ('level' == k) {
 						if (x < 0 || x > 1) {throw zErrInvalid + k + ': expected 0 to 1: got '+ x}
 					}
-					// record time types
-					if (isTime) {aTimes.push(typeCheck)}
 					// record values
 					if (Infinity == x) (x += '')
 					data[k] = x
