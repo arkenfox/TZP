@@ -15,15 +15,13 @@ const get_battery = (METRIC) => new Promise(resolve => {
 		} else {
 			if ('function' !== typeCheck) {throw zErrType +'getBattery: '+ typeCheck}
 			navigator.getBattery().then((battery) => {
-				// console.log(battery)
-				let data = {}, aTimes = []
+				let data = {}
 				let oItems = {
 					charging: 'boolean',
 					chargingTime: 'Infinity', // integer seconds, 0 if full | Infinity if discharging
 					dischargingTime: 'Infinity', // integer seconds | Infinity if charging 
 					level: 'number', // 0.0 to 1
 				}
-				// *Time: seconds are not precise: we should check the interval returned in chrome
 				for (const k of Object.keys(oItems)) {
 					let x = battery[k]
 					// type check
@@ -47,30 +45,30 @@ const get_battery = (METRIC) => new Promise(resolve => {
 					if (Infinity == x) (x += '')
 					data[k] = x
 				}
-				// chargingTime + dischargingTime: should be 1 x Infinity + 1 x integer
-				// we can use number because we have already type checked
-				if (aTimes[0] == aTimes[1]) {
-					let strType = aTimes[0] + ('number' == aTimes[0] ? 's': '')
-					throw zErrInvalid + 'chargingTime and dischargingTime can\'t both be '+ strType
-				}
-				// we could do more checks: e.g. charging is true if no battery or being charged,
-				// so if true then if chargingTime is Infinity or 0 that may be weird - I need to
-				// check a 100% charged phone/laptop being charged at the same time
 
 				// return a string
 					// ToDo: clean up and make as stable as possible: we can return
-					// has a battery or don't know
-					// is fully charged (meaning battery would be known)
+					// chargingTime + dischargingTime: should be 1 x Infinity + 1 x integer
+					// but if changing state in a chrome seesion, you can get 2 x Infinity
+
 				let aParts = [data.charging]
 				aParts.push('Infinity' == data.chargingTime ? 'Infinity' : (0 == data.chargingTime ? 0 : '> 0'))
 				aParts.push('Infinity' == data.dischargingTime ? 'Infinity' : (0 == data.dischargingTime ? 0 : '> 0'))
-				aParts.push(Number.isInteger(data.level) ? data.level : '> 0 and < 1')
+				aParts.push(Number.isInteger(data.level) ? data.level : 'non-integer')
 				let str = aParts.join(', ')
 				let hash = mini(aParts)
 				//if (data.charging && 1 !== data.level && data.chargingTime > 0) {str = 'charging'} // meaning you have a battery
 
+				//                desktop no battery:  true,        0, Infinity, 1
+				// mobile not 100% not being charged: false, Infinity,      > 0, non-integer
+				// mobile not 100%     being charged:  true,      > 0, Infinity, non-integer
+				// mobile not 100% charging then not:     ?, Infinity, Infinity, ?
+
+				// mobile     100% not being charged:
+				// mobile     100%     being charged:
+
 				// record object for clicking
-				let btn = addButton(7, METRIC +'_reported') +' ['+ hash+']'
+				let btn = addButton(7, METRIC +'_reported')// +' ['+ hash+']'
 				sDetail.document[METRIC +'_reported'] = data
 				addDisplay(7, METRIC +'_reported', btn)
 				// exit
