@@ -15,7 +15,7 @@ const get_battery = (METRIC) => new Promise(resolve => {
 		} else {
 			if ('function' !== typeCheck) {throw zErrType +'getBattery: '+ typeCheck}
 			navigator.getBattery().then((battery) => {
-				let data = {}
+				let data = {}, aTimes = []
 				let oItems = {
 					charging: 'boolean',
 					chargingTime: 'Infinity', // integer seconds, 0 if full | Infinity if discharging
@@ -39,38 +39,38 @@ const get_battery = (METRIC) => new Promise(resolve => {
 					} else if ('level' == k) {
 						if (x < 0 || x > 1) {throw zErrInvalid + k + ': expected 0 to 1: got '+ x}
 					}
+					if (isTime) {aTimes.push(x)}
 					// record values
 					if (Infinity == x) (x += '')
 					data[k] = x
 				}
 
-				// return a string
-					// ToDo: clean up and make as stable as possible: we can return
-					// chargingTime + dischargingTime: should be 1 x Infinity + 1 x integer
-					// but if changing state in a chrome seesion, you can get 2 x Infinity
-
 				let aParts = [data.charging]
-				aParts.push('Infinity' == data.chargingTime ? 'Infinity' : (0 == data.chargingTime ? 0 : '> 0'))
-				aParts.push('Infinity' == data.dischargingTime ? 'Infinity' : (0 == data.dischargingTime ? 0 : '> 0'))
-				aParts.push(Number.isInteger(data.level) ? data.level : 'non-integer')
+				aParts.push('Infinity' == data.chargingTime ? 'Infinity' : (0 == data.chargingTime ? 0 : '!0'))
+				aParts.push('Infinity' == data.dischargingTime ? 'Infinity' : (0 == data.dischargingTime ? 0 : '!0'))
+				aParts.push(Number.isInteger(data.level) ? data.level : '!Integer')
 				let str = aParts.join(', ')
 				let hash = mini(aParts)
-				//if (data.charging && 1 !== data.level && data.chargingTime > 0) {str = 'charging'} // meaning you have a battery
 
 				//                desktop no battery:  true,        0, Infinity, 1
 				// mobile not 100% not being charged: false, Infinity,      > 0, non-integer
 				// mobile not 100%     being charged:  true,      > 0, Infinity, non-integer
-				// mobile not 100% charging then not:     ?, Infinity, Infinity, ?
+				// mobile     100% not being charged: false, Infinity,      > 0, 1
+				// mobile     100%     being charged:  true,        0, Infinity, 1 (same as desktop)
 
-				// mobile     100% not being charged:
-				// mobile     100%     being charged:
+				// note: change of charging state in chrome session, we can get 2 x Infinity
+					// so the *Times are not reliable indicators as to what's going on
+				// has battery exists if the level is less than 1 || charging is false || 2 x Infinity
+					// this should be enough
+				let fpvalue = 'unknown'
+				if (!data.charging || data.level < 1 || 'InfinityInfinty' == aTimes.join('')) {fpvalue = 'yes'}
+				addData(7, METRIC, fpvalue)
 
 				// record object for clicking
-				let btn = addButton(7, METRIC +'_reported')// +' ['+ hash+']'
+				let btn = addButton(7, METRIC +'_reported')
 				sDetail.document[METRIC +'_reported'] = data
-				addDisplay(7, METRIC +'_reported', btn)
-				// exit
-				exit(str)
+				addDisplay(7, METRIC +'_reported', fpvalue +' '+ btn +' <span class="faint">['+ str +']</span>')
+				return resolve()
 			}).catch(e => {
 				exit(e, zErrLog)
 			})
