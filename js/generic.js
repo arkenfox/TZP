@@ -373,9 +373,18 @@ function get_isGecko(METRIC) {
 }
 
 const get_isOS = (METRIC) => new Promise(resolve => {
-	if (!isGecko) {return resolve()}
-
 	let t0 = nowFn()
+	if (!isGecko) {
+		// get svh and lvh: if they differ then you're android?
+		let aList = ['L','S']
+		try {
+			let data = {}
+			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
+			log_perf(SECTG, METRIC, t0, '', 'L: '+ data['L'] +' | S: '+ data['S'])
+		} catch(e) {}
+		return resolve()
+	}
+
 	function exit(value) {
 		isOS = value
 		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
