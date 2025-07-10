@@ -336,9 +336,9 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 			if (devices.length > 0) {
 				// tampered
 				let aSplit = (devices +'').split(',')
-				let expected = isGecko ? '[object MediaDeviceInfo]' : '[object InputDeviceInfo]'
+				let aValid = ['[object InputDeviceInfo]','[object MediaDeviceInfo]']
 				for (let i=0; i < aSplit.length; i++) {
-					if (aSplit[i] !== expected ) {throw zErrInvalid +'expected '+ expected +': got '+ aSplit[i]}
+					if (!aValid.includes(aSplit[i])) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ aSplit[i]}
 				}
 				// enumerate
 					// don't combine kind, keep order, record length not strings
