@@ -102,6 +102,11 @@ let oList = {
 		'script',
 			// 132	fetchPriority
 			// 135	innerText, textContent
+		'input',
+			// 116	dirName
+			// 125	popoverTargetElement, popoverTargetAction
+			// 142  (mozIsTextField)
+
 	],
 	"STABLE A": [
 	// no changes since FF126
@@ -111,9 +116,6 @@ let oList = {
 			// 125	popoverTargetElement, popoverTargetAction
 		'iframe',
 			// 121	(loading)
-		'input',
-			// 116	dirName
-			// 125	popoverTargetElement, popoverTargetAction
 		'marquee',
 			// 126	(onbounce, onfinish, onstart)
 		'select',
@@ -475,7 +477,7 @@ function run() {
 						// 116	dirName
 					*/
 					// bba6c822 125
-					if (hash == "17e4f55c") {notation = sg +' ['+ green_tick +' FF126+]'+ sc
+					if (hash == "2725cdc1") {notation = sg +' ['+ green_tick +' FF126+]'+ sc
 					} else {notation = ' '+ zNEW
 					}
 				}
