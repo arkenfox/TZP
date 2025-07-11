@@ -1177,6 +1177,7 @@ function get_moz_objects(num, name) {
 			// FF none exceptions
 			if (isVer < 63 && name === "ShadowRoot") {bool = zNA, hash = zNA +": FF63+ required"}
 			if (isVer < 71 && name === "MathMLElement") {bool = zNA, hash = zNA +": FF71+ required"}
+			if (isVer > 141 && name === 'HTMLInputElement') {bool = zNA, hash = zNA +": FF141 or lower"}
 			if (name === "OfflineResourceList") {bool = zNA, hash = zNA +": assuming Beta/Dev/Nightly pref"}
 			if (name === "Navigator") {
 				// TB/PM build without WebRTC: mozGetUserMedia
