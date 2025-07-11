@@ -341,7 +341,6 @@ function get_isGecko(METRIC) {
 			[Document, 'Document', 'mozFullScreen'],
 			[HTMLCanvasElement, 'HTMLCanvasElement', 'mozPrintCallback'],
 			[HTMLElement, 'HTMLElement', 'onmozfullscreenerror'],
-			[HTMLInputElement, 'HTMLInputElement', 'mozIsTextField'],
 			[HTMLVideoElement, 'HTMLVideoElement', 'mozDecodedFrames'],
 			[IDBIndex, 'IDBIndex', 'mozGetAllKeys'],
 			[IDBObjectStore, 'IDBObjectStore', 'mozGetAll'],
