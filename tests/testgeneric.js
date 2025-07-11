@@ -32,7 +32,7 @@ function typeFn(item, isSimple = false) {
 	// return a more detailed result
 	let type = typeof item
 	if ("number" === type) {
-		if (Number.isNaN(item)) {type = "NaN"} else if (Infinity === item) {type = Infinity}
+		if (Number.isNaN(item)) {type = "NaN"} else if (Infinity === item) {type = 'Infinity'}
 	} else if ("string" === type) {
 		if (!isSimple) {
 			if ("" === item) {type = "empty string"} else if ("" === item.trim()) {type = "whitespace"}
@@ -49,7 +49,7 @@ function typeFn(item, isSimple = false) {
 		}
 	}
 	// do nothing: undefined, bigint, boolean, function
-	return type
+	return type +''
 }
 
 function getUniqueElements() {
@@ -321,7 +321,7 @@ const get_globals = () => new Promise(resolve => {
 			[Document, "Document", "mozFullScreen"],
 			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
 			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
-			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
+			//[HTMLInputElement, "HTMLInputElement", "mozIsTextField"], // removed FF142
 			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
 			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
 			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
