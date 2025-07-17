@@ -233,6 +233,8 @@ function get_timing(METRIC) {
 		gData.timing.currenttime = [962.486] // only a single non-RFP entry
 		//ToDo: cleanup rogue is10's and is100's
 		gData.timing.currenttime = [86.4, 136.44, 236.48] // real world example that causes a 100ms entry
+		gData.timing.currenttime = [75.12, 125.16, 225.24] // another one
+		gData.timing.exslt = ["2025-07-14T03:53:46.047","2025-07-14T03:53:46.058"]
 		//*/
 
 		// isDecimal
@@ -305,6 +307,7 @@ function get_timing(METRIC) {
 
 			// get diffs
 			let isZero = false, is10 = true, is100 = true
+			if ('exslt' == k) {is100 = false} // exslt can only be 10 or RFP
 			let setDiffs = new Set(), setIncremental = new Set(), aTotal = []
 			if (1 == aTimes.length) {
 				aTotal.push(0) // make sure we display something
@@ -340,6 +343,8 @@ function get_timing(METRIC) {
 				setIncremental.add(diff)
 				startIncremental = end // set this end value for the next incremental start value
 			}
+
+
 			// diff arrays
 			let aDiffs = Array.from(setDiffs)
 			let aIncremental = Array.from(setIncremental)
@@ -513,8 +518,12 @@ function get_component_shims(METRIC) {
 		data = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		hash = mini(data); btn = addButton(18, METRIC, data.length)
 	} catch(e) {
-		if (isBB && e+'' == 'ReferenceError: Components is not defined') {notation = bb_green}
-		hash = e; data = zErrLog
+		if (e+'' == 'ReferenceError: Components is not defined') {
+			if (isBB) {notation = bb_green}
+			hash = 'undefined'
+		} else {
+			hash = e; data = zErrLog
+		}
 	}
 	addBoth(18, METRIC, hash, btn, notation, data)
 	return
@@ -654,12 +663,12 @@ function get_navigator_keys(METRIC) {
 			} else if (140 == isVer) {
 				// changes: vibrate gone, added share, canShare, login, gpu
 				if (isMB) {
-					if ('8c9bf1a5' == hash) {notation = bb_green} // MB15 44
+					if ('a389214b' == hash) {notation = bb_green} // MB15 41
 				} else if (isTB) {
 					if ('android' == isOS) {
 						if ('' == hash) {notation = bb_green} // no builds yet
 					} else {
-						if ('16011d09' == hash) {notation = bb_green} // MB15 42
+						if ('' == hash) {notation = bb_green} // no builds yet
 					}
 				}
 			}
@@ -739,6 +748,75 @@ function get_pdf(METRIC) {
 		return
 	})
 }
+
+const get_speech_engines = (METRIC) => new Promise(resolve => {
+	// media.webspeech.synth.enabled
+	let t0 = nowFn(), notation = rfp_red, isLies = false
+	function exit(display, value) {
+		addBoth(18, METRIC, display,'', notation, value, isLies)
+		return resolve()
+	}
+
+	function populateVoiceList() {
+		let res = [], ignoreLen, ignoreStr
+		/* examples
+			moz-tts:android:hr_HR
+			urn:moz-tts:sapi:Microsoft David - English (United States)?en-US
+			urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy
+		*/
+		let aStrip = [
+			'moz-tts:android:', // android
+			'urn:moz-tts:osx:com.apple.eloquence.', // mac
+			'urn:moz-tts:sapi:', // windows
+		]
+		try {
+			let v = speechSynthesis.getVoices()
+			if (runST) {v = null} else if (runSI) {v = [{}]} else if (runSL) {addProxyLie('speechSynthesis.getVoices')}
+			let typeCheck = typeFn(v, true)
+			if ('array' !== typeCheck) {throw zErrType + typeFn(v)}
+			if (v.length) {
+				let expected = '[object SpeechSynthesisVoice]'
+				if ((v +'').slice(0,29) !== '[object SpeechSynthesisVoice]') {throw zErrInvalid +'expected '+ expected}
+			}
+			if (v.length == 0) {
+				notation = rfp_green
+				exit('none','none')
+			} else {
+				// enumerate: reduce redundancy/noise
+					// only record default if true and localService if false | ignore voiceURI if it matches expected
+				v.forEach(function(i) {
+					let uriStr = i.voiceURI, skipURI = false
+					// replace useless strings
+					aStrip.forEach(function(str){uriStr = uriStr.replace(str, '')})
+					uriStr.trim()
+					if (isGecko) {
+						skipURI = (uriStr = i.name +'?'+ i.lang) // windows
+					} else {
+						// blink
+						skipURI = (uriStr == i.name) // dedupe repetitive crap
+					}
+					res.push(
+						i.name +' | '+ i.lang + (i['default'] ? ' | default' : '') + (i.localService ? '' : ' | false') + (skipURI ? '' : ' | '+ uriStr)
+					)
+				})
+				let hash = mini(res)
+				addBoth(18, METRIC, hash, addButton(18, METRIC, res.length), notation, res, isProxyLie('speechSynthesis.getVoices'))
+				log_perf(18, METRIC, t0)
+				return resolve()
+			}
+		} catch(e) {
+			exit(e, zErrLog)
+		}
+	}
+	try {
+		populateVoiceList()
+		if (speechSynthesis.onvoiceschanged !== undefined) {
+			speechSynthesis.onvoiceschanged = populateVoiceList;
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+})
 
 function get_svg(METRIC) {
 	let hash, data ='', target = dom.tzpSVG
@@ -948,6 +1026,7 @@ const outputMisc = () => new Promise(resolve => {
 		get_navigator_keys('navigator_keys'),
 		get_webdriver('webdriver'),
 		get_pdf('pdf'),
+		get_speech_engines('speech_engines'),
 	]).then(function(){
 		return resolve()
 	})
