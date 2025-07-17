@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>relatedyear</title>
+	<title>dtf: relatedyear</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -69,7 +69,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
@@ -272,11 +272,11 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "af55e7fc") { // FF140+
+				if (resultsHash == "dc200825") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "78d26ff1") { // FF140+: 171
+				if (localesHash == "acdcfe06") { // FF140+: 171
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -384,8 +384,6 @@ Promise.all([
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	//list = ['en,english']
-	//list = ['en-NZ,english']
 	legend()
 	if (isSupported) {
 		setBtn("all")
