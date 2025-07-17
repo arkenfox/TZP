@@ -418,8 +418,6 @@
 			<tr class="togAW"><td>worker</td><td class="c mono" id="agent_worker"></td></tr>
 			<tr class="togAW"><td>shared worker</td><td class="c mono" id="agent_worker_shared"></td></tr>
 			<tr class="togAW"><td>service worker</td><td class="c mono" id="agent_worker_service"></td></tr>
-			<tr class="togAW"><td>nested worker</td><td class="mono s99" id="agent_worker_nested">test to come</td></tr>
-			<tr class="togAW"><td>worker from blob</td><td class="mono s99" id="agent_worker_blob">test to come</td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goNW_AGENT')">[ click ]</span>
 			window.open</td><td class="c mono" id="agent_open"></td></tr>
 		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
@@ -630,11 +628,13 @@
 		<tr><td>sessionStorage</td><td class="c mono" id="sessionStorage"></td></tr>
 		<tr><td>indexedDB</td><td class="mono"><span class="c" id="indexedDB"></span>	| <span class="c" id="indexedDB_test"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">worker | web | shared | service</span></div>
-			&nbsp; workers</td><td class="mono"><span class="c" id="worker"></span>
-			| <span class="c" id="worker_web_test"></span>
+			<span class="ttxtb">service | shared | worker</span></div>
+			&nbsp; workers</td><td class="c mono" id="workers">
+		</td></tr>
+		<tr><td>[tests] workers</td><td class="mono">
+			<span class="c" id="worker_service_test"></span>
 			| <span class="c" id="worker_shared_test"></span>
-			| <span class="c" id="worker_service_test"></span>
+			| <span class="c" id="worker_test"></span>
 		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.fs.enabled</span></div>
 			&nbsp; file system</td><td class="c mono" id="filesystem"></td></tr>
