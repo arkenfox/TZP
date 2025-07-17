@@ -69,6 +69,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .bad {color: var(--testbad);}
 .red {color: var(--testred);} /* use in basic mode to enforce showing an issue e.g. mismatched metric counts */
 .faint {color: var(--test99);}
+.white {color: #FFFFFF;}
 .hidden {display: none;}
 .health, .healthsilent {font-size: 10px;}
 .offscreen {
@@ -273,7 +274,7 @@ tr td.border-top {
 #tbblock th {background-color: var(--bg99);}
 
 .togA, .togP, #btnFS, /* android, perf, fullscreen element */
-.togUA, .togUAD, .togAI, .togAW,
+.togUA, .togUAD, .togAI, .togAW, .togMM,
 .togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
 
 
@@ -301,6 +302,7 @@ tr td.border-top {
 #tb13 td:first-child {color: var(--test13);}
 #tb14 td:first-child {color: var(--test14);}
 	#tb14 .togCS td:first-child {color: var(--test99);} /* computed styles */
+	#tb14 .togMM td:first-child {color: var(--test99);} /* matchmedia + css */
 #tb15 td:first-child {color: var(--test15);}
 #tb16 td:first-child {color: var(--test16);}
 #tb17 td:first-child {color: var(--test17);}
