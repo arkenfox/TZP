@@ -365,30 +365,65 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 	}
 })
 
-const test_worker_web = (log = false) => new Promise(resolve => {
+const test_worker_shared_new = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	const METRIC = 'web_worker_test'
+	let METRIC = 'shared_worker_test'
 	function exit(value) {
-		dom[METRIC] = value
+		console.log(value)
+		dom[METRIC].innerHTML = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
 		return resolve()
 	}
-	if (isFile) {
-		exit(zSKIP)
+	if ('undefined' == typeof SharedWorker) {
+		exit('undefined')
 	} else {
+
 		try {
-			let worker = new Worker('js/storage_workers.js')
-			let rndStr1 = rnd_string()
-			worker.addEventListener('message', function(e) {
-				let value = ('TZP-'+ rndStr1 === e.data) ? zS : zF
-				worker.terminate
-				exit(value)
-			}, false)
-			worker.onerror = function (e) {exit(zErr)}
-			worker.postMessage(rndStr1)
-		} catch {
+			// define/create dynamically using a blob
+			function createWorker(fn) {
+				let str = 'var ports = []; onconnect = function(e) {let port = e.ports[0]; ports.push(port); port.start(); '
+					+ 'port.onmessage = function(e) {port.postMessage("eek")}'
+				var blob = new Blob([str +' =', fn.toString()], {type: 'text/javascript'})
+				var url = URL.createObjectURL(blob)
+				return new SharedWorker(url)
+			}
+			const shared = createWorker(async () => {port.postMessage('eek')})
+			shared.port.postMessage('eek') // ping
+			shared.onmessage = function(e) {port.close(); worker.terminate; exit(zS)} // receive
+			shared.onerror = function(e) {
+				console.log('onerror', e, e.message)
+				exit(zErr)
+			} // error
+			shared.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
+		} catch(e) {
+			console.log('trycatch', e)
 			exit(zErr)
 		}
+	}
+})
+
+const test_worker_web = (log = false) => new Promise(resolve => {
+	let t0 = nowFn()
+	let METRIC = 'worker_web_test'
+	function exit(value) {
+		dom[METRIC].innerHTML = value
+		if (log) {log_perf(SECTNF, METRIC, t0)}
+		return resolve()
+	}
+	if ('undefined' == typeof Worker) {
+		exit('undefined')
+	} else {
+		// define/create dynamically using a blob
+		function createWorker(fn) {
+			var blob = new Blob(['self.onmessage = ', fn.toString()], {type: 'text/javascript'})
+			var url = URL.createObjectURL(blob)
+			return new Worker(url)
+		}
+		const worker = createWorker(async () => {postMessage('eek')})
+		worker.postMessage('eek') // ping
+		worker.onmessage = function(e) {worker.terminate; exit(zS)} // receive
+		worker.onerror = function(e) {exit(zErr)} // error
+		worker.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
 	}
 })
 
