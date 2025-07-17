@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>signdisplay</title>
+	<title>nf: signdisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -66,7 +66,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
@@ -195,11 +195,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "5bbeb6ab") { // FF140+
+				if (resultsHash == "473af57c") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "5361b78a") { // FF140+: 40
+				if (localesHash == "0a2c7891") { // FF140+: 40
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -275,7 +275,6 @@ Promise.all([
 	} catch(e) {}
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"ar-dz,arabic (algeria)",
 		"ar-er,arabic (eritrea)",
 		"ff-adlm,fulah (adlam)",
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
@@ -285,6 +284,7 @@ Promise.all([
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+
 	legend()
 	if (isSupported) {
 		setBtn("all")
