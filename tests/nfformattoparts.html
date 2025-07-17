@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>numberformat toparts</title>
+	<title>nf: number formattoparts</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -44,7 +44,21 @@
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
-	isSupported = false
+	oTestData = {},
+	isSupported = false,
+	isBigIntSupported = false
+
+let aNumsys = [
+'undefined', // 58
+// the rest vary 51-53 except for arab/arabext and 15 and 17
+'adlm','ahom','arab','arabext','bali','beng','bhks','brah','cakm','cham','deva','diak','fullwide','gara','gong',
+'gonm','gujr','gukh','guru','hanidec','hmng','hmnp','java','kali','kawi','khmr','knda','krai','lana','lanatham',
+'laoo','latn','lepc','limb','mathbold','mathdbl','mathmono','mathsanb','mathsans','mlym','modi','mong','mroo',
+'mtei','mymr','mymrepka','mymrpao','mymrshan','mymrtlng','nagm','newa','nkoo','olck','onao','orya','osma','outlined',
+'rohg','saur','segment','shrd','sind','sinh','sora','sund','sunu','takr','talu','tamldec','telu','thai','tibt',
+'tirh','tnsa','vaii','wara','wcho',
+]
+aNumsys.sort()
 
 function log_console(name) {
 	let hash = mini(sDetail[name])
@@ -62,7 +76,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
@@ -92,17 +106,62 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
-function run_main() {
+function testitems() {
+	//loop each numsys on it's own
+	dom.perf = ""
+	dom.results = ""
+	oTestData = {}
+	setTimeout(function() {
+		try {
+			aNumsys.forEach(function(item){
+				// allow testing arrays of scripts
+				let testarray = 'object' == typeof item ? item : [item]
+				run_main(item, true)
+			})
+		} catch(e) {
+			console.log(e)
+		}
+	}, 5)
+}
+
+function run_main(numsys = undefined, isLoop = false) {
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
+	if (!isLoop) {
+		dom.perf = ""
+		dom.results = ""
+	}
 
+	if (numsys == 'undefined') {numsys = undefined}
+	let nBig
+	if (isBigIntSupported) {
+		nBig = BigInt("987354000000000000")
+	}
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options
+	// ^ options
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/formatToParts#return_value
+	// ^ return values
+		//"exponentMinusSign" returns minusSign as type
 	let tests = {
+		// these need no options
 		"decimal": [1.2],
 		"group": [1000, 99999],
 		"infinity": [Infinity],
 		"minusSign": [-5],
-		"nan": ["a"]
+		"nan": ["a"],
+
+		// these items require options which means another constructor
+		//"percentSign": [.2], // {style: "percent"}
+		//"exponentSeparator": [1], //{style: 'scientitic'}
+
+		/* already captured elsewhere
+			- units + currency: both are large and lots of constructors
+			- literals - extra constructors
+			- percentSign + exponentSeparator complicates TZP tests due to changein constuctor
+		*/
 	}
 
 	function get_value(type, parts) {
@@ -120,15 +179,27 @@ function run_main() {
 			return "error"
 		}
 	}
-
+	
 	try {
 		aLocales.forEach(function(code) {
-			let formatter = new Intl.NumberFormat(code)
+			let formatter = new Intl.NumberFormat(code, {numberingSystem: numsys})
 			let oStyles = {}
-			Object.keys(tests).forEach(function(t){ // each type
+			Object.keys(tests).forEach(function(t){ // each type - DO NOT SORT
+				// we need to ensure we have the right options
+				// we can do this by grouping by style, then by the test name
+				// but for now we don't know how much we want to add, so for now
+				// lets just add items after default and change the formatter as required
+				if ('percentSign' == t) {
+					formatter = new Intl.NumberFormat(code, {style: 'percent', numberingSystem: numsys})
+				} else if ('exponentSeparator' == t) {
+					formatter = new Intl.NumberFormat(code, {notation: 'scientific', numberingSystem: numsys})
+				}
 				oStyles[t] = []
 				tests[t].forEach(function(n){ // each number
 					let value = get_value(t, formatter.formatToParts(n))
+					if (list.length == 1) {
+						console.log(t,formatter.formatToParts(n))
+					}
 					oStyles[t].push(value)
 				})
 			})
@@ -165,18 +236,31 @@ function run_main() {
 		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
 			let localeCount = oData[k]["locales"].split(",").length
-			let str = ""
-			for (const p of Object.keys(oData[k])) {
-				if (p !== "locales") {
-					str += "<li>"+ s16 + p +": "+ sc + oData[k][p] +"</li>"
+			if (!isLoop) {
+				let str = ""
+				for (const p of Object.keys(oData[k])) {
+					if (p !== "locales") {
+						str += "<li>"+ s16 + p +": "+ sc + oData[k][p] +"</li>"
+					}
 				}
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ str
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
 			}
-			displaylist.push(
-				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul class='main'>"+ str
-				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
-			)
 		}
+
+		if (isLoop) {
+			let testCount = localeGroups.length
+			// record it
+			if (undefined == oTestData[testCount]) {oTestData[testCount] = []}
+			oTestData[testCount].push(numsys)
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ '\''+ numsys +' ' + testCount
+			return
+		}
+
 		// hashes + btns
 		sDetail["results"] = oData
 		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
@@ -216,22 +300,29 @@ Promise.all([
 	} catch(e) {
 		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 	}
+
+	// check bigint support: FF68+
+	try {
+		let y = BigInt("9999999999999999")
+		isBigIntSupported = true
+	} catch(e) {}
+
+
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"ar-ae,arabic (united arabic emirates)",
 		"ar-dj,arabic (djibouti)",
 		"ar-dz,arabic (algeria)",
-		"de-ch,german (switzerland)",
 		"ff-adlm,fulah (adlam)",
 		"it-ch,italian (switzerland)",
 		"ru-ua,russian (ukraine)",
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 		"yue-cn,cantonese (china)",
-		// blink
+				// blink
 		'pa-pk,punjabi (pakistan)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en']
 	legend()
 	if (isSupported) {
 		setTimeout(function() {
