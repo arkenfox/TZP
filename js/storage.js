@@ -404,7 +404,7 @@ const test_worker_shared_new = (log = false) => new Promise(resolve => {
 
 const test_worker_web = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	let METRIC = 'worker_web_test'
+	let METRIC = 'web_worker_test'
 	function exit(value) {
 		dom[METRIC].innerHTML = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
