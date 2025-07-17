@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>notation</title>
+	<title>nf: notation</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -67,7 +67,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
@@ -241,11 +241,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "aeb77829") { // FF140+
+				if (resultsHash == "54ffdab3") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "02366b83") { // FF140+: 80
+				if (localesHash == "519a935f") { // FF140+: 80
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -321,20 +321,18 @@ Promise.all([
 
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"ar-ae,arabic (united arabic emirates)",
 		"ar-dj,arabic (djibouti)",
 		"ar-dz,arabic (algeria)",
-		"de-ch,german (switzerland)",
 		"en-au,english (australia)",
 		"en-se,english (sweden)",
 		"ff-adlm,fulah (adlam)",
-		"fr-ch,french (switzerland)",
 		"it-ch,italian (switzerland)",
 		"ru-ua,russian (ukraine)",
 		"ur-in,urdu (india)",
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 		"yue-hans,cantonese (simplified)",
 		// blink
+		"fr-ch,french (switzerland)",
 		'pa-arab,punjabi (arabic)',
 	]
 	list = list.concat(aListExtra)
