@@ -46,8 +46,95 @@
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
+	oTestData = {},
 	isSupported = false,
 	localesHashAll = "" // to compare min to
+
+// when numberingSystem is undefined, what does it use exactly?
+	// undefined = 216
+	//       all = 216
+	// anyway, looks like we don't care about per numbering system for entropy
+
+let aNumsys = [
+'adlm', // 210
+'ahom', // 210
+'arab', // 187
+'arabext', // 188
+'bali', // 210
+'beng', // 210
+'bhks', // 210
+'brah', // 210
+'cakm', // 210
+'cham', // 210
+'deva', // 210
+'diak', // 210
+'fullwide', // 209
+'gara', // 210
+'gong', // 210
+'gonm', // 210
+'gujr', // 210
+'gukh', // 210
+'guru', // 210
+'hanidec', // 210
+'hmng', // 210
+'hmnp', // 210
+'java', // 210
+'kali', // 210
+'kawi', // 210
+'khmr', // 210
+'knda', // 210
+'krai', // 210
+'lana', // 210
+'lanatham', // 210
+'laoo', // 210
+'latn', // 210
+'lepc', // 210
+'limb', // 210
+'mathbold', // 210
+'mathdbl', // 210
+'mathmono', // 210
+'mathsanb', // 210
+'mathsans', // 210
+'mlym', // 210
+'modi', // 210
+'mong', // 210
+'mroo', // 210
+'mtei', // 210
+'mymr', // 210
+'mymrepka', // 210
+'mymrpao', // 210
+'mymrshan', // 210
+'mymrtlng', // 210
+'nagm', // 210
+'newa', // 210
+'nkoo', // 210
+'olck', // 210
+'onao', // 210
+'orya', // 210
+'osma', // 210
+'outlined', // 210
+'rohg', // 210
+'saur', // 210
+'segment', // 210
+'shrd', // 210
+'sind', // 210
+'sinh', // 210
+'sora', // 210
+'sund', // 210
+'sunu', // 210
+'takr', // 210
+'talu', // 210
+'tamldec', // 210
+'telu', // 210
+'thai', // 210
+'tibt', // 210
+'tirh', // 210
+'tnsa', // 210
+'undefined', // 216
+'vaii', // 210
+'wara', // 210
+'wcho', // 210
+]
 
 function log_console(name) {
 	let hash = mini(sDetail[name])
@@ -65,7 +152,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = Intl.DurationFormat.supportedLocalesOf([code]).length > 0
 			if (go) {
 				aLocales.push(code)
@@ -92,12 +179,34 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
-function run_main(method) {
+function testitems() {
+	//loop each numsys on it's own
+	dom.perf = ""
+	dom.results = ""
+	oTestData = {}
+	setTimeout(function() {
+		try {
+			aNumsys.forEach(function(item){
+				// allow testing arrays of scripts
+				let testarray = 'object' == typeof item ? item : [item]
+				run_main('all', testarray, true)
+			})
+		} catch(e) {
+			console.log(e)
+		}
+	}, 5)
+}
+
+function run_main(method, aTest, isLoop = false) {
 	if (!isSupported) {return}
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/DurationFormat
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
+	if (!isLoop) {
+		dom.perf = ""
+		dom.results = ""
+	}
 
 	let styles = ['digital','long','narrow','short']
 	let options = {
@@ -132,24 +241,9 @@ function run_main(method) {
 		}
 	}
 
-	// when numberingSystem is undefined, what does it use?
-		// undefined = 205
-		//       all = 200
-		//      latn = 199
-		// I don't quite understand this: why doesn't all match or exceed undefined?
-	// changing app locale doesn't change results: just stick with undefined
-
-	let numsys = [
-		'adlm','ahom','arab','arabext','bali','beng','bhks','brah','cakm','cham','deva','diak','fullwide','gara',
-		'gong','gonm','gujr','gukh','guru','hanidec','hmng','hmnp','java','kali','kawi','khmr','knda','krai',
-		'lana','lanatham','laoo','latn','lepc','limb','mathbold','mathdbl','mathmono','mathsanb','mathsans',
-		'mlym','modi','mong','mroo','mtei','mymr','mymrepka','mymrpao','mymrshan','mymrtlng','nagm','newa','nkoo',
-		'olck','onao','orya','osma','outlined','rohg','saur','segment','shrd','sind','sinh','sora','sund','sunu',
-		'takr','talu','tamldec','telu','thai','tibt','tirh','tnsa','vaii','wara','wcho'
-	]
-	numsys = ['undefined']
+	let numsys = [undefined]
+	numsys = undefined == aTest ? numsys : aTest
 	numsys.sort()
-
 
 	/* // which split makes the difference
 	if ('all' == method) {
@@ -161,7 +255,6 @@ function run_main(method) {
 	//*/
 	//console.log(tests)
 
-	//numsys = ['latn']
 	try {
 		aLocales.forEach(function(code) {
 			let oStyles = {}
@@ -172,8 +265,10 @@ function run_main(method) {
 					// set formatter once per code + style
 					// always display so we catch 0's
 					let nsvalue = ns
-					if (numsys.length == 1 && 'undefined' == ns) {
+					// make sure undefined is nsvalue and "undefined" is ns (our key)
+					if ('undefined' == ns || undefined == ns) {
 						nsvalue = undefined
+						ns = 'undefined'
 					}
 
 					let formatoptions, splitoptions
@@ -262,38 +357,55 @@ function run_main(method) {
 		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
 			let localeCount = oData[k]["locales"].split(",").length
-			let displayData = []
-			for (const ns of Object.keys(oData[k])) {
-				if ('locales' !== ns) {
-					displayData.push(s14 + 'numberingSystem: '+ns + sc)
-					for (const s of Object.keys(oData[k][ns])) {
-						if ('min' == method) {
-							let sInitial = s.slice(0,1).toUpperCase()
-							let aTests = []
-							for (const t of Object.keys(oData[k][ns][s])) {
-								aTests.push(oData[k][ns][s][t])
+			if (!isLoop) {
+				let displayData = []
+				for (const ns of Object.keys(oData[k])) {
+					if ('locales' !== ns) {
+						displayData.push(s14 + 'numberingSystem: '+ns + sc)
+						for (const s of Object.keys(oData[k][ns])) {
+							if ('min' == method) {
+								let sInitial = s.slice(0,1).toUpperCase()
+								let aTests = []
+								for (const t of Object.keys(oData[k][ns][s])) {
+									aTests.push(oData[k][ns][s][t])
+								}
+								displayData.push('<li>'+ s16 + sInitial +": "+ sc + aTests.join(' | ') +"</li>")
+							} else {
+								displayData.push('<li>'+ s16 + s +": "+ sc)
+								for (const t of Object.keys(oData[k][ns][s])) {
+									let x = parseInt(t)
+									if (isNaN(x)) {x = t}
+									if ('1k' == t) (x = t)
+									displayData.push('<li>'+ s12 + x +": "+ sc + oData[k][ns][s][t] +"</li>")
+								}
+								displayData.push('</li>')
 							}
-							displayData.push('<li>'+ s16 + sInitial +": "+ sc + aTests.join(' | ') +"</li>")
-						} else {
-							displayData.push('<li>'+ s16 + s +": "+ sc)
-							for (const t of Object.keys(oData[k][ns][s])) {
-								let x = parseInt(t)
-								if (isNaN(x)) {x = t}
-								if ('1k' == t) (x = t)
-								displayData.push('<li>'+ s6 + x +": "+ sc + oData[k][ns][s][t] +"</li>")
-							}
-							displayData.push('</li>')
 						}
 					}
 				}
+				let strData = displayData.join('')
+				if ('all' == method) {strData = '<details>' + strData +'</details>'}
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ strData
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
 			}
-			let strData = displayData.join('')
-			if ('all' == method) {strData = '<details>' + strData +'</details>'}
-			displaylist.push(
-				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul class='main'>"+ strData
-				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
-			)
+		}
+
+		if (isLoop) {
+			let testCount = localeGroups.length
+			// record it
+			if (undefined == oTestData[testCount]) {oTestData[testCount] = []}
+			oTestData[testCount].push(numsys)
+			//console.log(testCount, aUsed)
+			/*
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ s16 + testCount + sc +': '+ '[\''+ aUsed.join('\', \'') +'\']'
+			//*/
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ '\''+ numsys.join('\', \'') +'\', // ' + testCount
+			return
 		}
 
 		// hashes + btns
@@ -320,11 +432,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == '3462f263') { // FF140+
+				if (resultsHash == '3c8f6826') { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == 'fdcef8a5') { // FF140+: 216
+				if (localesHash == 'e32ac242') { // FF140+: 216
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -382,8 +494,8 @@ Promise.all([
 "bs-cyrl,bosnian (cyrillic)",
 "de-at,german (austria)",
 "de-ch,german (switzerland)",
-"en-001,english",
 "en-at,english (austria)",
+'en-au,english (australia)',
 "en-ca,english (canada)",
 "en-ch,english (switzerland)",
 "en-dk,english (denmark)",
@@ -428,16 +540,16 @@ Promise.all([
 "yue-cn,cantonese (china)",
 
 //* blink
+'en-001,english',
 'az-cyrl,azerbaijani (cyrillic)',
-'en-au,english (australia)',
 'pa-arab,punjabi (arabic)',
-//*/
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	//list = ['en,english','fr,french','de,german']
 	//list = ['en,english']
 	//list = ['wo,wolof','tg,tajik','ie,interlingue','ln,lingala'] // example of split durations adding 'and"
+	//list = ['af','en','fr','he']
 	list.sort()
 
 	legend()
