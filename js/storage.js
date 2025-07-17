@@ -191,6 +191,21 @@ function get_filesystem(METRIC) {
 	return
 }
 
+function get_idb(METRIC) {
+	let value = zE
+	try {
+		let test = window[METRIC]
+		if (runST) {test = []}
+		let typeCheck = typeFn(test, true)
+		if ('undefined' == typeCheck) {value = typeCheck
+		} else if ('object' !== typeCheck) {throw zErrType +typeCheck}
+	} catch(e) {
+		log_error(6, METRIC, e); value = zErr
+	}
+	addBoth(6, METRIC, value)
+	return
+}
+
 function get_storage(METRIC, rndStr) {
 	// dom.storage.enabled
 	let value, type = ('localStorage' == METRIC ? 'local' : 'session')
@@ -210,6 +225,30 @@ function get_storage(METRIC, rndStr) {
 		log_error(6, METRIC +'_test', e); value += ' | '+ zErr
 	}
 	addBoth(6, METRIC, value)
+	return
+}
+
+function get_workers(METRIC) {
+	// these are kinda redundant because we have them in window properties metric, and in future
+	// we will type check and use their scopes in the overall fingerptint: until then ...
+	let aList = ['ServiceWorker','SharedWorker','Worker']
+	let data = {}, aStr = []
+	aList.forEach(function(k){
+		let value = zE
+		try {
+			let test = window[k]
+			if (runST) {test = false}
+			let typeCheck = typeFn(test)
+			if ('undefined' == typeCheck) {value = typeCheck
+			} else if ('function' !== typeCheck) {throw zErrType + typeCheck}
+		} catch(e) {
+			log_error(6, METRIC +'_'+ k, e); value = zErr
+		}
+		data[k] = value
+		aStr.push(value)
+	})
+	addDisplay(6, METRIC, aStr.join(' | '))
+	addData(6, METRIC, data, mini(data))
 	return
 }
 
@@ -323,6 +362,31 @@ const test_idb = (log = false) => new Promise(resolve => {
 	}
 })
 
+const test_worker = (log = false) => new Promise(resolve => {
+	let t0 = nowFn()
+	let METRIC = 'worker_test'
+	function exit(value) {
+		dom[METRIC].innerHTML = value
+		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
+		return resolve()
+	}
+	if ('undefined' == typeof Worker) {
+		exit('undefined')
+	} else {
+		try {
+			const workerScript = `self.postMessage('eek')`
+			const workerBlob = new Blob([workerScript], {type: 'application/javascript'})
+			const workerURL = URL.createObjectURL(workerBlob)
+			const worker = new Worker(workerURL)
+			worker.onmessage = function(e) {worker.terminate; exit(zS)} // receive
+			worker.onerror = function(e) {exit(zErr)} // error
+			worker.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
+		} catch {
+			exit(zErr)
+		}
+	}
+})
+
 const test_worker_service = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
 	const METRIC = 'worker_service_test'
@@ -330,15 +394,19 @@ const test_worker_service = (log = false) => new Promise(resolve => {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
 	}
-	try {
-		navigator.serviceWorker.register('js/storage_service_worker.js').then((registration) => {
-			exit(zS)
-			registration.unregister().then(function(boolean) {})
-		})
-    .catch((error) => {
-			exit(zErr)
-		})
-	} catch {exit(zErr)}
+	if ('undefined' == typeof ServiceWorker) {
+			exit('undefined')
+	} else {
+		try {
+			navigator.serviceWorker.register('js/storage_service_worker.js').then((registration) => {
+				exit(zS)
+				registration.unregister().then(function(boolean) {})
+			})
+			.catch((error) => {
+				exit(zErr)
+			})
+		} catch {exit(zErr)}
+	}
 })
 
 const test_worker_shared = (log = false) => new Promise(resolve => {
@@ -349,19 +417,23 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
 		return resolve()
 	}
-	try {
-		let shared = new SharedWorker('js/storage_shared_worker.js')
-		let rndStr2 = rnd_string()
-		shared.port.addEventListener('message', function(e) {
-			let value = ('TZP-'+ rndStr2 === e.data) ? zS : zF
-			shared.port.close()
-			exit(value)
-		}, false)
-		shared.onerror = function (err) {exit(zErr)}
-		shared.port.start()
-		shared.port.postMessage(rndStr2)
-	} catch {
-		exit(zErr)
+	if ('undefined' == typeof SharedWorker) {
+		exit('undefined')
+	} else {
+		try {
+			let shared = new SharedWorker('js/storage_shared_worker.js')
+			let rndStr2 = rnd_string()
+			shared.port.addEventListener('message', function(e) {
+				let value = ('TZP-'+ rndStr2 === e.data) ? zS : zF
+				shared.port.close()
+				exit(value)
+			}, false)
+			shared.onerror = function (err) {exit(zErr)}
+			shared.port.start()
+			shared.port.postMessage(rndStr2)
+		} catch {
+			exit(zErr)
+		}
 	}
 })
 
@@ -396,38 +468,11 @@ const test_worker_shared_new = (log = false) => new Promise(resolve => {
 	}
 })
 
-const test_worker_web = (log = false) => new Promise(resolve => {
-	let t0 = nowFn()
-	let METRIC = 'worker_web_test'
-	function exit(value) {
-		dom[METRIC].innerHTML = value
-		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
-		return resolve()
-	}
-	if ('undefined' == typeof Worker) {
-		exit('undefined')
-	} else {
-		try {
-			const workerScript = `self.postMessage('eek')`
-			const workerBlob = new Blob([workerScript], {type: 'application/javascript'})
-			const workerURL = URL.createObjectURL(workerBlob)
-			const worker = new Worker(workerURL)
-			worker.onmessage = function(e) {worker.terminate; exit(zS)} // receive
-			worker.onerror = function(e) {exit(zErr)} // error
-			worker.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
-		} catch {
-			exit(zErr)
-		}
-	}
-})
-
 const outputStorage = () => new Promise(resolve => {
-	// ToDo: notification support/test
-	addBoth(6, 'indexedDB', 'indexedDB' in window ? zE : zD)
-	addBoth(6, 'worker', 'function' == typeFn(Worker) ? zE : zD)
-
 	let rndStr = rnd_string()
 	Promise.all([
+		get_idb('indexedDB'),
+		get_workers('workers'),
 		get_cookies('cookies', rndStr),
 		get_storage('localStorage', rndStr),
 		get_storage('sessionStorage', rndStr),
