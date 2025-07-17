@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=600">
-	<title>dayperiod</title>
+	<title>dft: dayperiod</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -119,7 +119,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let test = Intl.DateTimeFormat.supportedLocalesOf([code])
 			if (test.length) {
 				aLocales.push(code)
@@ -268,11 +268,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "1ec06004") { // FF140+
+				if (resultsHash == "69d65fb9") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "34132935") { // FF140+: 225
+				if (localesHash == "593ee92a") { // FF140+: 225
 				} else {localesHash += ' '+ zNEW
 				}
 			}
