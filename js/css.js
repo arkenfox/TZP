@@ -29,7 +29,7 @@ function get_colors() {
 	if (!isGecko) {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
-	} else if (isVer < 128) { // soon we'll only go as low as 127
+	} else if (isVer < 128) { // use 128 as soon we'll only go as low as "127 or lower"
 		let aTmp = oList.moz
 		aTmp.push (
 			// removed FF122: 1867854
@@ -278,18 +278,26 @@ function get_computed_styles(METRIC) {
 				btn = addButton(14, METRIC, data.length)
 				// notate
 				if (isBB) {
-					if ('mac' == isOS) {
-						/* mac has
-							MozOsxFontSmoothing,-moz-osx-font-smoothing,
-							WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
-						*/
-						if ('9f958210' == hash) {notation = bb_green} // BB14 1106
-					} else {
-						// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
-							// some older (mostly unsupported) win10 and android <= 6 will lack
-							// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
-							// but I consider these out-of-scope
-						if ('d86abd90' == hash) {notation = bb_green} // BB14 1101
+					if (isVer == 128) {
+						if ('mac' == isOS) {
+							if ('9f958210' == hash) {notation = bb_green} // BB14 1106
+						} else {
+							if ('d86abd90' == hash) {notation = bb_green} // BB14 1101
+						}
+					} else if (isVer > 139) {
+						if ('mac' == isOS) {
+							/* mac has
+								MozOsxFontSmoothing,-moz-osx-font-smoothing,
+								WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
+							*/
+							if ('' == hash) {notation = bb_green} // BB15
+						} else {
+							// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
+								// some older (mostly unsupported) win10 and android <= 6 will lack
+								// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
+								// but I consider these out-of-scope
+							if ('ed89a929' == hash) {notation = bb_green} // BB15 1122
+						}
 					}
 				}
 			} else {
@@ -338,80 +346,168 @@ function get_link(METRIC) {
 	return
 }
 
-function get_mm_css() {
-	// https://searchfox.org/mozilla-central/source/servo/components/style/gecko/media_features.rs#690
+function get_media_css(METRIC) {
+	let oTmpData = {}, countFail = 0, countSuccess = 0
 
-	// only notate from when the mediaquery is enabled by default _and_ rfp is applied
-	const oTests = {
-		// expected
-		'prefers-reduced-motion': { // FF63+
-			id: 'PRM', test: ['no-preference','reduce'], rfp: 'no-preference', rfpver: 1
-		},
-		'prefers-contrast': { // FF65+
-			id: 'PC', test: ['no-preference','high','low'], rfp: 'no-preference', rfpver: 1
-			// 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
-			// FF101: 1656363 enabled
-			// FF132: 1917034 pref removed
-		},
-		'prefers-color-scheme': {// FF67+: 1494034
-			id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1
-			// FF79+: 1643656: no-preference obsolete
-		},
-		'forced-colors': {
-			// layout.css.forced-color-adjust.enabled
-			// FF89+: 1659511 enabled
-			// FF132: 1917034 prefs removed
-			id: 'FC', test: ['none','active'], rfpver: 1
-		},
-		// not expected
-		'prefers-reduced-transparency': { // FF95+: 1736914
-			id: 'PRT', test: ['no-preference','reduce'],
-			// layout.css.prefers-reduced-transparency.enabled
-			// 1822176: issue to enable it - currently default disabled
-			// ToDo: notation when pref flipped: RFP = "no-preference"
-		},
-		'inverted-colors': { // FF114+
-			id: 'IC', test: ['none','inverted'], rfp: 'none', rfpver: 999,
-			// 1794628: layout.css.inverted-colors.enabled (default disabled)
-			// ToDo: notation when pref flips: RFP = 'none'
-		},
-		'prefers-reduced-data': {
-			id: 'PRD', test: ['no-preference','reduce'],
-		}
+	function collect_data(metric, value, notation, data='', isLies = false) {
+		//console.log(metric, '~'+value +'~', '~'+data+'~', notation)
+		// data
+		if (zErr == value) {isLies = false}
+		oTmpData[metric] = isSmart && isLies ? zLIE : (data == '' ? value : data)
+		// failures: we catch failures only on checked items
+		if (rfp_red == notation) {countFail++} else if (rfp_green == notation) {countSuccess++}
+		// display
+		if (zLIE == oTmpData[metric]) {value = log_known(14, metric, value)} // color up + record lies
+		addDisplay(14, METRIC +'_'+ metric, value,'', notation)
 	}
-	for (const k of Object.keys(oTests)) {
-		let value, data='', notation ='', cssnotation ='', aTest = oTests[k].test
+
+	function get_mm_color(metric = 'color') {
+		let value, isLies = false
+		let cssvalue = getElementProp(7, '#cssC', METRIC +'_css')
 		try {
-			for (let i=0; i < aTest.length; i++) {
-				if (window.matchMedia('('+ k +':'+ aTest[i] +')').matches) {value = aTest[i]; break}
-			}
-			if (isGecko) {
-				// can only be a valid value or undefined
-				if (runST) {value = undefined} else if (runSL) {
-					if (value == undefined || value == aTest[1]) {value = aTest[0]} else {value = aTest[1]}
-				}
-			}
-			if (undefined == value) {value = zNA} // not pref'ed on yet, match css 'n/a'
+			value = (function() {for (let i=0; i < 1000; i++) {if (matchMedia('(color:'+ i +')').matches === true) {return i}}
+				return i
+			})()
+			if (runSI) {value = 4.5} else if (runSL) {value = 3}
+			let typeCheck = typeFn(value)
+			if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
+			// lies
+			if (cssvalue !== zErr && value !== cssvalue) {isLies = true}
 		} catch(e) {
-			value = e; data = zErrShort
+			log_error(14, METRIC +'_'+ metric, e)
+			value = zErr
 		}
-		let cssdata = getElementProp(14, '#css'+ oTests[k].id, k +'_css')
-		let isLies = (data !== zErrShort && cssdata !== zErr && value !== cssdata)
-		let rfp = oTests[k].rfp
-		if (rfp !== undefined && isVer >= oTests[k].rfpver) {
-			notation = value == rfp ? rfp_green : rfp_red
-			cssnotation = cssdata == rfp ? rfp_green : rfp_red
-		}
-		addBoth(14, k, value,'', notation, data, isLies)
-		addBoth(14, k +'_css','','', cssnotation, cssdata)
+		let notation = (zErr !== value && !isLies && 8 == value) ? rfp_green : rfp_red
+		collect_data(metric, value, notation, '', isLies)
+		collect_data(metric +'_css', '', (8 == cssvalue ? rfp_green : rfp_red), cssvalue)
+		return
 	}
+
+	function get_mm_css() {
+		// https://searchfox.org/mozilla-central/source/servo/components/style/gecko/media_features.rs#660
+		// only notate from when the mediaquery is enabled by default _and_ rfp is applied
+		const np = 'no-preference'
+		const oTests = {
+		// expected
+			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
+			'prefers-contrast': {id: 'PC', test: [np,'high','low'], rfp: np, rfpver: 1}, // FF101+: 1656363
+			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
+			'forced-colors': {id: 'FC', test: ['none','active']}, // FF89+: 1659511
+			'dynamic-range': {id: 'DR', test: ['standard','low']}, // FF100+
+			'video-dynamic-range': {id: 'VDR', test: ['standard','low']}, // FF100+
+			'color-gamut': {id: 'CG', test: ['srgb','p3','rec2020'], rfp: 'srgb', rfpver: 1}, // FF110+: 1422237
+		// not enabled yet
+			'prefers-reduced-transparency': {id: 'PRT', test: [np,'reduce'], rfp: np, rfpver: 999}, // FF113+: 1736914
+				// layout.css.prefers-reduced-transparency.enabled: 1822176: issue to enable it
+			'inverted-colors': {id: 'IC', test: ['none','inverted'], rfp: 'none', rfpver: 999}, // FF114+
+				// 1794628: layout.css.inverted-colors.enabled
+			'prefers-reduced-data': {id: 'PRD', test: [np,'reduce']},
+		}
+		// ToDo: notation reduced-transparency | inverted-colors rfpver when feature enabled
+
+		for (const metric of Object.keys(oTests)) {
+			let value = zNA // match css if not supported
+			let notation ='', cssnotation ='', aTest = oTests[metric].test
+			try {
+				for (let i=0; i < aTest.length; i++) {
+					if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value = aTest[i]; break}
+				}
+				if (isGecko) {
+					// can only be a valid value or zNA
+					if (runST) {value = undefined} else if (runSL) {
+						// run lies just pick the non true value from tests
+						if (value == aTest[1]) {value = aTest[0]} else {value = aTest[1]}
+					}
+				}
+			} catch(e) {
+				log_error(14, METRIC +'_'+ metric, e)
+				value = zErr
+			}
+			let cssvalue = getElementProp(14, '#css'+ oTests[metric].id, metric +'_css')
+			let isLies = (value !== zErr && cssvalue !== zErr && value !== cssvalue)
+			let rfp = oTests[metric].rfp
+			if (rfp !== undefined && isVer >= oTests[metric].rfpver) {
+				notation = value == rfp ? rfp_green : rfp_red
+				cssnotation = cssvalue == rfp ? rfp_green : rfp_red
+			}
+//ToDo: i need to test combos of outcomes here
+
+			collect_data(metric, value, notation,'', isLies)
+			collect_data(metric +'_css', '', cssnotation, cssvalue)
+		}
+		return
+	}
+
+	// go!
+	get_mm_color()
+	get_mm_css()
+
+	//console.log(countFail, countSuccess, oTmpData)
+	// sort into new object
+	let data = {}
+	for (const k of Object.keys(oTmpData).sort()) {data[k] = oTmpData[k]}
+	// notation
+	let strCounts = (0 == countFail ? sg : sb) +'['+ countSuccess +'/'+ (countSuccess + countFail) +']'+ sc
+	let medianotation = (0 == countFail ? silent_rfp_green : silent_rfp_red)
+	// add
+	addBoth(14, METRIC, mini(data), addButton(14, METRIC), medianotation + strCounts, data)
+}
+
+function get_mm_pointer(group, type, id, rfpvalue) {
+	const METRIC = type
+	let value, data ='', notation ='', cssnotation ='', isLies = false
+	try {
+		if (group == 3) {
+			if (window.matchMedia('('+ type +':hover)').matches) value = 'hover'
+			if (window.matchMedia('('+ type +':none)').matches) value = 'none'
+		} else {
+			if (window.matchMedia('('+ type +':fine').matches) {value = 'fine' // fine over coarse
+			} else if (window.matchMedia('('+ type +':coarse)').matches) {value = 'coarse'
+			} else if (window.matchMedia('('+ type +':none)').matches) {value = 'none'}
+			if (group == 2) {
+				// https://www.w3.org/TR/mediaqueries-4/#any-input
+					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
+				let value2 = zNA
+				if (window.matchMedia('('+ type +':coarse').matches) {value2 = 'coarse' // coarse over fine
+				} else if (window.matchMedia('('+ type +':fine)').matches) {value2 = 'fine'
+				} else if (window.matchMedia('('+ type +':none)').matches) {value2 = 'none'}
+				value += ' + '+ value2
+			}
+		}
+		if (runST) {value = undefined} else if (runSL) {value = zNA}
+		let typeCheck = typeFn(value)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+	} catch(e) {
+		value = e; data = zErrShort
+	}
+
+	let cssvalue = getElementProp(7, id, METRIC +'_css')
+	if (group == 2 && cssvalue !== zErr) {cssvalue = getElementProp(7, id, METRIC +'_css', ':before') + cssvalue}
+	if (value !== zErrShort && cssvalue !== zErr) {isLies = (value !== cssvalue)}
+
+	// notate: FF74+ 1607316
+	if ('any-pointer' == type && 'android' !== isOS) {
+		notation = ('fine + fine' == value ? rfp_green : rfp_red)
+		cssnotation = ('fine + fine' == cssvalue ? rfp_green : rfp_red)
+	} else if ('android' == isOS) {
+		notation = (value == rfpvalue ? rfp_green : rfp_red)
+		cssnotation = (cssvalue == rfpvalue ? rfp_green : rfp_red)
+	}
+	addBoth(14, METRIC, value,'', notation, data, isLies)
+	addBoth(14, METRIC +'_css','','', cssnotation, cssvalue)
 	return
 }
 
 const outputCSS = () => new Promise(resolve => {
 	Promise.all([
-		get_mm_css(),
 		get_colors(),
+		get_media_css('media'),
+/*
+		get_mm_pointer(1, 'pointer','#cssP','coarse'),
+		get_mm_pointer(2, 'any-pointer','#cssAP','coarse + coarse'),
+		get_mm_pointer(3, 'hover','#cssH','none'),
+		get_mm_pointer(3, 'any-hover','#cssAH','none'),
+*/
 		get_computed_styles('computed_styles'),
 		get_link('underline_links')
 	]).then(function(){
