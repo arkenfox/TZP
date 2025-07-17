@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>dn: region</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="32%"><col width="68%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">displaynames: region
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy.
+			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#region_code_display_names
+// ISO-3166 2-letter country codes
+// https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+// https://www.iso.org/obp/ui/#iso:pub:PUB500001:en
+
+/**
+	0. ensure a good range of locales in list
+	1. generate_codes() -> all possible 676 two-letter codes into aItems
+	2. testregions()
+		test each code individually and populate into oTestData
+		where codes are bucketized by their unique hash count
+	3. oTestData
+		e.g. oTestData[1] shows 385 codes, such as 'AA'
+		e.g. console.log("'" + oTestData[1].join("','") +"'")
+		these are the useless codes
+		run_main('all',aItemsIgnore) and see for yourself
+	4. compute_data()
+		ignore oTestData[1]
+		logs to console an output for pasting into aRegions
+		as a starting point
+
+	gecko 140+
+	code space: 676 | not supported 385 | left for max tests 291
+
+
+**/
+
+let aItemsIgnore = [
+	// 385 confirmed all locales return the same hash
+	// run_main('all', aItemsIgnore)
+	'AA','AB','AH','AJ','AK','AP','AV','AY','BC','BK','BP','BX','CB','CE','CJ','DA','DB','DC','DF','DH',
+	'DI','DL','DN','DP','DQ','DR','DS','DT','DU','DV','DW','DX','EB','ED','EF','EI','EJ','EK','EL','EM',
+	'EN','EO','EP','EQ','EV','EW','EX','EY','FA','FB','FC','FD','FE','FF','FG','FH','FL','FN','FP','FS',
+	'FT','FU','FV','FW','FY','FZ','GC','GJ','GK','GO','GV','GX','GZ','HA','HB','HC','HD','HE','HF','HG',
+	'HH','HI','HJ','HL','HO','HP','HQ','HS','HW','HX','HY','HZ','IA','IB','IF','IG','IH','II','IJ','IK',
+	'IP','IU','IV','IW','IX','IY','IZ','JA','JB','JC','JD','JF','JG','JH','JI','JJ','JK','JL','JN','JQ',
+	'JR','JS','JU','JV','JW','JX','JY','JZ','KA','KB','KC','KD','KF','KJ','KK','KL','KO','KQ','KS','KT',
+	'KU','KV','KX','LD','LE','LF','LG','LH','LJ','LL','LM','LN','LO','LP','LQ','LW','LX','LZ','MB','MJ',
+	'NB','ND','NJ','NK','NM','NN','NS','NV','NW','NX','NY','OA','OB','OC','OD','OE','OF','OG','OH','OI',
+	'OJ','OK','OL','ON','OO','OP','OQ','OR','OS','OT','OU','OV','OW','OX','OY','OZ','PB','PD','PI','PJ',
+	'PO','PP','PQ','PV','PX','QB','QC','QD','QE','QF','QG','QH','QI','QJ','QK','QL','QM','QN','QP','QQ',
+	'QR','QS','QT','QV','QW','QX','QY','QZ','RA','RB','RC','RD','RF','RG','RI','RJ','RK','RL','RM','RN',
+	'RP','RQ','RR','RT','RV','RX','RY','RZ','SF','SP','SQ','SW','TB','TE','TI','TQ','TS','TU','TX','TY',
+	'UB','UC','UD','UE','UF','UH','UI','UJ','UL','UO','UP','UQ','UR','UT','UU','UV','UW','UX','VB','VF',
+	'VH','VJ','VK','VL','VM','VO','VP','VQ','VR','VS','VT','VV','VW','VX','VY','VZ','WA','WB','WC','WD',
+	'WE','WG','WH','WI','WJ','WL','WM','WN','WO','WP','WQ','WR','WT','WU','WV','WW','WX','WY','WZ','XC',
+	'XD','XE','XF','XG','XH','XI','XJ','XL','XM','XN','XO','XP','XQ','XR','XS','XT','XU','XV','XW','XX',
+	'XY','XZ','YA','YB','YC','YF','YG','YH','YI','YJ','YK','YL','YM','YN','YO','YP','YQ','YR','YS','YV',
+	'YW','YX','YY','YZ','ZB','ZC','ZD','ZE','ZF','ZG','ZH','ZI','ZJ','ZK','ZL','ZN','ZO','ZP','ZQ','ZS',
+	'ZT','ZU','ZV','ZX','ZY',
+]
+
+// 291 confirmed supported in FF140+
+let aItems = [
+// first cover gLocales: alpha-2 and alpha-3 codes (aiming for 233/245)
+'VI', // 185
+'US', // 184
+'ZZ', // 150
+'CM', // 106 and after that we're growing in 2's
+// switch to extended locale list
+	// starting at 229 for the above: aiming for 281
+'VC', // 179 | 235
+'TL', // 139 | 239
+'FR', // 149 | 242
+'QO', // 144 | 245
+'GB', // 183 | 247 now growing in 2's
+'ZA', // 169 | 249
+'KP', // 167 | 251
+'PL', // 129 | 253
+'KH', // 124 | 255
+'ZM', // 101 | 257
+// now growing in 1's
+
+
+'UK','VG', // 182
+'PS', // 181
+'TC', // 181
+'MP', // 179
+'KY', // 178
+'CK','MH', // 176
+'BA', // 175
+'NF', // 175
+'SB', // 174
+'CF','FK', // 173
+'PM', // 171
+'GF','PF', // 170
+'AE', // 169
+'KR', // 167
+'DO','ST', // 166
+'GQ','KN', // 165
+'AS','PN', // 161
+'NZ', // 160
+'CH','PG', // 158
+'CZ','DD','DE','NC', // 157
+'GS', // 155
+'AG', // 153
+'NT','SA','TT', // 152
+'JT', // 151
+'MI','PU','UM','WK', // 151
+'GR','HM','TF', // 150
+'FX', // 149
+'AZ','CC','NL', // 148
+'CD','MO','ZR', // 147
+'CI','WF', // 146
+'IC', // 145
+'CX','HK','RU','SC','SU','TR', // 144
+'HR', // 143
+'ES','FO', // 142
+'AT','KM','VA', // 141
+'AX','SH', // 140
+'MV','NO', // 139
+'TP', // 139
+'BV','CV','HU', // 138
+'GE','SE', // 137
+'EG', // 136
+'BE','DZ','EU','QU', // 135
+'CY','KG','PH', // 134
+'CN','CP','GW', // 133
+'FM','PC', // 132
+'EH','LC', // 131
+'AC','AU','BG','BQ','GL','UN', // 130
+'RO','SJ','SK', // 129
+'CG','IE', // 128
+'IS', // 128
+'IM','JO','SI', // 128
+'BR','BU','MM','UZ', // 127
+'DK','ET','MR','MU','SS', // 126
+'AM','FI','JP','TH','TM', // 125
+'BY', // 124
+'KZ','LU','MK', // 123
+'IN','TJ', // 122
+'NG','SL','UA', // 120
+'AR','ID','IL','PT','XA', // 119
+'SZ', // 118
+'BD','EE','LT','RE', // 117
+'EA','ER','GP','IT','LI','MY','VD','VN', // 116
+'AL','DJ','TN', // 115
+'MD', // 114
+'BH','BO','CL','IO','MX', // 113
+'BM', // 112
+'AF','CO','LV','PR','SV','VE', // 111
+'MN','SY', // 110
+'BN','BS','GI','TD','XB', // 109
+'EZ','UY', // 108
+'BF','HV','MS','NE', // 107
+'EC','MZ', // 106
+'AI','MA','PY', // 105
+'BL','CR','LR','SO','TZ', // 104
+'GD','JM', // 103
+'HN','KW','RH','SM','ZW', // 102
+'BW','LB','SD','YT', // 101
+
+// under 100
+'AD','AN','AO','AQ','AW','BB','BI','BJ',
+'BT','BZ','CA','CQ','CS','CT','CU','CW',
+'DG','DM','DY','FJ','FQ','GA','GG','GH',
+'GM','GN','GT','GU','GY','HT','IQ','IR',
+'JE','KE','KI','LA','LK','LS','LY','MC',
+'ME','MF','MG','ML','MQ','MT','MW','NA',
+'NH','NI','NP','NQ','NR','NU','OM','PA',
+'PE','PK','PW','PZ','QA','RS','RW','SG',
+'SN','SR','SX','TA','TG','TK','TO','TV',
+'TW','UG','VU','WS','XK','YD','YE','YU',
+]
+aItems.sort()
+
+
+function generate_codes() {
+	let aAll = []
+	for (let i =65; i < 91; i++) {
+		let one = String.fromCharCode(i)
+		for (let j =65; j < 91; j++) {
+			let two = String.fromCharCode(j)
+			aAll.push(one + two)
+		}
+	}
+	console.log(aAll)
+	aRegions = aAll
+}
+
+
+function compute_data() {
+	aRes = []
+	for (const key of Object.keys(oTestData)) {
+		if (key !== '1') {
+			aRes.push(["'" + oTestData[key].join("','") +"', // "+ key])
+		}
+	}
+	console.log(aRes.join('\n'))
+}
+
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	oTestData = {},
+	isSupported = false,
+	localesHashAll = "" // to compare min to
+
+function testitems() {
+	//loop each script on it's own
+	dom.perf = ""
+	dom.results = ""
+	oTestData = {}
+	try {
+		aItems.forEach(function(item){
+			/* take one of the highest oTestData results and keep adding until you reach max
+			item = [
+				'VI','US','ZZ','CM','VC','TL','FR','QO','GB','ZA','KP','PL','KH','ZM',
+				item
+			]
+			//*/
+			// allow testing arrays of scripts
+			let testarray = 'object' == typeof item ? item : [item]
+			run_main('all', testarray, true)
+		})
+	} catch(e) {
+		console.log(e)
+	}
+}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
+			let go = true
+			if (isSupported) {
+				go = Intl.DisplayNames.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method, aTest, isLoop = false) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {} 
+	let spacer = '<br><br>'
+	let tests = {}
+	let aUsed = undefined == aTest ? aItems: aTest
+	if (!isLoop) {
+		dom.perf = ""
+		dom.results = ""
+	}
+
+	if (method == "all") {
+		aUsed.sort()
+		tests = {'region': {'long': aUsed, 'narrow': aUsed, 'short': aUsed}}
+
+	} else if (method == "min") {
+		tests = {
+			'region': {
+				'narrow': [
+					'VI','US','ZZ','CM','VC','TL','FR','QO','GB','ZA','KP','PL','KH','ZM',
+					// in ones
+					'AS','CN','EH','GH','GL','GS','IM','IT','JT','KE','KY','LS',
+					'MM','MO','MS','MZ','NL','PK','PS','RW','SJ','SS','SZ','TF',
+					'UM', // and UM for blink
+				],
+			}
+		}
+	} else {
+		// TINY
+		tests = {
+			'region': {'narrow': ['VI','US','ZZ','CM','VC','TL','FR'],}
+		}
+	}
+
+	try {
+		aLocales.forEach(function(code) { // for each locale
+			let oType = {}
+			Object.keys(tests).sort().forEach(function(t){ // for each type
+				oType[t] = {}
+				for (const s of Object.keys(tests[t])) { // for each style
+					oType[t][s] = ('tiny' !== method) ? [] : {}
+					let dn = new Intl.DisplayNames([code], {type: t, style: s})
+					tests[t][s].sort().forEach(function(item){
+						let value = dn.of(item)
+						if ('tiny' !== method) {
+							oType[t][s].push(item +': '+ value)	
+						} else {
+							oType[t][s][item] = value
+						}
+					})
+				}
+			})
+			let hash = mini(oType) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				Object.keys(oType).forEach(function(typekey){
+					oTempData[hash][typekey] = oType[typekey]
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order in new object
+		for (const h of Object.keys(oTempData).sort()) { // for each hash
+			oData[h] = {}
+			for (const key of Object.keys(oTempData[h]).sort()) { // for each granularity
+				if (key == "locales") {
+					oData[h][key] = oTempData[h][key].join(", ")
+				} else {
+					if (Object.keys(oTempData[h][key]).length) {
+						oData[h][key] = oTempData[h][key]
+					}
+				}
+			}
+		}
+		//console.log(oTempData)
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) { // for each hash
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+
+			if (!isLoop) {
+				let str = ""
+				for (const type of Object.keys(oData[k])) { // for each type
+					if (type !== "locales") {
+						str += "<li>"+ s14 + type + sc +"</li>"
+						Object.keys(oData[k][type]).forEach(function(s){ // for each style
+							if ('tiny' !== method) {
+								// color up the parts
+								let aParts = [], array = oData[k][type][s]
+								array.forEach(function(item){ // for each item
+									let parts = item.split(":")
+									item = item.replace(parts[0] +':', s12 + parts[0]+ ':' + sc)
+									aParts.push(item)
+								})
+								str += s16 + s.slice(0,1).toUpperCase() +": "+ sc + aParts.join(', ') +"</br>"
+							} else {
+								str += s16 + s + sc + '<ul class="main">'
+								Object.keys(oData[k][type][s]).forEach(function(item){ // for each item
+									str += "<li>"+ s12 + item +': '+ sc + oData[k][type][s][item] +"</li>"
+								})
+								str += '</ul>'
+							}
+						})
+					}
+				}
+				if ('tiny' !== method) {str = "<details><summary>details</summary>"+ str +"</details>"}
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ str
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
+			}
+		}
+
+		if (isLoop) {
+			let testCount = localeGroups.length
+			// record it
+			if (undefined == oTestData[testCount]) {oTestData[testCount] = []}
+			oTestData[testCount].push(aUsed)
+			//console.log(testCount, aUsed)
+			/*
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ s16 + testCount + sc +': '+ '[\''+ aUsed.join('\', \'') +'\']'
+			//*/
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ '\''+ aUsed.join('\', \'') +'\', // ' + testCount
+			return
+		}
+
+		// hashes + btns
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		sDetail["results"] = oData
+
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// notate new if 140+
+			if (isVer > 139) {
+				// results
+				if (resultsHash == "b23a61e5") { // FF140+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "404d71fe") { // FF140+ 281
+				} else {localesHash += ' '+ zNEW
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_isVer()
+
+	try {
+		let test = new Intl.DisplayNames(undefined, {type: 'region'}).resolvedOptions().locale
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message +'banana'
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = [
+'ar-ly,arabic (libya)',
+'ar-sa,arabic (saudi arabia)',
+'az-cyrl,azerbaijani (cyrillic)',
+'bn-in,bengali (india)',
+'bs-cyrl,bosnian (cyrillic)',
+'de-at,german (austria)',
+'de-ch,german (switzerland)',
+'en-au,english (australia)',
+'en-ca,english (canada)',
+'en-in,english (india)',
+'es-ar,spanish (argentina)',
+'es-br,spanish (brazil)',
+'es-cl,spanish (chile)',
+'es-mx,spanish (mexico)',
+'es-pr,spanish (puerto rico)',
+'es-us,spanish (united states)',
+'fa-af,persian (afghanistan)',
+'ff-adlm,fulah (adlam)',
+'fr-be,french (belgium)',
+'fr-ca,french (canada)',
+'hi-latn,hindi (latin)',
+'ko-kp,korean (north korea)',
+'kok-latn,konkani (latin)',
+'ks-deva,kashmiri (devanagari)',
+'kxv-telu,kuvi (telugu)',
+'pa-arab,punjabi (arabic)',
+'ps-pk,pashto (pakistan)',
+'pt-ao,portuguese (angola)',
+'ro-md,romanian (moldova)',
+'ru-ua,russian (ukraine)',
+'sd-deva,sindhi (devanagari)',
+'se-fi,northern sami (finland)',
+'shi-latn,tachelhit (latin)',
+'sr-ba,serbian (bosnia & herzegovina)',
+'sr-cyrl-me,serbian (cyrillic montenegro)',
+'sr-cyrl-xk,serbian (cyrillic kosovo)',
+'sr-latn,serbian (latin)',
+'sr-latn-ba,serbian (latin bosnia & herzegovina)',
+'sr-latn-me,serbian (latin montenegro)',
+'sr-latn-xk,serbian (latin kosovo)',
+'sw-cd,swahili (congo kinshasa)',
+'sw-ke,swahili (kenya)',
+'ur-in,urdu (india)',
+'uz-af,uzbek (afghanistan)',
+'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
+'vai-latn,vai (latin)',
+'yo-bj,yoruba (benin)',
+'yue-cn,cantonese (china)',
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en','de','fr','pl','pt','sv']
+
+	legend()
+	if (isSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>
