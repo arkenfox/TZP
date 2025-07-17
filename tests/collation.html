@@ -185,7 +185,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let test = Intl.Collator.supportedLocalesOf([code])
 			if (test.length == 1) {
 				aLocales.push(code)
@@ -436,8 +436,7 @@ function collator() {
 				// important: reset to original order
 				let str = list[i].toLowerCase()
 				let code = str.split(",")[0].trim()
-				let name = str.split(",")[1].trim()
-
+				let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 				// always reset order
 				charsSearch.sort()
 				charsSort.sort()

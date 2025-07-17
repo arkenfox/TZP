@@ -325,7 +325,7 @@ const test_idb = (log = false) => new Promise(resolve => {
 
 const test_worker_service = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	const METRIC = 'service_worker_test'
+	const METRIC = 'worker_service_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
@@ -343,7 +343,7 @@ const test_worker_service = (log = false) => new Promise(resolve => {
 
 const test_worker_shared = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	const METRIC = 'shared_worker_test'
+	const METRIC = 'worker_shared_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
@@ -367,7 +367,7 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 
 const test_worker_shared_new = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	let METRIC = 'shared_worker_test'
+	let METRIC = 'worker_shared_test'
 	function exit(value) {
 		dom[METRIC].innerHTML = value +' TEST'
 		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
@@ -398,7 +398,7 @@ const test_worker_shared_new = (log = false) => new Promise(resolve => {
 
 const test_worker_web = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	let METRIC = 'web_worker_test'
+	let METRIC = 'worker_web_test'
 	function exit(value) {
 		dom[METRIC].innerHTML = value
 		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}

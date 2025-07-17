@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>currencydisplay</title>
+	<title>nf: currencydisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -30,7 +30,7 @@
 			<span class="no_color">A proof to confirm minimum tests for maximum entropy in currencyDisplay
 				and currencySign. The default test covers base languages, but you can expand locales to expose
 				<span class="s4">regional differences</span> on all four tests.
-				The <code>TINY</code> and <code>USD</code> tests are minimalist hardcoded tests built for speed.
+				The <code>TINY</code> test is a minimalist hardcoded test built for speed.
 			</span>
 		</td></tr>
 		<tr>
@@ -39,7 +39,6 @@
 				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
 				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
 				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
-				<span id="busd" class="btn4 btn" onClick="run('usd')">[ USD ]</span>
 				<input type="checkbox" id="optExpanded"> +locales
 				<span id="allcurrency"><input type="checkbox" id="optCurrency"> +cur</span>
 			<br><br><hr><br>
@@ -93,7 +92,7 @@ function legend(method) {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
@@ -141,83 +140,49 @@ function set_currency_lists() {
 	supported.sort()
 	oCurrencies["supported"] = supported
 
-	// min
-	let min = [
-		'AED', // kde
-		'AUD', // ebu
-		'BRL', // yue
-		'DKK', // smn
-		'GBP', // nus
-		'KES', // dav, lyi
-		'MZN', // rw, zgh
-		'PHP', // mt
-		'SZL', // nyn
-		'USD', // bo, dua, haw, ii, lkt, sah
-		'XAF', // kkj, mgo, nnh, rw
-		'ZAR', // st
-		'ZMW', // bem
-		// FF121+ 1859752 ICU 74
-		'PLN', 
-		'XXX',
-	]
-	if (supported.length) {
-		min = min.filter(x => supported.includes(x))
-	}
-	min = min.filter(function(item, position) {return min.indexOf(item) === position}) // dedupe in case of typos
-	min.sort()
-	oCurrencies["min"] = min
-
 	// expanded: for additonal locale tests
 	let expanded = [
-		'ANG','AOA','ARS','AWG','AZN','BAM','BBD','BIF','BMD','BOB',
-		'BSD','BWP','BYN','BZD','CDF','CNY','COP','CUP','DJF','DZD',
-		'ERN','ESP','ETB','FJD','FKP','FRF','GEL','GTQ','GHS','GIP','GMD',
-		'GNF','GYD','HNL','HTG','JMD','KGS','KMF','KYD','KZT','LKR','LRD',
-		'LUF','MDL','MGA','MKD','MMK','MOP','MRU','MUR','MWK','MYR',
-		'NAD','NGN','NIO','NOK','NZD','PAB','PGK','PKR','RWF','SBD','SCR','SDG',
-		'SGD','SHP','SLE','SOS','SRD','SSP','STN','SYP','TND','TOP',
-		'TTD','TZS','XCD','UGX','VUV','WST',
+		'AED','ANG','AOA','ARS','AUD','AWG','AZN','BAM','BBD','BIF','BMD','BOB',
+		'BRL','BSD','BWP','BYN','BZD','CAD','CDF','CNY','COP','CUP','DJF','DKK',
+		'DZD','ERN','ETB','FJD','FKP','FRF','GBP','GEL','GTQ','GHS','GIP','GMD',
+		'GNF','GYD','HNL','HTG','JMD','KES','KGS','KMF','KYD','KZT','LKR','LRD',
+		'LSL','LUF','MDL','MGA','MKD','MOP','MRU','MUR','MWK','MYR','MZN','NAD',
+		'NGN','NIO','NOK','NZD','PAB','PGK','PHP','PKR','PLN','RWF','SBD','SCR',
+		'SDG','SGD','SHP','SLE','SOS','SRD','SSP','STN','SYP','SZL','TND','TOP',
+		'TTD','TZS','XCD','UGX','USD','VUV','WST','XAF','XXX','ZAR','ZMW',
+		// blink
+		'PEN','PYG',
 	]
-	
-	expanded = expanded.concat(min)
-	if (supported.length) {
-		expanded = expanded.filter(x => supported.includes(x))
-	}
+	if (supported.length) {expanded = expanded.filter(x => supported.includes(x))}
 	expanded = expanded.filter(function(item, position) {return expanded.indexOf(item) === position})
 	expanded.sort()
 	oCurrencies["expanded"] = expanded
 
 	// ignore: don't seem to add any more buckets
 	let ignore = [
-		'ADP','AFA','AFN','ALK','ALL','AMD','AOK','AON','AOR','ARA',
-		'ARL','ARM','ARP','ATS','AZM','BAD','BAN','BDT','BEC','BEF',
-		'BEL','BGL','BGM','BGN','BGO','BHD','BND','BOL','BOP','BOV',
-		'BRB','BRC','BRE','BRN','BRR','BRZ','BTN','BUK','BYB','BYR',
-		'CAD','CHE','CHF','CHW','CLE','CLF','CLP','CNH','CNX','COU',
-		'CRC','CSD','CSK','CUC','CVE','CYP','CZK','DDM','DEM','DOP',
-		'ECS','ECV','EEK','EGP','ESA','ESB','EUR','FIM','GEK','GHC',
-		'GNS','GQE','GRD','GWE','GWP','HKD','HRD','HRK','HUF',
-		'IDR','IEP','ILP','ILR','ILS','INR','IQD','IRR','ISJ','ISK',
-		'ITL','JOD','JPY','KHR','KPW','KRH','KRO','KRW','KWD',
-		'LAK','LBP','LSL','LTL','LTT','LUC','LUL','LVL','LVR','LYD',
-		'MAD','MAF','MCF','MDC','MGF','MKN','MLF','MNT','MRO','MTL',
-		'MTP','MVP','MVR','MXN','MXP','MXV','MZE','MZM','NIC','NLG',
-		'NPR','OMR','PEI','PEN','PES','PLZ','PTE',
-		'PYG','QAR','RHD','ROL','RON','RSD','RUB','RUR','SAR','SDD',
-		'SDP','SEK','SIT','SKK','SLL','SRG','STD','SUR','SVC','THB',
-		'TJR','TJS','TMM','TMT','TPE','TRL','TRY','TWD','UAH','UAK',
-		'UGS','USN','USS','UYI','UYP','UYU','UYW','UZS','VEB','VED',
-		'VEF','VES','VND','VNN','XAG','XAU','XBA','XBB','XBC','XBD',
-		'XDR','XEU','XFO','XFU','XOF','XPD','XPF','XPT','XRE','XSU',
-		'XTS','XUA','YDD','YER','YUD','YUM','YUN','YUR','ZAL',
-		'ZMK','ZRN','ZRZ','ZWD','ZWL','ZWR',
+		'ADP','AFA','AFN','ALK','ALL','AMD','AOK','AON','AOR','ARA','ARL','ARM',
+		'ARP','ATS','AZM','BAD','BAN','BDT','BEC','BEF','BEL','BGL','BGM','BGN',
+		'BGO','BHD','BND','BOL','BOP','BOV','BRB','BRC','BRE','BRN','BRR','BRZ',
+		'BTN','BUK','BYB','BYR','CHE','CHF','CHW','CLE','CLF','CLP','CNH','CNX',
+		'COU','CRC','CSD','CSK','CUC','CVE','CYP','CZK','DDM','DEM','DOP','ECS',
+		'ECV','EEK','EGP','ESA','ESB','ESP','EUR','FIM','GEK','GHC','GNS','GQE',
+		'GRD','GWE','GWP','HKD','HRD','HRK','HUF','IDR','IEP','ILP','ILR','ILS',
+		'INR','IQD','IRR','ISJ','ISK','ITL','JOD','JPY','KHR','KPW','KRH','KRO',
+		'KRW','KWD','LAK','LBP','LTL','LTT','LUC','LUL','LVL','LVR','LYD','MAD',
+		'MAF','MCF','MDC','MGF','MKN','MLF','MMK','MNT','MRO','MTL','MTP','MVP',
+		'MVR','MXN','MXP','MXV','MZE','MZM','NIC','NLG','NPR','OMR','PEI','PES',
+		'PLZ','PTE','QAR','RHD','ROL','RON','RSD','RUB','RUR','SAR','SDD','SDP',
+		'SEK','SIT','SKK','SLL','SRG','STD','SUR','SVC','THB','TJR','TJS','TMM',
+		'TMT','TPE','TRL','TRY','TWD','UAH','UAK','UGS','USN','USS','UYI','UYP',
+		'UYU','UYW','UZS','VEB','VED','VEF','VES','VND','VNN','XAG','XAU','XBA',
+		'XBB','XBC','XBD','XDR','XEU','XFO','XFU','XOF','XPD','XPF','XPT','XRE',
+		'XSU','XTS','XUA','YDD','YER','YUD','YUM','YUN','YUR','ZAL','ZMK','ZRN',
+		'ZRZ','ZWD','ZWL','ZWR',
 	]
 	let all = expanded.concat(ignore) // so at least we have soomething if supported = empty
 	all = all.concat(supported) // in case anything new turns up
 	all = all.filter(function(item, position) {return all.indexOf(item) === position})
-	if (supported.length) {
-		all = all.filter(x => supported.includes(x))
-	}
+	if (supported.length) {all = all.filter(x => supported.includes(x))}
 	all.sort()
 	oCurrencies["all"] = all
 }
@@ -229,15 +194,7 @@ function run_main(method) {
 	let optCurrency = dom.optCurrency.checked
 	let optExpanded = dom.optExpanded.checked
 
-	if (optExpanded && method == "min" && localesHashAllExpanded == "") {
-		dom.results.innerHTML = "first run [ ALL ] with &#9745 expand locales checked"
-		return
-	}
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
-
-	// "currencySign": we only need one per locale
-		// only useful when not using the min test: e.g. it adds to tiny/usd and we will include it in ALL for completeness
-		// ToDo: not that interested but not sure if this could replace some of the min currencies: potentially less overall tests
 
 	let tests = {}, tmptests = []
 	let items = {
@@ -246,139 +203,113 @@ function run_main(method) {
 		"name": [-1],
 		"symbol": [1000],
 	}
-	let curN = {"name": [-1]},
-		curS = {"symbol": [1000]},
-		curB = {"name": [-1], "symbol": [1000]},
-		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
+	let curAll = {"accounting": [-1000], "name": [-1], "symbol": [1000]},
+		curA = {"accounting": [-1000]},
+		curAN = {"accounting": [-1000], "name": [-1]},
+		curAS = {"accounting": [-1000], "symbol": [1000]},
+		curN = {"name": [-1]},
+		curNS = {"name": [-1], "symbol": [1000]},
+		curS = {"symbol": [1000]}
 
-	if (method == "min") {
-		if (!optExpanded) {
-			tmptests = {
-				// 17 tests (PLN, XXX for 121+ ICU tree 74)
-				"AED": curN,
-				"AUD": curN,
-				"BRL": curN,
-				"DKK": curN,
-				"GBP": curS,
-				"KES": curB,
-				"MZN": curB,
-				"PHP": curS,
-				"SZL": curN,
-				"USD": curB,
-				"XAF": curN,
-				"ZAR": curS,
-				"ZMW": curS,
-				// FF121+ 1859752 ICU 74
-				"PLN": curS,
-				"XXX": curN,
-			}
-		} else {
-			tmptests = { // expanded currencies
-				// core languages
-				"AED": curN,
-				"AUD": curB,
-				"BRL": curS,
-				"DKK": curB,
-				"GBP": curB,
-				"KES": curS,
-				"KZT": curB,
-				"MZN": curS,
-				"PHP": curS,
-				"SZL": curB,
-				"USD": curB,
-				"XAF": curN,
-				"ZAR": curS,
-				"ZMW": curS,
-				// FF121+ 1859752 ICU 74
-				"PLN": curS, 
-				"XXX": curN,
-			}
-			let aBoth = ['GHS','NIO','SHP','STN','UGX']
-			aBoth.forEach(function(c){
-				tmptests[c] = curB
-			})
-			let aIgnore = Object.keys(tmptests)
-			aIgnore = aIgnore.concat(aBoth)
-			let aSymbol = oCurrencies.expanded.filter(x => !aIgnore.includes(x))
-			aSymbol.forEach(function(c){
-				tmptests[c] = curS
-			})
-		}
-		// remove unsupported
-		let supported = oCurrencies["supported"]
-		for (const k of Object.keys(tmptests)) {
-			if (supported.length) {
-				if (supported.includes(k)) {
-					tests[k] = tmptests[k]
-				}
-			} else {
-				tests[k] = tmptests[k]
-			}
-		}
-	} else if (method == "tiny") {
-		// smaller set that gets most base languages + bang for buck on expanded
-		/*
-		old: 271: 4 currencies + 7 tests (base locales 205)
-			"USD": curA,
-			"XAF": curN,
-			"KES": curB,
-			"GBP": curS,
-
-		FF123+: optExpanded: accumative
-			// 407 = max
-			// 244 = USD (w/o accounting)
-			// 285 = expanded min (14 currencies 17 tests)
-
-		USD-curB 244 + XXX-curN = 255 + KES-curB = 265 + USD-acounting = 271
-		anything after that is not worth it: most add one one more per test
-		*/
-		tests = {
-			"USD": curA, // 244
-			"XXX": curN, // 255
-			"KES": curB, // 265 + USD-accounting = 271
-			"MOP": curS, // 275
-			//"GBP": curS, // 278
-			//"GHS": curS, // 278
-			//"DJF": curS, // 278
-			//"ERN": curS, // 278
-			//"GNF": curS, // 278
-			//"LUF": curS, // 278
-			//"MRU": curS, // 278
-			//"RWF": curS, // 278
-			//"SGD": curS, // 278
-			//"SSP": curS, // 278
-			//"XAF": curN, // 278
-		}
-	} else if (method == "usd") {
-		tests = {
-			// with accounting: 195 + 253
-			// w/out 191, 244
-			"USD": curA
-		}
-	} else {
+	if (method == "all") {
 		let currencies = []
-		currencies = optExpanded ? oCurrencies["expanded"] : oCurrencies["min"]
+		currencies = oCurrencies["expanded"]
 		if (optCurrency) {currencies = oCurrencies["all"]}
 		currencies.forEach(function(c){
-			tests[c] = items
+			/*
+			curAll : 426
+							 ---
+			curA   : 341
+			curAN  : 426 <-
+			curAS  : 344
+			curN   : 259
+			curNS  : 426 <-
+			curS   : 325
+			*/
+			tests[c] = optExpanded ? curNS : curAll
 		})
-	}
+	} else if (method == "tiny") {
+		tests = {
+			"USD": curAN, // 264
+			"XXX": curN, // 275 (+11)
+			'ETB': curN, // 281 (+6)
+			"GBP": curS, // 286 (+5)
+			"KES": curS, // 291 (+5)
+		}
+	} else if (method == "min" && !optExpanded) {
+		tests = {
+			// looking for 228
+			// 12 currencies + 14 tests against base core lanaguges
+			'USD': curAN, // 204
+			'XXX': curN, // 211
+			'XAF': curN, // 217
+			'GBP': curS, // 219
+			'AED': curN, // +1
+			'AUD': curN, // +1
+			'CAD': curN, // +1
+			'DKK': curN, // +1
+			'SZL': curN, // +1
+			'PLN': curS, // +1
+			'ZAR': curS, // +1
+			'MZN': curAN, // n+1 s+1 = 228
+		}
+	} else if (method == "min") { // expanded
+		// looking for 426
+			// min non-expanded (just above) = 297
 
-	// FF110+ doesn't need KZT in min (or tiny)
-		// don't remove if 109 or lower
-		// don't remove if we said use all currencies
-		// don't remove if expanded (we only move it from min to expanded: expanded needs it)
-	let hasKZT = tests.hasOwnProperty("KZT")
-	if (hasKZT && !optCurrency && !optExpanded) {
-		if (isFF && "object" === typeof ondeviceorientationabsolute) {
-			delete tests.KZT
+		tests = {
+			// from tiny
+			"USD": curAN, // 264
+			"XXX": curNS, // 275 (+11)	// added S
+			'ETB': curNS, // 281 (+6)		// added S
+			"GBP": curNS, // 286 (+5)		// added N
+			"KES": curS, // 291 (+5)
+			// everything else now with NS = 426 max
+			// 294 so far
+			'GHS': curNS, 'MOP': curNS, // +4s = 302 
+			// +3s
+			'ANG': curNS, 'BYN': curNS, 'DJF': curNS, 'ERN': curNS,
+			'MRU': curNS, 'GNF': curNS, 'LUF': curNS, 'PKR': curNS,
+			'RWF': curNS, // 329
+			// +2s
+			'AUD': curNS, 'BIF': curNS, 'BWP': curNS, 'BZD': curNS,
+			'DKK': curNS, 'GMD': curNS, 'KMF': curNS, 'LRD': curNS,
+			'MDL': curNS, 'MGA': curNS, 'MUR': curNS, 'MZN': curNS,
+			'NAD': curNS,	'NGN': curNS, 'SCR': curNS, 'SGD': curNS,
+			'SLE': curNS, 'SZL': curNS, 'TZS': curNS, 'UGX': curNS,
+			'VUV': curNS, 'ZAR': curNS, // 373
+			// +1s name
+			'CAD': curN, 'XAF': curN, // 375
+			// +1s symbol
+			'AOA': curS, 'ARS': curS, 'AWG': curS, 'AZN': curS, 'BAM': curS,
+			'BBD': curS, 'BMD': curS, 'BRL': curS, 'BSD': curS, 'CDF': curS,
+			'CNY': curS, 'DZD': curS, 'FJD': curS, 'FKP': curS, 'FRF': curS,
+			'GEL': curS, 'GTQ': curS, 'GIP': curS, 'GYD': curS, 'HNL': curS,
+			'HTG': curS, 'JMD': curS, 'KGS': curS, 'KYD': curS, 'KZT': curS,
+			'LKR': curS, 'LSL': curS, 'MKD': curS, 'MWK': curS, 'MYR': curS,
+			'NIO': curS, 'NOK': curS, 'NZD': curS, 'PAB': curS, 'PGK': curS,
+			'PHP': curS, 'PLN': curS, 'SBD': curS, 'SDG': curS, 'SHP': curS,
+			'SOS': curS, 'SRD': curS, 'SSP': curS, 'STN': curS, 'SYP': curS,
+			'TND': curS, 'TOP': curS, 'TTD': curS, 'XCD': curS, 'WST': curS,
+			'ZMW': curS, // +51 = 426
+
+			// blink
+			'PEN': curS, // just for blink
 		}
 	}
+
+	// remove unsupported if min: the others have aleady been checked
+	if (method == 'min') {
+		let supported = oCurrencies["supported"]
+		if (supported.length) {
+			for (const k of Object.keys(tests)) {
+				if (!supported.includes(k)) {delete tests[k]}
+			}
+		}
+	}
+
 	let oStyles = {}
 	let array = optExpanded ? aLocalesExpanded : aLocales
-	//console.log(method, Object.keys(tests).length, array.length)
-	//console.log(tests)
-
 	try {
 		array.forEach(function(code) { // for each locale
 			oStyles = {}
@@ -403,7 +334,7 @@ function run_main(method) {
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
-				Object.keys(oStyles).forEach(function(c){ // each currency
+			Object.keys(oStyles).forEach(function(c){ // each currency
 					oTempData[hash][c] = {}
 					Object.keys(oStyles[c]).forEach(function(cd){ // for each currencyDisplay
 						if (oStyles[c][cd].length) {
@@ -441,19 +372,12 @@ function run_main(method) {
 			let str = ""
 			for (const c of Object.keys(oData[h])) { // for each currency
 				if (c !== "locales") {
-					let linecount = Object.keys(oData[h][c]).length
-					if (linecount > 1) {
-						str += "<li>"+ s12 + c + sc +"</li>"
-					} else {
-						str += "<li>"
-					}
+					str += "<li>"+ s12 + c + ":"+ sc
 					Object.keys(oData[h][c]).forEach(function(cd){ // for each currencyDisplay
-						if (linecount > 1) {
-							str += s16 + cd +": "+ sc + oData[h][c][cd] +"</br>"
-						} else {
-							str += s12 + c + sc +" "+ s16 + cd +": "+ sc + oData[h][c][cd] +"</li>"
-						}
+						let option = ('all' == method) ? cd.slice(0,1).toUpperCase() : cd
+						str += ' '+ s16 + option +": "+ sc + oData[h][c][cd]
 					})
+					str += "</li>"
 				}
 			}
 			// wrap into details for long lists
@@ -511,20 +435,11 @@ function run_main(method) {
 			if (isVer > 139) {
 				if (optExpanded) {
 					// expanded results
-					if (resultsHash == "adb4141c") { // FF140+
+					if (resultsHash == "c593e12e") { // FF140+
 					} else {resultsHash += ' '+ zNEW
 					}
 					// expanded locales
-					if (localesHash == "aaaf66c2") { // FF140+: 424
-					} else if (isFF) {localesHash += ' '+ zNEW
-					}
-				} else {
-					// results
-					if (resultsHash == "9b0bdbf4") { //[FF140+
-					} else {resultsHash += ' '+ zNEW
-					}
-					// locales
-					if (localesHash == "3442bb3f") { // FF140+: 227
+					if (localesHash == "fa32c7e2") { // FF140+: 426
 					} else if (isFF) {localesHash += ' '+ zNEW
 					}
 				}
@@ -532,6 +447,11 @@ function run_main(method) {
 		} else if (method == "min") {
 			let localeHashCompare = optExpanded ? localesHashAllExpanded :	localesHashAll
 			localesMatch = localesHash == localeHashCompare ? green_tick : red_cross
+		
+			if (optExpanded && method == "min" && localesHashAllExpanded == "") {
+				// we haven't run expanded ALL yes so don't notate
+				localesMatch = ''
+			}
 		}
 		// display
 		let display = s4 + method.toUpperCase() +": "
@@ -801,6 +721,7 @@ Promise.all([
 		"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
 		"sr-latn,serbian (latin)",
 		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+		'st-ls,southern sotho',
 		"sw-cd,swahili (congo kinshasa)",
 		"sw-ke,swahili (kenya)",
 		"sw-ug,swahili (uganda)",
@@ -834,8 +755,10 @@ Promise.all([
 	expanded.sort()
 	oLists["expanded"] = expanded
 
+
 	legend()
 	set_currency_lists()
+
 	if (isSupported) {
 		setBtn("all")
 		dom.results = "calculating ..."

@@ -1097,6 +1097,9 @@ const get_scr_positions = (METRIC) => new Promise(resolve => {
 })
 
 function get_scr_viewport_units() {
+	// https://developer.mozilla.org/en-US/docs/Web/CSS/length
+	// large, dynamic, small unit support: FF101, Safari 15.4, blink 108
+
 	// desktop + android use small in inner section
 	// android uses large as a standalone
 	let aList = 'android' == isOS ? ['L','S'] : ['S']
@@ -1259,7 +1262,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 
 const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 	let oReported = {'useragent': {}, 'useragentdata': {}}
-	let oComplex = {}, oData = {}, countFail = 0
+	let oComplex = {}, oData = {}, countFail = 0, countSuccess = 0
 	/*
 	windows:
 	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
@@ -1375,10 +1378,10 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			// and because non-expected is lies
 		// still notate slent fails so our count makes sense
 		let isLies = reported !== expected
-		let notation = (isErr || isLies) ? silent_red : ''
-		addDisplay(2, 'ua_'+ property, reported, '', notation, (isErr ? false : isLies))
-		// record value in oData
+		let notation = (isErr || isLies) ? rfp_red : ''
+		addDisplay(2, METRIC +'_'+ property, reported, '', notation, (isErr ? false : isLies))
 		let fpvalue = isErr ? zErr : (isSmart && isLies ? zLIE : reported)
+		if (zLIE == fpvalue) {log_known(2, METRIC +'_'+ property, reported)}
 		oData[property] = fpvalue
 	}
 
@@ -1423,30 +1426,31 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 				}
 			}
 		}
-		let notation = isLies ? silent_red : '' // in case os is undefined
+		let notation = isLies ? rfp_red : '' // in case os is undefined
 		if (os !== undefined) {
 			let rfpvalue = oRFP[os][k], isMatch = false
 			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
-			notation = isMatch ? silent_green : silent_red
+			notation = isMatch ? rfp_green : rfp_red
 			// notate good desktopmode
 			if (k == 'userAgent' && isMatch && 'android' == isOS) {
 				if (reported.includes('Linux')) {notation = desktopmode_green}
 			}
 			// catch non-errors and non-lies health failures
-			if (notation.includes(cross)) {countFail++}
+			if (notation.includes(cross)) {countFail++} else if (notation.includes(tick)) {countSuccess++}
 		}
-		addDisplay(2, 'ua_'+ k, reported, '', notation, (isErr ? false : isLies))
+		addDisplay(2, METRIC +'_'+ k, reported, '', notation, (isErr ? false : isLies))
 		// record value in oData
 		let fpvalue = isErr ? zErr : (isSmart && isLies ? zLIE : reported)
+		if (zLIE == fpvalue) {log_known(2, METRIC +'_'+ k, reported)}
 		oData[k] = fpvalue
 	}
 	// add lookup
 	addDetail('agent_reported', oReported) // add reported for matching/compares: e.g. iframes
 	// add metric
 	for (const k of Object.keys(oData)) {if (zLIE == oData[k] || zErr == oData[k]) {countFail++}} // count failures
-	let strFail = (0 == countFail ? '' : sb +'['+ countFail +']'+ sc)
-	let agentnotation = (0 == countFail ? rfp_green : rfp_red)
-	addBoth(2, METRIC, mini(oData), addButton(2, METRIC), agentnotation + strFail, oData)
+	let strCount = (0 == countFail ? sg : sb) +'['+ countSuccess +'/'+ (countFail + countSuccess) +']'+ sc
+	let agentnotation = (0 == countFail ? silent_rfp_green : silent_rfp_red)
+	addBoth(2, METRIC, mini(oData), addButton(2, METRIC), agentnotation + strCount, oData)
 	return resolve()
 })
 
@@ -1776,13 +1780,16 @@ const outputFD = () => new Promise(resolve => {
 	}
 
 	if (!isGecko) {
-		let aList = ['logo','wordmark','os','version']
+		let aList = ['logo','wordmark','version']
+		if (undefined == isOS) {aList.push('os')}
 		if ('blink' == isEngine) {aList.push('browser_architecture')}
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
 		addBoth(3, 'browser', (undefined == isEngine ? zNA : isEngine))
+		// os
+		if (undefined !== isOS) {addBoth(3, 'os', isOS)}
 		return resolve()
 	}
 
@@ -1846,7 +1853,7 @@ const outputFD = () => new Promise(resolve => {
 	}
 	// os, version
 	addBoth(3, 'os', (isOS == undefined ? (isOSErr !== undefined ? isOSErr : zErr) : isOS))
-	addBoth(3, 'version', (isVerExtra == '+' ? isVer + isVerExtra : isVer))
+	addBoth(3, 'version', (isVerExtra !== '' ? isVer + isVerExtra : isVer))
 	// set metricsPrefix
 	if (isGecko && isSmart) {
 		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'

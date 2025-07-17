@@ -571,9 +571,6 @@ function get_xslt_sort(aChars = []) {
 				'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A'
 			]
 		}
-		// note: if we sort by collatiom first and add the data in that order then it always matches (so far)
-		// the question is do we still get the same number of unique xslt hashes: I think so since collation is exactly that
-
 		// DONE: matches collator PoC
 		aChars.sort() // always resort: default is already sorted, but in TZP we'll reuse the oIntl.collator.sort array
 		//oData['chars'] = {'hash': mini(aChars.join(' , ').trim()), 'data': aChars.join(' , ').trim()}
@@ -581,6 +578,7 @@ function get_xslt_sort(aChars = []) {
 		// build xslt
 		aChars.forEach(function(item){aData.push('<a>'+ item +'</a>')})
 		const xData = '<?xml version="1.0" encoding="UTF-8"?><doc>'+ aData.join('') +'</doc>'
+		//console.log(mini(xData)) // 8f0f6080
 
 		// DONE: matches collator PoC
 		let code = isLocale
@@ -592,6 +590,7 @@ function get_xslt_sort(aChars = []) {
 			+'<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">'
 			+'<xsl:template match="/"><xsl:for-each select="doc/a"><xsl:sort select="text()"/>'
 			+'<xsl:value-of select="text()"/>,</xsl:for-each></xsl:template></xsl:stylesheet>'
+		//console.log(mini(xslText)) // 97940905
 
 		const parser = new DOMParser()
 		const xsltProcessor = new XSLTProcessor()
@@ -609,9 +608,7 @@ function get_xslt_sort(aChars = []) {
 			notation = isMatch ? collatormatch_green : collatormatch_red
 			notation = ''
 		}
-
 		dom.xslt_sort.innerHTML = oData.xslt.hash +' '+ notation +"<br>"+ json_highlight(oData)
-
 	} catch(e) {
 		dom.xslt_sort = e+""
 	}
@@ -627,7 +624,7 @@ Promise.all([
 
 	} else {
 		// tmp
-		if (isFile) {get_xslt_sort()}
+		//if (isFile) {get_xslt_sort()}
 	}
 })
 

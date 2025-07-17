@@ -69,30 +69,10 @@ function run() {
 		let hash = mini(res), code = ""
 
 		if (isFF) {
-			// only hash notate if 115+
-			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-			if (is115) {
-				if (hash == "db8d9901") {code = s14 +" [FF139+]"+ sc
+			// notate new if 140+
+			if (isVer > 139) {
+				if (hash == "db8d9901") {code = s14 +" [FF140+]"+ sc
 					/* timezone" + America/Coyhaique */
-				} else if (hash == "2a128964") {code = s14 +" [FF135+]"+ sc
-					/* 1930466
-					-35 timezones
-						Africa/Timbuktu, America/Argentina/ComodRivadavia, America/Coral_Harbour, America/Ensenada, America/Montreal,
-						America/Nipigon, America/Pangnirtung, America/Rainy_River, America/Rosario, America/Thunder_Bay,
-						America/Yellowknife, Asia/Chongqing, Asia/Harbin, Asia/Kashgar, Asia/Tel_Aviv, Atlantic/Jan_Mayen,
-						Australia/Currie, CET, CST6CDT, EET, EST, EST5EDT, Europe/Belfast, Europe/Tiraspol, Europe/Uzhgorod,
-						Europe/Zaporozhye, Factory, HST, MET, MST, MST7MDT, PST8PDT, Pacific/Enderbury, Pacific/Johnston, WET
-					+11 timezones
-						America/Kralendijk, America/Lower_Princes, America/Marigot, America/St_Barthelemy
-						Arctic/Longyearbyen, Europe/Bratislava, Europe/Busingen, Europe/Mariehamn, Europe/Podgorica,
-						Europe/San_Marino, Europe/Vatican
-					*/
-				} else if (hash == "13652de1") {code = s14 +" [FF134]"+ sc
-					// +2 currency: adds XCG, ZWG
-					// +8 numberingSystem: adds gara, gukh, krai, mymrepka, mymrpao, onao, outlined, sunu
-				} else if (hash == "59e3994e") {code = s14 +" [FF133]"+ sc
-					// 1922503: -1 timezone: Asia/Choibalsan dropped -> alias Asia/Ulaanbaatar
-				} else if (hash == "deb2f155") {code = s14 +" [FF115-132]"+ sc
 				} else {code = ' '+ zNEW
 				}
 			}
@@ -109,6 +89,7 @@ function run() {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	run()
 })
 

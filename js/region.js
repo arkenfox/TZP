@@ -106,17 +106,18 @@ function get_nav_dnt(METRIC) {
 
 function get_nav_online(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/onLine
-	let value, data =''
+	let value, data ='', notation = rfp_red
 	try {
 		value = navigator.onLine
 		if (runST) {value = undefined}
 		let typeCheck = typeFn(value)
 		// we expect blink, gecko, webkit to return a boolean
 		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+		if (value) {notation = rfp_green} // 1975851: FF142+
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	addBoth(5, METRIC, value,'','', data)
+	addBoth(5, METRIC, value,'', notation, data)
 	return
 }
 
@@ -146,6 +147,13 @@ function get_nav_gpc(METRIC) {
 }
 
 /* REGION */
+
+function add_microperf_intl(m, countC, tsub0, isIntl) {
+	if (undefined == oIntlPerf[m]) {oIntlPerf[m] = {}}
+	if (isIntl) {oIntlPerf[m]['constructors'] = countC}
+	let subname = (isIntl ? 'intl' : 'string')
+	oIntlPerf[m][subname] = nowFn() - tsub0
+}
 
 function set_isLanguageSmart() {
 	// set once: ignore android for now
@@ -277,15 +285,35 @@ function set_isLanguageSmart() {
 }
 
 function set_oIntlDateTests() {
-	// all dates must be timezone resistent: we do not want the noise: we are checking locales
-	// and want to maintain max entropy checks: timezone entropy == timezonename
+
+	// all dates (days/months/am-pm) must be timezone resistent
+	// we do not want the noise or extra checks we are checking locale AND timezonename
+	// timezone entropy is in the actual timezonename (we're confirming that here)
+
+	// however, PoCs need to cover all possible combos of locales x timezonenames because those
+	// are the TWO variables that I cannot control (oIntlTests only have ONE variable: locale)
+	// and not all locales handle timezonenames to the same degree: e.g.
+		// America/Los_Angles has 343 possible outcomes, Europe/Vatican has 344
+		// this is because pt-ao has a different result for the vatican than pt-ch
+		// which is not the case for los angeles
+
+	// checking
+	/* all identical dates+times identical: e.g. jan + fri
+		+14 Pacific/Kiritimati
+		+ 9 Asia/Pyongyang
+		+ 4 Asia/Baku
+		- 3 America/Sao_Paulo
+		-12 Etc/GMT+12
+	*/
+
 	let dates = {
-		// cover the seasons, key weekdays, am/pm
-		Jan: new Date("January 5, 2024 13:12:34"), // jan, fri pm
-		May: new Date("May 9, 2024 01:12:34"), // thur <-- adds something
-		Jul: new Date("July 5, 2024 01:12:34"), // july, fri am
-		Sep: new Date("September 6, 2024 01:12:34"), // sep, wed
-		Nov: new Date("November 6, 2024 01:12:34"), // nov wed am
+		// cover key month names, key weekday names, (and am/pm maybe it helps with h23/h11 etc)
+		// this covers date locale diffs: the tests themseleves also cover timezonename
+		Jan: new Date("January 5, 2024 13:12:34"),  // jan, fri
+		May: new Date("May 9, 2024 01:12:34"),      // may, thu
+		Jul: new Date("July 5, 2024 01:12:34"),     // jul, fri
+		Sep: new Date("September 6, 2024 01:12:34"),// sep, fri
+		Nov: new Date("November 6, 2024 01:12:34"), // nov, wed
 	}
 
 	oIntlDateTests = {
@@ -319,13 +347,22 @@ function set_oIntlTests() {
 	let tzDays = [new Date('August 1, 2019 0:00:00 UTC')],
 		tzLG = {'longGeneric': tzDays},
 		tzSG = {'shortGeneric': tzDays}
-	let curN = {'name': [-1]},
-		curS = {'symbol': [1000]},
-		curB = {'name': [-1], 'symbol': [1000]},
-		curA = {'accounting': [-1000], 'name': [-1], 'symbol': [1000]}
+	let curAN = {"accounting": [-1000], "name": [-1]},
+		curN = {"name": [-1]},
+		curS = {"symbol": [1000]}
 
-	// all dates must be timezone resistent: we do not want the noise: we are checking locales
-	// and want to maintain max entropy checks: timezone entropy == timezonename
+	// all dates (days/months/am-pm) must be timezone resistent
+	// we do not want the noise or extra checks we are checking locale only
+	// reported timezonename (andlocale) is tested set_oIntlDateTests section
+
+	// checking timezone resistance
+	/* all identical hashes
+		Pacific/Kiritimati +14
+		KABUL at +4:30
+		Buenos_Aires at -3:00
+		America/Adak at -10:00
+		Etc/GMT+12 at -12:00
+	*/
 	let dates = {
 		FSD: new Date('2023-06-11T01:12:34.5678'), // no Z
 		Era: new Date(-1, -11, -30),
@@ -349,13 +386,8 @@ function set_oIntlTests() {
 				'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A'
 			]
 		},
-		compact: {
-			'long': [0/0, 1000, 2e6, 6.6e12, 7e15],
-			'short': [-1100000000, -1000],
-		},
-		currency: {'KES': curB, 'MOP': curS, 'USD': curA, 'XXX': curN,},
-		dayperiod: {'long': [8,22], 'narrow': [8,15], 'short': [12,15,18]},
-		datetimeformat: {
+		// DTF
+		'datetimeformat.components': {
 			era: {
 				// we need to control the date part so toLocaleString matches
 				'long': [{era: 'long', year: 'numeric', month: 'numeric', day: 'numeric'}, [dates.Era]]
@@ -382,28 +414,14 @@ function set_oIntlTests() {
 				'2-digit': [{year: "2-digit"}, [dates.Jan]]
 			},
 		},
-		durationformat: {
-			'digital': {'a': {'milliseconds': 1}},
-			'long': {'a': {'years': 1, 'microseconds': 1}, 'b': {'seconds': 2}},
-			'narrow': {'a': {'years': 1, 'months': 2, 'seconds': 1, 'microseconds': 1000}},
-			'short': {'a': {'days': 2, 'seconds': 2, 'nanoseconds': 1}},
+		'datetimeformat.dayperiod': {
+			'long': [8,22], 'narrow': [8,15], 'short': [12,15,18]
 		},
-		listformat: {
+		'datetimeformat.listformat': {
 			'narrow': ['conjunction','disjunction','unit'],
 			'short': ['conjunction','unit']
 		},
-		notation: {
-			scientific: {'decimal': []},
-			standard: {'decimal': [0/0, -1000, 987654], 'percent': [1000]},
-		},
-		'numberformat_ftp': {
-			'decimal': [1.2],'group': [1000, 99999],'infinity': [Infinity],'minusSign': [-5],'nan': ['a']
-		},
-		pluralrules: {
-			cardinal: [0, 1, 2, 3, 7, 21, 100],
-			ordinal: [1, 2, 3, 4, 5, 8, 10, 81]
-		},
-		relatedyear: {
+		'datetimeformat.relatedyear': {
 			// these are all long
 			buddhist: [dates.RY],
 			chinese: [dates.RY],
@@ -415,24 +433,50 @@ function set_oIntlTests() {
 			japanese: [new Date("January 5, 2023 1:00:00")],
 			roc: [dates.RY],
 		},
-		relativetimeformat: { // 8 of 12
-			always: {'narrow': [[1, 'day'], [0, 'year']]},
-			auto: {'long': [[1, 'second']],'narrow': [[3,'day'],[0,'quarter'],[0,'second'],[1,'second'],[3,'second']]},
-		},
-		'relativetimeformat_ftp': { // 4 of 12
-			auto: {'narrow': [[0,'day'],[1,'day'],[1,'week'],[1,'year']]}
-		},
-		sign: {always: [-1, 0/0]},
-		timezonename: {
-			"Africa/Douala": tzLG,
-			"America/Montevideo": tzSG,
-			"America/Winnipeg": tzLG,
+		'datetimeformat.timezonename': {
+			'Africa/Douala': tzLG,
+			'America/Montevideo': tzSG,
+			'America/Winnipeg': tzLG,
 			'Asia/Hong_Kong': tzSG,
-			"Asia/Seoul": tzLG,
-			"Europe/London": tzSG,
-			"Asia/Muscat": tzSG,
+			'Asia/Seoul': tzLG,
+			'Europe/London': tzSG,
+			'Asia/Muscat': tzSG,
 		},
-		unit: {
+		// DN
+		displaynames: {
+			calendar: {
+				'short': ['chinese','ethiopic','gregory','islamic-rgsa','islamic-umalqura','roc'],
+			},
+			dateTimeField: {
+				'narrow': ['day','dayPeriod','weekOfYear','weekday'],
+				'short': ['era','month','second','timeZoneName'],
+			},
+			language: {'dialect': ['bn-in','en','fr-ch','gu','kl','sr-ba','zh-hk']},
+			region: {'narrow': ['CM','FR','TL','US','VC','VI','ZZ']},
+			script: {
+				// blink is case sensitive
+				'short': ['Arab','Beng','Cyrl','Deva','Guru','Hans','Latn','Mong','Mymr','Orya','Zxxx','Zzzz'],
+			},
+ 		},
+		// DF
+		durationformat: {
+			'digital': {'a': {'milliseconds': 1}},
+			'long': {'a': {'years': 1, 'microseconds': 1}, 'b': {'seconds': 2}},
+			'narrow': {'a': {'years': 1, 'months': 2, 'seconds': 1, 'microseconds': 1000}},
+			'short': {'a': {'days': 2, 'seconds': 2, 'nanoseconds': 1}},
+		},
+		// NF
+		'numberformat.compact': {'long': [0/0, 1000, 2e6, 6.6e12, 7e15],'short': [-1100000000, -1000],},
+		'numberformat.currency': {"KES": curS, 'ETB': curN, "GBP": curS, "USD": curAN, "XXX": curN},
+		'numberformat.formattoparts': {
+			'decimal': [1.2],'group': [1000, 99999],'infinity': [Infinity],'minusSign': [-5],'nan': ['a']
+		},
+		'numberformat.notation': {
+			scientific: {'decimal': []},
+			standard: {'decimal': [0/0, -1000, 987654], 'percent': [1000]},
+		},
+		'numberformat.sign': {always: [-1, 0/0]},
+		'numberformat.unit': {
 			'byte': unitN, // ICU 74
 			'fahrenheit': unitB,
 			'foot': unitL,
@@ -444,12 +488,29 @@ function set_oIntlTests() {
 			'percent': {"long": [1], "narrow": [1], "short": [987654]},
 			'second': {'long': [1], 'narrow': [1], 'short': [987654]},
 			'terabyte': unitL,
-		}
+		},
+		// other
+		pluralrules: {
+			cardinal: [0, 1, 2, 3, 7, 21, 100],
+			ordinal: [1, 2, 3, 4, 5, 8, 10, 81]
+		},
+		relativetimeformat: { // 8 of 12
+			always: {'narrow': [[1, 'day'], [0, 'year']]},
+			auto: {
+				'long': [[1, 'second']],
+				'narrow': [[0,'second'],[1,'second'],[3,'second'],[0,'day'],[1,'day'], [3,'day'],[1,'week'],[0,'quarter'],[1,'year']]
+			},
+		},
+		resolvedoptions: {
+			collator: ['caseFirst'],
+			datetimeformat: ['calendar','day','hourcycle','month','numberingSystem'],
+			pluralrules: ['pluralCategories'],
+		},
 	}
-	try {oIntlTests['compact']['long'].push(BigInt('987354000000000000'))} catch {}
+	try {oIntlTests['numberformat.compact']['long'].push(BigInt('987354000000000000'))} catch {}
 	let nBig = 987654
 	try {nBig = BigInt('987354000000000000')} catch {}
-	oIntlTests['notation']['scientific']['decimal'].push(nBig)
+	oIntlTests['numberformat.notation']['scientific']['decimal'].push(nBig)
 	// build keys
 	for (const k of Object.keys(oIntlTests)) {
 		oIntlKeys[k] = []
@@ -660,55 +721,81 @@ function get_language_system(METRIC) {
 }
 
 function get_dates_intl() {
-	function get_metric(m, code, tz, isIntl) {
+	function get_metric(m, isIntl) {
+		let tsub0 = nowFn(), countC = 0
 		try {
-			let obj = {}, tests = oIntlDateTests[m], testkeys = oIntlDateKeys[m], value
+			let obj = {}, objcheck = {}, tests = oIntlDateTests[m], testkeys = oIntlDateKeys[m], value
+			let formatter, checker
 			if ('date_timestyle' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					obj[key] = {}
+					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
-						let data = [], styles = s.split('_'), cal = 'default' == key ? undefined : key
-						let formatter = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: styles[0], timeStyle: styles[1], timeZone: tz})
-						tests[key][s].forEach(function(n) {value = formatter.format(n); data.push(value)})
-						obj[key][s] = data
+						let data = [], datacheck = []
+						let styles = s.split('_'), cal = 'default' == key ? undefined : key
+						// test
+						let options = {calendar: cal, dateStyle: styles[0], timeStyle: styles[1], timeZone: tzTest}
+						formatter = Intl.DateTimeFormat(locTest, options); countC++
+						// check
+						if (isCheck) {
+							options = {calendar: cal, dateStyle: styles[0], timeStyle: styles[1], timeZone: tzCheck}
+							checker = Intl.DateTimeFormat(locCheck, options); countC++
+						}
+						tests[key][s].forEach(function(n) {
+							value = formatter.format(n); data.push(value)
+							if (isCheck) {value = checker.format(n); datacheck.push(value)}
+						})
+						obj[key][s] = data; objcheck[key][s] = datacheck
 					})
 				}
 			}
-			return {'hash': mini(obj), 'metrics': obj}
+			// microperf
+			add_microperf_intl('datetimeformat.'+ m, countC, tsub0, isIntl)
+			// return
+			return [
+				{'hash': mini(obj), 'metrics': obj},
+				(isCheck ? {'hash': mini(objcheck), 'metrics': objcheck} : undefined)
+			]
 		} catch(e) {
+			add_microperf_intl('datetimeformat.'+ m, countC, tsub0, isIntl)
 			log_error(4, METRIC +'_'+ m, e)
-			return zErr
+			return [zErr, zErr]
 		}
 	}
 
 	const oMetrics = {
 		intl : ['date_timestyle',],
-		'to*string': [],
+		'to-string': [],
 	}
-	let METRIC, oString = {}
-	let oIntlDateTemp = {}
+	let METRIC, oStringExpected = {}, isCheck = isLocaleValid && isTimeZoneValid
+	let locTest = undefined, locCheck = isLocaleValue // use variables so I can test them
+	let tzTest = undefined, tzCheck = isTimeZoneValue // use variables so I can test them
+
 	Object.keys(oMetrics).forEach(function(list){
 		METRIC = 'dates_'+ list
 		let t0 = nowFn(), isIntl = 'intl' == list, notation = localetz_red
-		let oData = {}, oCheck = {}
+		let oData = {}, oCheck = {} // data from each intl/string loop
+
 		oMetrics[list].forEach(function(m) {
-			let value = get_metric(m, undefined, undefined, isIntl) 
-			oData[m] = value
-			if (isIntl && oMetrics['to*string'].includes(m)) {oString[m] = value} // intl version of to*string
+			let res = get_metric(m, isIntl) 
+			oData[m] = res[0]
+			oCheck[m] = res[1]
+			let isString = (isIntl && oMetrics['to-string'].includes(m))
+			if (isString) {oStringExpected[m] = res[0]} // intl version of to*string to compare to
+			// console.log(list, res); console.log('test', oData); console.log('check', oCheck); console.log('expected string', oStringExpected)
 		})
 		let hash = mini(oData)
+		// on string loop (we have an empty tostring list hence the extra check)
 		if (!isIntl && oMetrics[list].length) {
-			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oString) ? intl_green : intl_red))
+			// does the undefined string data match the undefined intl data
+			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oStringExpected) ? intl_green : intl_red))
 		}
-		if (isLocaleValid && isTimeZoneValid) {
-			oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isTimeZoneValue, isIntl)})
-			//oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, 'fr', 'Asia/Brunei', isIntl)}) // test
+		if (isCheck) {
 			if (hash == mini(oCheck)) {
 				notation = localetz_green
 			} else {
-				addDetail(METRIC +'_check', oCheck)
-				notation = addButton('bad', METRIC +'_check', "<span class='health'>"+ cross +"</span> locale + timezone")
+				addDetail(METRIC +'_expected', oCheck)
+				notation = addButton('bad', METRIC +'_expected', "<span class='health'>"+ cross +"</span> locale + timezone")
 			}
 		}
 		if (oMetrics[list].length) { // temp check until we start building string tests
@@ -720,191 +807,311 @@ function get_dates_intl() {
 }
 
 function get_locale_intl() {
-	function get_metric(m, code, isIntl) {
+	function get_metric(m, isIntl) {
+		let tsub0 = nowFn(), countC = 0
 		try {
-			let obj = {}, tests = oIntlTests[m], testkeys = oIntlKeys[m], value
+			let obj = {}, objcheck = {}, tests = oIntlTests[m], testkeys = oIntlKeys[m], value
+			let formatter, checker
+
 			if ('collation' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
 					let testdata = tests[key].sort() // always resort
-					obj[key] = testdata.sort(Intl.Collator(code, {usage: key}).compare).join(' , ').trim() // spaces before and to help LTR/RTL
+					// trim leading/trailing spacesto help LTR/RTL
+					obj[key] = testdata.sort(Intl.Collator(locTest, {usage: key}).compare).join(' , ').trim(); countC++
+					if (isCheck) {objcheck[key] = testdata.sort(Intl.Collator(locCheck, {usage: key}).compare).join(' , ').trim(); countC++}
 				}
-			} else if ('compact' == m) {
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i], data = [], formatter
-					let option = {notation: m, compactDisplay: key, useGrouping: true}
-					if (isIntl) {formatter = new Intl.NumberFormat(code, option)}
-					tests[key].forEach(function(n) {
-						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option)); data.push(value)
-					})
-					obj[key] = data
-				}
-			} else if ('currency' == m) {
+			} else if ('datetimeformat.components' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					obj[key] = {}
+					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
-						let option = 'accounting' == s ? {style: m, currency: key, currencySign: s} : {style: m, currency: key, currencyDisplay: s}, data = []
-						tests[key][s].forEach(function(n) {
-							value = (isIntl ? Intl.NumberFormat(code, option).format(n) : (n).toLocaleString(code, option)); data.push(value)
-						})
-						obj[key][s] = data
-					})
-				}
-			} else if ('datetimeformat' == m) {
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i]
-					obj[key] = {}
-					Object.keys(tests[key]).forEach(function(s) {
-						let option = tests[key][s][0], formatter, data = []
-						if (isIntl) {formatter = new Intl.DateTimeFormat(code, option)}
+						let option = tests[key][s][0]
+						let data = [], datacheck = []
+						if (isIntl) {
+							formatter = new Intl.DateTimeFormat(locTest, option); countC++
+							if (isCheck) {checker = new Intl.DateTimeFormat(locCheck, option); countC++}
+						}
 						tests[key][s][1].forEach(function(n){
-							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option)); data.push(value)
+							value = (isIntl ? formatter.format(n) : (n).toLocaleString(strTest, option)); data.push(value)
+							if (isCheck) {value = (isIntl ? checker.format(n) : (n).toLocaleString(strCheck, option)); datacheck.push(value)}
 						})
-						obj[key][s] = data
+						obj[key][s] = data; objcheck[key][s] = datacheck
 					})
 				}
-			} else if ('dayperiod' == m) {
+			} else if ('datetimeformat.dayperiod' == m) {
 				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i], data = []
-					let formatter = new Intl.DateTimeFormat(code, {hourCycle: 'h12', dayPeriod: key})
-					tests[key].forEach(function(item) {data.push(formatter.format(dayperiods[item]))})
-					obj[key] = data
+					let key = testkeys[i]
+					let data = [], datacheck = []
+					formatter = new Intl.DateTimeFormat(locTest, {hourCycle: 'h12', dayPeriod: key}); countC++
+					if (isCheck) {checker = new Intl.DateTimeFormat(locCheck, {hourCycle: 'h12', dayPeriod: key}); countC++}
+					tests[key].forEach(function(item) {
+						data.push(formatter.format(dayperiods[item]))
+						if (isCheck) {datacheck.push(checker.format(dayperiods[item]))}
+					})
+					obj[key] = data; objcheck[key] = datacheck
+				}
+			} else if ('datetimeformat.listformat' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let data = [], datacheck = []
+					tests[key].forEach(function(item) {
+						data.push(new Intl.ListFormat(locTest, {style: key, type: item}).format(['a','b','c'])); countC++
+						if (isCheck) {datacheck.push(new Intl.ListFormat(locCheck, {style: key, type: item}).format(['a','b','c'])); countC++}
+					})
+					obj[key] = data; objcheck[key] = datacheck
+				}
+			} else if ('datetimeformat.relatedyear' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let cal = 'default' == key ? undefined : key
+					let data = [], datacheck = []
+					if (isIntl) {
+						formatter = Intl.DateTimeFormat(locTest, {calendar: cal, relatedYear: 'long'}); countC++
+						if (isCheck) {checker = Intl.DateTimeFormat(locCheck, {calendar: cal, relatedYear: 'long'}); countC++}
+					}
+					tests[key].forEach(function(d) {
+						let stroptions = {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'}
+						value = (isIntl ? formatter.format(d) : (d).toLocaleString(strTest, stroptions)); data.push(value)
+						if (isCheck) {value = (isIntl ? checker.format(d) : (d).toLocaleString(strCheck, stroptions)); datacheck.push(value)}
+					})
+					obj[key] = data; objcheck[key] = datacheck
+				}
+			} else if ('datetimeformat.timezonename' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let data = [], datacheck = []
+					Object.keys(tests[key]).forEach(function(tzn){
+						try {
+							// use y+m+d numeric so toLocaleString matches
+							// use hour12 in case - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
+							// key: e.g. Africa/Douala | tzn: e.g. longGeneric
+							let option = {year: 'numeric', month: 'numeric', day: 'numeric', hour12: true, timeZone: key, timeZoneName: tzn}
+							if (isIntl) {
+								formatter = Intl.DateTimeFormat(locTest, option); countC++
+								if (isCheck) {checker = Intl.DateTimeFormat(locCheck, option); countC++}
+							}
+							tests[key][tzn].forEach(function(dte){
+
+								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(strTest, option)); data.push(value)
+								if(isCheck) {value = (isIntl ? checker.format(dte) : (dte).toLocaleString(strCheck, option)); datacheck.push(value)}
+							})
+						} catch {} // ignore invalid
+						if (data.length) {obj[key] = data}
+						if (datacheck.length) {objcheck[key] = datacheck}
+					})
+				}
+				if (!Object.keys(obj).length) {let trap = Intl.DateTimeFormat(locTest, {timeZoneName: 'longGeneric'})} // trap error
+			} else if ('displaynames' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					obj[key] = {}; objcheck[key] = {}
+					Object.keys(tests[key]).forEach(function(s) { // for each style
+						let options = {type: key, style: s}
+						if ('language' == key) {options = {type: key, languageDisplay: s}}
+						let data = {}, datacheck = {}
+						// displaynames takes an empty array for undefined, but allow oour override for testing
+						let locIntl = undefined == locTest ? [] : locTest
+						formatter = new Intl.DisplayNames(locIntl, options); countC++
+						if (isCheck) {checker = new Intl.DisplayNames(locCheck, options); countC++}
+						tests[key][s].forEach(function(item) {
+							data[item] = formatter.of(item)
+							if (isCheck) {datacheck[item] = checker.of(item)}
+						})
+						obj[key][s] = data; objcheck[key][s] = datacheck
+					})
 				}
 			} else if ('durationformat' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
 					let yearformat = ('long' == key || 'short' == key) ? 'always' : 'auto' // long we want to force 0 for years
-					let formatter = new Intl.DurationFormat(code, {style: key, yearsDisplay: yearformat})
-					let tmpArray = []
-					for (const item of Object.keys(tests[key])) {tmpArray.push(formatter.format(tests[key][item]))}
-					obj[key] = tmpArray.join(' | ')
+					formatter = new Intl.DurationFormat(locTest, {style: key, yearsDisplay: yearformat}); countC++
+					if (isCheck) {checker = new Intl.DurationFormat(locCheck, {style: key, yearsDisplay: yearformat}); countC++}
+					let data = [], datacheck = []
+					for (const item of Object.keys(tests[key])) {
+						data.push(formatter.format(tests[key][item]))
+						if (isCheck) {datacheck.push(checker.format(tests[key][item]))}
+					}
+					obj[key] = data.join(' | '); objcheck[key] = datacheck.join(' | ')
 				}
-			} else if ('listformat' == m) {
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i], data = []
-					tests[key].forEach(function(item) {data.push(new Intl.ListFormat(code, {style: key, type: item}).format(['a','b','c']))})
-					obj[key] = data
-				}
-			} else if ('notation' == m) {
+			} else if ('numberformat.compact' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					obj[key] = {}
+					let option = {notation: 'compact', compactDisplay: key, useGrouping: true}
+					let data = [], datacheck = []
+					if (isIntl) {
+						formatter = new Intl.NumberFormat(locTest, option); countC++
+						if (isCheck) {checker = new Intl.NumberFormat(locCheck, option); countC++}
+					}
+					tests[key].forEach(function(n) {
+						value = (isIntl ? formatter.format(n) : (n).toLocaleString(strTest, option)); data.push(value)
+						if (isCheck) {value = (isIntl ? checker.format(n) : (n).toLocaleString(strCheck, option)); datacheck.push(value)}
+					})
+					obj[key] = data; objcheck[key] = datacheck
+				}
+			} else if ('numberformat.currency' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
-						let formatter = (isIntl ? Intl.NumberFormat(code, {notation: key, style: s}) : undefined), data = []
-						tests[key][s].forEach(function(n){
-							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {notation: key, style: s})); data.push(value)
+						let option = 'accounting' == s ? {style: 'currency', currency: key, currencySign: s} : {style: 'currency', currency: key, currencyDisplay: s}
+						let data = [], datacheck = []
+						tests[key][s].forEach(function(n) {
+							value = (isIntl ? Intl.NumberFormat(locTest, option).format(n) : (n).toLocaleString(strTest, option))
+							data.push(value); countC++
+							if (isCheck) {
+								value = (isIntl ? Intl.NumberFormat(locCheck, option).format(n) : (n).toLocaleString(strCheck, option))
+								datacheck.push(value); countC++
+							}
 						})
-						obj[key][s] = data
+						obj[key][s] = data; objcheck[key][s] = datacheck
 					})
 				}
-			} else if ('numberformat_ftp' == m) {
+			} else if ('numberformat.formattoparts' == m) {
 				function get_value(type, aParts) {
 					for (let i=0; i < aParts.length; i++) {
 						if (aParts[i].type === type) {str = aParts[i].value; return (str.length == 1 ? str.charCodeAt(0) : str)}
 					}
 					return 'none'
 				}
-				let formatter = Intl.NumberFormat(code), str
+				formatter = Intl.NumberFormat(locTest); countC++
+				if (isCheck) {checker = Intl.NumberFormat(locCheck); countC++}
+				let str
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					let data = []
-					tests[key].forEach(function(num){data.push(get_value(key, formatter.formatToParts(num)))})
-					obj[key] = data
-				}
-			} else if ('pluralrules' == m) {
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i], data = [], prev='', current=''
-					let formatter = new Intl.PluralRules(code, {type: key}), nos = tests[key]
-					nos.forEach(function(n) {
-						current = formatter.select(n)
-						if (prev !== current) {data.push(n +': '+ current)}
-						prev = current
+					let data = [], datacheck = []
+					tests[key].forEach(function(num){
+						data.push(get_value(key, formatter.formatToParts(num)))
+						if (isCheck) {datacheck.push(get_value(key, checker.formatToParts(num)))}
 					})
-					obj[key] = data
+					obj[key] = data; objcheck[key] = datacheck
 				}
-			} else if ('relatedyear' == m) {
+			} else if ('numberformat.notation' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					let cal = 'default' == key ? undefined : key
-					let formatter = Intl.DateTimeFormat(code, {calendar: cal, relatedYear: 'long'}), data = []
-					tests[key].forEach(function(d) {
-						let stroptions = {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'}
-						value = (isIntl ? formatter.format(d) : (d).toLocaleString(code, stroptions)); data.push(value)
-					})
-					obj[key] = data
-				}
-			} else if ('relativetimeformat' == m) {
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i]
-					obj[key] = {}
-					Object.keys(tests[key]).forEach(function(item) {
-						let formatter = new Intl.RelativeTimeFormat(code, {style: item, numeric: key}), data = []
-						tests[key][item].forEach(function(pair){data.push(formatter.format(pair[0], pair[1]))})
-						obj[key][item] = data
-					})
-				}
-			} else if ('relativetimeformat_ftp' == m) {
-				function parts(length, value) {
-					let output ='', tmp = formatter.formatToParts(length, value)
-					for (let x=0; x < tmp.length; x++) {output += tmp[x].value}
-					return output
-				}
-				let formatter, data = []
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i]
-					obj[key] = {}
+					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
-						formatter = new Intl.RelativeTimeFormat(code, {style: s, numeric: key}), data = []
-						tests[key][s].forEach(function(pair){data.push(parts(pair[0], pair[1]))})
-						obj[key][s] = data
+						let data = [], datacheck = []
+						if (isIntl) {
+							formatter = Intl.NumberFormat(locTest, {notation: key, style: s}); countC++
+							if (isCheck) {checker = Intl.NumberFormat(locCheck, {notation: key, style: s}); countC++}
+						}
+						tests[key][s].forEach(function(n){
+							value = (isIntl ? formatter.format(n) : (n).toLocaleString(strTest, {notation: key, style: s})); data.push(value)
+							if (isCheck) {value = (isIntl ? checker.format(n) : (n).toLocaleString(strCheck, {notation: key, style: s})); datacheck.push(value)}
+						})
+						obj[key][s] = data; objcheck[key][s] = datacheck
 					})
 				}
-			} else if ('sign' == m) {
+			} else if ('numberformat.sign' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					let formatter = (isIntl ? new Intl.NumberFormat(code, {signDisplay: key}) : undefined), data = []
+					let data = [], datacheck = []
+					if (isIntl) {
+						formatter = new Intl.NumberFormat(locTest, {signDisplay: key}); countC++
+						if (isCheck) {checker = new Intl.NumberFormat(locCheck, {signDisplay: key}); countC++}
+					}
 					tests[key].forEach(function(n){
-						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {signDisplay: key})); data.push(value)
+						value = (isIntl ? formatter.format(n) : (n).toLocaleString(strTest, {signDisplay: key})); data.push(value)
+						if (isCheck) {value = (isIntl ? checker.format(n) : (n).toLocaleString(strCheck, {signDisplay: key})); datacheck.push(value)}
 					})
-					obj[key] = data
+					obj[key] = data; objcheck[key] = datacheck
 				}
-			} else if ('timezonename' == m) {
+			} else if ('numberformat.unit' == m) {
 				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i], data = []
-					Object.keys(tests[key]).forEach(function(tzn){
-						try {
-							// use y+m+d numeric so toLocaleString matches
-							// use hour12 in case - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
-							let option = {year: 'numeric', month: 'numeric', day: 'numeric', hour12: true, timeZone: key, timeZoneName: tzn}
-							let formatter = (isIntl ? Intl.DateTimeFormat(code, option) : undefined)
-							tests[key][tzn].forEach(function(dte){
-								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(code, option)); data.push(value)
-							})
-						} catch {} // ignore invalid
-						if (data.length) {obj[key] = data}
-					})
-				}
-				if (!Object.keys(obj).length) {let trap = Intl.DateTimeFormat(code, {timeZoneName: 'longGeneric'})} // trap error
-			} else if ('unit' == m) {
-				for (let i=0; i < testkeys.length; i++) {
-					let key = testkeys[i], data = []
+					let key = testkeys[i]
+					let data = [], datacheck = []
 					Object.keys(tests[key]).forEach(function(ud){
 						try {
-							let formatter = (isIntl ? Intl.NumberFormat(code, {style: 'unit', unit: key, unitDisplay: ud}) : undefined)
+							if (isIntl) {
+								formatter = Intl.NumberFormat(locTest, {style: 'unit', unit: key, unitDisplay: ud}); countC++
+								if (isCheck) {checker = Intl.NumberFormat(locCheck, {style: 'unit', unit: key, unitDisplay: ud}); countC++}
+							}
 							tests[key][ud].forEach(function(n){
-								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: 'unit', unit: key, unitDisplay: ud})); data.push(value)
+								value = (isIntl ? formatter.format(n) : (n).toLocaleString(strTest, {style: 'unit', unit: key, unitDisplay: ud}))
+								data.push(value)
+								if (isCheck) {
+									value = (isIntl ? checker.format(n) :	(n).toLocaleString(strCheck, {style: 'unit', unit: key, unitDisplay: ud}))
+									datacheck.push(value)
+								}
 							})
 						} catch {} // ignore invalid
 					})
 					if (data.length) {obj[key] = data}
+					if (datacheck.length) {objcheck[key] = datacheck}
 				}
-				if (!Object.keys(obj).length) {let trap = Intl.NumberFormat(code, {style: 'unit', unit: 'day'})} // trap error
+				if (!Object.keys(obj).length) {let trap = Intl.NumberFormat(locTest, {style: 'unit', unit: 'day'})} // trap error
+			} else if ('pluralrules' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let data = [], datacheck = []
+					formatter = new Intl.PluralRules(locTest, {type: key}); countC++
+					if (isCheck) {checker = new Intl.PluralRules(locCheck, {type: key}); countC++}
+					let prev='', current='', prevchk='', currentchk=''
+					tests[key].forEach(function(n) {
+						current = formatter.select(n); if (prev !== current) {data.push(n +': '+ current)}; prev = current
+						if (isCheck) {
+							currentchk = checker.select(n); if (prevchk !== currentchk) {datacheck.push(n +': '+ currentchk)}; prevchk = currentchk
+						}
+					})
+					obj[key] = data; objcheck[key] = datacheck
+				}
+			} else if ('relativetimeformat' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					obj[key] = {}; objcheck[key] = {}
+					Object.keys(tests[key]).forEach(function(s) {
+						let data = [], datacheck = []
+						formatter = new Intl.RelativeTimeFormat(locTest, {style: s, numeric: key}); countC++
+						if (isCheck) {checker = new Intl.RelativeTimeFormat(locCheck, {style: s, numeric: key}); countC++}
+						tests[key][s].forEach(function(pair){
+							data.push(formatter.format(pair[0], pair[1]))
+							if (isCheck) {datacheck.push(checker.format(pair[0], pair[1]))}
+						})
+						obj[key][s] = data; objcheck[key][s] = datacheck
+					})
+				}
+			} else if ('resolvedoptions' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					if ('collator' == key) {formatter = Intl.Collator(locTest).resolvedOptions(); countC++
+					} else if ('datetimeformat' == key) {formatter = Intl.DateTimeFormat(locTest).resolvedOptions(); countC++
+					} else if ('pluralrules' == key) {formatter = new Intl.PluralRules(locTest).resolvedOptions(); countC++
+					}
+					if (isCheck) {
+						if ('collator' == key) {checker = Intl.Collator(locCheck).resolvedOptions(); countC++
+						} else if ('datetimeformat' == key) {checker = Intl.DateTimeFormat(locCheck).resolvedOptions(); countC++
+						} else if ('pluralrules' == key) {checker = new Intl.PluralRules(locCheck).resolvedOptions(); countC++
+						}
+					}
+					obj[key] = {}; objcheck[key] = {}
+					tests[key].forEach(function(s){
+						if ('hourcycle' == s) {value = Intl.DateTimeFormat(locTest, {hour: 'numeric'}).resolvedOptions().hourCycle; countC++
+						} else if ('pluralCategories' == s) {value = formatter[s].join(', ')
+						} else {value = formatter[s]}
+						obj[key][s] = value
+
+						if (isCheck) {
+							if ('hourcycle' == s) {value = Intl.DateTimeFormat(locCheck, {hour: 'numeric'}).resolvedOptions().hourCycle; countC++
+							} else if ('pluralCategories' == s) {value = checker[s].join(', ')
+							} else {value = checker[s]}
+							objcheck[key][s] = value
+						}
+					})
+				}
 			}
-			return {'hash': mini(obj), 'metrics': obj}
+			// microperf
+			add_microperf_intl(m, countC, tsub0, isIntl)
+			// return
+			return [
+				//{'hash': mini(obj), 'metrics': obj},
+				//(isCheck ? {'hash': mini(objcheck), 'metrics': objcheck} : undefined)
+				obj, (isCheck ? objcheck : undefined)
+			]
 		} catch(e) {
-			log_error(4, METRIC +'_'+ m, e)
-			return zErr
+			add_microperf_intl(m, countC, tsub0, isIntl)
+			log_error(4, METRIC +'_'+ m.replace('.','_'), e)
+			return [zErr, zErr]
 		}
 	}
 
@@ -917,102 +1124,93 @@ function get_locale_intl() {
 	}
 	const oMetrics = {
 		intl : [
-			'collation','compact','currency','durationformat','datetimeformat','dayperiod',
-			'listformat','notation','numberformat_ftp','pluralrules','relatedyear',
-			'relativetimeformat','relativetimeformat_ftp','sign','timezonename','unit'
+			'collation',
+			'datetimeformat.components','datetimeformat.dayperiod','datetimeformat.listformat',
+				'datetimeformat.relatedyear','datetimeformat.timezonename',
+			'displaynames','durationformat',
+			'numberformat.compact','numberformat.currency','numberformat.formattoparts',
+				'numberformat.notation','numberformat.sign','numberformat.unit',
+			'pluralrules','relativetimeformat','resolvedoptions',
 		],
 		tolocalestring: [
-			'compact','currency','datetimeformat','notation','relatedyear','sign','timezonename','unit'
+			'datetimeformat.components','datetimeformat.relatedyear','datetimeformat.timezonename',
+			'numberformat.compact','numberformat.currency','numberformat.notation','numberformat.sign','numberformat.unit',
 		],
 	}
-	let METRIC, oString = {}
+	let METRIC, isCheck = isLocaleValid
+	let oStringExpected = {}, oStringExpectedChildren = {}
+	let locTest = undefined, locCheck = isLocaleValue // use variables so I can test them
+	let strTest = undefined, strCheck = isLocaleValue
+	//locTest = 'de'; locCheck = 'de' // should be the same
+	//locTest = 'it'; locCheck = 'ko' // everything should be different
+
+	//strTest = 'fr', strCheck = 'fr' // should be the same
+	//strTest = 'pl', strCheck = 'es' // everything should be different
+
 	Object.keys(oMetrics).forEach(function(list){
 		METRIC = 'locale_'+ list
 		let t0 = nowFn(), isIntl = 'intl' == list, notation = locale_red
-		let oData = {}, oCheck = {}
+		let oData = {}, oCheck = {} // data from each intl/string loop
+		let oDataChildren = {}, oCheckChildren = {}
+
 		oMetrics[list].forEach(function(m) {
-			let value = get_metric(m, undefined, isIntl) 
-			oData[m] = value
-			if (isIntl && oMetrics['tolocalestring'].includes(m)) {oString[m] = value} // intl version of tolocalestring
+			let res = get_metric(m, isIntl)
+			let isParent = m.includes('.')
+			let isString = (isIntl && oMetrics['tolocalestring'].includes(m))			
+			if (isParent) {
+				let parent = m.split('.')[0], child = m.split('.')[1]
+				// placeholders (so sorted order is kelp)
+				oData[parent] = {}
+				oCheck[parent] = {}
+
+				// children
+				if (undefined == oDataChildren[parent]) {oDataChildren[parent] = {}}
+					oDataChildren[parent][child] = res[0]
+				if (undefined == oCheckChildren[parent]) {oCheckChildren[parent] = {}}
+					oCheckChildren[parent][child] = res[1]
+				if (isString) {
+					oStringExpected[parent] = {}
+					if (undefined == oStringExpectedChildren[parent]) {oStringExpectedChildren[parent] = {}}
+					oStringExpectedChildren[parent][child] = res[0]
+				}
+			} else {
+				// direct: don't hash zErr
+				oData[m] = zErr == res[0] ? zErr : {'hash': mini(res[0]), 'metrics': res[0]}
+				oCheck[m] = zErr == res[1] ? zErr: {'hash': mini(res[1]), 'metrics': res[1]}
+				if (isString) {
+					oStringExpected[m] = zErr == res[0] ? zErr : {'hash': mini(res[0]), 'metrics': res[0]}
+				}
+			}
 		})
-		let hash = mini(oData)
-		if (!isIntl) {
-			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oString) ? intl_green : intl_red))
+		// update placeholders
+		for (const k of Object.keys(oDataChildren)) {
+			oData[k] = {'hash': mini(oDataChildren[k]), 'metrics': oDataChildren[k]}
+			oCheck[k] = {'hash': mini(oCheckChildren[k]), 'metrics': oCheckChildren[k]}
 		}
-		if (isLocaleValid) {
-			oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isIntl)})
-			//oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, 'fr', isIntl)}) // test
+		let hash = mini(oData)
+
+		// update expected string placeholder on the intl loop
+		if (isIntl) {
+			for (const k of Object.keys(oStringExpectedChildren)) {
+				oStringExpected[k] = {'hash': mini(oStringExpectedChildren[k]), 'metrics': oStringExpectedChildren[k]}
+			}
+		} else {
+			// on string loop compare it
+			// does the undefined string data match the undefined intl data
+			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oStringExpected) ? intl_green : intl_red))
+		}
+		if (isCheck) {
 			if (hash == mini(oCheck)) {
 				notation = locale_green
 			} else {
-				addDetail(METRIC +'_check', oCheck)
-				notation = addButton('bad', METRIC +'_check', "<span class='health'>"+ cross +"</span> locale")
+				addDetail(METRIC +'_expected', oCheck)
+				notation = addButton('bad', METRIC +'_expected', "<span class='health'>"+ cross +"</span> locale")
 			}
 		}
 		addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
 		log_perf(4, METRIC, t0)
 		if (!isIntl) {return}
 	})
-}
-
-function get_locale_resolvedoptions(METRIC) {
-	// already sorted
-	let oTests = {
-		collator: ['caseFirst'],
-		datetimeformat: ['calendar','day','hourcycle','month','numberingSystem'],
-		pluralrules: ['pluralCategories'],
-	}
-	function get_metrics(code) {
-		let tmpData = {}
-		for (const k of Object.keys(oTests)) {
-			tmpData[k] = {}
-			let metrics = oTests[k]
-			try {
-				// set constructor
-				let constructor
-				if ('collator' == k) {constructor = Intl.Collator(code).resolvedOptions()
-				} else if ('datetimeformat' == k) {constructor = Intl.DateTimeFormat(code).resolvedOptions()
-				} else if ('pluralrules' == k) {constructor = new Intl.PluralRules(code).resolvedOptions()
-				}
-				// get values
-				metrics.forEach(function(m) {
-					try {
-						let value
-						if ('hourcycle' == m) {
-							value = Intl.DateTimeFormat(code, {hour: 'numeric'}).resolvedOptions().hourCycle
-						} else if ('pluralCategories' == m) {
-							value = constructor[m].join(', ')
-						} else {
-							value = constructor[m]
-						}
-						tmpData[k][m] = value
-					} catch(e) {
-						log_error(4, METRIC +'_'+ k +'_'+ m, e)
-						tmpData[k][m] = zErr
-					}
-				})
-			} catch(e) {
-				log_error(4, METRIC +'_'+ k, e)
-				tmpData[k] = zErr
-			}
-		}
-		return tmpData
-	}
-
-	let oData = get_metrics(undefined), oCheck = {}, notation = locale_red
-	let hash = mini(oData)
-	if (isLocaleValid) {
-		oCheck = get_metrics(isLocaleValue)
-		//oCheck = get_metrics('et') // test
-		if (hash == mini(oCheck)) {
-			notation = locale_green
-		} else {
-			addDetail(METRIC +'_check', oCheck)
-			notation = addButton('bad', METRIC +'_check', "<span class='health'>"+ cross +"</span> locale")
-		}
-	}
-	addBoth(4, METRIC, hash, addButton(4, METRIC), notation, oData)
-	return
 }
 
 function get_timezone(METRIC) {
@@ -1770,6 +1968,8 @@ const get_dates = () => new Promise(resolve => {
 })
 
 const outputRegion = () => new Promise(resolve => {
+	oIntlPerf = {} // reset
+
 	set_isLanguageSmart() // required for BB health in get_language_locale()
 	Promise.all([
 		get_geo('geolocation'),
@@ -1781,7 +1981,6 @@ const outputRegion = () => new Promise(resolve => {
 		}
 		Promise.all([
 			get_language_system('languages_system'), // uses isLanguagesNav
-			get_locale_resolvedoptions('locale_resolvedoptions'),
 			get_locale_intl(),
 			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
 			get_l10n_validation_messages('l10n_validation_messages'),
@@ -1795,6 +1994,38 @@ const outputRegion = () => new Promise(resolve => {
 				get_dates(), // to migrate to get_dates_intl
 				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
+				// microperf: add totals, re-order into anew obj
+				let btn = '', count = 0, newobj = {'all': {}}
+
+				let iTime = 0, sTime = 0 // running totals
+				let countInteger = 0 
+				for (const k of Object.keys(oIntlPerf).sort()) {
+					newobj[k] = oIntlPerf[k]
+					let kTime = 0 // running sub total
+					for (const j of Object.keys(oIntlPerf[k]).sort()) {
+						let value = oIntlPerf[k][j]
+						if ('constructors' == j) {
+							count += value
+						} else {
+							if ('intl' == j) {iTime += value} else {sTime += value}
+							kTime += value // sum time for this metric k
+							if (Number.isInteger(value)) {countInteger++} // track integers
+							if (isGecko && 16.67 == value.toFixed(2)) {countInteger++} // add RFP "integers"
+						}
+					}
+					// add a subtotal if more than expected constructors|intl
+					if (Object.keys(oIntlPerf[k]).length > 2) {newobj[k]['total'] = kTime}
+				}
+				// we currently have 26 times
+					// gecko noRFP + RFP = 26 | noRFP but reduceTimer + chrome = 0 to 5
+				if (countInteger < 13) {
+					newobj.all = {'constructors': count, 'intl': iTime}
+					if (sTime > 0) {newobj.all['string'] = sTime}
+					newobj.all['total'] = iTime + sTime
+					addDetail('intl', newobj, 'microperf')
+					btn = addButton(99, 'intl','perf','btnc','microperf') //+' '+ countInteger
+				}
+				dom['intl_perf'].innerHTML = btn
 				return resolve()
 			})
 		})

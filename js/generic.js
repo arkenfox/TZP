@@ -199,25 +199,29 @@ function get_isAutoplay(METRIC) {
 	// get non-user-gesture values once
 	let t0 = nowFn()
 	try {
-		let aTest, mTest
-		let aPolicy = navigator.getAutoplayPolicy('audiocontext')
-		try {
-			if (runSG) {foo++}
-			aTest = navigator.getAutoplayPolicy(dom.tzpAudio)
-		} catch(e) {
-			log_error(13, METRIC +'_audio', e, isScope, true) // persist sect13
-			aTest = zErr
+		if ('undefined' == typeof navigator.getAutoplayPolicy) {
+			isAutoPlay = 'undefined'
+		} else {
+			let aTest, mTest
+			let aPolicy = navigator.getAutoplayPolicy('audiocontext')
+			try {
+				if (runSG) {foo++}
+				aTest = navigator.getAutoplayPolicy(dom.tzpAudio)
+			} catch(e) {
+				log_error(13, METRIC +'_audio', e, isScope, true) // persist sect13
+				aTest = zErr
+			}
+			let mPolicy = navigator.getAutoplayPolicy('mediaelement')
+			try {
+				if (runSG) {bar++}
+				mTest = navigator.getAutoplayPolicy(dom.tzpVideo)
+			} catch(e) {
+				log_error(13, METRIC +'_media', e, isScope, true) // persist sect13
+				mTest = zErr
+			}
+			// combine
+			isAutoPlay = (aPolicy === aTest ? aPolicy : aPolicy +', '+ aTest) +' | '+ (mPolicy === mTest ? mPolicy : mPolicy +', '+ mTest)
 		}
-		let mPolicy = navigator.getAutoplayPolicy('mediaelement')
-		try {
-			if (runSG) {bar++}
-			mTest = navigator.getAutoplayPolicy(dom.tzpVideo)
-		} catch(e) {
-			log_error(13, METRIC +'_media', e, isScope, true) // persist sect13
-			mTest = zErr
-		}
-		// combine
-		isAutoPlay = (aPolicy === aTest ? aPolicy : aPolicy +', '+ aTest) +' | '+ (mPolicy === mTest ? mPolicy : mPolicy +', '+ mTest)
 	} catch(e) {
 		isAutoPlay = zErr
 		isAutoPlayError = log_error(13, METRIC, e, isScope, true) // persist sect13
@@ -230,6 +234,7 @@ function get_isDevices() {
 	isDevices = undefined
 	let t0 = nowFn()
 	try {
+		if (undefined !== navigator.mediaDevices) {return}
 		if (runSG) {foo++}
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			isDevices = devices
@@ -310,13 +315,15 @@ function get_isEngine(METRIC) {
 	log_perf(SECTG, METRIC, t0,'', isEngine)
 }
 
-const get_isFileSystem = (METRIC) => new Promise(resolve => {
+const get_isFileSystem = (METRIC, isWarmup = false) => new Promise(resolve => {
 	// meta: 1748667
 	// note: pref change (dom.fs.enabled) requires new reload: so we can run once
 	let t0 = nowFn()
 	function exit(value) {
-		isFileSystem = value
-		log_perf(SECTG, METRIC, t0,'', value)
+		if (!isWarmup) {
+			isFileSystem = value
+			log_perf(SECTG, METRIC, t0,'', value)
+		}
 		return resolve()
 	}
 	if (navigator.storage == undefined || 'function' !== typeof navigator.storage.getDirectory) {
@@ -374,11 +381,24 @@ function get_isGecko(METRIC) {
 const get_isOS = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 	if (!isGecko) {
-		// get svh and lvh: if they differ then you're android?
+		// get svh and lvh: if they differ then you have a dynamic urlbar
+
+		// this is fast - could we leverage it for gecko as well
+			// maybe not since isBB might restrict it for FPing dynamic urlbar
+			// also apps may allow disabling it
+			// also maybe apps will enable it on other devices/tablets/platforms
+		// so for now just record the info for non-gecko
+
 		let aList = ['L','S']
 		try {
 			let data = {}
 			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
+			/*
+			let diff = Math.abs(data['L'] - data['S'])
+			if (diff > 20) { // allow some wriggle room
+				if ('blink' == isEngine) {isOS = 'android'}
+			}
+			//*/
 			log_perf(SECTG, METRIC, t0, '', 'L: '+ data['L'] +' | S: '+ data['S'])
 		} catch(e) {}
 		return resolve()
@@ -429,7 +449,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 						trysomethingelse()
 					}
 					//console.log('isOS font check', found, isOS)
-				} else if (aDetected.length == 0) {
+				} else if (isGecko && aDetected.length == 0) {
 					exit('linux')
 				} else {
 					trysomethingelse()
@@ -456,12 +476,14 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 				if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
 				} else if (font == '-apple-system') {exit('mac')
 				} else {throw zErr}
-			}
+			} else {
 			// mac webkit
 				// search and select return -apple-system
 				// mozfonts (e.g. mozbutton) return webkit-standard
 				// status-bar returns -apple-status-bar
 				// menu returns -apple-menu
+				tryfonts()
+			}
 		}
 	} catch {
 		tryfonts()
@@ -481,7 +503,7 @@ const get_isRecursion = () => new Promise(resolve => {
 	} catch(e) {
 		let stacklen = e.stack.toString().length
 		// display value
-		isRecursion = [level +" | "+ stacklen]
+		isRecursion = [level +" [stack length: "+ stacklen +']']
 		log_perf(SECTG, METRIC, t0, "", isRecursion.join())
 		// metric values: only collect level
 			// https://github.com/arkenfox/user.js/issues/1789: round down: level to 1000's
@@ -892,6 +914,16 @@ function copyclip(element) {
 			content = content.replace(/<\/?span[^>]*>/g,'')
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
+				// indicate it
+				try {
+					let target = dom.metricsBtnCopy
+					target.classList.add('white')
+					target.classList.remove('btn0')
+					setTimeout(function() {
+						target.classList.add('btn0')
+						target.classList.remove('white')
+					}, 500)
+				} catch {}
 			}, function() {
 				// clipboard write failed
 			})
@@ -1079,11 +1111,11 @@ function metricsEvent(evt) {
 	} else if ((evt.ctrlKey || evt.metaKey) && 67 == evt.keyCode) {
 		copyclip('metricsDisplay')
 		let target = dom.metricsBtnCopy
-		target.classList.add('btngood')
+		target.classList.add('white')
 		target.classList.remove('btn0')
 		setTimeout(function() {
 			target.classList.add('btn0')
-			target.classList.remove('btngood')
+			target.classList.remove('white')
 		}, 500)
 	}
 }
@@ -1103,6 +1135,9 @@ function metricsShow(name, scope) {
 	if (name == SECT98 || name == SECT99) {
 		// prototype/proxy
 		data = gData[name]
+	} else if ('document_health_list' == name) {
+		data = gData.health['document_list']
+		target = 'health_list'
 	} else if (aShowFormat.includes(name)) {
 		// FP/health
 		if (isHealth) {
@@ -1207,6 +1242,9 @@ function lookup_health(sect, metric, scope, isPass) {
 	try {
 		let nested ='', tmpdata, sDetailTemp
 		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
+		if ('useragent_' == metric.slice(0,10)) {nested = 'useragent'; metric = metric.replace('useragent_','')}
+		if ('media_' == metric.slice(0,6)) {nested = 'media'; metric = metric.replace('media_','')}
+
 		if ('' !== nested) {
 			data = gData[zFP][scope][sect]['metrics'][nested]['metrics'][metric]
 		} else if (sDetail[scope].lookup[metric] !== undefined) {
@@ -1256,6 +1294,7 @@ function output_health(scope) {
 	if (!isSmart) {return}
 	let h = "health", countPass = 0, countTotal = Object.keys(gData.health[scope +'_collect']).length
 	gData[h][scope] = {}
+	gData[h][scope +'_list'] = []
 	gData[h][scope +'_fail'] = {}
 	gData[h][scope +'_pass'] = {}
 	gData[h][scope +'_summary'] = {}
@@ -1278,14 +1317,22 @@ function output_health(scope) {
 			if ('' == detail) {detail = symbol}
 			gData[h][scope][metric] = detail
 			gData[h][scope + sub][metric] = detail
-			// populate summary
+			// populate summary + metriclist
+			gData[h][scope +'_list'].push(metric)
 			gData[h][scope +'_summary'][metric] = symbol + summary
 			gData[h][scope +'_summary'+ sub][metric] = symbol + summary
 		}
 		if (countTotal > 0) {
 			let isAll = countPass == countTotal
 			overlayHealthCount = countPass +'/'+ countTotal
-			dom[scope + h].innerHTML = addButton((isAll ? 'good' : 'bad'), h, overlayHealthCount)
+			//dom[scope + h].innerHTML = addButton(0,'document_health_list', countTotal)
+			//		+' '+ addButton((isAll ? 'good' : 'bad'), h, overlayHealthCount)
+
+			let btnPart1 = addButton((isAll ? 'good' : 'bad'), h, countPass)
+			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> | </span>'
+			dom[scope + h].innerHTML = btnPart1
+				+ addButton(0,'document_health_list', countTotal).replace('[','')
+
 			overlayHealthCount = (isAll ? sg : sb) +'['+ overlayHealthCount +']'+ sc
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
@@ -1353,7 +1400,11 @@ function output_perf(id, click = false) {
 					+ time2 + extra
 				aPretty.push(pretty)
 				if (sectionNames.includes(name)) {
-					dom["perf"+ name] = " "+ time1 +" ms"
+					try {
+						dom["perf"+ name] = " "+ time1 +" ms"
+					} catch(e) {
+						console.error('perf'+ name +' element is missing')
+					}
 				}
 			}
 			// detail
@@ -1863,6 +1914,9 @@ function countJS(item) {
 		}
 		// otherwise not blocked
 		isBlock = false
+		// tidy up metric overlay symbols
+		dom.overlay_tick.innerHTML = tick +' '
+		dom.overlay_cross.innerHTML = cross +' '
 
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 
@@ -2150,6 +2204,7 @@ function run_immediate() {
 	zErrLog = rnd_string()
 	zErrShort = rnd_string()
 	gData['perf'].push([1, 'IMMEDIATE', t00])
+	isFile = 'file:' == location.protocol
 	Promise.all([
 		get_isGecko('isGecko')
 	]).then(function(){
@@ -2159,10 +2214,9 @@ function run_immediate() {
 			// return if not supported
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		}
-		isFile = 'file:' == location.protocol
 		get_isRecursion()
 		// storage warm ups
-		try {navigator.storage.getDirectory()} catch {}
+		get_isFileSystem('isFileSystem', true)
 		try {window.caches.keys()} catch {}
 		// other warm ups
 		get_isDevices()
@@ -2180,8 +2234,8 @@ function run_immediate() {
 		get_isXML()
 		get_isArch('isArch')
 		try {
-			// FF142+ in windows at least: reproducible always. STR: open FF (cold session) then open TZP. On 1st load
-			// hev/hvc video codecs are false positives in canPlayType + isTypeSupported. A rerun, reload etc fixes it
+			// ensure hevc correctness e.g. see 1972902 fixed by 1974881
+				// 1st query on a new session hevc are false positives: a recheck fixes it
 			let vCodecs = ['"hev1.1.6.L93.B0"','"hev1.2.4.L120.B0"','"hvc1.1.6.L93.B0"','"hvc1.2.4.L120.B0"']
 			let vObj = document.createElement('video')
 			vCodecs.forEach(function(item) {let vTest = vObj.canPlayType('video/mp4; codecs='+ item)})

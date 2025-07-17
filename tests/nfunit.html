@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>unitdisplay</title>
+	<title>nf: unitdisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -48,6 +48,7 @@ var list = gLocales,
 	oUnits = {},
 	aLegend = [],
 	aLocales = [],
+	oTestData = {},
 	isSupported = false,
 	isBigIntSupported = false,
 	localesHashAll = "", // to compare min to
@@ -156,7 +157,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
@@ -186,10 +187,12 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
+
 function run_main(method) {
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
+	oTestData = {}
 
 	let tests = {}
 	let units = oUnits["supported"]
@@ -267,6 +270,24 @@ function run_main(method) {
 		})
 	}
 
+	function get_value(type, parts) {
+		try {
+			let str = "none"
+			for (let i = 0 ; i < parts.length; i++) {
+				if (parts[i]["type"] === type) {
+					str = parts[i]["value"]
+					str += str.length == 1 ? " ("+ str.charCodeAt(0) +")" : ""
+					str = str.charCodeAt(0)
+					return str // no need to keep checking
+				}
+			}
+			return str
+		} catch(e) {
+			return "error"
+		}
+	}
+
+
 	let oStyles = {}
 	try {
 		aLocales.forEach(function(code) { // for each locale
@@ -275,10 +296,23 @@ function run_main(method) {
 				oStyles[u] = {}
 				Object.keys(tests[u]).sort().forEach(function(ud){ // for each unitdisplay
 					oStyles[u][ud] = []
+					let isFound = false
 					try {
 						let formatter = Intl.NumberFormat(code, {style: "unit", unit: u, unitDisplay: ud})
 						tests[u][ud].forEach(function(n){ // for each number
 							oStyles[u][ud].push(formatter.format(n))
+							/* temp: checking for a test that returns a literal most/all of the time
+							let testvalue = get_value('literal', formatter.formatToParts(n))
+							if ('number' == typeof testvalue) {
+								if (undefined == oTestData[u+'_'+ud]) {oTestData[u+'_'+ud] = {}}
+								if (undefined == oTestData[u+'_'+ud][testvalue]) {
+									oTestData[u+'_'+ud][testvalue] = [code]; isFound = true
+								} else if (!isFound) {
+									// don't duplicate
+									oTestData[u+'_'+ud][testvalue].push(code); isFound = true
+								}
+							}
+							//*/
 						})
 					} catch (e) {} // ignore invalid
 				})
@@ -369,11 +403,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "17ccdefe") { // FF140+
+				if (resultsHash == "6cf68d0f") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "01ead1f0") { // FF140+ 206
+				if (localesHash == "4bcaa457") { // FF140+ 206
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -445,7 +479,6 @@ Promise.all([
 
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"ar-ae,arabic (united arabic emirates)",
 		"ar-bh,arabic (bahrain)",
 		"ar-dz,arabic (algeria)",
 		"ar-sa,arabic (saudi arabia)",

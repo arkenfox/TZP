@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>dn: script</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="32%"><col width="68%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">displaynames: script
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#script_code_display_names
+
+
+// https://unicode.org/iso15924/iso15924-codes.html
+// nonsense 4 letter codes, or ones not supported simply
+	// return themselves in all styles: we can determine these
+	// one by one if we get a single unique hash across all locales
+
+let aItemsIgnore = [
+	// confirmed all locales return the same hash
+	'Berf','Chis','Hntl','Kitl','Leke','Nkdb','Pcun','Pelm','Piqd',
+	'Psin','Qaaa','Qabx','Ranj','Seal','Shui','Sidt','Tayo','Tols',
+]
+
+// confirmed supported in FF140+
+let aItems = [
+'Zxxx', // 155
+'Latn', // 127 -> 174
+'Hans', // 150 -> 181
+'Arab', // 124 -> 183
+'Deva', // 89 -> 185
+'Zzzz', // 152 -> 187
+'Cyrl', // 128 -> 188
+'Mymr', // 109 -> 189
+'Mong', // 108 -> 190
+'Beng', // 106 -> 191
+'Orya', // 92 -> 192
+'Guru', // 90 -> 193
+
+'Hant', // 145
+'Hrkt', // 125
+'Ethi', // 124
+'Jpan', // 122
+'Armn', // 119
+'Cans', // 119
+'Geor', // 117
+'Hebr', // 117
+'Kore', // 116
+'Zyyy', // 114
+'Grek', // 113
+'Zmth', // 112
+'Zsym', // 111
+'Sinh', // 110
+'Syrc', // 109
+'Tibt', // 106
+'Hanb', // 103
+'Sund', // 102
+'Laoo', // 100
+'Mlym', // 99
+'Taml', // 98
+'Thai', // 97
+'Gujr', // 94
+'Khmr', // 94
+'Brai', // 92
+'Deva', // 89
+'Cher', // 86
+'Knda', // 86
+'Mtei', // 86
+'Telu', // 85
+'Egyp', // 84
+'Hani', // 84
+'Ital', // 83
+'Zinh', // 83
+'Xpeo', // 82
+'Xsux', // 82
+'Hung', // 81
+'Olck', // 81
+
+// 61 to 80
+'Adlm','Aran','Armi','Avst','Bali','Bopo','Bugi','Cakm',
+'Cari','Copt','Cprt','Cyrs','Egyd','Egyh','Glag','Goth',
+'Hang','Hira','Jamo','Java','Kana','Latf','Latg','Lina',
+'Linb','Lyci','Lydi','Mand','Mani','Maya','Mero','Nkoo',
+'Osma','Perm','Phli','Phlp','Phnx','Plrd','Prti','Rohg',
+'Runr','Samr','Sgnw','Shaw','Syre','Syrj','Syrn','Talu',
+'Tfng','Thaa','Ugar','Vaii','Visp','Yiii','Zsye',
+
+// under 60
+'Afak','Aghb','Ahom','Bamu','Bass','Batk','Bhks','Blis',
+'Brah','Buhd','Cham','Chrs','Cirt','Cpmn','Diak','Dogr',
+'Dsrt','Dupl','Elba','Elym','Geok','Gong','Gonm','Gran',
+'Hano','Hatr','Hluw','Hmng','Hmnp','Inds','Jurc','Kali',
+'Kawi','Khar','Khoj','Kits','Kpel','Kthi','Lana','Lepc',
+'Limb','Lisu','Loma','Mahj','Maka','Marc','Medf','Mend',
+'Merc','Modi','Moon','Mroo','Mult','Nagm','Nand','Narb',
+'Nbat','Newa','Nkgb','Nshu','Ogam','Orkh','Osge','Ougr',
+'Palm','Pauc','Phag','Phlv','Rjng','Roro','Sara','Sarb',
+'Saur','Shrd','Sidd','Sind','Sogd','Sogo','Sora','Soyo',
+'Sylo','Tagb','Takr','Tale','Tang','Tavt','Teng','Tglg',
+'Tirh','Tnsa','Toto','Vith','Wara','Wcho','Wole','Yezi',
+'Zanb',
+// FYI: these seven are the same for all locales in blink
+'Gara','Sunu','Tutg', // 4
+'Gukh','Krai','Onao','Todr', // 3
+//*/
+	]
+aItems.sort()
+
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	oTestData = {},
+	isSupported = false,
+	localesHashAll = "" // to compare min to
+
+function testitems() {
+	//loop each script on it's own
+	dom.perf = ""
+	dom.results = ""
+	oTestData = {}
+	try {
+		aItems.forEach(function(item){
+			/* take one of the highest oTestData results and keep adding until you reach max
+			item = [
+				'Zxxx','Latn','Hans','Arab','Deva','Zzzz','Cyrl','Mymr','Mong','Beng','Orya','Guru',
+				item
+			]
+			//*/
+			// allow testing arrays of scripts
+			let testarray = 'object' == typeof item ? item : [item]
+			run_main('all', testarray, true)
+		})
+	} catch(e) {
+		console.log(e)
+	}
+}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
+			let go = true
+			if (isSupported) {
+				go = Intl.DisplayNames.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method, aTest, isLoop = false) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {} 
+	let spacer = '<br><br>'
+	let tests = {}
+	let aUsed = undefined == aTest ? aItems: aTest
+	if (!isLoop) {
+		dom.perf = ""
+		dom.results = ""
+	}
+
+	if (method == "all") {
+		aUsed.sort()
+		tests = {'script': {'long': aUsed, 'narrow': aUsed, 'short': aUsed}}
+
+	} else {
+		// long + narrow add nothing
+		tests = {'script': {'short': ['Zxxx','Latn','Hans','Arab','Deva','Zzzz','Cyrl','Mymr','Mong','Beng','Orya','Guru']}}
+	}
+
+	try {
+		aLocales.forEach(function(code) { // for each locale
+			let oType = {}
+			Object.keys(tests).sort().forEach(function(t){ // for each type
+				oType[t] = {}
+				for (const s of Object.keys(tests[t])) { // for each style
+					oType[t][s] = ('all' == method) ? [] : {}
+					let dn = new Intl.DisplayNames([code], {type: t, style: s})
+					tests[t][s].sort().forEach(function(item){
+						//item = item.toLowerCase() // blink is case sensitive
+						let value = dn.of(item)
+						if ('all' == method) {
+							oType[t][s].push(item.toLowerCase() +': '+ value)	
+						} else {
+							oType[t][s][item.toLowerCase()] = value
+						}
+					})
+				}
+			})
+			let hash = mini(oType) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				Object.keys(oType).forEach(function(typekey){
+					oTempData[hash][typekey] = oType[typekey]
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order in new object
+		for (const h of Object.keys(oTempData).sort()) { // for each hash
+			oData[h] = {}
+			for (const key of Object.keys(oTempData[h]).sort()) { // for each granularity
+				if (key == "locales") {
+					oData[h][key] = oTempData[h][key].join(", ")
+				} else {
+					if (Object.keys(oTempData[h][key]).length) {
+						oData[h][key] = oTempData[h][key]
+					}
+				}
+			}
+		}
+		//console.log(oTempData)
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) { // for each hash
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+
+			if (!isLoop) {
+				let str = ""
+				for (const type of Object.keys(oData[k])) { // for each type
+					if (type !== "locales") {
+						str += "<li>"+ s14 + type + sc +"</li>"
+						Object.keys(oData[k][type]).forEach(function(s){ // for each style
+							if ('all' == method) {
+								// color up the parts
+								let aParts = [], array = oData[k][type][s]
+								array.forEach(function(item){ // for each item
+									let parts = item.split(":")
+									item = item.replace(parts[0] +':', s12 + parts[0]+ ':' + sc)
+									aParts.push(item)
+								})
+								str += s16 + s.slice(0,1).toUpperCase() +": "+ sc + aParts.join(', ') +"</br>"
+							} else {
+								str += s16 + s + sc + '<ul class="main">'
+								Object.keys(oData[k][type][s]).forEach(function(item){ // for each item
+									str += "<li>"+ s12 + item +': '+ sc + oData[k][type][s][item] +"</li>"
+								})
+								str += '</ul>'
+							}
+						})
+					}
+				}
+				if ('all' == method) {str = "<details><summary>details</summary>"+ str +"</details>"}
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ str
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
+			}
+		}
+		//console.log(oData)
+
+		if (isLoop) {
+			let testCount = localeGroups.length
+			// record it
+			if (undefined == oTestData[testCount]) {oTestData[testCount] = []}
+			oTestData[testCount].push(aUsed)
+			//console.log(testCount, aUsed)
+			/*
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ s16 + testCount + sc +': '+ '[\''+ aUsed.join('\', \'') +'\']'
+			//*/
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ '\''+ aUsed.join('\', \'') +'\', // ' + testCount
+			return
+		}
+
+		// hashes + btns
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		sDetail["results"] = oData
+
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// notate new if 140+
+			if (isVer > 139) {
+				// results
+				if (resultsHash == "71431273") { // FF140+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "dbf61e20") { // FF140+ 193
+				} else {localesHash += ' '+ zNEW
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_isVer()
+
+	try {
+		let test = new Intl.DisplayNames(undefined, {type: 'region'}).resolvedOptions().locale
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message +'banana'
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = [
+'az-cyrl,azerbaijani (cyrillic)',
+'bs-cyrl,bosnian (cyrillic)',
+'en-au,english (australia)',
+'en-in,english (india)',
+'es-us,spanish (united states)',
+'es-ar,spanish (argentina)',
+'fa-af,persian (afghanistan)',
+'ff-adlm,fulah (adlam)',
+'fr-ca,french (canada)',
+'hi-latn,hindi (latin)',
+'kok-latn,konkani (latin)',
+'ks-deva,kashmiri (devanagari)',
+'kxv-telu,kuvi (telugu)',
+'pa-arab,punjabi (arabic)',
+'pt-ao,portuguese (angola)',
+'sd-deva,sindhi (devanagari)',
+'se-fi,northern sami (finland)',
+'sr-latn,serbian (latin)',
+'sw-ke,swahili (kenya)',
+'uz-af,uzbek (afghanistan)',
+'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
+'yo-bj,yoruba (benin)',
+'yue-cn,cantonese (china)',
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en','de','fr','pl','pt','sv']
+	//list = ['en']
+
+	legend()
+	if (isSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>

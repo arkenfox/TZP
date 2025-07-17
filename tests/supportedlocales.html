@@ -74,7 +74,7 @@ function legend() {
 		for (let i = 0 ; i < listUsed.length; i++) {
 			let str = listUsed[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			if (isExpanded) {
 				aLocalesExpanded.push(code)
 			} else {
@@ -138,11 +138,11 @@ function run_main(method, isLoopy) {
 			let notation = ""
 			if (isVer > 139) {
 				if (method == "C") {
-					if (hash == "5c8aa708") {notation = " [FF134+]" // 123
+					if (hash == "6eb2ef9e") {notation = " [FF140+]" // 122
 					} else { notation = " "+ zNEW
 					}
 				} else {
-					if (hash == "f092f744") {notation = " [FF134+]" // 234
+					if (hash == "66c554ac") {notation = " [FF140+]" // 245
 					} else { notation = " "+ zNEW
 					}
 				}
@@ -161,6 +161,8 @@ function run_main(method, isLoopy) {
 				// split: code, name
 				let code = listUsed[i].split(",")[0]
 				let name = listUsed[i].split(",")[1]
+				code = code.toLowerCase()
+
 				// test
 				let test = ""
 				if (method == "C") {
@@ -183,7 +185,7 @@ function run_main(method, isLoopy) {
 					test = Intl.Segmenter.supportedLocalesOf([code], {localeMatcher: type})
 				}
 				if (test.length) {
-					let found = test[0]
+					let found = test[0].toLowerCase()
 					all.push(found +":"+ code)
 					if (type == "lookup") {
 						nocase.push(found.toLowerCase())
@@ -191,7 +193,7 @@ function run_main(method, isLoopy) {
 							nocasemap.push(code)
 						}
 					}
-					if (code.toLowerCase() !== found.toLowerCase()) {
+					if (code !== found) {
 						map.push(code +" -> "+ found)
 						data.push(code +" -> "+ found)
 						if ('lookup' == type) {aSupported.push(found.toLowerCase())}
@@ -318,7 +320,7 @@ function run_main(method, isLoopy) {
 				// split: code, name
 				let str = listUsed[i].toLowerCase()
 				let code = str.split(",")[0].trim()
-				let name = str.split(",")[1].trim()
+				let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 				if (nocase.includes(code.toLowerCase())) {
 					let isSplit = (name.includes("(") && (name.length + code.length) > 32)
 					if (name.includes("(")) {
@@ -417,7 +419,21 @@ Promise.all([
 ]).then(function(){
 	get_isVer()
 	list = gLocales
+	let aListExtra = [
+/*
+'cnr,montenegrin', // maps to sr-me
+'gom,goan', // maps to kok
+'prp,parsi', // maps to gu
+'prs,dari', // maps to fa-af
+'sh,serbo-croatian', // maps to sr-latn
+'swc,congo', // maps to sw-cd
+'tl,tagalog', // maps to fil
+'tw,twi', // maps to ak except in collator
+*/
+	]
+	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+
 	listExpanded = gLocales = gLocales.concat(gLocalesExpand)
 	listExpanded = listExpanded.filter(function(item, position) {return listExpanded.indexOf(item) === position})
 	run("ALL")
