@@ -6,7 +6,7 @@ const SECTG = '_global', SECTP = '_prereq', SECTNF = 'NON-FP', SECT98 = 'prototy
 
 const sectionMap = {
 	1: 'screen', 2: 'agent', 3: 'feature', 4: 'region', 5: 'headers', 6: 'storage',
-	7: 'devices', 9: 'canvas', 10: 'webgl', 11: 'audio', 12: 'fonts', 13: 'media',
+	7: 'devices', 9: 'canvas', 10: 'webgl', 11: 'audio', 12: 'fonts', 13: 'codecs',
 	14: 'css', 15: 'elements', 17: 'timing', 18: 'misc',
 }
 let sectionOrder = [], // numerical order for objects
@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 147
+	expectedMetrics = 121
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -104,6 +104,8 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	rfp_red = sbx+'RFP]'+sc,
 	silent_green = sg +"[<span class='healthsilent'>"+ tick +'</span>]'+ sc,
 	silent_red = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc,
+	silent_rfp_green = sg +"[<span class='healthsilent'>"+ tick +'</span> RFP]'+ sc,
+	silent_rfp_red = sb +"[<span class='healthsilent'>" + cross +'</span> RFP]'+ sc,
 	nw_green = sgtick+'RFP newwin]'+sc,
 	nw_red = sbx+'RFP newwin]'+sc,
 	default_green = sgtick+'default]'+sc,
@@ -123,7 +125,7 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	tz_red = sbx+' timezone]'+sc,
 	position_green = sgtick+'RFP positions]'+sc,
 	position_red = sbx+'RFP positions]'+sc,
-	desktopmode_green = sg +"[<span class='healthsilent'>"+ tick +'</span> desktop mode]'+sc
+	desktopmode_green = sgtick+'RFP desktop mode]'+sc
 
 // dynamic BB notation
 let bb_green = sgtick+'TB]'+sc,
@@ -170,7 +172,8 @@ let languagesSupported = {},
 	oIntlTests = {},
 	oIntlKeys = {},
 	oIntlDateTests = {},
-	oIntlDateKeys = {}
+	oIntlDateKeys = {},
+	oIntlPerf = {}
 
 // other
 let aDomRect = [true, true, true, true],
