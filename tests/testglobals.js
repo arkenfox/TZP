@@ -173,9 +173,11 @@ let gTimezones = [
 
 // language/locale tests
 var gLocales = [
-	// ISO_639-1 alpha-2 codes
-	// https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-	//* not supported in FF
+	// ISO_639-1 alpha-2 codes: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+	// ISO_639-2 alpha-3 codes: https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes
+
+// not supported in FF
+	// but keep just in case: we check SupportedLocalesOf in each Intl constructor anyway
 'aa,afar',
 'ab,abkhazian',
 'ae,avestan',
@@ -183,8 +185,12 @@ var gLocales = [
 'av,avaric',
 'ay,aymara',
 'ba,bashkir',
+'bal,baluchi',
+'bcg,haryanvi',
 'bi,bislama',
+'cak,kaqchikel',
 'ch,chamorro',
+'cho,choctaw',
 'co,corsican',
 'cr,cree',
 'cu,church slavic',
@@ -203,46 +209,74 @@ var gLocales = [
 'kv,komi',
 'la,latin',
 'li,limburgan',
+'ltg,latgalian',
+'meh,mixtec (southwestern tlaxiaco)',
 'mh,marshallese',
+'mix,mixtepec mixtec',
 'na,nauru',
 'ng,ndonga',
 'nr,south ndebele',
 'nv,navajo',
 'ny,chichewa',
 'oj,ojibwa',
+'pap,papiamento',
 'pi,pali',
+'sco,scots',
+'skr,saraiki',
 'sm,samoan',
 'ss,siswati',
-'st,southern sotho',
-'tn,tswana',
+'trs,triqui',
 'ts,tsonga',
 'ty,tahitian',
 've,venda',
 'vo,volapük',
 'wa,walloon',
-	//*/
 
+// supported in FF140+
 'af,afrikaans',
+'agq,aghem',
 'ak,akan',
 'am,amharic',
 'ar,arabic',
 'as,assamese',
+'asa,asu',
+'ast,asturian',
 'az,azerbaijani',
+'bas,basaa',
 'be,belarusian',
+'bem,bemba',
+'bez,bena',
 'bg,bulgarian',
+'bgc,haryanvi',
+'bho,bhojpuri',
+'blo,anii',
 'bm,bambara',
 'bn,bengali',
 'bo,tibetan',
 'br,breton',
+'brx,bodo',
 'bs,bosnian',
 'ca,catalan',
+'ccp,chakma',
 'ce,chechen',
+'ceb,cebuano',
+'cgg,chiga',
+'chr,cherokee',
+'ckb,central kurdish',
 'cs,czech',
+'csw,swampy',
 'cv,chuvash',
 'cy,welsh',
 'da,danish',
+'dav,taita',
 'de,german',
+'dje,zarma',
+'doi,dogri',
+'dsb,lower sorbian',
+'dua,duala',
+'dyo,jola-fonyi',
 'dz,dzongkha',
+'ebu,embu',
 'ee,éwé',
 'el,greek',
 'en,english',
@@ -250,21 +284,29 @@ var gLocales = [
 'es,spanish',
 'et,estonian',
 'eu,basque',
+'ewo,ewondo',
 'fa,persian',
 'ff,fulah',
 'fi,finnish',
+'fil,filipino',
 'fo,faroese',
 'fr,french',
+'fur,friulian',
 'fy,frisian',
 'ga,irish',
+'gaa,ga',
 'gd,scottish gaelic',
 'gl,galician',
+'gsw,swiss german',
 'gu,gujarati',
+'guz,gusii',
 'gv,manx',
 'ha,hausa',
+'haw,hawaiian',
 'he,hebrew',
 'hi,hindi',
 'hr,croatian',
+'hsb,upper sorbian',
 'hu,hungarian',
 'hy,armenian',
 'ia,interlingua',
@@ -275,225 +317,173 @@ var gLocales = [
 'is,icelandic',
 'it,italian',
 'ja,japanese',
+'jgo,ngomba',
+'jmc,machame',
 'jv,javanese',
 'ka,georgian',
+'kab,kabyle',
+'kam,kamba',
+'kde,makonde',
+'kea,kabuverdianu',
+'kgp,kaingang',
+'khq,koyra chiini',
 'ki,kikuyu',
 'kk,kazakh',
+'kkj,kako',
 'kl,greenlandic',
+'kln,kalenjin',
 'km,khmer',
 'kn,kannada',
 'ko,korean',
+'kok,konkani',
 'ks,kashmiri',
+'ksb,shambala',
+'ksf,bafia',
+'ksh,colognian',
 'ku,kurdish',
 'kw,cornish',
+'kxv,kuvi',
 'ky,kyrgyz',
+'lag,langi',
 'lb,luxembourgish',
 'lg,ganda',
+'lij,ligurian',
+'lkt,lakota',
+'lmo,lombard',
 'ln,lingala',
 'lo,lao',
+'lrc,northern luri',
 'lt,lithuanian',
 'lu,luba-katanga',
+'luo,luo',
+'luy,luyia',
 'lv,latvian',
+'mai,maithili',
+'mas,maasai',
+'mer,meru',
+'mfe,morisyen',
 'mg,malagasy',
+'mgh,makhuwa-meetto',
+'mgo,meta\'',
 'mi,maori',
 'mk,macedonian',
 'ml,malayalam',
 'mn,mongolian',
+'mni,meitei',
 'mr,marathi',
 'ms,malay',
 'mt,maltese',
+'mua,mundang',
 'my,burmese',
+'mzn,mazanderani',
+'naq,nama',
 'nb,norwegian bokmål',
 'nd,north ndebele',
+'nds,low german',
 'ne,nepali',
 'nl,dutch',
+'nmg,kwasio',
 'nn,norwegian nynorsk',
+'nnh,ngiemboon',
 'no,norwegian',
+'nqo,n’ko',
+'nso,northern sotho',
+'nus,nuer',
+'nyn,nyankole',
 'oc,occitan',
 'om,oromo',
 'or,odia',
 'os,ossetian',
 'pa,punjabi',
+'pcm,nigerian',
 'pl,polish',
+'prg,prussian',
 'ps,pashto',
 'pt,portuguese',
 'qu,quechua',
+'raj,rajasthani',
 'rm,rhaeto-romanic',
 'rn,kirundi',
 'ro,romanian',
+'rof,rombo',
 'ru,russian',
 'rw,kinyarwanda',
+'rwk,rwa',
 'sa,sanskrit',
+'sah,yakut',
+'saq,samburu',
+'sat,santali',
+'sbp,sangu',
 'sc,sardinian',
 'sd,sindhi',
 'se,northern sami',
+'seh,sena',
+'ses,koyraboro senni',
 'sg,sango',
+'shi,tachelhit',
 'si,sinhala',
 'sk,slovak',
 'sl,slovenian',
+'smn,inari sámi',
 'sn,shona',
 'so,somali',
 'sq,albanian',
 'sr,serbian',
+'st,southern sotho',
 'su,sundanese',
 'sv,swedish',
 'sw,swahili',
+'syr,syriac',
+'szl,silesian',
 'ta,tamil',
 'te,telugu',
+'teo,teso',
 'tg,tajik',
 'th,thai',
 'ti,tigrinya',
 'tk,turkmen',
-'tl,tagalog',
+'tn,tswana',
 'to,tongan',
+'tok,toki pona',
 'tr,turkish',
 'tt,tatar',
-'tw,twi',
+'twq,tasawaq',
+'tzm,central atlas tamazight',
 'ug,uighur',
 'uk,ukrainian',
 'ur,urdu',
 'uz,uzbek',
-'vi,vietnamese',
-'wo,wolof',
-'xh,xhosa',
-'yi,yiddish',
-'yo,yoruba',
-'za,zhuang',
-'zh,chinese',
-'zu,zulu',
-
-	// ISO_639-2 alph-3 codes
-	// https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes
-	// only add the ones supported in FF
-'ast,asturian',
-'bas,basaa',
-'bem,bemba',
-'bho,bhojpuri',
-'ceb,cebuano',
-'chr,cherokee',
-'doi,dogri',
-'dsb,lower sorbian',
-'dua,duala',
-'ewo,ewondo',
-'fil,filipino',
-'fur,friulian',
-'gsw,swiss german',
-'haw,hawaiian',
-'hsb,upper sorbian',
-'kab,kabyle',
-'kam,kamba',
-'kok,konkani',
-'luo,luo',
-'mai,maithili',
-'mas,maasai',
-'mni,meitei',
-'nyn,nyankole',
-'raj,rajasthani',
-'sah,yakut',
-'sat,santali', // 1731528, 1852843
-'sco,scots', // 1714293
-'smn,inari sámi',
 'vai,vai',
-'zgh,standard moroccan tamazight',
-
-	// other alpha-3
-'agq,aghem',
-'asa,asu',
-'bal,baluchi',
-'bcg,haryanvi',
-'bez,bena',
-'bgc,haryanvi',
-'blo,anii',
-'brx,bodo',
-'cak,kaqchikel',
-'ccp,chakma',
-'cgg,chiga',
-'cho,choctaw',
-'ckb,central kurdish',
-'csw,swampy',
-'dav,taita',
-'dje,zarma',
-'dyo,jola-fonyi',
-'ebu,embu',
-'gaa,ga',
-'guz,gusii',
-'jgo,ngomba',
-'jmc,machame',
-'kde,makonde',
-'kea,kabuverdianu',
-'kgp,kaingang',
-'khq,koyra chiini',
-'kkj,kako',
-'kln,kalenjin',
-'ksb,shambala',
-'ksf,bafia',
-'ksh,colognian',
-'kxv,kuvi',
-'lag,langi',
-'lij,ligurian',
-'lkt,lakota',
-'lmo,lombard',
-'lrc,northern luri',
-'nso,northern sotho',
-'ltg,latgalian',
-'luy,luyia',
-//'meh,mixtec (southwestern tlaxiaco)',
-'mer,meru',
-'mfe,morisyen',
-'mgh,makhuwa-meetto',
-'mgo,meta\'',
-'mix,mixtepec mixtec',
-'mua,mundang',
-'mzn,mazanderani',
-'naq,nama',
-'nds,low german',
-'nmg,kwasio',
-'nnh,ngiemboon',
-'nqo,n’ko',
-'nus,nuer',
-'pap,papiamento',
-'pcm,nigerian',
-'prg,prussian',
-'rof,rombo',
-'rwk,rwa',
-'saq,samburu',
-'sbp,sangu',
-'seh,sena',
-'shi,tachelhit',
-'skr,saraiki', // 1808127, 1900150
-'ses,koyraboro senni',
-'syr,syriac',
-'szl,silesian', // 1691695
-'teo,teso',
-'tok,toki pona',
-'trs,triqui', // 1583177
-'twq,tasawaq',
-'tzm,central atlas tamazight',
 'vec,venetian',
+'vi,vietnamese',
 'vmw,makhuwa',
 'vun,vunjo',
 'wae,walser',
+'wo,wolof',
+'xh,xhosa',
 'xnr,kangri',
 'xog,soga',
 'yav,yangben',
-'yue,cantonese',
+'yi,yiddish',
+'yo,yoruba',
 'yrl,nhengatu',
+'yue,cantonese',
+'za,zhuang',
+'zgh,standard moroccan tamazight',
+'zh,chinese',
 'zh-cn,chinese (china)',
 'zh-hans,chinese (simplified)',
 'zh-hant,chinese (traditional)',
 'zh-hk,chinese (hong kong)',
 'zh-sg,chinese (singapore)',
 'zh-tw,chinese (taiwan)',
-
-/* ignore: maps to already listed items in expanded tests
-'prs,dari', // fa-af
-'sh,serbo-croatian', // sr-latn
-'swc,congo', // sw-cd
-//*/
+'zu,zulu',
 ]
 
+var gLocalesOriginal = gLocales
+
 // ** local files only for dev tests ** //
-let gLocalesExpand = [
+let gLocalesLikely = [
 // the usual suspects
 //*
 'af-na,afrikaans (namibia)',
@@ -502,6 +492,7 @@ let gLocalesExpand = [
 'ar-dj,arabic (djibouti)',
 'ar-dz,arabic (algeria)',
 'ar-eg,arabic (egypt)',
+'ar-eh,arabic (western sahara)',
 'ar-er,arabic (eritrea)',
 'ar-il,arabic (israel)',
 'ar-iq,arabic (iraq)',
@@ -666,6 +657,8 @@ let gLocalesExpand = [
 'kea-cv,kabuverdianu (cape verde)',
 'ko-kp,korean (north korea)',
 'kok-latn,konkani (latin)',
+'knn-knda,konkani (kannada)', // 
+'knn-latn,konkani (latin)', // 
 'ks-deva,kashmiri (devanagari)',
 'kxv-telu,kuvi (telugu)',
 'ln-ao,lingala (angola)',
@@ -746,7 +739,9 @@ let gLocalesExpand = [
 'zh-hant-mo,chinese (traditional macau)',
 'zh-my,chinese (malaysia)',
 //*/
+]
 
+let gLocalesExpand = [
 // unlikely
 //*
 'af-arab,afrikaans (arabic)',
@@ -761,7 +756,6 @@ let gLocalesExpand = [
 'am-et,amharic (ethiopic)',
 'ar-001,arabic (world)',
 'ar-brai,arabic (braille)',
-'ar-eh,arabic (western sahara)',
 'ar-jo,arabic (jordan)',
 'ar-kw,arabic (kuwait)',
 'ar-om,arabic (oman)',
@@ -1253,10 +1247,6 @@ let gLocalesExpand = [
 'tk-arab,turkmen (arabic)',
 'tk-arab-ir,turkmen (arabic iran)',
 'tk-cyrl,turkmen (cyrillic)',
-'tl-brai,tagalog (braille)',
-'tl-buhd,tagalog',
-'tl-hano,tagalog',
-'tl-tglg,tagalog (tagalog)',
 'to-to,tongan (tonga)',
 'tr-arab,turkish (arabic)',
 'tr-brai,turkish (braille)',
@@ -1265,7 +1255,6 @@ let gLocalesExpand = [
 'tt-arab,tatar (arabic)',
 'tt-latn,tatar (latin)',
 'tt-ru,tatar (russia)',
-'tw-x-asante,twi',
 'twq-ne,tasawaq (niger)',
 'tzm-arab,central atlas tamazight (arabic)',
 'tzm-ma,central atlas tamazight (morocco)',
@@ -1345,22 +1334,83 @@ let gLocalesExpand = [
 'zu-za,zulu (south africa)',
 //*/
 
-/* these map to already listed items
-'arb-eg,arabic standard (egypt)', // ar-eg
+// gecko: supportedlocaleof, running maxmimum
+  // 779 + 1093: with these in
+	// 777 + 1083: with these no included
+	// get names and sort into place in expanded
+	// they don't add entropy in locale POCs
+'gaa-arab',
+'kxv-latn',
+'nds-nl',
+'nds-runr',
+'nso-brai',
+'uz-cyrl',
+'vmw-arab',
+'xnr-takr',
+'za-hani',
+'za-hans',
+]
+
+let gLocalesCanonical = [
+//*
+	// redundant: see getCanonicalLocale
+'arb-eg,arabic standard (egypt)',   // ar-eg
 'arb-lb,arabic standard (lebanon)', // ar-lb
-'cnr,montenegrin', // sr-me
-'cnr-latn,montenegrin', // sr-latn-me
-'fil-tglg,filipino (tagalog)', // tl-tglg
-'knn-knda,konkani (kannada)', // kok-knda
-'knn-latn,konkani (latin)', // kok-latn
-'swc-arab,congo (arabic)', // sw-arab-cd
+'cnr,montenegrin',           // sr-me
+'cnr-latn,montenegrin',      // sr-latn-me
+'gom,goan',                  // kok
+'gom-knda',                  // kok-knda
+'gom-latn',                  // kok-latn
+'prp,parsi',                 // gu
+'prs,dari',                  // fa-af
+'sh,serbo-croatian',         // sr-latn
+'swc,congo',                 // sw-cd
+'swc-arab,congo (arabic)',   // sw-arab-cd
 'swh-arab,swahili (arabic)', // sw-arab
-'swh-brai,swahili (braille)', // sw-brai
+'swh-brai,swahili (braille)',// sw-brai
+'tl,tagalog',                // fil
+'tl-brai,tagalog (braille)', // fil-brai
+'tl-buhd,tagalog',           // fil-buhd
+'tl-hano,tagalog',           // fil-hano
+'tl-tglg,tagalog (tagalog)', // fil-tglg
+'tw,twi',                    // ak
+'tw-x-asante,twi',           // ak-x-asante
 //*/
 ]
 
-function expand_locales() {
- gLocales = gLocales.concat(gLocalesExpand)
+function check_canonicals() {
+
+	let list = gLocales
+	list = list.concat(gLocalesLikely)
+	list = list.concat(gLocalesExpand)
+	list = list.concat(gLocalesCanonical)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+
+	let aCanonical = []
+	list.forEach(function(item) {
+		let code = item.split(',')[0]
+		let test = Intl.getCanonicalLocales([code])
+		if (test.join(',').toLowerCase() !== code.toLowerCase()) {
+			aCanonical.push(code +': ' + test.join(', '))
+		}
+	})
+	if (aCanonical.length) {
+		console.log('canonicals detected\n-------\n', aCanonical.join('\n '))
+	}
 }
+
+function expand_likely() {
+	gLocales = gLocales.concat(gLocalesLikely)
+	gLocales = gLocales.filter(function(item, position) {return gLocales.indexOf(item) === position})
+}
+
+function expand_maximum() {
+	gLocales = gLocales.concat(gLocalesLikely)
+	gLocales = gLocales.concat(gLocalesExpand)
+	gLocales = gLocales.filter(function(item, position) {return gLocales.indexOf(item) === position})
+}
+
 // expand once in a while to see if entropy counts change
-//expand_locales()
+//expand_likely()
+//expand_maximum() // also checks for canonical names
+
