@@ -387,17 +387,17 @@
 		<!--agent*-->
 		<tr><td><span id="labelUA" class="btn btn0" onClick="togglerows('UA','btn')">[+]</span>
 			userAgent</td><td class="c mono" id="useragent"></td></tr>
-		<tr class="togUA"><td>appCodeName</td><td class="c mono spaces" id="ua_appCodeName"></td></tr>
-		<tr class="togUA"><td>appName</td><td class="c mono spaces" id="ua_appName"></td></tr>
-		<tr class="togUA"><td>appVersion</td><td class="c mono spaces" id="ua_appVersion"></td></tr>
-		<tr class="togUA"><td>buildID</td><td class="c mono spaces" id="ua_buildID"></td></tr>
-		<tr class="togUA"><td>oscpu</td><td class="c mono spaces" id="ua_oscpu"></td></tr>
-		<tr class="togUA"><td>platform</td><td class="c mono spaces" id="ua_platform"></td></tr>
-		<tr class="togUA"><td>product</td><td class="c mono spaces" id="ua_product"></td></tr>
-		<tr class="togUA"><td>productSub</td><td class="c mono spaces" id="ua_productSub"></td></tr>
-		<tr class="togUA"><td>userAgent</td><td class="c mono spaces" id="ua_userAgent"></td></tr>
-		<tr class="togUA"><td>vendor</td><td class="c mono spaces" id="ua_vendor"></td></tr>
-		<tr class="togUA"><td>vendorSub</td><td class="c mono spaces" id="ua_vendorSub"></td></tr>
+		<tr class="togUA"><td>appCodeName</td><td class="c mono spaces" id="useragent_appCodeName"></td></tr>
+		<tr class="togUA"><td>appName</td><td class="c mono spaces" id="useragent_appName"></td></tr>
+		<tr class="togUA"><td>appVersion</td><td class="c mono spaces" id="useragent_appVersion"></td></tr>
+		<tr class="togUA"><td>buildID</td><td class="c mono spaces" id="useragent_buildID"></td></tr>
+		<tr class="togUA"><td>oscpu</td><td class="c mono spaces" id="useragent_oscpu"></td></tr>
+		<tr class="togUA"><td>platform</td><td class="c mono spaces" id="useragent_platform"></td></tr>
+		<tr class="togUA"><td>product</td><td class="c mono spaces" id="useragent_product"></td></tr>
+		<tr class="togUA"><td>productSub</td><td class="c mono spaces" id="useragent_productSub"></td></tr>
+		<tr class="togUA"><td>userAgent</td><td class="c mono spaces" id="useragent_userAgent"></td></tr>
+		<tr class="togUA"><td>vendor</td><td class="c mono spaces" id="useragent_vendor"></td></tr>
+		<tr class="togUA"><td>vendorSub</td><td class="c mono spaces" id="useragent_vendorSub"></td></tr>
 		<tr><td>
 			<!--<span id="labelUAD" class="btn btn0" onClick="togglerows('UAD','btn')">[+]</span>-->
 			userAgentData</td><td class="c mono" id="useragentdata"></td></tr>
@@ -503,11 +503,12 @@
 		<tr><td>locale</td><td class="c mono" id="locale"></td></tr>
 		<tr><td>[intl] locale</td><td class="mono">
 			<span class="c" id="locale_intl"></span>
-			<div class="btn-right s99">locale</div>
+			<div class="btn-right s99">intl</div>
 		</td></tr>
-		<tr><td>[resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
 		<tr><td>[tolocalstring] locale</td><td class="mono">
-			<span class="c" id="locale_tolocalestring"></span><span class="c" id="locale_tolocalestring_matches_intl"></span>
+			<span class="c" id="locale_tolocalestring"></span>
+			<span class="c" id="locale_tolocalestring_matches_intl"></span>
+			<div class="btn-right" id="intl_perf"></div> <!-- don't class c-->
 		</td></tr>
 		<tr><td>[intl] dates</td><td class="c mono" id="dates_intl"></td></tr>
 		<tr><td>[to*string] dates</td><td class="mono border-bottom">
@@ -631,9 +632,9 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">worker | web | shared | service</span></div>
 			&nbsp; workers</td><td class="mono"><span class="c" id="worker"></span>
-			| <span class="c" id="web_worker_test"></span>
-			| <span class="c" id="shared_worker_test"></span>
-			| <span class="c" id="service_worker_test"></span>
+			| <span class="c" id="worker_web_test"></span>
+			| <span class="c" id="worker_shared_test"></span>
+			| <span class="c" id="worker_service_test"></span>
 		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.fs.enabled</span></div>
 			&nbsp; file system</td><td class="c mono" id="filesystem"></td></tr>
@@ -659,39 +660,26 @@
 		</td></tr>
 		<tr><td>battery</td><td class="mono"><span class="c" id="battery"></span>
 			<span class="c" id="battery_reported"></span></td></tr>
-		<tr><td>color</td>
-				<td class="mono"><span id="cssC"></span><span class="cssc" id="color_css"></span> | <span class="c" id="color"></span></td></tr>
-		<tr><td>pixel depth | color depth</td>
+		<tr><td>pixelDepth | colorDepth</td>
 			<td class="mono"><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
-		<tr><td>color gamut</td>
-			<td class="mono"><span id="cssCG"></span><span class="cssc" id="color-gamut_css"></span> | <span class="c" id="color-gamut"></span></td></tr>
-		<tr><td>deviceMemory | devicePosture</td><td class="mono">
-			<span class="c" id="deviceMemory"></span> | <span class="c" id="devicePosture"></span>
-		</td></tr>
+		<tr><td>deviceMemory</td><td class="c mono" id="deviceMemory"></td></tr>
+		<tr><td>devicePosture</td><td class="c mono" id="devicePosture"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp; hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
-		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span>
-			<span class="cssc" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
-		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="cssc" id="hover_css"></span>
-			| <span class="c" id="hover"></span></td></tr>
 		<tr><td>[screen] isExtended</td><td class="c mono" id="isExtended"></td></tr>
 		<tr><td>keyboard</td><td class="c mono" id="keyboard"></td></tr>
+		<tr><td>maxTouchPoints</td><td class="c mono" id="maxTouchPoints"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
 		<tr><td>permissions</td><td class="c mono" id="permissions"></td></tr>
-		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
-			<span class="cssc" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
-		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="cssc" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
 		<tr><td id="tzpPointer"><span class="btn btn0">[ <span>click</span> ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">altitudeAngle<br>azimuthAngle<br>height<br>isPrimary<br>mozInputSource<br>
 				mozPressure<br>pointerType<br>pressure<br>tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
 			</div> &nbsp; pointer event <sup>1</sup></td><td class="c mono" id="ptEvent"></td></tr>
-		<tr><td>recursion | stack length</td><td class="c mono" id="recursion"></td></tr>
-		<tr><td>speech engines</td><td class="c mono" id="speech_engines"></td></tr>
-		<tr><td>[maxTouchPoints] touch</td><td class="c mono" id="maxTouchPoints"></td></tr>
+		<tr><td>recursion</td><td class="c mono" id="recursion"></td></tr>
 		<tr><td colspan="2"><span class="no_color">pointer code based on work by </span>
 			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke</a> <sup>1</sup></td></tr>
 	</table>
@@ -802,7 +790,7 @@
 		<thead><tr><th colspan="2"><a name="fonts"></a>
 			<div class="nav-title"><a href="#fonts">fonts</a>
 			<div class="nav-up"><a href="#audio">&#9650;</a> <span class="c perf" id="perffonts"></span></div>
-			<div class="nav-down"><a href="#mediad">&#9660;</a></div>
+			<div class="nav-down"><a href="#codecsd">&#9660;</a></div>
 			<div class="nav-right"><a name="fontsd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
@@ -872,27 +860,27 @@
 		</td></tr>
 	</table>
 
-	<!--media-->
+	<!--codecs-->
 	<table id="tb13">
 		<col width="31%"><col width="69%">
-		<thead><tr><th colspan="3"><a name="media"></a>
-			<div class="nav-title"><a href="#media">media</a>
-			<div class="nav-up"><a href="#fonts">&#9650;</a> <span class="c perf" id="perfmedia"></span></div>
+		<thead><tr><th colspan="3"><a name="codecs"></a>
+			<div class="nav-title"><a href="#codecs">codecs</a>
+			<div class="nav-up"><a href="#fonts">&#9650;</a> <span class="c perf" id="perfcodecs"></span></div>
 			<div class="nav-down"><a href="#cssd">&#9660;</a></div>
-			<div class="nav-right"><a name="mediad"></a></div></div>
+			<div class="nav-right"><a name="codecsd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn13 btn" onClick="outputSection(13)">[ re-run ]</span></div>
-			<span class="c" id="mediahash"></span>
+			<span class="c" id="codecshash"></span>
 			<div class="btn-right"><span id="mediaBtn"></span></div></td></tr>
 		<tr><td>autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy"></td></tr>
 		<tr><td>[user] autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy_user"></td></tr>
 		<tr><td>clearkey</td><td class="c mono" id="clearkey"></td></tr>
-		<tr><td>[audio | video] canPlayType</td><td class="mono">
+		<tr><td>canPlayType</td><td class="mono">
 			<span class="c" id="audiocan"></span> | <span class="c" id="videocan"></span></td></tr>
-		<tr><td>[audio | video] isTypeSupported</td><td class="mono">
+		<tr><td>isTypeSupported</td><td class="mono">
 			<span class="c" id="audiotype"></span> | <span class="c" id="videotype"></span></td></tr>
-		<tr><td>[HTMLMediaElement] preload</td><td class="c mono" id="media_preload"></td></tr>
+		<tr><td>preload</td><td class="c mono" id="preload_htmlmediaelement"></td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
 
@@ -901,7 +889,7 @@
 		<col width="31%"><col width="69%">
 		<thead><tr><th colspan="2"><a name="css"></a>
 			<div class="nav-title"><a href="#css">css</a>
-			<div class="nav-up"><a href="#media">&#9650;</a> <span class="c perf" id="perfcss"></span></div>
+			<div class="nav-up"><a href="#codecs">&#9650;</a> <span class="c perf" id="perfcss"></span></div>
 			<div class="nav-down"><a href="#elementsd">&#9660;</a></div>
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
@@ -920,27 +908,56 @@
 		<tr class="togCS"><td>DOMParser <sup>1</sup></td><td class="c mono" id="computed_styles_domparser"></td></tr>
 		<tr class="togCS"><td>getComputedStyle <sup>1</sup></td><td class="c mono" id="computed_styles_getcomputed"></td></tr>
 		<tr class="togCS"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="computed_styles_htmlelement"></td></tr>
-		<tr><td>forced-colors</td><td class="mono">
-			<span id="cssFC"></span><span class="cssc" id="forced-colors_css"></span>
-			| <span class="c" id="forced-colors"></span></td></tr>
-		<tr><td>inverted-colors</td><td class="mono">
-			<span id="cssIC"></span><span class="cssc" id="inverted-colors_css"></span>
-			| <span class="c" id="inverted-colors"></span></td></tr>
-		<tr><td>prefers-color-scheme</td><td class="mono">
-			<span id="cssPCS"></span><span class="cssc" id="prefers-color-scheme_css"></span>
-			| <span class="c" id="prefers-color-scheme"></span></td></tr>
-		<tr><td>prefers-contrast</td><td class="mono">
-			<span id="cssPC"></span><span class="cssc" id="prefers-contrast_css"></span>
-			| <span class="c" id="prefers-contrast"></span></td></tr>
-		<tr><td>prefers-reduced-data</td><td class="mono">
-			<span id="cssPRD"></span><span class="cssc" id="prefers-reduced-data_css"></span>
-			| <span class="c" id="prefers-reduced-data"></span></td></tr>
-		<tr><td>prefers-reduced-motion</td><td class="mono">
-			<span id="cssPRM"></span><span class="cssc" id="prefers-reduced-motion_css"></span>
-			| <span class="c" id="prefers-reduced-motion"></span></td></tr>		
-		<tr><td>prefers-reduced-transparency</td><td class="mono">
-			<span id="cssPRT"></span><span class="cssc" id="prefers-reduced-transparency_css"></span>
-			| <span class="c" id="prefers-reduced-transparency"></span></td></tr>
+
+		<!--media: matchmedia + @media-->
+		<tr><td><span id="labelMM" class="btn btn0" onClick="togglerows('MM','btn')">[+]</span>
+			media</td><td class="mono"><span id="media"></span> <!--name can't be media which is a section name-->
+		<tr class="togMM"><td>color</td><td class="mono"><span id="cssC"></span>
+			<span class="cssc" id="media_color_css"></span>
+			| <span class="c" id="media_color"></span></td></tr>
+		<tr class="togMM"><td>color gamut</td><td class="mono"><span id="cssCG"></span>
+			<span class="cssc" id="media_color-gamut_css"></span>
+			| <span class="c" id="media_color-gamut"></span></td></tr>
+		<tr class="togMM"><td>forced-colors</td><td class="mono"><span id="cssFC"></span>
+			<span class="cssc" id="media_forced-colors_css"></span>
+			| <span class="c" id="media_forced-colors"></span></td></tr>
+		<tr class="togMM"><td>dynamic-range</td><td class="mono"><span id="cssDR"></span>
+			<span class="cssc" id="media_dynamic-range_css"></span>
+			| <span class="c" id="media_dynamic-range"></span></td></tr>
+		<tr class="togMM"><td>any-hover</td><td class="mono"><span id="cssAH"></span>
+			<span class="cssc" id="media_any-hover_css"></span>
+			| <span class="c" id="media_any-hover"></span></td></tr>
+		<tr class="togMM"><td>hover</td><td class="mono"><span id="cssH"></span>
+			<span class="cssc" id="media_hover_css"></span>
+			| <span class="c" id="media_hover"></span></td></tr>
+		<tr class="togMM"><td>inverted-colors</td><td class="mono"><span id="cssIC"></span>
+			<span class="cssc" id="media_inverted-colors_css"></span>
+			| <span class="c" id="media_inverted-colors"></span></td></tr>
+		<tr class="togMM"><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
+			<span class="cssc" id="media_any-pointer_css"></span>
+			| <span class="c" id="media_any-pointer"></span></td></tr>
+		<tr class="togMM"><td>pointer</td><td class="mono"><span id="cssP"></span>
+			<span class="cssc" id="media_pointer_css"></span>
+			| <span class="c" id="media_pointer"></span></td></tr>
+		<tr class="togMM"><td>prefers-color-scheme</td><td class="mono"><span id="cssPCS"></span>
+			<span class="cssc" id="media_prefers-color-scheme_css"></span>
+			| <span class="c" id="media_prefers-color-scheme"></span></td></tr>
+		<tr class="togMM"><td>prefers-contrast</td><td class="mono"><span id="cssPC"></span>
+			<span class="cssc" id="media_prefers-contrast_css"></span>
+			| <span class="c" id="media_prefers-contrast"></span></td></tr>
+		<tr class="togMM"><td>prefers-reduced-data</td><td class="mono"><span id="cssPRD"></span>
+			<span class="cssc" id="media_prefers-reduced-data_css"></span>
+			| <span class="c" id="media_prefers-reduced-data"></span></td></tr>
+		<tr class="togMM"><td>prefers-reduced-motion</td><td class="mono"><span id="cssPRM"></span>
+			<span class="cssc" id="media_prefers-reduced-motion_css"></span>
+			| <span class="c" id="media_prefers-reduced-motion"></span></td></tr>		
+		<tr class="togMM"><td>prefers-reduced-transparency</td><td class="mono"><span id="cssPRT"></span>
+			<span class="cssc" id="media_prefers-reduced-transparency_css"></span>
+			| <span class="c" id="media_prefers-reduced-transparency"></span></td></tr>
+		<tr class="togMM"><td>video-dynamic-range</td><td class="mono"><span id="cssVDR"></span>
+			<span class="cssc" id="media_video-dynamic-range_css"></span>
+			| <span class="c" id="media_video-dynamic-range"></span></td></tr>
+
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">layout.css.always_underline_links</span></div>
 			&nbsp; underline links</td><td class="c mono" id="underline_links"></td></tr>
@@ -1065,6 +1082,7 @@
 		<tr><td>[trigonometric] math</td><td class="c mono" id="math_trig"></td></tr>
 		<tr><td>navigator keys</td><td class="c mono" id="navigator_keys"></td></tr>
 		<tr><td>pdf</td><td class="c mono" id="pdf"></td></tr>
+		<tr><td>speech engines</td><td class="c mono" id="speech_engines"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">svg.disabled</span></div>
 			&nbsp; svg</td><td class="c mono" id="svg_enabled"></td></tr>
@@ -1072,7 +1090,7 @@
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp; wasm</td><td class="c mono" id="wasm"></td></tr>
 		<tr><td>webdriver</td><td class="c mono" id="webdriver"></td></tr>
-		<tr><td>[iframe] window properties <sup>1</sup></td>
+		<tr><td>window properties <sup>1</sup></td>
 			<td class="mono"><span class="c" id="window_properties"></span><span class="c" id="consolestatus"></span></td></tr>
 		<tr><td colspan="2"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
@@ -1105,8 +1123,8 @@
 			<span id="overlaybuttons">
 				<span class='btn0 btnc' onClick="metricsAction('download')" id="metricDownload">[DOWNLOAD]</span>
 				<span class='btn0 btnc' onClick="metricsAction('console')" id="metricsConsole">[CONSOLE]</span>
-				<span class='btn0 btnc' onClick="copyclip('metricsDisplay')" id="metricsBtnCopy">[COPY]</span>
-				<span class='btn0 btnc' onClick="metricsAction('close')">[CLOSE]</span>
+				<span class='btn0 btnc' onClick="copyclip('metricsDisplay')" id="metricsBtnCopy"><abbr title="Ctrl+C">[COPY]</abbr></span>
+				<span class='btn0 btnc' onClick="metricsAction('close')"><abbr title="Esc">[CLOSE]</abbr></span>
 				<br><br>
 				<div id="metricOptions"><br><p><u>FORMAT</u></p>
 					<p id="optDetail">detail <input type="radio" name="optOverlay" id="optFormat_detail" value="_detail" checked onchange="metricsAction()"></p>
@@ -1114,8 +1132,8 @@
 					<p id="optFlat">flat <input type="radio" name="optOverlay" id="optFormat_flat" value="_flat" onchange="metricsAction()"></p>
 					<p id="optList">list <input type="radio" name="optOverlay" id="optFormat_list" value="_list" onchange="metricsAction()"></p>
 					<span id="groupHealth">–––<p>all <input type="radio" name="optHealth" checked id="healthAll" onchange="metricsAction()"></p>
-						<p><span class="good">✓ </span><input type="radio" name="optHealth" id="healthPass" onchange="metricsAction()"></p>
-						<p><span class="bad">✗ </span><input type="radio" name="optHealth" id="healthFail" onchange="metricsAction()"></p>
+						<p><span id="overlay_tick" class="good">✓ </span><input type="radio" name="optHealth" id="healthPass" onchange="metricsAction()"></p>
+						<p><span id="overlay_cross" class="bad">✗ </span><input type="radio" name="optHealth" id="healthFail" onchange="metricsAction()"></p>
 					</span>
 				</div>
 			</span>
@@ -1135,7 +1153,7 @@
 	<script src="js/css.js"></script>
 	<script src="js/elements.js"></script>
 	<script src="js/misc.js"></script>
-	<script src="js/media.js"></script>
+	<script src="js/codecs.js"></script>
 	<script src="js/canvas.js"></script>
 	<script src="js/webgl.js"></script>
 	<script src="js/iframes.js"></script>
