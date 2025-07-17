@@ -656,7 +656,7 @@ function get_isVer(METRIC) {
 			// 141: fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
 			try {if (window["IntersectionObserver"].prototype.hasOwnProperty('scrollMargin')) return 141} catch(e) {} // 1860030
 			// 140: fast-path: pref: dom.event.pointer.rawupdate.enabled : default true 140+
-			try {ver140b = "object" === typeof onpointerrawupdate} catch(e) {} // 1550462
+			try {if ("object" === typeof onpointerrawupdate) return 140 } catch(e) {} // 1550462
 			// 140: if < 141 there is only one paint entry "PerformancePaintTiming"
 			try {if (undefined !== performance.getEntriesByType("paint")[0].presentationTime) return 140} catch(e) {} // 1963464
 			try {if ('' !== dom.tzpAudio.preload) return 140} catch(e) {} // 929890
