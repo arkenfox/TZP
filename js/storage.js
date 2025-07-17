@@ -287,13 +287,13 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 	}
 })
 
-function test_idb(log = false) {
+const test_idb = (log = false) => new Promise(resolve => {
 	let t0 = nowFn(), rndStr = rnd_string()
 	const METRIC = 'indexedDB_test'
 	function exit(value) {
 		dom[METRIC] = value
-		if (log) {log_perf(SECTNF, METRIC, t0)}
-		return
+		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
+		return resolve()
 	}
 	try {
 		let openIDB = indexedDB.open(rndStr +'_idb')
@@ -321,14 +321,14 @@ function test_idb(log = false) {
 	} catch {
 		exit(zErr)
 	}
-}
+})
 
 const test_worker_service = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
 	const METRIC = 'service_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
-		if (log) {log_perf(SECTNF, METRIC, t0)}
+		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
 	}
 	try {
 		navigator.serviceWorker.register('js/storage_service_worker.js').then((registration) => {
@@ -346,7 +346,7 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 	const METRIC = 'shared_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
-		if (log) {log_perf(SECTNF, METRIC, t0)}
+		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
 		return resolve()
 	}
 	try {
@@ -369,27 +369,21 @@ const test_worker_shared_new = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
 	let METRIC = 'shared_worker_test'
 	function exit(value) {
-		console.log(value)
-		dom[METRIC].innerHTML = value
-		if (log) {log_perf(SECTNF, METRIC, t0)}
+		dom[METRIC].innerHTML = value +' TEST'
+		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
 		return resolve()
 	}
 	if ('undefined' == typeof SharedWorker) {
 		exit('undefined')
 	} else {
-
 		try {
-			// define/create dynamically using a blob
-			function createWorker(fn) {
-				let str = 'var ports = []; onconnect = function(e) {let port = e.ports[0]; ports.push(port); port.start(); '
-					+ 'port.onmessage = function(e) {port.postMessage("eek")}'
-				var blob = new Blob([str +' =', fn.toString()], {type: 'text/javascript'})
-				var url = URL.createObjectURL(blob)
-				return new SharedWorker(url)
-			}
-			const shared = createWorker(async () => {port.postMessage('eek')})
+			const workerScript = 'var ports = []; onconnect = function(e) {let port = e.ports[0]; ports.push(port); '
+				+ 'port.start(); port.onmessage = function(e) {port.postMessage("eek")}'
+			const workerBlob = new Blob([workerScript], {type: 'application/javascript'})
+			const workerURL = URL.createObjectURL(workerBlob)
+			const shared = new SharedWorker(workerURL)
 			shared.port.postMessage('eek') // ping
-			shared.onmessage = function(e) {port.close(); worker.terminate; exit(zS)} // receive
+			shared.onmessage = function(e) {port.close(); shared.terminate; exit(zS)} // receive
 			shared.onerror = function(e) {
 				console.log('onerror', e, e.message)
 				exit(zErr)
@@ -407,23 +401,23 @@ const test_worker_web = (log = false) => new Promise(resolve => {
 	let METRIC = 'web_worker_test'
 	function exit(value) {
 		dom[METRIC].innerHTML = value
-		if (log) {log_perf(SECTNF, METRIC, t0)}
+		if (log) {log_perf(SECTNF, METRIC, t0,'', value)}
 		return resolve()
 	}
 	if ('undefined' == typeof Worker) {
 		exit('undefined')
 	} else {
-		// define/create dynamically using a blob
-		function createWorker(fn) {
-			var blob = new Blob(['self.onmessage = ', fn.toString()], {type: 'text/javascript'})
-			var url = URL.createObjectURL(blob)
-			return new Worker(url)
+		try {
+			const workerScript = `self.postMessage('eek')`
+			const workerBlob = new Blob([workerScript], {type: 'application/javascript'})
+			const workerURL = URL.createObjectURL(workerBlob)
+			const worker = new Worker(workerURL)
+			worker.onmessage = function(e) {worker.terminate; exit(zS)} // receive
+			worker.onerror = function(e) {exit(zErr)} // error
+			worker.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
+		} catch {
+			exit(zErr)
 		}
-		const worker = createWorker(async () => {postMessage('eek')})
-		worker.postMessage('eek') // ping
-		worker.onmessage = function(e) {worker.terminate; exit(zS)} // receive
-		worker.onerror = function(e) {exit(zErr)} // error
-		worker.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
 	}
 })
 
