@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=600">
-	<title>compactdisplay</title>
+	<title>nf: compactdisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -65,7 +65,7 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
-			let name = str.split(",")[1].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
 			let go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
 			if (go) {
 				aLocales.push(code)
@@ -253,11 +253,11 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "704306fd") { // FF140+
+				if (resultsHash == "84bfbe65") { // FF140+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "05db779b") { // FF140+: 170
+				if (localesHash == "e91aa639") { // FF140+: 170
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -307,7 +307,6 @@ Promise.all([
 	get_isVer()
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"ar-ae,arabic (united arabic emirates)",
 		"ar-bh,arabic (bahrain)",
 		"ar-dz,arabic (algeria)",
 		"bs-cyrl,bosnian (cyrillic)",
@@ -324,7 +323,6 @@ Promise.all([
 		"ff-adlm,fulah (adlam)",
 		"fr-ca,french (canada)",
 		"fr-lu,french (luxembourg)",
-		"hi-latn,hindi (latin)",
 		"it-ch,italian (switzerland)",
 		"kok-latn,konkani (latin)",
 		"kxv-telu,kuvi (telugu)",
