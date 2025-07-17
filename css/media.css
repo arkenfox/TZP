@@ -1,6 +1,6 @@
 /* @supports: https://drafts.csswg.org/css-conditional-5/#at-supports-ext */
 
-/* if font-tech is not supported, we end up with "not font-tech" */
+/* font-tech */
 #cssCOLRv0:after{content:"n/a";}
 @supports font-tech(color-COLRv0){#cssCOLRv0:after{content:"supported";}}
 #cssCOLRv1:after{content:"n/a";}
@@ -90,11 +90,9 @@
 #cssAH:after{content:"n/a";}
 @media (any-hover:none){#cssAH:after{content:"none ";}}
 @media (any-hover:hover){#cssAH:after{content:"hover";}}
-
 #cssPCS:after{content:"n/a";}
 @media (prefers-color-scheme:light){#cssPCS:after{content:"light";}}
 @media (prefers-color-scheme:dark){#cssPCS:after{content:"dark";}}
-/* @media (prefers-color-scheme:no-preference){#cssPCS:after{content:"no-preference";}} /* obsolete FF79+: 1643656 */
 #cssPRM:after{content:"n/a";}
 @media (prefers-reduced-motion:no-preference){#cssPRM:after{content:"no-preference";}}
 @media (prefers-reduced-motion:reduce){#cssPRM:after{content:"reduce";}}
@@ -114,6 +112,12 @@
 #cssIC:after{content:"n/a";}
 @media (inverted-colors:none){#cssIC:after{content:"none ";}}
 @media (inverted-colors:inverted){#cssIC:after{content:"inverted";}}
+#cssDR:after{content:"n/a";}
+@media (dynamic-range:standard){#cssDR:after{content:"standard";}}
+@media (dynamic-range:high){#cssDR:after{content:"high";}}
+#cssVDR:after{content:"n/a";}
+@media (dynamic-range:standard){#cssVDR:after{content:"standard";}}
+@media (dynamic-range:high){#cssVDR:after{content:"high";}}
 
 /* dpi */
 @media (min-resolution:39dpi){#P:before{content:"";}}
