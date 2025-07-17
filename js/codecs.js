@@ -19,7 +19,7 @@ function get_autoplay(METRIC) {
 
 	// user: not part of FP; don't record errors etc
 	const METRICuser = METRIC +'_user'
-	if (gLoad) {
+	if (gLoad || 'undefined' == isAutoPlay) {
 		addDisplay(13, METRICuser, zNA)
 		return
 	}
@@ -109,7 +109,7 @@ const get_clearkey = (METRIC) => new Promise(resolve => {
 	}
 })
 
-function get_media(type) {
+function get_mimetype_codecs(type) {
 	// https://privacycheck.sec.lrz.de/active/fp_cpt/fp_can_play_type.html
 	// https://cconcolato.github.io/media-mime-support/
 	let v = "video/", a = "audio/"
@@ -371,7 +371,7 @@ function get_media(type) {
 	}
 }
 
-function get_media_preload(METRIC) {
+function get_preload_media(METRIC) {
 	// ToDo: 1969210 when landed
 	let value, data = ''
 	try {
@@ -392,9 +392,9 @@ function get_media_preload(METRIC) {
 const outputMedia = () => new Promise(resolve => {
 	Promise.all([
 		get_clearkey('clearkey'),
-		get_media('audio'),
-		get_media('video'),
-		get_media_preload('media_preload'),
+		get_mimetype_codecs('audio'),
+		get_mimetype_codecs('video'),
+		get_preload_media('preload_htmlmediaelement'),
 		get_autoplay('getAutoplayPolicy'),
 	]).then(function(){
 		return resolve()
