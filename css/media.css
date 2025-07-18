@@ -34,11 +34,6 @@
 @media (display-mode:picture-in-picture){#cssDM:after{content:"picture-in-picture";}}
 @media (display-mode:window-controls-overlay){#cssDM:after{content:"window-controls-overlay";}}
 
-#cssCG:after{content:"n/a";}
-@media (color-gamut:srgb){#cssCG:after{content:"srgb";}}
-@media (color-gamut:p3){#cssCG:after{content:"p3";}}
-@media (color-gamut:rec2020){#cssCG:after{content:"rec2020";}}
-
 @media (color:0){#cssC:after{content:"";}}
 @media (color:1){#cssC:after{content:"1";}}
 @media (color:2){#cssC:after{content:"2";}}
@@ -69,7 +64,17 @@
 /*
 	always return none with a traling space so we can differentiate between this
 	and default none: https://www.w3.org/TR/CSS21/generate.html#content
+	and default none: https://www.w3.org/TR/CSS21/generate.html#content
 */
+#cssH:after{content:"n/a";}
+@media (hover:hover){#cssH:after{content:"hover";}}
+@media (hover:none){#cssH:after{content:"none ";}}
+#cssAH:after{content:"n/a";}
+@media (any-hover:hover){#cssAH:after{content:"hover";}}
+@media (any-hover:none){#cssAH:after{content:"none ";}}
+#cssPRM:after{content:"n/a";}
+@media (prefers-reduced-motion:no-preference){#cssPRM:after{content:"no-preference";}}
+@media (prefers-reduced-motion:reduce){#cssPRM:after{content:"reduce";}}
 #cssP:after{content:"n/a";}
 @media (pointer:fine){#cssP:after{content:"fine";}}
 @media (pointer:coarse){#cssP:after{content:"coarse";}}
@@ -83,41 +88,36 @@
 @media (any-pointer:fine){#cssAP:after{content:" + fine";}}
 @media (any-pointer:coarse){#cssAP:after{content:" + coarse";}} /* coarse over fine */
 @media (any-pointer:none){#cssAP:after{content:" + none ";}}
-#cssH:after{content:"n/a";}
-@media (hover:none){#cssH:after{content:"none ";}}
-@media (hover:hover){#cssH:after{content:"hover";}}
-#cssAH:after{content:"n/a";}
-@media (any-hover:none){#cssAH:after{content:"none ";}}
-@media (any-hover:hover){#cssAH:after{content:"hover";}}
+#cssPC:after{content:"n/a";}
+@media (prefers-contrast:no-preference){#cssPC:after{content:"no-preference";}}
+@media (prefers-contrast:less){#cssPC:after{content:"less";}}
+@media (prefers-contrast:more){#cssPC:after{content:"more";}}
+@media (prefers-contrast:custom){#cssPC:after{content:"custom";}}
 #cssPCS:after{content:"n/a";} /*note: no-preference: obsolete FF79+: 1643656 */
 @media (prefers-color-scheme:light){#cssPCS:after{content:"light";}}
 @media (prefers-color-scheme:dark){#cssPCS:after{content:"dark";}}
-#cssPRM:after{content:"n/a";}
-@media (prefers-reduced-motion:no-preference){#cssPRM:after{content:"no-preference";}}
-@media (prefers-reduced-motion:reduce){#cssPRM:after{content:"reduce";}}
-#cssPC:after{content:"n/a";}
-@media (prefers-contrast:no-preference){#cssPC:after{content:"no-preference";}}
-@media (prefers-contrast:more){#cssPC:after{content:"more";}}
-@media (prefers-contrast:less){#cssPC:after{content:"less";}}
-@media (prefers-contrast:custom){#cssPC:after{content:"custom";}}
 #cssFC:after{content:"n/a";}
 @media (forced-colors:none){#cssFC:after{content:"none ";}}
 @media (forced-colors:active){#cssFC:after{content:"active";}}
-#cssPRT:after{content:"n/a";}
-@media (prefers-reduced-transparency:no-preference){#cssPRT:after{content:"no-preference";}}
-@media (prefers-reduced-transparency:reduce){#cssPRT:after{content:"reduce";}}
-#cssPRD:after{content:"n/a";}
-@media (prefers-reduced-data:no-preference){#cssPRD:after{content:"no-preference";}}
-@media (prefers-reduced-data:reduce){#cssPRD:after{content:"reduce";}}
-#cssIC:after{content:"n/a";}
-@media (inverted-colors:none){#cssIC:after{content:"none ";}}
-@media (inverted-colors:inverted){#cssIC:after{content:"inverted";}}
 #cssDR:after{content:"n/a";}
 @media (dynamic-range:standard){#cssDR:after{content:"standard";}}
 @media (dynamic-range:high){#cssDR:after{content:"high";}}
 #cssVDR:after{content:"n/a";}
 @media (dynamic-range:standard){#cssVDR:after{content:"standard";}}
 @media (dynamic-range:high){#cssVDR:after{content:"high";}}
+#cssCG:after{content:"n/a";}
+@media (color-gamut:srgb){#cssCG:after{content:"srgb";}}
+@media (color-gamut:p3){#cssCG:after{content:"p3";}}
+@media (color-gamut:rec2020){#cssCG:after{content:"rec2020";}}
+#cssPRT:after{content:"n/a";}
+@media (prefers-reduced-transparency:no-preference){#cssPRT:after{content:"no-preference";}}
+@media (prefers-reduced-transparency:reduce){#cssPRT:after{content:"reduce";}}
+#cssIC:after{content:"n/a";}
+@media (inverted-colors:none){#cssIC:after{content:"none ";}}
+@media (inverted-colors:inverted){#cssIC:after{content:"inverted";}}
+#cssPRD:after{content:"n/a";}
+@media (prefers-reduced-data:no-preference){#cssPRD:after{content:"no-preference";}}
+@media (prefers-reduced-data:reduce){#cssPRD:after{content:"reduce";}}
 #cssDP:after{content:"undefined";} /* use undefined to match navigator */
 @media (device-posture:continuous){#cssDR:after{content:"continuous";}}
 @media (device-posture:folded){#cssDR:after{content:"folded";}}
