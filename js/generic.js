@@ -1978,8 +1978,8 @@ function outputPostSection(id) {
 	gRun = false // stop collecting
 
 	if (id == "storage") {
+		test_worker(isLog)
 		test_worker_service(isLog) // doesn't return
-		test_worker_web(isLog)
 		test_worker_shared(isLog)
 		test_idb(isLog)
 	} else if (id == "agent") {
@@ -1988,7 +1988,7 @@ function outputPostSection(id) {
 	} else if (id == "all") {
 		test_worker_service(isLog) // doesn't return
 		Promise.all([
-			test_worker_web(isLog),
+			test_worker(isLog),
 			test_worker_shared(isLog),
 			test_idb(isLog),
 			get_agent_iframes(isLog),
