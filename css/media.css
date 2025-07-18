@@ -30,7 +30,6 @@
 @media (display-mode:fullscreen){#cssDM:after{content:"fullscreen";}}
 @media (display-mode:browser){#cssDM:after{content:"browser";}}
 @media (display-mode:minimal-ui){#cssDM:after{content:"minimal-ui";}}
-@media (display-mode:portrait){#cssDM:after{content:"portrait";}}
 @media (display-mode:standalone){#cssDM:after{content:"standalone";}}
 @media (display-mode:picture-in-picture){#cssDM:after{content:"picture-in-picture";}}
 @media (display-mode:window-controls-overlay){#cssDM:after{content:"window-controls-overlay";}}
@@ -90,7 +89,7 @@
 #cssAH:after{content:"n/a";}
 @media (any-hover:none){#cssAH:after{content:"none ";}}
 @media (any-hover:hover){#cssAH:after{content:"hover";}}
-#cssPCS:after{content:"n/a";}
+#cssPCS:after{content:"n/a";} /*note: no-preference: obsolete FF79+: 1643656 */
 @media (prefers-color-scheme:light){#cssPCS:after{content:"light";}}
 @media (prefers-color-scheme:dark){#cssPCS:after{content:"dark";}}
 #cssPRM:after{content:"n/a";}
@@ -98,8 +97,9 @@
 @media (prefers-reduced-motion:reduce){#cssPRM:after{content:"reduce";}}
 #cssPC:after{content:"n/a";}
 @media (prefers-contrast:no-preference){#cssPC:after{content:"no-preference";}}
-@media (prefers-contrast:high){#cssPC:after{content:"high";}}
-@media (prefers-contrast:low){#cssPC:after{content:"low";}}
+@media (prefers-contrast:more){#cssPC:after{content:"more";}}
+@media (prefers-contrast:less){#cssPC:after{content:"less";}}
+@media (prefers-contrast:custom){#cssPC:after{content:"custom";}}
 #cssFC:after{content:"n/a";}
 @media (forced-colors:none){#cssFC:after{content:"none ";}}
 @media (forced-colors:active){#cssFC:after{content:"active";}}
@@ -118,6 +118,9 @@
 #cssVDR:after{content:"n/a";}
 @media (dynamic-range:standard){#cssVDR:after{content:"standard";}}
 @media (dynamic-range:high){#cssVDR:after{content:"high";}}
+#cssDP:after{content:"undefined";} /* use undefined to match navigator */
+@media (device-posture:continuous){#cssDR:after{content:"continuous";}}
+@media (device-posture:folded){#cssDR:after{content:"folded";}}
 
 /* dpi */
 @media (min-resolution:39dpi){#P:before{content:"";}}
