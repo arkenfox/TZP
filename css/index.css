@@ -225,10 +225,10 @@ table {
 	font-size: 12px;
 }
 tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
-td {padding-top: 2px; padding-bottom: 3px; padding-left: 10px;}
+td {padding-top: 2px; padding-bottom: 3px; padding-left: 10px; vertical-align: top;}
 th {color: black; font-size: 14px; padding: 3px 0;}
 
-table td:first-child { text-align: right; vertical-align: top;}
+table td:first-child { text-align: right;}
 table td.blurb {text-align: center; line-height: 1.5em;}
 table td.center {text-align: center;}
 table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px; padding-left: 0px;}
