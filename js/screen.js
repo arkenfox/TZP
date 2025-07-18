@@ -122,14 +122,10 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 		const item2 = item +'_css'
 		let data, isLies = false
 		try {
-			let q = '(display-mode:'
-			if (window.matchMedia(q +'browser)').matches) {data = 'browser'
-			} else if (window.matchMedia(q +'fullscreen)').matches) {data = 'fullscreen'
-			} else if (window.matchMedia(q +'minimal-ui)').matches) {data = 'minimal-ui'
-			} else if (window.matchMedia(q +'standalone)').matches) {data = 'standalone'
-			}
-			if (!isGecko) {
-				if (window.matchMedia(q +'window-controls-overlay)').matches) {data = 'window-controls-overlay'}
+			let aValid = ['browser','fullscreen','miniumal-ui','standalone']
+			if (!isGecko) {aValid.push('picture-in-picture','window-controls-overlay')}
+			for (let i=0; i < aValid.length; i++) {
+				if (window.matchMedia('(display-mode:'+ aValid[i] +')').matches) {data = aValid[i]; break}
 			}
 			if (runST) {data = undefined} else if (runSL) {data += '_fake'}
 			let typeCheck = typeFn(data)

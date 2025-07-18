@@ -347,6 +347,7 @@ function get_link(METRIC) {
 }
 
 function get_media_css(METRIC) {
+	// https://drafts.csswg.org/mediaqueries-5/
 	let oTmpData = {}, countFail = 0, countSuccess = 0
 
 	function collect_data(metric, value, notation, data='', isLies = false) {
@@ -357,7 +358,7 @@ function get_media_css(METRIC) {
 		// failures: we catch failures only on checked items
 		if (rfp_red == notation) {countFail++} else if (rfp_green == notation) {countSuccess++}
 		// display
-		if (zLIE == oTmpData[metric]) {value = log_known(14, metric, value)} // color up + record lies
+		if (zLIE == oTmpData[metric]) {value = log_known(14, METRIC +'_'+ metric, value)} // color up + record lies
 		addDisplay(14, METRIC +'_'+ metric, value,'', notation)
 	}
 
@@ -368,7 +369,7 @@ function get_media_css(METRIC) {
 			value = (function() {for (let i=0; i < 1000; i++) {if (matchMedia('(color:'+ i +')').matches === true) {return i}}
 				return i
 			})()
-			if (runSI) {value = 4.5} else if (runSL) {value = 3}
+			if (runSE) {foo++} else if (runSI) {value = 4.5} else if (runSL) {value = 3}
 			let typeCheck = typeFn(value)
 			if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
 			// lies
@@ -387,14 +388,19 @@ function get_media_css(METRIC) {
 		// https://searchfox.org/mozilla-central/source/servo/components/style/gecko/media_features.rs#660
 		// only notate from when the mediaquery is enabled by default _and_ rfp is applied
 		const np = 'no-preference'
-		const oTests = {
+		let oTests = {
 		// expected
+			'hover': {id: 'H', test: ['hover','none']},
+			'any-hover': {id: 'H', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
-			'prefers-contrast': {id: 'PC', test: [np,'high','low'], rfp: np, rfpver: 1}, // FF101+: 1656363
+			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
+				// ^ this is FINE over COARSE | do not change the order
+			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + fine', rfpver: 1}, // FF64+
+			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
 			'forced-colors': {id: 'FC', test: ['none','active']}, // FF89+: 1659511
-			'dynamic-range': {id: 'DR', test: ['standard','low']}, // FF100+
-			'video-dynamic-range': {id: 'VDR', test: ['standard','low']}, // FF100+
+			'dynamic-range': {id: 'DR', test: ['standard','high']}, // FF100+
+			'video-dynamic-range': {id: 'VDR', test: ['standard','high'], rfp: 'standard', rfpver: 1}, // FF100+
 			'color-gamut': {id: 'CG', test: ['srgb','p3','rec2020'], rfp: 'srgb', rfpver: 1}, // FF110+: 1422237
 		// not enabled yet
 			'prefers-reduced-transparency': {id: 'PRT', test: [np,'reduce'], rfp: np, rfpver: 999}, // FF113+: 1736914
@@ -402,13 +408,35 @@ function get_media_css(METRIC) {
 			'inverted-colors': {id: 'IC', test: ['none','inverted'], rfp: 'none', rfpver: 999}, // FF114+
 				// 1794628: layout.css.inverted-colors.enabled
 			'prefers-reduced-data': {id: 'PRD', test: [np,'reduce']},
+		// matchmedia only: maybe collect for completeness' sake?
+			// these are either expected values or not implemented yet
+			/*
+			'environment-blending': {id: '', test: ['opaque','additive','subtractive']},
+			'grid': {id: '', test: ['0','1']}, // always 0?
+			'nav-controls': {id: '', test: ['none','active']},
+			'overflow-block': {id: '', test: ['none','scroll','paged']}, // always scroll?
+			'overflow-inline': {id: '', test: ['none','scroll']}, //  always scroll?
+			//'scan': {id: '', test: ['progressive','interlace']}, // noone supports this
+			'scripting': {id: '', test: ['enabled','initial-only','none']},
+			'update': {id: '', test: ['fast','slow','none']}, // always fast?
+			'video-color-gamut': {id: '', test: ['srgb','p3','rec2020']},
+			//*/
 		}
 		// ToDo: notation reduced-transparency | inverted-colors rfpver when feature enabled
 
+		if ('android' == isOS) {
+			oTests['hover']['rfp'] = 'none'; oTests['hover']['rfpver'] = 1
+			oTests['any-hover']['rfp'] = 'none'; oTests['any-hover']['rfpver'] = 1
+			oTests['pointer']['rfp'] = 'coarse'; oTests['pointer']['rfpver'] = 1
+			oTests['any-pointer']['rfp'] = 'coarse + coarse';
+		}
+
 		for (const metric of Object.keys(oTests)) {
+			let isTest = '' == oTests[metric].id
 			let value = zNA // match css if not supported
 			let notation ='', cssnotation ='', aTest = oTests[metric].test
 			try {
+				if (runSE) {foo++}
 				for (let i=0; i < aTest.length; i++) {
 					if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value = aTest[i]; break}
 				}
@@ -419,30 +447,50 @@ function get_media_css(METRIC) {
 						if (value == aTest[1]) {value = aTest[0]} else {value = aTest[1]}
 					}
 				}
+				// same try catch so we don't concat errors
+				if ('any-pointer' == metric) {
+					// https://www.w3.org/TR/mediaqueries-4/#any-input
+					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
+					// COARSE over FINE: the first check was FINE over COARSE
+					let value2 = zNA, miniTest = ['coarse','fine','none']
+					for (let i=0; i < miniTest.length; i++) {
+						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]; break}
+					}
+					value = value += ' + '+ value2
+				}
 			} catch(e) {
-				log_error(14, METRIC +'_'+ metric, e)
+				if(!isTest) {log_error(14, METRIC +'_'+ metric, e)}
 				value = zErr
 			}
-			let cssvalue = getElementProp(14, '#css'+ oTests[metric].id, metric +'_css')
-			let isLies = (value !== zErr && cssvalue !== zErr && value !== cssvalue)
-			let rfp = oTests[metric].rfp
-			if (rfp !== undefined && isVer >= oTests[metric].rfpver) {
-				notation = value == rfp ? rfp_green : rfp_red
-				cssnotation = cssvalue == rfp ? rfp_green : rfp_red
+			if (isTest) {
+				//console.log(metric, value)
+				oTmpData[metric] = value
+			} else {
+				let cssvalue = getElementProp(14, '#css'+ oTests[metric].id, metric +'_css')
+				// don't concat errors
+				if ('any-pointer' == metric && cssvalue !== zErr) {
+					let cssvalue2 = getElementProp(7, '#css'+ oTests[metric].id, metric +'_css', ':before')
+					cssvalue = cssvalue2 == zErr ? zErr : cssvalue2 + cssvalue
+				}
+				let isLies = (value !== zErr && cssvalue !== zErr && value !== cssvalue)
+				let rfp = oTests[metric].rfp
+				if (rfp !== undefined && isVer >= oTests[metric].rfpver) {
+					notation = value == rfp && !isLies ? rfp_green : rfp_red
+					cssnotation = cssvalue == rfp ? rfp_green : rfp_red
+				}
+				/*
+				1. css not loaded: 5 _css RFP fails || 11 _css errors (Invalid: got 'none')
+				2. css not loaded + lies: no lies recorded because we need the css value to determie that
+				3. just lies: 11 lies and rfp notation correct
+				*/
+				collect_data(metric, value, notation,'', isLies)
+				collect_data(metric +'_css', '', cssnotation, cssvalue)
 			}
-//ToDo: i need to test combos of outcomes here
-
-			collect_data(metric, value, notation,'', isLies)
-			collect_data(metric +'_css', '', cssnotation, cssvalue)
 		}
-		return
 	}
-
 	// go!
 	get_mm_color()
 	get_mm_css()
-
-	//console.log(countFail, countSuccess, oTmpData)
 	// sort into new object
 	let data = {}
 	for (const k of Object.keys(oTmpData).sort()) {data[k] = oTmpData[k]}
@@ -453,61 +501,10 @@ function get_media_css(METRIC) {
 	addBoth(14, METRIC, mini(data), addButton(14, METRIC), medianotation + strCounts, data)
 }
 
-function get_mm_pointer(group, type, id, rfpvalue) {
-	const METRIC = type
-	let value, data ='', notation ='', cssnotation ='', isLies = false
-	try {
-		if (group == 3) {
-			if (window.matchMedia('('+ type +':hover)').matches) value = 'hover'
-			if (window.matchMedia('('+ type +':none)').matches) value = 'none'
-		} else {
-			if (window.matchMedia('('+ type +':fine').matches) {value = 'fine' // fine over coarse
-			} else if (window.matchMedia('('+ type +':coarse)').matches) {value = 'coarse'
-			} else if (window.matchMedia('('+ type +':none)').matches) {value = 'none'}
-			if (group == 2) {
-				// https://www.w3.org/TR/mediaqueries-4/#any-input
-					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-				let value2 = zNA
-				if (window.matchMedia('('+ type +':coarse').matches) {value2 = 'coarse' // coarse over fine
-				} else if (window.matchMedia('('+ type +':fine)').matches) {value2 = 'fine'
-				} else if (window.matchMedia('('+ type +':none)').matches) {value2 = 'none'}
-				value += ' + '+ value2
-			}
-		}
-		if (runST) {value = undefined} else if (runSL) {value = zNA}
-		let typeCheck = typeFn(value)
-		if ('string' !== typeCheck) {throw zErrType + typeCheck}
-	} catch(e) {
-		value = e; data = zErrShort
-	}
-
-	let cssvalue = getElementProp(7, id, METRIC +'_css')
-	if (group == 2 && cssvalue !== zErr) {cssvalue = getElementProp(7, id, METRIC +'_css', ':before') + cssvalue}
-	if (value !== zErrShort && cssvalue !== zErr) {isLies = (value !== cssvalue)}
-
-	// notate: FF74+ 1607316
-	if ('any-pointer' == type && 'android' !== isOS) {
-		notation = ('fine + fine' == value ? rfp_green : rfp_red)
-		cssnotation = ('fine + fine' == cssvalue ? rfp_green : rfp_red)
-	} else if ('android' == isOS) {
-		notation = (value == rfpvalue ? rfp_green : rfp_red)
-		cssnotation = (cssvalue == rfpvalue ? rfp_green : rfp_red)
-	}
-	addBoth(14, METRIC, value,'', notation, data, isLies)
-	addBoth(14, METRIC +'_css','','', cssnotation, cssvalue)
-	return
-}
-
 const outputCSS = () => new Promise(resolve => {
 	Promise.all([
 		get_colors(),
 		get_media_css('media'),
-/*
-		get_mm_pointer(1, 'pointer','#cssP','coarse'),
-		get_mm_pointer(2, 'any-pointer','#cssAP','coarse + coarse'),
-		get_mm_pointer(3, 'hover','#cssH','none'),
-		get_mm_pointer(3, 'any-hover','#cssAH','none'),
-*/
 		get_computed_styles('computed_styles'),
 		get_link('underline_links')
 	]).then(function(){
