@@ -394,10 +394,8 @@ function get_media_css(METRIC) {
 			'any-hover': {id: 'AH', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
 			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
-			'any-pointer': {id: 'AP', test: ['fine','coarse','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
-				// ^ any-pointer: DO NOT CHANGE ORDER
-				// ^ this is our before value: fine over coarse
-				// ^ reverse #cssAP:after order in css because we break on first match but css takes the final value
+			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
+				// ^ any-pointer: DO NOT CHANGE ORDER: this is our after value: coarse over fine: we break on first match
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
 			'forced-colors': {id: 'FC', test: ['none','active']}, // FF89+: 1659511
@@ -452,17 +450,15 @@ function get_media_css(METRIC) {
 				}
 				// same try catch so we don't concat errors
 				if ('any-pointer' == metric) {
-					//value = ' + '+ (value+'').toUpperCase()
 					// https://www.w3.org/TR/mediaqueries-4/#any-input
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-						// this is the after value: coarse over fine | reverse #cssAP:before order in css because we break
-					let value2 = zNA, miniTest = ['coarse','fine','none']
+					let value2 = zNA, miniTest = ['fine','coarse','none']
+					// ^ any-pointer: DO NOT CHANGE ORDER: this is our before value: fine over coarse: we break on first match
 					for (let i=0; i < miniTest.length; i++) {
 						if (window.matchMedia('('+ metric +':'+ miniTest[i] +')').matches) {value2 = miniTest[i]; break}
 					}
-					// value = fine over coarse (before) | value2 = coarse over fine (after)
-debug.push(' mm |   before | ~'+ value +'~ | after | ~'+ value2 +'~')
-					value = value + ' + '+ value2.toUpperCase()
+					// value = after | value2 = before
+					value = value2 + ' + '+ value
 				}
 			} catch(e) {
 				if(!isTest) {log_error(14, METRIC +'_'+ metric, e)}
@@ -477,11 +473,8 @@ debug.push(' mm |   before | ~'+ value +'~ | after | ~'+ value2 +'~')
 				if ('any-pointer' == metric && cssvalue !== zErr) {
 					// this is the 1st value - we use :before
 					let cssvalue2 = getElementProp(14, id, metric +'_css', ':before')
-					// ccvalue2 = fine over coarse (before) | cssvalue = coarse over fine (after)
+					// cssvalue = after | cssvalue2 = before
 					cssvalue = cssvalue == zErr ? zErr : cssvalue2 + cssvalue
-debug.push(' mm | combined | ~'+ value +'~')
-debug.push('css | combined | ~'+ cssvalue +'~')
-debug.push('match: ' + (value == cssvalue) )
 				}
 				let isLies = (value !== zErr && cssvalue !== zErr && value !== cssvalue)
 				let rfp = oTests[metric].rfp
@@ -500,39 +493,8 @@ debug.push('match: ' + (value == cssvalue) )
 		}
 	}
 	// go!
-	let debug = []
 	get_mm_color()
 	get_mm_css()
-
-	// lets test the old code
-	function get_mm_pointer() {
-		let type = 'any-pointer', id = '#cssAP'
-		let value = zNA
-		try {
-			if (window.matchMedia('('+ type +':fine').matches) {value = 'fine' // fine over coarse
-			} else if (window.matchMedia('('+ type +':coarse)').matches) {value = 'coarse'
-			} else if (window.matchMedia('('+ type +':none)').matches) {value = 'none'}
-			debug.push('---')
-			let value2 = zNA
-			if (window.matchMedia('('+ type +':coarse').matches) {value2 = 'coarse' // coarse over fine
-			} else if (window.matchMedia('('+ type +':fine)').matches) {value2 = 'fine'
-			} else if (window.matchMedia('('+ type +':none)').matches) {value2 = 'none'}
-			debug.push(' mm |   before | ~'+ value +'~ | after | ~'+ value2 +'~')
-			value += ' + '+ value2.toUpperCase() // original
-			//value = value2 + value
-
-		} catch(e) {
-			value = zErr
-		}
-		let cssvalue = getElementProp(7, id, METRIC +'_css')
-		let cssvalue2 = getElementProp(7, id, METRIC +'_css', ':before')
-		cssvalue = cssvalue2 + cssvalue
-		debug.push(' mm | combined | ~'+ value +'~')
-		debug.push('css | combined | ~'+ cssvalue +'~')
-		debug.push('match: ' + (value == cssvalue) )
-	}
-	get_mm_pointer()
-	dom.perfS.innerHTML = debug.join('<br>')
 
 	// sort into new object
 	let data = {}
