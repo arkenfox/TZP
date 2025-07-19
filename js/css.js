@@ -396,7 +396,7 @@ function get_media_css(METRIC) {
 			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
 			'any-pointer': {id: 'AP', test: ['fine','coarse','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
 				// ^ any-pointer: DO NOT CHANGE ORDER
-				// ^ this is our before value
+				// ^ this is our before value: fine over coarse
 				// ^ reverse #cssAP:after order in css because we break on first match but css takes the final value
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
@@ -453,19 +453,16 @@ function get_media_css(METRIC) {
 				// same try catch so we don't concat errors
 				if ('any-pointer' == metric) {
 					//value = ' + '+ (value+'').toUpperCase()
-debug.push('mm | before | ~'+ value +'~')
 					// https://www.w3.org/TR/mediaqueries-4/#any-input
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-						// this is the after value | reverse #cssAP:before order in css because we break
+						// this is the after value: coarse over fine | reverse #cssAP:before order in css because we break
 					let value2 = zNA, miniTest = ['coarse','fine','none']
 					for (let i=0; i < miniTest.length; i++) {
-						console.log('checking', aTest[i])
-						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]; break}
+						if (window.matchMedia('('+ metric +':'+ miniTest[i] +')').matches) {value2 = miniTest[i]; break}
 					}
-					value2 = ' + '+ value2.toUpperCase()
-debug.push('mm | after | ~'+ value2 +'~')
-					value = value + value2
-debug.push('mm | combined | ~'+ value +'~')
+					// value = fine over coarse (before) | value2 = coarse over fine (after)
+debug.push(' mm |   before | ~'+ value +'~ | after | ~'+ value2 +'~')
+					value = value + ' + '+ value2.toUpperCase()
 				}
 			} catch(e) {
 				if(!isTest) {log_error(14, METRIC +'_'+ metric, e)}
@@ -478,11 +475,11 @@ debug.push('mm | combined | ~'+ value +'~')
 				let cssvalue = getElementProp(14, id, metric +'_css')
 				// don't concat errors
 				if ('any-pointer' == metric && cssvalue !== zErr) {
-debug.push('css | after | ~'+ cssvalue +'~')
 					// this is the 1st value - we use :before
 					let cssvalue2 = getElementProp(14, id, metric +'_css', ':before')
-debug.push('css | before | ~'+ cssvalue2 +'~')
-					cssvalue = cssvalue2 == zErr ? zErr : cssvalue2 + cssvalue
+					// ccvalue2 = fine over coarse (before) | cssvalue = coarse over fine (after)
+					cssvalue = cssvalue == zErr ? zErr : cssvalue2 + cssvalue
+debug.push(' mm | combined | ~'+ value +'~')
 debug.push('css | combined | ~'+ cssvalue +'~')
 debug.push('match: ' + (value == cssvalue) )
 				}
@@ -492,10 +489,6 @@ debug.push('match: ' + (value == cssvalue) )
 					notation = value == rfp && !isLies ? rfp_green : rfp_red
 					cssnotation = cssvalue == rfp ? rfp_green : rfp_red
 				}
-if ('any-pointer' == metric) {
-debug.push('isLies: ' + isLies)
-}
-
 				/*
 				1. css not loaded: 5 _css RFP fails || 11 _css errors (Invalid: got 'none')
 				2. css not loaded + lies: no lies recorded because we need the css value to determie that
@@ -519,32 +512,24 @@ debug.push('isLies: ' + isLies)
 			if (window.matchMedia('('+ type +':fine').matches) {value = 'fine' // fine over coarse
 			} else if (window.matchMedia('('+ type +':coarse)').matches) {value = 'coarse'
 			} else if (window.matchMedia('('+ type +':none)').matches) {value = 'none'}
-			//value = ' + '+ (value+'').toUpperCase()
 			debug.push('---')
-			debug.push('mm | after | ~'+ value +'~')
-
 			let value2 = zNA
 			if (window.matchMedia('('+ type +':coarse').matches) {value2 = 'coarse' // coarse over fine
 			} else if (window.matchMedia('('+ type +':fine)').matches) {value2 = 'fine'
 			} else if (window.matchMedia('('+ type +':none)').matches) {value2 = 'none'}
-			debug.push('mm | before | ~'+ value2 +'~')
-
+			debug.push(' mm |   before | ~'+ value +'~ | after | ~'+ value2 +'~')
 			value += ' + '+ value2.toUpperCase() // original
 			//value = value2 + value
 
-			debug.push('mm | combined | ~'+ value +'~')
 		} catch(e) {
 			value = zErr
 		}
 		let cssvalue = getElementProp(7, id, METRIC +'_css')
-		debug.push('css | after | ~'+ cssvalue +'~')
 		let cssvalue2 = getElementProp(7, id, METRIC +'_css', ':before')
-		debug.push('css | before | ~'+ cssvalue2 +'~')
 		cssvalue = cssvalue2 + cssvalue
+		debug.push(' mm | combined | ~'+ value +'~')
 		debug.push('css | combined | ~'+ cssvalue +'~')
 		debug.push('match: ' + (value == cssvalue) )
-		let isLies = (value !== cssvalue)
-		debug.push('isLies: ' + isLies)
 	}
 	get_mm_pointer()
 	dom.perfS.innerHTML = debug.join('<br>')
