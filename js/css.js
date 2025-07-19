@@ -394,8 +394,8 @@ function get_media_css(METRIC) {
 			'any-hover': {id: 'AH', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
 			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
-			'any-pointer': {id: 'AP', test: ['fine','coarse','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
-				// ^ any-pointer: DO NOT CHANGE ORDER
+			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
+				// ^ any-pointer: DO NOT CHANGE ORDER // opposite order to css entries because we break
 				// this is the 2nd value (we check :after: by default)
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
@@ -456,7 +456,7 @@ debug.push('mm | after | ~'+ value +'~')
 					// https://www.w3.org/TR/mediaqueries-4/#any-input
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
 					// COARSE over FINE: the first check was FINE over COARSE
-					let value2 = zNA, miniTest = ['coarse','fine','none']
+					let value2 = zNA, miniTest = ['fine','coarse','none']
 						// ^ any-pointer: DO NOT CHANGE ORDER
 						// this is the 1st value (to match :before:)
 					for (let i=0; i < miniTest.length; i++) {
