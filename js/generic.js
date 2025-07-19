@@ -125,9 +125,7 @@ function run_basic(str = 'basic') {
 function getElementProp(sect, id, name, pseudo = ':after') {
 	// default none: https://www.w3.org/TR/CSS21/generate.html#content
 	try {
-		let item = window.getComputedStyle(document.querySelector(id), pseudo)
-		item = item.getPropertyValue('content')
-		//console.log(sect, pseudo, id, name, item)
+		let item = window.getComputedStyle(document.querySelector(id), pseudo).content
 		if (runSI && !runSL) {item = 'none'} // don't error if runSL
 		let typeCheck = typeFn(item, true)
 		if ('string' !== typeCheck) {throw zErrType + typeCheck}
