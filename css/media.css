@@ -85,9 +85,9 @@
 @media (any-pointer:fine){#cssAP:before{content:"fine";}} /* fine over coarse */
 @media (any-pointer:none){#cssAP:before{content:"none ";}}
 #cssAP:after{content:" + n/a";}
-@media (any-pointer:fine){#cssAP:after{content:" + fine";}}
-@media (any-pointer:coarse){#cssAP:after{content:" + coarse";}} /* coarse over fine */
-@media (any-pointer:none){#cssAP:after{content:" + none ";}}
+@media (any-pointer:fine){#cssAP:after{content:" + FINE";}}
+@media (any-pointer:coarse){#cssAP:after{content:" + COARSE";}} /* coarse over fine */
+@media (any-pointer:none){#cssAP:after{content:" + NONE ";}}
 #cssPC:after{content:"n/a";}
 @media (prefers-contrast:no-preference){#cssPC:after{content:"no-preference";}}
 @media (prefers-contrast:less){#cssPC:after{content:"less";}}
