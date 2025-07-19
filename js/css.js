@@ -394,9 +394,9 @@ function get_media_css(METRIC) {
 			'any-hover': {id: 'AH', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
 			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
-			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
-				// ^ any-pointer: DO NOT CHANGE ORDER // opposite order to css entries because we break
-				// this is the 2nd value (we check :after: by default)
+			'any-pointer': {id: 'AP', test: ['fine','coarse','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
+				// ^ any-pointer: DO NOT CHANGE ORDER
+				// this is the after value | match #cssAP:after order in css and don't break
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
 			'forced-colors': {id: 'FC', test: ['none','active']}, // FF89+: 1659511
@@ -435,12 +435,14 @@ function get_media_css(METRIC) {
 let debug = []
 		for (const metric of Object.keys(oTests)) {
 			let isTest = '' == oTests[metric].id
+			// don't break on first match if getting multiple results so we match css
+			let isBreak = 'any-pointer' !== metric
 			let value = zNA // match css if not supported
 			let notation ='', cssnotation ='', aTest = oTests[metric].test
 			try {
 				if (runSE) {foo++}
 				for (let i=0; i < aTest.length; i++) {
-					if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value = aTest[i]; break}
+					if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value = aTest[i]; if (isBreak) {break}}
 				}
 				if (isGecko) {
 					// can only be a valid value or zNA
@@ -455,12 +457,10 @@ let debug = []
 debug.push('mm | after | ~'+ value +'~')
 					// https://www.w3.org/TR/mediaqueries-4/#any-input
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-					// COARSE over FINE: the first check was FINE over COARSE
-					let value2 = zNA, miniTest = ['fine','coarse','none']
-						// ^ any-pointer: DO NOT CHANGE ORDER
-						// this is the 1st value (to match :before:)
-					for (let i=0; i < miniTest.length; i++) {
-						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]; break}
+						// this is the before value | match #cssAP:before order in css and don't break
+					let value2 = zNA, miniTest = ['coarse','fine','none']
+					for (let i=0; i < aMini.length; i++) {
+						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]}
 					}
 debug.push('mm | before | ~'+ value2 +'~')
 					value = value2 + value
