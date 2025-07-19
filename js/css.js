@@ -459,7 +459,7 @@ debug.push('mm | after | ~'+ value +'~')
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
 						// this is the before value | match #cssAP:before order in css and don't break
 					let value2 = zNA, miniTest = ['coarse','fine','none']
-					for (let i=0; i < aMini.length; i++) {
+					for (let i=0; i < miniTest.length; i++) {
 						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]}
 					}
 debug.push('mm | before | ~'+ value2 +'~')
