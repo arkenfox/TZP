@@ -452,10 +452,11 @@ function get_media_css(METRIC) {
 				if ('any-pointer' == metric) {
 					// https://www.w3.org/TR/mediaqueries-4/#any-input
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-					let value2 = zNA, miniTest = ['fine','coarse','none']
+					let value2 = zNA
+					aTest = ['fine','coarse','none']
 					// ^ any-pointer: DO NOT CHANGE ORDER: this is our before value: fine over coarse: we break on first match
-					for (let i=0; i < miniTest.length; i++) {
-						if (window.matchMedia('('+ metric +':'+ miniTest[i] +')').matches) {value2 = miniTest[i]; break}
+					for (let i=0; i < aTest.length; i++) {
+						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]; break}
 					}
 					// value = after | value2 = before
 					value = value2 + ' + '+ value
