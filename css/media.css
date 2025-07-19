@@ -119,8 +119,8 @@
 @media (prefers-reduced-data:no-preference){#cssPRD:after{content:"no-preference";}}
 @media (prefers-reduced-data:reduce){#cssPRD:after{content:"reduce";}}
 #cssDP:after{content:"undefined";} /* use undefined to match navigator */
-@media (device-posture:continuous){#cssDR:after{content:"continuous";}}
-@media (device-posture:folded){#cssDR:after{content:"folded";}}
+@media (device-posture:continuous){#cssDP:after{content:"continuous";}}
+@media (device-posture:folded){#cssDP:after{content:"folded";}}
 
 /* dpi */
 @media (min-resolution:39dpi){#P:before{content:"";}}
