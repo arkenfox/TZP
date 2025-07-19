@@ -394,9 +394,9 @@ function get_media_css(METRIC) {
 			'any-hover': {id: 'AH', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
 			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
-			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
+			'any-pointer': {id: 'AP', test: ['fine','coarse','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
 				// ^ any-pointer: DO NOT CHANGE ORDER
-				// ^ this is the after value
+				// ^ this is our before value
 				// ^ reverse #cssAP:after order in css because we break on first match but css takes the final value
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
@@ -452,18 +452,19 @@ function get_media_css(METRIC) {
 				}
 				// same try catch so we don't concat errors
 				if ('any-pointer' == metric) {
-					value = ' + '+ (value+'').toUpperCase()
-debug.push('mm | after | ~'+ value +'~')
+					//value = ' + '+ (value+'').toUpperCase()
+debug.push('mm | before | ~'+ value +'~')
 					// https://www.w3.org/TR/mediaqueries-4/#any-input
 					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-						// this is the before value | reverse #cssAP:before order in css because we break
-					let value2 = zNA, miniTest = ['fine','coarse','none']
+						// this is the after value | reverse #cssAP:before order in css because we break
+					let value2 = zNA, miniTest = ['coarse','fine','none']
 					for (let i=0; i < miniTest.length; i++) {
 						console.log('checking', aTest[i])
 						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]; break}
 					}
-debug.push('mm | before | ~'+ value2 +'~')
-					value = value2 + value
+					value2 = ' + '+ value2.toUpperCase()
+debug.push('mm | after | ~'+ value2 +'~')
+					value = value + value2
 debug.push('mm | combined | ~'+ value +'~')
 				}
 			} catch(e) {
@@ -518,7 +519,7 @@ debug.push('isLies: ' + isLies)
 			if (window.matchMedia('('+ type +':fine').matches) {value = 'fine' // fine over coarse
 			} else if (window.matchMedia('('+ type +':coarse)').matches) {value = 'coarse'
 			} else if (window.matchMedia('('+ type +':none)').matches) {value = 'none'}
-			value = ' + '+ (value+'').toUpperCase()
+			//value = ' + '+ (value+'').toUpperCase()
 			debug.push('---')
 			debug.push('mm | after | ~'+ value +'~')
 
@@ -527,7 +528,10 @@ debug.push('isLies: ' + isLies)
 			} else if (window.matchMedia('('+ type +':fine)').matches) {value2 = 'fine'
 			} else if (window.matchMedia('('+ type +':none)').matches) {value2 = 'none'}
 			debug.push('mm | before | ~'+ value2 +'~')
-			value = value2 + value
+
+			value += ' + '+ value2.toUpperCase() // original
+			//value = value2 + value
+
 			debug.push('mm | combined | ~'+ value +'~')
 		} catch(e) {
 			value = zErr
