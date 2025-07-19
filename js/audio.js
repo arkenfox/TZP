@@ -302,12 +302,15 @@ const get_oscillator_compressor = () => new Promise(resolve => {
 })
 
 function outputAudioUser() {
-	if (!gClick) {return}
+	const METRIC = 'audio_user'
+	if (!gClick) {
+		dom[METRIC] = 'beep beep'
+		return
+	}
 	gt0 = nowFn()
 	gClick = false
 	gRun = false
 	let section = {}
-	const METRIC = 'audio_user'
 
 	function output() {
 		let obj = {}
