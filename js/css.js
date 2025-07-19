@@ -394,7 +394,7 @@ function get_media_css(METRIC) {
 			'any-hover': {id: 'AH', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
 			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
-			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + FINE', rfpver: 1}, // FF64+
+			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + fine', rfpver: 1}, // FF64+
 				// ^ any-pointer: DO NOT CHANGE ORDER: this is our after value: coarse over fine: we break on first match
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
@@ -428,7 +428,7 @@ function get_media_css(METRIC) {
 			oTests['hover']['rfp'] = 'none'; oTests['hover']['rfpver'] = 1
 			oTests['any-hover']['rfp'] = 'none'; oTests['any-hover']['rfpver'] = 1
 			oTests['pointer']['rfp'] = 'coarse'; oTests['pointer']['rfpver'] = 1
-			oTests['any-pointer']['rfp'] = 'coarse + COARSE';
+			oTests['any-pointer']['rfp'] = 'coarse + coarse';
 		}
 
 		for (const metric of Object.keys(oTests)) {
