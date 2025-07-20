@@ -36,13 +36,32 @@ const lookup_permission = (item) => new Promise(resolve => {
 })
 
 function lookup_storage_bucket(type, bytes, granted = false) {
+	const GiB = 1073741824
 	// test
-		// bytes = 5368709120 // 5GB exactly = 5-6GB
-		// bytes = 5368709119 // 5GB minus 1 byte = 4-5GB
-	// 1073741824 = (1024 * 1024 * 1024)/10
-		// round down so even 1 byte less !== 10
-	let value = Math.floor(bytes/(1073741824) * 10)/10
-	let isExact = (10737418240 == bytes || 53687091200 == bytes)
+	//bytes = Math.floor(((32/5) * GiB))    // = 6.4 exact
+	//bytes = Math.floor(((32/5) * GiB)) -1 // = 6-7 range
+	//bytes = Math.floor(((32/5) * GiB)) +1 // = 6-7 range
+	//bytes = 5368709119 // 5GiB minus 1 byte = 4-5 range
+
+	let value = (bytes/GiB) // in GiBs
+	let isExact = Number.isInteger(value)
+	if (!isExact) {
+		// catch obvious floating points: i.e a part byte difference :)
+		// e.g. 32GiB * 20% (gecko's %) = 6.4GiB = but we get 6.3999999994412065
+		// 6.4 * GiB = 6871947673.6 (gecko floors)
+		let upper = (Math.ceil(value *10)/10) // e.g. 6.4
+		let diff = (upper * GiB) - bytes
+		console.log('bytes', bytes,'\nvalue', value,'\nupper', upper,'\ndiff', diff)
+		if (diff < 1) {
+			isExact = true
+			value = upper
+		}
+	}
+	if (!isExact) {
+		// still not exact, floor it
+		value = Math.floor(bytes/(GiB) * 10)/10
+	}
+
 	if ('quota' == type && !isExact) {
 		// bucketize quota more
 			// if persistent-storage is granted
@@ -62,7 +81,7 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 		}
 	}
 	// webkit private window returns 1048576000 bytes = 1000MB
-	if ('webkit' == isEngine && 1048576000 == bytes) {value = '1000 MB'} else {value += ' GB'}
+	if ('webkit' == isEngine && 1048576000 == bytes) {value = '1000 MB'} else {value += ' GiB'}
 	// blink incognito returns 1819735497 bytes = some reduced calculation?
 	return value
 }
@@ -228,30 +247,6 @@ function get_storage(METRIC, rndStr) {
 	return
 }
 
-function get_workers(METRIC) {
-	// these are kinda redundant because we have them in window properties metric, and in future
-	// we will type check and use their scopes in the overall fingerptint: until then ...
-	let aList = ['ServiceWorker','SharedWorker','Worker']
-	let data = {}, aStr = []
-	aList.forEach(function(k){
-		let value = zE
-		try {
-			let test = window[k]
-			if (runST) {test = false}
-			let typeCheck = typeFn(test)
-			if ('undefined' == typeCheck) {value = typeCheck
-			} else if ('function' !== typeCheck) {throw zErrType + typeCheck}
-		} catch(e) {
-			log_error(6, METRIC +'_'+ k, e); value = zErr
-		}
-		data[k] = value
-		aStr.push(value)
-	})
-	addDisplay(6, METRIC, aStr.join(' | '))
-	addData(6, METRIC, data, mini(data))
-	return
-}
-
 const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	// note: delay = 0 = silent run if permission granted
 	const METRIC = 'storage_manager'
@@ -267,7 +262,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 			navigator.storage.persist().then(function(persistent) {
 				navigator.storage.estimate().then(estimate => {
 					// we don't care about estimate.usage
-					let bytes = estimate.quota
+					let bytes = estimate.quota // bytes
 					let typeCheck = typeFn(bytes)
 					if ('number' === typeCheck && Number.isInteger(bytes)) {
 						let value = lookup_storage_bucket('manager', bytes)
@@ -275,7 +270,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 						if (isProxyLie('StorageManager.estimate')) {
 							value = log_known(6, METRIC, value)
 						} else {
-							// 1781277 RFP can only be exactly 10GB or 50GB
+							// 1781277 RFP can only be exactly 10GiB or 50GiB
 							if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
 						}
 						exit(value)
@@ -325,6 +320,30 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 		}
 	}
 })
+
+function get_workers(METRIC) {
+	// these are kinda redundant because we have them in window properties metric, and in future
+	// we will type check and use their scopes in the overall fingerptint: until then ...
+	let aList = ['ServiceWorker','SharedWorker','Worker']
+	let data = {}, aStr = []
+	aList.forEach(function(k){
+		let value = zE
+		try {
+			let test = window[k]
+			if (runST) {test = false}
+			let typeCheck = typeFn(test)
+			if ('undefined' == typeCheck) {value = typeCheck
+			} else if ('function' !== typeCheck) {throw zErrType + typeCheck}
+		} catch(e) {
+			log_error(6, METRIC +'_'+ k, e); value = zErr
+		}
+		data[k] = value
+		aStr.push(value)
+	})
+	addDisplay(6, METRIC, aStr.join(' | '))
+	addData(6, METRIC, data, mini(data))
+	return
+}
 
 const test_idb = (log = false) => new Promise(resolve => {
 	let t0 = nowFn(), rndStr = rnd_string()
