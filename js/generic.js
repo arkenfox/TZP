@@ -628,7 +628,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 142) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 143) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -644,6 +644,8 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
+			// 143: fast-path: pref: layout.css.moz-appearance.webidl.enabled: default false 143+
+			if (!CSS2Properties.prototype.hasOwnProperty('-moz-appearance')) return 143 // 1977489
 			try {
 				let segmenter = new Intl.Segmenter('en', {granularity: 'word'})
 				test = Array.from(segmenter.segment('a:b')).map(({ segment }) => segment)
