@@ -129,6 +129,7 @@ function get_mimetype_codecs(type) {
 		a+'mp4; codecs="mp3"',
 		a+'mp4; codecs="mp4a.40.2"',
 		a+'mp4; codecs="mp4a.40.29"',
+		a+'mp4; codecs="mp4a.40.42"', // 1711882
 		a+'mp4; codecs="mp4a.40.5"',
 		a+'mp4; codecs="mp4a.67"',
 		//a+'mp4; codecs=\'\'',
