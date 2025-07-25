@@ -853,7 +853,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 67, oOther = {}
+	let countOther = 0, expectOther = 66, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -927,6 +927,9 @@ function outputVersion() {
 		rec(135.1, 135, "1775215", ver135a, performance.now()-t135a, "EVAL") // 0.05ms
 
 		// 135: 1930466
+			// this broke in FF142+, and even though we could wrap it in another test
+			// and it doesn't affect any logic since we cascade down, let's just remove it
+		/*
 		let t135 = performance.now(), ver135 = false
 		try {
 			let test135 = new Intl.DateTimeFormat('en', {timeZone: 'Factory'}).format(new Date())
@@ -934,6 +937,7 @@ function outputVersion() {
 			if ('RangeError: invalid time zone in DateTimeFormat(): Factory' == e+'') ver135 = true
 		}
 		rec(135, 135, "1930466", ver135, performance.now()-t135) // very slow if not an error, slow if an eror
+		//*/
 
 		// 134: 1927706 (see 1931044)
 		// packages that use --with-system-icu can cause issues
