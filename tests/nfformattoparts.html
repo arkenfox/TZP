@@ -15,8 +15,13 @@
 
 <body>
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
 
 	<table id="tb4">
@@ -293,6 +298,8 @@ function run_main(numsys = undefined, isLoop = false) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	buildnav()
+
 	try {
 		// pointless if we can't use the feature being tested: FF58+
 		let test = new Intl.NumberFormat("en").formatToParts(1.1)
