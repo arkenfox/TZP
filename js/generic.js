@@ -29,9 +29,8 @@ function smartFn(type) {
 			// we do not know isBB yet
 			if (isSmartAllowed || isFile) {isSmart = true}
 		} else {
-			// now we know isBB 128.5+ and 140+
 			// block BB15 for now, too much noise
-			if (isSmartAllowed || isFile || !isBB || (isBB && 128 == isVer)) {isSmart = true}
+			if (isSmartAllowed || isFile || !isBB) {isSmart = true}
 		}
 		isSmartDataMode = !isSmart // isSmartDataMode must be the opposite
 		if ('final' == type && isSmartDataMode) {run_basic('data-only')}
@@ -117,7 +116,11 @@ function run_basic(str = 'basic') {
 	if (str.length) {
 		let items = document.getElementsByClassName('nav-down')
 		for (let i=0; i < items.length; i++) {
-			items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>"+ str +' mode</span> <')
+			// find '<a href' to end, prepend span
+			// e.g. '<a href="#uad">▼</a>' -> '<span class="perf">notation</span><a href="#uad">▼</a>'
+			let link = items[i].innerHTML
+			link = link.slice(link.indexOf('<a href'), link.length)
+			items[i].innerHTML = "<span class='perf'>"+ str +' mode</span> '+ link
 		}
 	}
 }
@@ -590,30 +593,20 @@ const get_isBB = (METRIC) => new Promise(resolve => {
 	}
 	if (!runSG) {
 		try {
-			if (isVer > 127) {
-				let list = [
-					'content/torconnect/tor-connect.svg', // TB13.5
-					'skin/icons/torbrowser.png', // TB14.5
-					'skin/icons/mullvadbrowser.png', // MB14.5
-				]
-				expected = list.length
-				list.forEach(function(image) {
-					let parts = (image.slice(0,-4)).split('/')
-					let id = parts[parts.length - 1]
-					let el = new Image()
-					el.src = 'chrome://global/' + image
-					get_event(el, id)
-				})
-			} else {
-				// support TB13 until we raise minVer next ESR
-				let el = document.createElement('link')
-				el.href = 'chrome://browser/content/abouttor/aboutTor.css';
-				el.type = 'text/css'
-				el.rel = 'stylesheet'
-				el.setAttribute('id', 'aboutTor')
-				document.head.appendChild(el)
-				get_event(el, 'aboutTor')
-			}
+			// min ver is 128 now
+			let list = [
+				'content/torconnect/tor-connect.svg', // TB13.5
+				'skin/icons/torbrowser.png', // TB14.5
+				'skin/icons/mullvadbrowser.png', // MB14.5
+			]
+			expected = list.length
+			list.forEach(function(image) {
+				let parts = (image.slice(0,-4)).split('/')
+				let id = parts[parts.length - 1]
+				let el = new Image()
+				el.src = 'chrome://global/' + image
+				get_event(el, id)
+			})
 		} catch(e) {
 			// catch any unexpected extension fuckery
 			log_error(3, METRIC, e, isScope, true) // persist sect3
@@ -628,7 +621,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 143) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 143) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -641,8 +634,8 @@ function get_isVer(METRIC) {
 	function cascade() {
 		let test
 		try {
-			// old-timey check: avoid false postives: must be 115 or higher
-			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
+			// old-timey check: avoid false postives: must be 128 or higher
+			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
 			// 143: fast-path: pref: layout.css.moz-appearance.webidl.enabled: default false 143+
 			if (!CSS2Properties.prototype.hasOwnProperty('-moz-appearance')) return 143 // 1977489
@@ -696,35 +689,7 @@ function get_isVer(METRIC) {
 			} catch {}
 			try {new RegExp('[\\00]','u')} catch(e) {if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130} // 1907236
 			if (CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
-			try {let test128 = (new Blob()).bytes(); return 128} catch {} // 1896509
-			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch {} // 1894248
-			if ('function' === typeof URL.parse) {return 126}
-			try {if ('Invalid Date' == new Date('Sep 26 Thurs 1995 10:00')) return 125} catch {} // 1872793
-			let el = document.documentElement
-			if (!CSS2Properties.prototype.hasOwnProperty('MozUserFocus')) {
-				try {
-					el.style.zIndex = 'calc(1 / max(-0, 0))'
-					test = getComputedStyle(el).zIndex
-					el.style.zIndex = 'auto'
-					if (test > 0) {return 124} // 1867569
-				} catch {}
-				return 123 // 1871745
-			}
-			if ('function' === typeof Promise.withResolvers) {
-				try {
-					el.style.zIndex = 'calc(1 / abs(-0))'
-					test = getComputedStyle(el).zIndex
-					el.style.zIndex = 'auto'
-					if (test > 0) {return 122} // 1867558
-				} catch {}
-				return 121 // 1845586
-			}
-			if (window.hasOwnProperty('UserActivation')) return 120 // 1791079
-			try {location.href = 'http://a>b/'} catch(e) {if (e.name === 'SyntaxError') return 119} // 1817591
-			if (CSS2Properties.prototype.hasOwnProperty('fontSynthesisPosition')) return 118 // 1849010
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('fontStretch')) return 117 // 1842467
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('textRendering')) return 116 // 1839614
-			return 115
+			return 128
 		} catch(e) {
 			console.error(e)
 			return 0
@@ -1925,6 +1890,8 @@ function countJS(item) {
 			get_isFileSystem('isFileSystem'),
 			get_isAutoplay('getAutoplayPolicy'),
 		]).then(function(){
+			// 140+ notations: if isBB then block FPP notations & vice versa
+			isFPPFallback = !isBB
 			Promise.all([
 				get_isOS('isOS')
 			]).then(function(){
@@ -2170,11 +2137,9 @@ function outputSection(id, isResize = false) {
 	smartFn('final')
 	// BB: font.vis + bundled fonts
 		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
-		// not the case when using font.system.whitelist
-		// we should see if we can get this fixed upstream
-	//*
-	// ToDo: alpha128 is using this so we can't use isVer, we need to promise if fontface is working
-
+		// not the case when using font.system.whitelist | we should see if we can get this fixed upstream
+	// currently only nightly uses font vis which fucks up my mojo and workflow: so enforce a delay
+		// ToDo: detect if we need a delay - we can't use isVer, we need to promise if fontface is working
 	if (gLoad && isBB && isVer > 139) {
 		if ('windows' == isOS || 'mac' == isOS) {
 			delay = 2000 // using fontasync PoC on my machine this is around 990+ ms
@@ -2182,7 +2147,6 @@ function outputSection(id, isResize = false) {
 			dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
 		}
 	}
-	//*/
 	setTimeout(function() {
 		get_isPerf()
 		if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}

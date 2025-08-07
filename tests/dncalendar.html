@@ -15,8 +15,13 @@
 
 <body>
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
 
 	<table id="tb4">
@@ -318,6 +323,7 @@ Promise.all([
 	get_globals()
 ]).then(function(){
 	get_isVer()
+	buildnav()
 
 	try {
 		let test = new Intl.DisplayNames(undefined, {type: 'region'}).resolvedOptions().locale

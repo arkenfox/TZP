@@ -520,7 +520,7 @@
 		</td></tr>
 		<tr><td>validation messages</td><td class="c mono" id="l10n_validation_messages"></td></tr>
 		<tr><td>XML messages</td><td class="c mono" id="l10n_xml_messages"></td></tr>
-		<!--<tr><td>XSLT messages</td><td class="c mono" id="l10n_xslt"></td></tr>-->
+		<tr><td>XSLT messages</td><td class="c mono" id="l10n_xslt"></td></tr>
 		<tr><td>XSLT sort</td><td class="mono border-bottom"><span class="c" id="l10n_xslt_sort"></span></td></tr>
 		<!--tz-->
 		<tr><td><span id="labelTT" class="btn btn0" onClick="togglerows('TT','btn')">[+]</span>
@@ -550,6 +550,7 @@
 		<tr class="togTO"><td>date.valueOf</td><td class="c mono" id="date.valueOf"></td></tr>
 		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
 		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
+		<tr class="togTO"><td>offsetNanoseconds</td><td class="c mono" id="offsetNanoseconds"></td></tr>
 		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="Symbol.toPrimitive"></td></tr>
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
@@ -665,15 +666,14 @@
 			<span class="ttxtx">[css | matchmedia] device-posture<br>navigator.devicePosture</span></div>
 			&nbsp; devicePosture</td><td class="mono">
 			<span id="cssDP"></span>
-			| <span class="c" id="device-posture"></span>
-			| <span class="c" id="devicePosture"></span>
+			| <span class="c" id="devicePosture_device-posture"></span>
+			| <span class="c" id="devicePosture_devicePosture"></span>
 			</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp; hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
 		<tr><td>[screen] isExtended</td><td class="c mono" id="isExtended"></td></tr>
 		<tr><td>keyboard</td><td class="c mono" id="keyboard"></td></tr>
-		<tr><td>maxTouchPoints</td><td class="c mono" id="maxTouchPoints"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
@@ -684,6 +684,7 @@
 				mozPressure<br>pointerType<br>pressure<br>tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
 			</div> &nbsp; pointer event <sup>1</sup></td><td class="c mono" id="ptEvent"></td></tr>
 		<tr><td>recursion</td><td class="c mono" id="recursion"></td></tr>
+		<tr><td>touch</td><td class="c mono" id="touch"></td></tr>
 		<tr><td colspan="2"><span class="no_color">pointer code based on work by </span>
 			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke</a> <sup>1</sup></td></tr>
 	</table>

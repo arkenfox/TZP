@@ -231,9 +231,13 @@ function get_timing(METRIC) {
 		gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
 		gData.timing.currenttime = [966.686] // only a single RFP entry
 		gData.timing.currenttime = [962.486] // only a single non-RFP entry
+
 		//ToDo: cleanup rogue is10's and is100's
-		gData.timing.currenttime = [86.4, 136.44, 236.48] // real world example that causes a 100ms entry
+			// looking at these they aren't actually 100's but also 50's: but I use divided by 2
+		gData.timing.currenttime = [86.4, 136.44, 236.48] // real world examples that causes a 100ms entry
 		gData.timing.currenttime = [75.12, 125.16, 225.24] // another one
+		gData.timing.currenttime = [71.12, 121.14, 171.16] // another one
+
 		gData.timing.exslt = ["2025-07-14T03:53:46.047","2025-07-14T03:53:46.058"]
 		//*/
 
@@ -648,28 +652,13 @@ function get_navigator_keys(METRIC) {
 		hash = mini(aNav); btn = addButton(18, METRIC, aNav.length)
 		// health: BB only as ESR is stable
 		if (isBB) {
-			// MB diffs: has mediaDevices, mediaSession
-			if (128 == isVer) {
-				if (isMB) {
-					if ('05cfe113' == hash) {notation = bb_green} // MB14 41
-				} else if (isTB) {
-					if ('android' == isOS) {
-						// android has share, canShare
-						if ('e416473d' == hash) {notation = bb_green} // TB14 41
-					} else {
-						if ('8325e1db' == hash) {notation = bb_green} // TB14 39
-					}
-				}
-			} else if (140 == isVer) {
-				// changes: vibrate gone, added share, canShare, login, gpu
-				if (isMB) {
-					if ('a389214b' == hash) {notation = bb_green} // MB15 41
-				} else if (isTB) {
-					if ('android' == isOS) {
-						if ('' == hash) {notation = bb_green} // no builds yet
-					} else {
-						if ('' == hash) {notation = bb_green} // no builds yet
-					}
+			if (isMB) { // MB
+				if ('a389214b' == hash) {notation = bb_green} // MB15 41
+			} else { // TB
+				if ('android' == isOS) {
+					if ('' == hash) {notation = bb_green} // no builds yet
+				} else {
+					if ('8d3dd2a1' == hash) {notation = bb_green} // TB15
 				}
 			}
 		}
@@ -1004,12 +993,7 @@ const outputMisc = () => new Promise(resolve => {
 		// 1259822: FF74+ | 1965165: javascript.options.property_error_message_fix FF140+ default enabled
 		try {null.bar} catch(e) {
 			if (isBB) {
-				if (128 == isVer) {
-					notation = (e+'' == 'TypeError: null has no properties' ? bb_green : bb_red)
-				} else {
-					// FF140+
-					notation = (e+'' == 'TypeError: can\'t access property "bar" of null' ? bb_green : bb_red)
-				}
+				notation = (e+'' == 'TypeError: can\'t access property "bar" of null' ? bb_green : bb_red)
 			}
 			value = e.message
 		}

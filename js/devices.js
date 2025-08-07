@@ -26,42 +26,22 @@ const get_battery = (METRIC) => new Promise(resolve => {
 					let x = battery[k]
 					// type check
 					let typeCheck = typeFn(x), typeExpected = oItems[k]
-					let isTime = 'Time' == k.slice(-4)
-					let isTimeCheck = ('number' == typeCheck && isTime)
-					if (typeCheck !== typeExpected) {
-						let isThrow = true
-						if (isTimeCheck) {isThrow = false}
-						if (isThrow) {throw zErrType + k +': '+ typeCheck}
-					}
+					let isTime = 'Time' == k.slice(-4), isTimeCheck = ('number' == typeCheck && isTime)
+					if (typeCheck !== typeExpected) {if (!isTimeCheck) {throw zErrType + k +': '+ typeCheck}}
 					// validity
 					if (isTimeCheck) {
 						if (!Number.isInteger(x) || x < 0) {throw zErrInvalid + k + ': expected a positive integer: got '+ x}
 					} else if ('level' == k) {
 						if (x < 0 || x > 1) {throw zErrInvalid + k + ': expected 0 to 1: got '+ x}
 					}
-					if (isTime) {aTimes.push(x)}
-					// record values
 					if (Infinity == x) (x += '')
+					if (isTime) {aTimes.push(x)}
 					data[k] = x
 				}
 
-				let aParts = [data.charging]
-				aParts.push('Infinity' == data.chargingTime ? 'Infinity' : (0 == data.chargingTime ? 0 : '!0'))
-				aParts.push('Infinity' == data.dischargingTime ? 'Infinity' : (0 == data.dischargingTime ? 0 : '!0'))
-				aParts.push(Number.isInteger(data.level) ? data.level : '!Integer')
-				let str = aParts.join(', ')
-				let hash = mini(aParts)
-
-				//                desktop no battery:  true,        0, Infinity, 1
-				// mobile not 100% not being charged: false, Infinity,      > 0, non-integer
-				// mobile not 100%     being charged:  true,      > 0, Infinity, non-integer
-				// mobile     100% not being charged: false, Infinity,      > 0, 1
-				// mobile     100%     being charged:  true,        0, Infinity, 1 (same as desktop)
-
-				// note: change of charging state in chrome session, we can get 2 x Infinity
-					// so the *Times are not reliable indicators as to what's going on
-				// has battery exists if the level is less than 1 || charging is false || 2 x Infinity
-					// this should be enough
+				// true, 0, Infinity, 1 == no battery or fully charged | else  == a battery (or tampering)
+				// note: *Times are not reliable: change of charging state during a chrome session, we can get 2 x Infinity
+				// logic: battery exists if the level is less than 1 || charging is false || 2 x Infinity: this should be enough
 				let fpvalue = 'unknown'
 				if (!data.charging || data.level < 1 || 'InfinityInfinty' == aTimes.join('')) {fpvalue = true}
 				addData(7, METRIC, fpvalue)
@@ -82,7 +62,7 @@ const get_battery = (METRIC) => new Promise(resolve => {
 
 function get_device_integer(METRIC, proxyCheck) {
 	// concurrency: 1630089: macOS reports physical cores instead of logical
-		// capped at 16 dom.maxHardwareConcurrency e.g 1728741
+		// dom.maxHardwareConcurrency : 1958598: FF139+ 128
 	let value, data ='', expected = 'hardwareConcurrency' == METRIC ? 2 : 24
 	try {
 		value = 2 == expected ? navigator[METRIC] : screen[METRIC]
@@ -124,29 +104,51 @@ function get_device_memory(METRIC) {
 
 function get_device_posture(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/devicePosture
-	let value, data =''
-	try {
-		value = navigator.devicePosture
-		if (runST) {value = false} else if (runSI) {value = {}}
-		let typeCheck = typeFn(value, true)
-		if ('undefined' == typeCheck) {
-			value = typeCheck
-		} else {
-			if ('object' !== typeCheck) {throw zErrType + 'devicePosture: '+ typeCheck}
-			let expected = '[object DevicePosture]'
-			if (value+'' !== expected) {throw zErrInvalid + 'devicePosture expected '+ expected +': got '+ value+''}
-			value = value.type
-			typeCheck = typeFn(value)
-			if ('string' !== typeCheck) {throw zErrType + 'devicePosture.type: '+ typeCheck}
-			let aValid = ['continuous','folder']
-			if (!aValid.includes(value)) {
-				throw zErrInvalid +'expected: '+ aValid.join(', ') +': got '+ value
+	let oData = {}, aValid = ['continuous','folder']
+	function get_nav(m) {
+		let value
+		try {
+			value = navigator[m]
+			if (runST) {value = false} else if (runSI) {value = {}}
+			let typeCheck = typeFn(value, true)
+			if ('undefined' == typeCheck) {
+				value = typeCheck
+			} else {
+				if ('object' !== typeCheck) {throw zErrType + 'devicePosture: '+ typeCheck}
+				let expected = '[object DevicePosture]'
+				if (value+'' !== expected) {throw zErrInvalid + 'devicePosture expected '+ expected +': got '+ value+''}
+				value = value.type
+				typeCheck = typeFn(value)
+				if ('string' !== typeCheck) {throw zErrType + 'devicePosture.type: '+ typeCheck}
+				if (!aValid.includes(value)) {
+					throw zErrInvalid +'expected: '+ aValid.join(', ') +': got '+ value
+				}
 			}
+		} catch(e) {
+			value = zErr; log_error(7, METRIC +'_'+ m, e)
 		}
-	} catch(e) {
-		value = e; data = zErrShort
+		oData[m] = value; addDisplay(7, METRIC +'_'+ m, value)
 	}
-	addBoth(7, METRIC, value,'','', data)
+
+	function get_mm(m) {
+		let cssvalue = getElementProp(7, '#cssDP', METRIC +'_'+ m +'_css')
+		let value = 'undefined'
+		try {
+			if (runSE) {foo++}
+			for (let i=0; i < aValid.length; i++) {
+				if (window.matchMedia('('+ m +':'+ aValid[i] +')').matches) {value = aValid[i]; break}
+			}
+		} catch(e) {
+			value = zErr; log_error(7, METRIC +'_'+ m, e)
+		}
+		oData[m] = value; addDisplay(7, METRIC +'_'+ m, value)
+		oData[m +'_css'] = cssvalue
+	}
+
+	// do in alphabetival order
+	get_mm('device-posture')
+	get_nav('devicePosture')
+	addData(7, METRIC, oData, mini(oData))
 	return
 }
 
@@ -192,26 +194,6 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 	}
 })
 
-function get_maxtouch(METRIC) {
-	// https://www.w3.org/TR/pointerevents/#extensions-to-the-navigator-interface
-	// FF64+: RFP 1363508
-	let value, data =''
-	try {
-		value = navigator[METRIC]
-		if (runST) {value = undefined} else if (runSI) {value = -5} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
-		let typeCheck = typeFn(value)
-		if ('number' !== typeCheck) {throw zErrType + typeCheck}
-		if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value}
-	} catch(e) {
-		value = e; data = zErrLog
-	}
-	// 1826051: FF132+ 10 except mac
-	// 1957658: FF139+ ?
-	let rfpvalue = (isVer > 131 && 'mac' !== isOS) ? 10 : 0
-	addBoth(7, METRIC, value,'', (rfpvalue == value ? rfp_green : rfp_red), data, isProxyLie('Navigator.'+ METRIC))
-	return
-}
-
 const get_media_devices = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 
@@ -221,16 +203,7 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 		if (isTB) {
 			notation = 'undefined' == value ? bb_green : bb_red
 		} else {
-			let rfplegacy = '54a59537', rfpnew = '75e77887'
-			if (isMB) {
-				// tor-browser#42043
-				notation = value == rfpnew ? bb_green : bb_red
-			} else if (isVer > 131) {
-				// 1916993: FF132+ default false
-				notation = value == rfpnew ? rfp_green : rfp_red
-			} else {
-				notation = (value == rfplegacy ? sgtick : sbx) + ' RFP gUM legacy]' + sc
-			}
+			notation = '75e77887' == value ? rfp_green : rfp_red
 		}
 		return notation
 	}
@@ -330,8 +303,9 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 	}
 	for (let i=0; i < aList.length; i++) {
 		let k = aList[i], key = k
-		// so far all follow the same allowed values
-		let aGood = ['denied','granted','prompt']
+		// https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus
+		// spec: https://w3c.github.io/permissions/#permissions
+		let aValid = ['denied','granted','prompt']
 		function accrue(k, value) {
 			count++
 			if (undefined ==tmpData[value]) {tmpData[value] = [k]} else {tmpData[value].push(k)}
@@ -347,7 +321,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 				// checks
 				let typeCheck = typeFn(state)
 				if ('string' !== typeCheck) {throw zErrType + typeCheck}
-				if (!aGood.includes(state)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ state}
+				if (!aValid.includes(state)) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ state}
 				accrue(k, state)
 			}).catch(err => {
 				if (isGecko) {log_error(7, METRIC +'_'+ k, err)} // don't log nonGecko
@@ -361,14 +335,8 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 	function exit() {
 		// sort object
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k]}
-		let hash = mini(data), isGreen = false
-		if (isGecko) {
-			// add notation: both TB/FF are identical
-			if (isVer < 132 && 'd34d3764' == hash) {isGreen = true
-			} else if (isVer > 131 && 'd417aea2' == hash) {isGreen = true // FF132+: camera + microphone added
-			}
-		}
-		let notation = isGreen ? default_green : default_red
+		let hash = mini(data)
+		let notation = 'd417aea2' == hash ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
 		return resolve()
@@ -416,6 +384,139 @@ function get_pointer_event(event) {
 	dom.ptEvent.innerHTML = oDisplay.join(', ') //+ sg +'['+ mini(oData) +']'+ sc
 }
 
+function get_touc_h(METRIC) {
+	// note: function name avoids "ouch" to avoid being picked up in window properties
+	// the element keys and window properties are redundant but required for health/benign value checks
+	// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
+
+	function get_maxTouchPoints(m) {
+		// https://www.w3.org/TR/pointerevents/#extensions-to-the-navigator-interface
+		// FF64+: RFP 1363508
+		let value
+		try {
+			value = navigator[m]
+			if (runST) {value = undefined} else if (runSI) {value = -5} else if (runSL) {addProxyLie('Navigator.'+ m)}
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value}
+			if (isProxyLie('Navigator.'+ m)) {
+				log_known(7, METRIC +'_'+ m, value)
+				value = zLIE
+			}
+		} catch(e) {
+			log_error(7, METRIC +'_'+ m, e)
+			value = zErr
+		}
+		data[m] = value
+	}
+
+	function get_element_touch(m) {
+		// domparser: 0.12ms | dom: 0.08 | just use domparser
+		let value = []
+		try {
+			let parser = new DOMParser
+			let doc = parser.parseFromString('<a>', "text/html")
+			let target = doc.body.firstChild
+			//let target = dom.tzpDiv // dom test
+			for (const key in target) {if (key.includes('ouch')) {value.push(key)}}
+			if (0 == value.length) {value = 'none'}
+			if (isGecko) {
+				// gecko: ontouch only exists in android: desktop blocks these to avoid being identified as mobile
+				let got = 'none' == value ? value : value.join(', ')
+				if ('android' == isOS) {
+					// android
+					if ('a0cd45fb' !== mini(value)) {
+						let expected = ['ontouchstart','ontouchend','ontouchmove','ontouchcancel'] // a0cd45fb
+						throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
+					}
+				} else if ('none' !== value) {
+					// desktop
+					throw zErrInvalid +'expected none: got '+ got
+				}
+			}
+		} catch(e) {
+			log_error(7, METRIC +'_'+ m, e)
+			value = zErr
+		}
+		data[m] = value
+	}
+
+	function get_window_touch(m) {
+		// 0.4ms window | 1.2ms iframe
+		let value
+		try {
+			let props = Object.getOwnPropertyNames(window)
+			value = props.filter(x => x.includes('ouch'))
+			value.sort() // we already capture order in window properties
+			if (0 == value.length) {value = 'none'}
+			if (isGecko) {
+				let expected, got = 'none' == value ? value : value.join(', ')
+				if ('mac' == isOS) {
+					// mac doesn't have touch
+					throw zErrInvalid +'expected none: got '+ got
+				} else if ('android' == isOS) {
+					// android
+					if ('62482a70' !== mini(value)) {
+						expected = ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart'] // ordered
+						throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
+					}
+				} else {
+					// windows/linux: none or ['Touch','TouchEvent','TouchList']
+					if ('none' !== value && 'a8d0e340' !== mini(value)) {
+						expected = ['Touch','TouchEvent','TouchList']
+						throw zErrInvalid +'expected none or '+ expected.join(', ') +': got '+ got
+					}
+				}
+			}
+		} catch(e) {
+			log_error(7, METRIC +'_'+ m, e)
+			value = zErr
+		}
+		data[m] = value
+	}
+
+	// do in alphabetical order
+	let data = {}, notation = ''
+	get_element_touch('element')
+	get_maxTouchPoints('maxTouchPoints')
+	get_window_touch('window')
+
+	let hash = mini(data), btn = addButton(7, METRIC)
+	// RFP
+		// 1957658: FF143+, ESR140.2: 5 android, 10 windows, 0 mac and linux
+		// 1980472: window touch properties: isBB via prefs, awaiting FF
+	let rfpHashes = {
+		'android': '725ba69f',
+			/*
+			{	"element": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+				"maxTouchPoints": 5,
+				"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
+			}
+			*/
+		'linux': 'd539fa63', // {"element": "none", "maxTouchPoints": 0, "window": "none"}
+		'mac': 'd539fa63',
+		'windows': 'dee1c4c9', // {"element": "none", "maxTouchPoints": 10, "window": ['Touch','TouchEvent','TouchList']}
+	}
+	notation = rfpHashes[isOS] == hash ? rfp_green : rfp_red
+
+	// non-BB: fails RFP but may match FPP
+	if (isFPPFallback && undefined !== isOS && notation == rfp_red) {
+		// FPP
+			// 1977836 FF143: 0 or 1, everything else as 5
+			// 1978414: ship touch points
+		let fppHashes = {
+			'android': ['725ba69f'], // everything + 5
+			'mac': ['d539fa63'], // nothing
+			'linux': ['d539fa63', '976cb3af', '7d4aea2b'], // 0,1,5
+			'windows': ['d539fa63', '976cb3af', '7d4aea2b'], // same as linux
+		}
+		if (fppHashes[isOS].includes(hash)) {notation = fpp_green}
+	}
+
+	addBoth(7, METRIC, hash, btn, notation, data)
+	return
+}
+
 const outputDevices = () => new Promise(resolve => {
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 
@@ -432,7 +533,7 @@ const outputDevices = () => new Promise(resolve => {
 
 	Promise.all([
 		get_media_devices('mediaDevices'),
-		get_maxtouch('maxTouchPoints'),
+		get_touc_h('touch'),
 		get_device_integer('pixelDepth','Screen.'),
 		get_device_integer('colorDepth','Screen.'),
 		get_device_integer('hardwareConcurrency','Navigator.'),

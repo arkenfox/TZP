@@ -590,6 +590,67 @@ const get_isVer = () => new Promise(resolve => {
 
 /** GENERAL CLICK FUNCTIONS **/
 
+function buildnav() {
+	// add prev/next nav links in all the intl tests so it's easy to loop thru them
+	let aTests = [ // filenames: in order as per listed, not necerssarily alphabetical
+		'collation',
+		'dncalendar','dncurrency','dndatetime','dnlanguage','dnregion','dnscript',
+		'dtfcomponents','dtfdatetimestyle','dtfdayperiod','dtflistformat','dtfrelated','dtftimezonename',
+		'duration',
+		'nfcompact','nfcurrency','nfformattoparts','nfnotation','nfsign','nfunit',
+		'pluralrules','rtf','resolvedoptions','segmenter',
+	]
+	let oTests = { // just hardcode the prettyy names
+		'dncalendar': 'dn: calendar',
+		'dncurrency': 'dn: currency',
+		'dndatetime': 'dn: datetimefield',
+		'dnlanguage': 'dn: language',
+		'dnregion': 'dn: region',
+		'dnscript': 'dn: script',
+		'dtfcomponents': 'dtf: components',
+		'dtfdatetimestyle': 'dtf: date-&-timestyle',
+		'dtfdayperiod': 'dtf: dayperiod',
+		'dtflistformat': 'dtf: listformat',
+		'dtfrelated': 'dtf: relatedyear',
+		'dtftimezonename': 'dtf: timezonename',
+		'duration': 'durationformat',
+		'nfcompact': 'nf: compact',
+		'nfcurrency': 'nf: currency',
+		'nfformattoparts': 'nf: ftp',
+		'nfnotation': 'nf: notation',
+		'nfsign': 'nf: sign',
+		'nfunit': 'nf: unit',
+		'rtf': 'relativetimeformat',
+	}
+	// if not file skip segementer
+	if (!isFile) {aTests = aTests.filter(x => !['segmenter'].includes(x)) }
+
+	// get filename
+	let loc = location +''
+	let file = loc.slice(loc.lastIndexOf('/') + 1, loc.length - 5)
+	// index
+	let current = aTests.indexOf(file), previous, next, max = (aTests.length - 1)
+	if (current == 0) {previous = max} else {previous = current - 1}
+	if (current == max) {next = 0} else {next = current + 1}
+	// keys/filenames
+	previous = aTests[previous]
+	next = aTests[next]
+	// pretty names
+	let pName = undefined !== oTests[previous] ? oTests[previous] : previous
+	let nName = undefined !== oTests[next] ? oTests[next] : next
+
+	try {
+		// handle undefined: i.e I forgot to add it to a/oTests
+		if (undefined !== pName) {
+			dom.navprev.innerHTML = '<a class="return" href="'+ previous +'.html">◀ ' + pName +'</a>'
+		}
+		if (undefined !== nName) {
+			dom.navnext.innerHTML = '<a class="return" href="'+ next +'.html">'+ nName +' ▶</a>'
+		}
+	} catch(e) {}
+
+}
+
 function copyclip(element) {
 	// fallback: e.g FF62-
 	function copyExec() {

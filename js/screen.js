@@ -2,21 +2,21 @@
 
 /* SCREEN */
 
-function return_lb(w,h,isNew) {
+function return_lb(w,h) {
 	// LB
 	let wstep = 200, hstep = 200, bw = false, bh = false
-	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = isNew ? 200: 100}
+	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = 200}
 	if (h < 501) {hstep = 50} else if (h < 1601) {hstep = 100}
 	bw = Number.isInteger(w/wstep)
 	bh = Number.isInteger(h/hstep)
 	return (bw && bh) ? true : false
 }
 
-function return_nw(w,h, isNew) {
+function return_nw(w,h) {
 	// NW
 	let wstep = 200, hstep = 100, bw = false, bh = false
-	if (w < (isNew ? 1401 : 1001)) {bw = Number.isInteger(w/wstep)}
-	if (h < (isNew ? 901 : 1001)) {bh = Number.isInteger(h/hstep)}
+	if (w < 1401) {bw = Number.isInteger(w/wstep)}
+	if (h < 901) {bh = Number.isInteger(h/hstep)}
 	return (bw && bh) ? nw_green : nw_red
 }
 
@@ -343,7 +343,6 @@ const get_scr_measure = () => new Promise(resolve => {
 		let notation ='', initData = zNA, initHash =''
 		let innerw = oData.inner.width.window, innerh = oData.inner.height.window
 		let screenw = oData.screen.width.screen, screenh = oData.screen.height.screen
-		let isNew = (isBB || isVer > 132) // 1556002 newWin & LB step alignment
 
 		// controls: we want integers so we know what to match to
 		let controlw = innerw, controlh = innerh
@@ -372,7 +371,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			initData = isInitial; initHash = mini(isInitial)
 		} else {
 			// NW
-			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh, isNew))
+			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh))
 		}
 		let isCompareValid = 'number' == typeFn(controlw) && 'number' == typeFn(controlh)
 
@@ -443,7 +442,7 @@ const get_scr_measure = () => new Promise(resolve => {
 				if (isSame && isCompareValid) {
 					// if inner: does it match LBing
 					if ('inner' == k) {
-						isSame = return_lb(controlw, controlh, isNew)
+						isSame = return_lb(controlw, controlh)
 					} else {
 						// we can refine these rules later per key/OS: currently does it == inner
 						let match = 'width' == j ? controlw : controlh
@@ -884,8 +883,9 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 				log_error(1, METRIC +'_'+ item, zErrType + typeCheck), value = zErr
 			}
 		}
-		let rfpvalue = isVer > 133 ? 192 : 96
-		addDisplay(1, METRIC +'_'+ item,'','', (value == rfpvalue || '?' == value ? rfp_green : rfp_red)) // css notate
+		// why did I allow a ? for css
+			// was: 192 == value || '?' == value ? rfp_green : rfp_red
+		addDisplay(1, METRIC +'_'+ item,'','', (192 == value ? rfp_green : rfp_red)) // css notate
 		oData[item] = value
 	}
 
@@ -944,19 +944,15 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		for (const k of Object.keys(results[0])) {
 			// expected 100% zoom values
 			let oMatch = {
-				'-moz-device-pixel-ratio': 1,
-				'-webkit-device-pixel-ratio': 1,
-				'dpcm': 37.79527499999999,
-				'dpi': 96.00000000000003,
-				'dppx': 1,
+				'-moz-device-pixel-ratio': 2,
+				'-webkit-device-pixel-ratio': 2,
+				'dpcm': 75.59054999999998,
+				'dpi': 192.00000000000006,
+				'dppx': 2,
 			}
-			let value = results[0][k], notation =''
-			if (oMatch[k] !== undefined) {
-				let rfpvalue = isVer > 133 ? oMatch[k] * 2 : oMatch[k]
-				notation = value == rfpvalue ? rfp_green : rfp_red
-			}
+			let value = results[0][k]
 			oData[k] = value
-			addDisplay(1, METRIC +'_'+ k, value,'', notation)
+			addDisplay(1, METRIC +'_'+ k, value,'', (value == oMatch[k] ? rfp_green : rfp_red))
 		}
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
@@ -970,10 +966,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		addData(1, METRIC, newobj, mini(newobj))
 		// pixel matches
 		if (isSmart) {
-			// ignore BB14 until ESR140
-			if (isBB && isVer < 129) {} else {
-				get_scr_pixels_match('pixels_match', oData)
-			}
+			get_scr_pixels_match('pixels_match', oData)
 		}
 		return resolve()
 	})
@@ -1825,11 +1818,6 @@ const outputFD = () => new Promise(resolve => {
 		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
 			isMB = true
 			isBB = true
-			bb_green = sgtick+'MB]'+sc
-			bb_red = sbx+'MB]'+sc
-			bb_slider_red = sbx+'MB Slider]'+sc
-			bb_standard = sg+'[MB Standard]'+sc
-			bb_safer = sg+'[MB Safer]'+sc
 		}
 	}
 	// browser

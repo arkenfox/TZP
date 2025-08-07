@@ -256,11 +256,6 @@ function set_isLanguageSmart() {
 		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '536abb21', xs: '42d5bac6'},
 		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '6d106412'},
 	}
-	// 128 values
-	if (128 == isVer) {
-		localesSupported['ar'].v = '1dfb5b8c'
-		localesSupported['el'].v = 'b1a88a13'
-	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
 		languagesSupported['ja'].push('ja-JP')
@@ -447,6 +442,7 @@ function set_oIntlTests() {
 			calendar: {
 				'short': ['chinese','ethiopic','gregory','islamic-rgsa','islamic-umalqura','roc'],
 			},
+			currency: {'long': ['JPY','NIO','SEK','SZL','TZS','XAF']},
 			dateTimeField: {
 				'narrow': ['day','dayPeriod','weekOfYear','weekday'],
 				'short': ['era','month','second','timeZoneName'],
@@ -664,9 +660,8 @@ function get_language_locale() {
 	if (isLanguageSmart && isBB) { // only notate BB
 		notation = bb_red
 		let errHash = mini(oErr)
-		if (isVer > 139 && Object.keys(oErr).length == 0 || isVer == 128 && '61a9b098' == errHash) {
-			// BB15: no errors (durationformat default enabled 136+)
-			// BB14: 1 exact error: 61a9b098: { durationformat: "TypeError: Intl.DurationFormat is not a constructor" }
+		if (Object.keys(oErr).length == 0) {
+			// BB15: no errors
 			// only green if BB supported
 			let key = oData.language
 			if (languagesSupported[key] !== undefined) {
@@ -1220,9 +1215,13 @@ function get_timezone(METRIC) {
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
-	let days = ['January 1','July 1'], years = [1879, 1921, 1952, 1976, 2025]
+	let years = [1879, 1921, 1952, 1976, 2025]
+	let days = {'January 1': '01-01','July 1': '07-01'}
+	
+	// 1879-01-01T13:00Z
+
 	let aMethods = [
-		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','Symbol.toPrimitive',
+		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','offsetNanoseconds','Symbol.toPrimitive',
 	]
 
 	function get_tz() {
@@ -1260,7 +1259,7 @@ function get_timezone(METRIC) {
 		})
 		try {
 			years.forEach(function(year) {
-				days.forEach(function(day) {
+				Object.keys(days).forEach(function(day) {
 					let isFirst = (year == years[0] && day == days[0])
 					let datetime = day +', '+ year +' 13:00:00'
 					let control = new Date(datetime +' UTC')
@@ -1269,20 +1268,28 @@ function get_timezone(METRIC) {
 					aMethods.forEach(function(method) {
 						let offset, k = 60000
 						try {
-							if (method == 'getTimezoneOffset') {
+							if ('getTimezoneOffset' == method) {
 								offset = test.getTimezoneOffset()
 								k = 1
 							} else {
-								if (method == 'date.parse') {
+								if ('date.parse' == method) {
 									offset = Date.parse(test) - Date.parse(control)
-								} else if (method == 'date.valueOf') {
+								} else if ('date.valueOf' == method) {
 									offset = test.valueOf() - control.valueOf()
-								} else if (method == 'Symbol.toPrimitive') {
+								} else if ('Symbol.toPrimitive' == method) {
 									offset = test[Symbol.toPrimitive]('number') - control[Symbol.toPrimitive]('number')
-								} else if (method == 'getTime') {
+								} else if ('getTime' == method) {
 									offset = test.getTime() - control.getTime()
-								} else if (method == 'date') {
+								} else if ('date' == method) {
 									offset = test - control
+								} else if ('offsetNanoseconds' == method) {
+									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
+									// e.g. 1879-01-01T13:00Z
+									let tzid = Temporal.Now.timeZoneId(),
+										instant = Temporal.Instant.from(year +'-'+ days[day] +'T13:00Z'),
+										source = instant.toZonedDateTimeISO(tzid).offsetNanoseconds,
+										target = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
+										offset = (target - source) / 1e6
 								}
 							}
 							if (isFirst) {
@@ -1307,7 +1314,6 @@ function get_timezone(METRIC) {
 		get_tz(),
 		get_offsets(),
 	]).then(function(res){
-
 		// TZ: we returned an object
 		let tz, tzObj = res[0], tzData = []
 		// display each item and track non-errors
@@ -1342,7 +1348,8 @@ function get_timezone(METRIC) {
 		}
 		// display hashes + btns
 		if (go) {
-			let isHashMixed = (Object.keys(aHash).length > 1 || countErr > 0) ? true : false // includes errors
+			//let isHashMixed = (Object.keys(aHash).length > 1 || countErr > 0) ? true : false // includes errors
+			let isHashMixed = Object.keys(aHash).length > 1 // excludes errors
 			for (const k of Object.keys(aHash)) {
 				allHash = k
 				let items = aHash[k]
@@ -1369,7 +1376,7 @@ function get_timezone(METRIC) {
 					// just use date.parse
 					years.forEach(function(year) {
 						oTest[year] = []
-						days.forEach(function(day) {
+						Object.keys(days).forEach(function(day) {
 							let datetime = day +', '+ year +' 13:00:00'
 							let control = new Date(datetime)
 							let test = control.toLocaleString('en', {timeZone: 'UTC'})
@@ -1379,17 +1386,20 @@ function get_timezone(METRIC) {
 						})
 					})
 					let testHash = mini(oTest)
-					notation = testHash === allHash ? tz_green : tz_red
+					notation = testHash === allHash && 0 == countErr ? tz_green : tz_red // no errors allowed (smart min is 140)
 					if (testHash !== allHash) {
 						isLies = true
 					} else if (isSmart) {
 						// legit single timezonename
 						// legit looking offset values
-						// all offsets methods match
+						// all non-error offsets methods match
 						// a control matches using the timezonename
-					 isTimeZoneValid = true
+						isTimeZoneValid = 0 == countErr // no errors allowed otherwise assume fuckery
+						//isTimeZoneValid = true
 					}
-				} catch {}
+				} catch(e) {
+					console.log(e)
+				}
 			}
 			// display
 			addBoth(4, METRIC, allHash, addButton(4, METRIC), notation, oOffsets['getTime'], isLies)

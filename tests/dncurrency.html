@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>dn: currency</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
+	</table>
+
+	<table id="tb4">
+		<col width="32%"><col width="68%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">displaynames: currency
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy.
+			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#currency_code_display_names
+
+let aAll = [ // for reference
+'ADP', 'AED', 'AFA', 'AFN', 'ALK', 'ALL', 'AMD', 'ANG', 'AOA', 'AOK',
+'AON', 'AOR', 'ARA', 'ARL', 'ARM', 'ARP', 'ARS', 'ATS', 'AUD', 'AWG',
+'AZM', 'AZN', 'BAD', 'BAM', 'BAN', 'BBD', 'BDT', 'BEC', 'BEF', 'BEL',
+'BGL', 'BGM', 'BGN', 'BGO', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOL',
+'BOP', 'BOV', 'BRB', 'BRC', 'BRE', 'BRL', 'BRN', 'BRR', 'BRZ', 'BSD',
+'BTN', 'BUK', 'BWP', 'BYB', 'BYN', 'BYR', 'BZD', 'CAD', 'CDF', 'CHE',
+'CHF', 'CHW', 'CLE', 'CLF', 'CLP', 'CNH', 'CNX', 'CNY', 'COP', 'COU',
+'CRC', 'CSD', 'CSK', 'CUC', 'CUP', 'CVE', 'CYP', 'CZK', 'DDM', 'DEM',
+'DJF', 'DKK', 'DOP', 'DZD', 'ECS', 'ECV', 'EEK', 'EGP', 'ERN', 'ESA',
+'ESB', 'ESP', 'ETB', 'EUR', 'FIM', 'FJD', 'FKP', 'FRF', 'GBP', 'GEK',
+'GEL', 'GHC', 'GHS', 'GIP', 'GMD', 'GNF', 'GNS', 'GQE', 'GRD', 'GTQ',
+'GWE', 'GWP', 'GYD', 'HKD', 'HNL', 'HRD', 'HRK', 'HTG', 'HUF', 'IDR',
+'IEP', 'ILP', 'ILR', 'ILS', 'INR', 'IQD', 'IRR', 'ISJ', 'ISK', 'ITL',
+'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRH', 'KRO',
+'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LTL',
+'LTT', 'LUC', 'LUF', 'LUL', 'LVL', 'LVR', 'LYD', 'MAD', 'MAF', 'MCF',
+'MDC', 'MDL', 'MGA', 'MGF', 'MKD', 'MKN', 'MLF', 'MMK', 'MNT', 'MOP',
+'MRO', 'MRU', 'MTL', 'MTP', 'MUR', 'MVP', 'MVR', 'MWK', 'MXN', 'MXP',
+'MXV', 'MYR', 'MZE', 'MZM', 'MZN', 'NAD', 'NGN', 'NIC', 'NIO', 'NLG',
+'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEI', 'PEN', 'PES', 'PGK', 'PHP',
+'PKR', 'PLN', 'PLZ', 'PTE', 'PYG', 'QAR', 'RHD', 'ROL', 'RON', 'RSD',
+'RUB', 'RUR', 'RWF', 'SAR', 'SBD', 'SCR', 'SDD', 'SDG', 'SDP', 'SEK',
+'SGD', 'SHP', 'SIT', 'SKK', 'SLE', 'SLL', 'SOS', 'SRD', 'SRG', 'SSP',
+'STD', 'STN', 'SUR', 'SVC', 'SYP', 'SZL', 'THB', 'TJR', 'TJS', 'TMM',
+'TMT', 'TND', 'TOP', 'TPE', 'TRL', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH',
+'UAK', 'UGS', 'UGX', 'USD', 'USN', 'USS', 'UYI', 'UYP', 'UYU', 'UYW',
+'UZS', 'VEB', 'VED', 'VEF', 'VES', 'VND', 'VNN', 'VUV', 'WST', 'XAF',
+'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XCG', 'XDR', 'XEU',
+'XFO', 'XFU', 'XOF', 'XPD', 'XPF', 'XPT', 'XRE', 'XSU', 'XTS', 'XUA',
+'XXX', 'YDD', 'YER', 'YUD', 'YUM', 'YUN', 'YUR', 'ZAL', 'ZAR', 'ZMK',
+'ZMW', 'ZRN', 'ZRZ', 'ZWD', 'ZWG', 'ZWL', 'ZWR',
+]
+
+// currencies: 307 supported in gecko | 159 in chrome
+	// so we should filter these to those supported per engine
+let aItems = []
+try {aAll = Intl.supportedValuesOf('currency')} catch(e) {}
+aAll.sort()
+aItems = aAll
+
+let aTestItems = [
+	// these add something in gecko but we can reduce the styles they test
+	'AFN', 'ANG', 'AOA', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BIF', 'BMD', 
+	'BND', 'BOB', 'BRL', 'BSD', 'BWP', 'BZD', 'CAD', 'CDF', 'CLP', 'CNY', 
+	'COP', 'CRC', 'CUP', 'DJF', 'DKK', 'DOP', 'DZD', 'ERN', 'ETB', 'EUR', 
+	'FJD', 'FKP', 'FRF', 'GBP', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 
+	'HNL', 'HTG', 'IDR', 'IQD', 'JMD', 'JPY', 'KES', 'KGS', 'KMF', 'KYD', 
+	'KZT', 'LKR', 'LRD', 'LSL', 'LUF', 'MDL', 'MGA', 'MKD', 'MOP', 'MRU', 
+	'MUR', 'MWK', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NZD', 'PAB', 'PEN', 
+	'PGK', 'PHP', 'PKR', 'PLN', 'PTE', 'PYG', 'RUB', 'RUR', 'RWF', 'SBD', 
+	'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 
+	'SYP', 'SZL', 'TND', 'TOP', 'TTD', 'TZS', 'UGX', 'USD', 'UYW', 'VES', 
+	'VUV', 'WST', 'XAF', 'XCD', 'ZAR', 'ZMW', 
+
+/* these add nothing in gecko or blink
+	'ADP', 'AED', 'AFA', 'ALK', 'ALL', 'AMD', 'AOK', 'AON', 'AOR', 'ARA', 
+	'ARL', 'ARM', 'ARP', 'ARS', 'ATS', 'AZM', 'BAD', 'BAN', 'BDT', 'BEC', 
+	'BEF', 'BEL', 'BGL', 'BGM', 'BGN', 'BGO', 'BHD', 'BOL', 'BOP', 'BOV', 
+	'BRB', 'BRC', 'BRE', 'BRN', 'BRR', 'BRZ', 'BTN', 'BUK', 'BYB', 'BYN', 
+	'BYR', 'CHE', 'CHF', 'CHW', 'CLE', 'CLF', 'CNH', 'CNX', 'COU', 'CSD', 
+	'CSK', 'CUC', 'CVE', 'CYP', 'CZK', 'DDM', 'DEM', 'ECS', 'ECV', 'EEK', 
+	'EGP', 'ESA', 'ESB', 'ESP', 'FIM', 'GEK', 'GEL', 'GHC', 'GNS', 'GQE', 
+	'GRD', 'GWE', 'GWP', 'HKD', 'HRD', 'HRK', 'HUF', 'IEP', 'ILP', 'ILR', 
+	'ILS', 'INR', 'IRR', 'ISJ', 'ISK', 'ITL', 'JOD', 'KHR', 'KPW', 'KRH', 
+	'KRO', 'KRW', 'KWD', 'LAK', 'LBP', 'LTL', 'LTT', 'LUC', 'LUL', 'LVL', 
+	'LVR', 'LYD', 'MAD', 'MAF', 'MCF', 'MDC', 'MGF', 'MKN', 'MLF', 'MMK', 
+	'MNT', 'MRO', 'MTL', 'MTP', 'MVP', 'MVR', 'MXN', 'MXP', 'MXV', 'MZE', 
+	'MZM', 'NIC', 'NLG', 'NOK', 'NPR', 'OMR', 'PEI', 'PES', 'PLZ', 'QAR', 
+	'RHD', 'ROL', 'RON', 'RSD', 'SAR', 'SDD', 'SDP', 'SIT', 'SKK', 'SLL', 
+	'SRG', 'STD', 'SUR', 'SVC', 'THB', 'TJR', 'TJS', 'TMM', 'TMT', 'TPE', 
+	'TRL', 'TRY', 'TWD', 'UAH', 'UAK', 'UGS', 'USN', 'USS', 'UYI', 'UYP', 
+	'UYU', 'UZS', 'VEB', 'VED', 'VEF', 'VND', 'VNN', 'XAG', 'XAU', 'XBA', 
+	'XBB', 'XBC', 'XBD', 'XCG', 'XDR', 'XEU', 'XFO', 'XFU', 'XOF', 'XPD', 
+	'XPF', 'XPT', 'XRE', 'XSU', 'XTS', 'XUA', 'XXX', 'YDD', 'YER', 'YUD', 
+	'YUM', 'YUN', 'YUR', 'ZAL', 'ZMK', 'ZRN', 'ZRZ', 'ZWD', 'ZWG', 'ZWL', 
+	'ZWR',
+//*/
+]
+//aItems = aTestItems
+// filter aItems
+aItems = aItems.filter(x => aAll.includes(x))
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	oTestData = {},
+	isSupported = false,
+	localesHashAll = "" // to compare min to
+
+function compute_data() {
+	aRes = []
+	for (const key of Object.keys(oTestData)) {
+		if (key !== '1') {
+			aRes.push(["'" + oTestData[key].join("','") +"', // "+ key])
+		}
+	}
+	console.log(aRes.join('\n'))
+}
+
+function testitems() {
+	//loop each script on it's own
+	dom.perf = ""
+	dom.results = ""
+	oTestData = {}
+	try {
+		aItems.forEach(function(item){
+			/* take one of the highest oTestData results and keep adding until you reach max
+			item = [
+				'VI','US','ZZ','CM','VC','TL','FR','QO','GB','ZA','KP','PL','KH','ZM',
+				item
+			]
+			//*/
+			// allow testing arrays of scripts
+			let testarray = 'object' == typeof item ? item : [item]
+			run_main('all', testarray, true)
+		})
+	} catch(e) {
+		console.log(e)
+	}
+}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "currencies") {
+		console.log(name +": " + sDetail[name].length +"\n"+ sDetail[name].join(", "))
+	} else if (name == "allcurrencies") {
+		console.log("all supported currencies" +": " + aAll.length +"\n"+ aAll.join(", "))
+	} else if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
+			let go = true
+			if (isSupported) {
+				go = Intl.DisplayNames.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method, aTest, isLoop = false) {
+	let t0 = performance.now()
+	sDetail['currencies'] = []
+	let oData = {}, oTempData = {} 
+	let spacer = '<br><br>'
+	let tests = {}
+	let intTests = 0
+	let aUsed = undefined == aTest ? aItems: aTest
+	if (!isLoop) {
+		dom.perf = ""
+		dom.results = ""
+	}
+	//aUsed = ['NZD','USD']
+
+	if (method == "all") {
+		aUsed.sort()
+		sDetail['currencies'] = aUsed
+		// it is a lot faster to loop by style then currency
+		tests = {'long': aUsed, 'narrow': aUsed, 'short': aUsed}
+		intTests = aUsed.length * 3
+		// long     244
+		// narrow   168
+		// short    296
+		// combined 398
+
+	} else if (method == "min") {
+		let minBase = [
+		'AFN', 'ANG', 'AOA', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BIF', 'BMD', 
+		'BND', 'BOB', 'BRL', 'BSD', 'BWP', 'BZD', 'CAD', 'CDF', 'CLP', 'CNY', 
+		'COP', 'CRC', 'CUP', 'DJF', 'DKK', 'DOP', 'DZD', 'ERN', 'ETB', 'EUR', 
+		'FJD', 'FKP', 'FRF', 'GBP', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 
+		'HNL', 'HTG', 'IDR', 'IQD', 'JMD', 'JPY', 'KES', 'KGS', 'KMF', 'KYD', 
+		'KZT', 'LKR', 'LRD', 'LSL', 'LUF', 'MDL', 'MGA', 'MKD', 'MOP', 'MRU', 
+		'MUR', 'MWK', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NZD', 'PAB', 'PEN', 
+		'PGK', 'PHP', 'PKR', 'PLN', 'PTE', 'PYG', 'RUB', 'RUR', 'RWF', 'SBD', 
+		'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 
+		'SYP', 'SZL', 'TND', 'TOP', 'TTD', 'TZS', 'UGX', 'USD', 'UYW', 'VES', 
+		'VUV', 'WST', 'XAF', 'XCD', 'ZAR', 'ZMW']
+
+		tests = {
+			'long': ['AUD','CAD','GBP','JPY','MZN','NIO','SEK','SZL','TZS','USD','XAF'],
+			'narrow': ['BND','EUR'],
+			'short': [
+				// long/narrow items: tested by removing them: all needed
+				'AUD', 'BND', 'CAD', 'EUR', 'GBP', 'JPY', 'MZN', 'NIO', 'SEK', 'SZL', 'TZS', 'USD', 'XAF',
+				// the rest: required from earlier testing
+				'AFN', 'ANG', 'AOA', 'AWG', 'AZN', 'BAM', 'BBD', 'BIF', 'BMD', 
+				'BOB', 'BRL', 'BSD', 'BWP', 'BZD', 'CDF', 'CLP', 'CNY', 
+				'COP', 'CRC', 'CUP', 'DJF', 'DKK', 'DOP', 'DZD', 'ERN', 'ETB',  
+				'FJD', 'FKP', 'FRF', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 
+				'HNL', 'HTG', 'IDR', 'IQD', 'JMD', 'KES', 'KGS', 'KMF', 'KYD', 
+				'KZT', 'LKR', 'LRD', 'LSL', 'LUF', 'MDL', 'MGA', 'MKD', 'MOP', 'MRU', 
+				'MUR', 'MWK', 'MYR', 'NAD', 'NGN', 'NZD', 'PAB', 'PEN', 
+				'PGK', 'PHP', 'PKR', 'PLN', 'PTE', 'PYG', 'RUB', 'RUR', 'RWF', 'SBD', 
+				'SCR', 'SDG', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 
+				'SYP', 'TND', 'TOP', 'TTD', 'UGX', 'UYW', 'VES', 
+				'VUV', 'WST', 'XCD', 'ZAR', 'ZMW',
+			]
+		}
+		tests.short = tests.short.sort()
+	} else {
+		// TINY
+			// we already use USD, GBP, ETB and KES in numberformat: currencydisplay
+			// so ignore those
+
+		tests = {
+			// anything outside of the core longs is miniscule +1s or +2s
+			'long': [
+'JPY', // 177
+'XAF', // 197 +20
+'NIO', // 204 +7
+'SZL', // 207 +3
+'TZS', // 210 +3
+'SEK', // 212 +2
+//'AUD','CAD','MZN','GBP','USD',
+			],
+		}
+	}
+	if ('all' !== method) {
+		let tmpArray = []
+		for (const s of Object.keys(tests)) {
+			tmpArray = tmpArray.concat(tests[s])
+			// remove unsupported
+			tmpArray = tmpArray.filter(x => aAll.includes(x))
+			tests[s] = tmpArray
+			intTests += tests[s].length
+		}
+		tmpArray = tmpArray.filter(function(item, position) {return tmpArray.indexOf(item) === position})
+		sDetail['currencies'] = tmpArray.sort()
+	}
+	//console.log(tests)
+
+	try {
+		aLocales.forEach(function(code) { // for each locale
+			let oType = {}
+			for (const s of Object.keys(tests).sort()) { // for each style
+				oType[s] = {}
+				let dn = new Intl.DisplayNames([code], {type: 'currency', style: s})
+				tests[s].sort().forEach(function(item){
+					let value = dn.of(item)
+					oType[s][item] = value
+				})
+			}
+			let hash = mini(oType) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				Object.keys(oType).forEach(function(typekey){
+					oTempData[hash][typekey] = oType[typekey]
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order in new object
+		for (const h of Object.keys(oTempData).sort()) { // for each hash
+			oData[h] = {}
+			for (const key of Object.keys(oTempData[h]).sort()) { // for each granularity
+				if (key == "locales") {
+					oData[h][key] = oTempData[h][key].join(", ")
+				} else {
+					if (Object.keys(oTempData[h][key]).length) {
+						oData[h][key] = oTempData[h][key]
+					}
+				}
+			}
+		}
+		//console.log(oTempData)
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) { // for each hash
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+			if (!isLoop) {
+				let str = ""
+				for (const c of Object.keys(oData[k])) { // for each currency or style
+					if (c !== "locales") {
+						str += '<li>'+ s16 + c.slice(0,1).toUpperCase() +': '+ sc
+						Object.keys(oData[k][c]).forEach(function(s){ // for each style or currency
+							str += ' '+ s12 + s +": "+ sc + oData[k][c][s]
+						})
+						str += "</li>"
+					}
+				}
+				if ('tiny' !== method) {str = "<details><summary>data</summary>"+ str +"</details>"}
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ str
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
+			}
+		}
+
+		if (isLoop) {
+			let testCount = localeGroups.length
+			// record it
+			if (undefined == oTestData[testCount]) {oTestData[testCount] = []}
+			oTestData[testCount].push(aUsed)
+			//console.log(testCount, aUsed)
+			/*
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ s16 + testCount + sc +': '+ '[\''+ aUsed.join('\', \'') +'\']'
+			//*/
+			dom.results.innerHTML = dom.results.innerHTML + '<br>'
+				+ '\''+ aUsed.join('\', \'') +'\', // ' + testCount
+			return
+		}
+
+		// hashes + btns
+		let curBtn = "<span class='btn4 btnc' onClick='log_console(`allcurrencies`)'>[" + aAll.length + "]</span>" // all supported
+		if (sDetail['currencies'].length !== aAll.length) {
+			curBtn = "<span class='btn4 btnc' onClick='log_console(`currencies`)'>[" + sDetail.currencies.length + "]</span> from "+ curBtn
+		}
+		curBtn += ' ['+ intTests +' tests]'
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		sDetail["results"] = oData
+
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// notate new if 140+
+			if (isVer > 139) {
+				// results
+				if (resultsHash == "6da6cad4") { // FF140+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "932ecd4d") { // FF140+ 398
+				} else {localesHash += ' '+ zNEW
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc + spacer
+			+ s12 +"currencies: "+ sc + curBtn + spacer
+			+ s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_isVer()
+	buildnav()
+
+	try {
+		let test = new Intl.DisplayNames(undefined, {type: 'region'}).resolvedOptions().locale
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message +'banana'
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = [
+"af-na,afrikaans (namibia)",
+"ar-ae,arabic (united arabic emirates)",
+"ar-dj,arabic (djibouti)",
+"ar-er,arabic (eritrea)",
+"ar-km,arabic (cosmoros)",
+"ar-lb,arabic (lebanon)",
+"ar-so,arabic (somalia)",
+"ar-ss,arabic (south sudan)",
+"az-cyrl,azerbaijani (cyrillic)",
+"bn-in,bengali (india)",
+"bo-in,tibetan (india)",
+"bs-cyrl,bosnian (cyrillic)",
+"ca-fr,catalan (france)",
+"de-ch,german (switzerland)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
+"en-ag,english (antigua & barbuda)",
+"en-au,english (australia)",
+"en-bb,english (barbados)",
+"en-bi,english (burundi)",
+"en-bm,english (bermuda)",
+"en-bs,english (bahamas)",
+"en-bw,english (botswana)",
+"en-bz,english (belize)",
+"en-ca,english (canada)",
+"en-cc,english (cocos islands)",
+"en-dk,english (denmark)",
+"en-er,english (eritrea)",
+"en-fj,english (fiji)",
+"en-fk,english (falkland islands)",
+"en-gb,english (united kingdom)",
+"en-gg,english (guernsey)",
+"en-gh,english (ghana)",
+"en-gi,english (gibraltar)",
+"en-gm,english (gambia)",
+"en-gy,english (guyana)",
+"en-in,english (india)",
+"en-jm,english (jamaica)",
+"en-ke,english (kenya)",
+"en-ky,english (cayman islands)",
+"en-lr,english (liberia)",
+"en-ls,english (lesotho)",
+"en-mg,english (madagascar)",
+"en-mo,english (macau)",
+"en-mt,english (malta)",
+"en-mu,english (mauritius)",
+"en-mw,english (malawai)",
+"en-my,english (malaysia)",
+"en-na,english (namibia)",
+"en-ng,english (nigeria)",
+"en-nz,english (new zealand)",
+"en-pg,english (papua new guinea)",
+"en-pk,english (pakistan)",
+"en-rw,english (rwanda)",
+"en-sb,english (solomon islands)",
+"en-sc,english (seychelles)",
+"en-se,english (sweden)",
+"en-sg,english (singapore)",
+"en-sh,english (saint helena)",
+"en-sl,english (sierra leone)",
+"en-ss,english (south sudan)",
+"en-sx,english (sint maarten)",
+"en-sz,english (swaziland)",
+"en-to,english (tonga)",
+"en-tt,english (trinidad & tobago)",
+"en-tz,english (tanzania)",
+"en-ug,english (uganda)",
+"en-vu,english (vanuatu)",
+"en-ws,english (samoa)",
+"en-zm,english (zambia)",
+"es-419,spanish (latin america and the caribbean)",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-br,spanish (brazil)",
+"es-bz,spanish (belize)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-cu,spanish (cuba)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-gq,spanish (equatorial guinea)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-ni,spanish (nicaragua)",
+"es-pa,spanish (panama)",
+"es-pe,spanish (peru)",
+"es-ph,spanish (philippines)",
+"es-py,spanish (paraguay)",
+"es-us,spanish (united states)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
+"fa-af,persian (afghanistan)",
+"ff-adlm,fulah (adlam)",
+"ff-adlm-bf,fulah (adlam burkina faso)",
+"ff-adlm-gh,fulah (adlam ghana)",
+"ff-adlm-gm,fulah (adlam gambia)",
+"ff-adlm-lr,fulah (adlamd liberia)",
+"ff-adlm-mr,fulah (adlam mauritania)",
+"ff-adlm-ng,fulah (adlam nigeria)",
+"ff-adlm-sl,fulah (adlam sierra leone)",
+"ff-gn,fulah (guinea)",
+"ff-mr,fulah (mauritania)",
+"fo-dk,faroese (denmark)",
+"fr-bi,french (burundi)",
+"fr-ca,french (canada)",
+"fr-cd,french (congo kinshasa)",
+"fr-dj,french (djibouti)",
+"fr-dz,french (algeria)",
+"fr-gn,french (guinea)",
+"fr-ht,french (haiti)",
+"fr-km,french (comoros)",
+"fr-lu,french (luxembourg)",
+"fr-mg,french (madagascar)",
+"fr-mr,french (mauritania)",
+"fr-mu,french (mauritius)",
+"fr-rw,french (rwanda)",
+"fr-sc,french (seychelles)",
+"fr-sy,french (syria)",
+"fr-tn,french (tunisia)",
+"fr-vu,french (vanuatu)",
+"ha-gh,hausa (ghana)",
+"hi-latn,hindi (latin)",
+"hr-ba,croatian (bosnia & herzegovina)",
+"ks-deva,kashmiri (devanagari)",
+"kxv-telu,kuvi (telugu)",
+"ln-ao,lingala (angola)",
+"mas-tz,masia (tanzania)",
+"ms-bn,malay (brunei)",
+"ms-id,malay (indonesia)",
+"ms-sg,malay (singapore)",
+"nl-aw,dutch (aruba)",
+"nl-bq,dutch (caribbean netherlands)",
+"nl-cw,dutch (curaçao)",
+"nl-sr,dutch (suriname)",
+"om-ke,oromo (kenya)",
+"os-ru,ossetian (russia)",
+"pa-pk,punjabi (pakistan)",
+"ps-pk,pashto (pakistan)",
+"pt-ao,portuguese (angola)",
+"pt-cv,portuguese (cape verde)",
+"pt-lu,portuguese (luxembourg)",
+"pt-mo,portuguese (macau)",
+"pt-mz,portuguese (mazambique)",
+"pt-pt,portuguese (portugal)",
+"pt-st,portuguese (são tomé & príncipe)",
+"qu-bo,quechua (bolivia)",
+"qu-ec,quechua (ecuador)",
+"ro-md,romanian (moldova)",
+"ru-by,russian (belarus)",
+"ru-kg,russian (kyrgyzstan)",
+"ru-kz,russian (kazakhstan)",
+"ru-md,russian (moldova)",
+"sd-deva,sindhi (devanagari)",
+"se-se,northern sami",
+"shi-latn,tachelhit (latin)",
+"so-dj,somali (djibouti)",
+"so-et,somali (ethiopia)",
+"so-ke,somali (kenya)",
+"sq-mk,albanian (macedonia)",
+"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
+"sr-latn,serbian (latin)",
+"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+'st-ls,southern sotho',
+"sw-cd,swahili (congo kinshasa)",
+"sw-ke,swahili (kenya)",
+"sw-ug,swahili (uganda)",
+"ta-lk,tamil (sri lanka)",
+"ta-my,tamil (malaysia)",
+"ta-sg,tamil (singapore)",
+"teo-ke,teso (kenya)",
+"ti-er,tigrinya (eritrea)",
+'tn-bw,tswana (botswana)',
+"ur-in,urdu (india)",
+"uz-af,uzbek (afghanistan)",
+"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+"vai-latn,vai (latin)",
+"yo-bj,yoruba (benin)",
+"yue-hans,cantonese (simplified)",
+"zh-hans-hk,chinese (simplified hong kong)",
+"zh-hans-mo,chinese (simplified macau)",
+"zh-hant-mo,chinese (traditional macau)",
+//*/
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en','de','sv']
+
+	legend()
+	if (isSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>

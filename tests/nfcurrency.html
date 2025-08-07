@@ -15,8 +15,13 @@
 
 <body>
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
 
 	<table id="tb4">
@@ -28,9 +33,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">A proof to confirm minimum tests for maximum entropy in currencyDisplay
-				and currencySign. The default test covers base languages, but you can expand locales to expose
-				<span class="s4">regional differences</span> on all four tests.
-				The <code>TINY</code> test is a minimalist hardcoded test built for speed.
+				and currencySign. The <code>TINY</code> test is a minimalist hardcoded test built for speed.
 			</span>
 		</td></tr>
 		<tr>
@@ -39,7 +42,6 @@
 				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
 				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
 				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
-				<input type="checkbox" id="optExpanded"> +locales
 				<span id="allcurrency"><input type="checkbox" id="optCurrency"> +cur</span>
 			<br><br><hr><br>
 				<span class="spaces" id ="results"></span>
@@ -51,15 +53,12 @@
 'use strict';
 
 var oCurrencies = {},
-	oLists = {},
+	list = gLocales,
 	aLegend = [],
 	aLocales = [],
-	aLegendExpanded = [],
-	aLocalesExpanded = [],
 	isSupported = false,
 	isBigIntSupported = false,
-	localesHashAll = "", // to compare min to
-	localesHashAllExpanded = "" // to compare min to
+	localesHashAll = '' // to compare min to
 
 function log_console(name) {
 	let hash = mini(sDetail[name])
@@ -74,20 +73,9 @@ function log_console(name) {
 	}
 }
 
-function legend(method) {
+function legend() {
 	// build once
-	let optExpanded = dom.optExpanded.checked
-	method = optExpanded ? "expanded" : "list"
-	let list = oLists[method]
-
-	let proceed = false
-	if (method == "list") {
-		if (aLegend.length == 0) {proceed = true}
-	} else {
-		if (aLegendExpanded.length == 0) {proceed = true}
-	}
-
-	if (proceed) {
+	if (aLegend.length == 0) {
 		list.sort()
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
@@ -98,11 +86,7 @@ function legend(method) {
 				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
 			}
 			if (go) {
-				if (method == "list") {
-					aLocales.push(code)
-				} else {
-					aLocalesExpanded.push(code)
-				}
+				aLocales.push(code)
 				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
 				if (name.includes("(")) {
 					let name0 = name.split("(")[0].trim()
@@ -117,18 +101,13 @@ function legend(method) {
 						name = name0 +" "+ name1
 					}
 				}
-				if (method == "list") {
-					aLegend.push(code.padStart(7) +": "+ name)
-				} else {
-					aLegendExpanded.push(code.padStart(7) +": "+ name)
-				}
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
 	}
 	// output
-	let aDisplay = (method == "list" ? aLegend : aLegendExpanded)
-	let header = s4 +"LEGEND ["+ aDisplay.length +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function set_currency_lists() {
@@ -192,7 +171,7 @@ function run_main(method) {
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
 	let optCurrency = dom.optCurrency.checked
-	let optExpanded = dom.optExpanded.checked
+	let intTests = 0
 
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
@@ -226,8 +205,12 @@ function run_main(method) {
 			curNS  : 426 <-
 			curS   : 325
 			*/
-			tests[c] = optExpanded ? curNS : curAll
+			tests[c] = curNS //curAll
 		})
+		intTests = currencies.length * Object.keys(curNS).length
+
+		// style then currency isn't any faster
+		// 2.3s = old / 2.2 new
 	} else if (method == "tiny") {
 		tests = {
 			"USD": curAN, // 264
@@ -236,27 +219,8 @@ function run_main(method) {
 			"GBP": curS, // 286 (+5)
 			"KES": curS, // 291 (+5)
 		}
-	} else if (method == "min" && !optExpanded) {
-		tests = {
-			// looking for 228
-			// 12 currencies + 14 tests against base core lanaguges
-			'USD': curAN, // 204
-			'XXX': curN, // 211
-			'XAF': curN, // 217
-			'GBP': curS, // 219
-			'AED': curN, // +1
-			'AUD': curN, // +1
-			'CAD': curN, // +1
-			'DKK': curN, // +1
-			'SZL': curN, // +1
-			'PLN': curS, // +1
-			'ZAR': curS, // +1
-			'MZN': curAN, // n+1 s+1 = 228
-		}
-	} else if (method == "min") { // expanded
+	} else if (method == "min") {
 		// looking for 426
-			// min non-expanded (just above) = 297
-
 		tests = {
 			// from tiny
 			"USD": curAN, // 264
@@ -297,6 +261,9 @@ function run_main(method) {
 			'PEN': curS, // just for blink
 		}
 	}
+	if ('all' !== method) {
+		for (const k of Object.keys(tests)) {intTests += Object.keys(tests[k]).length}
+	}
 
 	// remove unsupported if min: the others have aleady been checked
 	if (method == 'min') {
@@ -309,9 +276,8 @@ function run_main(method) {
 	}
 
 	let oStyles = {}
-	let array = optExpanded ? aLocalesExpanded : aLocales
 	try {
-		array.forEach(function(code) { // for each locale
+		aLocales.forEach(function(code) { // for each locale
 			oStyles = {}
 			Object.keys(tests).sort().forEach(function(c){ // for each currency: sort for consistency
 				oStyles[c] = {}
@@ -319,10 +285,7 @@ function run_main(method) {
 					oStyles[c][cd] = []
 					try {
 						let option = {style: "currency", currency: c, currencyDisplay: cd}
-						if (cd == "accounting") {
-							option = {style: "currency", currency: c, currencySign: cd}
-						}
-
+						if (cd == "accounting") {option = {style: "currency", currency: c, currencySign: cd}} // accounting is currencySign
 						let formatter = Intl.NumberFormat(code, option)
 						tests[c][cd].forEach(function(n){ // for each number
 							oStyles[c][cd].push(formatter.format(n))
@@ -334,7 +297,7 @@ function run_main(method) {
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
-			Object.keys(oStyles).forEach(function(c){ // each currency
+				Object.keys(oStyles).forEach(function(c){ // each currency
 					oTempData[hash][c] = {}
 					Object.keys(oStyles[c]).forEach(function(cd){ // for each currencyDisplay
 						if (oStyles[c][cd].length) {
@@ -426,37 +389,25 @@ function run_main(method) {
 		// notations
 		let localesMatch = ""
 		if (method == "all" && !optCurrency) {
-			if (optExpanded) {
-				localesHashAllExpanded = localesHash
-			} else {
-				localesHashAll = localesHash
-			}
+			localesHashAll = localesHash
 			// notate new if 140+
 			if (isVer > 139) {
-				if (optExpanded) {
-					// expanded results
-					if (resultsHash == "c593e12e") { // FF140+
-					} else {resultsHash += ' '+ zNEW
-					}
-					// expanded locales
-					if (localesHash == "fa32c7e2") { // FF140+: 426
-					} else if (isFF) {localesHash += ' '+ zNEW
-					}
+				// results
+				if (resultsHash == "c593e12e") { // FF140+
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "fa32c7e2") { // FF140+: 426
+				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
-			let localeHashCompare = optExpanded ? localesHashAllExpanded :	localesHashAll
-			localesMatch = localesHash == localeHashCompare ? green_tick : red_cross
-		
-			if (optExpanded && method == "min" && localesHashAllExpanded == "") {
-				// we haven't run expanded ALL yes so don't notate
-				localesMatch = ''
-			}
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 		// display
 		let display = s4 + method.toUpperCase() +": "
-			+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"] " + sc + spacer
-			+ s12 +"currencies: "+ sc + curBtn + spacer
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"] " + sc + spacer
+			+ s12 +"currencies: "+ sc + curBtn +' ['+  intTests + ' tests]'+spacer
 			+ s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
@@ -470,18 +421,14 @@ function run_main(method) {
 
 function run(method) {
 	if (isSupported) {
-		// set legend
-		legend()
 		//reset
 		setBtn(method)
-		dom.perf = ""
-		let status = "calculating ..."
-		if (method == "all" || method == "min") {
-			if (dom.optExpanded.checked) {
-				status += " don't panic, it's working<br><br> ... expanded locales takes a few seconds"
-			}
+		dom.perf = ''
+		let status = ''
+		if ('tiny' !== method) {
+			status = 'calculating ...'+ ('all' == method ? ' takes a few seconds': '')
 		}
-		dom.results.innerHTML = status
+		dom.results = status
 		// delay so users see change and allow paint
 		setTimeout(function() {
 			run_main(method)
@@ -506,10 +453,9 @@ Promise.all([
 	get_globals()
 ]).then(function(){
 	get_isVer()
+	buildnav()
 
 	dom.optCurrency.checked = false
-	dom.optExpanded.checked = false
-
 	if (!isFile) {
 		dom.allcurrency.style.display = "none"
 	}
@@ -535,13 +481,8 @@ Promise.all([
 		isBigIntSupported = true
 	} catch(e) {}
 
-	// set lists
-	let list = gLocales
-	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	list.sort()
-	oLists["list"] = list
-	// expanded: add additional locales to core locales for this test
-	let listExtra = [
+	// add additional locales to core locales for this test
+	let aListExtra = [
 		"af-na,afrikaans (namibia)",
 		"ar-ae,arabic (united arabic emirates)",
 		"ar-bh,arabic (bahrain)",
@@ -742,26 +683,16 @@ Promise.all([
 		"zh-hans-mo,chinese (simplified macau)",
 		"zh-hant-mo,chinese (traditional macau)",
 	]
-	let expanded = listExtra.concat(list)
-
-	/* temp
-	let everything = gLocales.concat(gLocalesExpand)
-	everything = everything.filter(function(item, position) {return everything.indexOf(item) === position})
-	let notused = everything.filter(x => !expanded.includes(x))
-	console.log("\""+ notused.join("\",\n\"") +"\"")
-	*/
-
-	expanded = expanded.filter(function(item, position) {return expanded.indexOf(item) === position})
-	expanded.sort()
-	oLists["expanded"] = expanded
-
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en','de','sv']
 
 	legend()
 	set_currency_lists()
 
 	if (isSupported) {
 		setBtn("all")
-		dom.results = "calculating ..."
+		dom.results = "calculating ... takes a few seconds"
 		setTimeout(function() {
 			run_main("all")
 		}, 100)
