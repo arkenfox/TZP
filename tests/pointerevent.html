@@ -376,7 +376,8 @@ function start() {
 }
 
 function run_once() {
-	let hash, display = '', data = {'element': [], 'window': []}
+	let t0 = performance.now()
+	let hash, display = '', data = {'element': [], 'window': []}, counter = 0
 
 	// maxtouchpoints
 	try {hash = navigator.maxTouchPoints} catch(e){hash = zErr}
@@ -389,7 +390,8 @@ function run_once() {
 		let doc = parser.parseFromString('<div>', "text/html")
 		let htmlElement = doc.body.firstChild
 		for (const key in htmlElement) {
-			if (key.includes('Touch') || key.includes('touch')) {data['element'].push(key)}
+			counter++
+			if (key.includes('Touch') || key.includes('touch')) {data['element'].push(key +', '+ counter)}
 		}
 		if (data['element'].length) {
 			hasKeys = true // when we have element keys we have touch events
@@ -399,8 +401,10 @@ function run_once() {
 	} catch(e) {
 		data['element'] = e.name
 	}
+
 	// properties
 	let id = 'iframe-window-version'
+	counter = 0
 	try {
 		// create & append
 		let el = document.createElement('iframe')
@@ -412,8 +416,11 @@ function run_once() {
 		let contentWindow = iframe.contentWindow
 		let props = Object.getOwnPropertyNames(contentWindow)
 		props.forEach(function(item){
-			if (item.includes('Touch') || item.includes('touch')) {data['window'].push(item)}
+			counter++
+			if (item.includes('Touch') || item.includes('touch')) {data['window'].push(item + ', ' + counter)}
 		})
+		//let test = props.filter(x => x.includes('ouch'))
+		//console.log(test)
 		if (data['window'].length == 0) {
 			data['window'] = 'none'
 		}
@@ -422,6 +429,8 @@ function run_once() {
 	}
 	removeElementFn(id)
 
+	console.log(performance.now() - t0)
+
 	// hash
 	if (data['element'].length && 'object' == typeof data['element']) {data.element.sort()}
 	if (data['window'].length && 'object' == typeof data['window']) {data['window'].sort()}
@@ -429,6 +438,8 @@ function run_once() {
 	if ('a9139fa7' == hash) {data = 'none'; hash = 'none'} else {display = '<br><br>' + json_stringify(data)}
 	oFP.touch_properties = data
 	dom.touch_properties.innerHTML = hash + display
+
+
 }
 
 let targetreset = dom.reset
