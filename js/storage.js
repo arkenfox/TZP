@@ -51,7 +51,7 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 		// 6.4 * GiB = 6871947673.6 (gecko floors)
 		let upper = (Math.ceil(value *10)/10) // e.g. 6.4
 		let diff = (upper * GiB) - bytes
-		console.log('bytes', bytes,'\nvalue', value,'\nupper', upper,'\ndiff', diff)
+		//console.log('bytes', bytes,'\nvalue', value,'\nupper', upper,'\ndiff', diff)
 		if (diff < 1) {
 			isExact = true
 			value = upper
