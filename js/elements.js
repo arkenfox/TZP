@@ -99,15 +99,13 @@ function get_element_keys(METRIC) {
 		const aExpected = ['scrollWidth','scrollHeight','clientWidth','clientHeight']
 		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
 		if (isBB) {
-			// NS 12.1.1 only exposes all the set/value tampering on safer
 			if ('android' == isOS) {
-				// 7db91b52: standard
-				// 7766b529: safer (including webgl click-to-play)
-				if ('7db91b52' == hash || '7766b529' == hash) {notation = bb_green}
+				if ('' == hash || '' == hash) {notation = bb_green}
 			} else {
-				// 1817fdbe: 340 standard
-				// eb81553d: 353 safer (including webgl click-to-play)
-				if ('1817fdbe' == hash || 'eb81553d' == hash) {notation = bb_green}
+				// 1817fdbe: 352 standard
+				// eb81553d: 365 safer (including webgl click-to-play)
+				// the 13 items diff are all NS tampering
+				if ('40f682b2' == hash || '5e5ae1c9' == hash) {notation = bb_green}
 			}
 		}
 	} catch(e) {
