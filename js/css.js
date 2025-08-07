@@ -29,22 +29,6 @@ function get_colors() {
 	if (!isGecko) {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
-	} else if (isVer < 128) { // use 128 as soon we'll only go as low as "127 or lower"
-		let aTmp = oList.moz
-		aTmp.push (
-			// removed FF122: 1867854
-			'-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext', '-moz-mac-focusring','-moz-nativehyperlinktext', 
-			// removed FF121: 1863691
-			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-menuitem',
-			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-			// removed FF119: 1857695
-			'-moz-mac-menutextdisable','-moz-mac-menutextselect',
-			// removed FF117
-			'-moz-buttondefault','-moz-dragtargetzone','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
-			'-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-secondaryhighlight','-moz-menubartext',
-			'-moz-win-communicationstext','-moz-win-mediatext',
-		)
-		oList.moz = aTmp.sort()
 	}
 
 	function rgba2hex(orig) {
@@ -85,8 +69,7 @@ function get_colors() {
 			for (const k of Object.keys(tmpobj).sort()) {data[k] = tmpobj[k]; count += data[k].length} // sort/count
 			hash = mini(data); btn = addButton(14, METRIC, Object.keys(data).length +'/'+ count)
 			if ('moz' == type) {
-				let expectedhash = isVer == 140 ? 'c04857b2' : '2439d123' // FF140 + FF141+
-				if (isVer < 140) {expectedhash = '283089dc'} // FF128-FF139 (smart min is 128)
+				let expectedhash = isVer == 140 ? 'c04857b2' : '2439d123' // FF140 | FF141+
 				notation = expectedhash == hash ? rfp_green : rfp_red
 			}
 		} catch(e) {
@@ -278,26 +261,18 @@ function get_computed_styles(METRIC) {
 				btn = addButton(14, METRIC, data.length)
 				// notate
 				if (isBB) {
-					if (isVer == 128) {
-						if ('mac' == isOS) {
-							if ('9f958210' == hash) {notation = bb_green} // BB14 1106
-						} else {
-							if ('d86abd90' == hash) {notation = bb_green} // BB14 1101
-						}
-					} else if (isVer > 139) {
-						if ('mac' == isOS) {
-							/* mac has
-								MozOsxFontSmoothing,-moz-osx-font-smoothing,
-								WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
-							*/
-							if ('' == hash) {notation = bb_green} // BB15
-						} else {
-							// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
-								// some older (mostly unsupported) win10 and android <= 6 will lack
-								// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
-								// but I consider these out-of-scope
-							if ('ed89a929' == hash) {notation = bb_green} // BB15 1122
-						}
+					if ('mac' == isOS) {
+						/* mac has
+							MozOsxFontSmoothing,-moz-osx-font-smoothing,
+							WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
+						*/
+						if ('' == hash) {notation = bb_green} // BB15
+					} else {
+						// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
+							// some older (mostly unsupported) win10 and android <= 6 will lack
+							// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
+							// but I consider these out-of-scope
+						if ('ed89a929' == hash) {notation = bb_green} // BB15 1122
 					}
 				}
 			} else {
@@ -327,7 +302,7 @@ function get_computed_styles(METRIC) {
 function get_link(METRIC) {
 	// FF120+ 1858397: layout.css.always_underline_links
 	let value, data ='', notation = default_red
-	if (!isGecko || isVer < 120) {
+	if (!isGecko) {
 		value = zNA
 	} else {
 		try {
@@ -483,11 +458,6 @@ function get_media_css(METRIC) {
 					notation = value == rfp && !isLies ? rfp_green : rfp_red
 					cssnotation = cssvalue == rfp ? rfp_green : rfp_red
 				}
-				/*
-				1. css not loaded: 5 _css RFP fails || 11 _css errors (Invalid: got 'none')
-				2. css not loaded + lies: no lies recorded because we need the css value to determie that
-				3. just lies: 11 lies and rfp notation correct
-				*/
 				collect_data(metric, value, notation,'', isLies)
 				collect_data(metric +'_css', '', cssnotation, cssvalue)
 			}
