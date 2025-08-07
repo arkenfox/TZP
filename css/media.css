@@ -122,6 +122,20 @@
 @media (device-posture:continuous){#cssDP:after{content:"continuous";}}
 @media (device-posture:folded){#cssDP:after{content:"folded";}}
 
+/* https://drafts.csswg.org/mediaqueries-5/#mf-horizontal-viewport-segments */
+#cssVS:before{content:"n/a";}
+@media (horizontal-viewport-segments:1){#cssVS:before{content:"1";}}
+@media (horizontal-viewport-segments:2){#cssVS:before{content:"2";}}
+@media (horizontal-viewport-segments:3){#cssVS:before{content:"3";}}
+@media (horizontal-viewport-segments:4){#cssVS:before{content:"4";}}
+@media (horizontal-viewport-segments:5){#cssVS:before{content:"5";}}
+#cssVS:after{content:" x n/a";}
+@media (vertical-viewport-segments:1){#cssVS:after{content:" x 1";}}
+@media (vertical-viewport-segments:2){#cssVS:after{content:" x 2";}}
+@media (vertical-viewport-segments:3){#cssVS:after{content:" x 3";}}
+@media (vertical-viewport-segments:4){#cssVS:after{content:" x 4";}}
+@media (vertical-viewport-segments:5){#cssVS:after{content:" x 5";}}
+
 /* dpi */
 @media (min-resolution:39dpi){#P:before{content:"";}}
 @media (min-resolution:40dpi){#P:before{content:"40";}}
