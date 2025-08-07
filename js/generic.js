@@ -137,6 +137,8 @@ function getElementProp(sect, id, name, pseudo = ':after') {
 		if ('#S' == id || '#D' == id || '#P' == id) {
 			if (':after' == pseudo && ' x ' == item.slice(0,3)) {item = item.slice(3)} // S/D remove leading ' x '
 			if ('none' == item || '' == item) {item = '?'} // return consistent ? for out of range/blocked
+		} else if ('#cssVS' == id) {
+			if (':after' == pseudo && ' x ' == item.slice(0,3)) {item = item.slice(3)} // remove leading ' x '
 		}
 		// everything else should have a value: so "none" means css was blocked
 		if ('none' == item) {throw zErrInvalid +"got 'none'"}
