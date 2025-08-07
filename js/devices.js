@@ -419,14 +419,15 @@ function get_touc_h(METRIC) {
 			let target = doc.body.firstChild
 			//let target = dom.tzpDiv // dom test
 			for (const key in target) {if (key.includes('ouch')) {value.push(key)}}
+			value.sort() // we already capture order in window properties
 			if (0 == value.length) {value = 'none'}
 			if (isGecko) {
 				// gecko: ontouch only exists in android: desktop blocks these to avoid being identified as mobile
 				let got = 'none' == value ? value : value.join(', ')
 				if ('android' == isOS) {
 					// android
-					if ('a0cd45fb' !== mini(value)) {
-						let expected = ['ontouchstart','ontouchend','ontouchmove','ontouchcancel'] // a0cd45fb
+					if ('30ea93d7' !== mini(value)) {
+						let expected = ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'] // ordered
 						throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
 					}
 				} else if ('none' !== value) {
