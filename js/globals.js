@@ -157,7 +157,8 @@ let isArch = true,
 
 let isBB = false,
 	isMB = false,
-	isTB = false
+	isTB = false,
+	isFPPFallback = false // helps track FPP health, block BB giving passes to FPP protections
 
 // region
 let languagesSupported = {},
@@ -204,13 +205,14 @@ let gt0, gt1,
 	isAllowNonGecko = true, // allow some other engines
 	isAllowNonGeckoMin = true, // enforce min requirements on those other engines
 	isBlock = true,
-	isBlockMin = 115,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 
 	isSmart = false,
-	isSmartMin = 128,
 	isSmartDataMode = false, // when in data-only mode we still want to run proxy/prototype lies
 	isSmartAllowed = false // data-only mode - do not give off false health signals if not maintained
+
+const isBlockMin = 128,
+	isSmartMin = 140
 
 /** DEV **/
 // simulate errors
