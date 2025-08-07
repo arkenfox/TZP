@@ -15,8 +15,13 @@
 
 <body>
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
 
 	<table id="tb4">
@@ -24,6 +29,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title">pluralrules
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-down"><span class="c perf" id="perf1st"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
@@ -299,12 +305,10 @@ function run_test(type) {
 	}
 
 	// perf
-	if (type == "0") {
-		perf = "all: "+ Math.round(performance.now()-t0)
-	} else if (type == "1") {
-		perf += " | 1st: "+ Math.round(performance.now()-t0)
+	if (type == "1") {
+		dom.perf1st.innerHTML = '1st: '+ Math.round(performance.now()-t0) +" ms"
 	} else {
-		dom.perf.innerHTML = perf +" | test: "+ Math.round(performance.now()-t0) +" ms"
+		dom.perf.innerHTML = Math.round(performance.now()-t0) +" ms"
 	}
 
 	// sort array & loop: get hash + code + result buckets, and code_total
@@ -406,6 +410,7 @@ dom.custom.placeholder = "two arrays [cardinal] then [ordinal] e.g."
 Promise.all([
 	get_globals()
 ]).then(function(){
+	buildnav()
 	// support
 	try {
 		let test = new Intl.PluralRules(undefined)
