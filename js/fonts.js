@@ -380,7 +380,6 @@ let fntMaster = {
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic','游ゴシック',
 			// 10
 			'Bahnschrift','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
-			'HoloLens MDL2 Assets', // removed FF136+ 1942883
 			// 11
 			'SimSun-ExtG', // win11 24H2 see 1947960 | 1954265 FF139 adeed to base
 			// fntPlatformFont
@@ -631,6 +630,7 @@ let fntMaster = {
 			'Arial Nova','Georgia Pro','Gill Sans Nova','Ink Free','Neue Haas Grotesk Text Pro','Rockwell Nova',
 			'Segoe Fluent Icons','Segoe UI Variable Display','Segoe UI Variable Small','Segoe UI Variable Text',
 			'Simplified Arabic Fixed','Verdana Pro',
+			'HoloLens MDL2 Assets', // removed from base FF136+ 1942883
 			// 1957317: Noto Sans CJK HK/JP/KR/SC/TC and Noto Serif CJK HK/JP/KR/SC/TC
 				// ^ not added: windows only installs region-specific e.g. Noto Sans TC, not language-specific e.g. Noto Sans CJK TC
 			// other
@@ -701,14 +701,6 @@ function set_fntList() {
 				fpp: [], full: [], generic: [], 'generic_name': [], system: [], unexpected: []
 			},
 			offscreen: {base: [], baselang: [], fpp: [], full: [], unexpected: []},
-		}
-
-		if (isVer > 135 && !isBB && 'windows' == isOS) {
-			// removed from base in FF136+ 1942883
-			let tmpArray = fntMaster.base.windows
-			tmpArray = tmpArray.filter(x => !['HoloLens MDL2 Assets'].includes(x))
-			fntMaster.base.windows = tmpArray
-			fntMaster.system.windows.push('HoloLens MDL2 Assets')
 		}
 
 		// fntString
@@ -1005,6 +997,7 @@ function get_font_notation(METRIC, data) {
 			aMissingSystem = aMissingSystem.filter(x => !data.includes(x))
 		}
 	}
+
 	let count = aNotInBase.length + aMissing.length + aMissingSystem.length
 	if (count > 0) {
 		let tmpName = (isSizes ? 'font_names' : METRIC) +'_health', tmpobj = {}
@@ -1026,8 +1019,9 @@ function get_font_notation(METRIC, data) {
 		addDetail(tmpName, tmpobj)
 		let brand = isTB ? (isMB ? 'MB' : 'TB') : 'RFP'
 		notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
-		// FFP if all unexpected are in baselang then we're fpp_green
-		if (obj.baselang.length) {
+		// BB doesn't have baselang but check FPP fallback regardless
+		if (isFPPFallback && obj.baselang.length) {
+			// FFP if all unexpected are in baselang then we're fpp_green
 			let aNotInBaseLang = aNotInBase.filter(x => !obj.baselang.includes(x))
 			if (aNotInBaseLang.length == 0) {notation = fpp_green}
 		}
