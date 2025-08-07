@@ -518,6 +518,37 @@ function get_touc_h(METRIC) {
 	return
 }
 
+function get_viewport_segments(METRIC) {
+	let data = {}, display = {}, aList = ['horizontal','vertical']
+	aList.forEach(function(m) {
+		let value = zNA
+		try {
+			for (let i = 1; i < 6; i++) { // css only goes to 5
+				if (window.matchMedia('('+ m +'-viewport-segments:'+ i +')').matches) {value = i; break}
+			}
+			if (runSE) {foo++} else if (runSL) {value = 6}
+		} catch(e) {
+			value = zErr; log_error(7, METRIC +'_'+ m, e)
+		}
+		let pseudo = 'horizontal' == m ? ':before' : ':after'
+		let cssvalue = getElementProp(7, '#cssVS', METRIC +'_'+ m +'_css', pseudo)
+		display[m] = value
+		if (isSmart) {
+			if (cssvalue !== zErr && value !== zErr) {
+				if (value !== cssvalue) {
+					display[m] = log_known(7, METRIC +'_'+ m, value) // record and color up lies
+					value = zLIE
+				}
+			}
+		}
+		data[m] = value
+		data[m +'_css'] = cssvalue
+	})
+	addDisplay(7, METRIC, display.horizontal +' x '+ display.vertical)
+	addData(7, METRIC, data, mini(data))
+	return
+}
+
 const outputDevices = () => new Promise(resolve => {
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 
@@ -542,7 +573,8 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_posture('devicePosture'),
 		get_permissions('permissions'),
 		get_keyboard('keyboard'),
-		get_battery('battery')
+		get_battery('battery'),
+		get_viewport_segments('viewport-segments'),
 	]).then(function(){
 		return resolve()
 	})
