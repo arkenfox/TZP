@@ -641,7 +641,7 @@ function get_language_locale() {
 	// LOCALE
 	// remove errors + dupes
 	res = res.filter(x => ![zErr].includes(x))
-	res = res.filter(function(item, position) {return res.indexOf(item) === position})
+	res = dedupeArray(res)
 	let isLies = false
 	if (res.length == 1) {
 		value = res[0]
@@ -1324,7 +1324,7 @@ function get_timezone(METRIC) {
 			addDisplay(4, METRICtz +'_'+ k, display) // display
 		}
 		// dedupe, if only 1 non-error, then we have a tz value
-		tzData = tzData.filter(function(item, position) {return tzData.indexOf(item) === position})
+		tzData = dedupeArray(tzData)
 		if (1 == tzData.length) {tz = tzData[0]; isTimeZoneValue = tz}
 
 		// OFFSETS
@@ -1489,7 +1489,7 @@ function get_timezone_offset(METRIC) {
 		// are they all the same
 		let aTmp = [], xMod, xParts, xTime
 		for (const k of Object.keys(oData.format)) {aTmp.push(oData.format[k])}
-		aTmp = aTmp.filter(function(item, position) {return aTmp.indexOf(item) === position})
+		aTmp = dedupeArray(aTmp)
 		if (aTmp.length == 1) {return true}
 		// get exslt parts
 		if (isGecko) {
