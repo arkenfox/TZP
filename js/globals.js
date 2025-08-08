@@ -145,6 +145,7 @@ let isArch = true,
 	isFile = false,
 	isFileSystem,
 	isFileSystemError,
+	isFontDelay = false, // BB win/mac require a delay for async font fallback if font.vis used
 	isGecko = false,
 	isOS,
 	isOSErr,
