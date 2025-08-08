@@ -79,7 +79,7 @@ function get_timing_audio() {
 		cancelAnimationFrame(rAF)
 		aList.forEach(function(k){
 			let data = oTime[k]
-			data = data.filter(function(item, position) {return data.indexOf(item) === position})
+			data = dedupeArray(data)
 			// contextTime: if the first value (we deduped) is 0 then we need to drop it
 				// otherwise the first diff causes an offset to our 60FPS timing as rAF catches up: e.g.
 				// 0, 10, 26.6, 43.3, 76.6, 110, 143.3, 160, 176.6, 193.3, 210, 243.3
@@ -282,7 +282,7 @@ function get_timing(METRIC) {
 		try {
 			let aTimes = gData.timing[k]
 			if ('string' == typeof aTimes) {throw aTimes}
-			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
+			aTimes = dedupeArray(aTimes)
 			if (aTimes.length) {sDetail.document[METRIC +'_data'][k] = {'data': aTimes}}
 			// type check
 			let start = aTimes[0]
