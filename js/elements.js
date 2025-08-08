@@ -542,7 +542,7 @@ function get_element_scrollbars(METRIC) {
 	}
 
 	get_scroll()
-	addDisplay(15, METRIC, dedupeArrayToString(aAuto) +' | '+ dedupeArrayToString(aThin))
+	addDisplay(15, METRIC, dedupeArray(aAuto, true) +' | '+ dedupeArray(aThin, true))
 	addData(15, METRIC, oData, mini(oData))
 	return
 }

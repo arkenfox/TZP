@@ -254,7 +254,7 @@ function get_computed_styles(METRIC) {
 			// max errors
 			hash = zErr
 		} else {
-			aHashes = aHashes.filter(function(item, position) {return aHashes.indexOf(item) === position})
+			aHashes = dedupeArray(aHashes)
 			// same hashes
 			if (aHashes.length === 1) {
 				hash = aHashes[0], data = res[intHashes[0]]['keys']

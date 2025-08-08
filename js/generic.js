@@ -72,11 +72,10 @@ function testtypeFn(isSimple = false) {
 	})
 }
 
-function dedupeArrayToString(array) {
-	let str = array.join(', ')
+function dedupeArray(array, toString = false) {
 	array = array.filter(function(item, position) {return array.indexOf(item) === position})
-	if (1 == array.length) {str = array[0]}
-	return str
+	if (toString) {return array.join(', ')}
+	return array
 }
 
 function run_block(trace) {
@@ -340,6 +339,27 @@ const get_isFileSystem = (METRIC, isWarmup = false) => new Promise(resolve => {
 	.catch(function(e){
 		isFileSystemError = e+''
 		exit(zErr)
+	})
+})
+
+const get_isFontDelay = () => new Promise(resolve => {
+	if (!isBB || !isGecko || isVer < 139) {return resolve()}
+	if ('windows' !== isOS && 'mac' !== isOS) {return resolve()}
+
+	// BB: font.vis + bundled fonts
+		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
+		// not the case when using font.system.whitelist | we should see if we can get this fixed upstream
+	// currently only nightly uses font.vis but could change at any time and is not version specific
+		// detect if we need a delay by testing if fontface is working
+
+	isFontDelay = true // BB default delay in case of errors/fuckery
+	Promise.all([
+		get_fonts_faces('', ['Arial','Courier','Times New Roman']), // all are allowed + expected in windows/mac
+	]).then(function(res){
+		// either 'error', 'none' or an array of detected fonts
+		//console.log(res[0])
+		if ('none' == res[0]) {isFontDelay = false} // only remove delay if 'none': errors/detected-fonts = force a delay
+		return resolve()
 	})
 })
 
@@ -1931,7 +1951,11 @@ function countJS(item) {
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
-				outputSection('load')
+				Promise.all([
+					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
+				]).then(function(){
+					outputSection('load')
+				})
 			})
 		})
 	}
@@ -2137,17 +2161,10 @@ function outputSection(id, isResize = false) {
 
 	// reset smarts
 	smartFn('final')
-	// BB: font.vis + bundled fonts
-		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
-		// not the case when using font.system.whitelist | we should see if we can get this fixed upstream
-	// currently only nightly uses font vis which fucks up my mojo and workflow: so enforce a delay
-		// ToDo: detect if we need a delay - we can't use isVer, we need to promise if fontface is working
-	if (gLoad && isBB && isVer > 139) {
-		if ('windows' == isOS || 'mac' == isOS) {
-			delay = 2000 // using fontasync PoC on my machine this is around 990+ ms
-			dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
-			dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
-		}
+	if (gLoad && isFontDelay) {
+		delay = 2000
+		dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
+		dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
 	}
 	setTimeout(function() {
 		get_isPerf()
