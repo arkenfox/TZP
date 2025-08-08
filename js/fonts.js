@@ -838,7 +838,7 @@ function set_fntList() {
 			// dupes
 			if (gLoad) {
 				let aCheck = fntData.family.full
-				aCheck = aCheck.filter(function(item, position) {return aCheck.indexOf(item) === position})
+				aCheck = dedupeArray(aCheck)
 				if (aCheck.length !== fntData.family.full.length) {
 					log_alert(12, 'set_fntList', 'dupes in '+ isOS, isScope, true) // persist since we only do this once
 					fntData.family.full = aCheck
@@ -920,7 +920,7 @@ function set_fntList() {
 						array.push(font)
 					})
 					// dedupe
-					array = array.filter(function(item, position) {return array.indexOf(item) === position})
+					array = dedupeArray(array)
 					let newkey = k
 					if (isBB) {
 						newkey = ((k.slice(0,1)) * 1) + 2
@@ -928,7 +928,7 @@ function set_fntList() {
 					}
 					array = array.concat(fntData.family.summary[newkey].fonts)
 					try {array = array.concat(fntData.offscreen.summary[k].fonts)} catch {}
-					array = array.filter(function(item, position) {return array.indexOf(item) === position})
+					array = dedupeArray(array)
 
 					// remove unexpected if they're in the allow/expected lot
 					if (k.includes('unexpected')) {
@@ -1133,13 +1133,17 @@ function get_fonts_base(METRICB, selected) {
 	}
 }
 
-const get_fonts_faces = (METRIC) => new Promise(resolve => {
+const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
 	// testing non regular fonts + font face leaks (i.e not just light/black etc)
 		// it is problematic to test weighted fonts because you don't know
 		// if it's synthesized, a variable font, or an actual font(name)
 	// blocking document fonts does not affect this test
 
 	let t0 = nowFn()
+	// main test we don't pass an array of font names
+		// otherwise it's a test
+	let isMain = undefined == aFonts
+
 	// start with a letter or it throws "SyntaxError: An invalid or illegal string was specified"
 	let fntFaceFake = 'a'+ rnd_string()
 	async function testLocalFontFamily(font) {
@@ -1163,16 +1167,18 @@ const get_fonts_faces = (METRIC) => new Promise(resolve => {
 		.then(list => list.filter(font => font !== null))
 	}
 	function exit(value, btn, notation, data) {
-		addBoth(12, METRIC, value, btn, notation, data)
-		log_perf(12, METRIC, t0)
-		return resolve()
+		if (isMain) {
+			addBoth(12, METRIC, value, btn, notation, data)
+			log_perf(12, METRIC, t0)
+		}
+		return resolve(data)
 	}
 
 	Promise.all([
 		testLocalFontFamily(fntFaceFake),
 	]).then(function(res){
 		let value ='', data ='', btn='', notation =''
-		let fntList = fntData.faces.full
+		let fntList = isMain ? fntData.faces.full : aFonts
 		let isNotate = fntList.length > 0
 		// only notate if we're testing it
 		let badnotation = !isNotate ? '' : isBB ? bb_red : rfp_red
@@ -1185,21 +1191,26 @@ const get_fonts_faces = (METRIC) => new Promise(resolve => {
 			} else if (!isNotate) {
 				exit(zNA, btn, badnotation, data)
 			} else {
-				loadFonts(fntData.faces.full).then(function(results){
+				loadFonts(fntList).then(function(results){
 					if (results.length) {
 						data = results, value = mini(results)
 						btn = addButton(12, METRIC, results.length)
-						if (fntData.faces.base.length) {notation = get_font_notation(METRIC, data)}
+						if (isMain && fntList.length) {notation = get_font_notation(METRIC, data)}
 					} else {
 						// ToDo: once we allow fontFace in BB this will always be badnotation
 						notation = isBB ? goodnotation : badnotation
 						value = 'none'
+						if (!isMain) {data = 'none'}
 					}
 					exit(value, btn, notation, data)
 				})
 			}
 		} catch(e) {
-			exit(log_error(12, METRIC, e), btn, notation, zErr)
+			if (isMain) {
+				exit(log_error(12, METRIC, e), btn, notation, zErr)
+			} else {
+				exit(zErr, btn, notation, zErr)
+			}
 		}
 	})
 })
