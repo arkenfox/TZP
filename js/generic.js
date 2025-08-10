@@ -28,10 +28,12 @@ function smartFn(type) {
 		if ('early' == type) {
 			// we do not know isBB yet
 			if (isSmartAllowed || isFile) {isSmart = true}
+console.log(type, isSmart)
 		} else {
 			// block BB15 for now, too much noise
 			//if (isSmartAllowed || isFile || !isBB) {isSmart = true}
-			if (isSmartAllowed || isFile || !isTB) {isSmart = true}
+			if (isSmartAllowed || !isTB) {isSmart = true}
+console.log(type, isSmart)
 		}
 		isSmartDataMode = !isSmart // isSmartDataMode must be the opposite
 		if ('final' == type && isSmartDataMode) {run_basic('data-only')}
