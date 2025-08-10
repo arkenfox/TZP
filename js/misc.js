@@ -879,6 +879,12 @@ function get_window_props(METRIC) {
 
 		let tamperBtn = ''
 		if (isSmart) {
+			/* safer closed: Performance ... more items then Event
+			standard closed: Performance + no Event...
+			BB/FF/ALL open: Performance then Event...
+			*/
+			let indexPerf = data.indexOf('Performance'), indexEvent = data.indexOf('Event')
+
 			// tampered: filter items for console open etc
 			if (runSL) {data.push('fake')}
 			let aTampered = data.slice(data.indexOf('Performance')+1)
@@ -916,11 +922,6 @@ function get_window_props(METRIC) {
 			}
 			// notate console
 			if (!isLies && isOS !== 'android' && isOS !== undefined) {
-				/* safer closed: Performance ... more items then Event
-				standard closed: Performance + no Event...
-				BB/FF/ALL open: Performance then Event...
-				*/
-				let indexPerf = data.indexOf('Performance'), indexEvent = data.indexOf('Event')
 				let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
 				addDisplay(18, 'consolestatus', strConsole)
 			}
@@ -940,21 +941,19 @@ function get_window_props(METRIC) {
 
 		// hashes
 		if (isMB) {
-			// MB14
+			// MB15
 			if ('windows' == isOS) {
 				if ('522b7ca0' == hash // standard (has WebAssembly)
 					|| '266e1342' == hash // safer (w/ and w/o webgl clicktoplay)
 				) {notation = bb_green}
 			}
 
-
 		} else if (isTB) {
+			// TB15
 			if ('android' == isOS) {
-				// TB14
-				//if ('1059445d' == hash || '077a3df7' == hash || '8fc6eaf7' == hash) {notation = bb_green}
+
 			} else {
-				// TB14
-				//if ('62b9b2e9' == hash || '759e94b7' == hash || 'be2132e3' == hash) {notation = bb_green}
+
 			}
 		}
 	} catch(e) {
