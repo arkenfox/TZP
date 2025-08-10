@@ -202,7 +202,7 @@ let gt0, gt1,
 	gRun = true,
 	gClick = true,
 	gFS = false, // don't run FS measurements if already tiggered
-	gClear = true, // clear console of xml and BB's prototype/proxy errors
+	gClear = false, // clear console of xml and BB's prototype/proxy errors
 	isAllowNonGecko = true, // allow some other engines
 	isAllowNonGeckoMin = true, // enforce min requirements on those other engines
 	isBlock = true,
