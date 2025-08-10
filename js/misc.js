@@ -886,25 +886,27 @@ function get_window_props(METRIC) {
 			if (aTampered.length) {
 				addDetail(METRIC +'_tampered', aTampered.sort())
 				tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
-				// all the properties that can be tampered with by NS
-					// safer (no webgl-clicktoplay): 24 items
-				let aPossible = [
-					'Blob','Element','HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLIFrameElement',
-					'HTMLObjectElement','MediaSource','OffscreenCanvas','Promise','Proxy','SharedWorker',
-					'String','URL','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI',
-					'decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','webkitURL',
-					// ? these show up in file://
-					'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image',
-					// 
-					'WebAssembly'
-				]
-				let aHas = aPossible.filter(x => data.includes(x))
-				aHas = dedupeArray(aHas)
-				aHas.sort()
-				// move all these to the end
-				// this gives us a much more stable hash with NS tampering, but also allows false positives
-				data = data.filter(x => !aHas.includes(x))
-				data = data.concat(aHas)
+			}
+			// all the properties that can be tampered with by NS
+				// safer (no webgl-clicktoplay): 24 items
+			let aPossible = [
+				'Blob','Element','HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLIFrameElement',
+				'HTMLObjectElement','MediaSource','OffscreenCanvas','Promise','Proxy','SharedWorker',
+				'String','URL','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI',
+				'decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','webkitURL',
+				// ? these show up in file://
+				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image',
+				// 
+				'WebAssembly'
+			]
+			let aHas = aPossible.filter(x => data.includes(x))
+			aHas = dedupeArray(aHas)
+			aHas.sort()
+			// always move all these to the end
+				// this gives us a much more stable hash with and without NS tampering, but also allows false positives
+			data = data.filter(x => !aHas.includes(x))
+			data = data.concat(aHas)
+			if (aTampered.length) {
 				// now we check tampered items not in possible
 				let aTamperedNotInPossible = aTampered.filter(x => !aPossible.includes(x))
 				if (aTamperedNotInPossible.length) {
@@ -936,13 +938,16 @@ function get_window_props(METRIC) {
 		}
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
 
-
-		// hashes are standard | safer | safer with click to play webgl
+		// hashes
 		if (isMB) {
 			// MB14
-			if ('522b7ca0' == hash // file standard (has WebAssembly)
-				|| '266e1342' == hash // file safer (w/ and w/o webgl clicktoplay)
-			) {notation = bb_green}
+			if ('windows' == isOS) {
+				if ('522b7ca0' == hash // standard (has WebAssembly)
+					|| '266e1342' == hash // safer (w/ and w/o webgl clicktoplay)
+				) {notation = bb_green}
+			}
+
+
 		} else if (isTB) {
 			if ('android' == isOS) {
 				// TB14
