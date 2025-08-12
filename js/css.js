@@ -301,21 +301,22 @@ function get_computed_styles(METRIC) {
 
 function get_link(METRIC) {
 	// FF120+ 1858397: layout.css.always_underline_links
+	// FF143+ 1980562: returns 'none' or 'underline'
 	let value, data ='', notation = default_red
-	if (!isGecko) {
-		value = zNA
-	} else {
-		try {
-			let property = getComputedStyle(dom.tzpLink).textDecoration
-			if (runST) {property = null} else if (runSI) {property = 'x'}
-			let typeCheck = typeFn(property)
-			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if (!property.includes('rgb(')) {throw zErrInvalid +'got ' + property}
-			value = 'underline' == property.slice(0,9) ? zE : zD
-			if (zD == value) {notation = default_green}
-		} catch(e) {
-			value = e; data = zErrLog
+	try {
+		value = getComputedStyle(dom.tzpLink).textDecoration
+		if (runST) {value = null} else if (runSI) {value = 'x'}
+		let typeCheck = typeFn(value)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		if (isGecko && isVer < 143) {
+			if (!value.includes('rgb(')) {throw zErrInvalid +'got ' + value}
 		}
+		// ignore rgb values: we're using a custom value from css
+		// but even if we weren't we already have that info from LinkText
+		value = 'none' == value.slice(0,4) ? 'none' : 'underline'
+		if ('none' == value) {notation = default_green}
+	} catch(e) {
+		value = e; data = zErrLog
 	}
 	addBoth(14, METRIC, value,'', notation, data)
 	return
