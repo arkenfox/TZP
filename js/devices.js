@@ -282,8 +282,11 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 function get_memory(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory
 	// lets see if this produces anything useful
+	// okie dokie - super unstable in this form: just display for now
 	function exit(hash, data='', btn ='') {
-		addBoth(7, METRIC, hash, btn,'', data)
+		sDetail.document[METRIC] = data
+		addDisplay(7, METRIC, hash, btn)
+		//addBoth(7, METRIC, hash, btn,'', data)
 		return
 	}
 	try {
