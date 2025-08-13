@@ -313,7 +313,7 @@ function get_link(METRIC) {
 		}
 		// ignore rgb values: we're using a custom value from css
 		// but even if we weren't we already have that info from LinkText
-		value = 'none' == value.slice(0,4) ? 'none' : 'underline'
+		value = 'underline' == value.slice(0,9) ? 'underline' : 'none'
 		if ('none' == value) {notation = default_green}
 	} catch(e) {
 		value = e; data = zErrLog
