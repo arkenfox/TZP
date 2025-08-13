@@ -1463,7 +1463,7 @@ const get_agent_data = (METRIC, os = isOS) => new Promise(resolve => {
 			if (expected !== k+'') {throw zErrInvalid +'expected '+ expected +' got '+ k+''}
 			// https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData/getHighEntropyValues
 			navigator.userAgentData.getHighEntropyValues([
-				'architecture','bitness','brands','formFactor','fullVersionList','mobile',
+				'architecture','bitness','brands','formFactors','fullVersionList','mobile',
 				'model','platform','platformVersion','uaFullVersion','wow64'
 			]).then(res => {
 				//let data = res
@@ -1730,7 +1730,7 @@ function goNW_AGENT() {
 			if ('object' !== typeCheck) {throw zErr}
 			if ('[object NavigatorUAData]' !== k+'') {throw zErr}
 			navigator.userAgentData.getHighEntropyValues([
-				'architecture','bitness','brands','formFactor','fullVersionList','mobile',
+				'architecture','bitness','brands','formFactors','fullVersionList','mobile',
 				'model','platform','platformVersion','uaFullVersion','wow64'
 			]).then(res => {
  				exit(res)
