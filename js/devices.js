@@ -279,6 +279,41 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 	}
 })
 
+function get_memory(METRIC) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory
+	// lets see if this produces anything useful
+	function exit(hash, data='', btn ='') {
+		addBoth(7, METRIC, hash, btn,'', data)
+		return
+	}
+	try {
+		let k = performance.memory
+		let typeCheck = typeFn(k)
+		if ('undefined' == typeCheck) {
+			exit(typeCheck)
+		} else {
+			let expected = '[object MemoryInfo]', data = {}
+			if (k+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ k+''}
+			let aKeys = ['jsHeapSizeLimit','totalJSHeapSize','usedJSHeapSize']
+			aKeys.forEach(function(m){
+				let value, check
+				try {
+					value = k[m]
+					if (runSI) {value = null}
+					let check = typeFn(value)
+					if ('number' !== check) {throw zErrType + check}
+				} catch(e) {
+					value = zErr; log_error(7, METRIC +'_'+ m, e)
+				}
+				data[m] = value
+			})
+			exit(mini(data), data, addButton(7, METRIC))
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+}
+
 const get_permissions = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API#permission-aware_apis
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
@@ -575,6 +610,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_keyboard('keyboard'),
 		get_battery('battery'),
 		get_viewport_segments('viewport-segments'),
+		get_memory('memory'),
 	]).then(function(){
 		return resolve()
 	})
