@@ -76,7 +76,7 @@ const getDynamicIframeWindow = ({
 					if ('object' !== typeCheck) {throw zErr}
 					if ('[object NavigatorUAData]' !== k+'') {throw zErr}
 					navigator.userAgentData.getHighEntropyValues([
-						'architecture','bitness','brands','formFactor','fullVersionList','mobile',
+						'architecture','bitness','brands','formFactors','fullVersionList','mobile',
 						'model','platform','platformVersion','uaFullVersion','wow64'
 					]).then(res => {
 						exit({'hash': mini(res), 'metrics': res})
