@@ -61,17 +61,30 @@ const get_battery = (METRIC) => new Promise(resolve => {
 })
 
 function get_device_integer(METRIC, proxyCheck) {
-	// concurrency: 1630089: macOS reports physical cores instead of logical
-		// dom.maxHardwareConcurrency : 1958598: FF139+ 128
-	let value, data ='', expected = 'hardwareConcurrency' == METRIC ? 2 : 24
+	// dom.maxHardwareConcurrency : 1958598: FF139+ 128
+	let value, data ='', notation = rfp_red, expected = 24
+	let isHWC = 'hardwareConcurrency' == METRIC
+	// 1984333: FF144+ RFP: 8 if mac else 4 | FPP 4 or 8
+		// ToDo: add isBB if backported
+	if (isHWC) {expected = 2; if (isVer > 143) {expected = 'mac' == isOS ? 8 : 4}} // RFP
 	try {
-		value = 2 == expected ? navigator[METRIC] : screen[METRIC]
+		value = isHWC ? navigator[METRIC] : screen[METRIC]
 		if (runST) {value += ''} else if (runSL) {addProxyLie(proxyCheck + METRIC)}
 		if (!Number.isInteger(value)) {throw zErrType + typeFn(value)}
 	} catch(e) {
-		value = e; data = ('hardwareConcurrency' == METRIC ? zErrLog : zErrShort)
+		value = e; data = isHWC ? zErrLog : zErrShort
 	}
-	addBoth(7, METRIC, value,'', (value == expected ? rfp_green : rfp_red), data, isProxyLie(proxyCheck + METRIC))
+	if (value == expected) {
+		notation = rfp_green
+	} else if (isHWC && isFPPFallback) {
+		// non-BB: can fail RFP but may match FPP
+		// 1984333: FF144+ FPP 4 or 8	
+		// ToDo: clarify if mac spoof is always 8
+		if (isVer > 143) {
+			if (4 == value || 8 == value) {notation = fpp_green}
+		}
+	}
+	addBoth(7, METRIC, value,'', notation, data, isProxyLie(proxyCheck + METRIC))
 	return
 }
 
