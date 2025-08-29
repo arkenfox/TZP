@@ -216,7 +216,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 99, maxVer = 143, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 100, maxVer = 144, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -277,6 +277,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 144: 1919582
+		let t144 = performance.now()
+		let ver144 = undefined == window.CSS2Properties
+		rec(144, 144, "1919582", ver144, performance.now()-t144) // 0.005ms
 
 		// 143: 1977489
 			// fast-path: layout.css.moz-appearance.webidl.enabled (default false)
