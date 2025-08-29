@@ -27,14 +27,12 @@ function smartFn(type) {
 	if (isGecko && isVer >= isSmartMin) {
 		if ('early' == type) {
 			// we do not know isBB yet
-			if (isSmartAllowed || isFile) {isSmart = true}
-console.log(type, isSmart)
+			if (isSmartAllowed) {isSmart = true}
 		} else {
-			// block BB15 for now, too much noise
-			//if (isSmartAllowed || isFile || !isBB) {isSmart = true}
+			// block TB15 for now, too much noise
 			if (isSmartAllowed || !isTB) {isSmart = true}
-console.log(type, isSmart)
 		}
+		//console.log(type, isSmart)
 		isSmartDataMode = !isSmart // isSmartDataMode must be the opposite
 		if ('final' == type && isSmartDataMode) {run_basic('data-only')}
 	}
@@ -662,6 +660,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			if (undefined == window.CSS2Properties) return 144 // 144: 1919582
 			// 143: fast-path: pref: layout.css.moz-appearance.webidl.enabled: default false 143+
 			if (!CSS2Properties.prototype.hasOwnProperty('-moz-appearance')) return 143 // 1977489
 			try {
