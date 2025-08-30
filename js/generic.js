@@ -644,7 +644,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 143) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 144) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
