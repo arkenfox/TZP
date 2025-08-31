@@ -1833,9 +1833,9 @@ function get_l10n_xml_prettyprint(METRIC) {
 	// by using a narrow iframe width, word segmentation line breaks determine the height,
 		// and the content varies per app locale: height is not deterministic due to
 		// subpixels (system + other scaling) and fonts (per platform + language)
-	let value, data ='', range, method, isLies = false
+	let value, data ='', range, method
 	try {
-		let target = dom.tzpXMLunstyled.firstChild
+		let target = dom.tzpXMLunstyled.contentDocument.firstChild
 		// method
 		if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
 		if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
