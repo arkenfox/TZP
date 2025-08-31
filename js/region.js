@@ -1833,7 +1833,7 @@ function get_l10n_xml_prettyprint(METRIC) {
 	// by using a narrow iframe width, word segmentation line breaks determine the height,
 		// and the content varies per app locale: height is not deterministic due to
 		// subpixels (system + other scaling) and fonts (per platform + language)
-	let value, data ='', range, method
+	let value, data ='', notation='', range, method
 	try {
 		let target = dom.tzpXMLunstyled.contentDocument.firstChild
 		// method
@@ -1848,7 +1848,12 @@ function get_l10n_xml_prettyprint(METRIC) {
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	addBoth(4, METRIC, value,'','', data, (isDomRect == -1))
+	// sometimes we get 0 if the xml isn't loaded/parsed in time
+	// we should notate that as well as unexpected errors
+	if (!isFile) {
+		if ('number' !== typeof value || value < 50) {notation = rfp_red}
+	}
+	addBoth(4, METRIC, value,'',notation, data, (isDomRect == -1))
 }
 
 function get_l10n_xslt_sort(METRIC) {
