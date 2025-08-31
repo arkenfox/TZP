@@ -126,6 +126,8 @@ function get_nav_gpc(METRIC) {
 		// privacy.globalprivacycontrol.functionality.enabled = navigator
 		// privacy.globalprivacycontrol.enabled = true/false
 	// FF120+ desktop (?android): gpc enabled: false but true in pb mode
+
+	// ToDo: FF144+? 1983296 functionality pref deprecated
 	let hash, data='', notation = isBB ? default_red : ''
 	try {
 		hash = navigator[METRIC]
@@ -1823,6 +1825,32 @@ function get_l10n_xml_messages(METRIC) {
 	return
 }
 
+function get_l10n_xml_prettyprint(METRIC) {
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+
+	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom = XMLPrettyPrint
+		// note file schema errors due to CORS
+	// by using a narrow iframe width, word segmentation line breaks determine the height,
+		// and the content varies per app locale: height is not deterministic due to
+		// subpixels (system + other scaling) and fonts (per platform + language)
+	let value, data ='', range, method, isLies = false
+	try {
+		let target = dom.tzpXMLunstyled.firstChild
+		// method
+		if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
+		if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+		} else if (isDomRect == 1) {method = target.getClientRects()[0]
+		} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+		} else if (isDomRect > 2) {method = range.getClientRects()[0]
+		}
+		// value
+		value = method.height
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(4, METRIC, value,'','', data, (isDomRect == -1))
+}
+
 function get_l10n_xslt_sort(METRIC) {
 	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
@@ -2002,6 +2030,7 @@ const outputRegion = () => new Promise(resolve => {
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
+				get_l10n_xml_prettyprint('l10n_xml_prettyprint'),
 				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
 				// microperf: add totals, re-order into anew obj
