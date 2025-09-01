@@ -1865,7 +1865,7 @@ function get_l10n_xml_prettyprint(METRIC) {
 	addBoth(4, METRIC, value,'',notation, data, (isDomRect == -1))
 }
 
-function get_l10n_xslt(METRIC) {
+function get_l10n_xslt_messages(METRIC) {
 	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
 	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom/xslt.ftl
@@ -2070,7 +2070,7 @@ const outputRegion = () => new Promise(resolve => {
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
 				get_l10n_xml_prettyprint('l10n_xml_prettyprint'),
-				get_l10n_xslt('l10n_xslt'),
+				get_l10n_xslt_messages('l10n_xslt_messages'),
 				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
 				// microperf: add totals, re-order into anew obj
