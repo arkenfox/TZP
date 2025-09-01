@@ -212,51 +212,52 @@ function set_isLanguageSmart() {
 	}
 	// these are current stable BB hashes since last checked
 		// note: upstream ESR seems to pick up stable l10n changes
-	// last checked 15 nightly
+	// last checked TB15.0a1
 	let xsEN = '6cc5a8b4'
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		'ar': {m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '352c4e34'},
-		'be': {m: '076d68e6', v: '4edeafab', x: '42583d22', xs: '74053574'},
-		'bg': {m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: '7d747674'},
-		'ca': {m: 'd856d812', v: '6b3bb3d8', x: '77a62a49', xs: xsEN},
-		'cs': {m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: 'a7ddfef4'},
-		'da': {m: '39169214', v: '479797a1', x: 'a30818e8', xs: '88f55cfa'},
-		'de': {m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: xsEN},
-		'el': {m: '7053311d', v: 'fb391308', x: '493f7225', xs: 'cae41bf4'},
-		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: xsEN},
-		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: '32fce55a'},
-		'fa': {m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: 'ff0f7334'},
-		'fi': {m: '82d079c7', v: '3e29e6e7', x: '859efc32', xs: '26f7a3f8'},
-		'fr': {m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: xsEN},
-		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: xsEN},
-		'he': {m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: 'a0fcc2b4'},
-		'hu': {m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: '2fe650b4'},
-		'id': {m: '1e275882', v: '71224946', x: 'a70cd23c', xs: xsEN},
-		'is': {m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '93b575f8'},
-		'it': {m: '716e7242', v: '3b781f09', x: 'c567f479', xs: xsEN},
-		'ja': {m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: '22ec9486'},
-		'ka': {m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '7a65b6b4'},
-		'ko': {m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '9c39494c'},
-		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'f26c6ff4'},
-		'mk': {m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: 'f9e81474'},
-		'ms': {m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: xsEN},
-		'my': {m: '939f2013', v: '43cc3aa3', x: 'a6571ec7', xs: 'fbfb1d8c'},
-		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '88f55cfa'},
-		'nl': {m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: xsEN},
-		'pl': {m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '01902794'},
-		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: xsEN},
-		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: xsEN},
-		'ro': {m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '2a01a4d8'},
-		'ru': {m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '7d747674'},
-		'sq': {m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: 'f45c6af8'},
-		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '1ca25322'},
-		'th': {m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: 'a0bff3b4'},
-		'tr': {m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'e9fda72a'},
-		'uk': {m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: 'ae65fe74'},
-		'vi': {m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '2a01a4d8'},
-		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '536abb21', xs: '42d5bac6'},
-		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '6d106412'},
+		// m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort
+		'ar': {   m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '', xsort: '352c4e34'},
+		'be': {   m: '076d68e6', v: '4edeafab', x: '42583d22', xs: '', xsort: '74053574'},
+		'bg': {   m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: '', xsort: '7d747674'},
+		'ca': {   m: 'd856d812', v: '6b3bb3d8', x: '77a62a49', xs: '', xsort: xsEN},
+		'cs': {   m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: '', xsort: 'a7ddfef4'},
+		'da': {   m: '39169214', v: '479797a1', x: 'a30818e8', xs: '', xsort: '88f55cfa'},
+		'de': {   m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: '', xsort: xsEN},
+		'el': {   m: '7053311d', v: 'fb391308', x: '493f7225', xs: '', xsort: 'cae41bf4'},
+		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN},
+		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: '', xsort: '32fce55a'},
+		'fa': {   m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: '', xsort: 'ff0f7334'},
+		'fi': {   m: '82d079c7', v: '3e29e6e7', x: '859efc32', xs: '', xsort: '26f7a3f8'},
+		'fr': {   m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: '', xsort: xsEN},
+		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: '', xsort: xsEN},
+		'he': {   m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: '', xsort: 'a0fcc2b4'},
+		'hu': {   m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: '', xsort: '2fe650b4'},
+		'id': {   m: '1e275882', v: '71224946', x: 'a70cd23c', xs: '', xsort: xsEN},
+		'is': {   m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '', xsort: '93b575f8'},
+		'it': {   m: '716e7242', v: '3b781f09', x: 'c567f479', xs: '', xsort: xsEN},
+		'ja': {   m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: '', xsort: '22ec9486'},
+		'ka': {   m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '', xsort: '7a65b6b4'},
+		'ko': {   m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '', xsort: '9c39494c'},
+		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: '', xsort: 'f26c6ff4'},
+		'mk': {   m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: '', xsort: 'f9e81474'},
+		'ms': {   m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: '', xsort: xsEN},
+		'my': {   m: '939f2013', v: '43cc3aa3', x: 'a6571ec7', xs: '', xsort: 'fbfb1d8c'},
+		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '', xsort: '88f55cfa'},
+		'nl': {   m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: '', xsort: xsEN},
+		'pl': {   m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '', xsort: '01902794'},
+		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: '', xsort: xsEN},
+		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: '', xsort: xsEN},
+		'ro': {   m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '', xsort: '2a01a4d8'},
+		'ru': {   m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '', xsort: '7d747674'},
+		'sq': {   m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: '', xsort: 'f45c6af8'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '', xsort: '1ca25322'},
+		'th': {   m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: '', xsort: 'a0bff3b4'},
+		'tr': {   m: '4217ef80', v: '5048d312', x: '55daef93', xs: '', xsort: 'e9fda72a'},
+		'uk': {   m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: '', xsort: 'ae65fe74'},
+		'vi': {   m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '', xsort: '2a01a4d8'},
+		'zh-Hans-CN': {m: '550ea53e', v: '0e58f82a', x: '536abb21', xs: '686ba3a4', xsort: '42d5bac6'},
+		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '04fbed63', xsort: '6d106412'},
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
@@ -1702,7 +1703,11 @@ function get_timezone_offset(METRIC) {
 	return
 }
 
+/* l10n */
+
 const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
+
 	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ''
 	let aList = ['InvalidImage','ScaledImage']
 	for (const k of aList) {
@@ -1732,7 +1737,39 @@ const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
 	return resolve()
 })
 
+function get_l10n_parsererror_direction(METRIC) {
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString#error_handling
+		// 1954813: 
+		// 1666613: currently relies on chrome://global/locale/intl.css
+	let value, data = '', notation = isLanguageSmart ? locale_red : ''
+	try {
+		let target = dom.tzpDirection
+		target.innerHTML = '<parsererror></parsererror>'
+		value = getComputedStyle(target.children[0]).direction
+		// check
+		if (runST) {value = ''} else if (runSI) {value = 'upsidedown'}
+		let typeCheck = typeFn(value)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		let aGood = ['ltr','rtl']
+		if (!aGood.includes(value)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ value}
+		// notation
+			// since this is just BB (or FF en-US), we know only three locales are rtl: ar, fa, he
+		if (isLanguageSmart && isLocaleValid) {
+			let aRTL = ['ar','fa','he']
+			let expected = aRTL.includes(isLocaleValue) ? 'rtl' : 'ltr'
+			if (expected == value) {notation = locale_green}
+		}
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(4, METRIC, value,'', notation, data)
+	return
+}
+
 function get_l10n_validation_messages(METRIC) {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
+
 	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
 		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
 		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
@@ -1779,37 +1816,9 @@ function get_l10n_validation_messages(METRIC) {
 	return
 }
 
-function get_l10n_parsererror_direction(METRIC) {
-	if (!isGecko) {addBoth(4, METRIC, zNA); return}
-	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString#error_handling
-		// 1954813: 
-		// 1666613: currently relies on chrome://global/locale/intl.css
-	let value, data = '', notation = isLanguageSmart ? locale_red : ''
-	try {
-		let target = dom.tzpDirection
-		target.innerHTML = '<parsererror></parsererror>'
-		value = getComputedStyle(target.children[0]).direction
-		// check
-		if (runST) {value = ''} else if (runSI) {value = 'upsidedown'}
-		let typeCheck = typeFn(value)
-		if ('string' !== typeCheck) {throw zErrType + typeCheck}
-		let aGood = ['ltr','rtl']
-		if (!aGood.includes(value)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ value}
-		// notation
-			// since this is just BB (or FF en-US), we know only three locales are rtl: ar, fa, he
-		if (isLanguageSmart && isLocaleValid) {
-			let aRTL = ['ar','fa','he']
-			let expected = aRTL.includes(isLocaleValue) ? 'rtl' : 'ltr'
-			if (expected == value) {notation = locale_green}
-		}
-	} catch(e) {
-		value = e; data = zErrLog
-	}
-	addBoth(4, METRIC, value,'', notation, data)
-	return
-}
-
 function get_l10n_xml_messages(METRIC) {
+	// https://searchfox.org/firefox-main/source/dom/locales/en-US/chrome/layout/xmlparser.properties
+
 	let hash, btn ='', data = isXML, notation = isLanguageSmart ? locale_red : ''
 	if ('string' == typeof isXML) {
 		hash = isXML; data = isXML == zNA ? '' : zErrLog
@@ -1848,12 +1857,35 @@ function get_l10n_xml_prettyprint(METRIC) {
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	// sometimes we get 0 if the xml isn't loaded/parsed in time
-	// we should notate that as well as unexpected errors
-	if (!isFile) {
-		if ('number' !== typeof value || value < 50) {notation = rfp_red}
+	// if the xml isn't loaded in time we will get a low default value (e.g. 0 in latin, 8 in arabic)
+		// notate this as well as unexpected errors
+	if (isLanguageSmart) {
+		if ('number' !== typeof value || value < 50) {notation = locale_red}
 	}
 	addBoth(4, METRIC, value,'',notation, data, (isDomRect == -1))
+}
+
+function get_l10n_xslt(METRIC) {
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+
+	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom/xslt.ftl
+	// note file schema errors due to CORS
+		// we only need the one test for max entropy (tested Base Browser)
+		// but we need an object to create a btn, and this also allows future expansion
+	let hash, data ='', btn='', notation = isLanguageSmart ? locale_red : ''
+	try {
+		let test = dom.tzpXSLT.contentDocument.children[0].textContent
+		data = {'xslt-parse-failure': test} 
+		hash = mini(data); btn = addButton(4, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	if (isLanguageSmart) {
+		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+			if (hash === localesSupported[isLocaleAlt].xs) {notation = locale_green}
+		}
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
 }
 
 function get_l10n_xslt_sort(METRIC) {
@@ -1888,7 +1920,7 @@ function get_l10n_xslt_sort(METRIC) {
 		if (isLanguageSmart) {
 			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
 				// compare the string hash
-				if (mini(dataStr) === localesSupported[isLocaleAlt].xs) {notation = locale_green}
+				if (mini(dataStr) === localesSupported[isLocaleAlt].xsort) {notation = locale_green}
 			}
 		}
 	} catch(e) {
@@ -1897,6 +1929,8 @@ function get_l10n_xslt_sort(METRIC) {
 	addBoth(4, METRIC, hash, btn, notation, data)
 	return
 }
+
+/* TODO */
 
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
@@ -2036,6 +2070,7 @@ const outputRegion = () => new Promise(resolve => {
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
 				get_l10n_xml_prettyprint('l10n_xml_prettyprint'),
+				get_l10n_xslt('l10n_xslt'),
 				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
 				// microperf: add totals, re-order into anew obj
