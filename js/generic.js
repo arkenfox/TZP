@@ -1885,9 +1885,11 @@ function countJS(item) {
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
 
-		// help ensure/force images are loaded in time
-		//try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
-		//try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch {}
+		// set src's for our l10n iframe tests
+		try {dom.tzpInvalidImage.src = 'images/InvalidImage.png'} catch {}
+		try {dom.tzpScaledImage.src = 'images/ScaledImage.png'} catch {}
+		try {dom.tzpXMLunstyled.src = 'xml/xmlunstyled.xml'} catch {}
+		try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {}
 
 		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
