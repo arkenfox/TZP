@@ -1706,7 +1706,7 @@ function get_timezone_offset(METRIC) {
 /* l10n */
 
 const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
-	//if (!isGecko) {addBoth(4, METRIC, zNA); return resolve()}
+	if (!isGecko) {addBoth(4, METRIC, zNA); return resolve()}
 
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
 	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ''
