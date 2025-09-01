@@ -1886,8 +1886,9 @@ function countJS(item) {
 		}
 
 		// help ensure/force images are loaded in time
-		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
-		try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch {}
+		//try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch {}
+		//try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch {}
+
 		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
