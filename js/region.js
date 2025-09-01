@@ -1706,8 +1706,9 @@ function get_timezone_offset(METRIC) {
 /* l10n */
 
 const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
-	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
+	//if (!isGecko) {addBoth(4, METRIC, zNA); return resolve()}
 
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
 	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ''
 	let aList = ['InvalidImage','ScaledImage']
 	for (const k of aList) {
@@ -1874,8 +1875,7 @@ function get_l10n_xslt_messages(METRIC) {
 		// but we need an object to create a btn, and this also allows future expansion
 	let hash, data ='', btn='', notation = isLanguageSmart ? locale_red : ''
 	try {
-		let test = dom.tzpXSLT.contentDocument.children[0].textContent
-		data = {'xslt-parse-failure': test} 
+		data = {'xslt-parse-failure': dom.tzpXSLT.contentDocument.children[0].textContent} 
 		hash = mini(data); btn = addButton(4, METRIC)
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -2064,13 +2064,13 @@ const outputRegion = () => new Promise(resolve => {
 			get_l10n_xml_messages('l10n_xml_messages'),
 			get_l10n_parsererror_direction('l10n_parsererror_direction'),
 			get_l10n_xslt_sort('l10n_xslt_sort'),
+			get_l10n_xml_prettyprint('l10n_xml_prettyprint'),
+			get_l10n_xslt_messages('l10n_xslt_messages'),
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
-				get_l10n_xml_prettyprint('l10n_xml_prettyprint'),
-				get_l10n_xslt_messages('l10n_xslt_messages'),
 				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
 				// microperf: add totals, re-order into anew obj
