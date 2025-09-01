@@ -1886,10 +1886,17 @@ function countJS(item) {
 		}
 
 		// set src's for our l10n iframe tests
-		try {dom.tzpInvalidImage.src = 'images/InvalidImage.png'} catch {}
-		try {dom.tzpScaledImage.src = 'images/ScaledImage.png'} catch {}
-		try {dom.tzpXMLunstyled.src = 'xml/xmlunstyled.xml'} catch {}
-		try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {}
+			// setting these inline can cause the wrong contentDocument in the wrong iframes
+			// it's almost random like some sort of race with different results in android vs windows - WTF!!
+			// Switching the element order in html (with inline src and not by JS) I can replicate these
+			// mismatched contents in both windows and android. Only setting them via JS are we always correct
+			// jesus says: WT actual F
+		if (isGecko) {
+			try {dom.tzpInvalidImage.src = 'images/InvalidImage.png'} catch {}
+			try {dom.tzpScaledImage.src = 'images/ScaledImage.png'} catch {}
+			try {dom.tzpXMLunstyled.src = 'xml/xmlunstyled.xml'} catch {}
+			try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {}
+		}
 
 		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
