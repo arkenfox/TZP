@@ -67,6 +67,13 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 		}
 		if (mini(oHardcoded) !== 'dfda7813') {isLies = true}
 
+		// ac-state changes in blink (IDK about webkit ToDo I guess) on a re-run
+			// gRun = suspended, reruns = running
+			// doesn't seem partically useful, so let's change it in non-gecko
+		if (!isGecko) {
+			if (undefined !== data['ac-state']) {data['ac-state'] = zNA}
+		}
+
 		// notate
 			// non-RFP outputLatency can be variable per tab/run - return n/a + rehash to avoid any noise
 		hash = mini(data); btn = addButton(11, METRIC, Object.keys(data).length +' keys')
