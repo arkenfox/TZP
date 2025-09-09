@@ -21,7 +21,8 @@
 			font-size: 16px;
 		}
 		.padmoji {line-height: 2}
-		@font-face {font-family: "Noto"; src: url("../fonts/NotoColorEmoji.ttf");}
+		.noto {font-family: monospace,"Noto Color Emoji";}
+		.twemoji {font-family: monospace,"Twemoji Mozilla";}
 	</style>
 </head>
 
@@ -43,6 +44,10 @@
 			<span class="btn12 btn">
 				light <input id="rlight" type="radio" name="radio" value="lightmoji" onchange="handleTheme(this)">
 				dark <input id="rdark" type="radio" name="radio" value="darkmoji" onchange="handleTheme(this)" checked>
+			</span>
+      <span class="btn12 btn">
+				Noto Color Emoji <input id="noto" type="radio" name="font" onchange="handleFont()">
+				Twemoji <input id="twemoji" type="radio" name="font" onchange="handleFont()">
 			</span>
 			<br><br>
 			<textarea rows="4" class="darkmoji largemoji"
@@ -92,6 +97,11 @@ function handleTheme(src) {
 	dom.results.classList.add(src.value)
 	dom.results.classList.remove(remove)
 }
+function handleFont() {
+  dom.valueE.classList.toggle("noto", dom.noto.checked);
+  dom.valueE.classList.toggle("twemoji", dom.twemoji.checked);
+}
+handleFont()
 dom.rdark.checked = true
 
 function run_random(array) {
@@ -155,4 +165,3 @@ function run() {
 </script>
 </body>
 </html>
-
