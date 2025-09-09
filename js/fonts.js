@@ -72,10 +72,10 @@ let fntMaster = {
 		linux: [
 			'Arimo','Cousine','Noto Color Emoji','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP',
 			'Noto Sans KR','Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew',
-			'Noto Serif Thai','Pyidaungsu','STIX Two Math','Tinos',
+			'Noto Serif Thai','Pyidaungsu','STIX Two Math','Tinos','Twemoji Mozilla',
 		],
 		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','Pyidaungsu','STIX Two Math'],
-		windows: ['Noto Color Emoji','Noto Naskh Arabic','Noto Sans','Noto Serif','Pyidaungsu'],
+		windows: ['Noto Color Emoji','Noto Naskh Arabic','Noto Sans','Noto Serif','Pyidaungsu','Twemoji Mozilla'],
 	},
 	// BB whitelist system
 	allowlist: {
@@ -176,14 +176,14 @@ let fntMaster = {
 			'Verdana Bold','Verdana Bold Italic','Verdana Italic',
 			// other
 			'Cambria Math','Lucida Console','MS Gothic', // system
-			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular', // bundled
+			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla', // bundled
 		],
 		windowsoffscreen: [
 			// proportional only: in BB we test once against monospace + fallbacks
 			'Arial','Cambria Math','MS PGothic','Malgun Gothic','Microsoft JhengHei','Microsoft YaHei',
 			'Segoe UI','Sylfaen','Times New Roman','Verdana',
-			// some windows-only bundled fonts
-			'Noto Naskh Arabic','Noto Sans','Noto Serif',
+			// some windows-only bundled fonts + twemoji
+			'Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',
 		],
 	},
 	// BB unexpected
@@ -197,7 +197,6 @@ let fntMaster = {
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // BB12 fontnames
 			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
-			'Twemoji Mozilla', // BB15: 43959 removed from whitelist but file currently remains == fucks up font.vis
 		],
 		linuxfaces: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
@@ -235,7 +234,6 @@ let fntMaster = {
 			// other
 			'Noto Sans Symbols2', // BB12 bundled
 			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
-			'Twemoji Mozilla', // BB15: 43959 removed from whitelist but file currently remains == fucks up font.vis
 			'Helv', // ToDo: this might need to move with font.vis
 		],
 		windowsfaces: [
