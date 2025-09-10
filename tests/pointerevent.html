@@ -76,7 +76,8 @@
 				<div class="no_color spaces" id="touch"></div><hr><br>
 				<div class="s6 spaces">  maxTouchPoints <span class="no_color" id="maxTouchPoints"></span></div></div><br>
 				<div class="s6">touch properties <span class="no_color spaces" id="touch_properties"></span></div><br>
-				<div class="s4"><u>EVENTS</u></div><br><div class="no_color" id="events"></div>
+				<div class="s4"><u>EVENTS</u></div><br><div class="no_color" id="events"></div><br>
+				<div class="s4"><u>POINTERRAWUPDATE</u>  <span class="no_color spaces" id='raw'></span></div>
 			</td>
 		</tr>
 	</table>
@@ -90,13 +91,15 @@ let padlen = 18
 let oTemp = {'pointer':{},'touch':{}}
 let oData = {} // sorted oTemp for display and oFP
 let oFP = {
-	'pointer': {},
 	'maxTouchPoints': '',
+	'pointer': {},
+	'pointerrawupdate': '',
 	'touch': {},
 	'touch_properties': '',
 }
 let isStart = true, hasKeys = false
 let setEvents = new Set()
+let setRaw = new Set()
 
 // sorted list: these are all numbers
 let aList = [
@@ -145,6 +148,10 @@ function finish() {
 	expected = oDataEvents.touch.length
 	count = Object.keys(oTemp.touch).length
 	if (hasKeys && count !== expected) {return}
+
+	// add pointerrawupdate
+	let aRaw = Array.from(setRaw)
+	oFP.pointerrawupdate = aRaw.join(', ')
 
 	// sort & filter object for consistent hashes
 	for (const k of Object.keys(oTemp).sort()) {
@@ -330,6 +337,7 @@ function addEvent(type) {
 function reset() {
 	oTemp = {'pointer':{},'touch':{}}, oData = {}
 	oFP.pointer = {}
+	oFP.pointerrawupdate = ''
 	oFP.touch = {}
 
 	// force mouse out of target area
@@ -341,10 +349,12 @@ function reset() {
 		dom.results = ''
 		dom.touch = ''
 		dom.events = ''
+		dom.raw = ''
 		dom.hash = ''
 		dom.touchhash = ''
 		dom.pointerhash = ''
 		setEvents.clear()
+		setRaw.clear()
 	}
 }
 
@@ -373,6 +383,19 @@ function start() {
 	// add an auxclick
 	// tested, this doesn't seem to reveal/leak anything than all the other pointer events
 	//target.addEventListener('auxclick', (event) => {run(event, 'auxclick')})
+
+	// pointerrawupdate
+	addEventListener("pointerrawupdate", (event) => {
+		let data = 'undefined'
+		if (event.getCoalescedEvents && event.getCoalescedEvents().length > 1) {
+			console.log("Coalesced events:", event.getCoalescedEvents());
+		} else {
+			data = event.persistentDeviceId +' '+ event.pointerType
+		}
+		setRaw.add(data)
+		let aRaw = Array.from(setRaw)
+		dom.raw.innerHTML = aRaw.join(', ')
+	})
 }
 
 function run_once() {
@@ -429,7 +452,7 @@ function run_once() {
 	}
 	removeElementFn(id)
 
-	console.log(performance.now() - t0)
+	//console.log(performance.now() - t0)
 
 	// hash
 	if (data['element'].length && 'object' == typeof data['element']) {data.element.sort()}
