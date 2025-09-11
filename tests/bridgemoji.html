@@ -21,8 +21,6 @@
 			font-size: 16px;
 		}
 		.padmoji {line-height: 2}
-		.noto {font-family: monospace,"Noto Color Emoji";}
-		.twemoji {font-family: monospace,"Twemoji Mozilla";}
 	</style>
 </head>
 
@@ -44,13 +42,14 @@
 			<span class="btn12 btn">
 				light <input id="rlight" type="radio" name="radio" value="lightmoji" onchange="handleTheme(this)">
 				dark <input id="rdark" type="radio" name="radio" value="darkmoji" onchange="handleTheme(this)" checked>
-			</span>
-      <span class="btn12 btn">
-				Noto Color Emoji <input id="noto" type="radio" name="font" onchange="handleFont()">
-				Twemoji <input id="twemoji" type="radio" name="font" onchange="handleFont()">
+			</span><p>
+      <span><span class="no_color">Preferred system font: </span>
+				default <input id="default" value='default' type="radio" name="font" onchange="handleFont(this)">
+				Noto Color Emoji <input id="noto" value='noto' type="radio" name="font" onchange="handleFont(this)">
+				Twemoji <input id="twemoji" value='twemoji' type="radio" name="font" onchange="handleFont(this)">
 			</span>
 			<br><br>
-			<textarea rows="4" class="darkmoji largemoji"
+			<textarea rows="4" class="darkmoji"
 				placeholder="comma delimited values: e.g: 🔥, ☎️, 🌽"
 				style="width: 98%; resize: vertical;" id="valueE"></textarea>
 			<br><br>
@@ -81,6 +80,7 @@ let emojiPreset = [
 	"🎻", "🪕", "🥁", "☎️", "🔋", "💿️", "🧮", "🎬️", "💡", "🔦", "🏮", "📕", "🏷️", "💳️", "✏️", "🖌️", 
 	"🖍️", "📌", "📎", "🔑", "🪃", "🏹", "⚖️", "🧲", "🧪", "🧬", "🔬", "🔭", "📡", "🪑", "🧹", "🗿", 
 ]
+let oFonts = {'default': '', noto: 'Noto Color Emoji', twemoji: 'Twemoji Mozilla'}
 
 function reset() {
 	dom.valueE.value = ""
@@ -89,6 +89,7 @@ function preset() {
 	dom.valueE.value = emojiPreset.join(", ")
 }
 preset()
+
 function handleTheme(src) {
 	let remove = (src.value == "darkmoji" ? "lightmoji" : "darkmoji")
 	dom.valueE.classList.add(src.value)
@@ -97,12 +98,13 @@ function handleTheme(src) {
 	dom.results.classList.add(src.value)
 	dom.results.classList.remove(remove)
 }
-function handleFont() {
-  dom.valueE.classList.toggle("noto", dom.noto.checked);
-  dom.valueE.classList.toggle("twemoji", dom.twemoji.checked);
+function handleFont(src) {
+	let fnt = oFonts[src.value]
+	dom.valueE.style.fontFamily = fnt
+	dom.results.style.fontFamily = fnt
 }
-handleFont()
 dom.rdark.checked = true
+dom.default.checked = true
 
 function run_random(array) {
 	//
@@ -165,3 +167,4 @@ function run() {
 </script>
 </body>
 </html>
+
