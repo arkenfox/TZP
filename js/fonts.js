@@ -75,7 +75,7 @@ let fntMaster = {
 			'Noto Serif Thai','Pyidaungsu','STIX Two Math','Tinos','Twemoji Mozilla',
 		],
 		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','Pyidaungsu','STIX Two Math'],
-		windows: ['Noto Color Emoji','Noto Naskh Arabic','Noto Sans','Noto Serif','Pyidaungsu','Twemoji Mozilla'],
+		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Pyidaungsu','Twemoji Mozilla'],
 	},
 	// BB whitelist system
 	allowlist: {
@@ -234,6 +234,7 @@ let fntMaster = {
 			// other
 			'Noto Sans Symbols2', // BB12 bundled
 			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
+			'Noto Color Emoji', // bundled nightly: should be removed
 			'Helv', // ToDo: this might need to move with font.vis
 		],
 		windowsfaces: [
