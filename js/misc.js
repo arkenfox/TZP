@@ -943,22 +943,25 @@ function get_window_props(METRIC) {
 		}
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
 
-		// hashes
-		if (isMB) {
-			// MB15
-			// 43009 (1973265): removes various Encoded*, *Encoder, *Decodeer and *Track* items
-			if ('windows' == isOS) {
-				if ('83896626' == hash // standard (has WebAssembly)
-					|| '76547f48' == hash // safer (w/ and w/o webgl clicktoplay)
-				) {notation = bb_green}
+		// hashes v15
+		if (isBB) {
+			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
+			let oHashes = {
+				MB : {
+					'linux': ['e78afd55','73cfc4b7'],
+					'mac': [],
+					'windows': ['83896626','76547f48']
+				},
+				TB : {
+					'android': [],
+					'linux': [],
+					'mac': [],
+					'windows': []
+				},
 			}
-
-		} else if (isTB) {
-			// TB15
-			if ('android' == isOS) {
-
-			} else {
-
+			let key = isTB ? 'TB' : 'MB'
+			if (undefined !== oHashes[key][isOS]) {
+				if (oHashes[key][isOS].includes(hash)) {notation = bb_green}
 			}
 		}
 	} catch(e) {
