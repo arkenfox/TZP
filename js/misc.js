@@ -605,6 +605,8 @@ function get_navigator_keys(METRIC) {
 				'taintEnabled','javaEnabled','doNotTrack','cookieEnabled','pdfViewerEnabled','requestMediaKeySystemAccess',
 				'locks', // 1851539
 				'userActivation', // 1791079
+				// ToDo: FF144+? 1983296 functionality pref deprecated
+				//'globalPrivacyControl', // 1983296
 			]
 			// test
 			if (runSL) {
@@ -912,14 +914,16 @@ function get_window_props(METRIC) {
 				// this gives us a much more stable hash with and without NS tampering, but also allows false positives
 			data = data.filter(x => !aHas.includes(x))
 			data = data.concat(aHas)
+
+			// now we check tampered items not in possible
 			if (aTampered.length) {
-				// now we check tampered items not in possible
 				let aTamperedNotInPossible = aTampered.filter(x => !aPossible.includes(x))
 				if (aTamperedNotInPossible.length) {
 					isLies = true
 					console.log(mini(aTamperedNotInPossible), aTamperedNotInPossible)
 				}
 			}
+
 			// notate console
 			if (!isLies && isOS !== 'android' && isOS !== undefined) {
 				let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
@@ -942,9 +946,10 @@ function get_window_props(METRIC) {
 		// hashes
 		if (isMB) {
 			// MB15
+			// 43009 (1973265): removes various Encoded*, *Encoder, *Decodeer and *Track* items
 			if ('windows' == isOS) {
-				if ('522b7ca0' == hash // standard (has WebAssembly)
-					|| '266e1342' == hash // safer (w/ and w/o webgl clicktoplay)
+				if ('83896626' == hash // standard (has WebAssembly)
+					|| '76547f48' == hash // safer (w/ and w/o webgl clicktoplay)
 				) {notation = bb_green}
 			}
 
