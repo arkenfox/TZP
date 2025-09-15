@@ -217,6 +217,8 @@ function outputVersion() {
 	}
 
 	let countTZP = 0, expectTZP = 100, maxVer = 144, oTZP = {}, oResults = {}
+	let is144 = 'undefined' === typeof CSS2Properties
+
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -287,7 +289,7 @@ function outputVersion() {
 			// fast-path: layout.css.moz-appearance.webidl.enabled (default false)
 		let t143 = performance.now(), ver143
 		try {
-			ver143 = ('function' === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty('-moz-appearance'))
+			ver143 = (is144 || 'function' === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty('-moz-appearance'))
 		} catch(e) {}
 		rec(143, 143, "1977489", ver143, performance.now()-t143, 'PREF') // 
 
@@ -437,7 +439,7 @@ function outputVersion() {
 
 		// 129: 1595620
 		let t129 = performance.now()
-		let ver129 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings"))
+		let ver129 = (is144 || "function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings"))
 		rec(129, 129, "1595620", ver129, performance.now()-t129) // 0.6ms
 
 		// 128: 1896509
@@ -479,7 +481,7 @@ function outputVersion() {
 
 		// 123: 1871745
 		let t123 = performance.now()
-		let ver123 = ("function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserFocus"))
+		let ver123 = (is144 || "function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserFocus"))
 		rec(123, 123, "1871745", ver123, performance.now()-t123)
 
 		// 122: 1867558 (slow)
@@ -514,7 +516,7 @@ function outputVersion() {
 
 		// 118: 1849010
 		let t118 = performance.now()
-		let ver118 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition"))
+		let ver118 = (is144 || "function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition"))
 		rec(118, 118, "1849010", ver118, performance.now()-t118)
 
 		// 117: 1842467
@@ -534,7 +536,7 @@ function outputVersion() {
 
 		// 114: 1826629 // slow ~2ms
 		let t114 = performance.now()
-		let ver114 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
+		let ver114 = (is144 || "function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
 		rec(114, 114, "1826629", ver114, performance.now()-t114)
 
 		// 113: 1709347
@@ -734,8 +736,8 @@ function outputVersion() {
 
 		// 80: 1620467
 			// blink check: CSS2Properties
-		let t80 = performance.now(), ver80 = ("function" === typeof CSS2Properties
-			&& CSS2Properties.prototype.hasOwnProperty("appearance"))
+		let t80 = performance.now()
+		let ver80 = (is144 || "function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("appearance"))
 		rec(80, 80, "1620467", ver80, performance.now()-t80)
 
 		// 79: 1599769 shipped
@@ -896,7 +898,7 @@ function outputVersion() {
 		let t136 = performance.now(), ver136
 		try {
 			// backported to ESR128, so check for 129+ first
-			if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) {
+			if (is144 || "function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) {
 				let test136 = new Date('July 2, 2025 0:00:00 UTC').toLocaleString('en', {timeZone: 'America/Asuncion'})
 				ver136 = '7/1/2025, 9:00:00 PM' == test136 // was -4, now -3
 			}
@@ -906,7 +908,7 @@ function outputVersion() {
 		// 135: 1935198: pref `layout.css.moz-user-input.enabled` added as false
 			// fast-path: if property missing you can't be any lower than 135: "MozUserInput","-moz-user-input"
 		let t135c = performance.now()
-		let ver135c = ("function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserInput"))
+		let ver135c = (is144 || "function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserInput"))
 		rec(135.3, 135, "1935198", ver135c, performance.now()-t135c, 'PREF') // 0.002ms
 
 		// 135: 1930464
