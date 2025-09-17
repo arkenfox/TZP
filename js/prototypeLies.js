@@ -594,7 +594,12 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				'setProperty'
 			]
 		})
-		searchLies(() => CSS2Properties, { // Gecko
+		searchLies(() => CSS2Properties, { // Gecko 143 or lower
+			target: [
+				'setProperty'
+			]
+		})
+		searchLies(() => CSSStyleProperties, { // Gecko 144+
 			target: [
 				'setProperty'
 			]
