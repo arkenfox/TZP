@@ -202,6 +202,73 @@ function get_device_posture(METRIC) {
 	return
 }
 
+const get_feature_policy = (METRIC) => new Promise(resolve => {
+	// https://developer.mozilla.org/en-US/docs/Web/API/FeaturePolicy/allowsFeature
+	// blink only but behind a pref for gecko 65+: dom.security.featurePolicy.webidl.enabled
+
+	function exit(hash, data ='', btn ='') {
+		addBoth(7, METRIC, hash, btn,'', data)
+		return resolve()
+	}
+	try {
+		let f = document.featurePolicy
+		if (runST) {f = ''} else if (runSI) {f = {}}
+		let typeCheck = typeFn(f)
+		if ('undefined' == typeCheck) {
+			// any engine e.g. disabled by fork or due to sandboxing etc
+			exit(typeCheck)
+		} else if ('webkit' == isEngine) {
+			// webkit not supported
+			throw zErrInvalid +'expected undefined: got '+ typeCheck
+		} else {
+			// blink/gecko
+			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
+			let expected = '[object FeaturePolicy]'
+			if (f+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ f}
+			// enumerate: array
+			let aList = f.features()
+			// gecko: disabling geo or blocking geo requests or both doesn't remove geolocation
+				// so the assumption is these have no effect and we should always have a populated array
+			typeCheck = typeFn(aList)
+			if ('array' !== typeCheck) {throw zErrType +'features: ' + typeCheck}
+
+			// get properties: maintain order
+			let firstItem = aList[0]
+			let data = {'allowedFeatures': [],'false': [], 'true': []}
+			aList.forEach(function(item){
+				let isFirst = item == firstItem
+				let key = f.allowsFeature(item)
+				if (isFirst) {
+					//key = 'banana'
+					typeCheck = typeFn(key)
+					if ('boolean' !== typeCheck) {throw zErrType +' allowsFeature: '+ typeCheck}
+				}
+				data[key].push(item)
+			})
+			// should be redundant: allowedFeatures should match data['true']
+			let aAllowed = []
+			try {
+				aAllowed = f.allowedFeatures()
+				//aAllowed = ''
+				typeCheck = typeFn(aAllowed)
+				if ('array' !== typeCheck) {throw zErrType + typeCheck}
+				// only add if this differs
+				let trueHash = mini(data['true'])
+				if (trueHash == mini(aAllowed)) {delete data.allowedFeatures} else {data.allowedFeatures = aAllowed}
+			} catch(e) {
+				data.allowedFeatures = zErr
+				log_error(7, METRIC +'_allowedFeatures', e)
+			}
+
+			let hash = mini(data), btn = addButton(7, METRIC)
+			exit(hash, data, btn)
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+})
+
+
 const get_keyboard = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Keyboard_API
 	// blink only
@@ -345,7 +412,7 @@ function get_memory(METRIC) {
 	// blink only and deprecated
 
 	// super unstable in this form: just display for now
-	function exit(hash, data='', btn ='') {
+	function exit(hash, data ='', btn ='') {
 		sDetail.document[METRIC] = data
 		addDisplay(7, METRIC, hash, btn)
 		//addBoth(7, METRIC, hash, btn,'', data)
@@ -496,7 +563,7 @@ function get_screen_isextended(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Screen/isExtended
 	// currently blink (100+) only
 
-	let value, data=''
+	let value, data =''
 	try {
 		value = screen.isExtended
 		if (runST) {value = 'true'}
@@ -696,6 +763,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_integer('colorDepth','Screen.'),
 		get_device_integer('hardwareConcurrency','Navigator.'),
 		get_permissions('permissions'),
+		get_feature_policy('featurePolicy'), // blink only | gecko behind a pref since FF65
 		get_viewport_segments('viewport-segments'),
 		// blink only
 		get_battery('battery'),
