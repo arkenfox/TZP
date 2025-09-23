@@ -80,6 +80,9 @@ let oList = {
 			// 116	setSinkId, sinkId
 			// 128	(seekToNextFrame)
 			// 137n	allowedToPlay
+		'button',
+			// 125	popoverTargetElement, popoverTargetAction
+			// 144  commandForElement, command
 		'details',
 			// 130	name
 		'dialog',
@@ -106,14 +109,11 @@ let oList = {
 			// 116	dirName
 			// 125	popoverTargetElement, popoverTargetAction
 			// 142  (mozIsTextField)
-
 	],
 	"STABLE A": [
 	// no changes since FF126
 		// fast since the parser is already created
 		// cold: 0.7 | rerun 0.7
-		'button',
-			// 125	popoverTargetElement, popoverTargetAction
 		'iframe',
 			// 121	(loading)
 		'marquee',
@@ -462,13 +462,8 @@ function run() {
 					}
 				} else if ('STABLE A' == m && is126) {
 					/*
-					'button',
-						// 125	popoverTargetElement, popoverTargetAction
 					'iframe',
 						// 121	(loading)
-					'input',
-						// 116	dirName
-						// 125	popoverTargetElement, popoverTargetAction
 					'marquee',
 						// 126	(onbounce, onfinish, onstart)
 					'select',
@@ -477,7 +472,7 @@ function run() {
 						// 116	dirName
 					*/
 					// bba6c822 125
-					if (hash == "2725cdc1") {notation = sg +' ['+ green_tick +' FF126+]'+ sc
+					if (hash == "1ae1316a") {notation = sg +' ['+ green_tick +' FF126+]'+ sc
 					} else {notation = ' '+ zNEW
 					}
 				}
