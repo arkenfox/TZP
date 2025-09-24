@@ -75,8 +75,7 @@ function get_device_integer(METRIC, proxyCheck) {
 	let value, data ='', notation = rfp_red, expected = 24
 	let isHWC = 'hardwareConcurrency' == METRIC
 	// 1984333: FF143+ (backported to beta) RFP: 8 if mac else 4 | FPP 4 or 8
-		// ToDo: add isBB if backported
-	if (isHWC) {expected = 2; if (isVer > 142) {expected = 'mac' == isOS ? 8 : 4}} // RFP
+	if (isHWC) {expected = 2; if (isVer > 142 || isBB) {expected = 'mac' == isOS ? 8 : 4}} // RFP
 	try {
 		value = isHWC ? navigator[METRIC] : screen[METRIC]
 		if (runST) {value += ''} else if (runSL) {addProxyLie(proxyCheck + METRIC)}
