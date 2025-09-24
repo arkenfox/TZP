@@ -37,25 +37,14 @@ function get_autoplay(METRIC) {
 	return
 }
 
-const get_clearkey = (METRIC) => new Promise(resolve => {
-	let isDone = false
-	setTimeout(function() {
-		if (!isDone) {
-			notation = isBB ? bb_red : default_red 
-			exit(zErrTime)
-		}
-	}, 150)
-	function exit(value) {
-		isDone = true
-		let data = (value == zS ? '' : zErrLog) // if not success then it was an error
-		addBoth(13, METRIC, value,'', notation, data)
-		return resolve()
-	}
+const get_eme = (METRIC) => new Promise(resolve => {
 	/*
 	https://w3c.github.io/encrypted-media/#common-key-systems
 	gecko only supports
-		'com.widevine.alpha' triggers DRM prompt if disabled so ignore
 		'org.w3.clearkey'
+		'com.widevine.alpha' triggers DRM prompt if disabled
+			^ error is "NotSupportedError: EME has been preffed off"
+			^ this eats viewport/inner pixels: so be it
 	other
 		'com.microsoft.playready',
 		'com.youtube.playready',
@@ -64,50 +53,86 @@ const get_clearkey = (METRIC) => new Promise(resolve => {
 		'com.adobe.access',
 		'com.apple.fairplay'
 	note: media.gmp-gmpopenh264.enabled = no effect even after a restart
+	note: 1706121 FF128+ fixed PB mode
 	*/
 
-	let notation = isBB ? bb_red: ''
-	if (!runTE) {
-		try {
-			const config = {
-				initDataTypes: ['cenc'],
-				videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}],
-				persistentState: 'required'
-			}
-			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {
-				if (runST) {key = null} else if (runSI) {key = {}}
-				let typeCheck = typeFn(key)
-				if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
-				let expected = '[object MediaKeySystemAccess]'
-				if (key +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ key}
-				if ('android' == isOS) {notation = default_red}
-				exit(zS)
-			}).catch(function(e){
-			/* expected
-					isBB   : "NotSupportedError: CDM is not installed"
-					Android: "NotSupportedError: CDM is not installed"
-					FF PB  : "NotSupportedError: Key system configuration is not supported"
-						^ 1706121: PB mode
-				unexpected
-					blocked: timed out
-					strict : "NotSupportedError: Key system is unsupported" (JShelter "multimedia playback")
-						^ little lies I think does this about 12.5% of the time: we pick up on little lies in canPlayType anyway
-				*/
-				// ToDo: FF128 1706121 PB mode fix landed
-				if (isBB) {
-					notation = e+'' === 'NotSupportedError: CDM is not installed' ? bb_green: bb_red
-				} else if ('android' == isOS) {
-					notation = e+'' === 'NotSupportedError: CDM is not installed' ? default_green: default_red
-				} else {
-					notation = (e +'' !== 'NotSupportedError: Key system configuration is not supported') ? default_red : '' // tampered
-				}
-				exit(e)
-			})
-		} catch(e) {
-			exit(e)
+	let isDone = false
+	setTimeout(function() {if (!isDone) {exit(zErrTime)}}, 150)
+	function exit(value, data ='', btn='') {
+		if (!isDone) {
+			isDone = true
+			let notation = isBB ? bb_red : ''
+			if (isBB && '0ec5dc13' == value) {notation = bb_green}
+			addBoth(13, METRIC, value, btn, notation, data)
+			return resolve()
 		}
 	}
+
+	let oEME = {
+		clearkey: ['org.w3.clearkey','webkit-org.w3.clearkey'],
+		fairplay: ['com.apple.fairplay'],
+		playready: ['com.microsoft.playready','com.youtube.playready'],
+		primetime: ['com.adobe.access','com.adobe.primetime'],
+		widevine: ['com.widevine.alpha'],
+	}
+	try {
+		if (runSE) {foo++}
+		let request = window.navigator.requestMediaKeySystemAccess
+		if (runST) {request = ''}
+		let typeCheck = typeFn(request)
+		if ('undefined' == typeCheck) {exit(typeCheck)
+		} else if ('function' !== typeCheck) {throw zErrType +'requestMediaKeySystemAccess: ' + typeCheck
+		} else {
+			let data = {}
+			const config = {
+				initDataTypes: ['keyids', 'webm'],
+				audioCapabilities: [{contentType: 'audio/webm; codecs="opus"'}],
+			}
+
+			for (const key of Object.keys(oEME).sort()) {
+				data[key] = {}
+				let value
+				oEME[key].forEach(function(item){
+					navigator.requestMediaKeySystemAccess(item, [config]).then((result) => {
+					typeCheck = typeFn(result)
+					if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
+					let expected = '[object MediaKeySystemAccess]'
+					if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
+						data[key][item] = true
+					}).catch(function(e){
+						value = zErr
+						// suppress expected errors
+							// ToDo: check safari
+						let aCheck = []
+						if (isGecko) {
+							if (isBB) {
+								let checkvalue = 'Key system is unsupported'
+								if ('com.widevine.alpha' == item) {checkvalue = 'EME has been preffed off'
+								} else if ('org.w3.clearkey' == item) {checkvalue = 'CDM is not installed'}
+								aCheck.push('NotSupportedError: '+ checkvalue)
+							} else {
+								aCheck.push('NotSupportedError: Key system is unsupported')
+							}
+						} else if ('blink' == isEngine) {
+							aCheck.push('NotSupportedError: Unsupported keySystem or supportedConfigurations.')
+						}
+						if (aCheck.includes(e+'')) {
+							value = false
+						} else {
+							log_error(13, METRIC +'_'+ item, e) // item names are unique, we don't need the key
+						}
+						data[key][item] = value
+					})
+				})
+			}
+			let hash = mini(data)
+			exit(hash, data, addButton(13, METRIC))
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
 })
+
 
 function get_mimetype_codecs(type) {
 	// https://privacycheck.sec.lrz.de/active/fp_cpt/fp_can_play_type.html
@@ -182,7 +207,7 @@ function get_mimetype_codecs(type) {
 		v+'webm; codecs="vp9, opus"',
 		v+'webm; codecs="vp9, vorbis"',
 		v+'x-m4v',
-		v+'x-matroska',
+		v+'x-matroska', // 1986058 FF144+
 	]
 	if (isVer < 130) {
 		// theora support: FF126 1860492 prep + FF130 1890370 remove
@@ -392,7 +417,7 @@ function get_preload_media(METRIC) {
 
 const outputMedia = () => new Promise(resolve => {
 	Promise.all([
-		get_clearkey('clearkey'),
+		get_eme('eme'),
 		get_mimetype_codecs('audio'),
 		get_mimetype_codecs('video'),
 		get_preload_media('preload_htmlmediaelement'),
