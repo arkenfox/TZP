@@ -57,12 +57,24 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	*/
 
 	let isDone = false
-	setTimeout(function() {if (!isDone) {exit(zErrTime)}}, 150)
+	let timeout = 'blink' == isEngine ? 4000 : 150 // really slow on first session load in blink
+	setTimeout(function() {if (!isDone) {exit(zErrTime)}}, timeout)
 	function exit(value, data ='', btn='') {
 		if (!isDone) {
 			isDone = true
+			// results are not guaranteed to come back in the order requested: sort into a new object
+			if ('object' == typeof data) {
+				let newobj = {}
+				for (const k of Object.keys(data).sort()) {
+					newobj[k] = {}
+					for (const j of Object.keys(data[k]).sort()) {newobj[k][j] = data[k][j]}
+				}
+				data = newobj
+				value = mini(data)
+				btn = addButton(13, METRIC)
+			}
 			let notation = isBB ? bb_red : ''
-			if (isBB && '0ec5dc13' == value) {notation = bb_green}
+			if (isBB && '1f5a84f8' == value) {notation = bb_green}
 			addBoth(13, METRIC, value, btn, notation, data)
 			return resolve()
 		}
@@ -83,12 +95,12 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		if ('undefined' == typeCheck) {exit(typeCheck)
 		} else if ('function' !== typeCheck) {throw zErrType +'requestMediaKeySystemAccess: ' + typeCheck
 		} else {
-			let data = {}
+			let data = {}, maxCount = 0, counter = 0
+			for (const k of Object.keys(oEME)) {maxCount += oEME[k].length}
 			const config = {
 				initDataTypes: ['keyids', 'webm'],
 				audioCapabilities: [{contentType: 'audio/webm; codecs="opus"'}],
 			}
-
 			for (const key of Object.keys(oEME).sort()) {
 				data[key] = {}
 				let value
@@ -99,6 +111,9 @@ const get_eme = (METRIC) => new Promise(resolve => {
 					let expected = '[object MediaKeySystemAccess]'
 					if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
 						data[key][item] = true
+						counter++
+						// await all results
+						if (maxCount == counter) {exit('', data)}
 					}).catch(function(e){
 						value = zErr
 						// suppress expected errors
@@ -122,11 +137,12 @@ const get_eme = (METRIC) => new Promise(resolve => {
 							log_error(13, METRIC +'_'+ item, e) // item names are unique, we don't need the key
 						}
 						data[key][item] = value
+						counter++
+						// wait for all the results
+						if (maxCount == counter) {exit('', data)}
 					})
 				})
 			}
-			let hash = mini(data)
-			exit(hash, data, addButton(13, METRIC))
 		}
 	} catch(e) {
 		exit(e, zErrLog)
