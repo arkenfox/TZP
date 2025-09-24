@@ -57,7 +57,8 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	*/
 
 	let isDone = false
-	let timeout = 'blink' == isEngine ? 4000 : 150 // really slow on first session load in blink
+	// really slow on first session loads in blink / also android needs help
+	let timeout = 'blink' == isEngine || 'android' == isOS ? 4000 : 200 
 	setTimeout(function() {if (!isDone) {exit(zErrTime)}}, timeout)
 	function exit(value, data ='', btn='') {
 		if (!isDone) {
