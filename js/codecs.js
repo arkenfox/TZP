@@ -7,10 +7,11 @@ function get_autoplay(METRIC) {
 	// a check on a specific element is more reliable (though it doesn't matter on page load)
 
 	// cached from page load
-	let value, data ='', notation = default_red
+	let value, data ='', notation = 'android' == isOS ? '' : default_red
 	if (undefined == isAutoPlayError) {
-		// Note: android (120+ at least) returns 'disallowed | disallowed' if phone is on 'Do Not Disturb'
-		if ('5be5c665' == mini(isAutoPlay)) {notation = default_green}
+		// Note: this is inconsistent/unstable on android: e.g. can return 'disallowed | disallowed' if the
+		// phone is on 'Do Not Disturb' )or depending on the session and transient user activity/actions?)
+		if ('android' !== isOS && '5be5c665' == mini(isAutoPlay)) {notation = default_green}
 		value = isAutoPlay
 	} else {
 		value = isAutoPlayError; data = isAutoPlay
@@ -42,9 +43,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	https://w3c.github.io/encrypted-media/#common-key-systems
 	gecko only supports
 		'org.w3.clearkey'
-		'com.widevine.alpha' triggers DRM prompt if disabled
-			^ error is "NotSupportedError: EME has been preffed off"
-			^ this eats viewport/inner pixels: so be it
+		'com.widevine.alpha'
 	other
 		'com.microsoft.playready',
 		'com.youtube.playready',
@@ -56,9 +55,20 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	note: 1706121 FF128+ fixed PB mode
 	*/
 
+	/* widevine gecko issues
+		triggers DRM prompt if disabled
+			^ error is "NotSupportedError: EME has been preffed off"
+			^ this eats viewport/inner pixels
+		on android it can hold up the result and we end up with eme == timeout
+			^ if rerun/no-timeout we get
+			" error is: NotSupportedError: The application embedding this user agent has blocked MediaKeySystemAccess"
+		on android DRM in PB mode is always prompted
+	*/
+
+
 	let isDone = false
 	// really slow on first session loads in blink / also android needs help
-	let timeout = 'blink' == isEngine || 'android' == isOS ? 4000 : 200 
+	let timeout = 'blink' == isEngine ? 4000 : 200 
 	setTimeout(function() {if (!isDone) {exit(zErrTime)}}, timeout)
 	function exit(value, data ='', btn='') {
 		if (!isDone) {
@@ -75,7 +85,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				btn = addButton(13, METRIC)
 			}
 			let notation = isBB ? bb_red : ''
-			if (isBB && '1f5a84f8' == value) {notation = bb_green}
+			if (isBB && '1f5a84f8' == value) {notation = bb_green} // desktop + android
 			addBoth(13, METRIC, value, btn, notation, data)
 			return resolve()
 		}
@@ -88,6 +98,9 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		primetime: ['com.adobe.access','com.adobe.primetime'],
 		widevine: ['com.widevine.alpha'],
 	}
+	// widevine on non-BB android is problematic
+	if (!isBB && 'android' == isOS) {delete oEME.widevine}
+
 	try {
 		if (runSE) {foo++}
 		let request = window.navigator.requestMediaKeySystemAccess
