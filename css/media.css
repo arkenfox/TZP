@@ -121,6 +121,10 @@
 #cssDP:after{content:"undefined";} /* use undefined to match navigator */
 @media (device-posture:continuous){#cssDP:after{content:"continuous";}}
 @media (device-posture:folded){#cssDP:after{content:"folded";}}
+#cssUD:after{content:"n/a";}
+@media (update:none){#cssUD:after{content:"none";}} /* FF102+: 1422312 || FYI: gecko currently only reports none or fast */
+@media (update:slow){#cssUD:after{content:"slow";}}
+@media (update:fast){#cssUD:after{content:"fast";}}
 
 /* https://drafts.csswg.org/mediaqueries-5/#mf-horizontal-viewport-segments */
 #cssVS:before{content:"n/a";}
