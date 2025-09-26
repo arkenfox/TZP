@@ -377,6 +377,8 @@ function get_media_css(METRIC) {
 			'forced-colors': {id: 'FC', test: ['none','active']}, // FF89+: 1659511
 			'dynamic-range': {id: 'DR', test: ['standard','high']}, // FF100+
 			'video-dynamic-range': {id: 'VDR', test: ['standard','high'], rfp: 'standard', rfpver: 1}, // FF100+
+			'update': {id: 'UD', test: ['fast','slow','none']}, // FF102+: 1422312 || FYI: gecko currently only reports none or fast
+				// ^ https://searchfox.org/firefox-main/source/servo/components/style/gecko/media_features.rs#366
 			'color-gamut': {id: 'CG', test: ['srgb','p3','rec2020'], rfp: 'srgb', rfpver: 1}, // FF110+: 1422237
 		// not enabled yet
 			'prefers-reduced-transparency': {id: 'PRT', test: [np,'reduce'], rfp: np, rfpver: 999}, // FF113+: 1736914
@@ -394,7 +396,6 @@ function get_media_css(METRIC) {
 			'overflow-inline': {id: '', test: ['none','scroll']}, //  always scroll?
 			//'scan': {id: '', test: ['progressive','interlace']}, // noone supports this
 			'scripting': {id: '', test: ['enabled','initial-only','none']},
-			'update': {id: '', test: ['fast','slow','none']}, // always fast?
 			'video-color-gamut': {id: '', test: ['srgb','p3','rec2020']},
 			//*/
 		}
