@@ -12,29 +12,6 @@ function getUniqueElements() {
 /*** GENERIC ***/
 
 function measureFn(target, metric) {
-	//console.log(metric)
-	/* ToDo: investigate
-		when 2 (range.getBoundingClientRect()) we get different results in some targets
-		check what happens in blink/webkit
-		- does not affect blink
-
-		element_other: audio (weird)
-			0,1,4: "audio": [  301.25,        57.100006103515625,    -0.6833343505859375,   -8.550003051757812],
-			    2: "audio": [10252.68359375, 606.6500244140625,   -9952.1162109375,       -558.0999755859375],
-
-		// before switching to this function
-		glyphs: almost all of them (can be width/height or both): e.g.
-			0,1,4: "0x007F": [1005.6500244140625, 2840.39990234375],
-			    2: "0x007F": [1023.5,             2840.39990234375],
-			0,1,4: "0x0218": [1455.8499755859375, 2866.083251953125],
-          2: "0x0218": [1473.699951171875,  2866.083251953125],
-
-		// after switching to this function
-		// ALSO IN BLINK so there is some fundamental thing I am doing wrong!!
-		glyphs are different than when we did it in get_glyphs
-		why???? WTF
-
-	*/
 	let range, method, type = isDomRect
 	//type = 2 // test
 	try {
@@ -1222,7 +1199,7 @@ function metricsShow(name, scope) {
 	//add btn, show/hide options, display
 	let hash = mini(data)
 	metricsTitle = (scope == undefined ? '' : scope.toUpperCase() +': ') + target + filter +': '+ hash
-	dom.metricsTitle.innerHTML = metricsTitle + (isHealth && 'android' !== isOS ? overlayHealthCount : '')
+	dom.metricsTitle.innerHTML = metricsTitle + (isHealth && isDesktop ? overlayHealthCount : '')
 	if (isVisible) {
 		// avoid reflow
 		dom.metricsDisplay.innerHTML = display
@@ -1783,7 +1760,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	let aLen25 = [
 		'canPlayType','isTypeSuppo','font-format','font-tech','textmetrics',
 	]
-	let len = 'android' == isOS ? 25 : 50
+	let len = isDesktop ? 50 : 25
 	if (aLen25.includes(metric.slice(0,11))) {len = 25}
 	let key = 'errors'
 	// collect
@@ -1799,7 +1776,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	}
 	// trim if required + return
 	// is aLen25 and android, just display zErr
-	if ('android' == isOS && aLen25.includes(metric.slice(0,11))) {
+	if (!isDesktop && aLen25.includes(metric.slice(0,11))) {
 		error = zErr
 	} else if (error.length > len) {
 		error = error.slice(0,len-3) + "..."
@@ -1989,7 +1966,7 @@ function countJS(item) {
 			]).then(function(){
 				// adjust overlayMaxLength
 				if ('linux' == isOS) {overlayMaxLength = 88
-				} else if ('android' == isOS) {overlayMaxLength = 68
+				} else if (!isDesktop) {overlayMaxLength = 68
 				}
 				// tweak monospace size: ToDo: this is bad design
 				if ('windows' == isOS) {
@@ -2003,7 +1980,9 @@ function countJS(item) {
 				}
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
-				if ('android' == isOS) {
+				if (isDesktop) {
+					document.addEventListener('keydown', metricsEvent)
+				} else {
 					showhide('A','table-row')
 					// A1 inner_document: html class hidden - only used by android
 					// add class togS so it shows when expanding, remove hidden class
@@ -2018,8 +1997,6 @@ function countJS(item) {
 					}
 					// hide console button in overlay: width is a premium
 					dom.metricsConsole.classList.add('hidden')
-				} else {
-					document.addEventListener('keydown', metricsEvent)
 				}
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
