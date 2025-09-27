@@ -750,8 +750,8 @@ function set_fntList() {
 		fntData.family.control.forEach(function(name) {fntData.family['control_name'].push(name.split(',')[0])})
 		
 		// generic: expand baseSize
-			//'ui-monospace','ui-rounded','ui-serif','math','emoji','none' // redundant
-		baseSize = baseSize.concat(['cursive','fantasy','fangsong','system-ui'])
+			// don't use isStyles as that will duplicate and complicate existing entries with fallbacks
+		baseSize = baseSize.concat(['cursive','fantasy','fangsong','math','system-ui'])
 		baseSize = baseSize.concat(isSystemFont)
 		if (fntPlatformFont !== undefined) {baseSize.push(fntPlatformFont)}
 		fntData.family.generic = baseSize.sort()
@@ -1767,26 +1767,18 @@ function get_fonts(METRIC) {
 	})
 }
 
-function get_fonts_max(METRIC) {
+function get_fonts_max(METRIC, isLies) {
 	let t0 = nowFn()
 	let value = zNA, data ='', btn=''
 	let el = dom.tzpFontMax
 	try {
 		data = {}
-		let styles = ['cursive','fangsong','monospace','sans-serif','serif','system-ui']
 		let range, method
-		styles.forEach(function(stylename) {
+		isStylesAll.forEach(function(stylename) {
 			el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
 			let target = el.children[0]
-			if (isDomRect > 1) {
-				range = document.createRange()
-				range.selectNode(target)
-			}
-			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-			} else if (isDomRect == 1) {method = target.getClientRects()[0]
-			} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-			} else if (isDomRect > 2) {	method = range.getClientRects()[0]
-			}
+			method = measureFn(target, METRIC)
+			if (undefined !== method.error) {throw method.errorstring}
 			value = method.height
 			if (runST) {value += ''}
 			let typeCheck = typeFn(value)
@@ -1798,7 +1790,7 @@ function get_fonts_max(METRIC) {
 		value = e; data = zErrLog
 	}
 	el.innerHTML =''
-	addBoth(12, METRIC, value, btn,'', data, (isDomRect == -1))
+	addBoth(12, METRIC, value, btn,'', data, isLies)
 	log_perf(12, METRIC, t0)
 	return
 }
@@ -1830,7 +1822,7 @@ function get_formats() {
 	return
 }
 
-function get_glyphs(METRIC) {
+function get_glyphs(METRIC, isLies) {
 	/* NOTES
 	FF131+ nightly: 1900175 + 1403931 ride the train
 		- Enable USER_RESTRICTED for content processes on Nightly
@@ -1842,14 +1834,13 @@ function get_glyphs(METRIC) {
 		- so reminder that generally we should always be using https for final testing/analysis
 	*/
 	let t0 = nowFn()
-	let styles = ['cursive','monospace','sans-serif','serif','system-ui',]
-	/* Notes
+	/* Notes: math added FF145+
+		use isStyles currently = ['cursive','math','monospace','sans-serif','serif','system-ui']
+
 		unique sizes: win11 all system fonts FF
 		sans-serif = 34 + cursive = 66 + serif = 84 + system-ui = 102 + monospace = 112 + fantasy = 115
-	
-	- all the same: 'emoji','math','none','ui-monospace','ui-rounded','ui-sans-serif','ui-serif'
+	- all the same: 'emoji','ui-monospace','ui-rounded','ui-sans-serif','ui-serif'
 		- ui-* not added to gecko yet
-		- math is basically slated for deprecation
 		- emoji - we're not testing any emojis here
 		- do not increase unique sizes
 	- 'fangsong': does not add to unique sizes, we would need a different set of code points
@@ -1868,15 +1859,36 @@ function get_glyphs(METRIC) {
 		const span = dom['glyphs-span'], slot = dom['glyphs-slot']
 
 		let oData = {}, tmpobj = {}, newobj = {}, setSize = new Set()
-		let methoddiv, methodspan, rangeH, rangeW, width, height
-		styles.forEach(function(stylename) {
+		let methodW, methodH, width, height
+		
+		let methoddiv, methodspan, rangeH, rangeW // current method
+
+		isStyles.forEach(function(stylename) {
 			slot.style.fontFamily = stylename
 			oData[stylename] = {}
-			let isFirst = stylename == styles[0]
+			let isFirst = stylename == isStyles[0]
 			fntCodes.forEach(function(code) {
 				let codeString = String.fromCodePoint(code)
 				slot.textContent = codeString
 				// always get span width, div height
+
+				/* use a dedicated function
+				methodW = measureFn(div, METRIC)
+				methodH = measureFn(span, METRIC)
+				width = methodW.width, height = methodH.height
+				// only typecheck once: first char on first style
+				if (code == fntCodes[0] && isFirst) {
+					if (undefined !== methodW.error) {throw methodW.errorstring}
+					if (undefined !== methodH.error) {throw methodH.errorstring}
+					if (runST) {width = NaN, height = [1]}
+					let wType = typeFn(width), hType = typeFn(height)
+					if ('number' !== wType || 'number' !== hType) {
+						throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
+					}
+				}
+				//*/
+
+				// current method
 				if (isDomRect > 1) {
 					rangeH = document.createRange()
 					rangeH.selectNode(div)
@@ -1905,6 +1917,7 @@ function get_glyphs(METRIC) {
 						throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
 					}
 				}
+
 				oData[stylename][code] = [width, height]
 				setSize.add(width+'x'+height)
 			})
@@ -1923,7 +1936,7 @@ function get_glyphs(METRIC) {
 		hash = e; data = zErrLog
 	}
 	removeElementFn(id)
-	addBoth(12, METRIC, hash, btn,'', data, (isDomRect == -1))
+	addBoth(12, METRIC, hash, btn,'', data, isLies)
 	log_perf(12, METRIC, t0,'', strSizes)
 	return
 }
@@ -1952,6 +1965,7 @@ function get_script_defaults(METRIC) {
 	// this is zoom resistant
 		// except with "zoom text only" and you zoom from default
 
+	// note: isStyles|All doesn't add anything
 	const styles = ['monospace','sans-serif','serif']
 	const scripts = {
 		arabic: 'ar', armenian: 'hy', bengali: 'bn', cyrillic: 'ru', devanagari: 'hi', ethiopic: 'gez',
@@ -2156,7 +2170,7 @@ function get_textmetrics(METRIC) {
 		}
 		if (0 == aValid.length) {return}
 
-		let styles = ['cursive','monospace','sans-serif','serif','system-ui']
+		let styles = isStyles
 		// don't use 'none': this is default style + font per style for each language
 			// and is already present in covering monospace/sans-serif/serif
 			// fantasy vs sans-serif | fangsong vs serif both add very little
@@ -2329,10 +2343,11 @@ const outputFonts = () => new Promise(resolve => {
 		get_graphite('graphite'), // uses fntDocEnabled
 	]).then(function(){
 		// allow more time for font async fallback
+		let isLies = isDomRect == -1
 		Promise.all([
-			get_fonts_max('font_sizes_max'),
+			get_fonts_max('font_sizes_max', isLies),
 			get_fonts_faces('font_faces'),
-			get_glyphs('glyphs'),
+			get_glyphs('glyphs', isLies),
 			get_textmetrics('textmetrics'),
 			get_fonts_offscreen('font_offscreen'),
 		]).then(function(){
