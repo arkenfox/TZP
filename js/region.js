@@ -128,7 +128,7 @@ function get_nav_gpc(METRIC) {
 	// FF120+ desktop (?android): gpc enabled: false but true in pb mode
 
 	// ToDo: FF144+? 1983296 functionality pref deprecated
-	let hash, data='', notation = isBB ? default_red : ''
+	let hash, data ='', notation = isBB ? default_red : ''
 	try {
 		hash = navigator[METRIC]
 		if (runST) {hash = null} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
@@ -1835,7 +1835,7 @@ function get_l10n_xml_messages(METRIC) {
 	return
 }
 
-function get_l10n_xml_prettyprint(METRIC) {
+function get_l10n_xml_prettyprint(METRIC, isLies) {
 	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
 	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom = XMLPrettyPrint
@@ -1843,27 +1843,22 @@ function get_l10n_xml_prettyprint(METRIC) {
 	// by using a narrow iframe width, word segmentation line breaks determine the height,
 		// and the content varies per app locale: height is not deterministic due to
 		// subpixels (system + other scaling) and fonts (per platform + language)
-	let value, data ='', notation='', range, method
+	let value, data ='', notation=''
 	try {
 		let target = dom.tzpXMLunstyled.contentDocument.firstChild
-		// method
-		if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
-		if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-		} else if (isDomRect == 1) {method = target.getClientRects()[0]
-		} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-		} else if (isDomRect > 2) {method = range.getClientRects()[0]
-		}
-		// value
+		let method = measureFn(target, METRIC)
+		if (undefined !== method.error) {throw method.errorstring}
 		value = method.height
 	} catch(e) {
 		value = e; data = zErrLog
 	}
 	// if the xml isn't loaded in time we will get a low default value (e.g. 0 in latin, 8 in arabic)
 		// notate this as well as unexpected errors
-	if (isLanguageSmart) {
+		// don't notate if file schema (it makes file vs http have different health counts which is not good)
+	if (isLanguageSmart && !isFile) {
 		if ('number' !== typeof value || value < 50) {notation = locale_red}
 	}
-	addBoth(4, METRIC, value,'',notation, data, (isDomRect == -1))
+	addBoth(4, METRIC, value,'', notation, data, isLies)
 }
 
 function get_l10n_xslt_messages(METRIC) {
@@ -2056,6 +2051,7 @@ const outputRegion = () => new Promise(resolve => {
 		if (isGecko && isSmart && 'android' !== isOS) {
 			if (localesSupported[isLocaleValue] !== undefined) {isLanguageSmart = true}
 		}
+		let isLies = isDomRect == -1
 		Promise.all([
 			get_language_system('languages_system'), // uses isLanguagesNav
 			get_locale_intl(),
@@ -2064,7 +2060,7 @@ const outputRegion = () => new Promise(resolve => {
 			get_l10n_xml_messages('l10n_xml_messages'),
 			get_l10n_parsererror_direction('l10n_parsererror_direction'),
 			get_l10n_xslt_sort('l10n_xslt_sort'),
-			get_l10n_xml_prettyprint('l10n_xml_prettyprint'),
+			get_l10n_xml_prettyprint('l10n_xml_prettyprint', isLies),
 			get_l10n_xslt_messages('l10n_xslt_messages'),
 		]).then(function(){
 			Promise.all([
