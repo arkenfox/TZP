@@ -141,7 +141,7 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 		oRes[item2] = cssvalue
 		// get FS measurments if in FS
 		let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
-		if (!isElementFS && 'fullscreen' == data && 'android' !== isOS) {
+		if (!isElementFS && 'fullscreen' == data && isDesktop) {
 			get_scr_fs_measure()
 		} else {
 			gFS = false // cancel run state
@@ -208,8 +208,6 @@ const get_scr_measure = () => new Promise(resolve => {
 			inner: {height: {}, width: {}},
 			outer: {height: {}, width: {}},
 		}
-		// add desktop viewport so it's summarized
-		if ('android' !== isOS) {oTmp['viewport'] = res[1]}
 		// matchmedia
 		oTmp.screen.height.media = res[0]['device-height']
 		oTmp.screen.width.media = res[0]['device-width']
@@ -226,8 +224,11 @@ const get_scr_measure = () => new Promise(resolve => {
 		oTmp.inner.width['svw'] = vpWidth.svw
 		oTmp.inner.height['svh'] = vpHeight.svh
 
-		// document
-		if ('android' == isOS) {
+		if (isDesktop) {
+			// add desktop viewport so it's summarized/notated
+			oTmp['viewport'] = res[1]
+		} else {
+			// android "document" is an inner size not viewport || calculate get dynamic toolbar
 			oTmp.inner.width['document'] = vpWidth.document
 			oTmp.inner.height['document'] = vpHeight.document
 			// dynamic toolbar: display only - let it NaN for I care
@@ -252,7 +253,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			inner: ['innerHeight','innerWidth'],
 		}
 		// window.inner on android is dynamic and also redudnant with document + small viewport units
-		if ('android' == isOS) {delete oList.inner}
+		if (!isDesktop) {delete oList.inner}
 		let iTarget, target
 		try {iTarget = dom.tzpIframe.contentWindow} catch {}
 		try {target = iTarget.screen} catch {} // initial iframe target
@@ -347,7 +348,10 @@ const get_scr_measure = () => new Promise(resolve => {
 
 		// controls: we want integers so we know what to match to
 		let controlw = innerw, controlh = innerh
-		if ('android' == isOS) {
+
+		if (isDesktop) {
+			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh)) // newwin
+		} else {
 			/* on android
 			height
 				- window.inner height can differ due to dynamic toolbar, so we use doc
@@ -370,15 +374,12 @@ const get_scr_measure = () => new Promise(resolve => {
 			// initial_sizes
 			// ToDo: add notation
 			initData = isInitial; initHash = mini(isInitial)
-		} else {
-			// NW
-			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh))
 		}
 		let isCompareValid = 'number' == typeFn(controlw) && 'number' == typeFn(controlh)
 
 		// desktop: if in fullscreenElement mode, use the svh element to measure
 			// we don't have a resize event in android
-		if ('android' !== isOS) {
+		if (isDesktop) {
 			let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 			if (isElementFS) {
 				addDisplay(1, 'fsElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
@@ -410,7 +411,7 @@ const get_scr_measure = () => new Promise(resolve => {
 						Note: once we add lies logic to our data, handled just above, we also won't be
 						letting a possible genuine mismatch thru by not checking it for sameness
 					*/
-					if ('android' == isOS && 'inner' == k && 'window' == n) {isIgnore = true}
+					if (!isDesktop && 'inner' == k && 'window' == n) {isIgnore = true}
 					let control
 					if (!isIgnore) {
 						// *vw/h can be non-integer in inner
@@ -464,7 +465,7 @@ const get_scr_measure = () => new Promise(resolve => {
 				}
 			}
 			let notation = isSame ? rfp_green : rfp_red
-			if ('inner' == k && 'android' == isOS) {notation = ''}
+			if ('inner' == k && !isDesktop) {notation = ''}
 			addDisplay(1, 'sizes_'+ k, '','', notation)
 		}
 		//console.log('viewport', res[1])
@@ -496,7 +497,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			dockW = oData.screen.width.screen - oData.available.width.screen,
 			chromeW = oData.outer.width.window - oData.inner.width.window,
 			chromeH = oData.outer.height.window - oData.inner.height.window
-		if ('android' !== isOS) {
+		if (isDesktop) {
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
 			if (isOS == undefined) {dockStr = 'taskbar/dock/panel'}
 			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
@@ -811,7 +812,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 					'ccc8dc6d': 'portrait-primary | 90 | portrait',
 					'fb6084ad': 'portrait-primary | 90 | portrait | square',
 				}
-				if ('android' == isOS) {
+				if (!isDesktop) {
 					oGood = {
 						'813838a9': 'landscape-primary | 90 | landscape',
 						'360dd99a': 'portrait-primary | 0 | portrait',
@@ -974,7 +975,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
 		get_dpi_div('dpi_div')
-		if ('android' !== isOS) {
+		if (isDesktop) {
 			// android: useless, not stable as it is affected by zoom
 			get_vv_scale('visualViewport_scale')
 		}
@@ -1108,7 +1109,7 @@ function get_scr_viewport_units() {
 
 	// desktop + android use small in inner section
 	// android uses large as a standalone
-	let aList = 'android' == isOS ? ['L','S'] : ['S']
+	let aList = isDesktop ? ['S'] : ['L','S']
 	let data = {'height': {}, 'width': {}}
 
 	aList.forEach(function(k) {
@@ -1151,7 +1152,7 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 
 	function get_viewport(type) {
 		let w, h, method, target
-		let metric = 'android' == isOS ? aMETRIC : METRIC
+		let metric = isDesktop ? aMETRIC : METRIC
 
 		try {
 			if ('element' == type) {
@@ -1197,11 +1198,11 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 			}
 		} catch(e) {
 			h = zErr; w = zErr
-			if ('android' == isOS) {
+			if (isDesktop) {
+				log_error(1, metric +'_'+ type, e)
+			} else {
 				log_error(1, metric +'_width_'+ type, e)
 				log_error(1, metric +'_height_'+ type, e)
-			} else {
-				log_error(1, metric +'_'+ type, e)
 			}
 		}
 		oData.height[type] = h //+ 100
@@ -1209,7 +1210,7 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 
 		// android only calls document and uses it in inner section
 		// we can just store this in isViewportUnits
-		if ('android' == isOS) {
+		if (!isDesktop) {
 			isViewportUnits.height['document'] = h
 			isViewportUnits.width['document'] = w
 		}
@@ -1221,8 +1222,7 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 	// android: there is no viewport section: document becomes part of inner section.
 		// element + visualViewport are redundant with a TZP clean load (new tab etc) and
 		// can be or are unstable with dynamic urlbar/toolbar and pinch to zoom/reruns combos etc
-	if ('android' !== isOS) {
-		//desktop
+	if (isDesktop) {
 		get_viewport('element')
 		get_viewport('visualViewport')
 		removeElementFn(id)
@@ -1405,7 +1405,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
 			notation = isMatch ? rfp_green : rfp_red
 			// notate good desktopmode
-			if (k == 'userAgent' && isMatch && 'android' == isOS) {
+			if (k == 'userAgent' && isMatch && !isDesktop) {
 				if (reported.includes('Linux')) {notation = desktopmode_green}
 			}
 			// catch non-errors and non-lies health failures
@@ -1566,20 +1566,20 @@ function exitFS() {
 function goFS() {
 	gFS = false
 	try {
-		if ('android' == isOS) {
-			let element = dom.tzpFS
-			Promise.all([
-				element.requestFullscreen()
-			]).then(function(){
-				get_scr_fs_measure()
-			})
-		} else {
+		if (isDesktop) {
 			// desktop: use documentElement
 				// we can scroll, click, view everything
 				// let the resize event trigger running the section
 				// let get_scr_measure check for document.fullscreen and fill in the display
 				// use svh because otherwise the height is the full document height
 			document.documentElement.requestFullscreen()
+		} else {
+			let element = dom.tzpFS
+			Promise.all([
+				element.requestFullscreen()
+			]).then(function(){
+				get_scr_fs_measure()
+			})
 		}
 	} catch(e) {dom.fsElement.innerHTML = e+''}
 }
@@ -1796,10 +1796,9 @@ const outputFD = () => new Promise(resolve => {
 		isWordmark = e; isWordData = zErrShort
 	}
 
-	// set isMB: legacy: 115 + older 128's still need detection
-	if (gLoad && !isBB && 'android' !== isOS) {
-		let aMBVersions = [115, 128]
-		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
+	// set isMB: legacy: older 128's still need detection
+	if (gLoad && !isBB && isDesktop) {
+		if (128 == isVer && isWordmark + isLogo == '400 x 32300 x 236') {
 			isMB = true
 			isBB = true
 		}
@@ -1838,10 +1837,8 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 		get_scr_measure(),
 	]).then(function(){
 		// add listeners once
-		if (gLoad) {
-			if ('android' !== isOS) {
-				window.addEventListener('resize', function(){outputSection(1, true)})
-			}
+		if (gLoad && isDesktop) {
+			window.addEventListener('resize', function(){outputSection(1, true)})
 		}
 		return resolve()
 	})
