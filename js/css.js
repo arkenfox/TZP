@@ -401,7 +401,7 @@ function get_media_css(METRIC) {
 		}
 		// ToDo: notation reduced-transparency | inverted-colors rfpver when feature enabled
 
-		if ('android' == isOS) {
+		if (!isDesktop) {
 			oTests['hover']['rfp'] = 'none'; oTests['hover']['rfpver'] = 1
 			oTests['any-hover']['rfp'] = 'none'; oTests['any-hover']['rfpver'] = 1
 			oTests['pointer']['rfp'] = 'coarse'; oTests['pointer']['rfpver'] = 1

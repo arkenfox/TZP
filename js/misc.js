@@ -657,10 +657,10 @@ function get_navigator_keys(METRIC) {
 			if (isMB) { // MB
 				if ('a389214b' == hash) {notation = bb_green} // MB15 41
 			} else { // TB
-				if ('android' == isOS) {
-					if ('' == hash) {notation = bb_green} // no builds yet
-				} else {
+				if (isDesktop) {
 					if ('8d3dd2a1' == hash) {notation = bb_green} // TB15
+				} else {
+					if ('' == hash) {notation = bb_green} // no builds yet
 				}
 			}
 		}
@@ -925,7 +925,7 @@ function get_window_props(METRIC) {
 			}
 
 			// notate console
-			if (!isLies && isOS !== 'android' && isOS !== undefined) {
+			if (!isLies && isDesktop && isOS !== undefined) {
 				let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
 				addDisplay(18, 'consolestatus', strConsole)
 			}

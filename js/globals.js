@@ -138,6 +138,7 @@ let bb_green = sgtick+'TB]'+sc,
 let isArch = true,
 	isAutoPlay,
 	isAutoPlayError,
+	isDesktop = true,
 	isDevices,
 	isEngine,
 	isEngineBlocked = true,
@@ -150,6 +151,14 @@ let isArch = true,
 	isOS,
 	isOSErr,
 	isRecursion,
+	isStyles = ['cursive','math','monospace','sans-serif','serif','system-ui'],
+		// FF145+ 1788937 math
+		// 'emoji','ui-monospace','ui-rounded','ui-serif' = currently at least gecko + blink redundant (windows)
+		// 'emoji' = better covered in special metric/test targeting emojis/unicode
+	isStylesAll = [
+		'cursive','emoji','fangsong','fantasy','math','monospace',
+		'sans-serif','serif','system-ui','ui-monospace','ui-rounded','ui-serif'
+	],
 	isSystemFont = [],
 	isVer = 0,
 	isVerExtra = '',

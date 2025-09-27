@@ -141,7 +141,7 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 		oRes[item2] = cssvalue
 		// get FS measurments if in FS
 		let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
-		if (!isElementFS && 'fullscreen' == data && 'android' !== isOS) {
+		if (!isElementFS && 'fullscreen' == data && isDesktop) {
 			get_scr_fs_measure()
 		} else {
 			gFS = false // cancel run state
@@ -200,7 +200,8 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 const get_scr_measure = () => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm('measure'),
-	]).then(function(mmres){
+		get_scr_viewport('sizes_viewport'),
+	]).then(function(res){
 		let oTmp = {
 			screen: {height: {}, width: {}},
 			available: {height: {}, width: {}},
@@ -208,12 +209,12 @@ const get_scr_measure = () => new Promise(resolve => {
 			outer: {height: {}, width: {}},
 		}
 		// matchmedia
-		oTmp.screen.height.media = mmres[0]['device-height']
-		oTmp.screen.width.media = mmres[0]['device-width']
-		oTmp.inner.height.media = mmres[0].height
-		oTmp.inner.width.media = mmres[0].width
+		oTmp.screen.height.media = res[0]['device-height']
+		oTmp.screen.width.media = res[0]['device-width']
+		oTmp.inner.height.media = res[0].height
+		oTmp.inner.width.media = res[0].width
 		// test: css/media value is up to 1px higher: we should only allow a lower value
-		//oTmp.screen.width.media = mmres[0]['device-width'] + 1
+		//oTmp.screen.width.media = res[0]['device-width'] + 1
 
 		// small viewport units
 			// desktop: same as viewport element + clientrect but it ignores scollbars, so can
@@ -223,8 +224,11 @@ const get_scr_measure = () => new Promise(resolve => {
 		oTmp.inner.width['svw'] = vpWidth.svw
 		oTmp.inner.height['svh'] = vpHeight.svh
 
-		// document
-		if ('android' == isOS) {
+		if (isDesktop) {
+			// add desktop viewport so it's summarized/notated
+			oTmp['viewport'] = res[1]
+		} else {
+			// android "document" is an inner size not viewport || calculate get dynamic toolbar
 			oTmp.inner.width['document'] = vpWidth.document
 			oTmp.inner.height['document'] = vpHeight.document
 			// dynamic toolbar: display only - let it NaN for I care
@@ -249,7 +253,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			inner: ['innerHeight','innerWidth'],
 		}
 		// window.inner on android is dynamic and also redudnant with document + small viewport units
-		if ('android' == isOS) {delete oList.inner}
+		if (!isDesktop) {delete oList.inner}
 		let iTarget, target
 		try {iTarget = dom.tzpIframe.contentWindow} catch {}
 		try {target = iTarget.screen} catch {} // initial iframe target
@@ -336,8 +340,6 @@ const get_scr_measure = () => new Promise(resolve => {
 		// initial
 		oDisplay['initial_inner'] = isInitial.width.inner + ' x ' + isInitial.height.inner
 		oDisplay['initial_outer'] = isInitial.width.outer + ' x ' + isInitial.height.outer
-		//console.log('oData', oData)
-		//console.log('oDisplay', oDisplay)
 
 		// notation
 		let notation ='', initData = zNA, initHash =''
@@ -346,7 +348,10 @@ const get_scr_measure = () => new Promise(resolve => {
 
 		// controls: we want integers so we know what to match to
 		let controlw = innerw, controlh = innerh
-		if ('android' == isOS) {
+
+		if (isDesktop) {
+			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh)) // newwin
+		} else {
 			/* on android
 			height
 				- window.inner height can differ due to dynamic toolbar, so we use doc
@@ -369,15 +374,12 @@ const get_scr_measure = () => new Promise(resolve => {
 			// initial_sizes
 			// ToDo: add notation
 			initData = isInitial; initHash = mini(isInitial)
-		} else {
-			// NW
-			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh))
 		}
 		let isCompareValid = 'number' == typeFn(controlw) && 'number' == typeFn(controlh)
 
 		// desktop: if in fullscreenElement mode, use the svh element to measure
 			// we don't have a resize event in android
-		if ('android' !== isOS) {
+		if (isDesktop) {
 			let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 			if (isElementFS) {
 				addDisplay(1, 'fsElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
@@ -386,6 +388,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		}
 
 		// RFP/match
+		let aRound = ['media','css','svh','svw','document','element','visualViewport']
 		for (const k of Object.keys(oData)) {
 			let isSame = true
 			// for each axis
@@ -408,21 +411,22 @@ const get_scr_measure = () => new Promise(resolve => {
 						Note: once we add lies logic to our data, handled just above, we also won't be
 						letting a possible genuine mismatch thru by not checking it for sameness
 					*/
-					if ('android' == isOS && 'inner' == k && 'window' == n) {isIgnore = true}
+					if (!isDesktop && 'inner' == k && 'window' == n) {isIgnore = true}
 					let control
 					if (!isIgnore) {
 						// *vw/h can be non-integer in inner
 						// media can be non-integer | css can be off by 1 | both only screen + inner metrics
-						// document (used by android) width uses domrect
+						// document (android) width uses domrect
+						// viewport (desktop) ucan be non-integer
 						// match them to our inner or screen if within 1
-						if ('media' == n || 'css' == n || 'svh' == n || 'svw' == n || 'document' == n) {
+						if (aRound.includes(n)) {
 							value = Math.floor(value) // to remove non-integers + ensure valid diffs are positive
 							control = 'width' == j ? screenw : screenh // if these are invalid diff == NaN
-							if ('inner' == k) {control = 'width' == j ? controlw : controlh}
+							if ('inner' == k || 'viewport' == k) {control = 'width' == j ? controlw : controlh}
 							// we floored so any valid diff must be 1 or 0 because we substract value from control
 							if (1 == control - value) {value = control} // match control
 						}
-						//if ('inner' == k) {console.log(k, j, n, '\norig', original, '\ncontrol', control, '\nfinal value for sameness', value)}
+						//if ('viewport' == k) {console.log(k, j, n, '\norig', original, '\ncontrol', control, '\nfinal value for sameness', value)}
 						tmpSet.add(value)
 					}
 				}
@@ -440,9 +444,19 @@ const get_scr_measure = () => new Promise(resolve => {
 				// notation
 					// if all the same then does it match _based_ on inner
 				if (isSame && isCompareValid) {
-					// if inner: does it match LBing
+					// inner + viewport: does it match LBing: check once and pass both width + height
 					if ('inner' == k) {
-						isSame = return_lb(controlw, controlh)
+						if ('width' == j) {isSame = return_lb(controlw, controlh)}
+					} else if ('viewport' == k) {
+						// viewport RFP must match letterboxing AND inner
+						if ('width' == j) {
+							isSame = return_lb(oSummary.viewport.width, oSummary.viewport.height)
+							if (isSame) {
+								// it must also match inner
+								if (oSummary.viewport.width !== controlw) {isSame = false}
+								if (oSummary.viewport.height !== controlh) {isSame = false}
+							}
+						}
 					} else {
 						// we can refine these rules later per key/OS: currently does it == inner
 						let match = 'width' == j ? controlw : controlh
@@ -451,9 +465,13 @@ const get_scr_measure = () => new Promise(resolve => {
 				}
 			}
 			let notation = isSame ? rfp_green : rfp_red
-			if ('inner' == k && 'android' == isOS) {notation = ''}
+			if ('inner' == k && !isDesktop) {notation = ''}
 			addDisplay(1, 'sizes_'+ k, '','', notation)
 		}
+		//console.log('viewport', res[1])
+		//console.log('data', oData)
+		//console.log('sum', oSummary)
+		//console.log('display', oDisplay)
 
 		// health lookups
 		if (gRun) {
@@ -479,7 +497,7 @@ const get_scr_measure = () => new Promise(resolve => {
 			dockW = oData.screen.width.screen - oData.available.width.screen,
 			chromeW = oData.outer.width.window - oData.inner.width.window,
 			chromeH = oData.outer.height.window - oData.inner.height.window
-		if ('android' !== isOS) {
+		if (isDesktop) {
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
 			if (isOS == undefined) {dockStr = 'taskbar/dock/panel'}
 			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
@@ -794,7 +812,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 					'ccc8dc6d': 'portrait-primary | 90 | portrait',
 					'fb6084ad': 'portrait-primary | 90 | portrait | square',
 				}
-				if ('android' == isOS) {
+				if (!isDesktop) {
 					oGood = {
 						'813838a9': 'landscape-primary | 90 | landscape',
 						'360dd99a': 'portrait-primary | 0 | portrait',
@@ -957,7 +975,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
 		get_dpi_div('dpi_div')
-		if ('android' !== isOS) {
+		if (isDesktop) {
 			// android: useless, not stable as it is affected by zoom
 			get_vv_scale('visualViewport_scale')
 		}
@@ -1091,14 +1109,13 @@ function get_scr_viewport_units() {
 
 	// desktop + android use small in inner section
 	// android uses large as a standalone
-	let aList = 'android' == isOS ? ['L','S'] : ['S']
+	let aList = isDesktop ? ['S'] : ['L','S']
 	let data = {'height': {}, 'width': {}}
 
 	aList.forEach(function(k) {
 		let METRIC = 'L' == k ? 'sizes_viewport' : 'sizes_inner'
 		let target
 		try {target = dom['tzp'+ k +'V']} catch {}
-		let range, method
 		let prefix = k.toLowerCase() + 'v'
 		for (const p of Object.keys(data)) {
 		//aItems.forEach(function(p) {
@@ -1108,15 +1125,8 @@ function get_scr_viewport_units() {
 				if (isDomRect == -1) {
 					x = p == 'width' ? target.offsetWidth : target.offsetHeight
 				} else {
-					if (isDomRect > 1) {
-						range = document.createRange()
-						range.selectNode(target)
-					}
-					if (isDomRect < 1) {method = target.getBoundingClientRect()
-					} else if (isDomRect == 1) {method = target.getClientRects()[0]
-					} else if (isDomRect == 2) {method = target.getBoundingClientRect()
-					} else if (isDomRect > 2) {method = target.getClientRects()[0]
-					}
+					let method = measureFn(target, METRIC +'_'+ prefix)
+					if (undefined !== method.error) {throw method.errorstring}
 					x = 'width' == p ? method.width : method.height
 					//type check
 					if (runST) {x = p == 'width' ? undefined : '' }
@@ -1133,17 +1143,16 @@ function get_scr_viewport_units() {
 	return data
 }
 
-const get_scr_viewport = (runtype) => new Promise(resolve => {
+const get_scr_viewport = (METRIC) => new Promise(resolve => {
 	// get viewport units
 	isViewportUnits = get_scr_viewport_units()
 
-	let oData = {height: {}, width: {}}, aDisplay = []
-	const METRIC = 'sizes_viewport', id= 'vp-element'
-	const aMETRIC = 'sizes_inner'
+	let oData = {height: {}, width: {}}
+	const id= 'vp-element', aMETRIC = 'sizes_inner'
 
 	function get_viewport(type) {
-		let w, h, wDisplay ='', hDisplay, range, method, target
-		let metric = 'android' == isOS ? aMETRIC : METRIC
+		let w, h, method, target
+		let metric = isDesktop ? aMETRIC : METRIC
 
 		try {
 			if ('element' == type) {
@@ -1155,15 +1164,8 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 					w = target.offsetWidth
 					h = target.offsetHeight
 				} else {
-					if (isDomRect > 1) {
-						range = document.createRange()
-						range.selectNode(target)
-					}
-					if (isDomRect < 1) {method = target.getBoundingClientRect()
-					} else if (isDomRect == 1) {method = target.getClientRects()[0]
-					} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-					} else if (isDomRect > 2) {method = range.getClientRects()[0]
-					}
+					method = measureFn(target, METRIC +'_'+ type)
+					if (undefined !== method.error) {throw method.errorstring}
 					w = method.width
 					h = method.height
 				}
@@ -1175,15 +1177,8 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 				if (isDomRect == -1) {
 					w = target.clientWidth
 				} else {
-					if (isDomRect > 1) {
-						range = document.createRange()
-						range.selectNode(target)
-					}
-					if (isDomRect < 1) {method = target.getBoundingClientRect()
-					} else if (isDomRect == 1) {method = target.getClientRects()[0]
-					} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-					} else if (isDomRect > 2) {method = range.getClientRects()[0]
-					}
+					method = measureFn(target, METRIC +'_'+ type)
+					if (undefined !== method.error) {throw method.errorstring}
 					w = method.width
 				}
 			} else {
@@ -1201,31 +1196,23 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 				log_error(1, metric +'_height_'+ type, zErrType + hType)
 				h = zErr
 			}
-			hDisplay = h, wDisplay = w
 		} catch(e) {
-			h = zErr; w = zErr; wDisplay =''
-			if ('android' == isOS) {
+			h = zErr; w = zErr
+			if (isDesktop) {
+				log_error(1, metric +'_'+ type, e)
+			} else {
 				log_error(1, metric +'_width_'+ type, e)
 				log_error(1, metric +'_height_'+ type, e)
-			} else {
-				hDisplay = log_error(1, metric +'_'+ type, e)
 			}
 		}
-		oData.height[type] = h
-		oData.width[type] = w
+		oData.height[type] = h //+ 100
+		oData.width[type] = w //+ 200
 
 		// android only calls document and uses it in inner section
 		// we can just store this in isViewportUnits
-		if ('android' == isOS) {
+		if (!isDesktop) {
 			isViewportUnits.height['document'] = h
 			isViewportUnits.width['document'] = w
-		} else {
-			addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
-			// only do a summary for desktop
-			// toDo: correctly summarize it
-			if ('visualViewport' == type) {
-				addDisplay(1, 'vp_summary', ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
-			}
 		}
 	}
 
@@ -1235,16 +1222,13 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 	// android: there is no viewport section: document becomes part of inner section.
 		// element + visualViewport are redundant with a TZP clean load (new tab etc) and
 		// can be or are unstable with dynamic urlbar/toolbar and pinch to zoom/reruns combos etc
-	if ('android' !== isOS) {
-		//desktop
+	if (isDesktop) {
 		get_viewport('element')
 		get_viewport('visualViewport')
 		removeElementFn(id)
-		// return
-		addData(1, METRIC, oData, mini(oData))
 	}
 	// resolve
-	return resolve(oData) // for scrollbar
+	return resolve(oData) // return the data for use in the parent function
 })
 
 /* AGENT */
@@ -1421,7 +1405,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
 			notation = isMatch ? rfp_green : rfp_red
 			// notate good desktopmode
-			if (k == 'userAgent' && isMatch && 'android' == isOS) {
+			if (k == 'userAgent' && isMatch && !isDesktop) {
 				if (reported.includes('Linux')) {notation = desktopmode_green}
 			}
 			// catch non-errors and non-lies health failures
@@ -1582,20 +1566,20 @@ function exitFS() {
 function goFS() {
 	gFS = false
 	try {
-		if ('android' == isOS) {
-			let element = dom.tzpFS
-			Promise.all([
-				element.requestFullscreen()
-			]).then(function(){
-				get_scr_fs_measure()
-			})
-		} else {
+		if (isDesktop) {
 			// desktop: use documentElement
 				// we can scroll, click, view everything
 				// let the resize event trigger running the section
 				// let get_scr_measure check for document.fullscreen and fill in the display
 				// use svh because otherwise the height is the full document height
 			document.documentElement.requestFullscreen()
+		} else {
+			let element = dom.tzpFS
+			Promise.all([
+				element.requestFullscreen()
+			]).then(function(){
+				get_scr_fs_measure()
+			})
 		}
 	} catch(e) {dom.fsElement.innerHTML = e+''}
 }
@@ -1812,10 +1796,9 @@ const outputFD = () => new Promise(resolve => {
 		isWordmark = e; isWordData = zErrShort
 	}
 
-	// set isMB: legacy: 115 + older 128's still need detection
-	if (gLoad && !isBB && 'android' !== isOS) {
-		let aMBVersions = [115, 128]
-		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
+	// set isMB: legacy: older 128's still need detection
+	if (gLoad && !isBB && isDesktop) {
+		if (128 == isVer && isWordmark + isLogo == '400 x 32300 x 236') {
 			isMB = true
 			isBB = true
 		}
@@ -1846,20 +1829,16 @@ const outputFD = () => new Promise(resolve => {
 })
 
 const outputScreen = (isResize = false) => new Promise(resolve => {
-	let runtype = isResize ? 'resize': 'screen'
 	Promise.all([
 		get_scr_fullscreen('fullscreen'),
 		get_scr_positions('positions'),
 		get_scr_pixels('pixels'),
-		get_scr_viewport(runtype), // gets viewport units
 		get_scr_orientation('orientation'),
 		get_scr_measure(),
 	]).then(function(){
 		// add listeners once
-		if (gLoad) {
-			if ('android' !== isOS) {
-				window.addEventListener('resize', function(){outputSection(1, true)})
-			}
+		if (gLoad && isDesktop) {
+			window.addEventListener('resize', function(){outputSection(1, true)})
 		}
 		return resolve()
 	})

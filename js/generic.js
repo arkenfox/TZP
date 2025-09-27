@@ -11,6 +11,23 @@ function getUniqueElements() {
 
 /*** GENERIC ***/
 
+function measureFn(target, metric) {
+	let range, method, type = isDomRect
+	//type = 2 // test
+	try {
+		if (runSE) {foo++}
+		if (type > 1) {range = document.createRange(); range.selectNode(target)}
+		if (type < 1) {method = target.getBoundingClientRect() // get a result regardless
+		} else if (type == 1) {method = target.getClientRects()[0]
+		} else if (type == 2) {method = range.getBoundingClientRect()
+		} else if (type > 2) {method = range.getClientRects()[0]
+		}
+		return method
+	} catch(e) {
+		return {'error': true, 'errorstring': e+''}
+	}
+}
+
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function nowFn() {if (isPerf) {return performance.now()}; return}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
@@ -430,8 +447,9 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 
 	function exit(value) {
 		isOS = value
+		isDesktop = 'android' !== isOS
 		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
-			+ ('android' == isOS ? 'fav' : '') + "icon64.png')" // set icon
+			+ (isDesktop ? '' : 'fav') + "icon64.png')" // set icon
 		log_perf(SECTG, METRIC, t0, '', isOS +'')
 		if (undefined == isOS) {
 			isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
@@ -537,19 +555,29 @@ const get_isRecursion = () => new Promise(resolve => {
 })
 
 const get_isSystemFont = () => new Promise(resolve => {
-	if (!isGecko) {return resolve()}
+	//if (!isGecko) {return resolve()}
 	let t0 = nowFn()
 	function exit(value) {
 		log_perf(SECTG, 'isSystemFont', t0,'', value)
 		return resolve()
 	}
+	let aMoz = [
+		// -moz seem to always be the same
+		'-moz-bullet-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
+		'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window','-moz-workspace',
+	]
+	let aNonMoz = [
+		// in gecko non -moz seem to always be the same: mac might differ  I seem to recall this
+			// in the past - anyway we grab the first of each e.g. caption + menu differ in blink (windows)
+		'caption','icon','menu','message-box','small-caption','status-bar',
+	]
 	// first aFont per computed family
 		// add '-default-font' (alphabetically first) so it's easy to see what it pairs with in baseFonts
-	let aFonts = [
-		'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
-		'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window',
-		'-moz-workspace','caption','icon','menu','message-box','small-caption','status-bar',
-	]
+	let aFonts = ['-default-font']
+	if (isGecko) {aFonts = aFonts.concat(aMoz)}
+	aFonts = aFonts.concat(aNonMoz)
+	aFonts.sort()
+
 	try {
 		let el = dom.tzpDiv, data = []
 		aFonts.forEach(function(font){
@@ -561,6 +589,13 @@ const get_isSystemFont = () => new Promise(resolve => {
 				isSystemFont.push(font)
 			}
 		})
+		if (isGecko) {
+		// we use isSystemFont in fntSizes where -moz group doesn't match non -moz even though all of
+		// aFonts have the same computedStyes: ensure we have one of each
+			if (0 == isSystemFont.filter(x => aMoz.includes(x).length)) {isSystemFont.push(aMoz[0])}
+
+		}
+		isSystemFont.sort()
 		exit(isSystemFont.join(', '))
 	} catch(e) {
 		exit(e.name) // log nothing: we run in fonts later
@@ -1164,7 +1199,7 @@ function metricsShow(name, scope) {
 	//add btn, show/hide options, display
 	let hash = mini(data)
 	metricsTitle = (scope == undefined ? '' : scope.toUpperCase() +': ') + target + filter +': '+ hash
-	dom.metricsTitle.innerHTML = metricsTitle + (isHealth && 'android' !== isOS ? overlayHealthCount : '')
+	dom.metricsTitle.innerHTML = metricsTitle + (isHealth && isDesktop ? overlayHealthCount : '')
 	if (isVisible) {
 		// avoid reflow
 		dom.metricsDisplay.innerHTML = display
@@ -1725,7 +1760,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	let aLen25 = [
 		'canPlayType','isTypeSuppo','font-format','font-tech','textmetrics',
 	]
-	let len = 'android' == isOS ? 25 : 50
+	let len = isDesktop ? 50 : 25
 	if (aLen25.includes(metric.slice(0,11))) {len = 25}
 	let key = 'errors'
 	// collect
@@ -1741,7 +1776,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	}
 	// trim if required + return
 	// is aLen25 and android, just display zErr
-	if ('android' == isOS && aLen25.includes(metric.slice(0,11))) {
+	if (!isDesktop && aLen25.includes(metric.slice(0,11))) {
 		error = zErr
 	} else if (error.length > len) {
 		error = error.slice(0,len-3) + "..."
@@ -1931,7 +1966,7 @@ function countJS(item) {
 			]).then(function(){
 				// adjust overlayMaxLength
 				if ('linux' == isOS) {overlayMaxLength = 88
-				} else if ('android' == isOS) {overlayMaxLength = 68
+				} else if (!isDesktop) {overlayMaxLength = 68
 				}
 				// tweak monospace size: ToDo: this is bad design
 				if ('windows' == isOS) {
@@ -1945,7 +1980,9 @@ function countJS(item) {
 				}
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
-				if ('android' == isOS) {
+				if (isDesktop) {
+					document.addEventListener('keydown', metricsEvent)
+				} else {
 					showhide('A','table-row')
 					// A1 inner_document: html class hidden - only used by android
 					// add class togS so it shows when expanding, remove hidden class
@@ -1960,8 +1997,6 @@ function countJS(item) {
 					}
 					// hide console button in overlay: width is a premium
 					dom.metricsConsole.classList.add('hidden')
-				} else {
-					document.addEventListener('keydown', metricsEvent)
 				}
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback

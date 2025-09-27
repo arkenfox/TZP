@@ -116,7 +116,7 @@ function get_element_keys(METRIC) {
 	return
 }
 
-function get_element_font(METRIC) {
+function get_element_font(METRIC, isLies) {
 	let t0 = nowFn()
 	// we only need a few pt values: more than enough to correlate styles
 	// but go more in-depth with mono/serif/sans
@@ -130,6 +130,7 @@ function get_element_font(METRIC) {
 		'emoji': sizeA, // windows: emoji = serif
 		'fangsong': sizeA,
 		'fantasy': sizeA, // windows: fantasy = sans
+		'math': sizeA,
 		'monospace': sizeB,
 		'sans-serif': sizeB,
 		'serif': sizeB,
@@ -142,11 +143,10 @@ function get_element_font(METRIC) {
 	'ui-rounded': sizeA,
 	'ui-serif': sizeA,
 	'ui-sans-serif': sizeA,
-	'math': sizeA,
 	//*/
 
 	const id = 'element-fp'
-	let hash, btn ='', data = {}, range, method
+	let hash, btn ='', data = {}, method
 	try {
 		const doc = document
 		const div = doc.createElement('div')
@@ -155,21 +155,16 @@ function get_element_font(METRIC) {
 		let oData = {}, tmpobj = {}
 		for (const k of Object.keys(oList)) {
 			let sizes = oList[k]
-			let tmpsizes = [], isFirst = 'cursive' == k
+			let tmpsizes = [], isFirst = 'cursive' == k // this is a bit iffy if we change our keys: do BETTER!!
 			sizes.forEach(function(size) {
 				let isTypeCheck = isFirst && size == sizes[0]
 				// create + measure each individually as preceeding elements can affect subsequent ones
 				dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ k +"'>...</div>"
 				let target = div.firstChild
-				// method
-				if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
-				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-				} else if (isDomRect == 1) {method = target.getClientRects()[0]
-				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-				} else if (isDomRect > 2) {method = range.getClientRects()[0]
-				}
+				method = measureFn(target, METRIC)
 				// width+height = max entropy
 				if (isTypeCheck) {
+					if (undefined !== method.error) {throw method.errorstring}
 					[method.width, method.height].forEach(function(item) {
 						if (runST) {item = isLine ? undefined : '1'}
 						let typeCheck = typeFn(item)
@@ -190,12 +185,12 @@ function get_element_font(METRIC) {
 		hash = e; data = zErrLog
 	}
 	removeElementFn(id)
-	addBoth(15, METRIC, hash, btn,'', data, (isDomRect == -1))
+	addBoth(15, METRIC, hash, btn,'', data, isLies)
 	log_perf(15, METRIC, t0)
 	return
 }
 
-function get_element_forms(METRIC) {
+function get_element_forms(METRIC, isLies) {
 	let t0 = nowFn()
 	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
 	let oList = {
@@ -238,7 +233,7 @@ function get_element_forms(METRIC) {
 			select: '<select><option></option></select>',
 		}
 	}
-	let width, height, x, y, range, method
+	let width, height, x, y, method
 	const id = 'element-fp'
 	try {
 		const doc = document
@@ -257,17 +252,12 @@ function get_element_forms(METRIC) {
 				target.setAttribute('style', 'display:inline; writing-mode: vertical-lr;') 
 				if ('unstyled' == key) {target.classList.add('unstyled')}
 				if (k.includes('_option')) {target = target.lastElementChild}
-				// method
-				if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
-				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-				} else if (isDomRect == 1) {method = target.getClientRects()[0]
-				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-				} else if (isDomRect > 2) {method = range.getClientRects()[0]
-				}
+				method = measureFn(target, METRIC)
 				// typecheck
 				let itemdata = [method.width, method.height, method.x, method.y]
 				if (isFirst) {
 					isFirst = false
+					if (undefined !== method.error) {throw method.errorstring}
 					itemdata.forEach(function(item){
 						if (runST) {item = null}
 						let typeCheck = typeFn(item)
@@ -291,16 +281,16 @@ function get_element_forms(METRIC) {
 		hash = e; data = zErrLog
 	}
 	removeElementFn(id)
-	addBoth(15, METRIC, hash, btn,'', data, (isDomRect == -1))
+	addBoth(15, METRIC, hash, btn,'', data, isLies)
 	log_perf(15, METRIC, t0)
 	return
 }
 
-function get_element_mathml(METRIC) {
+function get_element_mathml(METRIC, isLies) {
 	let t0 = nowFn()
 	const id = 'element-fp'
 	const sizetype = 'px', sizes = [33,99,111], sizectl = sizes[0]
-	let hash, btn ='', data = {}, notation = isBB ? bb_slider_red : '', isLies = isDomRect == -1
+	let hash, btn ='', data = {}, notation = isBB ? bb_slider_red : ''
 	try {
 		// create element
 		const doc = document
@@ -322,45 +312,29 @@ function get_element_mathml(METRIC) {
 		doc.getElementById(id).innerHTML = divcontrol + divcontent
 
 		// measure
-		let control, width, height
-		let rangeC,	rangeW, rangeH
+		let control, width, height, methodW, methodH
 		let targetC = dom['mathmldivctrl'], targetH, targetW
 		let isDiff, wType, hType
 		sizes.forEach(function(size) {
 			targetH = dom['mathmldiv'+size]; targetW = dom['mathmlspan'+size]
 			let isCtrlSize = size == sizectl
 			size = size + sizetype
-			if (isDomRect > 1) {
-				// test
-				rangeH = document.createRange()
-				rangeH.selectNode(targetH)
-				rangeW = document.createRange()
-				rangeW.selectNode(targetW)
-				// control
-				if (isCtrlSize) {
-					rangeC = document.createRange()
-					rangeC.selectNode(targetC)
-				}
-			}
-			if (isDomRect < 1) { // get a result regardless
-				if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
-				height = targetH.getBoundingClientRect().height
-				width = targetW.getBoundingClientRect().width
-			} else if (isDomRect == 1) {
-				if (isCtrlSize) {control = targetC.getClientRects()[0].height}
-				height = targetH.getClientRects()[0].height
-				width = targetW.getClientRects()[0].width
-			} else if (isDomRect == 2) {
-				if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
-				height = rangeH.getBoundingClientRect().height
-				width = rangeW.getBoundingClientRect().width
-			} else if (isDomRect > 2) {
-				if (isCtrlSize) {control = targetC.getClientRects()[0].height}
-				height = rangeH.getClientRects()[0].height
-				width = rangeW.getClientRects()[0].width
-			}
-			// first item check/diff
+
+			// get div height and span width
+			methodH = measureFn(targetH, METRIC)
+			methodW = measureFn(targetW, METRIC)
+			width = methodW.width
+			height = methodH.height
+
+			// one time: first elment + size
+				// get a control size (for diffs) to detemine if mathml is enabled
 			if (isCtrlSize) {
+				methodH = measureFn(targetC, METRIC)
+				control = methodH.height
+				if (undefined !== methodH.error) {throw methodH.errorstring}
+				if (undefined !== methodH.error) {throw methodH.errorstring}
+				if (undefined !== methodW.error) {throw methodW.errorstring}
+				// first item check/diff
 				if (runST) {width = {}, height = ' '}
 				wType = typeFn(width); hType = typeFn(height)
 				if ('number' !== wType || 'number' !== hType) {
@@ -387,7 +361,7 @@ function get_element_mathml(METRIC) {
 	return
 }
 
-function get_element_other(METRIC) {
+function get_element_other(METRIC, isLies) {
 	let t0 = nowFn()
 	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
 
@@ -413,7 +387,7 @@ function get_element_other(METRIC) {
 	let aListAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','iframe','small','sub','sup',]
 	aListAdd.forEach(function(item){oList[item] = '<'+item+'>.</'+item+'>'})
 
-	let width, height, x, y, range, method
+	let width, height, x, y, method
 	const id = 'element-fp'
 	try {
 		const doc = document
@@ -439,17 +413,12 @@ function get_element_other(METRIC) {
 				}
 			}
 			target.setAttribute('style','display:inline; writing-mode: vertical-lr;')
-			// method
-			if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
-			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-			} else if (isDomRect == 1) {method = target.getClientRects()[0]
-			} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-			} else if (isDomRect > 2) {method = range.getClientRects()[0]
-			}
+			method = measureFn(target, METRIC)
 			// typecheck
 			let itemdata = [method.width, method.height, method.x, method.y]
 			if (isFirst) {
 				isFirst = false
+				if (undefined !== method.error) {throw method.errorstring}
 				itemdata.forEach(function(item){
 					if (runST) {item = null}
 					let typeCheck = typeFn(item)
@@ -463,12 +432,12 @@ function get_element_other(METRIC) {
 		hash = e; data = zErrLog
 	}
 	removeElementFn(id)
-	addBoth(15, METRIC, hash, btn,'', data, (isDomRect == -1))
+	addBoth(15, METRIC, hash, btn,'', data, isLies)
 	log_perf(15, METRIC, t0)
 	return
 }
 
-function get_element_scrollbars(METRIC) {
+function get_element_scrollbars(METRIC, isLies) {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
 		// ui.useOverlayScrollbars: 0 = yes, 1 = no
 		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only in css pixels at full zoom (default 0)
@@ -493,18 +462,9 @@ function get_element_scrollbars(METRIC) {
 				element = dom.tzpScroll
 				element.style['scrollbar-width'] = p
 				let target = element.children[0]
-				let range, width, method
-				if (isDomRect > 1) {
-					range = document.createRange()
-					range.selectNode(target)
-				}
-				// method
-				if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
-				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-				} else if (isDomRect == 1) {method = target.getClientRects()[0]
-				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-				} else if (isDomRect > 2) {method = range.getClientRects()[0]
-				}
+				let width, method
+				method = measureFn(target, METRIC)
+				if (undefined !== method.error) {throw method.errorstring}
 				width = method.width
 				if (runST) {width = NaN} else if (runSI) {width = 101}
 				let typeCheck = typeFn(width)
@@ -513,10 +473,10 @@ function get_element_scrollbars(METRIC) {
 				if (value < 0) {throw zErrInvalid + '< 0'}
 			} catch(e) {
 				value = zErr
-				log_error(1, METRIC +'_'+ p +'_'+ item, e)
+				log_error(15, METRIC +'_'+ p +'_'+ item, e)
 			}
 			let fpvalue = value
-			if (isDomRect < 0 && zErr !== value) {
+			if (isLies && zErr !== value) {
 				value = log_known(15, METRIC +'_'+ p +'_'+ item, value)
 				fpvalue = zLIE
 			}
@@ -534,7 +494,7 @@ function get_element_scrollbars(METRIC) {
 				if (value < 0) {throw zErrInvalid + '< 0'}
 			} catch(e) {
 				value = zErr
-				log_error(1, METRIC +'_'+ p +'_'+ item, e)
+				log_error(15, METRIC +'_'+ p +'_'+ item, e)
 			}
 			oData[p][item] = value
 			if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
@@ -548,14 +508,15 @@ function get_element_scrollbars(METRIC) {
 }
 
 const outputElements = () => new Promise(resolve => {
+	let isLies = isDomRect == -1
 	Promise.all([
 		get_domrect('domrect'),
-		get_element_font('element_font'),
+		get_element_font('element_font', isLies),
 		get_element_keys('htmlelement_keys'),
-		get_element_forms('element_forms'),
-		get_element_mathml('element_mathml'),
-		get_element_other('element_other'),
-		get_element_scrollbars('element_scrollbars'),
+		get_element_forms('element_forms', isLies),
+		get_element_mathml('element_mathml', isLies),
+		get_element_other('element_other', isLies),
+		get_element_scrollbars('element_scrollbars', isLies),
 	]).then(function(){
 		return resolve()
 	})

@@ -624,7 +624,7 @@ function get_touc_h(METRIC) {
 			if (isGecko) {
 				// gecko: ontouch only exists in android: desktop blocks these to avoid being identified as mobile
 				let got = 'none' == value ? value : value.join(', ')
-				if ('android' == isOS) {
+				if (!isDesktop) {
 					// android
 					if ('30ea93d7' !== mini(value)) {
 						let expected = ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'] // ordered
@@ -655,7 +655,7 @@ function get_touc_h(METRIC) {
 				if ('mac' == isOS) {
 					// mac doesn't have touch
 					throw zErrInvalid +'expected none: got '+ got
-				} else if ('android' == isOS) {
+				} else if (!isDesktop) {
 					// android
 					if ('62482a70' !== mini(value)) {
 						expected = ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart'] // ordered
