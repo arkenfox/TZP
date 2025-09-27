@@ -7,11 +7,11 @@ function get_autoplay(METRIC) {
 	// a check on a specific element is more reliable (though it doesn't matter on page load)
 
 	// cached from page load
-	let value, data ='', notation = 'android' == isOS ? '' : default_red
+	let value, data ='', notation = isDesktop ? default_red : ''
 	if (undefined == isAutoPlayError) {
 		// Note: this is inconsistent/unstable on android: e.g. can return 'disallowed | disallowed' if the
 		// phone is on 'Do Not Disturb' )or depending on the session and transient user activity/actions?)
-		if ('android' !== isOS && '5be5c665' == mini(isAutoPlay)) {notation = default_green}
+		if (isDesktop && '5be5c665' == mini(isAutoPlay)) {notation = default_green}
 		value = isAutoPlay
 	} else {
 		value = isAutoPlayError; data = isAutoPlay
@@ -99,7 +99,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		widevine: ['com.widevine.alpha'],
 	}
 	// widevine on non-BB android is problematic
-	if (!isBB && 'android' == isOS) {delete oEME.widevine}
+	if (!isBB && !isDesktop) {delete oEME.widevine}
 
 	try {
 		if (runSE) {foo++}
