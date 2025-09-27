@@ -159,7 +159,7 @@ function add_microperf_intl(m, countC, tsub0, isIntl) {
 
 function set_isLanguageSmart() {
 	// set once: ignore android for now
-	if (!gLoad || !isSmart && !isSmartDataMode || 'android' == isOS) {return}
+	if (!gLoad || !isSmart && !isSmartDataMode || !isDesktop) {return}
 
 	// BB always or FF if locale matches
 		// resource://gre/res/multilocale.txt
@@ -2048,7 +2048,7 @@ const outputRegion = () => new Promise(resolve => {
 		get_language_locale(), // sets isLocaleValid/Value, isLanguagesNav
 	]).then(function(){
 		// add smarts if locale matches: i.e we can notate messages in FF
-		if (isGecko && isSmart && 'android' !== isOS) {
+		if (isGecko && isSmart && isDesktop) {
 			if (localesSupported[isLocaleValue] !== undefined) {isLanguageSmart = true}
 		}
 		let isLies = isDomRect == -1
