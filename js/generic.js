@@ -151,7 +151,7 @@ function getElementProp(sect, id, name, pseudo = ':after') {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo).content
 		// if supported but css blocked we get 'none' but if not supported (e.g. servo during development) we get ''
 			// we want the FP css metrics to reflect what the css actually says, so match the defaults
-		if ('' == item) {
+		if ('undefined' == isEngine && '' == item) {
 			// out of range: screen, inner, dpi: default is '' but we return '?'
 			if ('#S' == id || '#D' == id || '#P' == id) {return '?'}
 			// deviceposture, orientations, aspect ratios, display-mode
@@ -441,7 +441,6 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 	if (!isGecko) {
 		// get svh and lvh: if they differ then you have a dynamic urlbar
-
 		// this is fast - could we leverage it for gecko as well
 			// maybe not since isBB might restrict it for FPing dynamic urlbar
 			// also apps may allow disabling it
