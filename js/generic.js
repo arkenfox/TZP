@@ -137,7 +137,6 @@ function run_basic(str = 'basic') {
 			// e.g. '<a href="#uad">▼</a>' -> '<span class="perf">notation</span><a href="#uad">▼</a>'
 			let link = items[i].innerHTML
 			link = link.slice(link.indexOf('<a href'), link.length)
-
 			str += ' mode'
 			if ('undefined' == isEngine) {str = 'experimental'}
 			items[i].innerHTML = "<span class='perf'>"+ str +'</span> '+ link
@@ -147,8 +146,21 @@ function run_basic(str = 'basic') {
 
 function getElementProp(sect, id, name, pseudo = ':after') {
 	// default none: https://www.w3.org/TR/CSS21/generate.html#content
+	//console.log(sect, id, pseudo)
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo).content
+		// if supported but css blocked we get 'none' but if not supported (e.g. servo during development) we get ''
+			// we want the FP css metrics to reflect what the css actually says, so match the defaults
+		if ('' == item) {
+			// out of range: screen, inner, dpi: default is '' but we return '?'
+			if ('#S' == id || '#D' == id || '#P' == id) {return '?'}
+			// deviceposture, orientations, aspect ratios, display-mode
+			let aUndefined = ['#cssDP','#cssOm','#cssDAR','#cssO','#cssAR','#cssDM']
+			if (aUndefined.includes(id)) {return 'undefined'}
+			// everything else
+			return zNA
+		}
+
 		if (runSI && !runSL) {item = 'none'} // don't error if runSL
 		let typeCheck = typeFn(item, true)
 		if ('string' !== typeCheck) {throw zErrType + typeCheck}
@@ -434,8 +446,8 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			// maybe not since isBB might restrict it for FPing dynamic urlbar
 			// also apps may allow disabling it
 			// also maybe apps will enable it on other devices/tablets/platforms
+			// or extensions might tamper with it
 		// so for now just record the info for non-gecko
-
 		let aList = ['L','S']
 		try {
 			let data = {}
