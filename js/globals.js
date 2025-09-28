@@ -214,6 +214,7 @@ let gt0, gt1,
 	gClear = true, // clear console of xml and BB's prototype/proxy errors
 	isAllowNonGecko = true, // allow some other engines
 	isAllowNonGeckoMin = true, // enforce min requirements on those other engines
+	isAllowNonGeckoUndefined = true, // allow undefined engines
 	isBlock = true,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 

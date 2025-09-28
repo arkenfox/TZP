@@ -1740,6 +1740,7 @@ const outputFD = () => new Promise(resolve => {
 	addBoth(3, METRIC, value,'','', data)
 
 	// arch: FF110+ pref removed: error means 32bit
+		// also works with servo but we don't specifically detect that yet
 	if (isGecko || 'webkit' == isEngine) {
 		let str = '64bit'; data = 64
 		if (isArch !== true) {
@@ -1755,7 +1756,7 @@ const outputFD = () => new Promise(resolve => {
 	if (!isGecko) {
 		let aList = ['logo','wordmark','version']
 		if (undefined == isOS) {aList.push('os')}
-		if ('blink' == isEngine) {aList.push('browser_architecture')}
+		if ('blink' == isEngine || 'undefined' == isEngine) {aList.push('browser_architecture')}
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})

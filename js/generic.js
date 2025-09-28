@@ -330,6 +330,9 @@ function get_isEngine(METRIC) {
 					}
 				} catch(e) {}
 			}
+		} else if (isAllowNonGeckoUndefined) {
+			isEngine = 'undefined' // a string vs undefined typeof
+			isEngineBlocked = false
 		}
 	} catch(e) {}
 	log_perf(SECTG, METRIC, t0,'', isEngine)
