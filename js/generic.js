@@ -137,7 +137,10 @@ function run_basic(str = 'basic') {
 			// e.g. '<a href="#uad">▼</a>' -> '<span class="perf">notation</span><a href="#uad">▼</a>'
 			let link = items[i].innerHTML
 			link = link.slice(link.indexOf('<a href'), link.length)
-			items[i].innerHTML = "<span class='perf'>"+ str +' mode</span> '+ link
+
+			str += ' mode'
+			if ('undefined' == isEngine) {str = 'experimental'}
+			items[i].innerHTML = "<span class='perf'>"+ str +'</span> '+ link
 		}
 	}
 }
