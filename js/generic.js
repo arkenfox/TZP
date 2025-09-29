@@ -131,14 +131,13 @@ function run_basic(str = 'basic') {
 	}
 	// basic/other modes: notation
 	if (str.length) {
+		if ('undefined' == isEngine) {str = 'experimental'} else {str += ' mode'}
 		let items = document.getElementsByClassName('nav-down')
 		for (let i=0; i < items.length; i++) {
 			// find '<a href' to end, prepend span
 			// e.g. '<a href="#uad">▼</a>' -> '<span class="perf">notation</span><a href="#uad">▼</a>'
 			let link = items[i].innerHTML
 			link = link.slice(link.indexOf('<a href'), link.length)
-			str += ' mode'
-			if ('undefined' == isEngine) {str = 'experimental'}
 			items[i].innerHTML = "<span class='perf'>"+ str +'</span> '+ link
 		}
 	}
