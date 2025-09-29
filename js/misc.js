@@ -879,7 +879,7 @@ function get_window_props(METRIC) {
 		let contentWindow = iframe.contentWindow
 		data = Object.getOwnPropertyNames(contentWindow)
 
-		let tamperBtn = '', aTampered, indexPerf
+		let tamperBtn = '', aTampered, indexPerf, indexEvent
 		if (isGecko) {
 			if (isSmart) {
 				/* safer closed: Performance ... more items then Event
@@ -887,7 +887,8 @@ function get_window_props(METRIC) {
 				BB/FF/ALL open: Performance then Event...
 				*/
 				// tampered: filter items for console open etc
-				indexPerf = data.indexOf('Performance'), indexEvent = data.indexOf('Event')
+				indexPerf = data.indexOf('Performance')
+				indexEvent = data.indexOf('Event')
 				if (runSL) {data.push('fake')}
 				aTampered = data.slice(data.indexOf('Performance')+1)
 				aTampered = aTampered.filter(x => !['Event','Location'].includes(x))
@@ -949,13 +950,13 @@ function get_window_props(METRIC) {
 				MB : {
 					'linux': ['e78afd55','73cfc4b7'],
 					'mac': [],
-					'windows': ['83896626','76547f48']
+					'windows': ['83896626','76547f48'] // 860, 859
 				},
 				TB : {
 					'android': [],
 					'linux': [],
 					'mac': [],
-					'windows': [] // 837, 836
+					'windows': ['94a092a3','ef6e9a85' ] // 837, 836
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
