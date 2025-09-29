@@ -343,11 +343,14 @@ function get_media_css(METRIC) {
 		let cssvalue = getElementProp(14, '#cssC', METRIC +'_css')
 		try {
 			value = (function() {for (let i=0; i < 1000; i++) {if (matchMedia('(color:'+ i +')').matches === true) {return i}}
-				return i
+				return zNA // to match
 			})()
 			if (runSE) {foo++} else if (runSI) {value = 4.5} else if (runSL) {value = 3}
-			let typeCheck = typeFn(value)
-			if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
+			if (zNA !== cssvalue) {
+				// unfortunately, servo returns all getElementProp calls with an empty string
+				let typeCheck = typeFn(value)
+				if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
+			}
 			// lies
 			if (cssvalue !== zErr && value !== cssvalue) {isLies = true}
 		} catch(e) {
@@ -452,7 +455,8 @@ function get_media_css(METRIC) {
 					// this is the 1st value - we use :before
 					let cssvalue2 = getElementProp(14, id, metric +'_css', ':before')
 					// cssvalue = after | cssvalue2 = before
-					cssvalue = cssvalue == zErr ? zErr : cssvalue2 + cssvalue
+					let joiner = ' + ' == cssvalue.slice(0,3) ? '' : ' + '
+					cssvalue = cssvalue == zErr ? zErr : cssvalue2 + joiner + cssvalue
 				}
 				let isLies = (value !== zErr && cssvalue !== zErr && value !== cssvalue)
 				let rfp = oTests[metric].rfp

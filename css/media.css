@@ -11,22 +11,25 @@
 @supports font-format(TrueType){#cssTrueType:after{content:"supported";}}
 
 /* font-format */
-#cssWoff2:after{content:"n/a";}
+#cssWoff2:after{content:"undefined";}
 @supports font-format(woff2){#cssWoff2:after{content:"supported";}}
 
 /* @media */
-#cssOm:after{content:"n/a";}
+#cssOm:after{content:"undefined";}
 @media (-moz-device-orientation:portrait){#cssOm:after{content:"portrait";}}
 @media (-moz-device-orientation:landscape){#cssOm:after{content:"landscape";}}
+#cssO:after{content:"undefined";}
 @media (orientation:portrait){#cssO:after{content:"portrait";}}
 @media (orientation:landscape){#cssO:after{content:"landscape";}}
+#cssAR:after{content:"undefined";}
 @media (aspect-ratio:1/1){#cssAR:after{content:"square";}}
 @media (min-aspect-ratio:10000/9999){#cssAR:after{content:"landscape";}}
 @media (max-aspect-ratio:9999/10000){#cssAR:after{content:"portrait";}}
+#cssDAR:after{content:"undefined";}
 @media (device-aspect-ratio:1/1){#cssDAR:after{content:"square";}}
 @media (min-device-aspect-ratio:10000/9999){#cssDAR:after{content:"landscape";}}
 @media (max-device-aspect-ratio:9999/10000){#cssDAR:after{content:"portrait";}}
-
+#cssDM:after{content:"undefined";}
 @media (display-mode:fullscreen){#cssDM:after{content:"fullscreen";}}
 @media (display-mode:browser){#cssDM:after{content:"browser";}}
 @media (display-mode:minimal-ui){#cssDM:after{content:"minimal-ui";}}
@@ -34,6 +37,7 @@
 @media (display-mode:picture-in-picture){#cssDM:after{content:"picture-in-picture";}}
 @media (display-mode:window-controls-overlay){#cssDM:after{content:"window-controls-overlay";}}
 
+#cssC:after{content:"n/a";}
 @media (color:0){#cssC:after{content:"";}}
 @media (color:1){#cssC:after{content:"1";}}
 @media (color:2){#cssC:after{content:"2";}}

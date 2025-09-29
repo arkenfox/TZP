@@ -259,26 +259,30 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	}
 	setTimeout(function() {
 		try {
-			navigator.storage.persist().then(function(persistent) {
-				navigator.storage.estimate().then(estimate => {
-					// we don't care about estimate.usage
-					let bytes = estimate.quota // bytes
-					let typeCheck = typeFn(bytes)
-					if ('number' === typeCheck && Number.isInteger(bytes)) {
-						let value = lookup_storage_bucket('manager', bytes)
-						value += ' ['+ bytes +' bytes]'
-						if (isProxyLie('StorageManager.estimate')) {
-							value = log_known(6, METRIC, value)
+			if (undefined == navigator.storage) {
+				exit('undefined')
+			} else {
+				navigator.storage.persist().then(function(persistent) {
+					navigator.storage.estimate().then(estimate => {
+						// we don't care about estimate.usage
+						let bytes = estimate.quota // bytes
+						let typeCheck = typeFn(bytes)
+						if ('number' === typeCheck && Number.isInteger(bytes)) {
+							let value = lookup_storage_bucket('manager', bytes)
+							value += ' ['+ bytes +' bytes]'
+							if (isProxyLie('StorageManager.estimate')) {
+								value = log_known(6, METRIC, value)
+							} else {
+								// 1781277 RFP can only be exactly 10GiB or 50GiB
+								if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
+							}
+							exit(value)
 						} else {
-							// 1781277 RFP can only be exactly 10GiB or 50GiB
-							if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
+							throw zErrType + typeCheck
 						}
-						exit(value)
-					} else {
-						throw zErrType + typeCheck
-					}
+					}).catch(function(e){exit(log_error(6, METRIC, e))})
 				}).catch(function(e){exit(log_error(6, METRIC, e))})
-			}).catch(function(e){exit(log_error(6, METRIC, e))})
+			}
 		} catch(e) {exit(log_error(6, METRIC, e))}
 	}, delay)
 })
@@ -291,21 +295,25 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 	]).then(function(res){
 		if ('granted' == res[0]) {isGranted = true}
 		try {
-			navigator.storage.estimate().then(estimate => {
-				let bytes = estimate.quota
-				if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
-				let typeCheck = typeFn(bytes)
-				if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
-				let value = lookup_storage_bucket('quota', bytes, isGranted)
-				let display = value +' ['+ bytes +' bytes]'
-				if (isProxyLie('StorageManager.estimate')) {isLies = true}
-				// 1781277 RFP can only be exactly 10GB or 50GB
-				if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
-				sDetail.document.lookup[METRIC] = display
-				exit(display, value)
-			}).catch(function(e){
-				exit(log_error(6, METRIC, e), zErr)
-			})
+			if (undefined == navigator.storage) {
+				exit('undefined')
+			} else {
+				navigator.storage.estimate().then(estimate => {
+					let bytes = estimate.quota
+					if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
+					let typeCheck = typeFn(bytes)
+					if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
+					let value = lookup_storage_bucket('quota', bytes, isGranted)
+					let display = value +' ['+ bytes +' bytes]'
+					if (isProxyLie('StorageManager.estimate')) {isLies = true}
+					// 1781277 RFP can only be exactly 10GB or 50GB
+					if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
+					sDetail.document.lookup[METRIC] = display
+					exit(display, value)
+				}).catch(function(e){
+					exit(log_error(6, METRIC, e), zErr)
+				})
+			}
 		} catch(e) {
 			exit(log_error(6, METRIC, e), zErr)
 		}

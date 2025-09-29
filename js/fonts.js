@@ -1141,9 +1141,19 @@ const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
 	// blocking document fonts does not affect this test
 
 	let t0 = nowFn()
-	// main test we don't pass an array of font names
-		// otherwise it's a test
+	// main test we don't pass an array of font names otherwise it's a test
 	let isMain = undefined == aFonts
+
+	let data ='', btn='', notation =''
+	function exit(value, btn, notation, data) {
+		if (isMain) {
+			addBoth(12, METRIC, value, btn, notation, data)
+			log_perf(12, METRIC, t0)
+		}
+		return resolve(data)
+	}
+	let typeCheck = typeFn(window.FontFace)
+	if ('undefined' == typeCheck) {exit(typeCheck); return}
 
 	// start with a letter or it throws "SyntaxError: An invalid or illegal string was specified"
 	let fntFaceFake = 'a'+ rnd_string()
@@ -1167,18 +1177,11 @@ const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
 		return Promise.all(fonts.map(getLocalFontFamily))
 		.then(list => list.filter(font => font !== null))
 	}
-	function exit(value, btn, notation, data) {
-		if (isMain) {
-			addBoth(12, METRIC, value, btn, notation, data)
-			log_perf(12, METRIC, t0)
-		}
-		return resolve(data)
-	}
 
 	Promise.all([
 		testLocalFontFamily(fntFaceFake),
 	]).then(function(res){
-		let value ='', data ='', btn='', notation =''
+		let value =''
 		let fntList = isMain ? fntData.faces.full : aFonts
 		let isNotate = fntList.length > 0
 		// only notate if we're testing it
@@ -1207,11 +1210,7 @@ const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
 				})
 			}
 		} catch(e) {
-			if (isMain) {
-				exit(log_error(12, METRIC, e), btn, notation, zErr)
-			} else {
-				exit(zErr, btn, notation, zErr)
-			}
+			if (isMain) {exit(log_error(12, METRIC, e), btn, notation, zErr)} else {exit(zErr, btn, notation, zErr)}
 		}
 	})
 })
@@ -2072,7 +2071,7 @@ function get_system_fonts(METRIC) {
 		hash = mini(data)
 		// moz: defaults since at least 115 on win/linux: assume android/mac the same: i.e switch to generic font-families
 		if ('fonts_moz' == METRIC) {
-			if ('windows' == isOS || 'mac' == isOS || 'linux' == isOS) {
+			if (isDesktop) {
 				if ('fe778289' == hash) {notation = default_green} // 16px normal 400 serif
 			} else if ('android' == isOS) {
 				if ('7e76c987' == hash) {notation = default_green} // 16px normal 400 sans-serif
@@ -2310,22 +2309,29 @@ function get_widget_fonts(METRIC) {
 }
 
 const get_woff2 = (METRIC) => new Promise(resolve => {
-	try {
-		const supportsWoff2 = (function(){
-			const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
-			font.load().catch(err => {
-				// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
-				// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
-				addDisplay(12, METRIC, log_error(12, METRIC, err))
-			})
-			return font.status == 'loaded' || font.status == 'loading'
-		})()
-		let value = (supportsWoff2 ? zS : zF)
-		addBoth(12, METRIC, value)
+	// check
+	let typeCheck = typeFn(window.FontFace)
+	if ('undefined' == typeCheck) {
+		addBoth(12, METRIC, typeCheck)
 		return resolve()
-	} catch(e) {
-		addBoth(12, METRIC, e,'','', zErrLog)
-		return resolve()
+	} else {
+		try {
+			const supportsWoff2 = (function(){
+				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
+				font.load().catch(err => {
+					// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
+					// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
+					addDisplay(12, METRIC, log_error(12, METRIC, err))
+				})
+				return font.status == 'loaded' || font.status == 'loading'
+			})()
+			let value = (supportsWoff2 ? zS : zF)
+			addBoth(12, METRIC, value)
+			return resolve()
+		} catch(e) {
+			addBoth(12, METRIC, e,'','', zErrLog)
+			return resolve()
+		}
 	}
 })
 
