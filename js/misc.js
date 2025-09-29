@@ -879,21 +879,22 @@ function get_window_props(METRIC) {
 		let contentWindow = iframe.contentWindow
 		data = Object.getOwnPropertyNames(contentWindow)
 
-		let tamperBtn = ''
-		if (isSmart) {
-			/* safer closed: Performance ... more items then Event
-			standard closed: Performance + no Event...
-			BB/FF/ALL open: Performance then Event...
-			*/
-			let indexPerf = data.indexOf('Performance'), indexEvent = data.indexOf('Event')
-
-			// tampered: filter items for console open etc
-			if (runSL) {data.push('fake')}
-			let aTampered = data.slice(data.indexOf('Performance')+1)
-			aTampered = aTampered.filter(x => !['Event','Location'].includes(x))
-			if (aTampered.length) {
-				addDetail(METRIC +'_tampered', aTampered.sort())
-				tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
+		let tamperBtn = '', aTampered, indexPerf
+		if (isGecko) {
+			if (isSmart) {
+				/* safer closed: Performance ... more items then Event
+				standard closed: Performance + no Event...
+				BB/FF/ALL open: Performance then Event...
+				*/
+				// tampered: filter items for console open etc
+				indexPerf = data.indexOf('Performance'), indexEvent = data.indexOf('Event')
+				if (runSL) {data.push('fake')}
+				aTampered = data.slice(data.indexOf('Performance')+1)
+				aTampered = aTampered.filter(x => !['Event','Location'].includes(x))
+				if (aTampered.length) {
+					addDetail(METRIC +'_tampered', aTampered.sort())
+					tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
+				}
 			}
 			// all the properties that can be tampered with by NS
 				// safer (no webgl-clicktoplay): 24 items
@@ -902,10 +903,8 @@ function get_window_props(METRIC) {
 				'HTMLObjectElement','MediaSource','OffscreenCanvas','Promise','Proxy','SharedWorker',
 				'String','URL','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI',
 				'decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','webkitURL',
-				// ? these show up in file://
-				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image',
-				// 
-				'WebAssembly'
+				// other
+				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly'
 			]
 			let aHas = aPossible.filter(x => data.includes(x))
 			aHas = dedupeArray(aHas)
@@ -915,22 +914,22 @@ function get_window_props(METRIC) {
 			data = data.filter(x => !aHas.includes(x))
 			data = data.concat(aHas)
 
-			// now we check tampered items not in possible
-			if (aTampered.length) {
-				let aTamperedNotInPossible = aTampered.filter(x => !aPossible.includes(x))
-				if (aTamperedNotInPossible.length) {
-					isLies = true
-					console.log(mini(aTamperedNotInPossible), aTamperedNotInPossible)
+			if (isSmart) {
+				// now we check tampered items not in possible
+				if (aTampered.length) {
+					let aTamperedNotInPossible = aTampered.filter(x => !aPossible.includes(x))
+					if (aTamperedNotInPossible.length) {
+						isLies = true
+						console.log(mini(aTamperedNotInPossible), aTamperedNotInPossible)
+					}
+				}
+				// notate console
+				if (!isLies && isDesktop && isOS !== undefined) {
+					let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
+					addDisplay(18, 'consolestatus', strConsole)
 				}
 			}
 
-			// notate console
-			if (!isLies && isDesktop && isOS !== undefined) {
-				let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
-				addDisplay(18, 'consolestatus', strConsole)
-			}
-		}
-		if (isGecko) {
 			// move expected Performance, Event, Location to the end
 				// these affect the order if console open and various tabs selected
 			let aCheck = ['Location','Performance','Event']
@@ -956,7 +955,7 @@ function get_window_props(METRIC) {
 					'android': [],
 					'linux': [],
 					'mac': [],
-					'windows': []
+					'windows': [] // 837, 836
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
