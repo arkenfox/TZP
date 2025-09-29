@@ -39,7 +39,11 @@
 
 	<table id="tb3">
 		<col width="1%"><col width="33%"><col width="33%"><col width="32%"><col width="1%">
-		<thead><tr><th colspan="5"><div class="nav-title">gecko versions</div></th></tr></thead>
+		<thead><tr><th colspan="5">
+			<div class="nav-title">gecko versions
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr><td colspan="5" class="intro">
 			<span class="no_color">
 				<details class="no_color"><summary>INFO</summary>
@@ -224,6 +228,7 @@ function outputVersion() {
 		gTZP = performance.now()
 		// record
 		function rec(order, version, bug, result, perf, note = '') {
+			dom.perf.innerHTML = 'main: '+ order
 			oResults[order] = [version, (performance.now() - gTZP) +" ms", result]
 			// do as little as possible to not affect perf
 			if (result === true) {
@@ -588,8 +593,10 @@ function outputVersion() {
 		rec(105, 105, "830716", ver105, performance.now()-t105) // 0.15ms
 
 		// 104: 1712623
-		let t104 = performance.now()
-		let ver104 = (SVGStyleElement.prototype.hasOwnProperty("disabled"))
+		let t104 = performance.now(), ver104
+		if (undefined !== window.SVGStyleElement) { // check window prop first e.g. servo
+			ver104 = (SVGStyleElement.prototype.hasOwnProperty("disabled"))
+		}
 		rec(104, 104, "1712623", ver104, performance.now()-t104)
 
 		// 103: 1772494
@@ -749,7 +756,10 @@ function outputVersion() {
 		rec(78, 78, "1626015", ver78, performance.now()-t78)
 
 		// 77: 1536540
-		let t77 = performance.now(), ver77 = (window.IDBCursor.prototype.hasOwnProperty("request"))
+		let t77 = performance.now(), ver77
+		if (undefined !== window.IDBCursor) { // checked for window proeprty for e.g. servo
+			ver77 = (window.IDBCursor.prototype.hasOwnProperty("request"))
+		}
 		rec(77, 77, "1536540", ver77, performance.now()-t77)
 
 		// 76: 1608010: legacy check toSource (74+) FF56- false positive
@@ -826,7 +836,10 @@ function outputVersion() {
 		rec(61, 61, "1455805", ver61, performance.now()-t61)
 
 		// 60: 1436659
-		let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
+		let t60 = performance.now(), ver60
+		if (undefined !== window.Animation) { // check for window property e.g. servo
+			ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
+		}
 		rec(60, 60, "1436659", ver60, performance.now()-t60)
 
 		// 59: 1336400

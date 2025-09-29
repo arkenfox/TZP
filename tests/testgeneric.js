@@ -513,7 +513,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) return 107 // 1174097
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
 		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
-		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
+		if (undefined !== window.SVGStyleElement && SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
 			if (Array(1).includes()) return 102 // 1767541: regression FF99
@@ -553,7 +553,7 @@ const get_isVer = () => new Promise(resolve => {
 		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
 		if ("function" === typeof Promise.any) return 79 // 1599769 shipped
 		if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
-		if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
+		if (undefined !== window.IDBCursor && window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
 		if ("undefined" === typeof Object.toSource
 			&& !test76.validity.rangeOverflow) return 76 // 1608010
 		if ("function" === typeof Intl.Locale) return 75 // 1613713
@@ -577,7 +577,7 @@ const get_isVer = () => new Promise(resolve => {
 		if ("desc" === Symbol('desc').description) return 63 // 1472170
 		if ("function" === typeof console.timeLog) return 62 // 1458466
 		if ("object" === typeof CSS) return 61 // 1455805
-		if ("function" === typeof Animation.prototype.updatePlaybackRate) return 60 // 1436659
+		if (undefined !== window.Animation && "function" === typeof Animation.prototype.updatePlaybackRate) return 60 // 1436659
 		if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) return 59 // 1336400
 		if ("function" === typeof Intl.PluralRules) return 58 // 1403318
 		if ("function" === typeof AbortSignal) return 57 // 1378342
