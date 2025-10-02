@@ -654,7 +654,7 @@ function get_touc_h(METRIC) {
 				let expected, got = 'none' == value ? value : value.join(', ')
 				if ('mac' == isOS) {
 					// mac doesn't have touch
-					throw zErrInvalid +'expected none: got '+ got
+					if ('none' !== value) {throw zErrInvalid +'expected none: got '+ got}
 				} else if (!isDesktop) {
 					// android
 					if ('62482a70' !== mini(value)) {
