@@ -201,6 +201,7 @@ let overlayScope = 'document',
 	overlaySection = '',
 	overlayName = '',
 	overlayCharLen, // length per monospace character
+	overlayInfo = '',
 	metricsData,
 	metricsTitle,
 	metricsPrefix = ''
