@@ -196,6 +196,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	position: absolute;
 	margin: 15px 25px 10px;
 	padding-bottom: 15px;
+	overflow-y:scroll;
 }
 #overlaybuttons {
 	float: right;
@@ -276,7 +277,6 @@ tr td.border-top {
 .togA, .togP, #btnFS, /* android, perf, fullscreen element */
 .togUA, .togUAD, .togAI, .togAW, .togMM,
 .togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
-
 
 #tb1 td:first-child {color: var(--test1);}
 	#tb1 .togS td:first-child {color: var(--test99);} /* screen/window/viewport */
