@@ -1006,6 +1006,9 @@ function json_highlight(json, clrValues = false) {
 			len = (contentWidth/overlayCharLen) - 2 // give us some wiggle room
 			if (len < minLen) {len = minLen} else {len = Math.floor(len)}
 			overlayInfo = contentWidth +' | '+ overlayCharLen +' | '+ len
+			let strLast = '1234567890', strSpacer = (' ').repeat(len -(overlayInfo.length + strLast.length))
+			overlayInfo += strSpacer + strLast
+
 			//console.log(contentWidth, overlayCharLen, len)
 		} catch(e) {}
 		json = json_stringify(json, len);
