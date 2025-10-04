@@ -999,11 +999,13 @@ function json_highlight(json, clrValues = false) {
 		// get the overlay width and use that to calculate a json maxlength
 			// old hardcoded code: linux 88, android 68, windows/mac incl. BB = 95
 		let minLen = 50, len = isDesktop ? 95 : minLen
+		overlayInfo = ''
 		try {
 			// we use the table because it is visible
 			let contentWidth = dom.tbfp.clientWidth - 100 // overlaycontent available width is 100px less
 			len = (contentWidth/overlayCharLen) - 2 // give us some wiggle room
 			if (len < minLen) {len = minLen} else {len = Math.floor(len)}
+			overlayInfo = contentWidth +' | '+ overlayCharLen +' | '+ len
 			//console.log(contentWidth, overlayCharLen, len)
 		} catch(e) {}
 		json = json_stringify(json, len);
@@ -1220,6 +1222,7 @@ function metricsShow(name, scope) {
 	metricsData = data
 	let isCache = (target == 'fingerprint' || target == 'fingerprint_flat')
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][scope + overlayFP] : json_highlight(data, true)): ''
+	dom.overlayInfo.innerHTML = isCache ? '' : overlayInfo
 
 	//add btn, show/hide options, display
 	let hash = mini(data)
