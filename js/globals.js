@@ -200,7 +200,7 @@ let overlayScope = 'document',
 	overlayHealthCount = '',
 	overlaySection = '',
 	overlayName = '',
-	overlayMaxLength = 95, // win/mac incl. BB
+	overlayCharLen, // length per monospace character
 	metricsData,
 	metricsTitle,
 	metricsPrefix = ''

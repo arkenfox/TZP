@@ -800,8 +800,8 @@ const get_isXML = () => new Promise(resolve => {
 			let typeCheck = typeFn(str)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 
-			// blink + webkit
-			if (undefined !== isEngine) {
+			if (!isGecko) {
+				// blink + webkit: also catch undefined engines
 				let newtarget = target.children
 				// [0] "This page contains the following errors:"
 				// [1] "error on line X at column Y: " + actual error
@@ -825,9 +825,8 @@ const get_isXML = () => new Promise(resolve => {
 					}
 				}
 				//if ('n02' == k) {console.log(str, '\n', newtarget)} //debug
-			}
-
-			if (isGecko) {
+			} else {
+				// gecko
 				//split into parts: works back to FF52 and works with LTR
 				parts = str.split('\n')
 				if ('n02' == k) {
@@ -997,7 +996,17 @@ function json_highlight(json, clrValues = false) {
 		if ('_summary' == overlayHealth) {clrSymbols = true}
 	}
 	if ('string' !== typeof json) {
-		json = json_stringify(json);
+		// get the overlay width and use that to calculate a json maxlength
+			// old hardcoded code: linux 88, android 68, windows/mac incl. BB = 95
+		let minLen = 50, len = isDesktop ? 95 : minLen
+		try {
+			// we use the table because it is visible
+			let contentWidth = dom.tbfp.clientWidth - 100 // overlaycontent available width is 100px less
+			len = (contentWidth/overlayCharLen) - 2 // give us some wiggle room
+			if (len < minLen) {len = minLen} else {len = Math.floor(len)}
+			//console.log(contentWidth, overlayCharLen, len)
+		} catch(e) {}
+		json = json_stringify(json, len);
 	}
 	json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
@@ -1025,7 +1034,7 @@ function json_highlight(json, clrValues = false) {
 	})
 }
 
-function json_stringify(passedObj, options = {}) {
+function json_stringify(passedObj, overlayMaxLength = 95, options = {}) {
 	/* https://github.com/lydell/json-stringify-pretty-compact */
 	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
 	const indent = JSON.stringify(
@@ -1598,6 +1607,14 @@ function output_section(section, scope) {
 		gData[zFP][list] = {}
 		for (const k of Object.keys(gFlat).sort()) {gData[zFP][flat][k] = gFlat[k]}
 		for (const k of Object.keys(gList).sort()) {gData[zFP][list][k] = gList[k]}
+		// recalculate overlayCharLen for cached big jsons
+		try {
+			// at a minimum this is 10 chars "0, 0, 0, 0" all platforms/engines
+			let target = dom.screen_positions
+			overlayCharLen = target.offsetWidth/target.innerText.length
+		} catch(e) {
+			overlayCharLen = 7
+		}
 		// cache big jsons displays
 		sDataTemp["cache"] = {}
 		sDataTemp["cache"][scope] = json_highlight(gData[zFP][scope])
@@ -1980,10 +1997,6 @@ function countJS(item) {
 			Promise.all([
 				get_isOS('isOS')
 			]).then(function(){
-				// adjust overlayMaxLength
-				if ('linux' == isOS) {overlayMaxLength = 88
-				} else if (!isDesktop) {overlayMaxLength = 68
-				}
 				// tweak monospace size: ToDo: this is bad design
 				if ('windows' == isOS) {
 					try {
