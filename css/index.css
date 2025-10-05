@@ -65,8 +65,8 @@
 	--link: #5079cb; /* test12: so basic mode ignores it */
 }
 
-/* DARK */
-@media (prefers-color-scheme: dark) {
+/* DARKL only apply on prefers light to encourage dark reader extensions to trigger */
+@media (prefers-color-scheme: light) {
 	:root{
 	/* tooltips */
 	--ttipbg: #b3b3b3;
