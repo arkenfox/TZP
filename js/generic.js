@@ -956,13 +956,13 @@ function copyclip(element) {
 				// indicate it
 				try {
 					let target = dom.metricsBtnCopy
-					target.classList.add('white')
+					target.classList.add('indicate')
 					target.classList.remove('btn0')
 					setTimeout(function() {
 						target.classList.add('btn0')
-						target.classList.remove('white')
-					}, 500)
-				} catch {}
+						target.classList.remove('indicate')
+					}, 500)	
+				} catch(e) {}
 			}, function() {
 				// clipboard write failed
 			})
@@ -1164,13 +1164,6 @@ function metricsEvent(evt) {
 	if (isEscape) {metricsAction('close')
 	} else if ((evt.ctrlKey || evt.metaKey) && 67 == evt.keyCode) {
 		copyclip('metricsDisplay')
-		let target = dom.metricsBtnCopy
-		target.classList.add('white')
-		target.classList.remove('btn0')
-		setTimeout(function() {
-			target.classList.add('btn0')
-			target.classList.remove('white')
-		}, 500)
 	}
 }
 
