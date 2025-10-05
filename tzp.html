@@ -177,14 +177,14 @@
 				<div class="btn-right c" id="documenthealth"></div>
 		</td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">fingerprints are always 
+		<tr><td colspan="2"><span class="normal"><span class="no_color">fingerprints are always 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
 			<sup>1</sup>, prototype/proxy lies by
 				<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a>
 				<sup>2</sup>, json format by
 				<a target="_blank" class="blue" href="https://github.com/lydell/json-stringify-pretty-compact">Simon Lydell</a>
 			</span>
-		</td></tr>
+		</span></td></tr>
 	</table>
 
 	<!--screen-->
@@ -368,7 +368,7 @@
 		<tr class="A2"><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
 
 		<tr><td colspan="2"></td></tr> <!--space-->
-		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
+		<tr><td colspan="2"><span class="normal"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
 			<span class="no_color">, </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
@@ -377,7 +377,7 @@
 			<a target="_blank" class="blue" href="https://blog.pastly.net/posts/2016-09-04-how-css-alone-can-help-track-you/">Matt Traudt</a> <sup>3</sup>
 			<span class="no_color"> and </span>
 			<a target="_blank" class="blue" href="https://github.com/earthlng/testpages">earthlng</a> <sup>4</sup>
-		</td></tr>
+		</span></td></tr>
 	</table>
 
 	<!--ua-->
@@ -430,9 +430,10 @@
 			<tr class="togAW"><td>service worker</td><td class="c mono" id="agent_worker_service"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goNW_AGENT')">[ click ]</span>
 			window.open</td><td class="c mono" id="agent_open"></td></tr>
-		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
+		<tr><td colspan="3"><span class="normal"><span class="no_color">iframe code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
-			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup></td></tr>
+			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
+			</span></td></tr>
 	</table>
 
 	<!--fd-->
@@ -444,13 +445,13 @@
 			<div class="nav-down"><a href="#regiond">&#9660;</a></div>
 			<div class="nav-right"><a name="featured"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">
-			These tests are to show that you cannot hide your engine
+		<tr><td colspan="2" class="intro"><span class="normal">
+			<span class="no_color">These tests are to show that you cannot hide your engine
 			<a class="blue" target="blank" href="tests/engineprop.html">[PoC1]</a>
 			+ <a class="blue" target="blank" href="tests/engine.html">[PoC2]</a>, version
 			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a> or OS
 			<a class="blue" target="blank" href="tests/os.html">[PoC]</a>.</span>
-		</td></tr>
+		</span></td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(3)">[ re-run ]</span></div>
 			<span class="c" id="featurehash"></span>
@@ -472,9 +473,10 @@
 				style="font-family: Roboto, Droid Sans, ABR;">Android</span>
 		</td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
+		<tr><td colspan="2"><span class="normal">
+			<span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/os-detection-font-css.html">Arthur Edelstein</a> <sup>1</sup>
-		</td></tr>
+		</span></td></tr>
 	</table>
 
 	<!--region-->
@@ -703,8 +705,9 @@
 		<tr><td>viewport-segments</td><td class="mono"><span id="cssVS"></span>
 			<span class="cssc" id="viewport-segments_css"></span>
 			| <span class="c" id="viewport-segments"></span></td></tr>
-		<tr><td colspan="2"><span class="no_color">pointer code based on work by </span>
-			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke</a> <sup>1</sup></td></tr>
+		<tr><td colspan="2"><span class="normal"><span class="no_color">pointer code based on work by </span>
+			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke</a> <sup>1</sup>
+			</span></td></tr>
 	</table>
 
 	<!--svg-->
@@ -728,10 +731,10 @@
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">These tests are only checking for
+		<tr><td colspan="2" class="intro"><span class="normal"><span class="no_color">These tests are only checking for
 			protection, not entropy. Additional canvas tests [iframes, workers, offscreen] can be found at
 			<a target="blank" class="blue" href="https://canvasblocker.kkapsner.de/test/test.html">CanvasBlocker</a></span>
-		</td></tr>
+			</span></td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(9)">[ re-run ]</span></div>
 			<span class="c" id="canvashash"></span>
@@ -749,9 +752,11 @@
 			&nbsp; toDataURL</td><td class="c mono" id="toDataURL"></td></tr>
 		<tr><td>[solid] toDataURL</td><td class="c mono" id="toDataURL_solid"></td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">canvas code based on work by </span>
+		<tr><td colspan="2"><span class="normal">
+			<span class="no_color">canvas code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
-			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
+			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a>
+			</span></td></tr>
 	</table>
 
 	<!--webgl-->
@@ -771,8 +776,9 @@
 		<tr><td>experimental</td><td class="mono">result</td></tr>
 		<tr><td>webgl</td><td class="mono">result</td></tr>
 		<tr><td>webgl2</td><td class="mono">result</td></tr>
-		<tr><td colspan="3"><span class="no_color">webgl code by </span>
-			<a target="_blank" class="blue" href="https://gist.github.com/abrahamjuliot/7baf3be8c451d23f7a8693d7e28a35e2">Abraham Juliot</a></td></tr>
+		<tr><td colspan="3"><span class="normal"><span class="no_color">webgl code by </span>
+			<a target="_blank" class="blue" href="https://gist.github.com/abrahamjuliot/7baf3be8c451d23f7a8693d7e28a35e2">Abraham Juliot</a>
+			</span></td></tr>
 	</table>
 
 	<!--audio-->
@@ -799,12 +805,12 @@
 		<tr><td>OscillatorNode <sup>1</sup></td><td class="c2 gc mono" id="oscillator"></td></tr>
 		<tr><td>+DynamicsCompressor <sup>1</sup></td><td class="c2 gc mono" id="oscillator_compressor"></td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">audio code based on work by </span>
+		<tr><td colspan="2"><span class="normal"><span class="no_color">audio code based on work by </span>
 			<a target="_blank" class="blue" href="https://audiofingerprint.openwpm.com/">openWPM</a> <sup>1</sup>
 			<span class="no_color"> and </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a> <sup>2</sup>
-		</td></tr>
+		</span></td></tr>
 	</table>
 
 	<!--fonts-->
@@ -871,7 +877,8 @@
 			<span id="cssWoff2"></span> | <span class="c" id="woff2"></span></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<!--creds-->
-		<tr><td colspan="2"><span class="no_color">custom font from </span>
+		<tr><td colspan="2"><span class="normal">
+			<span class="no_color">custom font from </span>
 			<a target="_blank" class="blue"	href="https://graphite.sil.org/">SIL</a> <sup>3</sup>
 			<span class="no_color"> and code based on work by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
@@ -880,7 +887,7 @@
 				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>2</sup>
 			<span class="no_color"> and </span>
 			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>4</sup>
-		</td></tr>
+		</span></td></tr>
 	</table>
 
 	<!--codecs-->
@@ -987,9 +994,9 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">layout.css.always_underline_links</span></div>
 			&nbsp; underline links</td><td class="c mono" id="underline_links"></td></tr>
-		<tr><td colspan="3"><span class="no_color">code by </span>
+		<tr><td colspan="3"><span class="normal"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
-		</td></tr>
+			</span></td></tr>
 	</table>
 
 	<!--elements-->
@@ -1118,9 +1125,9 @@
 		<tr><td>webdriver</td><td class="c mono" id="webdriver"></td></tr>
 		<tr><td>window properties <sup>1</sup></td>
 			<td class="mono"><span class="c" id="window_properties"></span><span class="c" id="consolestatus"></span></td></tr>
-		<tr><td colspan="2"><span class="no_color">code by </span>
+		<tr><td colspan="2"><span class="normal"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
-		</td></tr>
+			</span></td></tr>
 	</table>
 
 	<!--perf-->
