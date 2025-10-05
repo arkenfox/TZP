@@ -345,17 +345,17 @@ tr td.border-top {
 .togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
 
 #tb1 td:first-child {color: var(--test1); font-weight: var(--firstchildweight)}
-	#tb1 .togS td:first-child {color: var(--test99);} /* screen/window/viewport */
+	#tb1 .togS td:first-child {color: var(--test99); font-weight: normal;} /* screen/window/viewport */
 #tb2 td:first-child {color: var(--test2); font-weight: var(--firstchildweight)}
-	#tb2 .togUA td:first-child {color: var(--test99);} /* useragent */
+	#tb2 .togUA td:first-child {color: var(--test99); font-weight: normal;} /* useragent */
 	#tb2 .togUAD td:first-child {color: var(--test99);} /* useragentdata */
-	#tb2 .togAI td:first-child {color: var(--test99);} /* agent iframes */
-	#tb2 .togAW td:first-child {color: var(--test99);} /* agent workers */
+	#tb2 .togAI td:first-child {color: var(--test99); font-weight: normal;} /* agent iframes */
+	#tb2 .togAW td:first-child {color: var(--test99); font-weight: normal;} /* agent workers */
 #tb3 td:first-child {color: var(--test3); font-weight: var(--firstchildweight)}
 #tb4 td:first-child {color: var(--test4); font-weight: var(--firstchildweight)}
-	#tb4 .togTT td:first-child {color: var(--test99);} /* timezone timezone */
-	#tb4 .togTL td:first-child {color: var(--test99);} /* timezone lastmodified */
-	#tb4 .togTO td:first-child {color: var(--test99);} /* timezone offsets */
+	#tb4 .togTT td:first-child {color: var(--test99); font-weight: normal;} /* timezone timezone */
+	#tb4 .togTL td:first-child {color: var(--test99); font-weight: normal;} /* timezone lastmodified */
+	#tb4 .togTO td:first-child {color: var(--test99); font-weight: normal;} /* timezone offsets */
 #tb5 td:first-child {color: var(--test5); font-weight: var(--firstchildweight)}
 #tb6 td:first-child {color: var(--test6); font-weight: var(--firstchildweight)}
 #tb7 td:first-child {color: var(--test7); font-weight: var(--firstchildweight)}
@@ -364,16 +364,16 @@ tr td.border-top {
 #tb10 td:first-child {color: var(--test10); font-weight: var(--firstchildweight)}
 #tb11 td:first-child {color: var(--test11); font-weight: var(--firstchildweight)}
 #tb12 td:first-child {color: var(--test12); font-weight: var(--firstchildweight)}
-	#tb12 .togFS td:first-child {color: var(--test99);} /* font sizes */
+	#tb12 .togFS td:first-child {color: var(--test99); font-weight: normal;} /* font sizes */
 #tb13 td:first-child {color: var(--test13); font-weight: var(--firstchildweight)}
 #tb14 td:first-child {color: var(--test14); font-weight: var(--firstchildweight)}
-	#tb14 .togCS td:first-child {color: var(--test99);} /* computed styles */
-	#tb14 .togMM td:first-child {color: var(--test99);} /* matchmedia + css */
+	#tb14 .togCS td:first-child {color: var(--test99); font-weight: normal;} /* computed styles */
+	#tb14 .togMM td:first-child {color: var(--test99); font-weight: normal;} /* matchmedia + css */
 #tb15 td:first-child {color: var(--test15); font-weight: var(--firstchildweight)}
 #tb16 td:first-child {color: var(--test16); font-weight: var(--firstchildweight)}
 #tb17 td:first-child {color: var(--test17); font-weight: var(--firstchildweight)}
-	#tb17 .togTA td:first-child {color: var(--test99);} /* timing audio */
-	#tb17 .togTP td:first-child {color: var(--test99);} /* timing precision */
+	#tb17 .togTA td:first-child {color: var(--test99); font-weight: normal;} /* timing audio */
+	#tb17 .togTP td:first-child {color: var(--test99); font-weight: normal;} /* timing precision */
 #tb18 td:first-child {color: var(--test18); font-weight: var(--firstchildweight)}
 #tb99 td:first-child {color: var(--test99);} /* index page */
 #tbfp td:first-child {color: var(--test99); font-weight: var(--firstchildweight);}
