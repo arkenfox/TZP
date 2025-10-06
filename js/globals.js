@@ -151,6 +151,7 @@ let isArch = true,
 	isOS,
 	isOSErr,
 	isRecursion,
+	isScrollbar,
 	isStyles = ['cursive','math','monospace','sans-serif','serif','system-ui'],
 		// FF145+ 1788937 math
 		// 'emoji','ui-monospace','ui-rounded','ui-serif' = currently at least gecko + blink redundant (windows)
