@@ -1005,7 +1005,7 @@ function json_highlight(json, clrValues = false) {
 		overlayInfo = ''
 		try {
 			// we use the table because it is visible
-			let contentWidth = dom.tbfp.clientWidth - 100 // overlaycontent available width is 100px less
+			let contentWidth = dom.tbfp.clientWidth - (100 + isScrollbar) // overlaycontent available width is 100px less
 			len = (contentWidth/overlayCharLen) - 2 // give us some wiggle room
 			if (len < minLen) {len = minLen} else {len = Math.floor(len)}
 			overlayInfo = contentWidth +' | '+ overlayCharLen +' | '+ len
@@ -1221,6 +1221,8 @@ function metricsShow(name, scope) {
 	metricsData = data
 	let isCache = (target == 'fingerprint' || target == 'fingerprint_flat')
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][scope + overlayFP] : json_highlight(data, true)): ''
+	// overlay json maxLentgh info is annoying as it shows/flashes before the display data renders
+		// even if I do after setting dom.metricsDisplay.innerHTML
 	dom.overlayInfo.innerHTML = isCache ? '' : overlayInfo
 
 	//add btn, show/hide options, display
