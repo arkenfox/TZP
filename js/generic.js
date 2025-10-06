@@ -1005,14 +1005,13 @@ function json_highlight(json, clrValues = false) {
 		overlayInfo = ''
 		try {
 			// we use the table because it is visible
-			let contentWidth = dom.tbfp.clientWidth - (100 + isScrollbar) // overlaycontent available width is 100px less
+				// overlaycontent available width is 100px less
+			let contentWidth = dom.tbfp.clientWidth - (100 + isScrollbar) 
 			len = (contentWidth/overlayCharLen) - 2 // give us some wiggle room
 			if (len < minLen) {len = minLen} else {len = Math.floor(len)}
 			overlayInfo = contentWidth +' | '+ overlayCharLen +' | '+ len
 			let strLast = '1234567890', strSpacer = (' ').repeat(len -(overlayInfo.length + strLast.length))
 			overlayInfo += strSpacer + strLast
-
-			//console.log(contentWidth, overlayCharLen, len)
 		} catch(e) {}
 		json = json_stringify(json, len);
 	}
@@ -1148,6 +1147,7 @@ function metricsAction(type) {
 	} else {
 		// user changed settings
 		dom.metricsDisplay.innerHTML = ''
+		dom.overlayInfo.innerHTML = ''
 		// force delay so reflow = always start at the top
 		setTimeout(function() {
 			metricsShow(overlayName, overlayScope)
@@ -1221,9 +1221,8 @@ function metricsShow(name, scope) {
 	metricsData = data
 	let isCache = (target == 'fingerprint' || target == 'fingerprint_flat')
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][scope + overlayFP] : json_highlight(data, true)): ''
-	// overlay json maxLentgh info is annoying as it shows/flashes before the display data renders
-		// even if I do after setting dom.metricsDisplay.innerHTML
-	dom.overlayInfo.innerHTML = isCache ? '' : overlayInfo
+	dom.overlayInfo.innerHTML = overlayInfo
+
 
 	//add btn, show/hide options, display
 	let hash = mini(data)
@@ -1615,7 +1614,7 @@ function output_section(section, scope) {
 		// recalculate overlayCharLen for cached big jsons
 		try {
 			// at a minimum this is 10 chars "0, 0, 0, 0" all platforms/engines
-			let target = dom.screen_positions
+			let target = dom.window_positions
 			overlayCharLen = target.offsetWidth/target.innerText.length
 		} catch(e) {
 			overlayCharLen = 7
