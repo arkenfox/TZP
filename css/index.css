@@ -1,37 +1,7 @@
 
-/* LIGHT */
 :root{
-	/* tooltips */
-	--ttipbg: #000;
-	--ttipcolor: #eae3e3;
-	--indicate: #a4a4a4;
-	--testh: #000;
-	--test0: #0b0b0b;
-
-	/* section text color: first child, buttons etc */
-	--test1: #d10000;
-	--test2: #de6325;
-	--test3: #c88b10;
-	--test4: #999925;
-	--test5: #91bf38;
-	--test6: #65ad41;
-	--test7: #11b911;
-	--test8: #268e49;
-	--test9: #29ad81;
-	--test10: #1fadad;
-	--test11: #2e88b5;
-	--test12: #5079cb;
-	--test13: #6b6bc7;
-	--test14: #8560cf;
-	--test15: #ad64d2;
-	--test16: #c734c7;
-	--test17: #b63e8e;
-	--test18: #ca2059;
-	--test99: #808080;
-	--testbad: #d10000;
-	--testred: #d10000;
-	/* table header backgrounds */
-	--bg0: #dbe0e6;
+	/* backgrounds */
+	--bg0: #edf2f6; /* body */
 	--bg1: #f09b9b;
 	--bg2: #f0b89b;
 	--bg3: #f0d49b;
@@ -50,33 +20,56 @@
 	--bg16: #f09bf0;
 	--bg17: #f09bd4;
 	--bg18: #f09bb8;
-	--bg99: #a4a4a4;
-
-	/* health good and bad background colors */
-	--bggood: #96c88440; /* #96c88440 */
-	--bgbad: #fd3d3d2e; /* fd3d3d2e */
-	/* table rows 1st child */
-	--firstchildweight: bold;
-	/* overlay JSON colors */
-	--jstring: #DC01B7;
-	--jboolean: #058B00;
+	--bg99: #a4a4a4; /* fingerprint and perf */
+	--bggood: #bae6aa40;
+	--bgbad: #fb80802e;
+	/* text */
+	--testh: #000; /* h2 title */
+	--test0: #0b0b0b;  /* body */
+	--test1: #be0f0f;  /* 190,  15,  15 | s218 */
+	--test2: #c85a1e;  /* 200,  90,  30 | s188 */
+	--test3: #c8870f;  /* 200, 135,  15 | s219 */
+	--test4: #a0a00a;  /* 160. 160,  10 | s225 */
+	--test5: #82b919;  /* 130, 185,  25 | s194 */
+	--test6: #46be0f;  /*  70, 190,  15 | s214 */
+	--test7: #0ab90a;  /*  10, 185,  10 | s229 */
+	--test8: #0aa537;  /*  10, 165,  55 | s226 */
+	--test9: #0a9164;  /*  10, 145, 100 | s222 */
+	--test10: #14aaaa; /*  20, 170, 170 | s201 */
+	--test11: #1482b4; /*  30, 130, 180 | s204 */
+	--test12: #3c73e1; /*  60, 115, 225 | s187 */
+	--test13: #5f5fd7; /*  95,  95, 215 | s152 */
+	--test14: #8c60e6; /* 140,  95, 230 | s186 */
+	--test15: #9137be; /* 145,  55, 190 | s141 */
+	--test16: #d750d7; /* 215,  80, 215 | s160 */
+	--test17: #b43d8c; /* 180,  60, 140 | s128 */
+	--test18: #c81f5a; /* 200,  30,  90 | s188 */
+	--test99: #808080; /* fp + perf */
+	--testbad: #be0f0f;
+	--testred: #be0f0f; /* not affected by basic mode */
+	--testweight: bold;
+	/* other */
+	--txtbasic: #69004f;
+	--txtindicate: #a4a4a4; /* color change of copy button */
+	--txtlink: #5079cb;
+	/* json colors */
+	--jboolean: #058b00;
+	--jkey: #0074e8;
 	--jnull: #939395;
-	--jkey: #0074E8;
-	--link: #5079cb; /* test12: so basic mode ignores it */
+	--jstring: #dc01b7;
 }
 
-/* DARKL only apply on prefers light to encourage dark reader extensions to trigger */
 @media (prefers-color-scheme: light) {
+	/* DARK mode: we only apply it with prefers-light to encourage dark reader extensions to trigger */
 	:root{
-	/* tooltips */
-	--ttipbg: #b3b3b3;
-	--ttipcolor: black;
-	--indicate: white; /* color we change overlay button to when clicked or shortcut */
-	
-	--testh: #ffffff; /* white : only used for TorZillaPrint h2 header */
-	--test0: #b3b3b3; /* default color, no_color & no-color button etc */
-
-	/* section text color: first child, buttons etc */
+	/* backgrounds */
+	--bg0: #161b22;
+	--bg99: #808080;
+	--bggood: none;
+	--bgbad: none;
+	/* text */
+	--testh: #ffffff;
+	--test0: #b3b3b3;
 	--test1: #dc9d9d;
 	--test2: #dcb29d;
 	--test3: #dcc79d;
@@ -95,27 +88,24 @@
 	--test16: #dc9ddc;
 	--test17: #dc9dc7;
 	--test18: #dc9db2;
-	--test99: #808080;
-	--testbad: #ff8787; /* sat 120 */
-	--testred: #ff8787; /* not affected by basic mode */
-	/* table header backgrounds */
-	--bg0: #161b22;
-	--bg99: #808080;
-
-	/* health good and bad background colors */
-	--bggood: none; /* #96c88440 */
-	--bgbad: none; /* fd3d3d2e */
-	/* table rows 1st child */
-	--firstchildweight: normal;
-	/* overlay JSON colors */
+	--testbad: #ff8787;
+	--testred: #ff8787;
+	--testweight: normal;
+	/* other */
+	--txtbasic: #d4c1b3;
+	--txtindicate: white;
+	--txtlink: #9db2dc;
+	/* json colors */
 	--jstring: #ff7de9;
 	--jboolean: #86de74;
 	--jnull: #939395;
 	--jkey: #75bfff;
-	--link: #9db2dc; /* test12: so basic mode ignores it */
 	}
 }
 
+html {
+	scrollbar-width: none; /* so all window measurements are the same: note we still measure scrollbars in elements */
+}
 body {background-color: var(--bg0); color: var(--test0);}
 h2 {color: var(--testh); font-size: 14px; text-align: center; margin-top: inherit;}
 code {
@@ -124,11 +114,10 @@ code {
 }
 
 a {color: black; text-decoration: none;}
-a.blue {color: var(--test12); text-decoration: none;}
-a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-height: 1.2em}
+a.blue {color: var(--txtlink); text-decoration: none;}
+a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-height: 1.2em}
 
 .no_color {color: var(--test0);}
-.basic {color: #d4c1b3;}
 .good {color: var(--test7); background-color: var(--bggood);}
 .bad {color: var(--testbad); background-color: var(--bgbad);}
 .red {color: var(--testred); background-color: var(--bgbad);} /* use in basic mode to enforce showing an issue e.g. mismatched metric counts */
@@ -206,15 +195,15 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 
 /* tooltips */
 .icon {font-size: 10px; font-weight: bold; color: var(--test0); cursor: default;}
-.ttip {position: relative; display: inline-block;}
+.ttip {position: relative; display: inline-block; font-weight: normal;}
 .ttip .ttxt {
-	visibility: hidden; width: 150px; background-color: var(--ttipbg); color: var(--ttipcolor); text-align: center;
+	visibility: hidden; width: 150px; background-color: var(--test0); color: var(--bg0); text-align: center;
 	border-radius: 6px; padding: 5px 0; position: absolute; z-index: 1; top: -12px; left: 130%;}
 .ttip .ttxtb {
-	visibility: hidden; width: 210px; background-color: var(--ttipbg); color: var(--ttipcolor); text-align: center;
+	visibility: hidden; width: 210px; background-color: var(--test0); color: var(--bg0); text-align: center;
 	border-radius: 6px; padding: 5px 0; position: absolute; z-index: 1; top: -12px; left: 130%;}
 .ttip .ttxtx {
-	visibility: hidden; width: 250px; background-color: var(--ttipbg); color: var(--ttipcolor); text-align: center;
+	visibility: hidden; width: 250px; background-color: var(--test0); color: var(--bg0); text-align: center;
 	border-radius: 6px; padding: 5px 0; position: absolute; z-index: 1; top: -12px; left: 130%;}
 .ttip:hover .ttxt, .ttip:hover .ttxtb, .ttip:hover .ttxtx {visibility: visible;}
 .ttip .ttxt::after, .ttip .ttxtb::after, .ttip .ttxtx::after {
@@ -249,6 +238,7 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 	z-index: 1000;
 	overscroll-behavior: contain;
 	box-shadow: 5px 5px 10px black;
+	scrollbar-width: none;
 }
 #overlaytop {
 	position: sticky;
@@ -263,6 +253,7 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 	margin: 15px 25px 10px;
 	padding-bottom: 15px;
 	overflow-y:scroll;
+	scrollbar-width: none;
 }
 #overlaybuttons {
 	float: right;
@@ -344,39 +335,39 @@ tr td.border-top {
 .togUA, .togUAD, .togAI, .togAW, .togMM,
 .togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
 
-#tb1 td:first-child {color: var(--test1); font-weight: var(--firstchildweight)}
+#tb1 td:first-child {color: var(--test1); font-weight: var(--testweight)}
 	#tb1 .togS td:first-child {color: var(--test99); font-weight: normal;} /* screen/window/viewport */
-#tb2 td:first-child {color: var(--test2); font-weight: var(--firstchildweight)}
+#tb2 td:first-child {color: var(--test2); font-weight: var(--testweight)}
 	#tb2 .togUA td:first-child {color: var(--test99); font-weight: normal;} /* useragent */
 	#tb2 .togUAD td:first-child {color: var(--test99);} /* useragentdata */
 	#tb2 .togAI td:first-child {color: var(--test99); font-weight: normal;} /* agent iframes */
 	#tb2 .togAW td:first-child {color: var(--test99); font-weight: normal;} /* agent workers */
-#tb3 td:first-child {color: var(--test3); font-weight: var(--firstchildweight)}
-#tb4 td:first-child {color: var(--test4); font-weight: var(--firstchildweight)}
+#tb3 td:first-child {color: var(--test3); font-weight: var(--testweight)}
+#tb4 td:first-child {color: var(--test4); font-weight: var(--testweight)}
 	#tb4 .togTT td:first-child {color: var(--test99); font-weight: normal;} /* timezone timezone */
 	#tb4 .togTL td:first-child {color: var(--test99); font-weight: normal;} /* timezone lastmodified */
 	#tb4 .togTO td:first-child {color: var(--test99); font-weight: normal;} /* timezone offsets */
-#tb5 td:first-child {color: var(--test5); font-weight: var(--firstchildweight)}
-#tb6 td:first-child {color: var(--test6); font-weight: var(--firstchildweight)}
-#tb7 td:first-child {color: var(--test7); font-weight: var(--firstchildweight)}
-#tb8 td:first-child {color: var(--test8); font-weight: var(--firstchildweight)}
-#tb9 td:first-child {color: var(--test9); font-weight: var(--firstchildweight)}
-#tb10 td:first-child {color: var(--test10); font-weight: var(--firstchildweight)}
-#tb11 td:first-child {color: var(--test11); font-weight: var(--firstchildweight)}
-#tb12 td:first-child {color: var(--test12); font-weight: var(--firstchildweight)}
+#tb5 td:first-child {color: var(--test5); font-weight: var(--testweight)}
+#tb6 td:first-child {color: var(--test6); font-weight: var(--testweight)}
+#tb7 td:first-child {color: var(--test7); font-weight: var(--testweight)}
+#tb8 td:first-child {color: var(--test8); font-weight: var(--testweight)}
+#tb9 td:first-child {color: var(--test9); font-weight: var(--testweight)}
+#tb10 td:first-child {color: var(--test10); font-weight: var(--testweight)}
+#tb11 td:first-child {color: var(--test11); font-weight: var(--testweight)}
+#tb12 td:first-child {color: var(--test12); font-weight: var(--testweight)}
 	#tb12 .togFS td:first-child {color: var(--test99); font-weight: normal;} /* font sizes */
-#tb13 td:first-child {color: var(--test13); font-weight: var(--firstchildweight)}
-#tb14 td:first-child {color: var(--test14); font-weight: var(--firstchildweight)}
+#tb13 td:first-child {color: var(--test13); font-weight: var(--testweight)}
+#tb14 td:first-child {color: var(--test14); font-weight: var(--testweight)}
 	#tb14 .togCS td:first-child {color: var(--test99); font-weight: normal;} /* computed styles */
 	#tb14 .togMM td:first-child {color: var(--test99); font-weight: normal;} /* matchmedia + css */
-#tb15 td:first-child {color: var(--test15); font-weight: var(--firstchildweight)}
-#tb16 td:first-child {color: var(--test16); font-weight: var(--firstchildweight)}
-#tb17 td:first-child {color: var(--test17); font-weight: var(--firstchildweight)}
+#tb15 td:first-child {color: var(--test15); font-weight: var(--testweight)}
+#tb16 td:first-child {color: var(--test16); font-weight: var(--testweight)}
+#tb17 td:first-child {color: var(--test17); font-weight: var(--testweight)}
 	#tb17 .togTA td:first-child {color: var(--test99); font-weight: normal;} /* timing audio */
 	#tb17 .togTP td:first-child {color: var(--test99); font-weight: normal;} /* timing precision */
-#tb18 td:first-child {color: var(--test18); font-weight: var(--firstchildweight)}
+#tb18 td:first-child {color: var(--test18); font-weight: var(--testweight)}
 #tb99 td:first-child {color: var(--test99);} /* index page */
-#tbfp td:first-child {color: var(--test99); font-weight: var(--firstchildweight);}
+#tbfp td:first-child {color: var(--test99); font-weight: var(--testweight);}
 #tbperf td:first-child {color: var(--test99);}
 
 /*** FP POCs ***/
