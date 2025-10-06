@@ -124,10 +124,13 @@ function run_basic(str = 'basic') {
 	if (isGecko && 'basic' == str) {
 		log_perf(SECTG, 'isBasic','')
 		for (let i=1; i < 19; i++) {
-			document.body.style.setProperty('--test'+i, '#d4c1b3')
-			document.body.style.setProperty('--bg'+i, '#808080')
+			document.documentElement.style.setProperty('--test'+i, 'var(--txtbasic)')
+			document.documentElement.style.setProperty('--bg'+i, 'var(--bg99)')
 		}
-		document.body.style.setProperty('--testbad', '#d4c1b3')
+		document.documentElement.style.setProperty('--testweight', 'normal')
+		document.documentElement.style.setProperty('--bggood', 'none')
+		document.documentElement.style.setProperty('--bgbad', 'none')
+		document.body.style.setProperty('--testbad', 'var(--txtbasic)')
 	}
 	// basic/other modes: notation
 	if (str.length) {
@@ -956,11 +959,11 @@ function copyclip(element) {
 				// indicate it
 				try {
 					let target = dom.metricsBtnCopy
-					target.classList.add('indicate')
+					target.classList.add('txtindicate')
 					target.classList.remove('btn0')
 					setTimeout(function() {
 						target.classList.add('btn0')
-						target.classList.remove('indicate')
+						target.classList.remove('txtindicate')
 					}, 500)	
 				} catch(e) {}
 			}, function() {
@@ -1405,8 +1408,9 @@ function output_perf(id, click = false) {
 	}
 
 	let aPretty = [],
-		s2 = " <span class='s2'>",
-		s4 = " <span class='s4'>",
+		color1 = " <span class='s14'>",
+		color2 = " <span class='s7'>",
+		color3 = " <span class='s12'>",
 		s98 = "<span class='s99'>", // trimmed
 		pageLoad = false,
 		isStart = false,
@@ -1430,7 +1434,7 @@ function output_perf(id, click = false) {
 				if ("IMMEDIATE" == name) {pageLoad = true}
 				if ("DOCUMENT START" == name) {isStart = true}
 				time1 = pageLoad ? " "+ time1 : ""
-				aPretty.push(s2 + name +":"+ time1 + sc)
+				aPretty.push(color1 + name +":"+ time1 + sc)
 			}
 			// section/detail
 			if (type > 1) {
@@ -1443,8 +1447,8 @@ function output_perf(id, click = false) {
 			}
 			// section
 			if (2 === type) {
-				time2 = id == "all" ? " |"+ s2 + time2.padStart(4 + padFix) +" ms</span>" : ""
-				let pretty = name.padStart(pad) +":"+ s4 + time1.padStart(4 + padFix) +"</span> ms"
+				time2 = id == "all" ? " |"+ color3 + time2.padStart(4 + padFix) +" ms</span>" : ""
+				let pretty = name.padStart(pad) +":"+ color2 + time1.padStart(4 + padFix) +"</span> ms"
 					+ time2 + extra
 				aPretty.push(pretty)
 				if (sectionNames.includes(name)) {
