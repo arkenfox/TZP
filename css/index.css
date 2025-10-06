@@ -238,7 +238,6 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 	z-index: 1000;
 	overscroll-behavior: contain;
 	box-shadow: 5px 5px 10px black;
-	scrollbar-width: none;
 }
 #overlaytop {
 	position: sticky;
