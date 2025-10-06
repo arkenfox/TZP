@@ -471,6 +471,8 @@ function get_element_scrollbars(METRIC, isLies) {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				value = 100 - width // 100 set in html, not affected by zoom
 				if (value < 0) {throw zErrInvalid + '< 0'}
+				// get scrollbar width for json overlay
+				if (undefined == isScrollbar && 'auto' == p) {isScrollbar = value}
 			} catch(e) {
 				value = zErr
 				log_error(15, METRIC +'_'+ p +'_'+ item, e)
@@ -492,6 +494,8 @@ function get_element_scrollbars(METRIC, isLies) {
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				if (value < 0) {throw zErrInvalid + '< 0'}
+				// get scrollbar width for json overlay
+				if (undefined == isScrollbar && 'auto' == p) {isScrollbar = value}
 			} catch(e) {
 				value = zErr
 				log_error(15, METRIC +'_'+ p +'_'+ item, e)
@@ -502,6 +506,7 @@ function get_element_scrollbars(METRIC, isLies) {
 	}
 
 	get_scroll()
+	if (undefined == isScrollbar) {isScrollbar = 20}
 	addDisplay(15, METRIC, dedupeArray(aAuto, true) +' | '+ dedupeArray(aThin, true))
 	addData(15, METRIC, oData, mini(oData))
 	return
