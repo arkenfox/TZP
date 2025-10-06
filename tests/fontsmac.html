@@ -9,6 +9,7 @@
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 780px;}
+		indent {margin-left: 20px;}
 	</style>
 </head>
 
@@ -30,12 +31,14 @@
 		<tr><td class="intro"><span class="no_color">
 			Programmatically make sense of Apple's macOS font lists. The <code>group</code>
 			option is to aid visual parsing, and does <b>not</b> signify <code>font-families</code>.</br><br>
-				<span class="btn12 btnfirst" onclick="get_links()">[ links ]</span>
-				<span class="btn12 btn" onclick="get_list()">[ list ]</span>
+				<span class="btn12 btnfirst" onclick="get_links()">links</span> |
+				<span class="btn12 btn" onclick="get_list()">list</span>
 				&nbsp; <select id="optList" name="optList" onchange="get_list()"></select>
 				&nbsp; <input id="optGroup" type="checkbox" onclick="get_list()" checked> group
-				&nbsp; | <span class="btn12 btn" onclick="analyse()">[ analyse changes since ]</span>
-				&nbsp; <select id="optAnalyze" name="optAnalyse" onchange="analyse()"></select>
+				&nbsp; | <span class="btn12 btn" onclick="analyse()">analyse since</span>
+				&nbsp;<select id="optAnalyze" name="optAnalyse" onchange="analyse()"></select>
+				&nbsp; | <span class="btn12 btn" id="txtSearch" onclick="search()">search</span>
+				&nbsp;<input type="text" id="optSearch" style="width:100px;"></input>
 				&nbsp; <span id="alert" class='bad mono'></span>
 		</span></td></tr>
 		<tr><td><hr><br></td></tr>
@@ -148,6 +151,7 @@ function analyse() {
 
 function get_links() {
 	dom.results.innerHTML = aLinks.join('<br>')
+	currentDisplay = 'links'
 }
 
 function get_list() {
@@ -273,8 +277,51 @@ function run_once() {
 	let objTB = group(fntTB.list)
 	fntTB.group = group_display(objTB)
 
+	// add search listener
+	let target = dom.optSearch
+	target.addEventListener("keypress", function(event) {
+		if (event.key === "Enter") {search()}
+	})
+
 	// display something
 	analyse()
+}
+
+function search() {
+	let term = (dom.optSearch.value).trim()
+	if (0 == term.length) {return}
+	currentDisplay = 'search'
+	try {
+		let search = term.toLowerCase() // case-insenstive
+		let oData = {}, isFound = false
+		for (const k of Object.keys(fntData).sort()) {
+			if (fntData[k].list.length) {
+				let aFound = []
+				let aSearch = fntData[k].list.sort()
+				aSearch.forEach(function(item){
+					let value = item.toLowerCase()
+					if (value.includes(search)) {aFound.push(item)}
+				})
+				if (aFound.length) {
+					isFound = true
+					oData[fntData[k].version +' '+ fntData[k].name] = aFound
+				}
+			}
+		}
+		let aDisplay = [s14 +'SEARCH'+ sc +': ' + term +'<br>']
+		if (isFound) {
+			//console.log(oData)
+			for (const k of Object.keys(oData).sort()) {
+				aDisplay.push(s12 + k + sc)
+				aDisplay.push('<br><div class="indent">'+ oData[k].join(', ') +'</div><br>')
+			}
+		} else {
+			aDisplay.push('no results')
+		}
+		dom.results.innerHTML = aDisplay.join('<br>')
+	} catch(e) {
+		dom.results.innerHTML = e+''
+	}
 }
 
 let fntTB = {
@@ -324,6 +371,7 @@ let fntTB = {
 	   ventura     13: https://support.apple.com/en-nz/103197
 	    sonoma     14: https://support.apple.com/en-nz/108939
 	   sequoia     15: https://support.apple.com/en-us/120414
+	     tahoe     26: https://support.apple.com/en-us/122869
 
 	group by first part of font name: i.e don't distinguish between Avenir
 	vs Avenir Book: to break it up somewhat for easier analysis/parsing
@@ -1388,6 +1436,218 @@ let fntData = {
 			'YuKyokasho Bold','YuKyokasho Medium','YuKyokasho Yoko Bold','YuKyokasho Yoko Medium',
 			'YuMincho +36p Kana Demibold','YuMincho +36p Kana Extrabold','YuMincho +36p Kana Medium','YuMincho Demibold','YuMincho Extrabold','YuMincho Medium',
 			'Yuanti SC','Yuanti SC Bold','Yuanti SC Light','Yuanti TC','Yuanti TC Bold','Yuanti TC Light',
+			'Yuppy SC','Yuppy TC',
+			'Zapf Dingbats',
+			'Zapfino',
+		]
+	},
+	'v26': {
+		name: 'Tahoe',
+		version: 26,
+		url: 'https://support.apple.com/en-us/122869',
+		list: [
+			'Academy Engraved LET',
+			'Adelle Sans Devanagari','Adelle Sans Devanagari Bold','Adelle Sans Devanagari Extrabold','Adelle Sans Devanagari Heavy','Adelle Sans Devanagari Light','Adelle Sans Devanagari Semibold','Adelle Sans Devanagari Thin',
+			'AkayaKanadaka','AkayaTelivigala',
+			'Al Bayan','Al Bayan Bold','Al Nile','Al Nile Bold','Al Tarikh',
+			'American Typewriter','American Typewriter Bold','American Typewriter Condensed','American Typewriter Condensed Bold','American Typewriter Condensed Light','American Typewriter Light','American Typewriter Semibold',
+			'Andale Mono',
+			'Annai MN',
+			'Apple Braille','Apple Braille Outline 6 Dot','Apple Braille Outline 8 Dot','Apple Braille Pinpoint 6 Dot','Apple Braille Pinpoint 8 Dot',
+			'Apple Chancery','Apple Color Emoji','Apple LiGothic Medium',
+			'Apple LiSung Light','Apple SD Gothic Neo','Apple SD Gothic Neo Bold','Apple SD Gothic Neo ExtraBold','Apple SD Gothic Neo Heavy','Apple SD Gothic Neo Light','Apple SD Gothic Neo Medium','Apple SD Gothic Neo SemiBold','Apple SD Gothic Neo Thin','Apple SD Gothic Neo UltraLight','Apple Symbols','AppleGothic','AppleMyungjo',
+			'Arial','Arial Black','Arial Bold','Arial Bold Italic','Arial Hebrew','Arial Hebrew Bold','Arial Hebrew Light','Arial Hebrew Scholar','Arial Hebrew Scholar Bold','Arial Hebrew Scholar Light','Arial Italic','Arial Narrow','Arial Narrow Bold','Arial Narrow Bold Italic','Arial Narrow Italic','Arial Rounded MT Bold','Arial Unicode MS',
+			'Arima Koshi','Arima Koshi Black','Arima Koshi Bold','Arima Koshi ExtraBold','Arima Koshi ExtraLight','Arima Koshi Light','Arima Koshi Medium','Arima Koshi Thin','Arima Madurai','Arima Madurai Black','Arima Madurai Bold','Arima Madurai ExtraLight','Arima Madurai Light','Arima Madurai Medium','Arima Madurai Semi Bold','Arima Madurai Thin',
+			'Avenir Black','Avenir Black Oblique','Avenir Book','Avenir Book Oblique','Avenir Heavy','Avenir Heavy Oblique','Avenir Light','Avenir Light Oblique','Avenir Medium','Avenir Medium Oblique','Avenir Next Bold','Avenir Next Bold Italic','Avenir Next Condensed','Avenir Next Condensed Bold','Avenir Next Condensed Bold Italic','Avenir Next Condensed Demi Bold','Avenir Next Condensed Demi Bold Italic','Avenir Next Condensed Heavy','Avenir Next Condensed Heavy Italic','Avenir Next Condensed Italic','Avenir Next Condensed Medium','Avenir Next Condensed Medium Italic','Avenir Next Condensed Ultra Light','Avenir Next Condensed Ultra Light Italic','Avenir Next','Avenir Next Demi Bold','Avenir Next Demi Bold Italic','Avenir Next Heavy','Avenir Next Heavy Italic','Avenir Next Italic','Avenir Next Medium','Avenir Next Medium Italic','Avenir Next Ultra Light','Avenir Next Ultra Light Italic','Avenir Oblique','Avenir Roman',
+			'Ayuthaya',
+			'Baghdad',
+			'Bai Jamjuree','Bai Jamjuree Bold','Bai Jamjuree Bold Italic','Bai Jamjuree ExtraLight','Bai Jamjuree ExtraLight Italic','Bai Jamjuree Italic','Bai Jamjuree Light','Bai Jamjuree Light Italic','Bai Jamjuree Medium','Bai Jamjuree Medium Italic','Bai Jamjuree SemiBold','Bai Jamjuree SemiBold Italic',
+			'BIZ UDGothic','BIZ UDGothic Bold','BIZ UDMincho',
+			'BM DoHyeon','BM Hanna 11yrs Old','BM Hanna Air','BM Hanna Pro','BM Jua','BM Kirang Haerang','BM Yeonsung',
+			'Baloo 2','Baloo 2 Bold','Baloo 2 ExtraBold','Baloo 2 Medium','Baloo 2 SemiBold','Baloo Bhai 2','Baloo Bhai 2 Bold','Baloo Bhai 2 ExtraBold','Baloo Bhai 2 Medium','Baloo Bhai 2 SemiBold','Baloo Bhaijaan','Baloo Bhaina 2','Baloo Bhaina 2 Bold','Baloo Bhaina 2 ExtraBold','Baloo Bhaina 2 Medium','Baloo Bhaina 2 SemiBold','Baloo Chettan 2','Baloo Chettan 2 Bold','Baloo Chettan 2 ExtraBold','Baloo Chettan 2 Medium','Baloo Chettan 2 SemiBold','Baloo Da 2','Baloo Da 2 Bold','Baloo Da 2 ExtraBold','Baloo Da 2 Medium','Baloo Da 2 SemiBold','Baloo Paaji 2','Baloo Paaji 2 Bold','Baloo Paaji 2 ExtraBold','Baloo Paaji 2 Medium','Baloo Paaji 2 SemiBold','Baloo Tamma 2','Baloo Tamma 2 Bold','Baloo Tamma 2 ExtraBold','Baloo Tamma 2 Medium','Baloo Tamma 2 SemiBold','Baloo Tammudu 2','Baloo Tammudu 2 Bold','Baloo Tammudu 2 ExtraBold','Baloo Tammudu 2 Medium','Baloo Tammudu 2 SemiBold','Baloo Thambi 2','Baloo Thambi 2 Bold','Baloo Thambi 2 ExtraBold','Baloo Thambi 2 Medium','Baloo Thambi 2 SemiBold',
+			'Bangla MN','Bangla MN Bold','Bangla Sangam MN','Bangla Sangam MN Bold',
+			'Baoli SC','Baoli TC',
+			'Baskerville','Baskerville Bold','Baskerville Bold Italic','Baskerville Italic','Baskerville SemiBold','Baskerville SemiBold Italic',
+			'Beirut',
+			'BiauKaiHK','BiauKaiTC',
+			'Big Caslon Medium',
+			'Bodoni 72 Bold','Bodoni 72 Book','Bodoni 72 Book Italic','Bodoni 72 Oldstyle Bold','Bodoni 72 Oldstyle Book','Bodoni 72 Oldstyle Book Italic','Bodoni 72 Smallcaps Book','Bodoni Ornaments',
+			'Bradley Hand Bold',
+			'Brill Bold Italic','Brill Italic','Brill Medium Italic','Brill Roman','Brill Roman Bold','Brill Roman Medium','Brill Roman Semibold','Brill Semibold Italic',
+			'Brush Script MT Italic',
+			'Cambay Devanagari','Cambay Devanagari Bold','Cambay Devanagari Bold Oblique','Cambay Devanagari Oblique',
+			'Canela','Canela Bold','Canela Bold Italic','Canela Deck','Canela Deck Bold','Canela Deck Bold Italic','Canela Deck Italic','Canela Deck Medium','Canela Deck Medium Italic','Canela Italic','Canela Text','Canela Text Bold','Canela Text Bold Italic','Canela Text Italic','Canela Text Medium','Canela Text Medium Italic',
+			'Catamaran','Catamaran Black','Catamaran Bold','Catamaran ExtraBold','Catamaran ExtraLight','Catamaran Light','Catamaran Medium','Catamaran SemiBold','Catamaran Thin',
+			'Chakra Petch','Chakra Petch Bold','Chakra Petch Bold Italic','Chakra Petch ExtraLight','Chakra Petch ExtraLight Italic','Chakra Petch Italic','Chakra Petch Light','Chakra Petch Light Italic','Chakra Petch Medium','Chakra Petch Medium Italic','Chakra Petch SemiBold','Chakra Petch SemiBold Italic',
+			'Chalkboard','Chalkboard Bold','Chalkboard SE','Chalkboard SE Bold','Chalkboard SE Light','Chalkduster',
+			'Charm','Charm Bold',
+			'Charmonman','Charmonman Bold',
+			'Charter Black','Charter Black Italic','Charter Bold','Charter Bold Italic','Charter Italic','Charter Roman',
+			'Cochin','Cochin Bold','Cochin Bold Italic','Cochin Italic',
+			'Comic Sans MS','Comic Sans MS Bold',
+			'Copperplate','Copperplate Bold','Copperplate Light',
+			'Corsiva Hebrew','Corsiva Hebrew Bold',
+			'Courier New','Courier New Bold','Courier New Bold Italic','Courier New Italic',
+			'DIN Alternate Bold','DIN Condensed Bold',
+			'Damascus','Damascus Bold','Damascus Light','Damascus Medium','Damascus Semi Bold',
+			'Dash','Dash Practice',
+			'DecoType Naskh',
+			'Devanagari MT','Devanagari MT Bold','Devanagari Sangam MN','Devanagari Sangam MN Bold',
+			'Didot','Didot Bold','Didot Italic',
+			'Diwan Kufi','Diwan Thuluth',
+			'Domaine Display','Domaine Display Bold','Domaine Display Bold Italic','Domaine Display Italic','Domaine Display Medium','Domaine Display Medium Italic',
+			'Euphemia UCAS','Euphemia UCAS Bold','Euphemia UCAS Italic',
+			'Fahkwang','Fahkwang Bold','Fahkwang Bold Italic','Fahkwang ExtraLight','Fahkwang ExtraLight Italic','Fahkwang Italic','Fahkwang Light','Fahkwang Light Italic','Fahkwang Medium','Fahkwang Medium Italic','Fahkwang SemiBold','Fahkwang SemiBold Italic',
+			'Farah',
+			'Farisi',
+			'Founders Grotesk','Founders Grotesk Bold','Founders Grotesk Bold Italic','Founders Grotesk Condensed','Founders Grotesk Condensed Bold','Founders Grotesk Condensed Semibold','Founders Grotesk Italic','Founders Grotesk Light','Founders Grotesk Light Italic','Founders Grotesk Medium','Founders Grotesk Medium Italic','Founders Grotesk Semibold','Founders Grotesk Semibold Italic','Founders Grotesk Text','Founders Grotesk Text Bold','Founders Grotesk Text Bold Italic','Founders Grotesk Text Italic',
+			'Futura Bold','Futura Condensed ExtraBold','Futura Condensed Medium','Futura Medium','Futura Medium Italic',
+			'GB18030 Bitmap',
+			'Galvji','Galvji Bold','Galvji Bold Oblique','Galvji Oblique',
+			'Geeza Pro','Geeza Pro Bold',
+			'Geneva',
+			'Georgia','Georgia Bold','Georgia Bold Italic','Georgia Italic',
+			'Gill Sans','Gill Sans Bold','Gill Sans Bold Italic','Gill Sans Italic','Gill Sans Light','Gill Sans Light Italic','Gill Sans SemiBold','Gill Sans SemiBold Italic','Gill Sans UltraBold',
+			'Gotu',
+			'Grantha Sangam MN','Grantha Sangam MN Black','Grantha Sangam MN Bold','Grantha Sangam MN DemiBold','Grantha Sangam MN Light','Grantha Sangam MN Medium',
+			'Graphik','Graphik Bold','Graphik Bold Italic','Graphik Compact','Graphik Compact Bold','Graphik Compact Bold Italic','Graphik Compact Italic','Graphik Compact Medium','Graphik Compact Medium Italic','Graphik Compact Semibold','Graphik Compact Semibold Italic','Graphik Italic','Graphik Light','Graphik Light Italic','Graphik Medium','Graphik Medium Italic','Graphik Semibold','Graphik Semibold Italic',
+			'Gujarati MT','Gujarati MT Bold','Gujarati Sangam MN','Gujarati Sangam MN Bold',
+			'GungSeo',
+			'Gurmukhi MN','Gurmukhi MN Bold','Gurmukhi MT','Gurmukhi Sangam MN','Gurmukhi Sangam MN Bold',
+			'Hannotate SC','Hannotate SC Bold','Hannotate TC','Hannotate TC Bold',
+			'HanziPen SC','HanziPen SC Bold','HanziPen TC','HanziPen TC Bold',
+			'HeadLineA',
+			'Hei',
+			'Heiti SC Light','Heiti SC Medium','Heiti TC Light','Heiti TC Medium',
+			'Helvetica','Helvetica Bold','Helvetica Bold Oblique','Helvetica Light','Helvetica Light Oblique','Helvetica Neue','Helvetica Neue Bold','Helvetica Neue Bold Italic','Helvetica Neue Condensed Black','Helvetica Neue Condensed Bold','Helvetica Neue Italic','Helvetica Neue Light','Helvetica Neue Light Italic','Helvetica Neue Medium','Helvetica Neue Medium Italic','Helvetica Neue Thin','Helvetica Neue Thin Italic','Helvetica Neue UltraLight','Helvetica Neue UltraLight Italic','Helvetica Oblique',
+			'Herculanum',
+			'Hiragino Maru Gothic ProN W4','Hiragino Mincho ProN W3','Hiragino Mincho ProN W6','Hiragino Sans GB W3','Hiragino Sans GB W6','Hiragino Sans TC W3','Hiragino Sans TC W6','Hiragino Sans W0','Hiragino Sans W1','Hiragino Sans W2','Hiragino Sans W3','Hiragino Sans W4','Hiragino Sans W5','Hiragino Sans W6','Hiragino Sans W7','Hiragino Sans W8','Hiragino Sans W9',
+			'Hoefler Text','Hoefler Text Black','Hoefler Text Black Italic','Hoefler Text Italic','Hoefler Text Ornaments',
+			'Hubballi',
+			'Impact',
+			'InaiMathi','InaiMathi Bold',
+			'ITF Devanagari Bold','ITF Devanagari Book','ITF Devanagari Demi','ITF Devanagari Light','ITF Devanagari Marathi Bold','ITF Devanagari Marathi Book','ITF Devanagari Marathi Demi','ITF Devanagari Marathi Light','ITF Devanagari Marathi Medium','ITF Devanagari Medium',
+			'Jaini','Jaini Purva',
+			'K2D','K2D Bold','K2D Bold Italic','K2D ExtraBold','K2D ExtraBold Italic','K2D ExtraLight','K2D ExtraLight Italic','K2D Italic','K2D Light','K2D Light Italic','K2D Medium','K2D Medium Italic','K2D SemiBold','K2D SemiBold Italic','K2D Thin','K2D Thin Italic',
+			'Kai',
+			'Kailasa','Kailasa Bold',
+			'Kaiti SC','Kaiti SC Black','Kaiti SC Bold','Kaiti TC','Kaiti TC Black','Kaiti TC Bold',
+			'Kannada MN','Kannada MN Bold','Kannada Sangam MN','Kannada Sangam MN Bold',
+			'Katari','Katari Black','Katari Black Italic','Katari Bold','Katari Bold Italic','Katari Italic','Katari Medium','Katari Medium Italic',
+			'Kavivanar',
+			'Kefa III','Kefa III Bold','Kefa III ExtraBold','Kefa III Light',
+			'Khmer MN','Khmer MN Bold','Khmer Sangam MN',
+			'Kigelia','Kigelia Arabic','Kigelia Arabic Bold','Kigelia Arabic Extrabold','Kigelia Arabic Light','Kigelia Arabic Semibold','Kigelia Bold','Kigelia Bold Italic','Kigelia Extrabold','Kigelia Extrabold Italic','Kigelia Italic','Kigelia Light','Kigelia Light Italic','Kigelia Semibold','Kigelia Semibold Italic',
+			'Klee Demibold','Klee Medium',
+			'KoHo','KoHo Bold','KoHo Bold Italic','KoHo ExtraLight','KoHo ExtraLight Italic','KoHo Italic','KoHo Light','KoHo Light Italic','KoHo Medium','KoHo Medium Italic','KoHo SemiBold','KoHo SemiBold Italic',
+			'Kodchasan','Kodchasan Bold','Kodchasan Bold Italic','Kodchasan ExtraLight','Kodchasan ExtraLight Italic','Kodchasan Italic','Kodchasan Light','Kodchasan Light Italic','Kodchasan Medium','Kodchasan Medium Italic','Kodchasan SemiBold','Kodchasan SemiBold Italic',
+			'Kohinoor Bangla','Kohinoor Bangla Bold','Kohinoor Bangla Light','Kohinoor Bangla Medium','Kohinoor Bangla Semibold','Kohinoor Devanagari','Kohinoor Devanagari Bold','Kohinoor Devanagari Light','Kohinoor Devanagari Medium','Kohinoor Devanagari Semibold','Kohinoor Gujarati','Kohinoor Gujarati Bold','Kohinoor Gujarati Light','Kohinoor Gujarati Medium','Kohinoor Gujarati Semibold','Kohinoor Telugu','Kohinoor Telugu Bold','Kohinoor Telugu Light','Kohinoor Telugu Medium','Kohinoor Telugu Semibold',
+			'Kokonor',
+			'Krub','Krub Bold','Krub Bold Italic','Krub ExtraLight','Krub ExtraLight Italic','Krub Italic','Krub Light','Krub Light Italic','Krub Medium','Krub Medium Italic','Krub SemiBold','Krub SemiBold Italic',
+			'Krungthep',
+			'KufiStandardGK',
+			'Lahore Gurmukhi','Lahore Gurmukhi Bold','Lahore Gurmukhi Light','Lahore Gurmukhi Medium','Lahore Gurmukhi SemiBold',
+			'Lantinghei SC Demibold','Lantinghei SC Extralight','Lantinghei SC Heavy','Lantinghei TC Demibold','Lantinghei TC Heavy',
+			'Lao MN','Lao MN Bold','Lao Sangam MN',
+			'Lava Devanagari','Lava Devanagari Bold','Lava Devanagari Heavy','Lava Devanagari Medium','Lava Kannada','Lava Kannada Bold','Lava Kannada Heavy','Lava Kannada Medium','Lava Telugu','Lava Telugu Bold','Lava Telugu Heavy','Lava Telugu Medium',
+			'Libian SC','Libian TC',
+			'LiHei Pro',
+			'LingWai SC Medium','LingWai TC Medium',
+			'LiSong Pro',
+			'Lucida Grande','Lucida Grande Bold',
+			'Luminari',
+			'Maku','Maku Bold',
+			'Malayalam MN','Malayalam MN Bold','Malayalam Sangam MN','Malayalam Sangam MN Bold',
+			'Mali','Mali Bold','Mali Bold Italic','Mali ExtraLight','Mali ExtraLight Italic','Mali Italic','Mali Light','Mali Light Italic','Mali Medium','Mali Medium Italic','Mali SemiBold','Mali SemiBold Italic',
+			'Marker Felt Thin','Marker Felt Wide',
+			'Menlo','Menlo Bold','Menlo Bold Italic','Menlo Italic',
+			'Microsoft Sans Serif',
+			'Mishafi','Mishafi Gold',
+			'Modak',
+			'Monaco',
+			'Mshtakan','Mshtakan Bold','Mshtakan BoldOblique','Mshtakan Oblique',
+			'Mukta','Mukta Bold','Mukta ExtraBold','Mukta ExtraLight','Mukta Light','Mukta Mahee','Mukta Mahee Bold','Mukta Mahee ExtraBold','Mukta Mahee ExtraLight','Mukta Mahee Light','Mukta Mahee Medium','Mukta Mahee SemiBold','Mukta Malar','Mukta Malar Bold','Mukta Malar ExtraBold','Mukta Malar ExtraLight','Mukta Malar Light','Mukta Malar Medium','Mukta Malar SemiBold','Mukta Medium','Mukta SemiBold','Mukta Vaani','Mukta Vaani Bold','Mukta Vaani ExtraBold','Mukta Vaani ExtraLight','Mukta Vaani Light','Mukta Vaani Medium','Mukta Vaani SemiBold',
+			'Muna','Muna Black','Muna Bold',
+			'Myanmar MN','Myanmar MN Bold','Myanmar Sangam MN','Myanmar Sangam MN Bold',
+			'Myriad Arabic','Myriad Arabic Black','Myriad Arabic Black Italic','Myriad Arabic Bold','Myriad Arabic Bold Italic','Myriad Arabic Italic','Myriad Arabic Light','Myriad Arabic Light Italic','Myriad Arabic Semibold','Myriad Arabic Semibold Italic',
+			'Nadeem',
+			'Nanum Brush Script','Nanum Gothic','Nanum Gothic Bold','Nanum Gothic ExtraBold','Nanum Myeongjo','Nanum Myeongjo Bold','Nanum Myeongjo ExtraBold','Nanum Pen Script',
+			'New Peninim MT','New Peninim MT Bold','New Peninim MT Bold Inclined','New Peninim MT Inclined',
+			'Niramit','Niramit Bold','Niramit Bold Italic','Niramit ExtraLight','Niramit ExtraLight Italic','Niramit Italic','Niramit Light','Niramit Light Italic','Niramit Medium','Niramit Medium Italic','Niramit SemiBold','Niramit SemiBold Italic',
+			'Nom Na Tong',
+			'Noteworthy Bold','Noteworthy Light',
+			'Noto Nastaliq Urdu','Noto Nastaliq Urdu Bold',
+			'Noto Sans Batak','Noto Sans Kannada','Noto Sans Kannada Black','Noto Sans Kannada Bold','Noto Sans Kannada ExtraBold','Noto Sans Kannada ExtraLight','Noto Sans Kannada Light','Noto Sans Kannada Medium','Noto Sans Kannada SemiBold','Noto Sans Kannada Thin','Noto Sans Myanmar','Noto Sans Myanmar Black','Noto Sans Myanmar Bold','Noto Sans Myanmar ExtraBold','Noto Sans Myanmar ExtraLight','Noto Sans Myanmar Light','Noto Sans Myanmar Medium','Noto Sans Myanmar SemiBold','Noto Sans Myanmar Thin','Noto Sans NKo','Noto Sans Oriya','Noto Sans Oriya Bold','Noto Sans Syriac','Noto Sans Syriac Black','Noto Sans Syriac Bold','Noto Sans Syriac ExtraBold','Noto Sans Syriac ExtraLight','Noto Sans Syriac Light','Noto Sans Syriac Medium','Noto Sans Syriac SemiBold','Noto Sans Syriac Thin','Noto Sans Tagalog',
+			'Noto Serif Kannada','Noto Serif Kannada Black','Noto Serif Kannada Bold','Noto Serif Kannada ExtraBold','Noto Serif Kannada ExtraLight','Noto Serif Kannada Light','Noto Serif Kannada Medium','Noto Serif Kannada SemiBold','Noto Serif Kannada Thin','Noto Serif Myanmar','Noto Serif Myanmar Black','Noto Serif Myanmar Bold','Noto Serif Myanmar ExtraBold','Noto Serif Myanmar ExtraLight','Noto Serif Myanmar Light','Noto Serif Myanmar Medium','Noto Serif Myanmar SemiBold','Noto Serif Myanmar Thin',
+			'November Bangla Traditional','November Bangla Traditional Black','November Bangla Traditional Bold','November Bangla Traditional Compressed','November Bangla Traditional Compressed Black','November Bangla Traditional Compressed Bold','November Bangla Traditional Compressed Extralight','November Bangla Traditional Compressed Hairline','November Bangla Traditional Compressed Heavy','November Bangla Traditional Compressed Light','November Bangla Traditional Compressed Medium','November Bangla Traditional Compressed Thin','November Bangla Traditional Condensed','November Bangla Traditional Condensed Black','November Bangla Traditional Condensed Bold','November Bangla Traditional Condensed Extralight','November Bangla Traditional Condensed Hairline','November Bangla Traditional Condensed Heavy','November Bangla Traditional Condensed Light','November Bangla Traditional Condensed Medium','November Bangla Traditional Condensed Thin','November Bangla Traditional Extralight','November Bangla Traditional Hairline','November Bangla Traditional Heavy','November Bangla Traditional Light','November Bangla Traditional Medium','November Bangla Traditional Thin',
+			'October Compressed Devanagari','October Compressed Devanagari Black','October Compressed Devanagari Bold','October Compressed Devanagari ExtraLight','October Compressed Devanagari Hairline','October Compressed Devanagari Heavy','October Compressed Devanagari Light','October Compressed Devanagari Medium','October Compressed Devanagari Thin','October Compressed Gujarati','October Compressed Gujarati Black','October Compressed Gujarati Bold','October Compressed Gujarati ExtraLight','October Compressed Gujarati Hairline','October Compressed Gujarati Heavy','October Compressed Gujarati Light','October Compressed Gujarati Medium','October Compressed Gujarati Thin','October Compressed Gurmukhi','October Compressed Gurmukhi Black','October Compressed Gurmukhi Bold','October Compressed Gurmukhi ExtraLight','October Compressed Gurmukhi Hairline','October Compressed Gurmukhi Heavy','October Compressed Gurmukhi Light','October Compressed Gurmukhi Medium','October Compressed Gurmukhi Thin','October Compressed Kannada','October Compressed Kannada Black','October Compressed Kannada Bold','October Compressed Kannada ExtraLight','October Compressed Kannada Hairline','October Compressed Kannada Heavy','October Compressed Kannada Light','October Compressed Kannada Medium','October Compressed Kannada Thin','October Compressed Meetei Mayek','October Compressed Meetei Mayek Black','October Compressed Meetei Mayek Bold','October Compressed Meetei Mayek ExtraLight','October Compressed Meetei Mayek Hairline','October Compressed Meetei Mayek Heavy','October Compressed Meetei Mayek Light','October Compressed Meetei Mayek Medium','October Compressed Meetei Mayek Thin','October Compressed Odia','October Compressed Odia Black','October Compressed Odia Bold','October Compressed Odia ExtraLight','October Compressed Odia Hairline','October Compressed Odia Heavy','October Compressed Odia Light','October Compressed Odia Medium','October Compressed Odia Thin','October Compressed Ol Chiki','October Compressed Ol Chiki Black','October Compressed Ol Chiki Bold','October Compressed Ol Chiki ExtraLight','October Compressed Ol Chiki Hairline','October Compressed Ol Chiki Heavy','October Compressed Ol Chiki Light','October Compressed Ol Chiki Medium','October Compressed Ol Chiki Thin','October Compressed Tamil','October Compressed Tamil Black','October Compressed Tamil Bold','October Compressed Tamil ExtraLight','October Compressed Tamil Hairline','October Compressed Tamil Heavy','October Compressed Tamil Light','October Compressed Tamil Medium','October Compressed Tamil Thin','October Compressed Telugu','October Compressed Telugu Black','October Compressed Telugu Bold','October Compressed Telugu ExtraLight','October Compressed Telugu Hairline','October Compressed Telugu Heavy','October Compressed Telugu Light','October Compressed Telugu Medium','October Compressed Telugu Thin','October Condensed Devanagari','October Condensed Devanagari Black','October Condensed Devanagari Bold','October Condensed Devanagari ExtraLight','October Condensed Devanagari Hairline','October Condensed Devanagari Heavy','October Condensed Devanagari Light','October Condensed Devanagari Medium','October Condensed Devanagari Thin','October Condensed Gujarati','October Condensed Gujarati Black','October Condensed Gujarati Bold','October Condensed Gujarati ExtraLight','October Condensed Gujarati Hairline','October Condensed Gujarati Heavy','October Condensed Gujarati Light','October Condensed Gujarati Medium','October Condensed Gujarati Thin','October Condensed Gurmukhi','October Condensed Gurmukhi Black','October Condensed Gurmukhi Bold','October Condensed Gurmukhi ExtraLight','October Condensed Gurmukhi Hairline','October Condensed Gurmukhi Heavy','October Condensed Gurmukhi Light','October Condensed Gurmukhi Medium','October Condensed Gurmukhi Thin','October Condensed Kannada','October Condensed Kannada Black','October Condensed Kannada Bold','October Condensed Kannada ExtraLight','October Condensed Kannada Hairline','October Condensed Kannada Heavy','October Condensed Kannada Light','October Condensed Kannada Medium','October Condensed Kannada Thin','October Condensed Meetei Mayek','October Condensed Meetei Mayek Black','October Condensed Meetei Mayek Bold','October Condensed Meetei Mayek ExtraLight','October Condensed Meetei Mayek Hairline','October Condensed Meetei Mayek Heavy','October Condensed Meetei Mayek Light','October Condensed Meetei Mayek Medium','October Condensed Meetei Mayek Thin','October Condensed Odia','October Condensed Odia Black','October Condensed Odia Bold','October Condensed Odia ExtraLight','October Condensed Odia Hairline','October Condensed Odia Heavy','October Condensed Odia Light','October Condensed Odia Medium','October Condensed Odia Thin','October Condensed Ol Chiki','October Condensed Ol Chiki Black','October Condensed Ol Chiki Bold','October Condensed Ol Chiki ExtraLight','October Condensed Ol Chiki Hairline','October Condensed Ol Chiki Heavy','October Condensed Ol Chiki Light','October Condensed Ol Chiki Medium','October Condensed Ol Chiki Thin','October Condensed Tamil','October Condensed Tamil Black','October Condensed Tamil Bold','October Condensed Tamil ExtraLight','October Condensed Tamil Hairline','October Condensed Tamil Heavy','October Condensed Tamil Light','October Condensed Tamil Medium','October Condensed Tamil Thin','October Condensed Telugu','October Condensed Telugu Black','October Condensed Telugu Bold','October Condensed Telugu ExtraLight','October Condensed Telugu Hairline','October Condensed Telugu Heavy','October Condensed Telugu Light','October Condensed Telugu Medium','October Condensed Telugu Thin','October Devanagari','October Devanagari Black','October Devanagari Bold','October Devanagari ExtraLight','October Devanagari Hairline','October Devanagari Heavy','October Devanagari Light','October Devanagari Medium','October Devanagari Thin','October Gujarati','October Gujarati Black','October Gujarati Bold','October Gujarati ExtraLight','October Gujarati Hairline','October Gujarati Heavy','October Gujarati Light','October Gujarati Medium','October Gujarati Thin','October Gurmukhi','October Gurmukhi Black','October Gurmukhi Bold','October Gurmukhi ExtraLight','October Gurmukhi Hairline','October Gurmukhi Heavy','October Gurmukhi Light','October Gurmukhi Medium','October Gurmukhi Thin','October Kannada','October Kannada Black','October Kannada Bold','October Kannada ExtraLight','October Kannada Hairline','October Kannada Heavy','October Kannada Light','October Kannada Medium','October Kannada Thin','October Meetei Mayek','October Meetei Mayek Black','October Meetei Mayek Bold','October Meetei Mayek ExtraLight','October Meetei Mayek Hairline','October Meetei Mayek Heavy','October Meetei Mayek Light','October Meetei Mayek Medium','October Meetei Mayek Thin','October Odia','October Odia Black','October Odia Bold','October Odia ExtraLight','October Odia Hairline','October Odia Heavy','October Odia Light','October Odia Medium','October Odia Thin','October Ol Chiki','October Ol Chiki Black','October Ol Chiki Bold','October Ol Chiki ExtraLight','October Ol Chiki Hairline','October Ol Chiki Heavy','October Ol Chiki Light','October Ol Chiki Medium','October Ol Chiki Thin','October Tamil','October Tamil Black','October Tamil Bold','October Tamil ExtraLight','October Tamil Hairline','October Tamil Heavy','October Tamil Light','October Tamil Medium','October Tamil Thin','October Telugu','October Telugu Black','October Telugu Bold','October Telugu ExtraLight','October Telugu Hairline','October Telugu Heavy','October Telugu Light','October Telugu Medium','October Telugu Thin',
+			'Optima','Optima Bold','Optima Bold Italic','Optima ExtraBlack','Optima Italic',
+			'Oriya MN','Oriya MN Bold','Oriya Sangam MN','Oriya Sangam MN Bold',
+			'Osaka','Osaka-Mono',
+			'PSL Ornanong Pro','PSL Ornanong Pro Bold','PSL Ornanong Pro Bold Italic','PSL Ornanong Pro Demibold','PSL Ornanong Pro Demibold Italic','PSL Ornanong Pro Italic','PSL Ornanong Pro Light','PSL Ornanong Pro Light Italic',
+			'PT Mono','PT Mono Bold','PT Sans','PT Sans Bold','PT Sans Bold Italic','PT Sans Caption','PT Sans Caption Bold','PT Sans Italic','PT Sans Narrow','PT Sans Narrow Bold','PT Serif','PT Serif Bold','PT Serif Bold Italic','PT Serif Caption','PT Serif Caption Italic','PT Serif Italic',
+			'Padyakke Expanded One',
+			'Palatino','Palatino Bold','Palatino Bold Italic','Palatino Italic',
+			'Papyrus','Papyrus Condensed',
+			'Party LET',
+			'PCMyungjo',
+			'Phosphate Inline','Phosphate Solid',
+			'PilGi',
+			'PingFang HK','PingFang HK Light','PingFang HK Medium','PingFang HK Semibold','PingFang HK Thin','PingFang HK Ultralight','PingFang MO','PingFang MO Light','PingFang MO Medium','PingFang MO Semibold','PingFang MO Thin','PingFang MO Ultralight','PingFang SC','PingFang SC Light','PingFang SC Medium','PingFang SC Semibold','PingFang SC Thin','PingFang SC Ultralight','PingFang TC','PingFang TC Light','PingFang TC Medium','PingFang TC Semibold','PingFang TC Thin','PingFang TC Ultralight',
+			'Plantagenet Cherokee',
+			'Produkt','Produkt Extralight','Produkt Extralight Italic','Produkt Italic','Produkt Light','Produkt Light Italic','Produkt Medium','Produkt Medium Italic',
+			'Proxima Nova','Proxima Nova Bold','Proxima Nova Bold It','Proxima Nova Extrabold','Proxima Nova Extrabold It','Proxima Nova It','Proxima Nova Light','Proxima Nova Light It','Proxima Nova Medium','Proxima Nova Medium It','Proxima Nova Semibold','Proxima Nova Semibold It',
+			'Publico Headline Black','Publico Headline Black Italic','Publico Headline Bold','Publico Headline Bold Italic','Publico Headline Italic','Publico Headline Roman','Publico Text Bold','Publico Text Bold Italic','Publico Text Italic','Publico Text Roman','Publico Text Semibold','Publico Text Semibold Italic',
+			'Quotes Caps','Quotes Script',
+			'Raanana','Raanana Bold',
+			'Rockwell','Rockwell Bold','Rockwell Bold Italic','Rockwell Italic',
+			'STFangsong',
+			'STHeiti',
+			'STIX Two Math','STIX Two Text','STIX Two Text Bold','STIX Two Text Bold Italic','STIX Two Text Italic','STIX Two Text Medium Italic','STIX Two Text Medium','STIX Two Text SemiBold','STIX Two Text SemiBold Italic',
+			'STKaiti',
+			'STSong',
+			'STXihei',
+			'Sama Devanagari','Sama Devanagari Bold','Sama Devanagari Book','Sama Devanagari ExtraBold','Sama Devanagari Medium','Sama Devanagari SemiBold','Sama Gujarati','Sama Gujarati Bold','Sama Gujarati Book','Sama Gujarati ExtraBold','Sama Gujarati Medium','Sama Gujarati SemiBold','Sama Gurmukhi','Sama Gurmukhi Bold','Sama Gurmukhi Book','Sama Gurmukhi ExtraBold','Sama Gurmukhi Medium','Sama Gurmukhi SemiBold','Sama Kannada','Sama Kannada Bold','Sama Kannada Book','Sama Kannada ExtraBold','Sama Kannada Medium','Sama Kannada SemiBold','Sama Malayalam','Sama Malayalam Bold','Sama Malayalam Book','Sama Malayalam ExtraBold','Sama Malayalam Medium','Sama Malayalam SemiBold','Sama Tamil','Sama Tamil Bold','Sama Tamil Book','Sama Tamil ExtraBold','Sama Tamil Medium','Sama Tamil SemiBold',
+			'Sana',
+			'Sarabun','Sarabun Bold','Sarabun Bold Italic','Sarabun ExtraBold','Sarabun ExtraBold Italic','Sarabun ExtraLight','Sarabun ExtraLight Italic','Sarabun Italic','Sarabun Light','Sarabun Light Italic','Sarabun Medium','Sarabun Medium Italic','Sarabun SemiBold','Sarabun SemiBold Italic','Sarabun Thin','Sarabun Thin Italic',
+			'Sathu',
+			'Sauber Script',
+			'Savoye LET',
+			'Shobhika','Shobhika Bold',
+			'Shree Devanagari 714','Shree Devanagari 714 Bold','Shree Devanagari 714 Bold Italic','Shree Devanagari 714 Italic',
+			'SignPainter','SignPainter Semibold',
+			'Silom',
+			'SimSong','SimSong Bold',
+			'Sinhala MN','Sinhala MN Bold','Sinhala Sangam MN','Sinhala Sangam MN Bold',
+			'Skia','Skia Black','Skia Black Condensed','Skia Black Extended','Skia Bold','Skia Condensed','Skia Extended','Skia Light','Skia Light Condensed','Skia Light Extended',
+			'Snell Roundhand','Snell Roundhand Black','Snell Roundhand Bold',
+			'Songti SC','Songti SC Black','Songti SC Bold','Songti SC Light',
+			'Songti TC','Songti TC Bold','Songti TC Light',
+			'Spot Mono','Spot Mono Bold','Spot Mono Medium',
+			'Srisakdi','Srisakdi Bold',
+			'Sukhumvit Set Bold','Sukhumvit Set Light','Sukhumvit Set Medium','Sukhumvit Set Semi Bold','Sukhumvit Set Text','Sukhumvit Set Thin',
+			'Symbol',
+			'Tahoma','Tahoma Bold',
+			'Tamil MN','Tamil MN Bold','Tamil Sangam MN','Tamil Sangam MN Black','Tamil Sangam MN Bold','Tamil Sangam MN Demibold','Tamil Sangam MN Light','Tamil Sangam MN Medium',
+			'Telugu MN','Telugu MN Bold','Telugu Sangam MN','Telugu Sangam MN Bold',
+			'Thonburi','Thonburi Bold','Thonburi Light',
+			'Times New Roman','Times New Roman Bold','Times New Roman Bold Italic','Times New Roman Italic',
+			'Tiro Bangla','Tiro Bangla Italic','Tiro Devanagari Hindi','Tiro Devanagari Hindi Italic','Tiro Devanagari Marathi','Tiro Devanagari Marathi Italic','Tiro Devanagari Sanskrit','Tiro Devanagari Sanskrit Italic','Tiro Gurmukhi','Tiro Gurmukhi Italic','Tiro Kannada','Tiro Kannada Italic','Tiro Tamil','Tiro Tamil Italic','Tiro Telugu','Tiro Telugu Italic',
+			'Toppan Bunkyu Gothic','Toppan Bunkyu Gothic Demibold','Toppan Bunkyu Midashi Gothic Extrabold','Toppan Bunkyu Midashi Mincho Extrabold','Toppan Bunkyu Mincho',
+			'Trattatello',
+			'Trebuchet MS','Trebuchet MS Bold','Trebuchet MS Bold Italic','Trebuchet MS Italic',
+			'Tsukushi A Round Gothic','Tsukushi A Round Gothic Bold','Tsukushi B Round Gothic','Tsukushi B Round Gothic Bold',
+			'Verdana','Verdana Bold','Verdana Bold Italic','Verdana Italic',
+			'Waseem','Waseem Light',
+			'Wawati SC','Wawati TC',
+			'Webdings',
+			'Weibei SC Bold','Weibei TC Bold',
+			'Wingdings','Wingdings 2','Wingdings 3',
+			'Xingkai SC Bold','Xingkai SC Light','Xingkai TC Bold','Xingkai TC Light',
+			'Yuanti SC','Yuanti SC Bold','Yuanti SC Light','Yuanti TC','Yuanti TC Bold','Yuanti TC Light',
+			'YuGothic Bold','YuGothic Medium',
+			'YuKyokasho Bold','YuKyokasho Medium','YuKyokasho Yoko Bold','YuKyokasho Yoko Medium',
+			'YuMincho +36p Kana Demibold','YuMincho +36p Kana Extrabold','YuMincho +36p Kana Medium','YuMincho Demibold','YuMincho Extrabold','YuMincho Medium',
 			'Yuppy SC','Yuppy TC',
 			'Zapf Dingbats',
 			'Zapfino',
