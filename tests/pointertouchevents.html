@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Pointer+Touch event dump</title>
+  </head>
+  <body>
+    <button>Clear</button>
+    <label><input type="checkbox" id="mouse"> Mouse events</label>
+    <label><input type="checkbox" id="move"> Move events</label>
+    <pre></pre>
+    <script>
+const pre = document.querySelector("pre");
+const mouse = document.getElementById("mouse");
+const move = document.getElementById("move");
+
+document.querySelector("button").addEventListener("click", () => {
+  pre.textContent = "";
+});
+
+function log(t) {
+  pre.textContent = t + "\n" + pre.textContent;
+}
+
+function dumpPointer(e) {
+  if (e.pointerType == "mouse" && !mouse.checked) {
+    return;
+  }
+  if (e.type == "pointermove" && !move.checked) {
+    return;
+  }
+  log(`${e.type} ${e.pointerType} ${e.pointerId} (pressure=${e.pressure}; client=(${e.clientX}, ${e.clientY}))`);
+}
+
+function dumpTouch(e) {
+  if (e.type == "touchmove" && !move.checked) {
+    return;
+  }
+  const touches = Array.from(e.touches ?? [], t => "" + t.identifier).join(" ");
+  log(`${e.type} [${touches}]`);
+}
+
+for (const e of ["cancel", "down", "enter", "leave", "move", "out", "over", "up"]) {
+  document.addEventListener(`pointer${e}`, dumpPointer);
+}
+
+for (const e of ["cancel", "end", "move", "start"]) {
+  document.addEventListener(`touch${e}`, dumpTouch);
+}
+    </script>
+  </body>
+</html>
