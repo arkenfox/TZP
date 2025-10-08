@@ -1,13 +1,16 @@
 'use strict';
 
-/* https://github.com/abrahamjuliot/creepjs */
-/* modified for gecko only */
+/*
+https://github.com/abrahamjuliot/creepjs
+- https://abrahamjuliot.github.io/creepjs/tests/prototype.html
+- https://github.com/abrahamjuliot/creepjs/blob/master/docs/tests/prototype.js
+*/
 
 const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 	if (isResize) {return resolve()}
 	sData[SECT98] = {}
 	sData[SECT99] = []
-	if (!isSmart && !isSmartDataMode) { // both reset to default false in smartFn
+	if (!isProtoProxy) {
 		dom.protohash = zNA
 		return resolve()
 	}
@@ -46,7 +49,10 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 	} = getIframe()
 
 	const getPrototypeLies = scope => {
-		const IS_BLINK = false // one left
+		// engine
+		const IS_BLINK = 'blink' == isEngine
+		const IS_GECKO = isGecko
+		const IS_WEBKIT = 'webkit' == isEngine
 
 		const getRandomValues = () => (
 			String.fromCharCode(Math.random() * 26 + 97) +
@@ -111,6 +117,12 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		// extending the function on a fake class should throw a TypeError and message "not a constructor"
 		const getClassExtendsTypeErrorLie = apiFunction => {
 			try {
+				const shouldExitInSafari13 = (
+					/version\/13/i.test((navigator || {}).userAgent) && IS_WEBKIT
+				)
+				if (shouldExitInSafari13) {
+					return false
+				}
 				// begin tests
 				class Fake extends apiFunction { }
 				return true
@@ -274,7 +286,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				return true // failed to throw
 			} catch (error) {
 				return (
-					error.constructor.name != 'TypeError' || ( /incompatible\sProxy/.test(error.message))
+					error.constructor.name != 'TypeError' || (IS_GECKO && /incompatible\sProxy/.test(error.message))
 				)
 			}
 		}
@@ -294,12 +306,52 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		// checking proxy instanceof proxy should throw a valid TypeError
 		const getInstanceofCheckLie = apiFunction => {
 			const proxy = new Proxy(apiFunction, {})
-			return false
+			if (!IS_BLINK) {
+				return false
+			}
+			const hasValidStack = (error, type = 'Function') => {
+				const { message, name, stack } = error
+				const validName = name == 'TypeError'
+				const validMessage = message == `Function has non-object prototype 'undefined' in instanceof check`
+				const targetStackLine = ((stack || '').split('\n') || [])[1]
+				const validStackLine = (
+					targetStackLine.startsWith(`    at ${type}.[Symbol.hasInstance]`) ||
+					targetStackLine.startsWith('    at [Symbol.hasInstance]') // Chrome 102
+				)
+				return validName && validMessage && validStackLine
+			}
+			try {
+				proxy instanceof proxy
+				return true // failed to throw
+			}
+			catch (error) {
+				// expect Proxy.[Symbol.hasInstance]
+				if (!hasValidStack(error, 'Proxy')) {
+					return true
+				}
+				try {
+					apiFunction instanceof apiFunction
+					return true // failed to throw
+				}
+				catch (error) {
+					// expect Function.[Symbol.hasInstance]
+					return !hasValidStack(error)
+				}
+			}
 		}
 
 		// defining properties should not throw an error
 		const getDefinePropertiesLie = (apiFunction) => {
-			return false
+			if (!IS_BLINK) {
+				return false // chrome only test
+			}
+			try {
+				Object.defineProperty(apiFunction, '', { configurable: true })+''
+				Reflect.deleteProperty(apiFunction, '')
+				return false
+			} catch (error) {
+				return true // failed at Error
+			}
 		}
 
 		// setPrototypeOf error tests
@@ -315,8 +367,13 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 			const { name, message } = error
 			const hasRangeError = name == 'RangeError'
 			const hasInternalError = name == 'InternalError'
-			const firefoxLie = (message != `too much recursion` || !hasInternalError)
-			return (hasRangeError || hasInternalError) && !(firefoxLie)
+			const chromeLie = IS_BLINK && (
+				message != `Maximum call stack size exceeded` || !hasRangeError
+			)
+			const firefoxLie = IS_GECKO && (
+				message != `too much recursion` || !hasInternalError
+			)
+			return (hasRangeError || hasInternalError) && !(chromeLie || firefoxLie)
 		}
 
 		const getTooMuchRecursionLie = ({ apiFunction, method = 'setPrototypeOf' }) => {
@@ -341,8 +398,18 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				const { name, message, stack } = error
 				const targetStackLine = ((stack || '').split('\n') || [])[1]
 				const hasTypeError = name == 'TypeError'
-				const firefoxLie = (message != `can't set prototype: it would cause a prototype chain cycle`)
-				if (!hasTypeError || firefoxLie) {
+				const chromeLie = IS_BLINK && (
+					message != `Cyclic __proto__ value` || (
+						method == '__proto__' && (
+							!targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`) &&
+							!targetStackLine.startsWith(`    at set __proto__ [as __proto__]`) // Chrome 102
+						)
+					)
+				)
+				const firefoxLie = IS_GECKO && (
+					message != `can't set prototype: it would cause a prototype chain cycle`
+				)
+				if (!hasTypeError || chromeLie || firefoxLie) {
 					return true // failed Error
 				}
 			} finally {
@@ -477,7 +544,8 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 					} catch (error) {
 						return
 					}
-						const interfaceObject = !!obj.prototype ? obj.prototype : obj
+
+					const interfaceObject = !!obj.prototype ? obj.prototype : obj
 					;[...new Set([
 						...Object.getOwnPropertyNames(interfaceObject),
 						...Object.keys(interfaceObject) // backup
