@@ -1189,7 +1189,7 @@ function metricsShow(name, scope) {
 	if (isShowFormat) {target = metricsUI(target, isVisible, isSection, isHealth)}
 
 	let data, color = 99, filter = ''
-	if (name == SECT98 || name == SECT99) {
+	if (name == SECT97 || name == SECT98 || name == SECT99) {
 		// prototype/proxy
 		data = gData[name]
 	} else if ('document_health_list' == name) {
@@ -1927,18 +1927,21 @@ function log_section(name, time, scope = isScope) {
 
 		// prototype/proxy
 			// ToDo: isTB health
+		let protoDisplay = zNA
 		if (isProtoProxy) {
+			protoDisplay = 'none'
+			let propsCount = gData[SECT97].length
 			let protoCount = (Object.keys(gData[SECT98]).length)
 			let proxyCount = gData[SECT99].length
-			if (protoCount + proxyCount == 0) {
-				dom.protohash = "none"
-			} else {
+			if (protoCount + proxyCount > 0) {
 				let aStr = []
 				if (protoCount > 0) {aStr.push(mini(gData[SECT98]) + addButton(0, SECT98, protoCount))}
 				if (proxyCount > 0) {aStr.push(mini(gData[SECT99]) + addButton(0, SECT99, proxyCount))}
-				dom.protohash.innerHTML = aStr.join(" ")
+				protoDisplay = aStr.join(" ")
 			}
+			protoDisplay += ' from '+ addButton(0, SECT97, propsCount)
 		}
+		dom.protohash.innerHTML = protoDisplay
 
 		output_health(scope)
 
