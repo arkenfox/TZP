@@ -5,8 +5,8 @@ let fntCodes = [ // sorted
 	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
 	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
 	'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
-	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
-	'0xA830','0xF003','0xF810','0xFBEE',
+	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0x6E2F',
+	'0xA73D','0xA830','0xF003','0xF810','0xFBEE',
 	/* ignore: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
 		problematic e.g windows 1st use
 		'0xFFF9','0xFFFD',
@@ -70,9 +70,10 @@ let fntMaster = {
 		android: [],
 		// notos then linux +16, mac +5, win +4
 		linux: [
-			'Arimo','Cousine','Noto Color Emoji','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP',
-			'Noto Sans KR','Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew',
-			'Noto Serif Thai','Pyidaungsu','STIX Two Math','Tinos','Twemoji Mozilla',
+			// 'Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC' // BB 44227: replaced by Jigmo in BB15
+			'Arimo','Cousine','Jigmo','Jigmo2','Jigmo3','Noto Color Emoji','Noto Naskh Arabic','Noto Sans Armenian',
+			'Noto Sans Hebrew','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai','Pyidaungsu',
+			'STIX Two Math','Tinos','Twemoji Mozilla',
 		],
 		mac: ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','Pyidaungsu','STIX Two Math'],
 		windows: ['Noto Naskh Arabic','Noto Sans','Noto Serif','Pyidaungsu','Twemoji Mozilla'],
@@ -439,8 +440,11 @@ let fntMaster = {
 			'MingLiU','細明體','MingLiU_HKSCS','細明體_HKSCS','Miriam','Miriam Fixed','MoolBoran','Narkisim','Nyala','PMingLiU','新細明體',
 			'Plantagenet Cherokee','Raavi','Rod','Sakkal Majalla','Sanskrit Text','Shonar Bangla','Shruti','SimHei','黑体',
 			'Simplified Arabic','Traditional Arabic','Tunga','Urdu Typesetting','Utsaah','Vani','Vijaya','Vrinda','Yu Mincho','游明朝',
-			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-R', // original -R regular -B bold
-			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // late 2024 update
+			// UD Digi
+				// to save on code turmoil and maintenance, allow 24H2 in FF144 or lower: if FPP leaks it will show
+				// with other fonts and if FPP doesn't leak then they simply will not show in the results
+			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-R', // original (ignore weighted -B bold)
+			'UD Digi Kyokasho N','UD Digi Kyokasho NK','UD Digi Kyokasho NP', // 24H2: FF145+ 1988407
 			// 1954265: FF139+ win11 23H2 / win1022H2
 			'Noto Sans HK','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC',
 			'Noto Serif HK','Noto Serif JP','Noto Serif KR','Noto Serif SC','Noto Serif TC',
@@ -2336,6 +2340,23 @@ const get_woff2 = (METRIC) => new Promise(resolve => {
 })
 
 const outputFonts = () => new Promise(resolve => {
+	if (gLoad) {
+		let strDisplay
+		try {
+			let aDisplay = []
+			fntCodes.forEach(function(code) {
+				let codeString = String.fromCodePoint(code)
+				aDisplay.push('<span class="s99 monospace smaller" dir="ltr">'+ code.slice(2) + sc
+					+'</span> <span class="bold bigger"> '+ codeString +' </span>'
+				)
+			})
+			strDisplay = aDisplay.join('  ')
+		} catch(e) {
+			strDisplay = '<span class="mono">'+ e+'</span>'
+		}
+		addDisplay(12, 'glyphs_visual', strDisplay)
+	}
+
 	set_fntList()
 	Promise.all([
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
