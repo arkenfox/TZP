@@ -2011,15 +2011,14 @@ function countJS(item) {
 			Promise.all([
 				get_isOS('isOS')
 			]).then(function(){
-				// tweak monospace size: ToDo: this is bad design
+				// tweak monospace size
+					// ToDo: this is bad design: we need a better way to get nice consistent sizes across
+					// TB vs linux vs other lilnux vs other platforms
 				if ('windows' == isOS) {
 					try {
-						let items = document.querySelectorAll('.mono')
-						for (let i=0; i < items.length; i++) {
-							items[i].classList.add('monobigger')
-							items[i].classList.remove('mono')
-						}
-					} catch {}
+						document.documentElement.style.setProperty('--txtSize', '12px')
+						document.documentElement.style.setProperty('--txtSizeBigger', '24px')
+					} catch(e) {console.log(e)}
 				}
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
