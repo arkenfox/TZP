@@ -2,7 +2,8 @@
 
 var dom;
 
-const SECTG = '_global', SECTP = '_prereq', SECTNF = 'NON-FP', SECT98 = 'prototype', SECT99 = 'proxy'
+const SECTG = '_global', SECTP = '_prereq', SECTNF = 'NON-FP',
+	SECT97 = 'properties', SECT98 = 'prototype', SECT99 = 'proxy'
 
 const sectionMap = {
 	1: 'screen', 2: 'agent', 3: 'feature', 4: 'region', 5: 'headers', 6: 'storage',
