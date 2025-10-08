@@ -926,7 +926,7 @@ function get_window_props(METRIC) {
 				}
 				// notate console
 				if (!isLies && isDesktop && isOS !== undefined) {
-					let strConsole = ' [console ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
+					let strConsole = ' [devtools ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
 					addDisplay(18, 'consolestatus', strConsole)
 				}
 			}
