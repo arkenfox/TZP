@@ -954,11 +954,17 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 	}
 
 	// navigator
+		// prototype items that are not navigator
+		// this is lie 'b: failed undefined properties'? but here we cover all navigator keys
 	try {
-		let navData = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		let navTamper = [], navObj = navigator
-		for (const k of Object.keys(navObj)) {navTamper.push(k)}
-		navTamper.forEach(function(item) {
+		let aNav = []
+		for (const key in navigator) {aNav.push(key)}
+		let aProto = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		aProto = aProto.filter(x => !['constructor'].includes(x)) // ignore constructor
+		let aNotInNav = aProto.filter(x => !aNav.includes(x)) // 
+		//let aNotInProto = aNav.filter(x => !aProto.includes(x)) // this would catch made up shit?
+		//console.log(aNav, aProto, aNotInNav, aNotInProto)
+		aNotInNav.forEach(function(item) {
 			item = 'Navigator.'+ item
 			if (lieDetail[item] == undefined) {lieDetail[item] = []}
 			lieDetail[item].push('z: failed getOwnPropertyDescriptors')
