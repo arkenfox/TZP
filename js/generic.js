@@ -34,7 +34,13 @@ function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function removeElementFn(id) {try {dom[id].remove()} catch {}}
 function addProxyLie(value) {sData[SECT99].push(value)}
-function isProxyLie(value) {return sData[SECT99].includes(value)}
+function isProxyLie(value) {
+	// ensure we only _use_ tampering in gecko smart mode
+		// sect99 is now populated based on isProtoProxy which includes all gecko and can include other select engines
+		// isSmart and isSmartDataMode are reset each run in smartFn
+	if (isSmart || isSmartDataMode) {return sData[SECT99].includes(value)}
+	return false
+}
 function smartFn(type) {
 	// reset
 	isFile = 'file:' == location.protocol
@@ -219,6 +225,7 @@ const promiseRaceFulfilled = async ({
 function get_isArch(METRIC) {
 	// chrome limits ArrayBuffer to 2145386496: https://issues.chromium.org/issues/40055619
 	if ('blink' == isEngine) {return}
+	// FYI: 32bit no longer supported for linux FF145+
 	let t0 = nowFn(), value
 	try {
 		if (runSG) {foo++}
@@ -1920,7 +1927,7 @@ function log_section(name, time, scope = isScope) {
 
 		// prototype/proxy
 			// ToDo: isTB health
-		if (isSmart || isSmartDataMode) {
+		if (isProtoProxy) {
 			let protoCount = (Object.keys(gData[SECT98]).length)
 			let proxyCount = gData[SECT99].length
 			if (protoCount + proxyCount == 0) {
@@ -2277,6 +2284,12 @@ function run_immediate() {
 			// return if not supported
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		}
+		// set isProtoProxy
+			// currently blink returns "s: failed at too much recursion __proto__ error" on every test
+		//isProtoProxy = isGecko ? true : ('blink' == isEngine || 'webkit' == isEngine) ? true : false
+		isProtoProxy = isGecko
+
+		// recursion
 		get_isRecursion()
 		// storage warm ups
 		get_isFileSystem('isFileSystem', true)
