@@ -70,7 +70,6 @@ let fntMaster = {
 		android: [],
 		// notos then linux +16, mac +5, win +4
 		linux: [
-			// 'Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC' // BB 44227: replaced by Jigmo in BB15
 			'Arimo','Cousine','Jigmo','Jigmo2','Jigmo3','Noto Color Emoji','Noto Naskh Arabic','Noto Sans Armenian',
 			'Noto Sans Hebrew','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai','Pyidaungsu',
 			'STIX Two Math','Tinos','Twemoji Mozilla',
@@ -198,6 +197,7 @@ let fntMaster = {
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // BB12 fontnames
 			'Noto Sans Myanmar', // BB14.5 bundled replaced by Pyidaungsu
+			'Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC' // BB15 44227: replaced by Jigmo
 		],
 		linuxfaces: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
