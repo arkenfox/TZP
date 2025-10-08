@@ -10,10 +10,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 	if (isResize) {return resolve()}
 	sData[SECT98] = {}
 	sData[SECT99] = []
-	if (!isProtoProxy) {
-		dom.protohash = zNA
-		return resolve()
-	}
+	if (!isProtoProxy) {return resolve()}
 	let t0 = nowFn()
 
 	const getIframe = () => {
@@ -983,6 +980,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		for (const k of Object.keys(sData[SECT98])) {newObj[k] = sData[SECT98][k]}
 		gData[SECT98] = newObj
 	}
+	gData[SECT97] = propsSearched.sort()
 
 	log_perf(SECTP, SECT98 +"/"+ SECT99, t0)
 	return resolve()
