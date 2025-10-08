@@ -52,6 +52,8 @@
 	--txtbasic: #69004f;
 	--txtindicate: #a4a4a4; /* color change of copy button */
 	--txtlink: #5079cb;
+  --txtSize: 11px;
+  --txtSizeBigger: 18px;
 	/* json colors */
 	--jboolean: #058b00;
 	--jkey: #0074e8;
@@ -125,6 +127,8 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 .indicate {color: var(--indicate);}
 .hidden {display: none;}
 .health, .healthsilent {font-size: 10px;}
+.smaller {font-size: 11px;}
+.bigger {font-size: var(--txtSizeBigger);}
 .offscreen {
 	position: absolute !important;
 	top: -2000% !important;
@@ -132,8 +136,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 }
 .bold {font-weight: bold;}
 .normal {font-weight: normal;}
-.mono {font-family: monospace, "Courier New"; font-size: 11px;}
-.monobigger {font-family: monospace, "Courier New"; font-size: 12px;}
+.mono {font-family: monospace, "Courier New"; font-size: var(--txtSize);}
 .strike {text-decoration: line-through;}
 .spaces {white-space: pre-wrap;}
 .nospaces {white-space: normal;}
@@ -332,7 +335,7 @@ tr td.border-top {
 
 .togA, .togP, #btnFS, /* android, perf, fullscreen element */
 .togUA, .togUAD, .togAI, .togAW, .togMM,
-.togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
+.togCS, .togFS, .togFG, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
 
 #tb1 td:first-child {color: var(--test1); font-weight: var(--testweight)}
 	#tb1 .togS td:first-child {color: var(--test99); font-weight: normal;} /* screen/window/viewport */
@@ -355,6 +358,7 @@ tr td.border-top {
 #tb11 td:first-child {color: var(--test11); font-weight: var(--testweight)}
 #tb12 td:first-child {color: var(--test12); font-weight: var(--testweight)}
 	#tb12 .togFS td:first-child {color: var(--test99); font-weight: normal;} /* font sizes */
+	#tb12 .togFG td:first-child {color: var(--test99); font-weight: normal;} /* font glyphs */
 #tb13 td:first-child {color: var(--test13); font-weight: var(--testweight)}
 #tb14 td:first-child {color: var(--test14); font-weight: var(--testweight)}
 	#tb14 .togCS td:first-child {color: var(--test99); font-weight: normal;} /* computed styles */
