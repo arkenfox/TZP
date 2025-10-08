@@ -72,6 +72,7 @@
 				You need a new browser session and no history.<br>
 				<div class="mono">DISPLAY: 
 					<input type="radio" id="family" name="family" value="cursive" onClick='rebuild()'><label> cursive </label>
+					<input type="radio" id="family" name="family" value="math" onClick='rebuild()'><label> math </label>
 					<input type="radio" id="family" name="family" value="monospace" onClick='rebuild()'><label> monospace </label>
 					<input type="radio" id="family" name="family" value="sans-serif" onClick='rebuild()' checked><label> sans-serif </label>
 					<input type="radio" id="family" name="family" value="serif" onClick='rebuild()'><label> serif </label>
@@ -99,12 +100,13 @@
 'use strict';
 
 let fntCodes = [
+	// added 0x6E2F
 	// sorted
 	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
 	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
 	'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
-	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
-	'0xA830','0xF003','0xF810','0xFBEE',
+	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0x6E2F',
+	'0xA73D','0xA830','0xF003','0xF810','0xFBEE',
 	/* ignore replacement characters: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
 		these seem to be problematic at least on windows on first use
 		'0xFFF9','0xFFFD',
@@ -112,7 +114,7 @@ let fntCodes = [
 	'0xFFFF', // tofu
 ]
 
-let styles = ["cursive","monospace","sans-serif","serif","system-ui"]
+let styles = ["cursive","math","monospace","sans-serif","serif","system-ui"]
 let oData = {}, counter = 0
 let div = dom['element-fp'], span = dom['glyphs-span'], slot = dom['glyphs-slot']
 
