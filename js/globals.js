@@ -200,7 +200,6 @@ let aDomRect = [true, true, true, true],
 let overlayScope = 'document',
 	overlayFP = '_list',
 	overlayHealth = '_summary',
-	overlayHealthCount = '',
 	overlaySection = '',
 	overlayName = '',
 	overlayCharLen, // length per monospace character
