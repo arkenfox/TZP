@@ -20,7 +20,7 @@
 	--bg16: #f09bf0;
 	--bg17: #f09bd4;
 	--bg18: #f09bb8;
-	--bg98: #a4a4a4; /* overlaytop */
+	--bg98: #ededed; /* overlaytop */
 	--bg99: #a4a4a4; /* fingerprint and perf */
 	--bggood: #bae6aa40;
 	--bgbad: #fb80802e;
@@ -58,8 +58,8 @@
 	/* json colors */
 	--jboolean: #058b00;
 	--jkey: #0074e8;
-	--jnull: #939395;
-	--jstring: #dc01b7;
+	--jnull: #5c5c5f;
+	--jstring: #dd00a9;
 }
 
 @media (prefers-color-scheme: light) {
