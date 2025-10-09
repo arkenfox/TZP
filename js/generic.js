@@ -1234,7 +1234,7 @@ function metricsShow(name, scope) {
 	//add btn, show/hide options, display
 	let hash = mini(data)
 	metricsTitle = (scope == undefined ? '' : scope.toUpperCase() +': ') + target + filter +': '+ hash
-	dom.metricsTitle.innerHTML = metricsTitle + (isHealth && isDesktop ? overlayHealthCount : '')
+	dom.metricsTitle.innerHTML = metricsTitle
 	if (isVisible) {
 		// avoid reflow
 		dom.metricsDisplay.innerHTML = display
@@ -1383,16 +1383,11 @@ function output_health(scope) {
 		}
 		if (countTotal > 0) {
 			let isAll = countPass == countTotal
-			overlayHealthCount = countPass +'/'+ countTotal
-			//dom[scope + h].innerHTML = addButton(0,'document_health_list', countTotal)
-			//		+' '+ addButton((isAll ? 'good' : 'bad'), h, overlayHealthCount)
-
+			let overlayHealthCount = countPass +'/'+ countTotal
 			let btnPart1 = addButton((isAll ? 'good' : 'bad'), h, countPass)
 			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> | </span>'
 			dom[scope + h].innerHTML = btnPart1
 				+ addButton(0,'document_health_list', countTotal).replace('[','')
-
-			overlayHealthCount = (isAll ? sg : sb) +'['+ overlayHealthCount +']'+ sc
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
 		delete gData[h][scope +'_collect']
