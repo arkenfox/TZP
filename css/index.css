@@ -1,7 +1,7 @@
 
 :root{
 	/* backgrounds */
-	--bg0: #edf2f6; /* body */
+	--bg0: #fbfaf9; /* body */
 	--bg1: #f09b9b;
 	--bg2: #f0b89b;
 	--bg3: #f0d49b;
@@ -20,6 +20,7 @@
 	--bg16: #f09bf0;
 	--bg17: #f09bd4;
 	--bg18: #f09bb8;
+	--bg98: #a4a4a4; /* overlaytop */
 	--bg99: #a4a4a4; /* fingerprint and perf */
 	--bggood: #bae6aa40;
 	--bgbad: #fb80802e;
@@ -66,6 +67,7 @@
 	:root{
 	/* backgrounds */
 	--bg0: #161b22;
+	--bg98: #161b22;
 	--bg99: #808080;
 	--bggood: none;
 	--bgbad: none;
@@ -145,7 +147,6 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 
 /* buttons */
 .btn {
-	/* background-color: var(--bg0); */
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
@@ -245,7 +246,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 #overlaytop {
 	position: sticky;
 	top: 0;
-	background-color: var(--bg0);
+	background-color: var(--bg98);
 	border-bottom: 1px solid var(--test0);
 	padding: 18px 25px;
 	z-index: 1000;
