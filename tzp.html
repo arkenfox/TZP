@@ -64,6 +64,15 @@
 			background-color: #161b22;
 			/*opacity: 0;*/
 		}
+		#tzpBase {
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			width: 100%;
+			height: 100%;
+			overscroll-behavior: contain;
+			overflow-y:scroll;
+		}
 	</style>
 </head>
 
@@ -147,6 +156,7 @@
 		<div><img id="tzpBrandHidden" src="chrome://branding/content/about-wordmark.svg"></div>
 	</div>
 
+	<div id="tzpBase">
 	<table>
 		<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
 		<tr><td class="blurb" id="index"><a id="tzpLink" class="return" href="index.html">return to TZP index</a></td></tr>
@@ -1144,6 +1154,7 @@
 	</table>
 	<a name="theend" id="theend"></a><br>
 	</span> <!--end tzpcontent-->
+	</div> <!-- end tzpBase -->
 
 	<!--block-->
 	<div id='blockmsg' style="display: none;"></div>
