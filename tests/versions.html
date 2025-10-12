@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 100, maxVer = 144, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 101, maxVer = 145, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -284,6 +284,13 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 145: 1968987
+		let t145 = performance.now(), ver145
+		try {
+			ver145 = undefined !== (new ToggleEvent('toggle', null)).source
+		} catch(e) {}
+		rec(145, 145, "1968987", ver145, performance.now()-t145) // 0.02ms
 
 		// 144: 1919582
 		let t144 = performance.now()
