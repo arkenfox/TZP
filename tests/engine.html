@@ -876,6 +876,7 @@ function get_media_constraints(num, title) {
 			'channelCount', // FF56+
 			'autoGainControl','noiseSuppression', // FF55+
 			'mozAutoGainControl','mozNoiseSuppression', // FF54-
+			'resizeMode', // FF144+
 		]
 		let data = navigator.mediaDevices.getSupportedConstraints()
 		let res = Object.keys(data)
@@ -1107,35 +1108,45 @@ function get_moz_objects(num, name) {
 			useHas = true
 			oList[name] = [Element.prototype,["mozMatchesSelector","​mozRequestFullScreen"]]
 		}
-		if (name === "CSS2Properties" && "function" === typeof CSS2Properties) {
-			oList[name] = [CSS2Properties.prototype,
-				['MozAnimation','MozAnimationDelay','MozAnimationDirection','MozAnimationDuration','MozAnimationFillMode',
-				'MozAnimationIterationCount','MozAnimationName','MozAnimationPlayState','MozAnimationTimingFunction',
-				'MozAppearance','MozBackfaceVisibility','MozBorderEnd','MozBorderEndColor','MozBorderEndStyle',
-				'MozBorderEndWidth','MozBorderImage','MozBorderStart','MozBorderStartColor','MozBorderStartStyle',
-				'MozBorderStartWidth','MozBoxAlign','MozBoxDirection','MozBoxFlex','MozBoxOrdinalGroup','MozBoxOrient',
-				'MozBoxPack','MozBoxSizing','MozFloatEdge','MozFontFeatureSettings','MozFontLanguageOverride',
-				'MozForceBrokenImageIcon','MozHyphens','MozImageRegion','MozMarginEnd','MozMarginStart','MozOrient',
-				'MozPaddingEnd','MozPaddingStart','MozPerspective','MozPerspectiveOrigin','MozTabSize','MozTextSizeAdjust',
-				'MozTransform','MozTransformOrigin','MozTransformStyle','MozTransition','MozTransitionDelay',
-				'MozTransitionDuration','MozTransitionProperty','MozTransitionTimingFunction','MozUserFocus','MozUserInput',
-				'MozUserModify','MozUserSelect','MozWindowDragging',
-				// aliases
-				'-moz-animation','-moz-animation-delay','-moz-animation-direction','-moz-animation-duration',
-				'-moz-animation-fill-mode','-moz-animation-iteration-count','-moz-animation-name','-moz-animation-play-state',
-				'-moz-animation-timing-function','-moz-appearance','-moz-backface-visibility','-moz-border-end',
-				'-moz-border-end-color','-moz-border-end-style','-moz-border-end-width','-moz-border-image','-moz-border-start',
-				'-moz-border-start-color','-moz-border-start-style','-moz-border-start-width','-moz-box-align',
-				'-moz-box-direction','-moz-box-flex','-moz-box-ordinal-group','-moz-box-orient','-moz-box-pack',
-				'-moz-box-sizing','-moz-float-edge','-moz-font-feature-settings','-moz-font-language-override',
-				'-moz-force-broken-image-icon','-moz-hyphens','-moz-image-region','-moz-margin-end','-moz-margin-start',
-				'-moz-orient','-moz-padding-end','-moz-padding-start','-moz-perspective','-moz-perspective-origin',
-				'-moz-tab-size','-moz-text-size-adjust','-moz-transform','-moz-transform-origin','-moz-transform-style',
-				'-moz-transition','-moz-transition-delay','-moz-transition-duration','-moz-transition-property',
-				'-moz-transition-timing-function','-moz-user-focus','-moz-user-input','-moz-user-modify','-moz-user-select',
-				'-moz-window-dragging',
+		if (name === "CSS2|CSSStyle") {
+			let source
+			if ("function" === typeof CSS2Properties) {
+				source = CSS2Properties
+				title = "[CSS2Properties] moz"
+			} else if ("function" === typeof CSSStyleProperties) {
+				source = CSSStyleProperties
+				title = "[CSSStyleProperties] moz"
+			}
+			if (undefined !== source) {
+				oList[name] = [source.prototype,
+					['MozAnimation','MozAnimationDelay','MozAnimationDirection','MozAnimationDuration','MozAnimationFillMode',
+					'MozAnimationIterationCount','MozAnimationName','MozAnimationPlayState','MozAnimationTimingFunction',
+					'MozAppearance','MozBackfaceVisibility','MozBorderEnd','MozBorderEndColor','MozBorderEndStyle',
+					'MozBorderEndWidth','MozBorderImage','MozBorderStart','MozBorderStartColor','MozBorderStartStyle',
+					'MozBorderStartWidth','MozBoxAlign','MozBoxDirection','MozBoxFlex','MozBoxOrdinalGroup','MozBoxOrient',
+					'MozBoxPack','MozBoxSizing','MozFloatEdge','MozFontFeatureSettings','MozFontLanguageOverride',
+					'MozForceBrokenImageIcon','MozHyphens','MozImageRegion','MozMarginEnd','MozMarginStart','MozOrient',
+					'MozPaddingEnd','MozPaddingStart','MozPerspective','MozPerspectiveOrigin','MozTabSize','MozTextSizeAdjust',
+					'MozTransform','MozTransformOrigin','MozTransformStyle','MozTransition','MozTransitionDelay',
+					'MozTransitionDuration','MozTransitionProperty','MozTransitionTimingFunction','MozUserFocus','MozUserInput',
+					'MozUserModify','MozUserSelect','MozWindowDragging',
+					// aliases
+					'-moz-animation','-moz-animation-delay','-moz-animation-direction','-moz-animation-duration',
+					'-moz-animation-fill-mode','-moz-animation-iteration-count','-moz-animation-name','-moz-animation-play-state',
+					'-moz-animation-timing-function','-moz-appearance','-moz-backface-visibility','-moz-border-end',
+					'-moz-border-end-color','-moz-border-end-style','-moz-border-end-width','-moz-border-image','-moz-border-start',
+					'-moz-border-start-color','-moz-border-start-style','-moz-border-start-width','-moz-box-align',
+					'-moz-box-direction','-moz-box-flex','-moz-box-ordinal-group','-moz-box-orient','-moz-box-pack',
+					'-moz-box-sizing','-moz-float-edge','-moz-font-feature-settings','-moz-font-language-override',
+					'-moz-force-broken-image-icon','-moz-hyphens','-moz-image-region','-moz-margin-end','-moz-margin-start',
+					'-moz-orient','-moz-padding-end','-moz-padding-start','-moz-perspective','-moz-perspective-origin',
+					'-moz-tab-size','-moz-text-size-adjust','-moz-transform','-moz-transform-origin','-moz-transform-style',
+					'-moz-transition','-moz-transition-delay','-moz-transition-duration','-moz-transition-property',
+					'-moz-transition-timing-function','-moz-user-focus','-moz-user-input','-moz-user-modify','-moz-user-select',
+					'-moz-window-dragging',
+					]
 				]
-			]
+			}
 		}
 		// object: don't use, we can do this elsewhere
 		if (name === "window" && "object" == typeof window) {
@@ -1860,7 +1871,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof showDirectoryPicker, "showDirectoryPicker")
 		rec(num2, typeof showOpenFilePicker, "showOpenFilePicker")
 		rec(num2, typeof showSaveFilePicker, "showSaveFilePicker")
-		rec(num2, typeof trustedTypes, "trustedTypes")
+		rec(num2, typeof trustedTypes, "trustedTypes") // FF145 nightly 1955251
 		rec(num2, typeof webkitRequestFileSystem, "webkitRequestFileSystem")
 		rec(num2, typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL")
 		rec(num2, typeof webkitStorageInfo, "webkitStorageInfo")
@@ -1874,16 +1885,10 @@ function get_window_props(num1, num2, title) {
 				resU = resU.filter(x => !["oncontextlost"].includes(x))
 				resU = resU.filter(x => !["oncontextrestored"].includes(x))
 			}
-			if (isVer > 131) {
-				// FF132 nightly 1918643
-				resU = resU.filter(x => !["cookieStore"].includes(x))
-			}
-			if (isVer > 137) {
-				resU = resU.filter(x => !["originAgentCluster"].includes(x))
-			}
-			if (isVer > 138) {
-				resU = resU.filter(x => !["onbeforematch"].includes(x))
-			}
+			if (isVer > 131) {resU = resU.filter(x => !["cookieStore"].includes(x))} // FF132 nightly 1918643
+			if (isVer > 137) {resU = resU.filter(x => !["originAgentCluster"].includes(x))}
+			if (isVer > 138) {resU = resU.filter(x => !["onbeforematch"].includes(x))}
+			if (isVer > 144) {resU = resU.filter(x => !["trustedTypes"].includes(x))} // FF145 nightly 1955251
 		}
 
 		let boolU = resU.length == 0
@@ -1950,7 +1955,7 @@ function run() {
 	setTimeout(function() {
 		aPerf.push(["START 2", performance.now(), performance.now() - gt0])
 		get_moz_objects(88, "CanvasRenderingContext2D")
-		get_moz_objects(94, "CSS2Properties")
+		get_moz_objects(94, "CSS2|CSSStyle")
 		get_moz_objects(96, "DataTransfer")
 		get_moz_objects(98, "Document")
 		get_moz_objects(100, "Element")
