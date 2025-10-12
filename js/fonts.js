@@ -577,6 +577,7 @@ let fntMaster = {
 			'Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Herculanum','Hubballi',
 			'Jaini','Jaini Purva',
 			'K2D','Kai','Kaiti SC','Kaiti TC','Katari','Kavivanar','Kigelia','Kigelia Arabic','Kodchasan','KoHo','Krub',
+				'Kefa III', // new tahoe 26
 			'Lahore Gurmukhi','Lava Devanagari','Lava Kannada','Lava Telugu',
 				'LiHei Pro','LiSong Pro','Libian SC','Libian TC',
 			'Maku','Mali','Modak','Mukta','Mukta Malar','Mukta Vaani','Myriad Arabic',
