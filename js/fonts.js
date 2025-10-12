@@ -565,14 +565,14 @@ let fntMaster = {
 			'URW Bookman','URW Gothic','Z003',
 			// ToDo: expand
 		],
-		mac: [
+		mac: [ //NOT kBase/LangPack
 			'Academy Engraved LET','Adelle Sans Devanagari','AkayaKanadaka','AkayaTelivigala','Annai MN','Arima Koshi','Arima Madurai','Avenir Next Condensed',
 			'Bai Jamjuree','Baloo 2','Baloo Bhai 2','Baloo Bhaijaan','Baloo Bhaina 2','Baloo Chettan 2','Baloo Da 2','Baloo Paaji 2',
 				'Baloo Tamma 2','Baloo Tammudu 2','Baloo Thambi 2','Baoli SC','Baoli TC','BiauKai','BiauKaiHK','BiauKaiTC','BIZ UDGothic',
 				'BIZ UDMincho','BM DoHyeon','BM Hanna 11yrs Old','BM Hanna Air','BM Hanna Pro','BM Jua','BM Kirang Haerang','BM Yeonsung',
 			'Cambay Devanagari','Canela','Canela Deck','Canela Text','Chakra Petch','Charm','Charmonman',
 			'Dash','Domaine Display',
-			'Fahkwang','Founders Grotesk','Founders Grotesk Text',
+			'Fahkwang','Founders Grotesk','Founders Grotesk Condensed','Founders Grotesk Text',
 			'Gotu','Grantha Sangam MN','Graphik','Graphik Compact','GungSeo',
 			'Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Herculanum','Hubballi',
 			'Jaini','Jaini Purva',
