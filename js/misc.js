@@ -904,6 +904,7 @@ function get_window_props(METRIC) {
 				'HTMLObjectElement','MediaSource','OffscreenCanvas','Promise','Proxy','SharedWorker',
 				'String','URL','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI',
 				'decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','webkitURL',
+				'Error',
 				// other
 				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly'
 			]
@@ -948,15 +949,15 @@ function get_window_props(METRIC) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
 			let oHashes = {
 				MB : {
-					'linux': ['e78afd55','73cfc4b7'],
+					'linux': ['',''],
 					'mac': [],
-					'windows': ['83896626','76547f48'] // 860, 859
+					'windows': ['24a56526','1ecabe48'] // 860, 859
 				},
 				TB : {
 					'android': [],
-					'linux': [],
+					'linux': ['fbe478a3','82dd0085'], // 837, 836
 					'mac': [],
-					'windows': ['94a092a3','ef6e9a85' ] // 837, 836
+					'windows': ['fbe478a3','82dd0085' ] // 837, 836
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
