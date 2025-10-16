@@ -585,7 +585,7 @@ function get_math(METRIC, isLies) {
 }
 
 function get_navigator_keys(METRIC) {
-	let hash, btn='', aNav = [], notation = isBB ? bb_red : '', isLies = false
+	let hash, btn='', aNav = [], notation = (isBB && 'android' !== isOS) ? bb_red : '', isLies = false
 	try {
 		if (runST) {foo++}
 		// navigator
@@ -652,16 +652,12 @@ function get_navigator_keys(METRIC) {
 		}
 		// always return aNav
 		hash = mini(aNav); btn = addButton(18, METRIC, aNav.length)
-		// health: BB only as ESR is stable
-		if (isBB) {
+		// health: BB only as ESR is stable || drop TBA as it's moving to RR
+		if (isBB && 'android' !== isOS) {
 			if (isMB) { // MB
 				if ('a389214b' == hash) {notation = bb_green} // MB15 41
 			} else { // TB
-				if (isDesktop) {
-					if ('8d3dd2a1' == hash) {notation = bb_green} // TB15
-				} else {
-					if ('' == hash) {notation = bb_green} // no builds yet
-				}
+				if ('8d3dd2a1' == hash) {notation = bb_green} // TB15
 			}
 		}
 		// if tampered use notation to fail health
@@ -865,7 +861,7 @@ function get_webdriver(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, notation = isBB ? bb_red : '', isLies = false
+	let hash, btn='', data, notation = (isBB && 'android' !== isOS) ? bb_red : '', isLies = false
 	let id = 'iframe-window-version'
 
 	try {
@@ -945,19 +941,19 @@ function get_window_props(METRIC) {
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
 
 		// hashes v15
-		if (isBB) {
+			// we ignore android as tracking RR is not worth my time
+		if (isBB && 'android' !== isOS) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
 			let oHashes = {
 				MB : {
-					'linux': ['',''],
+					'linux': ['24a56526','1ecabe48'], // 860, 859
 					'mac': [],
 					'windows': ['24a56526','1ecabe48'] // 860, 859
 				},
 				TB : {
-					'android': [],
 					'linux': ['fbe478a3','82dd0085'], // 837, 836
 					'mac': [],
-					'windows': ['fbe478a3','82dd0085' ] // 837, 836
+					'windows': ['fbe478a3','82dd0085'] // 837, 836
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'

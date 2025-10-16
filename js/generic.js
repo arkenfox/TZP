@@ -52,8 +52,11 @@ function smartFn(type) {
 			// we do not know isBB yet
 			if (isSmartAllowed) {isSmart = true}
 		} else {
-			// block TB15 for now, too much noise
-			if (isSmartAllowed || !isTB) {isSmart = true}
+			// must be smart: but we can create blocks, set criteria for what to allow
+				// e.g. to block TB15 due to too much noise during development
+				// make sure to cater for isSmartAllowed so it can be overriden via console for reruns
+			//if (isSmartAllowed || !isTB) {isSmart = true} // example
+			isSmart = true
 		}
 		//console.log(type, isSmart)
 		isSmartDataMode = !isSmart // isSmartDataMode must be the opposite
