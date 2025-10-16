@@ -87,7 +87,7 @@ function get_computed_styles(METRIC) {
 	const names = ['cssrulelist','domparser','getcomputed','htmlelement',]
 	let aErr = [false, false, false, false]
 	let aHashes = [], intHashes = [], oDisplay = {}
-	let notation = isBB ? bb_red : '', isLies = false
+	let notation = (isBB && 'android' !== isOS) ? bb_red : '', isLies = false
 
 	let styleVersion = type => {
 		return new Promise(resolve => {
@@ -259,8 +259,8 @@ function get_computed_styles(METRIC) {
 			if (aHashes.length === 1) {
 				hash = aHashes[0], data = res[intHashes[0]]['keys']
 				btn = addButton(14, METRIC, data.length)
-				// notate
-				if (isBB) {
+				// health: BB only as ESR is stable || drop TBA as it's moving to RR
+				if (isBB && 'android' !== isOS) {
 					if ('mac' == isOS) {
 						/* mac has
 							MozOsxFontSmoothing,-moz-osx-font-smoothing,
