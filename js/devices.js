@@ -694,8 +694,8 @@ function get_touc_h(METRIC) {
 				"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
 			}
 			*/
-		'linux': '0645b89c', // {"element": "none", "maxTouchPoints": 10, "window": "none"}
-			/* linux gecko with touch doesn't have touch properties for now: see 1693172 */
+		'linux': 'ddf52610', // {"element": "none", "maxTouchPoints": 0, "window": ["Touch", "TouchEvent", "TouchList"]}
+			/* linux gecko with touch doesn't have maxTouchPoints */
 		'mac': 'd539fa63',
 		'windows': 'dee1c4c9', // {"element": "none", "maxTouchPoints": 10, "window": ['Touch','TouchEvent','TouchList']}
 	}
