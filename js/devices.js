@@ -694,9 +694,14 @@ function get_touc_h(METRIC) {
 				"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
 			}
 			*/
-		'linux': 'd539fa63', // {"element": "none", "maxTouchPoints": 0, "window": "none"}
+		'linux': '0645b89c', // {"element": "none", "maxTouchPoints": 10, "window": "none"}
+			/* linux gecko with touch doesn't have touch properties for now: see 1693172 */
 		'mac': 'd539fa63',
 		'windows': 'dee1c4c9', // {"element": "none", "maxTouchPoints": 10, "window": ['Touch','TouchEvent','TouchList']}
+	}
+	if (!isBB) {
+		// RFP will catch up in 1991701
+		rfpHashes.linux = 'd539fa63' // {"element": "none", "maxTouchPoints": 0, "window": "none"}
 	}
 	notation = rfpHashes[isOS] == hash ? rfp_green : rfp_red
 
