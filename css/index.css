@@ -239,12 +239,12 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 	max-width: 725px;
 	min-width: 225px;
 	height: 85%;
-	overflow-y:scroll;
 	border: 2px solid var(--test0);
 	background-color: var(--bg0);
+	box-shadow: 3px 3px 7px black;
 	z-index: 1000;
 	overscroll-behavior: contain;
-	box-shadow: 5px 5px 10px black;
+	overflow:scroll;
 }
 #overlaytop {
 	position: sticky;
