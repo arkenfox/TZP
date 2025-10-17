@@ -64,35 +64,37 @@ function smartFn(type) {
 	}
 }
 
-function expand_css(max = 3860, min = 300) {
-	// currently the ranges for both screen (min-device-*) and inner (min-) are 400-2560
-	// is there a faster way to do this? why do I need to add the full range when 400-2560 already exists?
-	let t0 = nowFn()
+function expand_css(end = 7680, start = 200) {
+	// currently the ranges for both screen (min-device-*) and
+	// inner (min-*) are 400-2560 and the two css files total almost 500kb
+	let t0 = nowFn(), state = start +'-'+ end
 	try {
-		function add_blank(i) {
-			styleSheet.insertRule("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
-			styleSheet.insertRule("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
-			styleSheet.insertRule("@media (min-width:"+ i +"px){#D:before{content:'';}}")
-			styleSheet.insertRule("@media (min-height:"+ i +"px){#D:after{content:'';}}")
-		}
-		// create
 		const style = document.createElement('style')
-		document.head.appendChild(style) // append to document.styleSheets
-		const styleSheet = style.sheet
-		add_blank(max+1)
-		for (let i= max; i > min; i--) {
-			styleSheet.insertRule("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
-			styleSheet.insertRule("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
-			styleSheet.insertRule("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
-			styleSheet.insertRule("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
+		style.type = 'text/css'
+		let rules = []
+		function add_blank(i) {
+			rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
+			rules.push("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
+			rules.push("@media (min-width:"+ i +"px){#D:before{content:'';}}")
+			rules.push("@media (min-height:"+ i +"px){#D:after{content:'';}}")
 		}
-		add_blank(min-1)
+		add_blank(start - 1)
+		for (let i= start; i <= end; i++) {
+			rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
+			rules.push("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
+			rules.push("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
+			rules.push("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
+		}
+		add_blank(end + 1)
+		style.appendChild(document.createTextNode(rules.join(' ')))
+		document.head.appendChild(style)
 	} catch(e) {
+		state = zErr
 		console.log(e)
 	}
-	// ~80ms for 3860 (4k)
-	// 260ms for 7680 (8k) : some of this time is awaiting files anyway
-	log_perf(SECTG, 'expanded_css', t0, '', min +'-'+ max)
+	// ~65ms for 7680 (8k) cold | reload ~15ms
+		// some/most of this time is spent awaiting more js files anyway
+	log_perf(SECTG, 'expanded_css', t0, '', state)
 }
 
 function typeFn(item, isSimple = false) {
