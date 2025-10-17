@@ -64,6 +64,37 @@ function smartFn(type) {
 	}
 }
 
+function expand_css(max = 3860, min = 300) {
+	// currently the ranges for both screen (min-device-*) and inner (min-) are 400-2560
+	// is there a faster way to do this? why do I need to add the full range when 400-2560 already exists?
+	let t0 = nowFn()
+	try {
+		function add_blank(i) {
+			styleSheet.insertRule("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
+			styleSheet.insertRule("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
+			styleSheet.insertRule("@media (min-width:"+ i +"px){#D:before{content:'';}}")
+			styleSheet.insertRule("@media (min-height:"+ i +"px){#D:after{content:'';}}")
+		}
+		// create
+		const style = document.createElement('style')
+		document.head.appendChild(style) // append to document.styleSheets
+		const styleSheet = style.sheet
+		add_blank(max+1)
+		for (let i= max; i > min; i--) {
+			styleSheet.insertRule("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
+			styleSheet.insertRule("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
+			styleSheet.insertRule("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
+			styleSheet.insertRule("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
+		}
+		add_blank(min-1)
+	} catch(e) {
+		console.log(e)
+	}
+	// ~80ms for 3860 (4k)
+	// 260ms for 7680 (8k) : some of this time is awaiting files anyway
+	log_perf(SECTG, 'expanded_css', t0, '', min +'-'+ max)
+}
+
 function typeFn(item, isSimple = false) {
 	// return a more detailed result
 	let type = typeof item
@@ -2289,7 +2320,8 @@ function run_immediate() {
 			// currently blink returns "s: failed at too much recursion __proto__ error" on every test
 		//isProtoProxy = isGecko ? true : ('blink' == isEngine || 'webkit' == isEngine) ? true : false
 		isProtoProxy = isGecko
-
+		// expand css
+		expand_css(7680)
 		// recursion
 		get_isRecursion()
 		// storage warm ups
