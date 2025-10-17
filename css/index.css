@@ -244,7 +244,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 	box-shadow: 3px 3px 7px black;
 	z-index: 1000;
 	overscroll-behavior: contain;
-	overflow:scroll;
+	overflow-y:scroll;
 }
 #overlaytop {
 	position: sticky;
