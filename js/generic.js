@@ -88,6 +88,7 @@ function expand_css(end = 7680, start = 200) {
 		add_blank(end + 1)
 		style.appendChild(document.createTextNode(rules.join(' ')))
 		document.head.appendChild(style)
+		isStylesheet = state
 	} catch(e) {
 		state = zErr
 		console.log(e)
@@ -1989,6 +1990,13 @@ function log_section(name, time, scope = isScope) {
 function countJS(item) {
 	jsFiles++
 	if (1 == jsFiles) {
+		if (undefined !== isStylesheet) {
+			// update tooltip
+			try {
+				let items = document.getElementsByClassName('cssrange')
+				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet}
+			} catch(e) {}
+		}
 		// block if iframed
 		if (window.location !== window.parent.location) {run_block('iframe'); return}
 		// block if insecure as this produces very different results e.g. some APIs require secure
