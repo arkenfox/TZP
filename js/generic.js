@@ -1004,11 +1004,11 @@ function copyclip(element) {
 				// indicate it
 				try {
 					let target = dom.metricsBtnCopy
-					target.classList.add('txtindicate')
+					target.classList.add('indicate')
 					target.classList.remove('btn0')
 					setTimeout(function() {
 						target.classList.add('btn0')
-						target.classList.remove('txtindicate')
+						target.classList.remove('indicate')
 					}, 500)	
 				} catch(e) {}
 			}, function() {
