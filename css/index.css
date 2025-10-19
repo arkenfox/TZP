@@ -51,7 +51,7 @@
 	--testweight: bold;
 	/* other */
 	--txtbasic: #69004f;
-	--txtindicate: #a4a4a4; /* color change of copy button */
+	--txtindicate: #0aa537; /* color change of copy button */
 	--txtlink: #5079cb;
   --txtSize: 11px;
   --txtSizeBigger: 18px;
@@ -123,7 +123,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 .bad {color: var(--testbad); background-color: var(--bgbad);}
 .red {color: var(--testred); background-color: var(--bgbad);} /* use in basic mode to enforce showing an issue e.g. mismatched metric counts */
 .faint {color: var(--test99);}
-.indicate {color: var(--indicate);}
+.indicate {color: var(--txtindicate);}
 .hidden {display: none;}
 .health, .healthsilent {font-size: 10px;}
 .smaller {font-size: 11px;}
