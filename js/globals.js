@@ -162,6 +162,7 @@ let isArch = true,
 		'cursive','emoji','fangsong','fantasy','math','monospace',
 		'sans-serif','serif','system-ui','ui-monospace','ui-rounded','ui-serif'
 	],
+	isStylesheet, // stylesheet screen/window rules added: string showing range
 	isSystemFont = [],
 	isVer = 0,
 	isVerExtra = '',
