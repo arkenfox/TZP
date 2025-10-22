@@ -15,8 +15,8 @@ function return_lb(w,h) {
 function return_nw(w,h) {
 	// NW
 	let wstep = 200, hstep = 100, bw = false, bh = false
-	if (w < 1401) {bw = Number.isInteger(w/wstep)}
-	if (h < 901) {bh = Number.isInteger(h/hstep)}
+	if (w < 501) {wstep = 50} else if (w < 1401) {bw = Number.isInteger(w/wstep)}
+	if (h < 501) {hstep = 50} else if (h < 901) {bh = Number.isInteger(h/hstep)}
 	return (bw && bh) ? nw_green : nw_red
 }
 
@@ -149,6 +149,7 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 	}
 
 	// nonGecko boolean vs undefined: i.e a string of "undefined" will be an error
+		// note: FF145+ 1989559 marked as deprecated
 	let expectedType = isGecko ? 'boolean' : 'undefined'
 	// fullScreen
 	function get_fullScreen(item) {
