@@ -14,9 +14,10 @@ function return_lb(w,h) {
 
 function return_nw(w,h) {
 	// NW
-	let wstep = 200, hstep = 100, bw = false, bh = false
-	if (w < 501) {wstep = 50} else if (w < 1401) {bw = Number.isInteger(w/wstep)}
-	if (h < 501) {hstep = 50} else if (h < 901) {bh = Number.isInteger(h/hstep)}
+	let wstep = w < 601 ? 50 : 200, hstep = h < 501 ? 50 : 100
+	let bw = false, bh = false
+	if (w < 1401) {bw = Number.isInteger(w/wstep)}
+	if (h < 901) {bh = Number.isInteger(h/hstep)}
 	return (bw && bh) ? nw_green : nw_red
 }
 
