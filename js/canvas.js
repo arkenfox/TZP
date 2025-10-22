@@ -513,40 +513,62 @@ const get_canvas = () => new Promise(resolve => {
 	Promise.all([
 		known.createHashes(window, 1)
 	]).then(function(run1){
+		let chunkStr = 'ABBkZUJH'
+		//chunkStr = '5ErkJggg==' // test
+
 		run1[0].forEach(function(item){
 			let name = item.name, key = name.slice(0,2), value = item.displayValue, data ='', notation =''
 			oRes[name] = {}
 			oRes[name][1] = value
-
 			if (undefined !== oErrors[name]) {
 				aSkip.push(name)
 				value = oErrors[name]; notation = rfp_red; data = zErrLog
-			} else if (!isGecko) {
-				if ('ge' == key) {data = zNA} // test is random, return a stable FP
 			} else {
-				if ('ge' == key) {
-					// run 1 check returns mini(dataDrawn) == mini(data)
-					let getCheck = check_canvas_get(name, 1)
-					if (getCheck) {
-						data = 'trustworthy' // the test is random, return a stable FP
-						notation = rfp_red
-						aSkip.push(name)
-					} else {
-						data = 'protected'
-						countFake++
-					}
+				if (!isGecko) {
+					if ('ge' == key) {data = zNA} // test is random, return a stable FP
 				} else {
-					if (oKnown[name].includes(value)) {
-						aSkip.push(name)
-						notation = rfp_red
+					if ('ge' == key) {
+						// run 1 check returns mini(dataDrawn) == mini(data)
+						let getCheck = check_canvas_get(name, 1)
+						if (getCheck) {
+							data = 'trustworthy' // the test is random, return a stable FP
+							notation = rfp_red
+							aSkip.push(name)
+						} else {
+							data = 'protected'
+							countFake++
+						}
 					} else {
-						data = 'protected'
-						countFake++
+						// chunk test
+						// gecko: we can already detect tampering since we use known hashes
+						// but in future we might use randomness and read back the value from the png
+						if ('to' == key && oData[name].includes(chunkStr)) {
+								notation = rfp_red
+								countFake++
+						} else {
+							if (oKnown[name].includes(value)) {
+								aSkip.push(name)
+								notation = rfp_red
+							} else {
+								data = 'protected'
+								countFake++
+							}
+						}
 					}
 				}
 			}
 			oFP[name] = {'value': value, 'notation': notation, 'data': data}
 		})
+		/*
+		console.log(aSkip)
+		console.log(oData)
+		console.log(oFP)
+		exit()
+		return resolve()
+		//*/
+
+		// test
+		aSkip = aSkip.filter(x => ![toBlob].includes(x))
 
 		// we're testing for protection so always do two passes, including gecko basic mode
 			// ToDo: handle canvas spoofing in nonGecko: e.g. we can easily test getImageData: for now just exit
@@ -582,7 +604,12 @@ const get_canvas = () => new Promise(resolve => {
 					if ('skip' == getCheck) {checkValue = 'skip'}
 				}
 				if (checkValue !== 'skip') {
-					let data ='', notation ='', stats ='', rfpvalue =''
+					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
+					// chunk test
+					if ('to' == key && oData[name].includes(chunkStr)) {isChunk = ' | chunk'
+					}
+					
+
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
@@ -616,8 +643,8 @@ const get_canvas = () => new Promise(resolve => {
 							stats = isCanvasGet
 							rfpvalue += ' | '+ isCanvasGetChannels
 						}
-						notation += ' [persistent' + (isWhite ? ' white]' : ']'+ stats)
-						data = 'protected | persistent'+ (isWhite ? ' white' : rfpvalue)
+						notation += ' [persistent' + isChunk + (isWhite ? ' white]' : ']'+ stats)
+						data = 'protected | persistent'+ isChunk + (isWhite ? ' white' : rfpvalue)
 
 					} else {
 						// per execution
@@ -633,8 +660,8 @@ const get_canvas = () => new Promise(resolve => {
 							stats = isCanvasGet
 							data += ' | '+ isCanvasGetChannels
 						}
-						notation += ' [per execution]'+ stats
-						data = 'protected | per execution'+ rfpvalue
+						notation += ' [per execution' + isChunk +']'+ stats
+						data = 'protected | per execution'+ isChunk + rfpvalue
 					}
 					oFP[name] = {'value': value, 'notation': notation, 'data': data}
 				}
