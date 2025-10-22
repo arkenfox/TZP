@@ -596,10 +596,12 @@ const get_canvas = () => new Promise(resolve => {
 							// exclude BB which must fail if not RFP
 							if (isFPPFallback) {
 								// FPP: 119+ and no proxy lies and no getImageData stealth
-								// exclude solids: FPP does not tamper with those
+								// FF144 or lower: exclude solids: FPP does not tamper with those
 								// exclude if all white | exclude if proxy lies
 								// note: isGetStealth is getImageData
-								if (!isWhite && !name.includes('_solid')) {
+								let useSolid = !name.includes('_solid')
+								if (isVer > 144 && 'to' == key) {useSolid = true} // FF145+ FPP now handles to* solids
+								if (!isWhite && useSolid) {
 									if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 										if ('ge' == key && !isGetStealth || 'ge' !== key) {
 											// no proxy lies but persistent, so must be FPP
