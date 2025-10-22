@@ -606,10 +606,7 @@ const get_canvas = () => new Promise(resolve => {
 				if (checkValue !== 'skip') {
 					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
 					// chunk test
-					if ('to' == key && oData[name].includes(chunkStr)) {isChunk = ' | chunk'
-					}
-					
-
+					if ('to' == key && oData[name].includes(chunkStr)) {isChunk = ' | chunk'}
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
@@ -627,7 +624,7 @@ const get_canvas = () => new Promise(resolve => {
 								// exclude if all white | exclude if proxy lies
 								// note: isGetStealth is getImageData
 								let useSolid = !name.includes('_solid')
-								if (isVer > 144 && 'to' == key) {useSolid = true} // FF145+ FPP now handles to* solids
+								if (isVer > 144 && 'to' == key && isChunk !== '') {useSolid = true} // FF145+ FPP now handles to* solids
 								if (!isWhite && useSolid) {
 									if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 										if ('ge' == key && !isGetStealth || 'ge' !== key) {
