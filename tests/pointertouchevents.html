@@ -28,7 +28,7 @@ function dumpPointer(e) {
   if (e.type == "pointermove" && !move.checked) {
     return;
   }
-  log(`${e.type} ${e.pointerType} ${e.pointerId} (pressure=${e.pressure}; client=(${e.clientX}, ${e.clientY}))`);
+  log(`${e.type} ${e.pointerType} ${e.pointerId} (pressure=${e.pressure}; client=(${e.clientX}, ${e.clientY}) primary=${e.isPrimary})`);
 }
 
 function dumpTouch(e) {
