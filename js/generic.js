@@ -98,10 +98,14 @@ function expand_css(end = 7680, start = 200) {
 
 	// get original expected stylesheet info
 		// hopefully this is before any extension can inject anything
-	let s = document.styleSheet
-	try {isStylesheet['hash'] = mini(a)} catch(e) {}
-	try {isStylesheet['length'] = Object.keys(s).length} catch(e) {}
-
+	let s = document.styleSheets
+	try {
+		let styleSheets = {}
+		isStylesheet['length'] = Object.keys(s).length
+		for (const k of Object.keys(s)) {styleSheets[k] = s[k]}
+		isStylesheet['stylesheets'] = styleSheets
+		isStylesheet['hash'] = mini(s)
+	} catch(e) {log_error(SECTG, 'styleSheet length', e, isScope, true)}
 	log_perf(SECTG, 'expanded_css', t0, '', state)
 }
 
