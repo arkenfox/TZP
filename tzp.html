@@ -16,67 +16,13 @@
 	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
 	<script src="js/globals.js"></script>
 	<script src="js/generic.js"></script>
-	<style>
-		body::after {
-			content: "";
-			background: url('chrome://global/skin/onion-pattern.svg');
-			background-repeat: repeat;
-			opacity: 0.15;
-			top: 0;
-			left: 0;
-			bottom: 0;
-			right: 0;
-			position: fixed;
-			z-index: -1;
-		}
-		#tzpLV {
-			height: 100lvh;
-			width: 100lvw;
-			position: fixed;
-			left: 0;
-			z-index: -6000;
-		}
-		#tzpSV {
-			height: 100svh;
-			width: 100svw;
-			position: fixed;
-			left: 0;
-			z-index: -6000;
-		}
-		#tzpResource {
-			background-image: url("about:logo"), url("");
-			background-size: auto 100%; background-repeat: no-repeat; background-position: 10px 0px;
-		}
-		#tzpWordmark {
-			background-image: url("chrome://branding/content/about-wordmark.svg"), url("");
-			background-size: auto 100%; background-repeat: no-repeat; background-position: 10px 0px;
-		}
-		#tzpScroll {width: 100px; overflow-y: scroll;}
-		#tzpRect {
-			position: fixed;
-			top: 0; left: 0;
-			width:100px; height:100px;
-			transform: rotate(45deg);
-			padding: 0px;
-			z-index: -1; 
-		}
-		#tzpFS::backdrop {
-			background-color: #161b22;
-			/*opacity: 0;*/
-		}
-		#tzpBase {
-			position: fixed;
-			top: 0px;
-			left: 0px;
-			width: 100%;
-			height: 100%;
-			overscroll-behavior: contain;
-			overflow:auto;
-		}
-	</style>
+	<!--<style></style>
+		important to not have any styleSheet here as when we calculate expected stylesheets
+		for later comparison, these haven't yet been enumerated into document.styleSheets
+	-->
 </head>
 
-<body>
+<body class='tzpBody'>
 	<span translate="no">
 	<div id="tzpRect"></div>
 	<div id="tzpLV"></div>
