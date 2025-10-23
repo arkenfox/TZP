@@ -88,13 +88,20 @@ function expand_css(end = 7680, start = 200) {
 		add_blank(end + 1)
 		style.appendChild(document.createTextNode(rules.join(' ')))
 		document.head.appendChild(style)
-		isStylesheet = state
+		isStylesheet['added'] = state
 	} catch(e) {
 		state = zErr
 		console.log(e)
 	}
 	// ~65ms for 7680 (8k) cold | reload ~15ms
 		// some/most of this time is spent awaiting more js files anyway
+
+	// get original expected stylesheet info
+		// hopefully this is before any extension can inject anything
+	let s = document.styleSheet
+	try {isStylesheet['hash'] = mini(a)} catch(e) {}
+	try {isStylesheet['length'] = Object.keys(s).length} catch(e) {}
+
 	log_perf(SECTG, 'expanded_css', t0, '', state)
 }
 
@@ -1990,11 +1997,11 @@ function log_section(name, time, scope = isScope) {
 function countJS(item) {
 	jsFiles++
 	if (1 == jsFiles) {
-		if (undefined !== isStylesheet) {
+		if (undefined !== isStylesheet.added) {
 			// update tooltip
 			try {
 				let items = document.getElementsByClassName('cssrange')
-				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet}
+				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet.added}
 			} catch(e) {}
 		}
 		// block if iframed
