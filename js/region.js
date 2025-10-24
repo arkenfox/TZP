@@ -216,7 +216,7 @@ function set_isLanguageSmart() {
 	let xsEN = '6cc5a8b4'
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		// m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort
+		// c = css | m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort
 		'ar': {   m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '5cee96ec', xsort: '352c4e34'},
 		'be': {   m: '076d68e6', v: '4edeafab', x: '42583d22', xs: 'c28dba41', xsort: '74053574'},
 		'bg': {   m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: 'b964cfe0', xsort: '7d747674'},
@@ -233,7 +233,7 @@ function set_isLanguageSmart() {
 		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: '021b6b57', xsort: xsEN},
 		'he': {   m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: '35d1f35c', xsort: 'a0fcc2b4'},
 		'hu': {   m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: 'ffae360e', xsort: '2fe650b4'},
-		'id': {   m: '1e275882', v: '71224946', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN},
+		'id': {   m: '1e275882', v: '5dda18f3', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN},
 		'is': {   m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '3d227a5a', xsort: '93b575f8'},
 		'it': {   m: '716e7242', v: '3b781f09', x: 'c567f479', xs: '7d0eba5c', xsort: xsEN},
 		'ja': {   m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: 'a0fa98ad', xsort: '22ec9486'},
@@ -1705,6 +1705,18 @@ function get_timezone_offset(METRIC) {
 
 /* l10n */
 
+function get_l10n_css(METRIC) {
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+	let hash, data = '', notation = '' //isLanguageSmart ? locale_red : ''
+	try {
+
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(4, METRIC, hash,'', notation)
+	return
+}
+
 const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
 	if (!isGecko) {addBoth(4, METRIC, zNA); return resolve()}
 
@@ -2062,6 +2074,7 @@ const outputRegion = () => new Promise(resolve => {
 			get_l10n_xslt_sort('l10n_xslt_sort'),
 			get_l10n_xml_prettyprint('l10n_xml_prettyprint', isLies),
 			get_l10n_xslt_messages('l10n_xslt_messages'),
+			//get_l10n_css('l10n_css'),
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
