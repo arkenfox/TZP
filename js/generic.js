@@ -64,51 +64,6 @@ function smartFn(type) {
 	}
 }
 
-function expand_css(end = 7680, start = 200) {
-	// currently the ranges for both screen (min-device-*) and
-	// inner (min-*) are 400-2560 and the two css files total almost 500kb
-	let t0 = nowFn(), state = start +'-'+ end
-	try {
-		const style = document.createElement('style')
-		style.type = 'text/css'
-		let rules = []
-		function add_blank(i) {
-			rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
-			rules.push("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
-			rules.push("@media (min-width:"+ i +"px){#D:before{content:'';}}")
-			rules.push("@media (min-height:"+ i +"px){#D:after{content:'';}}")
-		}
-		add_blank(start - 1)
-		for (let i= start; i <= end; i++) {
-			rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
-			rules.push("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
-			rules.push("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
-			rules.push("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
-		}
-		add_blank(end + 1)
-		style.appendChild(document.createTextNode(rules.join(' ')))
-		document.head.appendChild(style)
-		isStylesheet['added'] = state
-	} catch(e) {
-		state = zErr
-		console.log(e)
-	}
-	// ~65ms for 7680 (8k) cold | reload ~15ms
-		// some/most of this time is spent awaiting more js files anyway
-
-	// get original expected stylesheet info
-		// hopefully this is before any extension can inject anything
-	let s = document.styleSheets
-	try {
-		let styleSheets = {}
-		isStylesheet['length'] = Object.keys(s).length
-		for (const k of Object.keys(s)) {styleSheets[k] = s[k]}
-		isStylesheet['stylesheets'] = styleSheets
-		isStylesheet['hash'] = mini(s)
-	} catch(e) {log_error(SECTG, 'styleSheet length', e, isScope, true)}
-	log_perf(SECTG, 'expanded_css', t0, '', state)
-}
-
 function typeFn(item, isSimple = false) {
 	// return a more detailed result
 	let type = typeof item
@@ -321,6 +276,78 @@ function get_isAutoplay(METRIC) {
 	log_perf(SECTG, 'isAutoPlay', t0,'', (isAutoPlay == zErr ? zErr : ''))
 	return
 }
+
+const get_isBB = (METRIC) => new Promise(resolve => {
+	if (!isGecko) {return resolve()}
+
+	let t0 = nowFn(), isDone = false
+	setTimeout(() => {
+		if (!isDone) {
+			log_error(3, METRIC, zErrTime, isScope, true) // persist sect3
+			log_alert(SECTG, METRIC, zErrTime, isScope, true)
+			log_perf(SECTG, METRIC, t0,'', zErrTime)
+			resolve()
+		}
+	}, 150)
+
+	let count = 0, expected = 1
+	function exit(value, id) {
+		count++
+		if ('aboutTor' == id) {removeElementFn(id)}
+		//console.log(`${count} of ${expected}: ${value}, ${id}`)
+		// return on first true
+		if (!isDone && true === value) {
+			isDone = true
+			//console.log('resolving after first success: test return no.', count, id)
+			isBB = true
+			if (id.includes('mullvad')) {isMB = true} else {isTB = true}
+			// tidy notation
+			if (isMB) {
+				bb_green = sgtick+'MB]'+sc
+				bb_red = sbx+'MB]'+sc
+				bb_slider_red = sbx+'MB Slider]'+sc
+				bb_standard = sg+'[MB Standard]'+sc
+				bb_safer = sg+'[MB Safer]'+sc
+			}
+			log_perf(SECTG, METRIC, t0,'', (isMB ? 'mullvad': 'tor') +' browser | '+ id)
+			resolve()
+		}
+		// otherwise if !isBB we exit false after expected number of test(s)
+		if (!isBB && count == expected || zErr == value) {
+			isDone = true
+			log_perf(SECTG, METRIC, t0,'', (zErr == value ? zErr : false))
+			resolve()
+		}
+	}
+	// FF121+: 1855861
+	const get_event = (el, id) => {
+		el.onload = function() {exit(true, id)}
+		el.onerror = function() {exit(false, id)}
+	}
+	if (!runSG) {
+		try {
+			// min ver is 128 now
+			let list = [
+				'content/torconnect/tor-connect.svg', // TB13.5
+				'skin/icons/torbrowser.png', // TB14.5
+				'skin/icons/mullvadbrowser.png', // MB14.5
+			]
+			expected = list.length
+			list.forEach(function(image) {
+				let parts = (image.slice(0,-4)).split('/')
+				let id = parts[parts.length - 1]
+				let el = new Image()
+				el.src = 'chrome://global/' + image
+				get_event(el, id)
+			})
+		} catch(e) {
+			// catch any unexpected extension fuckery
+			log_error(3, METRIC, e, isScope, true) // persist sect3
+			log_alert(SECTG, METRIC, e.name, isScope, true)
+			exit(zErr)
+		}
+	}
+})
 
 function get_isDevices() {
 	isDevices = undefined
@@ -628,6 +655,90 @@ const get_isRecursion = () => new Promise(resolve => {
 	}
 })
 
+function get_isStylesheet(end = 7680, start = 200) {
+	// currently the ranges for both screen (min-device-*) and
+	// inner (min-*) are 400-2560 and the two css files total almost 500kb
+	let t0 = nowFn()
+	if (gLoad) {
+		let state = start +'-'+ end
+		try {
+			const style = document.createElement('style')
+			style.type = 'text/css'
+			let rules = []
+			function add_blank(i) {
+				rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
+				rules.push("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
+				rules.push("@media (min-width:"+ i +"px){#D:before{content:'';}}")
+				rules.push("@media (min-height:"+ i +"px){#D:after{content:'';}}")
+			}
+			add_blank(start - 1)
+			for (let i= start; i <= end; i++) {
+				rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
+				rules.push("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
+				rules.push("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
+				rules.push("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
+			}
+			add_blank(end + 1)
+			style.appendChild(document.createTextNode(rules.join(' ')))
+			document.head.appendChild(style)
+			isStylesheet['added'] = state
+		} catch(e) {
+			state = zErr
+			console.log(e)
+		}
+		// ~65ms for 7680 (8k) cold | reload ~15ms
+			// some/most of this time is spent awaiting more js files anyway
+		log_perf(SECTG, 'expanded_css', t0, '', state)
+	}
+
+	// get stylesheet info which we can then put into isStylesheet and return
+	// skip all the screen and window rules (> 1000 rules) | perf ~11ms
+	/* hopefully this is before any extension can inject anything: let's see
+		to check
+			- Dark Mode (https://addons.mozilla.org/en-US/firefox/addon/dark-mode-by-albert-inc/)
+			- Dark Reader
+			- scripts injected before document run
+			- MOAR!!!
+		we will also want to account for changes in values by TZP
+			- e.g. basicmode changes color and windows txtBigger etc
+	*/
+	t0 = nowFn()
+	let obj = {}, info = ''
+	try {
+		let ss = window.document.styleSheets
+		for(let i = 0; i < ss.length; i++) {
+			obj[i] = {'href': ss[i].href +''}
+			let r = ss[i].rules || s[i].cssRules
+			if (undefined !== r) {
+				if (r.length < 1000) {
+					let aRules = []
+					try {
+						if (r[0].cssText) {
+							for (var x = 0; x < r.length; x++) {aRules.push(r[x].cssText)}
+						} else {
+							for (var x = 0; x < r.length; x++) {aRules.push(r[x].style.cssText)}
+						}
+						obj[i]['rules'] = aRules
+					} catch(e) {
+						obj[i]['rules'] = e+''
+					}
+				}
+				obj[i]['rules_length'] = r.length
+			}
+		}
+	} catch(e) {
+		obj = e+''; info = zErr
+	}
+	if (gLoad) {
+		isStylesheet['hash'] = mini(obj)
+		if (zErr !== info) {info = isStylesheet.hash}
+		isStylesheet['stylesheets'] = obj
+		log_perf(SECTG, 'isStylesheet', t0,'', info)
+	} else {
+		return obj
+	}
+}
+
 const get_isSystemFont = () => new Promise(resolve => {
 	//if (!isGecko) {return resolve()}
 	let t0 = nowFn()
@@ -673,78 +784,6 @@ const get_isSystemFont = () => new Promise(resolve => {
 		exit(isSystemFont.join(', '))
 	} catch(e) {
 		exit(e.name) // log nothing: we run in fonts later
-	}
-})
-
-const get_isBB = (METRIC) => new Promise(resolve => {
-	if (!isGecko) {return resolve()}
-
-	let t0 = nowFn(), isDone = false
-	setTimeout(() => {
-		if (!isDone) {
-			log_error(3, METRIC, zErrTime, isScope, true) // persist sect3
-			log_alert(SECTG, METRIC, zErrTime, isScope, true)
-			log_perf(SECTG, METRIC, t0,'', zErrTime)
-			resolve()
-		}
-	}, 150)
-
-	let count = 0, expected = 1
-	function exit(value, id) {
-		count++
-		if ('aboutTor' == id) {removeElementFn(id)}
-		//console.log(`${count} of ${expected}: ${value}, ${id}`)
-		// return on first true
-		if (!isDone && true === value) {
-			isDone = true
-			//console.log('resolving after first success: test return no.', count, id)
-			isBB = true
-			if (id.includes('mullvad')) {isMB = true} else {isTB = true}
-			// tidy notation
-			if (isMB) {
-				bb_green = sgtick+'MB]'+sc
-				bb_red = sbx+'MB]'+sc
-				bb_slider_red = sbx+'MB Slider]'+sc
-				bb_standard = sg+'[MB Standard]'+sc
-				bb_safer = sg+'[MB Safer]'+sc
-			}
-			log_perf(SECTG, METRIC, t0,'', (isMB ? 'mullvad': 'tor') +' browser | '+ id)
-			resolve()
-		}
-		// otherwise if !isBB we exit false after expected number of test(s)
-		if (!isBB && count == expected || zErr == value) {
-			isDone = true
-			log_perf(SECTG, METRIC, t0,'', (zErr == value ? zErr : false))
-			resolve()
-		}
-	}
-	// FF121+: 1855861
-	const get_event = (el, id) => {
-		el.onload = function() {exit(true, id)}
-		el.onerror = function() {exit(false, id)}
-	}
-	if (!runSG) {
-		try {
-			// min ver is 128 now
-			let list = [
-				'content/torconnect/tor-connect.svg', // TB13.5
-				'skin/icons/torbrowser.png', // TB14.5
-				'skin/icons/mullvadbrowser.png', // MB14.5
-			]
-			expected = list.length
-			list.forEach(function(image) {
-				let parts = (image.slice(0,-4)).split('/')
-				let id = parts[parts.length - 1]
-				let el = new Image()
-				el.src = 'chrome://global/' + image
-				get_event(el, id)
-			})
-		} catch(e) {
-			// catch any unexpected extension fuckery
-			log_error(3, METRIC, e, isScope, true) // persist sect3
-			log_alert(SECTG, METRIC, e.name, isScope, true)
-			exit(zErr)
-		}
 	}
 })
 
@@ -2028,7 +2067,7 @@ function countJS(item) {
 			try {dom.tzpInvalidImage.src = 'images/InvalidImage.png'} catch {}
 			try {dom.tzpScaledImage.src = 'images/ScaledImage.png'} catch {}
 			try {dom.tzpXMLunstyled.src = 'xml/xmlunstyled.xml'} catch {}
-			try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {}
+			try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {} // in FF134 or lower this breaks devtools: oh dear, what a shame
 		}
 
 		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
@@ -2064,7 +2103,7 @@ function countJS(item) {
 			]).then(function(){
 				// tweak monospace size
 					// ToDo: this is bad design: we need a better way to get nice consistent sizes across
-					// TB vs linux vs other lilnux vs other platforms
+					// TB vs linux vs other linux vs other platforms
 				if ('windows' == isOS) {
 					try {
 						document.documentElement.style.setProperty('--txtSize', '12px')
@@ -2341,8 +2380,8 @@ function run_immediate() {
 			// currently blink returns "s: failed at too much recursion __proto__ error" on every test
 		//isProtoProxy = isGecko ? true : ('blink' == isEngine || 'webkit' == isEngine) ? true : false
 		isProtoProxy = isGecko
-		// expand css
-		expand_css(7680)
+		// expand css, record stylesheet info
+		get_isStylesheet(7680)
 		// recursion
 		get_isRecursion()
 		// storage warm ups
