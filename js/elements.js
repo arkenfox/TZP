@@ -52,7 +52,7 @@ function get_domrect(METRIC) {
 			for (const m of Object.keys(oDiffs)) {
 				if (oDiffs[m].length > 1) {multiples.push(oDiffs[m].join(' + '))}
 			}
-			console.log(k, oDiffs, multiples, max)
+			//console.log(k, oDiffs, multiples, max)
 			// sign: chamelon seems to always be -, CB seems to always be ±
 			let sign =''
 			if (isNegative && isPositive) {sign = '±'} else {
