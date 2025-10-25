@@ -702,6 +702,10 @@ function get_isStylesheet(end = 7680, start = 200) {
 		we will also want to account for changes in values by TZP
 			- e.g. basicmode changes color and windows txtBigger etc
 	*/
+	/* well damn: works from the console in gecko but otherwise
+		SecurityError: CSSStyleSheet.rules getter: Not allowed to access cross-origin stylesheet
+		e.g. blink 64+ changed to match spec: https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface
+	*/
 	t0 = nowFn()
 	let obj = {}, info = ''
 	try {
@@ -1275,14 +1279,15 @@ function metricsShow(name, scope) {
 
 	let target = name, overlayScope = scope
 	if (isShowFormat) {target = metricsUI(target, isVisible, isSection, isHealth)}
-
 	let data, color = 99, filter = ''
 	if (name == SECT97 || name == SECT98 || name == SECT99) {
 		// prototype/proxy
 		data = gData[name]
-	} else if ('document_health_list' == name) {
-		data = gData.health['document_list']
-		target = 'health_list'
+	} else if (scope+'_health_metrics' == name) {
+		data = gData.health[scope+'_metrics']
+		target = 'health_metrics'
+	} else if (zFP+'_metrics' == name) {
+		data = gData[zFP][scope+'_metrics']
 	} else if (aShowFormat.includes(name)) {
 		// FP/health
 		if (isHealth) {
@@ -1317,7 +1322,6 @@ function metricsShow(name, scope) {
 	let isCache = (target == 'fingerprint' || target == 'fingerprint_flat')
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][scope + overlayFP] : json_highlight(data, true)): ''
 	dom.overlayInfo.innerHTML = overlayInfo
-
 
 	//add btn, show/hide options, display
 	let hash = mini(data)
@@ -1441,7 +1445,7 @@ function output_health(scope) {
 	if (!isSmart) {return}
 	let h = "health", countPass = 0, countTotal = Object.keys(gData.health[scope +'_collect']).length
 	gData[h][scope] = {}
-	gData[h][scope +'_list'] = []
+	gData[h][scope +'_metrics'] = []
 	gData[h][scope +'_fail'] = {}
 	gData[h][scope +'_pass'] = {}
 	gData[h][scope +'_summary'] = {}
@@ -1465,7 +1469,7 @@ function output_health(scope) {
 			gData[h][scope][metric] = detail
 			gData[h][scope + sub][metric] = detail
 			// populate summary + metriclist
-			gData[h][scope +'_list'].push(metric)
+			gData[h][scope +'_metrics'].push(metric)
 			gData[h][scope +'_summary'][metric] = symbol + summary
 			gData[h][scope +'_summary'+ sub][metric] = symbol + summary
 		}
@@ -1475,7 +1479,7 @@ function output_health(scope) {
 			let btnPart1 = addButton((isAll ? 'good' : 'bad'), h, countPass)
 			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> | </span>'
 			dom[scope + h].innerHTML = btnPart1
-				+ addButton(0,'document_health_list', countTotal).replace('[','')
+				+ addButton(0,'document_health_metrics', countTotal).replace('[','')
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
 		delete gData[h][scope +'_collect']
@@ -1607,10 +1611,11 @@ function output_section(section, scope) {
 
 	// propagate data
 	let gList = {}, gFlat = {}
-	let summary = scope+"_summary"
+	let summary = scope+'_summary', metriclist = scope+'_metrics'
 	if (gRun) {
 		gData[zFP][summary] = {}
 		sData[zFP][summary] = {}
+		gData[zFP][metriclist] = []
 	}
 
 	aSection.forEach(function(number) {
@@ -1692,14 +1697,16 @@ function output_section(section, scope) {
 		} catch(e) {
 			console.error(e)
 		}
-
 	})
 	if (gRun) {
 		// flat + list
 		let flat = scope+'_flat', list = scope+'_list'
 		gData[zFP][flat] = {}
 		gData[zFP][list] = {}
-		for (const k of Object.keys(gFlat).sort()) {gData[zFP][flat][k] = gFlat[k]}
+		for (const k of Object.keys(gFlat).sort()) {
+			gData[zFP][flat][k] = gFlat[k]
+			gData[zFP][metriclist].push(k) // metric list
+		}
 		for (const k of Object.keys(gList).sort()) {gData[zFP][list][k] = gList[k]}
 		// recalculate overlayCharLen for cached big jsons
 		try {
@@ -1709,7 +1716,7 @@ function output_section(section, scope) {
 		} catch(e) {
 			overlayCharLen = 7
 		}
-		// cache big jsons displays
+		// cache big json displays
 		sDataTemp["cache"] = {}
 		sDataTemp["cache"][scope] = json_highlight(gData[zFP][scope])
 		sDataTemp["cache"][flat] = json_highlight(gData[zFP][flat])
@@ -1973,7 +1980,11 @@ function log_section(name, time, scope = isScope) {
 		try {
 			let metricCount = Object.keys(gData[zFP][scope +"_flat"]).length
 			let color = metricCount == expectedMetrics ? 0 : 'red' // use red to override color in basic mode
-			dom[scope + "hash"].innerHTML = mini(gData[zFP][scope]) + addButton(color, zFP, metricCount +" metrics")
+			
+			let btnPart1 = addButton(color, zFP, metricCount)
+			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> </span>'
+			dom[scope + 'hash'].innerHTML = mini(gData[zFP][scope]) + btnPart1
+				+ addButton(0,'fingerprint_metrics', 'metrics').replace('[','')
 		} catch(e) {
 			console.log(e)
 		}
