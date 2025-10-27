@@ -624,7 +624,7 @@ const get_canvas = () => new Promise(resolve => {
 						// persistent
 						let isWhite = false
 						if ('is' == key) {
-							notation = (value === allZeros && isProxy) ? rfp_green : rfp_red // all zeros
+							notation = (value === allZeros && !isProxy) ? rfp_green : rfp_red // all zeros
 						} else {
 							notation = rfp_red
 							// all white: e.g. perps stupidly being told to flip
