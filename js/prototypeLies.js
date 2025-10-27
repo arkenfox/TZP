@@ -656,6 +656,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		})
 		searchLies(() => CSSStyleDeclaration, {
 			target: [
+				'removeProperty',
 				'setProperty'
 			]
 		})
