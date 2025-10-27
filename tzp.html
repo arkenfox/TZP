@@ -10,7 +10,7 @@
 	<link rel="preload" href="images/ScaledImage.png" as="image">
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<link rel="stylesheet" type="text/css" href="css/media.css">
-	<link rel="stylesheet" href="chrome://global/locale/intl.css">
+	<link rel="stylesheet" href="chrome://global/locale/intl.css"> <!-- required for the parsererror dir leak -->
 	<link rel="stylesheet" type="text/css" href="css/window_size.css">
 	<link rel="stylesheet" type="text/css" href="css/screen_size.css">
 	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
@@ -476,6 +476,7 @@
 			<span class="c" id="dates_to*string"></span><span class="c" id="dates_to*string_matches_intl"></span>
 		</td></tr>
 		<!--l10n-->
+		<!--<tr><td>css</td><td class="c mono" id="l10n_css"></td></tr>-->
 		<tr><td>[parsererror] direction</td>
 			<td class="c mono" id="l10n_parsererror_direction">
 		</td></tr>
@@ -947,6 +948,7 @@
 			<span class="cssc" id="media_video-dynamic-range_css"></span>
 			| <span class="c" id="media_video-dynamic-range"></span></td></tr>
 
+		<tr><td>styleSheets</td><td class="c mono" id="styleSheets"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">layout.css.always_underline_links</span></div>
 			&nbsp; underline links</td><td class="c mono" id="underline_links"></td></tr>
@@ -1131,7 +1133,6 @@
 			<br><br><div id="overlayInfo" class='faint spaces'></div>
 		</div>
 	</div>
-
 	<script src="js/prototypeLies.js"></script>
 	<script src="js/region.js"></script>
 	<script src="js/fonts.js"></script>

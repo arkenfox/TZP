@@ -658,89 +658,36 @@ const get_isRecursion = () => new Promise(resolve => {
 function get_isStylesheet(end = 7680, start = 200) {
 	// currently the ranges for both screen (min-device-*) and
 	// inner (min-*) are 400-2560 and the two css files total almost 500kb
-	let t0 = nowFn()
-	if (gLoad) {
-		let state = start +'-'+ end
-		try {
-			const style = document.createElement('style')
-			style.type = 'text/css'
-			let rules = []
-			function add_blank(i) {
-				rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
-				rules.push("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
-				rules.push("@media (min-width:"+ i +"px){#D:before{content:'';}}")
-				rules.push("@media (min-height:"+ i +"px){#D:after{content:'';}}")
-			}
-			add_blank(start - 1)
-			for (let i= start; i <= end; i++) {
-				rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
-				rules.push("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
-				rules.push("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
-				rules.push("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
-			}
-			add_blank(end + 1)
-			style.appendChild(document.createTextNode(rules.join(' ')))
-			document.head.appendChild(style)
-			isStylesheet['added'] = state
-		} catch(e) {
-			state = zErr
-			console.log(e)
-		}
-		// ~65ms for 7680 (8k) cold | reload ~15ms
-			// some/most of this time is spent awaiting more js files anyway
-		log_perf(SECTG, 'expanded_css', t0, '', state)
-	}
-
-	// get stylesheet info which we can then put into isStylesheet and return
-	// skip all the screen and window rules (> 1000 rules) | perf ~11ms
-	/* hopefully this is before any extension can inject anything: let's see
-		to check
-			- Dark Mode (https://addons.mozilla.org/en-US/firefox/addon/dark-mode-by-albert-inc/)
-			- Dark Reader
-			- scripts injected before document run
-			- MOAR!!!
-		we will also want to account for changes in values by TZP
-			- e.g. basicmode changes color and windows txtBigger etc
-	*/
-	/* well damn: works from the console in gecko but otherwise
-		SecurityError: CSSStyleSheet.rules getter: Not allowed to access cross-origin stylesheet
-		e.g. blink 64+ changed to match spec: https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface
-	*/
-	t0 = nowFn()
-	let obj = {}, info = ''
+	let t0 = nowFn(), state = start +'-'+ end, METRIC = 'isStylesheet'
 	try {
-		let ss = window.document.styleSheets
-		for(let i = 0; i < ss.length; i++) {
-			obj[i] = {'href': ss[i].href +''}
-			let r = ss[i].rules || s[i].cssRules
-			if (undefined !== r) {
-				if (r.length < 1000) {
-					let aRules = []
-					try {
-						if (r[0].cssText) {
-							for (var x = 0; x < r.length; x++) {aRules.push(r[x].cssText)}
-						} else {
-							for (var x = 0; x < r.length; x++) {aRules.push(r[x].style.cssText)}
-						}
-						obj[i]['rules'] = aRules
-					} catch(e) {
-						obj[i]['rules'] = e+''
-					}
-				}
-				obj[i]['rules_length'] = r.length
-			}
+		const style = document.createElement('style')
+		style.type = 'text/css'
+		let rules = []
+		function add_blank(i) {
+			rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'';}}")
+			rules.push("@media (min-device-height:"+ i +"px){#S:after{content:'';}}")
+			rules.push("@media (min-width:"+ i +"px){#D:before{content:'';}}")
+			rules.push("@media (min-height:"+ i +"px){#D:after{content:'';}}")
 		}
+		add_blank(start - 1)
+		for (let i= start; i <= end; i++) {
+			rules.push("@media (min-device-width:"+ i +"px){#S:before{content:'" + i +"';}}")
+			rules.push("@media (min-device-height:"+ i +"px){#S:after{content:' x " + i +"';}}")
+			rules.push("@media (min-width:"+ i +"px){#D:before{content:'" + i +"';}}")
+			rules.push("@media (min-height:"+ i +"px){#D:after{content:' x " + i +"';}}")
+		}
+		add_blank(end + 1)
+		style.appendChild(document.createTextNode(rules.join(' ')))
+		document.head.appendChild(style)
+		isStylesheet = state
 	} catch(e) {
-		obj = e+''; info = zErr
+		state = zErr
+		log_error(SECTG, METRIC, e, isScope, true)
 	}
-	if (gLoad) {
-		isStylesheet['hash'] = mini(obj)
-		if (zErr !== info) {info = isStylesheet.hash}
-		isStylesheet['stylesheets'] = obj
-		log_perf(SECTG, 'isStylesheet', t0,'', info)
-	} else {
-		return obj
-	}
+	// ~65ms for 7680 (8k) cold | reload ~15ms
+		// some/most of this time is spent awaiting more js files anyway
+	log_perf(SECTG, METRIC, t0, '', state)
+	return
 }
 
 const get_isSystemFont = () => new Promise(resolve => {
@@ -1904,6 +1851,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 		if (gData[key][scope][section] == undefined) {gData[key][scope][section] = {}}
 		gData[key][scope][section][metric] = error
 	} else {
+		if (sDataTemp[key] == undefined) {sDataTemp[key] = {}}
 		if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
 		if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
 		sDataTemp[key][scope][section][metric] = error
@@ -2051,11 +1999,11 @@ function log_section(name, time, scope = isScope) {
 function countJS(item) {
 	jsFiles++
 	if (1 == jsFiles) {
-		if (undefined !== isStylesheet.added) {
+		if (undefined !== isStylesheet) {
 			// update tooltip
 			try {
 				let items = document.getElementsByClassName('cssrange')
-				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet.added}
+				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet}
 			} catch(e) {}
 		}
 		// block if iframed
