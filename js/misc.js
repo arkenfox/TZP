@@ -269,7 +269,7 @@ function get_timing(METRIC) {
 	}
 	let aNotInteger = ['mark','now','timestamp']
 	let calc1 = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
-	let str, data, notation, oData = {}, countFail = 0
+	let str, data, notation, oData = {}, countFail = 0, countErr = 0
 
 	sDetail.document[METRIC +'_data'] = {}
 	let isDateNoise = false
@@ -433,7 +433,12 @@ function get_timing(METRIC) {
 				}
 				str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
 				oData[k] = (zD == e || zSKIP == e) ? e : zErr
-				if (zSKIP !== e) {countFail++} else {notation = ''}
+				if (zSKIP !== e) {
+					countFail++
+					countErr++
+				} else {
+					notation = ''
+				}
 			}
 		}
 		//sDetail.document[METRIC][k] = data
@@ -472,6 +477,12 @@ function get_timing(METRIC) {
 			} catch(e) {}
 		}
 
+		// if _some_ RFP timing fails (i.e isProtected !== aLoop.length), then rtvalue
+			// can end up false when it isn't really - because we have decimals but cannot
+			// know for sure it's RFP (not worth checking everything non-error for 60FPS)
+			// but what we can do is exclude all errors
+		isProtected = (aLoop.length - countFail) + countErr == aLoop.length
+		//console.log(aLoop.length - countFail, countErr, aLoop.length, isProtected)
 		if (isProtected && isDecimal || !isGecko) {
 			// non-Gecko || if RFP which is also isDecimal, then we can't tell
 			rtvalue = zNA
