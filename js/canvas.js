@@ -504,6 +504,7 @@ const get_canvas = () => new Promise(resolve => {
 	aCanvas.forEach(function(k){let el = dom['tzpCanvas'+ k]; el.width = sizeW; el.height = sizeH})
 
 	function exit() {
+		//console.log(oData)
 		for (const m of Object.keys(oFP)) {
 			addBoth(9, m, oFP[m].value, '', oFP[m].notation, oFP[m].data)
 		}
@@ -517,7 +518,9 @@ const get_canvas = () => new Promise(resolve => {
 		//chunkStr = '5ErkJggg==' // test
 
 		run1[0].forEach(function(item){
-			let name = item.name, key = name.slice(0,2), value = item.displayValue, data ='', notation =''
+			let name = item.name, key = name.slice(0,2), value = item.displayValue, data =''
+			let notation = rfp_red // they're all red if only a single run: we green up on second runs
+			let hasChunk = false
 			oRes[name] = {}
 			oRes[name][1] = value
 			if (undefined !== oErrors[name]) {
@@ -532,7 +535,6 @@ const get_canvas = () => new Promise(resolve => {
 						let getCheck = check_canvas_get(name, 1)
 						if (getCheck) {
 							data = 'trustworthy' // the test is random, return a stable FP
-							notation = rfp_red
 							aSkip.push(name)
 						} else {
 							data = 'protected'
@@ -543,12 +545,11 @@ const get_canvas = () => new Promise(resolve => {
 						// gecko: we can already detect tampering since we use known hashes
 						// but in future we might use randomness and read back the value from the png
 						if ('to' == key && oData[name].includes(chunkStr)) {
-								notation = rfp_red
-								countFake++
+							countFake++
+							hasChunk = true
 						} else {
 							if (oKnown[name].includes(value)) {
 								aSkip.push(name)
-								notation = rfp_red
 							} else {
 								data = 'protected'
 								countFake++
@@ -557,7 +558,7 @@ const get_canvas = () => new Promise(resolve => {
 					}
 				}
 			}
-			oFP[name] = {'value': value, 'notation': notation, 'data': data}
+			oFP[name] = {'value': value, 'notation': notation, 'chunk': hasChunk, 'data': data}
 		})
 		/*
 		console.log(aSkip)
@@ -606,7 +607,14 @@ const get_canvas = () => new Promise(resolve => {
 				if (checkValue !== 'skip') {
 					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
 					// chunk test
-					if ('to' == key && oData[name].includes(chunkStr)) {isChunk = ' | chunk'}
+					if ('to' == key && oData[name].includes(chunkStr)) {
+						// privacyX, which doesn't protect toBlob yet, is causing intermittent isChunk on it's
+						// per execution *toDataURL when FPP is on. Is this FPP kicking in somewhere due to timing
+						// or do I need a better test? for now let's check that it must be in both tests
+						if (oFP[name].chunk == true) {
+							isChunk = ' | chunk'
+						}
+					}
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
