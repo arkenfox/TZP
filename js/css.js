@@ -1,5 +1,21 @@
 'use strict';
 
+function rgba2hex(orig, hexOnly = false) {
+	var a, isPercent,
+		rgb = orig.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i),
+		alpha = (rgb && rgb[4] || '').trim(),
+		hex = rgb ?
+		(rgb[1] | 1 << 8).toString(16).slice(1) +
+		(rgb[2] | 1 << 8).toString(16).slice(1) +
+		(rgb[3] | 1 << 8).toString(16).slice(1) : orig;
+	if (alpha !== '') {a = alpha} else {a = 0o1}
+	// multiply before convert to HEX
+	a = ((a * 255) | 1 << 8).toString(16).slice(1)
+	hex = hex + a
+	if (!hexOnly) {hex += ' '+ rgb[1] +'-'+ rgb[2] +'-'+ rgb[3]}
+	return hex
+}
+
 function get_colors() {
 	let t0 = nowFn()
 	/* https://www.w3.org/TR/css-color-4/ */
@@ -29,21 +45,6 @@ function get_colors() {
 	if (!isGecko) {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
-	}
-
-	function rgba2hex(orig) {
-		var a, isPercent,
-			rgb = orig.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i),
-			alpha = (rgb && rgb[4] || '').trim(),
-			hex = rgb ?
-			(rgb[1] | 1 << 8).toString(16).slice(1) +
-			(rgb[2] | 1 << 8).toString(16).slice(1) +
-			(rgb[3] | 1 << 8).toString(16).slice(1) : orig;
-		if (alpha !== '') {a = alpha} else {a = 0o1}
-		// multiply before convert to HEX
-		a = ((a * 255) | 1 << 8).toString(16).slice(1)
-		hex = hex + a
-		return hex +' '+ rgb[1] +'-'+ rgb[2] +'-'+ rgb[3]
 	}
 
 	for (const type of Object.keys(oList)) {
@@ -491,51 +492,43 @@ function get_stylesheets(METRIC) {
 	*/
 
 	/* check for any changes to expected styleSheets
-		- hash
-		- expected obj keys + order (UUIDs caught here)
-	- check color changes: background-color, color, link, unvisited link
-		- note: visited link colors are exposed now: https://github.com/mozilla/standards-positions/issues/1234
-		but we only care about unvisited: we will need an offscreen one (unless we can force a visited color)
 	- proxy tampering
-	- iframe with no styling
-
 	ToDo: test
 		- stylus
-		- changing contrast control
 		- extensions
 	*/
 
-	let value, data ='', btn='', notation = default_red
-	let obj = {'colors': {}, 'styleElement_list': [], 'styleSheets_hash': '',  'styleSheets_list': [], 'proxy': ''}
-
-	let metricH = 'styleSheets_hash', metricL = 'styleSheets_list'
+	// NOTE: settings>contrast control has no effect on styleElements and styleSheets
+	let tmpArray = [], data = {'colors': {}, 'styleElement': [], 'styleSheets': {'hash': '', 'list': [], 'proxy': ''}}
+	// styleSheets
+	let metric = 'styleSheets'
 	try {
 		let ss = window.document.styleSheets
-		obj[metricH] = mini(ss)
-			let tmpArray = []
+		data[metric].hash = mini(ss)
+			// list
 			try {
 				for(let i = 0; i < ss.length; i++) {
 					let href = ss[i].ownerNode.attributes.href
 					if (undefined == href) {href = ss[i].href +''} else {href = href.nodeValue}
 					tmpArray.push(href)
 				}
+				if (!tmpArray.length) {tmpArray = 'none'}
 			} catch(e) {
-				log_error(14, METRIC +'_'+ metricL, e)
+				tmpArray = zErr
+				log_error(14, METRIC +'_'+ metric +'_list', e)
 			}
-			obj[metricL] = tmpArray
-	} catch(e) {
-		obj[metricH] = zErr
-		log_error(14, METRIC +'_'+ metricH, e)
-	}
+			data[metric].list = tmpArray
+			// ToDo: add Proxy tampering
 
-	let metricS = 'styleElement_list'
+	} catch(e) {
+		data[metric] = zErr
+		log_error(14, METRIC +'_'+ metric, e)
+	}
+	// styleElement
+	metric = 'styleElement'; tmpArray = []
 	try {
 		let target = window.document.all
-		let tmpArray = []
-		// start at 2 (0 and 1 are html and head)
-			// we could break when we don't hit HTMLStyleElement
-			// or just check the next 20 items
-		for (let i=2; i < 22; i++) {
+		for (let i=2; i < 50; i++) { // start at 2 (0 and 1 are html and head)
 			let item = target[i], type = item+''
 			if ('[object HTMLBodyElement]' == item) {
 				break // stop here
@@ -544,17 +537,32 @@ function get_stylesheets(METRIC) {
 				if ('' !== classValue) {tmpArray.push(classValue)}
 			}
 		}
-		obj[metricS] = tmpArray
+		data[metric] = tmpArray.length ? tmpArray : 'none'
 	} catch(e) {
-		obj[metricS] = zErr
-		log_error(14, METRIC +'_'+ metricS, e)
+		data[metric] = zErr
+		log_error(14, METRIC +'_'+ metric, e)
 	}
-	//console.log(obj)
-	// for now just display the data + record the result
-	sDetail.document[METRIC] = obj
-	addDisplay(14, METRIC, mini(obj), addButton(14, METRIC))
+	
+	// colors: also to pick up on contrast controls: background-color, color, visited link, unvisited link
+		// note: dark reader etc all alter the css color tests as it is
+		// see: visited link colors will be exposed soon: https://github.com/mozilla/standards-positions/issues/1234
+		// ToDo: unvisited link color - we can't get a visited link
+	metric = 'colors'
+	try {
+		let target = document.body
+		let styles = window.getComputedStyle(target)
+		let aColors = ['background-color','color']
+		aColors.forEach(function(item){
+			data.colors[item] = '#'+ rgba2hex(styles.getPropertyValue(item))
+		})
+	} catch (e) {
+		data[metric] = zErr
+		log_error(14, METRIC +'_'+ metric, e)
+	}
 
-	//addBoth(14, METRIC, value, btn, notation, data)
+	let hash = mini(data), notation = default_red
+	notation = '' // skip notation for now
+	addBoth(14, METRIC, hash, addButton(14, METRIC), notation, data)
 	return
 }
 
@@ -564,7 +572,7 @@ const outputCSS = () => new Promise(resolve => {
 		get_media_css('media'),
 		get_computed_styles('computed_styles'),
 		get_link('underline_links'),
-		get_stylesheets('styleSheets'),
+		get_stylesheets('styling'),
 	]).then(function(){
 		return resolve()
 	})
