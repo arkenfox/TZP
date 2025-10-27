@@ -1411,12 +1411,7 @@ function get_timezone(METRIC) {
 		// TZ: after isTimeZoneValid set above
 			// which can only be true if we had a single tz (ignoring errors) after deduping
 		if (isTimeZoneValid) {
-			let tzHash = mini(tzObj)
-			let tzGood = [
-				'0282cadf', // Atlantic/Reykjavik + 2x "ReferenceError: Temporal is not defined"
-				'8d787cb5', // all Atlantic/Reykjavik
-			]
-			notation = tzGood.includes(tzHash) ? rfp_green : rfp_red
+			notation = '8d787cb5' == mini(tzObj) ? rfp_green : rfp_red
 			addBoth(4, METRICtz, tz,'', notation)
 		}	else {
 			notation = rfp_red
@@ -1864,11 +1859,12 @@ function get_l10n_xml_prettyprint(METRIC, isLies) {
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	// if the xml isn't loaded in time we will get a low default value (e.g. 0 in latin, 8 in arabic)
-		// notate this as well as unexpected errors
+	// if the xml isn't loaded in time we will get a low default value (e.g. 0 latin, 8 arabic, 18 privacyX)
+		// notate this as well as unexpected errors (i.e value is a string)
 		// don't notate if file schema (it makes file vs http have different health counts which is not good)
-	if (isLanguageSmart && !isFile) {
-		if ('number' !== typeof value || value < 50) {notation = locale_red}
+		// this test is gecko only, so we don't need to check isLanguageSmart
+	if (!isFile) {
+		if ('number' !== typeof value || value < 50) {notation = isLanguageSmart ? locale_red : default_red}
 	}
 	addBoth(4, METRIC, value,'', notation, data, isLies)
 }
