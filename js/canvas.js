@@ -606,15 +606,18 @@ const get_canvas = () => new Promise(resolve => {
 				}
 				if (checkValue !== 'skip') {
 					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
+
 					// chunk test
 					if ('to' == key && oData[name].includes(chunkStr)) {
-						// privacyX, which doesn't protect toBlob yet, is causing intermittent isChunk on it's
-						// per execution *toDataURL when FPP is on. Is this FPP kicking in somewhere due to timing
-						// or do I need a better test? for now let's check that it must be in both tests
-						if (oFP[name].chunk == true) {
+						// privacyX, which doesn't protect toBlob yet, is causing intermittent false positive isChunk
+						// on it's (per execution) *toDataURL when FPP is on. This is FPP kicking in somewhere due to
+						// timing. It's not sufficient to check the chunk is persistent (but we'll do that)
+						// I think all we can do is exclude if proxylies
+						if (oFP[name].chunk == true && !isProxyLie(proxyMap[name] +'.'+ name)) {
 							isChunk = ' | chunk'
 						}
 					}
+
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
