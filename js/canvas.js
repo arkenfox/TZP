@@ -593,7 +593,7 @@ const get_canvas = () => new Promise(resolve => {
 			known.createHashes(window, 2)
 		]).then(function(run2){
 			run2[0].forEach(function(item){
-				let name = item.name, key = name.slice(0,2)
+				let name = item.name, key = name.slice(0,2), proxyname = name.replace('_solid', '')
 				let value = item.displayValue
 				let checkValue = value
 				// getImageData doesn't get a 'skip' so we handle it differently
@@ -606,6 +606,8 @@ const get_canvas = () => new Promise(resolve => {
 				}
 				if (checkValue !== 'skip') {
 					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
+					// proxy
+					let isProxy = isProxyLie(proxyMap[proxyname] +'.'+ proxyname)
 
 					// chunk test
 					if ('to' == key && oData[name].includes(chunkStr)) {
@@ -613,7 +615,7 @@ const get_canvas = () => new Promise(resolve => {
 						// on it's (per execution) *toDataURL when FPP is on. This is FPP kicking in somewhere due to
 						// timing. It's not sufficient to check the chunk is persistent (but we'll do that)
 						// I think all we can do is exclude if proxylies
-						if (oFP[name].chunk == true && !isProxyLie(proxyMap[name] +'.'+ name)) {
+						if (oFP[name].chunk == true && !isProxy) {
 							isChunk = ' | chunk'
 						}
 					}
@@ -622,7 +624,7 @@ const get_canvas = () => new Promise(resolve => {
 						// persistent
 						let isWhite = false
 						if ('is' == key) {
-							notation = (value === allZeros && !isProxyLie(proxyMap[name] +'.'+ name)) ? rfp_green : rfp_red // all zeros
+							notation = (value === allZeros && isProxy) ? rfp_green : rfp_red // all zeros
 						} else {
 							notation = rfp_red
 							// all white: e.g. perps stupidly being told to flip
@@ -637,7 +639,7 @@ const get_canvas = () => new Promise(resolve => {
 								let useSolid = !name.includes('_solid')
 								if (isVer > 144 && 'to' == key && isChunk !== '') {useSolid = true} // FF145+ FPP now handles to* solids
 								if (!isWhite && useSolid) {
-									if (!isProxyLie(proxyMap[name] +'.'+ name)) {
+									if (!isProxy) {
 										if ('ge' == key && !isGetStealth || 'ge' !== key) {
 											// no proxy lies but persistent, so must be FPP
 											notation = fpp_green
