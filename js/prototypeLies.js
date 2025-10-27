@@ -714,6 +714,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				'getElementsByTagName',
 				'getElementsByTagNameNS',
 				'referrer',
+				'styleSheets',
 				'write',
 				'writeln'
 			],
@@ -967,7 +968,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		aNotInNav.forEach(function(item) {
 			item = 'Navigator.'+ item
 			if (lieDetail[item] == undefined) {lieDetail[item] = []}
-			lieDetail[item].push('z: failed getOwnPropertyDescriptors')
+			lieDetail[item].push('zz: failed getOwnPropertyDescriptors')
 			if (!tamperingList.includes(item)) {tamperingList.push(item)}
 		})
 	} catch(e) {console.log(e)}
