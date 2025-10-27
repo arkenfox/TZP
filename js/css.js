@@ -483,12 +483,88 @@ function get_media_css(METRIC) {
 	addBoth(14, METRIC, mini(data), addButton(14, METRIC), medianotation + strCounts, data)
 }
 
+function get_stylesheets(METRIC) {
+	/* we can't access rules
+		SecurityError: CSSStyleSheet.rules getter: Not allowed to access cross-origin stylesheet
+		e.g. blink 64+ changed to match spec: https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface
+	because of this, hashing them is super stable even if I change some rules' values
+	*/
+
+	/* check for any changes to expected styleSheets
+		- hash
+		- expected obj keys + order (UUIDs caught here)
+	- check color changes: background-color, color, link, unvisited link
+		- note: visited link colors are exposed now: https://github.com/mozilla/standards-positions/issues/1234
+		but we only care about unvisited: we will need an offscreen one (unless we can force a visited color)
+	- proxy tampering
+	- iframe with no styling
+
+	ToDo: test
+		- stylus
+		- changing contrast control
+		- extensions
+	*/
+
+	let value, data ='', btn='', notation = default_red
+	let obj = {'colors': {}, 'styleElement_list': [], 'styleSheets_hash': '',  'styleSheets_list': [], 'proxy': ''}
+
+	let metricH = 'styleSheets_hash', metricL = 'styleSheets_list'
+	try {
+		let ss = window.document.styleSheets
+		obj[metricH] = mini(ss)
+			let tmpArray = []
+			try {
+				for(let i = 0; i < ss.length; i++) {
+					let href = ss[i].ownerNode.attributes.href
+					if (undefined == href) {href = ss[i].href +''} else {href = href.nodeValue}
+					tmpArray.push(href)
+				}
+			} catch(e) {
+				log_error(14, METRIC +'_'+ metricL, e)
+			}
+			obj[metricL] = tmpArray
+	} catch(e) {
+		obj[metricH] = zErr
+		log_error(14, METRIC +'_'+ metricH, e)
+	}
+
+	let metricS = 'styleElement_list'
+	try {
+		let target = window.document.all
+		let tmpArray = []
+		// start at 2 (0 and 1 are html and head)
+			// we could break when we don't hit HTMLStyleElement
+			// or just check the next 20 items
+		for (let i=2; i < 22; i++) {
+			let item = target[i], type = item+''
+			if ('[object HTMLBodyElement]' == item) {
+				break // stop here
+			} else if ('[object HTMLStyleElement]' == type) {
+				let classValue = item.classList.value
+				if ('' !== classValue) {tmpArray.push(classValue)}
+			}
+		}
+		obj[metricS] = tmpArray
+	} catch(e) {
+		obj[metricS] = zErr
+		log_error(14, METRIC +'_'+ metricS, e)
+	}
+	//console.log(obj)
+	// for now just display the data + record the result
+	sDetail.document[METRIC] = obj
+	addDisplay(14, METRIC, mini(obj), addButton(14, METRIC))
+
+	//addBoth(14, METRIC, value, btn, notation, data)
+	return
+}
+
 const outputCSS = () => new Promise(resolve => {
 	Promise.all([
 		get_colors(),
 		get_media_css('media'),
 		get_computed_styles('computed_styles'),
-		get_link('underline_links')
+		get_link('underline_links'),
+		get_stylesheets('styleSheets'),
 	]).then(function(){
 		return resolve()
 	})
