@@ -568,7 +568,7 @@ const get_canvas = () => new Promise(resolve => {
 		//*/
 
 		// test
-		aSkip = aSkip.filter(x => ![toBlob].includes(x))
+		//aSkip = aSkip.filter(x => ![toBlob].includes(x))
 
 		// we're testing for protection so always do two passes, including gecko basic mode
 			// ToDo: handle canvas spoofing in nonGecko: e.g. we can easily test getImageData: for now just exit
