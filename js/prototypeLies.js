@@ -707,6 +707,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		})
 		searchLies(() => Document, {
 			target: [
+				'adoptedStyleSheets',
 				'createElement',
 				'createElementNS',
 				'getElementById',
@@ -732,6 +733,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 			target: [
 				'append',
 				'appendChild',
+				'attachShadow',
 				'getBoundingClientRect',
 				'getClientRects',
 				'insertAdjacentElement',
