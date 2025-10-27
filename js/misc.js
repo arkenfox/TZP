@@ -426,7 +426,10 @@ function get_timing(METRIC) {
 			oData[k] = ''
 			if ('reducetimer' !== k) {
 				if ('instant' == k) {
-					if ('ReferenceError: Temporal is not defined' == e || 'ReferenceError: Can\'t find variable: Temporal' == e) {e = zSKIP}
+					// gecko 139+ we expect temporal to work
+					if (!isGecko || isGecko && isVer < 139) {
+						if ('ReferenceError: Temporal is not defined' == e || 'ReferenceError: Can\'t find variable: Temporal' == e) {e = zSKIP}
+					}
 				}
 				str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
 				oData[k] = (zD == e || zSKIP == e) ? e : zErr
