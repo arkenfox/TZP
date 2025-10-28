@@ -484,48 +484,68 @@ function get_media_css(METRIC) {
 	addBoth(14, METRIC, mini(data), addButton(14, METRIC), medianotation + strCounts, data)
 }
 
-function get_stylesheets(METRIC) {
+function get_site_colors(METRIC) {
+	// contrast control in settings, but also checks what extensions change values to
+	// background-color, color, visited link, unvisited link
+		// note: dark reader etc all alter the css color tests as it is
+		// see: visited link colors will be exposed soon: https://github.com/mozilla/standards-positions/issues/1234
+		// ToDo: unvisited link color - we can't get a visited link
+	// also get all the 18 rainbow colors which shows if it retains color or just goes light/dark
+
+	let data = {}
+	try {
+		let target = document.body
+		let styles = window.getComputedStyle(target)
+		let aList = ['background-color','color']
+		aList.forEach(function(item){
+			data[item] = styles.getPropertyValue(item)
+		})
+		// our 18 colors: adds entrpy on whether the extension retains some semblance of color
+		// or goes simple two-color or whatever
+		for (let i=1; i < 19; i++) {
+			target = dom['tb'+i].childNodes[2].children[0].children[0]
+			styles = window.getComputedStyle(target)
+			let suffix = (i+'').padStart(2,'0')
+			data['color'+ suffix] = styles.getPropertyValue('background-color')
+		}
+		// link color
+
+	} catch (e) {
+		data = zErr
+		log_error(14, METRIC +'_'+ metric, e)
+	}
+	// display
+	let hash = mini(data), btn = addButton(14, METRIC), notation = default_red
+	let expected = ['b87968f9','e1061fd6'] // prefers light/dark
+	if (expected.includes(hash)) {
+		notation = default_green
+		sDetail.document[METRIC] = data
+		addDisplay(14, METRIC, 'original', btn, notation)
+		addData(14, METRIC, 'original')
+	} else {
+		addBoth(14, METRIC, hash, btn , notation, data)
+	}
+	return
+}
+
+function get_site_styles(METRIC) {
+	// NOTE: 'settings > contrast control' has no effect any of these
 	/* we can't access rules
 		SecurityError: CSSStyleSheet.rules getter: Not allowed to access cross-origin stylesheet
 		e.g. blink 64+ changed to match spec: https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface
-	because of this, hashing them is super stable even if I change some rules' values
+		because of this, hashing them is super stable even if some rules change values
 	*/
 
-	/* check for any changes to expected styleSheets
-	- proxy tampering
-	ToDo: test
-		- stylus
-		- extensions
-	*/
-
-	// NOTE: settings>contrast control has no effect on styleElements and styleSheets
-	let tmpArray = [], data = {'colors': {}, 'styleElement': [], 'styleSheets': {'hash': '', 'list': [], 'proxy': ''}}
-	// styleSheets
-	let metric = 'styleSheets'
-	try {
-		let ss = window.document.styleSheets
-		data[metric].hash = mini(ss)
-			// list
-			try {
-				for(let i = 0; i < ss.length; i++) {
-					let href = ss[i].ownerNode.attributes.href
-					if (undefined == href) {href = ss[i].href +''} else {href = href.nodeValue}
-					tmpArray.push(href)
-				}
-				if (!tmpArray.length) {tmpArray = 'none'}
-			} catch(e) {
-				tmpArray = zErr
-				log_error(14, METRIC +'_'+ metric +'_list', e)
-			}
-			data[metric].list = tmpArray
-			// ToDo: add Proxy tampering
-
-	} catch(e) {
-		data[metric] = zErr
-		log_error(14, METRIC +'_'+ metric, e)
-	}
+	// proxy
+	let metric = 'proxy', tmpArray = [], data = {}
+	let aList = ['CSSStyleDeclaration.removeProperty','CSSStyleDeclaration.setProperty',
+		'Document.adoptedStyleSheets','Document.styleSheets','Element.attachShadow']
+	aList.forEach(function(item){
+		if (isProxyLie(item)) {tmpArray.push(item)}
+	})
+	data['proxy'] = tmpArray.length ? tmpArray : 'none'
 	// styleElement
-	metric = 'styleElement'; tmpArray = []
+	metric = 'styleElement', tmpArray = []
 	try {
 		let target = window.document.all
 		for (let i=2; i < 50; i++) { // start at 2 (0 and 1 are html and head)
@@ -542,27 +562,39 @@ function get_stylesheets(METRIC) {
 		data[metric] = zErr
 		log_error(14, METRIC +'_'+ metric, e)
 	}
-	
-	// colors: also to pick up on contrast controls: background-color, color, visited link, unvisited link
-		// note: dark reader etc all alter the css color tests as it is
-		// see: visited link colors will be exposed soon: https://github.com/mozilla/standards-positions/issues/1234
-		// ToDo: unvisited link color - we can't get a visited link
-	metric = 'colors'
+	// styleSheets
+	metric = 'styleSheets'; tmpArray = []
 	try {
-		let target = document.body
-		let styles = window.getComputedStyle(target)
-		let aColors = ['background-color','color']
-		aColors.forEach(function(item){
-			data.colors[item] = '#'+ rgba2hex(styles.getPropertyValue(item))
-		})
-	} catch (e) {
+		let ss = window.document.styleSheets
+		data[metric] = {'hash' : mini(ss)}
+			// list
+			try {
+				for(let i = 0; i < ss.length; i++) {
+					let href = ss[i].ownerNode.attributes.href
+					if (undefined == href) {href = ss[i].href +''} else {href = href.nodeValue}
+					tmpArray.push(href)
+				}
+				if (!tmpArray.length) {tmpArray = 'none'}
+			} catch(e) {
+				tmpArray = zErr
+				log_error(14, METRIC +'_'+ metric +'_list', e)
+			}
+			data[metric]['list'] = tmpArray
+	} catch(e) {
 		data[metric] = zErr
 		log_error(14, METRIC +'_'+ metric, e)
 	}
-
-	let hash = mini(data), notation = default_red
-	notation = '' // skip notation for now
-	addBoth(14, METRIC, hash, addButton(14, METRIC), notation, data)
+	// display
+	let hash = mini(data), btn = addButton(14, METRIC), notation = default_red
+	let expected = undefined !== isStylesheet ? '23bf083d' : '650f2257' // w w/out our extended window/screem range
+	if (hash == expected) {
+		notation = default_green
+		sDetail.document[METRIC] = data
+		addDisplay(14, METRIC, 'original', btn, notation)
+		addData(14, METRIC, 'original')
+	} else {
+		addBoth(14, METRIC, hash, btn , notation, data)
+	}
 	return
 }
 
@@ -572,7 +604,8 @@ const outputCSS = () => new Promise(resolve => {
 		get_media_css('media'),
 		get_computed_styles('computed_styles'),
 		get_link('underline_links'),
-		get_stylesheets('styling'),
+		get_site_colors('site_colors'),
+		get_site_styles('site_styles'),
 	]).then(function(){
 		return resolve()
 	})
