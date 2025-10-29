@@ -170,7 +170,7 @@ let isArch = true,
 	isXML = {}
 
 let isBB = false,
-	isBBExtra = false,
+	isBBESR = false,
 	isMB = false,
 	isTB = false,
 	isFPPFallback = false // helps track FPP health, block BB giving passes to FPP protections
