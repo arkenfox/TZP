@@ -2089,9 +2089,9 @@ function countJS(item) {
 					// hide console button in overlay: width is a premium
 					dom.metricsConsole.classList.add('hidden')
 				}
-				// set isBBExtra: some health checks we only want to do if it's worthwhile
+				// set isBBESR: some health checks we only want to do if it's worthwhile
 				// android and alpha are moving to RR and it's not ffeasible to keep up with per release changes
-				if (isBB && 'android' !== isOS && isVer == 140) {isBBExtra = true}
+				if (isBB && 'android' !== isOS && isVer == 140) {isBBESR = true}
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
 				]).then(function(){
