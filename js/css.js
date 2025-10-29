@@ -88,7 +88,7 @@ function get_computed_styles(METRIC) {
 	const names = ['cssrulelist','domparser','getcomputed','htmlelement',]
 	let aErr = [false, false, false, false]
 	let aHashes = [], intHashes = [], oDisplay = {}
-	let notation = (isBB && 'android' !== isOS) ? bb_red : '', isLies = false
+	let notation = isBBESR ? bb_red : '', isLies = false
 
 	let styleVersion = type => {
 		return new Promise(resolve => {
@@ -260,8 +260,8 @@ function get_computed_styles(METRIC) {
 			if (aHashes.length === 1) {
 				hash = aHashes[0], data = res[intHashes[0]]['keys']
 				btn = addButton(14, METRIC, data.length)
-				// health: BB only as ESR is stable || drop TBA as it's moving to RR
-				if (isBB && 'android' !== isOS) {
+				// health: BB only if ESR
+				if (isBBESR) {
 					if ('mac' == isOS) {
 						/* mac has
 							MozOsxFontSmoothing,-moz-osx-font-smoothing,
@@ -600,12 +600,12 @@ function get_site_styles(METRIC) {
 
 const outputCSS = () => new Promise(resolve => {
 	Promise.all([
-		get_colors(),
+		get_site_colors('site_colors'),
+		get_site_styles('site_styles'),
 		get_media_css('media'),
 		get_computed_styles('computed_styles'),
 		get_link('underline_links'),
-		get_site_colors('site_colors'),
-		get_site_styles('site_styles'),
+		get_colors(),
 	]).then(function(){
 		return resolve()
 	})
