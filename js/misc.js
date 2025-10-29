@@ -599,7 +599,7 @@ function get_math(METRIC, isLies) {
 }
 
 function get_navigator_keys(METRIC) {
-	let hash, btn='', aNav = [], notation = (isBB && 'android' !== isOS) ? bb_red : '', isLies = false
+	let hash, btn='', aNav = [], notation = isBBESR ? bb_red : '', isLies = false
 	try {
 		if (runST) {foo++}
 		// navigator
@@ -666,8 +666,8 @@ function get_navigator_keys(METRIC) {
 		}
 		// always return aNav
 		hash = mini(aNav); btn = addButton(18, METRIC, aNav.length)
-		// health: BB only as ESR is stable || drop TBA as it's moving to RR
-		if (isBB && 'android' !== isOS) {
+		// health: BB only if ESR
+		if (isBBESR) {
 			if (isMB) { // MB
 				if ('a389214b' == hash) {notation = bb_green} // MB15 41
 			} else { // TB
@@ -875,7 +875,7 @@ function get_webdriver(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, notation = (isBB && 'android' !== isOS) ? bb_red : '', isLies = false
+	let hash, btn='', data, notation = isBBESR ? bb_red : '', isLies = false
 	let id = 'iframe-window-version'
 
 	try {
@@ -954,9 +954,8 @@ function get_window_props(METRIC) {
 		}
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
 
-		// hashes v15
-			// we ignore android as tracking RR is not worth my time
-		if (isBB && 'android' !== isOS) {
+		// health: BB only if ESR
+		if (isBBESR) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
 			let oHashes = {
 				MB : {
