@@ -85,7 +85,7 @@ function get_domrect(METRIC) {
 
 function get_element_keys(METRIC) {
 	const id = 'element-key'
-	let hash, btn ='', data = [], notation = isBBExtra ? bb_red : '', isLies = false
+	let hash, btn ='', data = [], notation = isBBESR ? bb_red : '', isLies = false
 	try {
 		if (runSE) {foo++}
 		const element = document.createElement('a')
@@ -99,7 +99,7 @@ function get_element_keys(METRIC) {
 		const aExpected = ['scrollWidth','scrollHeight','clientWidth','clientHeight']
 		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
 		// health: BB only if ESR
-		if (isBBExtra) {
+		if (isBBESR) {
 			// 40f682b2: 352 standard
 			// 5e5ae1c9: 365 safer (including webgl click-to-play)
 			// the 13 items diff are all NS tampering
