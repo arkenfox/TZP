@@ -957,16 +957,17 @@ function get_window_props(METRIC) {
 		// health: BB only if ESR
 		if (isBBESR) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
+			// funfact: 1419501 (backported from FF144) radically altered the order of items in the unordered list
 			let oHashes = {
 				MB : {
-					'linux': ['24a56526','1ecabe48'], // 860, 859
+					'linux': ['b4fd3924','34f246c6'], // 860, 859
 					'mac': [],
-					'windows': ['24a56526','1ecabe48'] // 860, 859
+					'windows': ['b4fd3924','34f246c6'] // 860, 859
 				},
 				TB : {
-					'linux': ['fbe478a3','82dd0085'], // 837, 836
+					'linux': ['4cf37ce5','32dfc047'], // 837, 836
 					'mac': [],
-					'windows': ['fbe478a3','82dd0085'] // 837, 836
+					'windows': ['4cf37ce5','32dfc047'] // 837, 836
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
