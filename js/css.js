@@ -88,7 +88,7 @@ function get_computed_styles(METRIC) {
 	const names = ['cssrulelist','domparser','getcomputed','htmlelement',]
 	let aErr = [false, false, false, false]
 	let aHashes = [], intHashes = [], oDisplay = {}
-	let notation = isBBExtra ? bb_red : '', isLies = false
+	let notation = isBBESR ? bb_red : '', isLies = false
 
 	let styleVersion = type => {
 		return new Promise(resolve => {
@@ -261,7 +261,7 @@ function get_computed_styles(METRIC) {
 				hash = aHashes[0], data = res[intHashes[0]]['keys']
 				btn = addButton(14, METRIC, data.length)
 				// health: BB only if ESR
-				if (isBBExtra) {
+				if (isBBESR) {
 					if ('mac' == isOS) {
 						/* mac has
 							MozOsxFontSmoothing,-moz-osx-font-smoothing,
