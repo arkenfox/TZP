@@ -12,7 +12,10 @@ function rgba2hex(orig, hexOnly = false) {
 	// multiply before convert to HEX
 	a = ((a * 255) | 1 << 8).toString(16).slice(1)
 	hex = hex + a
-	if (!hexOnly) {hex += ' '+ rgb[1] +'-'+ rgb[2] +'-'+ rgb[3]}
+	if (!hexOnly) {
+		rgb = rgb.slice(1, rgb.length)
+		hex += ' '+ rgb.join('-')
+	}
 	return hex
 }
 
@@ -34,22 +37,31 @@ function get_colors() {
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
 		moz: [
-			'-moz-buttonhoverface','-moz-buttonhovertext', // both removed FF141: 1968925 ?
-			'-moz-cellhighlight',
-			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
-			'-moz-eventreerow', // removed FF140: 1965343 ?
-			'-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext',
+			'-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog',
+			'-moz-dialogtext','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext',
 			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
 		],
 	}
+
 	if (!isGecko) {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
+	} else {
+	// see 1997240: when contrast control is used, removed -moz named colors are exposed
+		// and our 0.5 alpha value in strColor is used
+		// wrecking our RFP deterministic hash: to solve this we will add them if we expect them
+		let aAdd = []
+		if (isVer < 141) {aAdd.push('-moz-buttonhoverface','-moz-buttonhovertext')} // removed FF141: 1968925
+		if (isVer < 140) {aAdd.push('-moz-eventreerow')} // removed FF140: can't find bugzilla
+		if (aAdd.length) {
+			oList.moz = oList.moz.concat(aAdd).sort()
+		}
 	}
+	//console.log(oList)
 
 	for (const type of Object.keys(oList)) {
 		const element = dom.tzpColor
-		const strColor = 'rgba(1, 2, 3, 0.5)'
+		const strColor = 'rgba(1, 2, 3, 0.5)' // opacity used to help avoid collisions
 		const METRIC = 'colors_'+ type
 
 		let hash, btn ='', data = {}, notation = 'moz' == type ? rfp_red : ''
@@ -60,6 +72,8 @@ function get_colors() {
 				element.style.backgroundColor = strColor // reset color
 				element.style.backgroundColor = style
 				let rgb = window.getComputedStyle(element, null).getPropertyValue('background-color')
+				// note: when obsolete colors are exposed with contrast control: the alpha value is not used
+					// and we always report them as 0.5 or `af`: this means we could have a false positive
 				if (rgb !== strColor) { // drop obsolete
 					aTemp.push(style +':'+ rgb)
 					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
@@ -600,12 +614,12 @@ function get_site_styles(METRIC) {
 
 const outputCSS = () => new Promise(resolve => {
 	Promise.all([
-		get_site_colors('site_colors'),
-		get_site_styles('site_styles'),
+		get_colors(),
 		get_media_css('media'),
 		get_computed_styles('computed_styles'),
 		get_link('underline_links'),
-		get_colors(),
+		get_site_colors('site_colors'),
+		get_site_styles('site_styles'),
 	]).then(function(){
 		return resolve()
 	})
