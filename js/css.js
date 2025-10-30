@@ -8,7 +8,11 @@ function rgba2hex(orig, hexOnly = false) {
 		(rgb[1] | 1 << 8).toString(16).slice(1) +
 		(rgb[2] | 1 << 8).toString(16).slice(1) +
 		(rgb[3] | 1 << 8).toString(16).slice(1) : orig;
-	if (alpha !== '') {a = alpha} else {a = 0o1}
+	if (alpha !== '') {a = alpha
+	} else {
+		a = 0o1
+		rgb = rgb.slice(0, rgb.length - 1)
+	}
 	// multiply before convert to HEX
 	a = ((a * 255) | 1 << 8).toString(16).slice(1)
 	hex = hex + a
@@ -42,6 +46,12 @@ function get_colors() {
 			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
 		],
 	}
+	/* note: windows 11: tested in FF146
+		'Menu' has an opacity (0.6)
+		'-moz-menuhover' has an opacity (0.118) | protected in RFP
+		where do these come from (app theme, system, user prefs, prefers-color-scheme etc?)
+		how are they calculated or are they hardcoded
+	*/
 
 	if (!isGecko) {
 		delete oList.moz
