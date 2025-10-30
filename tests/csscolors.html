@@ -122,7 +122,7 @@ function get_colors() {
 		a = ((a * 255) | 1 << 8).toString(16).slice(1)
 		hex = hex + a
 		rgb = rgb.slice(1, rgb.length)
-		hex += ' '+ rgb.join('-')
+		return hex +' '+ rgb.join('-')
 	}
 
 	try {
