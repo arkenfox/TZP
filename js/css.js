@@ -47,8 +47,8 @@ function get_colors() {
 		],
 	}
 	/* note: windows 11: tested in FF146
-		'Menu' has an opacity (0.6)
 		'-moz-menuhover' has an opacity (0.118) | protected in RFP
+		'Menu' has an opacity (0.6) exposed when contrast control is enabled
 		where do these come from (app theme, system, user prefs, prefers-color-scheme etc?)
 		how are they calculated or are they hardcoded
 	*/
