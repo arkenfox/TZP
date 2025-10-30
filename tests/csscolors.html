@@ -75,9 +75,9 @@ function get_colors() {
 			'-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog',
 			'-moz-dialogtext','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext',
 			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
-			// removed FF141: 1968925 ?
+			// removed FF141: 1968925
 			'-moz-buttonhoverface','-moz-buttonhovertext',
-			// removed FF140: 1965343 ?
+			// removed FF140: can't find bugzilla
 			'-moz-eventreerow',
 			// removed FF122: 1867854
 			'-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext', '-moz-mac-focusring','-moz-nativehyperlinktext', 
@@ -106,6 +106,8 @@ function get_colors() {
 			'-moz-win-communications-toolbox','-moz-win-media-toolbox',
 		],
 	}
+	// see 1997240: when contrast control is used, removed -moz named colors are exposed
+		// and our 0.5 alpha value in strColor is used
 
 	function rgba2hex(orig) {
 		var a, isPercent,
@@ -119,7 +121,8 @@ function get_colors() {
 		// multiply before convert to HEX
 		a = ((a * 255) | 1 << 8).toString(16).slice(1)
 		hex = hex + a
-		return hex + " "+ rgb[1] +"-"+ rgb[2] +"-"+ rgb[3]
+		rgb = rgb.slice(1, rgb.length)
+		hex += ' '+ rgb.join('-')
 	}
 
 	try {
@@ -137,6 +140,8 @@ function get_colors() {
 				if (rgb !== strColor) { // drop obsolete
 					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
 				}
+				// note: removed moz items exposed with contrast control, return our alpha value in strColor
+				if ('moz' == type) {console.log(style, rgb)}
 			})
 			let tmpobj = {}
 			count = 0
