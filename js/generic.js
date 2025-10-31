@@ -2092,6 +2092,7 @@ function countJS(item) {
 				// set isBBESR: some health checks we only want to do if it's worthwhile
 				// android and alpha are moving to RR and it's not ffeasible to keep up with per release changes
 				if (isBB && 'android' !== isOS && isVer == 140) {isBBESR = true}
+
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
 				]).then(function(){
@@ -2161,6 +2162,19 @@ function outputSection(id, isResize = false) {
 		for (const k of Object.keys(sectionMap)) {sectionNos[sectionMap[k]] = k; tmpObj[sectionMap[k]] = k; sectionNames.push(sectionMap[k])}
 		for (const n of Object.keys(tmpObj).sort()) {sectionOrder.push(tmpObj[n])}
 		sectionNames.sort()
+	}
+
+	// set the onion skin pattern background if TB and dark
+	if (isTB && 'android' !== isOS) {
+		try {
+			let target = document.body
+			let bgcolor = window.getComputedStyle(target).getPropertyValue('background-color')
+			if ('rgb(22, 27, 34)' == bgcolor) {
+				target.classList.add('tzpBody')
+			} else {
+				target.classList.remove('tzpBody')
+			}
+		} catch(e) {}
 	}
 
 	gClick = false
