@@ -46,9 +46,9 @@ function get_colors() {
 			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
 		],
 	}
-	/* note: windows 11: tested in FF146
-		'-moz-menuhover' has an opacity (0.118) | protected in RFP
-		'Menu' has an opacity (0.6) exposed when contrast control is enabled
+	/* note: windows 11: tested in FF146 (both protected with RFP)
+		'-moz-menuhover' has an opacity (0.118)
+		'Menu' has an opacity (0.6) exposed when contrast control (forced colors) is enabled
 		where do these come from (app theme, system, user prefs, prefers-color-scheme etc?)
 		how are they calculated or are they hardcoded
 	*/
@@ -57,8 +57,7 @@ function get_colors() {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
 	} else {
-	// see 1997240: when contrast control is used, removed -moz named colors are exposed
-		// and our 0.5 alpha value in strColor is used
+	// with forced coloes, removed -moz named colors will be false positives (and our alpha setting is retained)
 		// wrecking our RFP deterministic hash: to solve this we will add them if we expect them
 		let aAdd = []
 		if (isVer < 141) {aAdd.push('-moz-buttonhoverface','-moz-buttonhovertext')} // removed FF141: 1968925
@@ -82,8 +81,6 @@ function get_colors() {
 				element.style.backgroundColor = strColor // reset color
 				element.style.backgroundColor = style
 				let rgb = window.getComputedStyle(element, null).getPropertyValue('background-color')
-				// note: when obsolete colors are exposed with contrast control: the alpha value is not used
-					// and we always report them as 0.5 or `af`: this means we could have a false positive
 				if (rgb !== strColor) { // drop obsolete
 					aTemp.push(style +':'+ rgb)
 					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
@@ -291,7 +288,7 @@ function get_computed_styles(METRIC) {
 							MozOsxFontSmoothing,-moz-osx-font-smoothing,
 							WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
 						*/
-						if ('' == hash) {notation = bb_green} // BB15
+						if ('1c5fe54d' == hash) {notation = bb_green} // BB15 1127
 					} else {
 						// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
 							// some older (mostly unsupported) win10 and android <= 6 will lack
