@@ -961,12 +961,12 @@ function get_window_props(METRIC) {
 			let oHashes = {
 				MB : {
 					'linux': ['b4fd3924','34f246c6'], // 860, 859
-					'mac': [],
+					'mac': ['a668f9dd','2436cf3f'], // 857, 856
 					'windows': ['b4fd3924','34f246c6'] // 860, 859
 				},
 				TB : {
 					'linux': ['4cf37ce5','32dfc047'], // 837, 836
-					'mac': [],
+					'mac': ['6fa6983a','2092245c'], // 834, 833
 					'windows': ['4cf37ce5','32dfc047'] // 837, 836
 				},
 			}
