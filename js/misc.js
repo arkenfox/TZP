@@ -953,11 +953,12 @@ function get_window_props(METRIC) {
 		} else {
 			data.sort()
 		}
-		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
+		hash = mini(data); btn = addButton(18, METRIC, data.length)
 		if (isGecko) {
 			btn += addButton(18, METRIC +'_sorted', 'sorted')
 			sDetail.document[METRIC +'_sorted'] = dataSorted.sort()
 		}
+		btn += tamperBtn
 		// health: BB only if ESR
 		if (isBBESR) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
