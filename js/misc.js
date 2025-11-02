@@ -875,7 +875,7 @@ function get_webdriver(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, notation = isBBESR ? bb_red : '', isLies = false
+	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isLies = false
 	let id = 'iframe-window-version'
 
 	try {
@@ -888,6 +888,7 @@ function get_window_props(METRIC) {
 		iframe = dom[id]
 		let contentWindow = iframe.contentWindow
 		data = Object.getOwnPropertyNames(contentWindow)
+		dataSorted = Object.getOwnPropertyNames(contentWindow)
 
 		let tamperBtn = '', aTampered, indexPerf, indexEvent
 		if (isGecko) {
@@ -953,7 +954,10 @@ function get_window_props(METRIC) {
 			data.sort()
 		}
 		hash = mini(data); btn = addButton(18, METRIC, data.length) + tamperBtn
-
+		if (isGecko) {
+			btn += addButton(18, METRIC +'_sorted', 'sorted')
+			sDetail.document[METRIC +'_sorted'] = dataSorted.sort()
+		}
 		// health: BB only if ESR
 		if (isBBESR) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
@@ -975,6 +979,7 @@ function get_window_props(METRIC) {
 				if (oHashes[key][isOS].includes(hash)) {notation = bb_green}
 			}
 		}
+
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
