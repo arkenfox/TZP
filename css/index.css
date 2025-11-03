@@ -20,6 +20,7 @@
 	--bg16: #f09bf0;
 	--bg17: #f09bd4;
 	--bg18: #f09bb8;
+	--bg67: #686868a6;
 	--bg98: #ededed; /* overlaytop */
 	--bg99: #a4a4a4; /* fingerprint and perf */
 	--bggood: #bae6aa40;
@@ -67,6 +68,7 @@
 	:root{
 	/* backgrounds */
 	--bg0: #161b22;
+	--bg67: #a2a2a2;
 	--bg98: #161b22;
 	--bg99: #808080;
 	--bggood: none;
@@ -114,6 +116,12 @@ code {
 	background: rgba(142, 142, 145, 0.25) !important;
 	padding: 2px 6px; /* top+bottom | left+ right */
 }
+.s67 {
+	background-color: var(--bg67);
+	color: var(--bg0);
+	margin: 0px 2px; /* top+bottom | left+ right */
+	padding: 0px 2px; /* top+bottom | left+ right */
+}
 
 a {color: black; text-decoration: none;}
 a.blue {color: var(--txtlink); text-decoration: none;}
@@ -141,6 +149,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 .nospaces {white-space: normal;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
 .lies {color: var(--test99); text-decoration: underline;}
+.revert {all: revert;}
 
 /* JSON */
 .string {color: var(--jstring);}
