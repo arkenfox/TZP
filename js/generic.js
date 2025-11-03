@@ -1736,7 +1736,7 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 		notation = notation.replace(tick, cross)
 	}
 	str += ''
-	if (str.length < 100) {
+	if (8 == str.length) { // limit to hopefully just hashes
 		if (str.includes('6') && str.includes('7')) {
 			if (str.indexOf('6') < str.indexOf('7')) {
 				str = str.replace('7','<span class="s67">7</span>')
