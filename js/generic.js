@@ -1735,6 +1735,15 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 		notation = notation.replace("class='good'", "class='bad'")
 		notation = notation.replace(tick, cross)
 	}
+	str += ''
+	if (str.length < 100) {
+		if (str.includes('6') && str.includes('7')) {
+			if (str.indexOf('6') < str.indexOf('7')) {
+				str = str.replace('7','<span class="s67">7</span>')
+				str = str.replace('6','<span class="s67">6</span>')
+			}
+		}
+	}
 	sDataTemp['display'][isScope][section][metric] = str + btn + notation
 	// global health: just grab pass/fail
 	if (gRun && '' !== notation && notation.includes("class='health'")) {
