@@ -18,7 +18,7 @@ let sectionOrder = [], // numerical order for objects
 	// some 'methods/entropy' are in the FP: e.g. canvas/domrect or errors e.g. font sizes
 const btnList = ['alerts', 'errors', 'lies']
 
-const jsFilesExpected = 14,
+const jsFilesExpected = 15,
 	gSectionsExpected = 16,
 	expectedMetrics = 127
 let jsFiles = 0, gCount = 0, gCountTiming = 0
@@ -196,7 +196,8 @@ let aDomRect = [true, true, true, true],
 	isDomRect = 0, // default non-gecko
 	oDomRect = {},
 	isDecimal = false,
-	isPerf = false
+	isPerf = false,
+	isPointerRawUpdate = 'undefined'
 
 // overlay metrics
 let overlayScope = 'document',
