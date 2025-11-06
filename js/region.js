@@ -161,7 +161,7 @@ function set_isLanguageSmart() {
 	// set once: ignore android for now
 	if (!gLoad || !isSmart && !isSmartDataMode || !isDesktop) {return}
 
-	// BB always or FF if locale matches
+	// BB if ESR
 		// resource://gre/res/multilocale.txt
 	isLanguageSmart = isBB
 
