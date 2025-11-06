@@ -125,7 +125,7 @@ function get_device_memory(METRIC) {
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	addBoth(7, METRIC, value,'','', data)
+	addBoth(7, METRIC, value,'','', data, isProxyLie('Navigator.'+ METRIC))
 	return
 }
 
@@ -517,47 +517,6 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 	}
 })
 
-function get_pointer_event(event) {
-	// ToDo: also look at radiusX/Y, screenX/Y, clientX/Y
-	/* https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/28535#note_2906361
-	RFP
-	1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: desktop (no touch/pen)
-	1 | true |  5 |  mouse | 0.5 |   0 | 0 | 0 | 0 | 1  098e0d22: mobile touch
-	1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: laptop mouse
-	1 | true |  1 |  mouse | 0.5 |   0 | 0 | 0 | 0 | 1  098e0d22: laptop touch
-	1 | true |  2 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  4b23f9ac: laptop pen
-	*/
-
-	if (window.PointerEvent === undefined) {
-		dom.ptEvent.innerHTML = 'undefined'
-		return
-	}
-
-	let oData = {}, oDisplay = []
-	let oList = {
-		isPrimary: 'boolean', // RFP true
-		pressure: 'number', // RFP: 0 if not active, 0.5 if active
-		mozPressure: 'number',
-		pointerType: 'string', // RFP mouse
-		mozInputSource: 'number', // mouse = 1, pen = 2, touch = 5
-		tangentialPressure: 'number', // RFP 0
-		tiltX: 'number', // RFP 0
-		tiltY: 'number', // RFP 0
-		twist: 'number', // RFP 0
-		width: 'number', // RFP 1
-		height: 'number', // RFP 1
-		altitudeAngle: 'number',
-		azimuthAngle: 'number',
-	}
-	for (const k of Object.keys(oList).sort()) {
-		let value = event[k], expected = oList[k]
-		if (typeFn(value) !== expected) {value = 'err'}
-		oData[k] = value
-		oDisplay.push(value)
-	}
-	dom.ptEvent.innerHTML = oDisplay.join(', ') //+ sg +'['+ mini(oData) +']'+ sc
-}
-
 function get_screen_isextended(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Screen/isExtended
 	// currently blink (100+) only
@@ -685,7 +644,7 @@ function get_touc_h(METRIC) {
 	let hash = mini(data), btn = addButton(7, METRIC)
 	// RFP
 		// 1957658: FF143+, ESR140.2: 5 android, 10 windows, 0 mac and linux
-		// 1980472: window touch properties: isBB via prefs, awaiting FF
+		// 1991701: FF146+ (and BB15): Re-enable touch on Linux (and remove RFPTarget::PointerId)
 	let rfpHashes = {
 		'android': '725ba69f',
 			/*
@@ -698,10 +657,6 @@ function get_touc_h(METRIC) {
 			/* linux gecko with touch doesn't have maxTouchPoints */
 		'mac': 'd539fa63',
 		'windows': 'dee1c4c9', // {"element": "none", "maxTouchPoints": 10, "window": ['Touch','TouchEvent','TouchList']}
-	}
-	if (!isBB) {
-		// RFP will catch up in 1991701
-		rfpHashes.linux = 'd539fa63' // {"element": "none", "maxTouchPoints": 0, "window": "none"}
 	}
 	notation = rfpHashes[isOS] == hash ? rfp_green : rfp_red
 

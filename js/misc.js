@@ -36,64 +36,6 @@ function check_timing(type) {
 	return result
 }
 
-function get_timing_audio() {
-	if (!gClick) {return}
-	gClick = false
-	// contexttime: geckoview
-		// TypeError: undefined (with and with and w/out RFP)) on first run sometimes (and sometimes subsequent runs)
-		// seen in FF139 stable, 141 beta, 142 nightly
-
-	const METRIC = 'timing_audio'
-	let aList = ['contexttime','performancetime'], oTime = {}, audioCtx, source, rAF 
-
-	aList.forEach(function(k){
-		gData.timing[k] = []
-		oTime[k] = []
-		dom[METRIC +'_'+ k.toLowerCase()] =''
-	})
-	dom[METRIC].innerHTML =''
-
-	// collect
-	function collectTimestamps() {
-		const ts = audioCtx.getOutputTimestamp();
-		oTime.contexttime.push(ts.contextTime * 1000)
-		oTime.performancetime.push(ts.performanceTime)
-		rAF = requestAnimationFrame(collectTimestamps); // Reregister itself
-		if (oTime.contexttime.length > 20) {stop()}
-	}
-
-	// record
-	try {
-		audioCtx = new AudioContext()
-		source = new AudioBufferSourceNode(audioCtx);
-		source.start(0);
-		rAF = requestAnimationFrame(collectTimestamps)
-	} catch(e) {
-		dom[METRIC].innerHTML = log_error(17, METRIC, e)
-		gClick = true
-	}
-
-	// finish
-	function stop() {
-		source.stop(0)
-		cancelAnimationFrame(rAF)
-		aList.forEach(function(k){
-			let data = oTime[k]
-			data = dedupeArray(data)
-			// contextTime: if the first value (we deduped) is 0 then we need to drop it
-				// otherwise the first diff causes an offset to our 60FPS timing as rAF catches up: e.g.
-				// 0, 10, 26.6, 43.3, 76.6, 110, 143.3, 160, 176.6, 193.3, 210, 243.3
-				// 0, 10, 26.6, 43.3
-				// ^ should be 0, 16.6, 33.3: i.e the [0, 10, 26.6...] we drop the start point of 0
-				// after that everythng is in sync
-			if ('contexttime' == k && 0 == data[0]) {data = data.slice(1)}
-			gData.timing[k] = data
-			get_timing(METRIC)
-		})
-		gClick = true
-	}
-}
-
 function get_timing_mark() {
 	try {
 		let entries = performance.getEntriesByName("a","mark")
@@ -271,7 +213,7 @@ function get_timing(METRIC) {
 	let calc1 = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
 	let str, data, notation, oData = {}, countFail = 0, countErr = 0
 
-	sDetail.document[METRIC +'_data'] = {}
+	sDetail[isScope][METRIC +'_data'] = {}
 	let isDateNoise = false
 
 	aLoop.forEach(function(k){
@@ -283,7 +225,7 @@ function get_timing(METRIC) {
 			let aTimes = gData.timing[k]
 			if ('string' == typeof aTimes) {throw aTimes}
 			aTimes = dedupeArray(aTimes)
-			if (aTimes.length) {sDetail.document[METRIC +'_data'][k] = {'data': aTimes}}
+			if (aTimes.length) {sDetail[isScope][METRIC +'_data'][k] = {'data': aTimes}}
 			// type check
 			let start = aTimes[0]
 			let expected = ('exslt' == k || 'instant' == k) ? 'string' : 'number'
@@ -352,8 +294,8 @@ function get_timing(METRIC) {
 			// diff arrays
 			let aDiffs = Array.from(setDiffs)
 			let aIncremental = Array.from(setIncremental)
-			sDetail.document[METRIC +'_data'][k]['diffs'] = aDiffs
-			sDetail.document[METRIC +'_data'][k]['incremental'] = aIncremental
+			sDetail[isScope][METRIC +'_data'][k]['diffs'] = aDiffs
+			sDetail[isScope][METRIC +'_data'][k]['incremental'] = aIncremental
 
 			// using incremental: test intervals
 			if (aIncremental.length) {
@@ -441,13 +383,13 @@ function get_timing(METRIC) {
 				}
 			}
 		}
-		//sDetail.document[METRIC][k] = data
+		//sDetail[isScope][METRIC][k] = data
 		if ('timing_precision' == METRIC) {
 			if ('reducetimer' !== k) {
 				addDisplay(17, METRIC +'_'+ k, str,'', notation)
 			}
 		} else {
-			dom[METRIC +'_'+ k].innerHTML = str + (isSmart ? notation : '')
+			addDisplay(17, METRIC +'_'+ k, str,'', notation)
 		}
 	})
 
@@ -503,16 +445,16 @@ function get_timing(METRIC) {
 		// add
 		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 		addBoth(17, METRIC, mini(oData), btn, notation, oData)
+		// cleanup
+		//performance.clearMeasures()
+
 	} else {
 		notation = (aLoop.length - countFail) == aLoop.length ? rfp_green : rfp_red
 		str = (aLoop.length - countFail) +'/' + aLoop.length
 		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
-		sDetail.document[METRIC] = oData
-		dom[METRIC].innerHTML = mini(oData) + btn + (isSmart ? notation : '')
-		gClick = false
+		sDetail[isScope][METRIC] = oData
+		addDisplay(17, METRIC, mini(oData), btn, notation)
 	}
-	// cleanup
-	//performance.clearMeasures()
 	return
 }
 

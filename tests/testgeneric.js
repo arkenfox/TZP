@@ -413,10 +413,11 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 145
+		isVerMax = 146
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {throw new DOMException('a', 'b')} catch(e) {if (0 !== e.columnNumber) return 146} // 1997216
 			if (undefined !== (new ToggleEvent('toggle', null)).source) return 145 // 1968987
 			if (undefined == window.CSS2Properties) return 144 // 144: 1919582
 			// 143: fast-path: pref: layout.css.moz-appearance.webidl.enabled: default false 143+

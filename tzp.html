@@ -184,6 +184,12 @@
 				| <span class="c" id="orientation_orientation.type"></span>
 			<div class="btn-right s99">orientation</div>
 			</td></tr>
+		<tr class="togS"><td>[iframe] device</td>
+			<td class="mono">
+				<span class="c" id="orientation_mozOrientation_iframe"></span>
+				| <span class="c" id="orientation_orientation.angle_iframe"></span>
+				| <span class="c" id="orientation_orientation.type_iframe"></span>
+			</td></tr>
 		<tr class="togS">
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
 			device-aspect-ratio</span></div> &nbsp; [css] device</td>
@@ -290,16 +296,16 @@
 			&nbsp; display-mode | fullscreen</td>
 			<td class="mono border-top"><span id="cssDM"></span> | <span class="c" id="display-mode"></span>
 				| <span class="c" id="windowfullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span> fullscreenElement <sup>4</sup></td>
+		<tr><td><span class="btn btn0" onClick="outputUser('fullscreenElement')">[ run ]</span> fullscreenElement <sup>4</sup></td>
 			<td class="mono">
-				<span class="c" id="fsElement"></span>
-				<div id="btnFS" class="btn-right btn1" onClick="outputUser('exitFS')">[ exit ]</div>
+				<span class="c" id="fullscreenElement"></span>
+				<div id="btnFS" class="btn-right btn1" onClick="exitUserFS()">[ exit ]</div>
 			</td></tr>
 		<tr><td><span class="mono no_color">[F11]</span> &nbsp; fullscreen</td><td class="c mono" id="fsSize"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('newwin')">[ run ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
-			&nbsp; new window</td><td class="mono border-bottom"><span class="c" id="newWinLeak"></span></td></tr>
+			&nbsp; new window</td><td class="mono border-bottom"><span class="c" id="newwin"></span></td></tr>
 		<!-- pixels-->
 		<tr><td>[div] dpi</td><td class="mono"><span class="c" id="dpi_div"></span>
 			<div class="btn-right s99">pixels</div></td></tr>
@@ -381,7 +387,7 @@
 			<tr class="togAW"><td>worker</td><td class="c mono" id="agent_worker"></td></tr>
 			<tr class="togAW"><td>shared worker</td><td class="c mono" id="agent_worker_shared"></td></tr>
 			<tr class="togAW"><td>service worker</td><td class="c mono" id="agent_worker_service"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goNW_AGENT')">[ click ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('agent_open')">[ run ]</span>
 			window.open</td><td class="c mono" id="agent_open"></td></tr>
 		<tr><td colspan="3"><span class="normal"><span class="no_color">iframe code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
@@ -604,7 +610,7 @@
 		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.fs.enabled</span></div>
 			&nbsp; file system</td><td class="c mono" id="filesystem"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('get_storage_manager')">[ click ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('storage_manager')">[ run ]</span>
 			storage manager</td><td class="c mono" id="storage_manager"></td></tr>
 		<tr><td>storage quota</td><td class="c mono" id="storage_quota"></td></tr>
 		<tr><td colspan="2"></td></tr>
@@ -648,11 +654,8 @@
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
 		<tr><td>memory</td><td class="c mono" id="memory"></td></tr>
 		<tr><td>permissions</td><td class="c mono" id="permissions"></td></tr>
-		<tr><td id="tzpPointer"><span class="btn btn0">[ <span>click</span> ]</span>
-			<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">altitudeAngle<br>azimuthAngle<br>height<br>isPrimary<br>mozInputSource<br>
-				mozPressure<br>pointerType<br>pressure<br>tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
-			</div> &nbsp; pointer event <sup>1</sup></td><td class="c mono" id="ptEvent"></td></tr>
+		<tr><td id="tzpPointer"><span class="btn btn0">[ run ]</span>
+			&nbsp; pointer event <sup>1</sup></td><td class="c mono" id="pointer_event"></td></tr>
 		<tr><td>recursion</td><td class="c mono" id="recursion"></td></tr>
 		<tr><td>screen.isExtended</td><td class="c mono" id="screen_isextended"></td></tr>
 		<tr><td>touch</td><td class="c mono" id="touch"></td></tr>
@@ -754,10 +757,10 @@
 			<span class="ttxt">copyFromChannel<br>getChannelData<br>sum of buffer</span></div>
 			&nbsp; offlineAudioContext <sup>2</sup></td><td class="c mono" id="offlineAudioContext"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('outputAudioUser')">[ click ]</span>
-			hash</td><td class="c2 gc mono" id="audio_user"></td></tr>
-		<tr><td>OscillatorNode <sup>1</sup></td><td class="c2 gc mono" id="oscillator"></td></tr>
-		<tr><td>+DynamicsCompressor <sup>1</sup></td><td class="c2 gc mono" id="oscillator_compressor"></td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('audio_test')">[ run ]</span>
+			hash</td><td class="gc mono" id="audio_test"></td></tr>
+		<tr><td>OscillatorNode <sup>1</sup></td><td class="uaudio_test gc mono" id="audio_test_oscillator"></td></tr>
+		<tr><td>+DynamicsCompressor <sup>1</sup></td><td class="uaudio_test gc mono" id="audio_test_oscillator_compressor"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="normal"><span class="no_color">audio code based on work by </span>
 			<a target="_blank" class="blue" href="https://audiofingerprint.openwpm.com/">openWPM</a> <sup>1</sup>
@@ -1020,11 +1023,11 @@
 			<div class="btn-right"></div>
 		</td></tr>
 		<!--manual-->
-		<tr><td><span class="btn btn0" onClick="outputUser('get_timing_audio')">[ click ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('timing_audio')">[ run ]</span>
 			<span id="labelTA" class="btn btn0" onClick="togglerows('TA','btn')">[+]</span>
 			audio</td><td class="c mono" id="timing_audio"></td></tr>
-		<tr class="togTA"><td>contexttime</td><td class="c mono" id="timing_audio_contexttime"></td></tr>
-		<tr class="togTA"><td>performancetime</td><td class="c mono" id="timing_audio_performancetime"></td></tr>
+		<tr class="togTA"><td>contexttime</td><td class="c mono utiming_audio" id="timing_audio_contexttime"></td></tr>
+		<tr class="togTA"><td>performancetime</td><td class="c mono utiming_audio" id="timing_audio_performancetime"></td></tr>
 		<!--auto-->
 		<tr><td><span id="labelTP" class="btn btn0" onClick="togglerows('TP','btn')">[+]</span>
 			timing precision</td><td class="c mono" id="timing_precision"></td></tr>
@@ -1148,6 +1151,7 @@
 	<script src="js/canvas.js"></script>
 	<script src="js/webgl.js"></script>
 	<script src="js/iframes.js"></script>
+	<script src="js/user.js"></script>
 
 	</span>
 </body>
