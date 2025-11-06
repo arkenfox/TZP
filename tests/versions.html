@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 101, maxVer = 145, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 102, maxVer = 146, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -284,6 +284,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 146: 1997216
+		let t146 = performance.now(), ver146
+		try {throw new DOMException('a', 'b')} catch(e) {ver146 = e.columnNumber !== 0}
+		rec(146, 146, "1997216", ver146, performance.now()-t146) // 0.02ms
 
 		// 145: 1968987
 		let t145 = performance.now(), ver145
