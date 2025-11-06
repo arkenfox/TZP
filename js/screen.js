@@ -68,8 +68,8 @@ function get_scr_fs_measure() {
 	}
 	// initial size
 	let size = measure()
-	let output = isElementFS ? dom.fsElement : dom.fsSize
-	output.innerHTML =''
+	let output = isElementFS ? dom.fullscreenElement : dom.fsSize
+	output.innerHTML ='' // clear
 
 	function check_size() {
 		clearInterval(checking)
@@ -384,7 +384,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		if (isDesktop) {
 			let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 			if (isElementFS) {
-				addDisplay(1, 'fsElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
+				addDisplay(1, 'fullscreenElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
 			}
 			try {dom.btnFS.style.display = (isElementFS ? 'block' : 'none')} catch {}
 		}
@@ -726,73 +726,66 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 
 	// screen
 	let items = ['mozOrientation', 'orientation.angle', 'orientation.type']
-	items.forEach(function(item) {
-		let value, expectedType = 'string', isAngle = 'orientation.angle' == item, isLies = false
-		try {
-			if ('mozOrientation' == item) {
-				value = screen.mozOrientation
-				// gecko: undefined throws an error, 'undefined' returns the string (or a lie if isSmart)
-				if (!isGecko) {expectedType = 'undefined'}
-			} else if (isAngle) {
-				value = screen.orientation.angle; expectedType = 'number'
-			} else {value = screen.orientation.type
-			}
-			if (runST) {value = isAngle ? value +'' : true
-			} else if (runSI && isAngle) {value = 45
-			} else if (runSL) {value = isAngle ? 90 : 'portrait-primary'
-			}
-			let typeCheck = typeFn(value)
-			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
-			if (isAngle) {
-				let aGood = [0, 90, 180, 270]
-				if (!aGood.includes(Math.abs(value))) {
-					throw zErrInvalid + 'expected 0, 90, 180 or 270: got '+ value
-				}
-			}
-			// lies
-			if (isSmart && zErr !== check) {
-				// check mozOrientation + .type matches css
-				// note: we can't check the angle, it could be anything - see Piero tablet tests
-				if ('string' == expectedType && value.split('-')[0] !== check) {
-					log_known(1, METRIC +'_device_'+ item, value)
-					isLies = true
-				}
-			}
-		} catch(e) {
-			log_error(1, METRIC +'_device_'+ item, e)
-			value = zErr
-		}
-		if ('mozOrientation' == item && undefined == value) {value += ''} // only nonGecko mozOrientation can be undefined
-		oDisplay[METRIC +'_'+ item] = {'value': value, 'lies': isLies}
-		oData['device'][item] = isLies ? zLIE : value
-	})
+	let targets = ['screen','iframe']
 
+	targets.forEach(function(k) {
+		let strIframe = 'iframe' == k ? '_iframe' : ''
+		try {
+			let target = 'screen' == k ? screen : dom.tzpIframe.contentWindow.screen
+			items.forEach(function(item) {
+				let value, expectedType = 'string', isAngle = 'orientation.angle' == item, isLies = false
+				try {
+					if ('mozOrientation' == item) {
+						value = target.mozOrientation
+						// gecko: undefined throws an error, 'undefined' returns the string (or a lie if isSmart)
+						if (!isGecko) {expectedType = 'undefined'}
+					} else if (isAngle) {
+						value = target.orientation.angle; expectedType = 'number'
+					} else {value = target.orientation.type
+					}
+					if (runST) {value = isAngle ? value +'' : true
+					} else if (runSI && isAngle) {value = 45
+					} else if (runSL) {value = isAngle ? 90 : 'portrait-primary'
+					}
+					let typeCheck = typeFn(value)
+					if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+					if (isAngle) {
+						let aGood = [0, 90, 180, 270]
+						if (!aGood.includes(Math.abs(value))) {
+							throw zErrInvalid + 'expected 0, 90, 180 or 270: got '+ value
+						}
+					}
+					// lies
+					if (isSmart && zErr !== check) {
+						// check mozOrientation + .type matches css
+						// note: we can't check the angle, it could be anything - see Piero tablet tests
+						if ('string' == expectedType && value.split('-')[0] !== check) {
+							log_known(1, METRIC +'_device_'+ item + strIframe, value)
+							isLies = true
+						}
+					}
+				} catch(e) {
+					log_error(1, METRIC +'_device_'+ item + strIframe, e)
+					value = zErr
+				}
+				if ('mozOrientation' == item && undefined == value) {value += ''} // only nonGecko mozOrientation can be undefined, we already threw
+				oDisplay[METRIC +'_'+ item + strIframe] = {'value': value, 'lies': isLies}
+				oData['device'][item + strIframe] = isLies ? zLIE : value
+			})
+		} catch(e) {
+			items.forEach(function(item) {
+				log_error(1, METRIC +'_device_'+ item + strIframe, e)
+				oDisplay[METRIC +'_'+ item + strIframe] = zErr
+				oData['device'][item + strIframe] = zErr
+			})
+		}
+	})
+	// sort device object
+	let tmpObj = {}
+	for (const k of Object.keys(oData.device).sort()) {tmpObj[k] = oData.device[k]}
+	oData.device = tmpObj
 	// https://searchfox.org/mozilla-central/source/testing/web-platform/tests/screen-orientation/orientation-reading.html
 	// see expectedAnglesLandscape + expectedAnglesPortrait
-
-	/*
-	let zUndefined = 'undefined'
-	let test = {
-		'-moz-device-orientation': zUndefined,
-		'-moz-device-orientation_css': zNA,
-		'device-aspect-ratio': 'square',
-		'device-aspect-ratio_css': 'square',
-		'mozOrientation': zUndefined,
-		'orientation.angle': 0,
-		'orientation.type':"portrait-primary",
-	}
-	let moztest = {
-		'-moz-device-orientation': 'portrait',
-		'-moz-device-orientation_css': 'portrait',
-		'device-aspect-ratio': 'square',
-		'device-aspect-ratio_css': 'square',
-		'mozOrientation': 'portrait-primary',
-		'orientation.angle': 0,
-		'orientation.type':"portrait-primary",
-	}
-	console.log('chrometest', mini(test))
-	console.log('moztest', mini(moztest))
-	//*/
 
 	// display, data
 	for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k]['value'],'','', oDisplay[k]['lies'])}
@@ -802,42 +795,54 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 		let hash = mini(data)
 		addData(1, METRIC +'_'+ k, oData[k], hash)
 		if ('device' == k) {
-			//console.log(hash, k, oData[k])
-			let oGood = {}
-			if (isGecko) {
-				// device health check
+			// create a summary
+			// type: note: we already type checked mozOrientation on all engines and threw
+			let aTemp = [data['orientation.type'], data['orientation.type_iframe']]
+			if (isGecko) {aTemp.push(data.mozOrientation, data.mozOrientation_iframe)
+			} else {
+				if ('undefined' !== data.mozOrientation) {aTemp.push(data.mozOrientation)}
+				if ('undefined' !== data.mozOrientation_iframe) {aTemp.push(data.mozOrientation_iframe)}
+			}
+			aTemp = dedupeArray(aTemp)
+			let summary = aTemp.length > 1 ? 'mixed': aTemp[0]
+			// angle
+			aTemp = [data['orientation.angle'], data['orientation.angle_iframe']]
+			aTemp = dedupeArray(aTemp)
+			summary += ' | ' + (aTemp.length > 1 ? 'mixed': aTemp[0])
+			// orientation
+				// note: aspect ratio can be square since we return that from css rather than portrait
+			aTemp = [data['-moz-device-orientation'], data['-moz-device-orientation_css']]
+			aTemp = dedupeArray(aTemp)
+			let strOrientation = (aTemp.length > 1 ? 'mixed': aTemp[0])
+			if (!isGecko && 'undefined' == strOrientation) {strOrientation = ''}
+			// aspect-ratio
+			if ('mixed' !== strOrientation) {
+				aTemp = [data['device-aspect-ratio'], data['device-aspect-ratio_css']]
+				aTemp = dedupeArray(aTemp)
+				let strAspect = (aTemp.length > 1 ? 'mixed': aTemp[0])
+				if (strOrientation !== strAspect) {strOrientation += (strOrientation.length ? ' + ': '') + strAspect}
+			}
+			summary += ' | ' + strOrientation
+			addDisplay(1, METRIC +'_'+ k +'_summary', summary)
+
+			// notation: use our summary
 				// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to BB
 				// RFP is always primary | on android the angle of 0 vs 90 is reversed
 				// type | angle | orientation (css) + aspect ratio (css)
-				oGood = {
-					'a1de035c': 'landscape-primary | 0 | landscape',
-					'ccc8dc6d': 'portrait-primary | 90 | portrait',
-					'fb6084ad': 'portrait-primary | 90 | portrait | square',
-				}
-				if (!isDesktop) {
-					oGood = {
-						'813838a9': 'landscape-primary | 90 | landscape',
-						'360dd99a': 'portrait-primary | 0 | portrait',
-						'fdc0295a': 'portrait-primary | 0 | portrait | square',
-					}
-				}
-			} else {
-				// nonGecko with undefined + n/a for moz* properties
-				// basic mode, ignore OS
-				oGood = {
-					// desktop
-					'68510616': 'landscape-primary | 0 | landscape',
-					'ca467d33': 'portrait-primary | 90 | portrait',
-					'ebce91f3': 'portrait-primary | 90 | portrait | square',
-					// android
-					'813838a9': 'landscape-primary | 90 | landscape',
-					'a9960814': 'portrait-primary | 0 | portrait',
-					'60585b54': 'portrait-primary | 0 | portrait | square',
-				}
+			let oGood = {
+				'true': [ // desktop
+					'landscape-primary | 0 | landscape',
+					'portrait-primary | 90 | portrait',
+					'portrait-primary | 90 | portrait + square'
+				],
+				'false': [ // android
+					'landscape-primary | 90 | landscape',
+					'portrait-primary | 0 | portrait',
+					'portrait-primary | 0 | portrait + square',
+				]
 			}
-			let display = undefined !== oGood[hash] ? oGood[hash] : hash
-			addDisplay(1, METRIC +'_'+ k +'_summary', display)
-			addDisplay(1, METRIC +'_'+ k,'','', (undefined !== oGood[hash] ? rfp_green : rfp_red))
+			let notation = oGood[isDesktop].includes(summary) ? rfp_green : rfp_red
+			addDisplay(1, METRIC +'_'+ k,'','', notation)
 		}
 	}
 	return resolve()
@@ -1553,179 +1558,6 @@ function get_agent_workers() {
 		})
 	} catch(e) {
 		target2.innerHTML = log_error(2, metric2, e, scope2)
-	}
-}
-
-/* USER TESTS */
-
-function exitFS() {
-	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
-	if (isElementFS) {
-		try {document.exitFullscreen()} catch {}
-	}
-}
-
-function goFS() {
-	gFS = false
-	try {
-		if (isDesktop) {
-			// desktop: use documentElement
-				// we can scroll, click, view everything
-				// let the resize event trigger running the section
-				// let get_scr_measure check for document.fullscreen and fill in the display
-				// use svh because otherwise the height is the full document height
-			document.documentElement.requestFullscreen()
-		} else {
-			let element = dom.tzpFS
-			Promise.all([
-				element.requestFullscreen()
-			]).then(function(){
-				get_scr_fs_measure()
-			})
-		}
-	} catch(e) {dom.fsElement.innerHTML = e+''}
-}
-
-function goNW() {
-	dom.newWinLeak =''
-	let sizesi = [], // inner history
-		sizeso = [], // outer history
-		n = 1, // setInterval counter
-		newWinLeak =''
-
-	// open
-		// was: tests/newwin.html
-		// use about:blank (same as forcing a delay with a non-existant website)
-	let newWin = window.open('about:blank','width=9000,height=9000')
-	//let newWin = window.open('tests/newwin.html','width=9000,height=9000')
-	let iw = newWin.innerWidth,
-		ih = newWin.innerHeight,
-		ow = newWin.outerWidth,
-		oh = newWin.outerHeight
-	sizesi.push(iw +' x '+ ih)
-	sizeso.push(ow +' x '+ oh)
-	// default output
-	newWinLeak = iw +' x '+ ih +' [inner] '+ ow +' x '+ oh +' [outer]'
-
-	function check_newwin() {
-		let changesi = 0,
-			changeso = 0
-		// detect changes
-		let prev = sizesi[0]
-		let strInner = s1 +'inner: '+ sc + iw +' x '+ ih
-		for (let k=0; k < sizesi.length; k++) {
-			if (sizesi[k] !== prev ) {
-				changesi++;	strInner += s1 +' &#9654 <b>['+ k +']</b> '+ sc + sizesi[k]
-			}
-			prev = sizesi[k]
-		}
-		prev = sizeso[0]
-		let strOuter = s1 +'outer: '+ sc + ow +' x '+ oh
-		for (let k=0; k < sizeso.length; k++) {
-			if (sizeso[k] !== prev ) {
-				changeso++;	strOuter += s1 +' &#9654 <b>['+ k +']</b> '+ sc + sizeso[k]
-			}
-			prev = sizeso[k]
-		}
-		// one or two lines
-		if (changesi > 0 || changeso > 0) {
-			newWinLeak = strInner +'<br>'+ strOuter
-		}
-		// output
-		dom.newWinLeak.innerHTML = newWinLeak
-	}
-	function build_newwin() {
-		// check n times as fast as we can/dare
-		if (n == 150) {
-			clearInterval(checking)
-			check_newwin()
-		} else {
-			// grab metrics
-			try {
-				sizesi.push(newWin.innerWidth +' x '+ newWin.innerHeight)
-				sizeso.push(newWin.outerWidth +' x '+ newWin.outerHeight)
-			} catch {
-				clearInterval(checking)
-				// if not 'permission denied', eventually we always get
-				// NS_ERROR_UNEXPECTED which we can ignore. Always output
-				//console.log(e)
-				//console.log(n, sizesi, sizeso)
-				check_newwin()
-			}
-		}
-		n++
-	}
-	let checking = setInterval(build_newwin, 3)
-}
-
-function goNW_AGENT() {
-	const METRIC = 'agent_open'
-	dom[METRIC].innerHTML =''
-	let list = ['appCodeName','appName','appVersion','buildID','oscpu',
-		'platform','product','productSub','userAgent','vendor','vendorSub']
-	
-	let data = {'useragent': {}, 'useragentdata': {}}, r
-	let newWin = window.open()
-	let newNavigator = newWin.navigator
-
-	function exit(value) {
-		newWin.close()
-		data['useragentdata'] = value
-		// make agent_reported same structure as section
-		let newobj = {}
-		for (const k of Object.keys(data).sort()) {
-			if ('object' == typeof data[k]) {newobj[k] = {'hash': mini(data[k]), 'metrics': data[k]}} else {newobj[k] = data[k]}
-		}
-		data = newobj
-		// hash
-		let hash = mini(data)
-		const ctrlHash = mini(sDetail.document.agent_reported)
-		// output
-		if (hash == ctrlHash) {
-			hash += match_green
-		} else {
-			addDetail(METRIC, data)
-			hash += addButton(2, METRIC) + match_red
-		}
-		dom[METRIC].innerHTML = hash
-	}
-
-	// useragent
-	list.forEach(function(p) {
-		try {
-			r = newNavigator[p]
-			let typeCheck = typeFn(r, true), expectedType = 'string'
-			if (!isGecko) {
-				// type check will throw an error for a string "undefined"
-				if ('buildID' == p || 'oscpu' == p) {expectedType = 'undefined'}
-			}
-			if (expectedType !== typeCheck) {throw zErr}
-			if ('' == r) {r = 'empty string'}
-		} catch(e) {
-			r = e
-		}
-		data['useragent'][p] = r+''
-	})
-	// useragentdata
-	try {
-		let k = navigator.userAgentData
-		let typeCheck = typeFn(k, true)
-		if ('undefined' == typeCheck) {
-			exit(typeCheck)
-		} else {
-			if ('object' !== typeCheck) {throw zErr}
-			if ('[object NavigatorUAData]' !== k+'') {throw zErr}
-			navigator.userAgentData.getHighEntropyValues([
-				'architecture','bitness','brands','formFactors','fullVersionList','mobile',
-				'model','platform','platformVersion','uaFullVersion','wow64'
-			]).then(res => {
- 				exit(res)
-			}).catch(function(err){
-				exit(zErr)
-			})
-		}
-	} catch(e) {
-		exit(zErr)
 	}
 }
 
