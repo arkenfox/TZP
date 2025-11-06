@@ -62,7 +62,7 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 			if (typeMatch !== typeCheck) {
 				log_error(11, METRIC +'_'+ k, zErrType + typeCheck)
 				if (!isSmart) {data[k] = zErr} // non smart reflect error in data
-				isLies = true // otherwise isSmart uses isLies and returns untrustworthy
+				isLies = true // otherwise smart uses isLies and returns untrustworthy
 			}
 		}
 		if (mini(oHardcoded) !== 'dfda7813') {isLies = true}
@@ -96,9 +96,8 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 	return resolve()
 })
 
-const get_audio_offline = () => new Promise(resolve => {
+const get_audio_offline = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn(), notation = rfp_red, isLies = false
-	const METRIC = 'offlineAudioContext'
 
 	function outputErrors(display) {
 		addBoth(11, METRIC, display,'', notation, zErr)
@@ -177,197 +176,10 @@ const get_audio_offline = () => new Promise(resolve => {
 	}
 })
 
-const get_oscillator = () => new Promise(resolve => {
-	let t0 = nowFn()
-	const METRIC = 'oscillator'
-	let notation = isSmart ? rfp_red : ''
-
-	function exit(display, value) {
-		if (value == undefined) {value = display}
-		dom[METRIC].innerHTML = display + notation
-		log_perf(11, METRIC, t0)
-		return resolve([METRIC, value])
-	}
-
-	try {
-		if (runSE) {foo++}
-		let results = [],
-			audioCtx = new window.AudioContext
-		let oscillator = audioCtx.createOscillator(),
-			analyser = audioCtx.createAnalyser(),
-			gain = audioCtx.createGain(),
-			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
-
-		gain.gain.value = 0
-		oscillator.type = 'triangle'
-		oscillator.connect(analyser)
-		analyser.connect(scriptProcessor)
-		scriptProcessor.connect(gain)
-		gain.connect(audioCtx.destination)
-
-		scriptProcessor.onaudioprocess = function(bins) {
-			try {
-				bins = new Float32Array(analyser.frequencyBinCount)
-				analyser.getFloatFrequencyData(bins) // JSShelter errors here
-				if ('object' !== typeFn(bins)) {throw zErrType +'Float32Array: '+ typeFn(bins)}
-				for (let i=0; i < bins.length; i++) {results.push(bins[i])}
-				analyser.disconnect()
-				scriptProcessor.disconnect()
-				gain.disconnect()
-				// output
-				if (runSL) {results = []}
-				let typeCheck = typeFn(results[0])
-				if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				let hash = mini(results)
-				if (isSmart) {
-					if (true === isArch) {
-						if ('5b3956a9' == hash) {notation = sgtick+'x86_64/amd_64]'+sc
-						} else if ('f263f055' == hash) {notation = sgtick+'ARM64/aarch64]'+sc}
-					} else {
-						if ('e9f98e24' == hash) {notation = sgtick+'x86/i686/ARMv7]'+sc}
-					}
-				}
-				exit(hash)
-			} catch(e) {
-				exit(log_error(11, METRIC, e), e+'')
-			}
-		}
-		oscillator.start(0)
-	} catch(e) {
-		exit(log_error(11, METRIC, e), e+'')
-	}
-})
-
-const get_oscillator_compressor = () => new Promise(resolve => {
-	let t0 = nowFn()
-	const METRIC = 'oscillator_compressor'
-	let notation = isSmart ? rfp_red : ''
-
-	function exit(display, value) {
-		if (value == undefined) {value = display}
-		dom[METRIC].innerHTML = display + notation
-		log_perf(11, METRIC, t0)
-		return resolve([METRIC, value])
-	}
-
-	try {
-		let results = []
-		let audioCtx = new window.AudioContext,
-			oscillator = audioCtx.createOscillator(),
-			analyser = audioCtx.createAnalyser(),
-			gain = audioCtx.createGain(),
-			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
-
-		// compressor
-		let compressor = audioCtx.createDynamicsCompressor()
-		compressor.threshold && (compressor.threshold.value = -50)
-		compressor.knee && (compressor.knee.value = 40)
-		compressor.ratio && (compressor.ratio.value = 12)
-		compressor.reduction && (compressor.reduction.value = -20)
-		compressor.attack && (compressor.attack.value = 0)
-		compressor.release && (compressor.release.value = .25)
-
-		gain.gain.value = 0 // 0 volume
-		oscillator.type = 'triangle' // wave
-		oscillator.connect(compressor)
-		compressor.connect(analyser)
-		analyser.connect(scriptProcessor)
-		scriptProcessor.connect(gain)
-		gain.connect(audioCtx.destination)
-
-		scriptProcessor.onaudioprocess = function(bins) {
-		try {
-				bins = new Float32Array(analyser.frequencyBinCount)
-				analyser.getFloatFrequencyData(bins) // JSShelter errors here
-				if ('object' !== typeFn(bins)) {throw zErrType +'Float32Array: '+ typeFn(bins)}
-				for (let i=0; i < bins.length; i++) {results.push(bins[i])}
-				analyser.disconnect()
-				scriptProcessor.disconnect()
-				gain.disconnect()
-				// check
-				if (runSE) {foo++} else if (runSL) {results = []}
-				let typeCheck = typeFn(results[0])
-				if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				let hash = mini(results)
-				if (isSmart) {
-					if (true === isArch) {
-						if ('e08487bf' == hash) {notation = sgtick+'x86_64/amd_64]'+sc
-						} else if ('1f38e089' == hash) {notation = sgtick+'ARM64/aarch64]'+sc}
-					} else {
-						if ('bafe56d6' == hash) {notation = sgtick+'x86/i686/ARMv7]'+sc}
-					}
-				}
-				exit(hash)
-			} catch(e) {
-				exit(log_error(11, METRIC, e), e+'') // user test: reflect error entropy
-			}
-		}
-		oscillator.start(0)
-	} catch(e) {
-		exit(log_error(11, METRIC, e), e+'') // user test: reflect error entropy
-	}
-})
-
-function outputAudioUser() {
-	const METRIC = 'audio_user'
-	if (!gClick) {
-		dom[METRIC] = 'beep beep'
-		return
-	}
-	gt0 = nowFn()
-	gClick = false
-	gRun = false
-	let section = {}
-
-	function output() {
-		let obj = {}
-		for (const k of Object.keys(section).sort()) {obj[k] = section[k]}
-		let hash = mini(obj)
-		addDetail(METRIC, obj, zDOC)
-		dom[METRIC].innerHTML = hash + addButton(0, METRIC, Object.keys(section).length +' metrics')
-		if (isPerf) {
-			sDataTemp['perf'].push([2, METRIC, performance.now() - gt0, performance.now()])
-			output_perf(METRIC)
-		}
-		gClick = true
-	}
-	function run() {
-		try {
-			let test = new window.AudioContext
-			Promise.all([
-				get_oscillator(),
-				get_oscillator_compressor(),
-			]).then(function(results){
-				section[results[0][0]] = results[0][1] // oscillator
-				section[results[1][0]] = results[1][1] // oscillator_compressor
-				output()
-			})
-		} catch(e) {
-			// output: no notation: already in audioContext etc
-			let eMsg = log_error(11,'audio2', e)
-			dom.oscillator_compressor = eMsg; dom.oscillator = eMsg
-			dom[METRIC] = zNA
-			gClick = true
-		}
-	}
-	// start
-	try {
-		let tbl = dom.tb11
-		tbl.querySelectorAll('.c2').forEach(e => {e.innerHTML =''})
-	} catch {}
-
-	get_isPerf()
-	Promise.all([
-		outputPrototypeLies(),
-	]).then(function(){
-		setTimeout(function(){run()}, 100) // delay so user sees it clear then recompute
-	})
-}
-
 const outputAudio = () => new Promise(resolve => {
 	Promise.all([
 		get_audio_context('audioContext'),
-		get_audio_offline(),
+		get_audio_offline('offlineAudioContext'),
 	]).then(function(){
 		return resolve()
 	})
