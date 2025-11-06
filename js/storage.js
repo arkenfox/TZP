@@ -247,53 +247,13 @@ function get_storage(METRIC, rndStr) {
 	return
 }
 
-const get_storage_manager = (delay = 170) => new Promise(resolve => {
-	// note: delay = 0 = silent run if permission granted
-	const METRIC = 'storage_manager'
-	dom[METRIC] = ''
-	let notation = rfp_red
-
-	function exit(value) {
-		dom[METRIC].innerHTML = value + (isSmart ? notation : '') // manual test so !isSmart notation not handled
-		return resolve()
-	}
-	setTimeout(function() {
-		try {
-			if (undefined == navigator.storage) {
-				exit('undefined')
-			} else {
-				navigator.storage.persist().then(function(persistent) {
-					navigator.storage.estimate().then(estimate => {
-						// we don't care about estimate.usage
-						let bytes = estimate.quota // bytes
-						let typeCheck = typeFn(bytes)
-						if ('number' === typeCheck && Number.isInteger(bytes)) {
-							let value = lookup_storage_bucket('manager', bytes)
-							value += ' ['+ bytes +' bytes]'
-							if (isProxyLie('StorageManager.estimate')) {
-								value = log_known(6, METRIC, value)
-							} else {
-								// 1781277 RFP can only be exactly 10GiB or 50GiB
-								if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
-							}
-							exit(value)
-						} else {
-							throw zErrType + typeCheck
-						}
-					}).catch(function(e){exit(log_error(6, METRIC, e))})
-				}).catch(function(e){exit(log_error(6, METRIC, e))})
-			}
-		} catch(e) {exit(log_error(6, METRIC, e))}
-	}, delay)
-})
-
 const get_storage_quota = (METRIC) => new Promise(resolve => {
 	let isLies = false, notation = rfp_red
-	let isGranted = false
+	let isAuto = false
 	Promise.all([
 		lookup_permission('persistent-storage')
 	]).then(function(res){
-		if ('granted' == res[0]) {isGranted = true}
+		if ('granted' == res[0] || 'denied' == res[0]) {isAuto = true} // no prompt
 		try {
 			if (undefined == navigator.storage) {
 				exit('undefined')
@@ -303,7 +263,7 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 					if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
 					let typeCheck = typeFn(bytes)
 					if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
-					let value = lookup_storage_bucket('quota', bytes, isGranted)
+					let value = lookup_storage_bucket('quota', bytes, isAuto)
 					let display = value +' ['+ bytes +' bytes]'
 					if (isProxyLie('StorageManager.estimate')) {isLies = true}
 					// 1781277 RFP can only be exactly 10GB or 50GB
@@ -321,8 +281,8 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 	function exit(display, value) {
 		addBoth(6, METRIC, display,'', notation, value, isLies)
 		// silent run manager to force granted quota when run
-		if (isGranted) {
-			Promise.all([get_storage_manager(0, true)]).then(function(){return resolve()})
+		if (isAuto) {
+			Promise.all([outputUserStorageManager()]).then(function(){return resolve()})
 		} else {
 			return resolve()
 		}
