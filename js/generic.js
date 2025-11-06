@@ -521,6 +521,20 @@ function get_isGecko(METRIC) {
 	return
 }
 
+function get_isPointerRawUpdate(event) {
+	let value = 'undefined'
+	try {
+		if (event.getCoalescedEvents && event.getCoalescedEvents().length > 1) {
+			//console.log("Coalesced events:", event.getCoalescedEvents());
+		} else {
+			value = {'persistentDeviceId': event.persistentDeviceId, 'pointerType': event.pointerType}
+		}
+	} catch(e) {
+		value = zErr
+	}
+	isPointerRawUpdate = value
+}
+
 const get_isOS = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 	if (!isGecko) {
@@ -743,7 +757,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 145) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 146) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -759,6 +773,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			try {throw new DOMException('a', 'b')} catch(e) {if (0 !== e.columnNumber) return 146} // 1997216
 			if (undefined !== (new ToggleEvent('toggle', null)).source) return 145 // 1968987
 			if (undefined == window.CSS2Properties) return 144 // 144: 1919582
 			// 143: fast-path: pref: layout.css.moz-appearance.webidl.enabled: default false 143+
@@ -1744,6 +1759,10 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 			}
 		}
 	}
+	if ('manual' == isScope) {
+		sDataTemp['display'][isScope][metric] = str + btn + notation
+		return
+	}
 	sDataTemp['display'][isScope][section][metric] = str + btn + notation
 	// global health: just grab pass/fail
 	if (gRun && '' !== notation && notation.includes("class='health'")) {
@@ -2079,7 +2098,9 @@ function countJS(item) {
 					} catch(e) {console.log(e)}
 				}
 				// do once
-				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
+				dom.tzpPointer.addEventListener('pointerdown', (event) => {outputUser('pointer_event', event)})
+				dom.tzpPointer.addEventListener('pointerrawupdate', (event) => {get_isPointerRawUpdate(event)})
+
 				if (isDesktop) {
 					document.addEventListener('keydown', metricsEvent)
 				} else {
@@ -2140,20 +2161,6 @@ function outputPostSection(id) {
 		]).then(function(){
 			output_perf(id)
 		})
-	}
-}
-
-function outputUser(fn) {
-	// user initiated
-	if (isBlock) {return}
-	if ('goFS' == fn) { goFS()
-	} else if ("exitFS" == fn) { exitFS()
-	} else if ("goNW" == fn) { goNW()
-	} else if ('goNW_AGENT' == fn) { goNW_AGENT()
-	} else if ('outputAudioUser' == fn) {outputAudioUser()
-	} else if ('get_storage_manager' == fn) { get_storage_manager()
-	} else if ('get_pointer_event' == fn) { get_pointer_event()
-	} else if ('get_timing_audio' == fn) { get_timing_audio()
 	}
 }
 
@@ -2229,7 +2236,7 @@ function outputSection(id, isResize = false) {
 			sDataTemp['display'][isScope][name] = {}
 		}
 		// sDetail
-		sDetail = {'document': {'lookup': {}}}
+		sDetail = {'document': {'lookup': {}}, 'manual': {}}
 	}
 
 	if ('load' == id) {
