@@ -104,10 +104,11 @@ function get_colors() {
 			'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
 			'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
 			'-moz-win-communications-toolbox','-moz-win-media-toolbox',
+			// test
+			//'-moz-made-up'
 		],
 	}
-	// see 1997240: when contrast control is used, removed -moz named colors are exposed
-		// and our 0.5 alpha value in strColor is used
+	// note: when contrast control (forced colors) is used, removed -moz named colors will be false positives
 
 	function rgba2hex(orig) {
 		var a, isPercent,
@@ -144,8 +145,6 @@ function get_colors() {
 				if (rgb !== strColor) { // drop obsolete
 					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
 				}
-				// note: removed moz items exposed with contrast control, return our alpha value in strColor
-				//if ('moz' == type) {console.log(style, rgb)}
 			})
 			let tmpobj = {}
 			count = 0
