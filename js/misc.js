@@ -777,7 +777,6 @@ function get_svg(METRIC) {
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	try {target.innerHTML =''} catch {}
 	addBoth(18, METRIC, hash,'','', data)
 	return
 }

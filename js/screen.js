@@ -23,25 +23,15 @@ function return_nw(w,h) {
 
 function get_scr_fs_measure() {
 	// F11: triggered by resize events if in FS
-	// fullscreenElement: called on android by goFS
+	// fullscreenElement: called on android by outputUserFS
 	if (gFS) {return} // don't run if already running
 	gFS = true // set running state
 	let delay = 25, max = 40, n = 1 // 40 x 25 = 1sec
-	let w, h, w1, h1
+	let w, h, firstW, firstH, lastW, lastH
 	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
-	let target = document.fullscreenElement, range, data
-
-	if (isElementFS) {
-		if (isDomRect > 1) {
-			range = document.createRange()
-			range.selectNode(target)
-		}
-		if (isDomRect == 0) {
-			data = document.fullscreenElement.getBoundingClientRect()
-		} else if (isDomRect == 1) {
-			data = document.fullscreenElement.getClientRects()[0]
-		}
-	}
+	let target = document.fullscreenElement //, range, data
+	let output = isElementFS ? 'fullscreenElement' : 'fsSize'
+	dom[output].innerHTML ='' // clear
 
 	function measure() {
 		if (isElementFS) {
@@ -50,40 +40,36 @@ function get_scr_fs_measure() {
 				w = document.fullscreenElement.clientWidth
 				h = document.fullscreenElement.clientHeight
 			} else if (isDomRect < 1) {
-				w = data.width; h = data.height
-			} else if (isDomRect == 1) {
-				w = data.width; h = data.height
-			} else if (isDomRect == 2) {
-				data = range.getBoundingClientRect()
-				w = data.width; h = data.height
-			} else if (isDomRect > 2) {
-				data = range.getClientRects()[0]
-				w = data.width; h = data.height
+				let method = measureFn(target, output)
+				w = method.width; h = method.height
 			}
 		} else {
 			w = window.innerWidth; h = window.innerHeight
 		}
-		if (w1 == undefined) {w1 = w; h1 = h} // remember first values
+		if (firstW == undefined) {firstW = w; firstH = h} // remember first values
+		lastW = w; lastH = h
 		return w +' x '+ h
 	}
 	// initial size
 	let size = measure()
-	let output = isElementFS ? dom.fullscreenElement : dom.fsSize
-	output.innerHTML ='' // clear
-
+	let notation = rfp_red, strSteps = ''
+	
 	function check_size() {
 		clearInterval(checking)
 		let len = oDiffs.length
 		if (len > 0) {
 			let lastValue = oDiffs[len-1]
-			let lastSize = lastValue.split(':')[1]
+			let lastSize = lastW +' x '+ lastH
 			let stepsTaken = ((lastValue.split(':')[0]) * 1)
 			let timeTaken = stepsTaken * delay
-			let diff = '[diff: '+ (w - w1) +' x '+ (h - h1) +']'
+			let diff = '[diff: '+ (w - firstW) +' x '+ (h - firstH) +']'
 			timeTaken = Math.ceil(timeTaken/50) * 50 // round up in 50s
-			size = size + s1 +' &#9654 '+ sc + lastSize + s1 +' <b>[~'+ timeTaken +' ms]</b> '+ sc + diff
+			size = size + s1 +' &#9654 '+ sc + lastSize
+			strSteps = s1 +' <b>[~'+ timeTaken +' ms]</b> '+ sc + diff
 		}
-		output.innerHTML = size
+		// notate
+		if (return_lb(lastW, lastH)) {notation = rfp_green}
+		dom[output].innerHTML = size + (isSmart ? notation : '') + strSteps
 		if (isElementFS) {document.exitFullscreen()} // only android can be isElementFS
 		gFS = false // reset
 	}
@@ -853,22 +839,28 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 	function get_dpr() {
 		// DPR window
 		let value, display, item = 'devicePixelRatio'
-		try {
-			value = window.devicePixelRatio
-			if (runST) {value = NaN} // this will also trigger dpi_div as varDPI is not set
-			let typeCheck = typeFn(value)
-			if ('number' !== typeCheck) {throw zErrType + typeCheck}
-			display = value
-			varDPR = value
-		} catch(e) {
-			log_error(1, METRIC +'_'+ item, e)
-			display = zErr
-			value = zErr
-		}
-		// FF127: 1554751
-		let notation = value == 2 ? rfp_green : rfp_red
-		addDisplay(1, METRIC +'_'+ item, display, '', notation)
-		oData[item] = value
+		let targets = ['window','iframe']
+		targets.forEach(function(k) {
+			value = undefined
+			let strIframe = 'iframe' == k ? '_iframe' : ''
+			try {
+				let target = 'window' == k ? window : dom.tzpIframe.contentWindow.window
+				value = target.devicePixelRatio
+				if (runST) {value = NaN} // this will also trigger dpi_div as varDPI is not set
+				let typeCheck = typeFn(value)
+				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				display = value
+				varDPR = value
+			} catch(e) {
+				log_error(1, METRIC +'_'+ item + strIframe, e)
+				display = zErr
+				value = zErr
+			}
+			// FF127: 1554751
+			let notation = value == 2 ? rfp_green : rfp_red
+			addDisplay(1, METRIC +'_'+ item + strIframe, display, '', notation)
+			oData[item + strIframe] = value
+		})
 
 		// DPR border: 477157: don't notate this for health
 		value = undefined, display = undefined, item = 'devicePixelRatio_border'
@@ -1019,6 +1011,7 @@ function get_scr_pixels_match(METRIC, oData) {
 			'-moz-device-pixel-ratio': [dprValue, dprStr],
 			'-webkit-device-pixel-ratio': [dprValue, dprStr],
 			//'devicePixelRatio': it's the control
+			'devicePixelRatio_iframe': [dprValue, dprStr +''],
 			'dpcm': [dprValue * 96 / 2.54, dprStr +' * 96 / 2.54'],
 			'dpi': [dprValue * 96, dprStr +' * 96'],
 			'dpi_css': [dprValue * 96, dprStr +' * 96'],
@@ -1038,7 +1031,12 @@ function get_scr_pixels_match(METRIC, oData) {
 				controlPx = oControls[k][0]
 				oPixels[k].control = oControls[k]
 			}
-			if ('dpcm' == k || 'dpi' == k) {
+			if ('devicePixelRatio_iframe' == k) {
+				testPx = oData[k] == controlPx
+				oPixels[k]['match'] = testPx
+				if (false === testPx) {isPixelMatch = false}
+				oSummary[testPx].push(k)
+			} else if ('dpcm' == k || 'dpi' == k) {
 				let diff = Math.abs(oData[k] - controlPx)
 				oPixels[k].diff = diff
 				let testPx = diff < 0.0001
