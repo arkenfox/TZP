@@ -3,8 +3,7 @@
 /* USER */
 
 function exitUserFS() {
-	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
-	if (isElementFS) {try {document.exitFullscreen()} catch {}}
+	try {document.exitFullscreen()} catch {}
 }
 
 const outputUserAgentOpen = (METRIC) => new Promise(resolve => {
@@ -484,7 +483,14 @@ function outputUser(x, event) {
 	if ('all' == x) {
 
 	} else {
-		// clear
+		// if already in fullscreenElement, nothing to do
+			// we already did it when entering and resize picks up changes
+		if ('fullscreenElement' == x) {
+			if (document.fullscreen || document.webkitIsFullscreen) {
+				gClick = true
+				return resolve()
+			}
+		}
 		try {dom[x] = ''} catch {} // clear
 		// clear additional
 		try {
