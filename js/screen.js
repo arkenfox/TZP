@@ -712,59 +712,51 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 
 	// screen
 	let items = ['mozOrientation', 'orientation.angle', 'orientation.type']
-	let targets = ['screen','iframe']
-
+	let targets = ['screen','iframe'], iscreen
+	try {iscreen = dom.tzpIframe.contentWindow.screen} catch {}
 	targets.forEach(function(k) {
 		let strIframe = 'iframe' == k ? '_iframe' : ''
-		try {
-			let target = 'screen' == k ? screen : dom.tzpIframe.contentWindow.screen
-			items.forEach(function(item) {
-				let value, expectedType = 'string', isAngle = 'orientation.angle' == item, isLies = false
-				try {
-					if ('mozOrientation' == item) {
-						value = target.mozOrientation
-						// gecko: undefined throws an error, 'undefined' returns the string (or a lie if isSmart)
-						if (!isGecko) {expectedType = 'undefined'}
-					} else if (isAngle) {
-						value = target.orientation.angle; expectedType = 'number'
-					} else {value = target.orientation.type
-					}
-					if (runST) {value = isAngle ? value +'' : true
-					} else if (runSI && isAngle) {value = 45
-					} else if (runSL) {value = isAngle ? 90 : 'portrait-primary'
-					}
-					let typeCheck = typeFn(value)
-					if (expectedType !== typeCheck) {throw zErrType + typeCheck}
-					if (isAngle) {
-						let aGood = [0, 90, 180, 270]
-						if (!aGood.includes(Math.abs(value))) {
-							throw zErrInvalid + 'expected 0, 90, 180 or 270: got '+ value
-						}
-					}
-					// lies
-					if (isSmart && zErr !== check) {
-						// check mozOrientation + .type matches css
-						// note: we can't check the angle, it could be anything - see Piero tablet tests
-						if ('string' == expectedType && value.split('-')[0] !== check) {
-							log_known(1, METRIC +'_device_'+ item + strIframe, value)
-							isLies = true
-						}
-					}
-				} catch(e) {
-					log_error(1, METRIC +'_device_'+ item + strIframe, e)
-					value = zErr
+		let target = 'screen' == k ? screen : iscreen
+		items.forEach(function(item) {
+			let value, expectedType = 'string', isAngle = 'orientation.angle' == item, isLies = false
+			try {
+				if ('mozOrientation' == item) {
+					value = target.mozOrientation
+					// gecko: undefined throws an error, 'undefined' returns the string (or a lie if isSmart)
+					if (!isGecko) {expectedType = 'undefined'}
+				} else if (isAngle) {
+					value = target.orientation.angle; expectedType = 'number'
+				} else {value = target.orientation.type
 				}
-				if ('mozOrientation' == item && undefined == value) {value += ''} // only nonGecko mozOrientation can be undefined, we already threw
-				oDisplay[METRIC +'_'+ item + strIframe] = {'value': value, 'lies': isLies}
-				oData['device'][item + strIframe] = isLies ? zLIE : value
-			})
-		} catch(e) {
-			items.forEach(function(item) {
+				if (runST) {value = isAngle ? value +'' : true
+				} else if (runSI && isAngle) {value = 45
+				} else if (runSL) {value = isAngle ? 90 : 'portrait-primary'
+				}
+				let typeCheck = typeFn(value)
+				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+				if (isAngle) {
+					let aGood = [0, 90, 180, 270]
+					if (!aGood.includes(Math.abs(value))) {
+						throw zErrInvalid + 'expected 0, 90, 180 or 270: got '+ value
+					}
+				}
+				// lies
+				if (isSmart && zErr !== check) {
+					// check mozOrientation + .type matches css
+					// note: we can't check the angle, it could be anything - see Piero tablet tests
+					if ('string' == expectedType && value.split('-')[0] !== check) {
+						log_known(1, METRIC +'_device_'+ item + strIframe, value)
+						isLies = true
+					}
+				}
+			} catch(e) {
 				log_error(1, METRIC +'_device_'+ item + strIframe, e)
-				oDisplay[METRIC +'_'+ item + strIframe] = zErr
-				oData['device'][item + strIframe] = zErr
-			})
-		}
+				value = zErr
+			}
+			if ('mozOrientation' == item && undefined == value) {value += ''} // only nonGecko mozOrientation can be undefined, we already threw
+			oDisplay[METRIC +'_'+ item + strIframe] = {'value': value, 'lies': isLies}
+			oData['device'][item + strIframe] = isLies ? zLIE : value
+		})
 	})
 	// sort device object
 	let tmpObj = {}
@@ -1074,36 +1066,69 @@ function get_scr_pixels_match(METRIC, oData) {
 	}
 }
 
-const get_scr_positions = (METRIC) => new Promise(resolve => {
-	let methods = {
-		// left/top = 0 depends on secondary monitor | availLeft/availTop = 0 depends on dock/taskbar
-		'screen': ['availLeft','availTop','left','top'],
-		// FS = all 0 except sometimes mozInnerScreenY | maximized can include negatives for screenX/Y
-		'window': ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']
-	}
-	let oData = {'screen': {}, 'window': {}}
+const get_scr_position_screen = (METRIC) => new Promise(resolve => {
+	// left/top = 0 depends on secondary monitor | availLeft/availTop = 0 depends on dock/taskbar
+	let tmpObj = {}, aList = ['availLeft','availTop','left','top']
 	// nonGecko: number vs undefined: i.e a string of "undefined" will be an error
-	let aNonGecko = ['left','top','mozInnerScreenX','mozInnerScreenY']
-	for (const m of Object.keys(methods)){
-		let display = [], x
-		methods[m].forEach(function(k){
+	let aNonGecko = ['left','top']
+	let targets = ['screen','iframe'], iscreen, display = []
+	try {iscreen = dom.tzpIframe.contentWindow.screen} catch {}
+	targets.forEach(function(k) {
+		let strIframe = 'iframe' == k ? '_iframe' : ''
+		let target = 'screen' == k ? screen : iscreen, x
+		aList.forEach(function(item){
 			try {
-				x = 'screen' == m ? screen[k] : window[k]
+				x = target[item]
 				if (runST) {x = 'undefined'}
 				let typeCheck = typeFn(x), expectedType = 'number'
 				if (!isGecko && aNonGecko.includes(k)) {expectedType = 'undefined'}
 				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
 				if (undefined == x) {x += ''}
 			} catch(e) {
-				log_error(1, METRIC +'_'+ k, e); x = zErr
+				log_error(1, METRIC +'_'+ item + strIframe, e); x = zErr
 			}
-			oData[m][k] = x; display.push(x)
+			tmpObj[item + strIframe] = x
 		})
-		addDisplay(1, m +'_'+ METRIC, display.join(', '))
-	}
+	})
+	// sort object
+	let oData = {}, isMixed = false, btn =''
+	for (const k of Object.keys(tmpObj).sort()) {oData[k] = tmpObj[k]}
+	//console.log(oData, mini(oData))
 	let hash = mini(oData)
-	let notation = '56aadb9d' == hash ? position_green : position_red
-	addDisplay(1, METRIC,'','', notation)
+	let notation = '4963ac89' == hash ? rfp_green : rfp_red
+	addData(1, METRIC, oData, hash)
+	aList.forEach(function(item){
+		let isMatch = oData[item] == oData[item +'_iframe']
+		if (!isMatch) {isMixed = true}
+		display.push(isMatch ? oData[item] : 'mixed')
+	})
+	if (isMixed) {btn = addButton(1, METRIC)}
+	addDisplay(1, METRIC, display.join(', '), btn, notation)
+	return resolve()
+})
+
+const get_scr_position_window = (METRIC) => new Promise(resolve => {
+	// FS = all 0 except sometimes mozInnerScreenY | maximized can include negatives for screenX/Y
+	let oData = {}, aList = ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']
+	// nonGecko: number vs undefined: i.e a string of "undefined" will be an error
+	let aNonGecko = ['mozInnerScreenX','mozInnerScreenY']
+	let display = [], x
+	aList.forEach(function(k){
+		try {
+			x = window[k]
+			if (runST) {x = 'undefined'}
+			let typeCheck = typeFn(x), expectedType = 'number'
+				if (!isGecko && aNonGecko.includes(k)) {expectedType = 'undefined'}
+				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+				if (undefined == x) {x += ''}
+		} catch(e) {
+			log_error(1, METRIC +'_'+ k, e); x = zErr
+		}
+		oData[k] = x; display.push(x)
+	})
+	let hash = mini(oData)
+	let notation = '66a7ee25' == hash ? rfp_green : rfp_red
+	addDisplay(1, METRIC, display.join(', '), '', notation)
 	addData(1, METRIC, oData, hash)
 	return resolve()
 })
@@ -1664,7 +1689,8 @@ const outputFD = () => new Promise(resolve => {
 const outputScreen = (isResize = false) => new Promise(resolve => {
 	Promise.all([
 		get_scr_fullscreen('fullscreen'),
-		get_scr_positions('positions'),
+		get_scr_position_screen('position_screen'),
+		get_scr_position_window('position_window'),
 		get_scr_pixels('pixels'),
 		get_scr_orientation('orientation'),
 		get_scr_measure(),
