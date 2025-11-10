@@ -1081,7 +1081,7 @@ const get_scr_position_screen = (METRIC) => new Promise(resolve => {
 				x = target[item]
 				if (runST) {x = 'undefined'}
 				let typeCheck = typeFn(x), expectedType = 'number'
-				if (!isGecko && aNonGecko.includes(k)) {expectedType = 'undefined'}
+				if (!isGecko && aNonGecko.includes(item)) {expectedType = 'undefined'}
 				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
 				if (undefined == x) {x += ''}
 			} catch(e) {
