@@ -504,7 +504,7 @@ const get_canvas = () => new Promise(resolve => {
 	aCanvas.forEach(function(k){let el = dom['tzpCanvas'+ k]; el.width = sizeW; el.height = sizeH})
 
 	function exit() {
-		//console.log(oData)
+		console.debug(oData)
 		for (const m of Object.keys(oFP)) {
 			addBoth(9, m, oFP[m].value, '', oFP[m].notation, oFP[m].data)
 		}
