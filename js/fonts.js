@@ -375,7 +375,7 @@ let fntMaster = {
 			'Palatino Linotype','Segoe Print','Segoe Script','Segoe UI','Segoe UI Symbol','SimSun','宋体','SimSun-ExtB',
 			'Sylfaen','Symbol','Tahoma','Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
 			// 8
-			'Gadugi','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text',
+			'Gadugi','Nirmala Text','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text',
 			// 8.1
 			'Javanese Text','Leelawadee UI','Segoe UI Emoji','Sitka Banner','Sitka Display',
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic','游ゴシック',
