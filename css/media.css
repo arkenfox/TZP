@@ -109,10 +109,10 @@
 #cssVDR:after{content:"n/a";}
 @media (dynamic-range:standard){#cssVDR:after{content:"standard";}}
 @media (dynamic-range:high){#cssVDR:after{content:"high";}}
-#cssCG:after{content:"n/a";}
-@media (color-gamut:srgb){#cssCG:after{content:"srgb";}}
-@media (color-gamut:p3){#cssCG:after{content:"p3";}}
-@media (color-gamut:rec2020){#cssCG:after{content:"rec2020";}}
+#cssCG:after{content:"n/a";} /* "ascending order" see https://drafts.csswg.org/mediaqueries/#color-gamut */
+@media (color-gamut:srgb){#cssCG:after{content:"srgb";}} /* narrow */
+@media (color-gamut:p3){#cssCG:after{content:"p3";}} /* wider: p3 includes srgb */
+@media (color-gamut:rec2020){#cssCG:after{content:"rec2020";}} /* wider: rec2020 includes p3 */
 #cssPRT:after{content:"n/a";}
 @media (prefers-reduced-transparency:no-preference){#cssPRT:after{content:"no-preference";}}
 @media (prefers-reduced-transparency:reduce){#cssPRT:after{content:"reduce";}}

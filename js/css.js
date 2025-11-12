@@ -404,7 +404,10 @@ function get_media_css(METRIC) {
 			'video-dynamic-range': {id: 'VDR', test: ['standard','high'], rfp: 'standard', rfpver: 1}, // FF100+
 			'update': {id: 'UD', test: ['fast','slow','none']}, // FF102+: 1422312 || FYI: gecko currently only reports none or fast
 				// ^ https://searchfox.org/firefox-main/source/servo/components/style/gecko/media_features.rs#366
-			'color-gamut': {id: 'CG', test: ['srgb','p3','rec2020'], rfp: 'srgb', rfpver: 1}, // FF110+: 1422237
+			'color-gamut': {id: 'CG', test: ['rec2020','p3','srgb'], rfp: 'srgb', rfpver: 1}, // FF110+: 1422237
+				// ^ https://drafts.csswg.org/mediaqueries/#color-gamut: An output device can return true for multiple values of this media
+					// feature, if it's full output gamut is large enough, or one gamut is a subset of another supported gamut
+				// ^ we break on first match: go wide to narrow (reverse to css)
 		// not enabled yet
 			'prefers-reduced-transparency': {id: 'PRT', test: [np,'reduce'], rfp: np, rfpver: 999}, // FF113+: 1736914
 				// layout.css.prefers-reduced-transparency.enabled: 1822176: issue to enable it
