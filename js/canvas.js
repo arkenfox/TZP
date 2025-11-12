@@ -514,8 +514,12 @@ const get_canvas = () => new Promise(resolve => {
 	Promise.all([
 		known.createHashes(window, 1)
 	]).then(function(run1){
-		let chunkStr = 'ABBkZUJH'
-		//chunkStr = '5ErkJggg==' // test
+		// ToDo: learn more about PNG file structure and detect this more robustly
+		let aChunk = [
+			'ABBkZUJH', // initial analysis 
+			'AAQZGVCR', // this comes up in solid FF145 but not FF146+
+		]
+		//aChunk = ['5ErkJggg==','VORK5CYII='] // test
 
 		run1[0].forEach(function(item){
 			let name = item.name, key = name.slice(0,2), value = item.displayValue, data =''
@@ -544,7 +548,9 @@ const get_canvas = () => new Promise(resolve => {
 						// chunk test
 						// gecko: we can already detect tampering since we use known hashes
 						// but in future we might use randomness and read back the value from the png
-						if ('to' == key && oData[name].includes(chunkStr)) {
+						hasChunk = false // reset
+						if ('to' == key) {aChunk.forEach(function(str){if (oData[name].includes(str)) {hasChunk = true}})}
+						if (hasChunk) {
 							countFake++
 							hasChunk = true
 						} else {
@@ -596,6 +602,7 @@ const get_canvas = () => new Promise(resolve => {
 				let name = item.name, key = name.slice(0,2), proxyname = name.replace('_solid', '')
 				let value = item.displayValue
 				let checkValue = value
+				let hasChunk = false
 				// getImageData doesn't get a 'skip' so we handle it differently
 				// don't check if already skipped: e.g. type error null
 				// run2 check returns skip if nothing to do, or true/false if RFP-like
@@ -610,14 +617,18 @@ const get_canvas = () => new Promise(resolve => {
 					let isProxy = isProxyLie(proxyMap[proxyname] +'.'+ proxyname)
 
 					// chunk test
-					if ('to' == key && oData[name].includes(chunkStr)) {
+					hasChunk = false // reset
+					if ('to' == key) {
+						aChunk.forEach(function(str){
+							if (oData[name].includes(str)) {hasChunk = true}
+						})
+					}
+					if (hasChunk) {
 						// privacyX, which doesn't protect toBlob yet, is causing intermittent false positive isChunk
 						// on it's (per execution) *toDataURL when FPP is on. This is FPP kicking in somewhere due to
 						// timing. It's not sufficient to check the chunk is persistent (but we'll do that)
 						// I think all we can do is exclude if proxylies
-						if (oFP[name].chunk == true && !isProxy) {
-							isChunk = ' | chunk'
-						}
+						if (oFP[name].chunk == true && !isProxy) {isChunk = '*'; console.log(name, 'chunk set')}
 					}
 
 					if (oRes[name][1] == value) {
