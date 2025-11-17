@@ -141,16 +141,26 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 				]).then(function(hashes){
 					// sum
 					let sum = 0
-					for (let i=0; i < getTest.length; i++) {
-						let x = getTest[i]
+					for (let i=0; i < copyTest.length; i++) {
+						let x = copyTest[i]
 						if (i > (bufferLen-501) && i < bufferLen) {sum += Math.abs(x)}
 					}
 					// get/copy
-					let hashG = mini(byteArrayToHex(hashes[0]))
 					let hashC = mini(byteArrayToHex(hashes[1]))
-					let display = hashC +' | '+ hashG +' | '+ sum, value = hashG
+					let hashG = mini(byteArrayToHex(hashes[0]))
 					// lies
-					if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
+					let isSame = hashG == hashC, display, btn = addButton(11, METRIC)
+					if (!isSame) {
+						isLies = true
+						addDetail(METRIC, {'copyFromChannel': copyTest, 'getChannelData': getTest})
+						display = 'mixed'
+					} else {
+						// no need to list twice
+						isLies = check_audioLies()
+						addDetail(METRIC, copyTest)
+						display = hashC
+						btn += ' '+ sum
+					}
 					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
 						// isArch: true = large arrays else it's an error string
 					if (true === isArch) {
@@ -159,7 +169,7 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 					} else {
 						if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
 					}
-					addBoth(11, METRIC, display,'', notation, value, isLies)
+					addBoth(11, METRIC, display + btn,'', notation,'', isLies)
 					log_perf(11, METRIC, t0)
 					return resolve()
 				})
