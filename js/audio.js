@@ -87,7 +87,6 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 			notation += ' [latency: '+ data['ac-outputLatency'] +']'
 			data['ac-outputLatency'] = zNA; hash = mini(data)
 		}
-		
 	} catch(e) {
 		hash = log_error(11, METRIC, e); data = zErr
 	}
@@ -110,10 +109,9 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 		if (runSE) {foo++}
 		const bufferLen = 5000 // 5000 to match documented
 		const context = new window.OfflineAudioContext(1, bufferLen, 44100)
-		const dynamicsCompressor = context.createDynamicsCompressor()
+		const dynamicsCompressor = context.createDynamicsCompressor() // servo breaks here
 		const oscillator = context.createOscillator()
-
-		// set
+ 		// set
 		oscillator.type = 'triangle'
 		oscillator.frequency.value = 10000
 		dynamicsCompressor.threshold && (dynamicsCompressor.threshold.value = -50)
@@ -181,7 +179,9 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 			}
 		}
 	} catch(e) {
-		if (gRun) {dom.oscillator_compressor = zNA; dom.oscillator = zNA; dom.audio_user = zNA}
+		try {
+			if (gRun) {dom.audio_test_oscillator_compressor = zNA; dom.audio_test_oscillator = zNA; dom.audio_test = zNA}
+		} catch {}
 		outputErrors(log_error(11, METRIC, e))
 	}
 })
