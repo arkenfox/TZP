@@ -675,7 +675,8 @@ function get_pdf(METRIC) {
 		get_obj('plugins'),
 	]).then(function() {
 		// FF116 1838415 dropped RFP protection
-		let notation = default_red, isLies = false
+		// FF147 1999126 re-added: just notate as RFP regardless of version
+		let notation = rfp_red, isLies = false
 		if (runSL) {data = {'mimeTypes': 'none', 'pdfViewerEnabled': true, 'plugins': 'none'}}
 		let hash = mini(data)
 		if (!['91073152','beccb452'].includes(hash) || isProxyLie('Navigator.pdfViewerEnabled')) {
@@ -686,7 +687,7 @@ function get_pdf(METRIC) {
 				if (keys.indexOf('pdfViewerEnabled') > keys.indexOf('constructor')) {isLies = true}
 			} catch {}
 		}
-		if ('91073152' == hash) {notation = default_green}
+		if ('91073152' == hash) {notation = rfp_green}
 		addBoth(18, METRIC, hash, addButton(18, METRIC), notation, data, isLies)
 		return
 	})
