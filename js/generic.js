@@ -2072,12 +2072,11 @@ function countJS(item) {
 		}
 		// otherwise not blocked
 		isBlock = false
-		// tidy up metric overlay symbols
+		// tidy up metric overlay symbols to match global symbol used
 		dom.overlay_tick.innerHTML = tick +' '
 		dom.overlay_cross.innerHTML = cross +' '
 
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
-
 		Promise.all([
 			get_isBB('isBB'),
 			get_isFileSystem('isFileSystem'),
@@ -2122,7 +2121,6 @@ function countJS(item) {
 				// set isBBESR: some health checks we only want to do if it's worthwhile
 				// android and alpha are moving to RR and it's not ffeasible to keep up with per release changes
 				if (isBB && 'android' !== isOS && isVer == 140) {isBBESR = true}
-
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
 				]).then(function(){
@@ -2368,10 +2366,8 @@ function run_immediate() {
 			// return if not supported
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		}
-		// set isProtoProxy
-			// currently blink returns "s: failed at too much recursion __proto__ error" on every test
-		//isProtoProxy = isGecko ? true : ('blink' == isEngine || 'webkit' == isEngine) ? true : false
-		isProtoProxy = isGecko
+		// set isProtoProxy on known engines
+		isProtoProxy = isGecko ? true : ('blink' == isEngine || 'webkit' == isEngine) ? true : false
 		// expand css, record stylesheet info
 		get_isStylesheet(7680)
 		// recursion
