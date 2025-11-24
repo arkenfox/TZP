@@ -398,8 +398,9 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				const chromeLie = IS_BLINK && (
 					message != `Cyclic __proto__ value` || (
 						method == '__proto__' && (
-							!targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`) &&
-							!targetStackLine.startsWith(`    at set __proto__ [as __proto__]`) // Chrome 102
+							!targetStackLine.startsWith(`    at set __proto__ (<anonymous>)`) && // Chrome ~117+
+							!targetStackLine.startsWith(`    at set __proto__ [as __proto__]`) && // Chrome 102+
+							!targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`)
 						)
 					)
 				)
@@ -965,7 +966,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		for (const key in navigator) {aNav.push(key)}
 		let aProto = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		aProto = aProto.filter(x => !['constructor'].includes(x)) // ignore constructor
-		let aNotInNav = aProto.filter(x => !aNav.includes(x)) // 
+		let aNotInNav = aProto.filter(x => !aNav.includes(x)) //
 		//let aNotInProto = aNav.filter(x => !aProto.includes(x)) // this would catch made up shit?
 		//console.log(aNav, aProto, aNotInNav, aNotInProto)
 		aNotInNav.forEach(function(item) {
