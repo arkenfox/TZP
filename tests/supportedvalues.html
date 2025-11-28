@@ -71,8 +71,12 @@ function run() {
 		if (isFF) {
 			// notate new if 140+
 			if (isVer > 139) {
-				if (hash == "db8d9901") {code = s14 +" [FF140+]"+ sc
-					/* timezone" + America/Coyhaique */
+				if (hash == "3c1a144a") {code = s14 +" [FF147+]"+ sc
+					/* calendar: -islamic -islamic-rgsa
+						numberingSystem: +tols
+					*/
+				} else if (hash == "db8d9901") {code = s14 +" [FF140-146]"+ sc
+					/* timezone: +America/Coyhaique */
 				} else {code = ' '+ zNEW
 				}
 			}
