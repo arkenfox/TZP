@@ -138,11 +138,13 @@ function run_main(method, isLoopy) {
 			let notation = ""
 			if (isVer > 139) {
 				if (method == "C") {
-					if (hash == "6eb2ef9e") {notation = " [FF140+]" // 122
+					if (hash == "50c5b9d7") {notation = " [FF147+]" // 123 - added 'ba' (bashkir)
+					} else if (hash == "6eb2ef9e") {notation = " [FF140-146]" // 122
 					} else { notation = " "+ zNEW
 					}
 				} else {
-					if (hash == "66c554ac") {notation = " [FF140+]" // 245
+					if (hash == "0376e707") {notation = " [FF147+]" // 245
+					} else if (hash == "66c554ac") {notation = " [FF140-14]" // 245
 					} else { notation = " "+ zNEW
 					}
 				}
