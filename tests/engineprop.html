@@ -35,6 +35,7 @@
 <option value="w">crypto</option>
 <option value="w">CSS</option>
 <option value="p">CSS2Properties</option>
+<option value="p">CSSStyleProperties</option>
 <option value="p">CanvasRenderingContext2D</option>
 <option value="w">clientInformation</option>
 <option value="p">Element</option>
@@ -596,7 +597,6 @@ function run() {
 			// newish: not in v90
 		rec(typeof getScreenDetails, "getScreenDetails", code, "function")
 		rec(typeof launchQueue, "launchQueue", code, "object") // + not in Brave (or android)
-		rec(typeof navigation, "navigation", code, "object")
 		rec(typeof onbeforexrselect, "onbeforexrselect", code, "object")
 		rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
 		rec(typeof sharedStorage, "sharedStorage", code, "object")
@@ -699,6 +699,7 @@ function run() {
 		rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
 		rec(typeof ondragexit, "ondragexit", code, "object") // touch
 		rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet
+		rec(typeof navigation, "navigation", code, "object") // // FF146 nightly 1979288
 		rec(typeof onscrollend, "onscrollend", code, "object")
 		rec(typeof ontouchcancel, "ontouchcancel", code, "object")
 		rec(typeof ontouchend, "ontouchend", code, "object")
