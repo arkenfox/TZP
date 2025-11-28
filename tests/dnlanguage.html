@@ -374,11 +374,13 @@ function run_main(method, aTest, isLoop = false) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "d3e7348d") { // FF140+
+				if (resultsHash == "c007aa4c") { // FF147+
+				} else if (resultsHash == "d3e7348d") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "d3d8302c") { // FF140+ 293
+				if (localesHash == "25fec345") { // FF147+ 292
+				} else if (localesHash == "d3d8302c") { // FF140-146 293
 				} else {localesHash += ' '+ zNEW
 				}
 			}

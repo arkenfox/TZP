@@ -363,11 +363,13 @@ function run_main(method) {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "ba6f54ce") { // FF140+
+				if (resultsHash == "723e9339") { // FF147+
+				} else if (resultsHash == "ba6f54ce") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "e50c9285") { // FF140+: 250
+				if (localesHash == "d98f0238") { // FF147+: 255
+				} else if (localesHash == "e50c9285") { // FF140-14: 250
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
