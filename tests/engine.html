@@ -607,7 +607,6 @@ function get_intl_supportedlocales(num) {
 	}
 	let control = (['c','C']).sort(Intl.Collator('mt').compare)
 	if (control.join('') == 'Cc') {oList['Collator']['list'].push('mt')}
-
 	if (isVer > 133) {
 		oList.DateTimeFormat.expected = 'd240302d'
 		oList.DisplayNames.expected = 'ccf106a6'
@@ -615,6 +614,11 @@ function get_intl_supportedlocales(num) {
 		oList.NumberFormat.expected = '741aaeb3'
 		oList.PluralRules.expected = '2d5fb02b'
 		oList.RelativeTimeFormat.expected = '98ac597e'
+	}
+	if (isVer > 146) {
+		// 2000225 (i think) - 'ba' (bashkir) now supported
+		oList.ListFormat.expected = '130cf142'
+		oList.PluralRules.expected = 'ed7c2f2a'
 	}
 
 	num = (num - 5)
@@ -1854,7 +1858,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof cookieStore, "cookieStore") // FF132 nightly 1918643
 		rec(num2, typeof getScreenDetails, "getScreenDetails")
 		rec(num2, typeof launchQueue, "launchQueue")
-		rec(num2, typeof navigation, "navigation")
+		rec(num2, typeof navigation, "navigation") // FF146 nightly 1979288
 		rec(num2, typeof offscreenBuffering, "offscreenBuffering")
 		rec(num2, typeof onappinstalled, "onappinstalled")
 		rec(num2, typeof onbeforeinstallprompt, "onbeforeinstallprompt")
@@ -1889,6 +1893,7 @@ function get_window_props(num1, num2, title) {
 			if (isVer > 137) {resU = resU.filter(x => !["originAgentCluster"].includes(x))}
 			if (isVer > 138) {resU = resU.filter(x => !["onbeforematch"].includes(x))}
 			if (isVer > 144) {resU = resU.filter(x => !["trustedTypes"].includes(x))} // FF145 nightly 1955251
+			if (isVer > 145) {resU = resU.filter(x => !["navigation"].includes(x))} // FF146 nightly 1979288 dom.navigation.webidl.enabled
 		}
 
 		let boolU = resU.length == 0
