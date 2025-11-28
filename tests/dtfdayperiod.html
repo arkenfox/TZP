@@ -273,11 +273,13 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "69d65fb9") { // FF140+
+				if (resultsHash == "d184e85c") { // FF147+
+				} else if (resultsHash == "69d65fb9") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "593ee92a") { // FF140+: 225
+				if (localesHash == "223e232d") { // FF147+: 226
+				} else if (localesHash == "593ee92a") { // FF140+: 225
 				} else {localesHash += ' '+ zNEW
 				}
 			}
