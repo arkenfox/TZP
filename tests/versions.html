@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 102, maxVer = 146, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 103, maxVer = 147, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -284,6 +284,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 147: 2000225 (not confirmed)
+		let t147 = performance.now(), ver147
+		try {ver147 = Intl.supportedValuesOf('numberingSystem').includes('tols')} catch(e) {}
+		rec(147, 147, "2000225", ver147, performance.now()-t147, 'INTL') // 0.02ms
 
 		// 146: 1997216
 		let t146 = performance.now(), ver146
