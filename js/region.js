@@ -492,7 +492,7 @@ function set_oIntlTests() {
 		// other
 		pluralrules: {
 			cardinal: [0, 1, 2, 3, 7, 21, 100],
-			ordinal: [1, 2, 3, 4, 5, 8, 10, 81]
+			ordinal: [1, 2, 3, 4, 5, 6, 8, 10, 81]
 		},
 		relativetimeformat: { // 8 of 12
 			always: {'narrow': [[1, 'day'], [0, 'year']]},
