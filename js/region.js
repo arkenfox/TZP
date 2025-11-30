@@ -417,7 +417,8 @@ function set_oIntlTests() {
 		},
 		'datetimeformat.listformat': {
 			'narrow': ['conjunction','disjunction','unit'],
-			'short': ['conjunction','unit']
+			'short': ['unit'],
+			'long': ['conjunction','unit']
 		},
 		'datetimeformat.relatedyear': {
 			// these are all long

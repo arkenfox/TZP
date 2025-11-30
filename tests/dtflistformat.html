@@ -90,18 +90,12 @@ function reset_custom(type) {
 		})
 	})
 	if (type == "min") {
-		/*
-		gecko min example
-		- shortunit + narrowunit = required (all but not either of those = no match)
-		- then one of conjunction (any style)
-		- then one of disjunction (any style)
-		*/
 		// min preset
+		dom.narrowunit.checked = true
 		dom.narrowconjunction.checked = true
 		dom.narrowdisjunction.checked = true
-		dom.narrowunit.checked = true
+		dom.longconjunction.checked = true
 		dom.shortunit.checked = true
-		dom.shortconjunction.checked = true
 	}
 }
 
@@ -251,11 +245,13 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "7d87a494") { // FF140+
+				if (resultsHash == "09836d2d") { // FF147+
+				} else if (resultsHash == "7d87a494") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "de63e1b0") { // FF140+: 153
+				if (localesHash == "b488b7e1") { // FF147+: 155
+				} else if (localesHash == "de63e1b0") { // FF140-146: 153
 				} else {localesHash += ' '+ zNEW
 				}
 			}
