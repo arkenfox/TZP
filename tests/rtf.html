@@ -363,13 +363,13 @@ function run_main(method) {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "723e9339") { // FF147+
-				} else if (resultsHash == "ba6f54ce") { // FF140-146
+				if (resultsHash == "afdf39f2") { // FF147+
+				} else if (resultsHash == "cba6cd42") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "d98f0238") { // FF147+: 255
-				} else if (localesHash == "e50c9285") { // FF140-14: 250
+				if (localesHash == "e2f93418") { // FF147+: 256
+				} else if (localesHash == "0e9d33f9") { // FF140-14: 250
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -431,48 +431,49 @@ Promise.all([
 		}
 		// add additional locales to core locales for this test
 		let aListExtra = [
-			"ar-ae,arabic (united arabic emirates)",
-			"ar-dj,arabic (djibouti)",
-			"bs-cyrl,bosnian (cyrillic)",
-			"en-at,english (austria)",
-			"en-au,english (australia)",
-			"en-ca,english (canada)",
-			"en-sg,english (singapore)",
-			"es-ar,spanish (argentina)",
-			"es-co,spanish (colombia)",
-			"es-mx,spanish (mexico)",
-			"es-py,spanish (paraguay)",
-			"es-us,spanish (united states)",
-			"ff-adlm,fulah (adlam)",
-			"fr-ca,french (canada)",
-			"hi-latn,hindi (latin)",
-			"kok-latn,konkani (latin)",
-			"ks-deva,kashmiri (devanagari)",
-			"kxv-telu,kuvi (telugu)",
-			"pa-pk,punjabi (pakistan)",
-			"ps-pk,pashto (pakistan)",
-			"pt-gw,portuguese (guinea-bissau)",
-			"pt-pt,portuguese (portugal)",
-			"sd-deva,sindhi (devanagari)",
-			"se-fi,northern sami (finland)",
-			"shi-latn,tachelhit (latin)",
-			"sr-ba,serbian (bosnia & herzegovina)",
-			"sr-latn,serbian (latin)",
-			"sr-latn-ba,serbian (latin bosnia & herzegovina)",
-			"ur-in,urdu (india)",
-			"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
-			"vai-latn,vai (latin)",
-			"yo-bj,yoruba (benin)",
-			"yue-hans,cantonese (simplified)",
+'ar-ae,arabic (united arabic emirates)',
+'ar-dj,arabic (djibouti)',
+'bs-cyrl,bosnian (cyrillic)',
+'en-at,english (austria)',
+'en-au,english (australia)',
+'en-ca,english (canada)',
+'en-sg,english (singapore)',
+'es-ar,spanish (argentina)',
+'es-co,spanish (colombia)',
+'es-mx,spanish (mexico)',
+'es-py,spanish (paraguay)',
+'es-us,spanish (united states)',
+'ff-adlm,fulah (adlam)',
+'fr-ca,french (canada)',
+'hi-latn,hindi (latin)',
+'kk-cn,kazakh (china)',
+'kok-latn,konkani (latin)',
+'ks-deva,kashmiri (devanagari)',
+'kxv-telu,kuvi (telugu)',
+'pa-pk,punjabi (pakistan)',
+'ps-pk,pashto (pakistan)',
+'pt-gw,portuguese (guinea-bissau)',
+'pt-pt,portuguese (portugal)',
+'sd-deva,sindhi (devanagari)',
+'se-fi,northern sami (finland)',
+'shi-latn,tachelhit (latin)',
+'sr-ba,serbian (bosnia & herzegovina)',
+'sr-latn,serbian (latin)',
+'sr-latn-ba,serbian (latin bosnia & herzegovina)',
+'ur-in,urdu (india)',
+'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
+'vai-latn,vai (latin)',
+'yo-bj,yoruba (benin)',
+'yue-hans,cantonese (simplified)',
 		]
 		list = list.concat(aListExtra)
 		list = list.filter(function(item, position) {return list.indexOf(item) === position})
 		//list = ['en']
 		legend()
 		if (isSupported) {
-			setBtn("all")
+			setBtn('all')
 			setTimeout(function() {
-				run_main("all")
+				run_main('all')
 			}, 100)
 		}
 	})
