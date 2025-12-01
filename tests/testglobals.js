@@ -655,7 +655,9 @@ let gLocalesLikely = [
 'hr-ba,croatian (bosnia & herzegovina)',
 'it-ch,italian (switzerland)',
 'kea-cv,kabuverdianu (cape verde)',
+'kk-cn,kazakh (china)',
 'ko-kp,korean (north korea)',
+'kok-in,konkani (india)',
 'kok-latn,konkani (latin)',
 'knn-knda,konkani (kannada)', // 
 'knn-latn,konkani (latin)', // 
@@ -714,6 +716,7 @@ let gLocalesLikely = [
 'sr-me,serbian (montenegro)',
 'sr-xk,serbian (kosovo)',
 'st-ls,southern sotho',
+'sv-ax,swedish (åland islands)',
 'sv-fi,swedish (finland)',
 'sw-cd,swahili (congo kinshasa)',
 'sw-ke,swahili (kenya)',
@@ -1021,7 +1024,6 @@ let gLocalesExpand = [
 'ki-ke,kikuyu (kenya)',
 'kk-af,kazakh (afghanistan)',
 'kk-brai,kazakh (braille)',
-'kk-cn,kazakh (china)',
 'kk-ir,kazakh',
 'kk-kz,kazakh (kazakhstan)',
 'kk-latn,kazakh',
@@ -1037,7 +1039,6 @@ let gLocalesExpand = [
 'ko-brai,korean (braille)',
 'ko-kr,korean (south korea)',
 'ko-latn,korean (latin)',
-'kok-in,konkani (india)',
 'kok-knda,konkani (kannada)',
 'ks-in,kashmiri (india)',
 'ks-latn,kashmiri (latin)',
@@ -1222,7 +1223,6 @@ let gLocalesExpand = [
 'su-arab,sundanese (arabic)',
 'su-java,sundanese',
 'su-sund,sundanese',
-'sv-ax,swedish (åland islands)',
 'sv-brai,swedish (braille)',
 'sv-runr,swedish (runic)',
 'sv-se,swedish (sweden)',
@@ -1413,4 +1413,3 @@ function expand_maximum() {
 // expand once in a while to see if entropy counts change
 //expand_likely()
 //expand_maximum() // also checks for canonical names
-

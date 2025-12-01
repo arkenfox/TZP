@@ -437,13 +437,13 @@ function run_main(method, aTest, isLoop = false) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == '35da1cd7') { // FF147+
-				} else if (resultsHash == '3c8f6826') { // FF140-146
+				if (resultsHash == '9f4bc603') { // FF147+
+				} else if (resultsHash == '306fc662') { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == 'f57c8159') { // FF147+: 217
-				} else if (localesHash == 'e32ac242') { // FF140-146: 216
+				if (localesHash == 'ed449139') { // FF147+: 218
+				} else if (localesHash == '50482048') { // FF140-146: 216
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -524,6 +524,7 @@ Promise.all([
 "fr-lu,french (luxembourg)",
 "hi-latn,hindi (latin)",
 "it-ch,italian (switzerland)",
+'kk-cn,kazakh (china)',
 "kok-latn,konkani (latin)",
 "ks-deva,kashmiri (devanagari)",
 "kxv-telu,kuvi (telugu)",

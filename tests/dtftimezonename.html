@@ -458,11 +458,13 @@ function run_main(method) {
 			// notate new if expanded and 140+
 			if (isVer > 139 && optExpanded) {
 				// expanded results
-				if (resultsHash == "ed71ffec") { // FF140+
+				if (resultsHash == "6e37f247") { // FF147+
+				} else if (resultsHash == "a5a4b5a1") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// expanded locales
-				if (localesHash == "bba7c720") { // FF40+: 336
+				if (localesHash == "ab48ed50") { // FF47+: 339
+				} else if (localesHash == "dc340cf5") { // FF40-146: 336
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -623,6 +625,7 @@ Promise.all([
 		"fr-gp,french (guadeloupe)",
 		"fr-tn,french (tunisia)",
 		"hi-latn,hindi (latin)",
+		'kk-cn,kazakh (china)',
 		"ko-kp,korean (north korea)",
 		"kok-latn,konkani (latin)",
 		"ks-deva,kashmiri (devanagari)",
@@ -652,6 +655,7 @@ Promise.all([
 		"sr-latn-xk,serbian (latin kosovo)",
 		"sr-me,serbian (montenegro)",
 		"sr-xk,serbian (kosovo)",
+		'sv-fi,swedish (finland)',
 		"sw-cd,swahili (congo kinshasa)",
 		"sw-ke,swahili (kenya)",
 		"ta-my,tamil (malaysia)",
@@ -663,7 +667,6 @@ Promise.all([
 		"yue-hans,cantonese (simplified)",
 		"zh-hans-hk,chinese (simplified hong kong)",
 		"zh-hans-mo,chinese (simplified macau)",
-
 		// blink
 		'ee-tg,éwé (togo)',
 		'uz-arab,uzbek (arabic)',

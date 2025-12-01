@@ -401,7 +401,7 @@ function set_oIntlTests() {
 			},
 			month: {
 				'narrow': [{month: 'narrow'}, [dates.Nov] ],
-				'short': [{month: 'short'}, [dates.Jan, dates.Jun, dates.Sep]],
+				'short': [{month: 'short'}, [dates.Jan, dates.Jun, dates.Sep, dates.Nov]],
 			},
 			weekday: {
 				'long': [{weekday: 'long'}, [dates.Wed, dates.Fri]],
@@ -444,7 +444,7 @@ function set_oIntlTests() {
 		// DN
 		displaynames: {
 			calendar: {
-				'short': ['chinese','ethiopic','gregory','islamic-rgsa','islamic-umalqura','roc'],
+				'short': ['chinese','dangi','ethiopic','gregory','islamic-tbla','islamic-umalqura','japanese','roc'],
 			},
 			currency: {'long': ['JPY','NIO','SEK','SZL','TZS','XAF']},
 			dateTimeField: {
@@ -455,7 +455,7 @@ function set_oIntlTests() {
 			region: {'narrow': ['CM','FR','TL','US','VC','VI','ZZ']},
 			script: {
 				// blink is case sensitive
-				'short': ['Arab','Beng','Cyrl','Deva','Guru','Hans','Latn','Mong','Mymr','Orya','Zxxx','Zzzz'],
+				'short': ['Arab','Beng','Cyrl','Deva','Guru','Hans','Hrkt','Latn','Mong','Mymr','Orya','Zxxx','Zzzz'],
 			},
  		},
 		// DF
