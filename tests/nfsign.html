@@ -200,13 +200,13 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "67e59615") { // FF147+
-				} else if (resultsHash == "473af57c") { // FF140-146
+				if (resultsHash == "4491496a") { // FF147+
+				} else if (resultsHash == "2a5a0fce") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "1bebc7dc") { // FF147+: 42
-				} else if (localesHash == "0a2c7891") { // FF140-146: 40
+				if (localesHash == "492461bc") { // FF147+: 43
+				} else if (localesHash == "68ebd8fb") { // FF140-146: 40
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -285,6 +285,7 @@ Promise.all([
 	let aListExtra = [
 		"ar-er,arabic (eritrea)",
 		"ff-adlm,fulah (adlam)",
+'kk-cn,kazakh (china)',
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 		"yue-hans,cantonese (simplified)",
 		// blink
