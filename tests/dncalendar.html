@@ -52,11 +52,12 @@
 let aItems = [
 	//https://tc39.es/ecma402/#sec-calendar-types
 	//https://github.com/unicode-org/cldr/blob/main/common/bcp47/calendar.xml
+	// Ff140 counts
 	'gregory', 					// 150
 	'islamic-umalqura', // 111 | + 7 -> 162
 	'ethiopic', 				// 125 | + 3 -> 165
 	'chinese', 					// 124 | + 1 -> 166
-	'islamic-rgsa', 		//  39 | + 1 -> 167
+	'islamic-rgsa', 		//  39 | + 1 -> 167 - dropped FF147
 	'roc', 							// 127 | + 1 -> 168
 	'buddhist', //125
 	'coptic', // 117
@@ -64,7 +65,7 @@ let aItems = [
 	'ethioaa', // 120
 	'hebrew', // 127
 	'indian', // 104
-	'islamic', // 110
+	'islamic', // 110 - dropped FF147
 	'islamic-civil', // 113
 	'islamic-tbla', // 55
 	'iso8601', // 122
@@ -147,12 +148,16 @@ function run_main(method) {
 		tests = {
 			'calendar': {
 				'short': [
-					'gregory', // 150
-					'islamic-umalqura', // 111 | + 7 -> 162
-					'ethiopic', // 125 | + 3 -> 165
-					'chinese', // 124 | + 1 -> 166
-					'islamic-rgsa', // 39 | + 1 -> 167
-					'roc', // 127 | + 1 -> 168
+					// FF147+
+					'gregory', // 153
+					'islamic-umalqura', // 117 | + 12 -> 165
+					'ethiopic', // 129 | + 3 -> 168
+					'chinese', // 129 | + 1 -> 169
+					'roc', // 131 | + 1 -> 170
+					'islamic-tbla', // 59 | +1 -> 171
+					// these next two required FF147+
+					'japanese', // 131 | +1 = 172
+					'dangi', // 123 | + 1 = 173
 				]
 			}
 		}
@@ -269,11 +274,13 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "f964c633") { // FF140+
+				if (resultsHash == "f9edfcf5") { // FF147+
+				} else if (resultsHash == "8010db57") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "8e31e842") { // FF140+ 168
+				if (localesHash == "c4ca9d63") { // FF147+: 173
+				} else if (localesHash == "8aee271e") { // FF140-146: 168
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -341,6 +348,7 @@ Promise.all([
 'es-ar,spanish (argentina)',
 'es-mx,spanish (mexico)',
 'ff-adlm,fulah (adlam)',
+'kk-cn,kazakh (china)',
 'ks-deva,kashmiri (devanagari)',
 'kxv-telu,kuvi (telugu)',
 'pa-arab,punjabi (arabic)',
