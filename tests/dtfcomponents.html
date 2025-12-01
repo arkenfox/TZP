@@ -244,9 +244,9 @@ function run_main(method = "all") {
 			[dateEra, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
 			[dateEra, {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
 			[dateEra, {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
-			[new Date("January 01, 0001 1:00:00"), {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
-			[new Date("January 01, 0001 1:00:00"), {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
-			[new Date("January 01, 0001 1:00:00"), {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
+			//[new Date("January 01, 0001 1:00:00"), {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
+			//[new Date("January 01, 0001 1:00:00"), {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
+			//[new Date("January 01, 0001 1:00:00"), {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
 		],
 //*/
 //* MIN
@@ -272,6 +272,7 @@ function run_main(method = "all") {
 			[new Date("2023-01-15"), {"short": {month: "short"}}],
 			[new Date("2023-06-15"), {"short": {month: "short"}}],
 			[new Date("2023-09-15"), {"short": {month: "short"}}],
+			[new Date("2023-11-15"), {"short": {month: "short"}}],
 			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
 		],
 //*/
@@ -477,11 +478,13 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "1fe66003") { // FF140+
+				if (resultsHash == "a2fd3fb0") { // FF147+
+				} else if (resultsHash == "eb5b62fa") { // FF140-146+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "998ee498") { // FF140+: 326
+				if (localesHash == "b4751570") { // FF147+: 325
+				} else if (localesHash == "32f59b41") { // FF140-146: 326
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -593,6 +596,7 @@ Promise.all([
 		"hi-latn,hindi (latin)",
 		"hr-ba,croatian (bosnia & herzegovina)",
 		"it-ch,italian (switzerland)",
+		'kk-cn,kazakh (china)',
 		"kok-latn,konkani (latin)",
 		"ks-deva,kashmiri (devanagari)",
 		"kxv-telu,kuvi (telugu)",
@@ -620,6 +624,7 @@ Promise.all([
 		"sr-latn-me,serbian (latin montenegro)",
 		"sr-latn-xk,serbian (latin kosovo)",
 		'st-ls,southern sotho',
+		'sv-ax,swedish (åland islands)',
 		"sv-fi,swedish (finland)",
 		"sw-cd,swahili (congo kinshasa)",
 		"ta-lk,tamil (sri lanka)",
