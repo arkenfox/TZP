@@ -258,13 +258,13 @@ function run_main(method) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "8144455c") { // FF147+
-				} else if (resultsHash == "84bfbe65") { // FF140-146
+				if (resultsHash == "da79a52f") { // FF147+
+				} else if (resultsHash == "f78d3384") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "9c5297f8") { // FF147+: 176
-				} else if (localesHash == "e91aa639") { // FF140-146: 170
+				if (localesHash == "5f8a76ff") { // FF147+: 178
+				} else if (localesHash == "d706f5b6") { // FF140-146: 170
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
@@ -316,51 +316,53 @@ Promise.all([
 
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"ar-bh,arabic (bahrain)",
-		"ar-dz,arabic (algeria)",
-		"bs-cyrl,bosnian (cyrillic)",
-		"de-at,german (austria)",
-		"de-ch,german (switzerland)",
-		"en-at,english (austria)",
-		"en-ch,english (switzerland)",
-		"en-fi,english (finland)",
-		"en-in,english (india)",
-		"es-cr,spanish (costa rica)",
-		"es-mx,spanish (mexico)",
-		"es-py,spanish (paraguay)",
-		"es-us,spanish (united states)",
-		"ff-adlm,fulah (adlam)",
-		"fr-ca,french (canada)",
-		"fr-lu,french (luxembourg)",
-		"it-ch,italian (switzerland)",
-		"kok-latn,konkani (latin)",
-		"kxv-telu,kuvi (telugu)",
-		"ms-bn,malay (brunei)",
-		"pt-pt,portuguese (portugal)",
-		"se-fi,northern sami (finland)",
-		"sr-latn,serbian (latin)",
-		"sw-cd,swahili (congo kinshasa)",
-		"sw-ke,swahili (kenya)",
-		"ta-my,tamil (malaysia)",
-		"ur-in,urdu (india)",
-		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
-		"yo-bj,yoruba (benin)",
-		"yue-hans,cantonese (simplified)",
-		// blink
-		'az-cyrl,azerbaijani (cyrillic)',
-		'pa-arab,punjabi (arabic)',
+'ar-bh,arabic (bahrain)',
+'ar-dz,arabic (algeria)',
+'bs-cyrl,bosnian (cyrillic)',
+'de-at,german (austria)',
+'de-ch,german (switzerland)',
+'en-at,english (austria)',
+'en-ch,english (switzerland)',
+'en-gb,english (united kingdom)',
+'en-fi,english (finland)',
+'en-in,english (india)',
+'es-cr,spanish (costa rica)',
+'es-mx,spanish (mexico)',
+'es-py,spanish (paraguay)',
+'es-us,spanish (united states)',
+'ff-adlm,fulah (adlam)',
+'fr-ca,french (canada)',
+'fr-lu,french (luxembourg)',
+'it-ch,italian (switzerland)',
+'kk-cn,kazakh (china)',
+'kok-latn,konkani (latin)',
+'kxv-telu,kuvi (telugu)',
+'ms-bn,malay (brunei)',
+'pt-pt,portuguese (portugal)',
+'se-fi,northern sami (finland)',
+'sr-latn,serbian (latin)',
+'sw-cd,swahili (congo kinshasa)',
+'sw-ke,swahili (kenya)',
+'ta-my,tamil (malaysia)',
+'ur-in,urdu (india)',
+'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
+'yo-bj,yoruba (benin)',
+'yue-hans,cantonese (simplified)',
+	// blink
+'az-cyrl,azerbaijani (cyrillic)',
+'pa-arab,punjabi (arabic)',
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
 	// check bigint support: FF68+
 	try {
-		let y = BigInt("9999999999999999")
+		let y = BigInt('9999999999999999')
 		isBigIntSupported = true
 	} catch(e) {}
-	setBtn("all")
+	setBtn('all')
 	setTimeout(function() {
-		run_main("all")
+		run_main('all')
 	}, 100)
 })
 
