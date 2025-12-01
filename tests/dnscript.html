@@ -238,7 +238,7 @@ function run_main(method, aTest, isLoop = false) {
 
 	} else {
 		// long + narrow add nothing
-		tests = {'script': {'short': ['Zxxx','Latn','Hans','Arab','Deva','Zzzz','Cyrl','Mymr','Mong','Beng','Orya','Guru']}}
+		tests = {'script': {'short': ['Zxxx','Latn','Hans','Arab','Deva','Zzzz','Cyrl','Mymr','Mong','Beng','Orya','Guru','Hrkt']}}
 	}
 
 	try {
@@ -371,13 +371,13 @@ function run_main(method, aTest, isLoop = false) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash == "a5a7f051") { // FF147+
-				} else if (resultsHash == "71431273") { // FF140-146
+				if (resultsHash == "4d2a0147") { // FF147+
+				} else if (resultsHash == "4f0204b0") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "957ab48d") { // FF147+ 193
-				} else if (localesHash == "dbf61e20") { // FF140-146 193
+				if (localesHash == "eeac2f94") { // FF147+ 195
+				} else if (localesHash == "552c1baf") { // FF140-146 193
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -440,6 +440,7 @@ Promise.all([
 'az-cyrl,azerbaijani (cyrillic)',
 'bs-cyrl,bosnian (cyrillic)',
 'en-au,english (australia)',
+'en-gb,english (united kingdom)',
 'en-in,english (india)',
 'es-us,spanish (united states)',
 'es-ar,spanish (argentina)',
@@ -447,6 +448,7 @@ Promise.all([
 'ff-adlm,fulah (adlam)',
 'fr-ca,french (canada)',
 'hi-latn,hindi (latin)',
+'kk-cn,kazakh (china)',
 'kok-latn,konkani (latin)',
 'ks-deva,kashmiri (devanagari)',
 'kxv-telu,kuvi (telugu)',
