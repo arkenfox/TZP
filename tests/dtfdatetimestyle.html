@@ -102,10 +102,13 @@ function legend() {
 				console.log("suported timezones missing in gTimezones\n", aMissing)
 				dom.alert.innerHTML = "<br>"+ s1 +"[alert] supported timezones missing in gTimezones"+ sc
 			}
-
 			aTZ = aTZ.concat(testTZ)
 			aTZ = aTZ.filter(function(item, position) {return aTZ.indexOf(item) === position})
 			aTZ.sort()
+
+			// chrome keeps crashing the tab with run_all : break into bits and test manually
+			//aTZ = aTZ.slice(400, 600) // 146 - 150
+
 			// arrange into an object
 			let optTZ = {}
 			aTZ.forEach(function(n) {
@@ -736,7 +739,9 @@ Promise.all([
 "hi-latn,hindi (latin)",
 "hr-ba,croatian (bosnia & herzegovina)",
 "it-ch,italian (switzerland)",
+'kk-cn,kazakh (china)',
 "ko-kp,korean (north korea)",
+'kok-in,konkani (india)',
 'kok-latn,konkani (latin)',
 "ks-deva,kashmiri (devanagari)",
 'kxv-telu,kuvi (telugu)',
@@ -767,6 +772,8 @@ Promise.all([
 "sr-latn-me,serbian (latin montenegro)",
 "sr-latn-xk,serbian (latin kosovo)",
 'st-ls,southern sotho',
+'sv-ax,swedish (åland islands)',
+'sv-fi,swedish (finland)',
 "sw-ke,swahili (kenya)",
 "ta-lk,tamil (sri lanka)",
 "ta-my,tamil (malaysia)",
