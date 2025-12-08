@@ -831,9 +831,13 @@ function get_window_props(METRIC) {
 		let contentWindow = iframe.contentWindow
 		data = Object.getOwnPropertyNames(contentWindow)
 		dataSorted = Object.getOwnPropertyNames(contentWindow)
+		//let data2 = Object.getOwnPropertyNames(contentWindow)
+		//console.log(data2)
 
-		let tamperBtn = '', aTampered, indexPerf, indexEvent
+		let tamperBtn = '', aTampered, indexPerf, indexEvent, isConsoleOpen = false
 		if (isGecko) {
+			// FF147+ 543535 changed things up
+			let a147 = ['PerformanceTiming','console','Promise','PageTransitionEvent']
 			if (isSmart) {
 				/* safer closed: Performance ... more items then Event
 				standard closed: Performance + no Event...
@@ -842,25 +846,38 @@ function get_window_props(METRIC) {
 				// tampered: filter items for console open etc
 				indexPerf = data.indexOf('Performance')
 				indexEvent = data.indexOf('Event')
+				isConsoleOpen = indexPerf + 1 == indexEvent // FF147 we could also check if console simply comes after Performance
 				if (runSL) {data.push('fake')}
 				aTampered = data.slice(data.indexOf('Performance')+1)
-				aTampered = aTampered.filter(x => !['Event','Location'].includes(x))
+				let aIgnore = ['Event','Location']
+				if (isVer > 146) {
+					aIgnore = aIgnore.concat(a147)
+				}
+				aTampered = aTampered.filter(x => !aIgnore.includes(x))
 				if (aTampered.length) {
 					addDetail(METRIC +'_tampered', aTampered.sort())
 					tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
 				}
+
 			}
 			// all the properties that can be tampered with by NS
 				// safer (no webgl-clicktoplay): 24 items
 			let aPossible = [
+				//*
 				'Blob','Element','HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLIFrameElement',
 				'HTMLObjectElement','MediaSource','OffscreenCanvas','Promise','Proxy','SharedWorker',
 				'String','URL','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI',
 				'decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','webkitURL',
 				'Error',
 				// other
-				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly'
+				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly',
+				//*/
 			]
+			if (isVer > 146) {
+				// FF147+ 543535 uBO exposes these 5
+				aPossible.push('JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget')
+			}
+
 			let aHas = aPossible.filter(x => data.includes(x))
 			aHas = dedupeArray(aHas)
 			aHas.sort()
@@ -880,7 +897,7 @@ function get_window_props(METRIC) {
 				}
 				// notate console
 				if (!isLies && isDesktop && isOS !== undefined) {
-					let strConsole = ' [devtools ' + (indexPerf + 1 == indexEvent ? 'open' : 'closed') +']'
+					let strConsole = ' [devtools ' + (isConsoleOpen ? 'open' : 'closed') +']'
 					addDisplay(18, 'consolestatus', strConsole)
 				}
 			}
@@ -888,6 +905,7 @@ function get_window_props(METRIC) {
 			// move expected Performance, Event, Location to the end
 				// these affect the order if console open and various tabs selected
 			let aCheck = ['Location','Performance','Event']
+			if (isVer > 146) {aCheck = aCheck.concat(a147)}
 			let aItems = data.filter(x => aCheck.includes(x))
 			aItems.sort() // because an open console can change the order
 			data = data.filter(x => !aItems.includes(x))
