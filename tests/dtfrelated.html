@@ -141,25 +141,28 @@ function run_main(method = "all") {
 		aSupportedCal = Intl.supportedValuesOf('calendar')
 	} catch(e) {}
 	// which calendars don't do much
+	// note: F147+ 1955545 Use "islamic-tbla" when either "islamic" or "islamic-rgsa" was requested
 	let aCalendars = [
+		'default',
 		'buddhist', // yes
 		'chinese', // yes
-		//'coptic',
-		//'dangi',
-		//'ethioaa',
-		//'ethiopic',
 		'gregory', // yes
 		'hebrew', // yes
 		'indian', // yes
-		'islamic', // yes
-		//'islamic-civil',
-		//'islamic-rgsa',
-		//'islamic-tbla',
-		//'islamic-umalqura',
-		//'iso8601',
+		'islamic-tbla',
 		'japanese',
-		//'persian',
 		'roc', // blink
+		// these seem redundant but incloude them for the full test
+		'coptic',
+		'dangi',
+		'ethioaa',
+		'ethiopic',
+		'islamic',
+		'islamic-civil',
+		'islamic-rgsa',
+		'islamic-umalqura',
+		'iso8601',
+		'persian',
 	]
 	aCalendars = aCalendars.filter(x => aSupportedCal.includes(x))
 	testsAll = {'default': testsAllMini}
@@ -174,7 +177,7 @@ function run_main(method = "all") {
 		'gregory': {'long': [dateB]},
 		'hebrew': {'long': [dateB]},
 		'indian': {'long': [dateB]},
-		'islamic': {'long': [dateB]},
+		'islamic-tbla': {'long': [dateB]},
 		'japanese': {'long': [dateA]}, // only one to use dateA
 		'roc': {'long': [dateB]},
 	}
@@ -277,11 +280,13 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "dc200825") { // FF140+
+				if (resultsHash == "1bfab5f2") { // FF147+
+				} else if (resultsHash == "694d0663") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "acdcfe06") { // FF140+: 171
+				if (localesHash == "833f653b") { // FF140+: 174
+				} else if (localesHash == "ed510b98") { // FF140-146: 171
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -353,6 +358,7 @@ Promise.all([
 		'en-bw,english (botswana)',
 		'en-ca,english (canada)',
 		'en-ch,english (switzerland)',
+		'en-gb,english (united kingdom)',
 		'en-hk,english (hong kong)',
 		'en-in,english (india)',
 		'en-nz,english (new zealand)',
@@ -367,6 +373,7 @@ Promise.all([
 		'fr-ca,french (canada)',
 		'fr-ch,french (switzerland)',
 		'hi-latn,hindi (latin)',
+		'kk-cn,kazakh (china)',
 		'kok-latn,konkani (latin)',
 		'lrc-iq,northern luri (iraq)',
 		'nl-be,dutch (belgium)',
@@ -374,6 +381,7 @@ Promise.all([
 		'pt-ao,portuguese (angola)',
 		'se-fi,northern sami (finland)',
 		'sr-latn,serbian (latin)',
+		'sv-fi,swedish (finland)',
 		'ur-in,urdu (india)',
 		'yue-cn,cantonese (china)',
 		'zh-hans-hk,chinese (simplified hong kong)',
