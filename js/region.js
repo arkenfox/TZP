@@ -428,7 +428,7 @@ function set_oIntlTests() {
 			gregory: [dates.RY],
 			hebrew: [dates.RY],
 			indian: [dates.RY],
-			islamic: [dates.RY],
+			'islamic-tbla': [dates.RY],
 			japanese: [new Date("January 5, 2023 1:00:00")],
 			roc: [dates.RY],
 		},
