@@ -818,6 +818,8 @@ function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
 	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isLies = false
+	let tamperHash = 'n/a', tamperBtn ='', aTampered =''
+
 	let id = 'iframe-window-version'
 
 	try {
@@ -834,7 +836,7 @@ function get_window_props(METRIC) {
 		//let data2 = Object.getOwnPropertyNames(contentWindow)
 		//console.log(data2)
 
-		let tamperBtn = '', aTampered, indexPerf, indexEvent, isConsoleOpen = false
+		let indexPerf, indexEvent, isConsoleOpen = false
 		if (isGecko) {
 			// FF147+ 543535 changed things up
 			let a147 = ['PerformanceTiming','console','Promise','PageTransitionEvent']
@@ -857,8 +859,11 @@ function get_window_props(METRIC) {
 				if (aTampered.length) {
 					addDetail(METRIC +'_tampered', aTampered.sort())
 					tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
+					tamperHash = mini(aTampered)
+				} else {
+					aTampered = ''
+					tamperHash = 'none'
 				}
-
 			}
 			// all the properties that can be tampered with by NS
 				// safer (no webgl-clicktoplay): 24 items
@@ -918,7 +923,6 @@ function get_window_props(METRIC) {
 			btn += addButton(18, METRIC +'_sorted', 'sorted')
 			sDetail.document[METRIC +'_sorted'] = dataSorted.sort()
 		}
-		btn += tamperBtn
 		// health: BB only if ESR
 		if (isBBESR) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
@@ -945,6 +949,7 @@ function get_window_props(METRIC) {
 		hash = e; data = zErrLog
 	}
 	removeElementFn(id)
+	addBoth(18, METRIC +'_tampered', tamperHash, tamperBtn, '', aTampered)
 	addBoth(18, METRIC, hash, btn, notation, data, isLies)
 	log_perf(18, METRIC, t0)
 	return
