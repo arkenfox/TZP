@@ -316,6 +316,7 @@ let fntMaster = {
 				'PingFang HK','PingFang SC','PingFang TC','Plantagenet Cherokee',
 			'Raanana','Rockwell',
 			'STIX Two Math', // FF133+ 1902570
+			'STIX Two Math Regular', // 2000429
 			'STIXGeneral','STIXIntegralsD','STIXIntegralsSm','STIXIntegralsUp','STIXIntegralsUpD','STIXIntegralsUpSm',
 				'STIXNonUnicode','STIXSizeFiveSym','STIXSizeFourSym','STIXSizeOneSym','STIXSizeThreeSym','STIXSizeTwoSym',
 				'STIXVariants','STSong','Sana','Sathu','Savoye LET','Shree Devanagari 714','SignPainter','Silom','Sinhala MN',
