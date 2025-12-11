@@ -509,38 +509,47 @@ function get_media_css(METRIC) {
 }
 
 function get_site_colors(METRIC) {
-	// contrast control in settings, but also checks what extensions change values to
-	// background-color, color, visited link, unvisited link
-		// note: dark reader etc all alter the css color tests as it is
-		// see: visited link colors will be exposed soon: https://github.com/mozilla/standards-positions/issues/1234
-		// ToDo: unvisited link color - we can't get a visited link
-	// also get all the 18 rainbow colors which shows if it retains color or just goes light/dark
+	// contrast control: only used when enabled or automatic
+		// and these override site styles
+	// background, text, visited link, unvisited link
+		// see: visited link colors will/may be exposed soon: https://github.com/mozilla/standards-positions/issues/1234
 
+	// all these are set by the site's css
 	let data = {}
 	try {
-		let target = document.body
+		// text, background-color
+		let target = document.body //dom.tzpBody
 		let styles = window.getComputedStyle(target)
 		let aList = ['background-color','color']
 		aList.forEach(function(item){
 			data[item] = styles.getPropertyValue(item)
 		})
-		// our 18 colors: adds entrpy on whether the extension retains some semblance of color
-		// or goes simple two-color or whatever
+		// our 18 colors: adds entropy on whether the extension retains some semblance of color
+		// or goes simple two-color or whatever (e.g. contrast, sepia, grayscale etc extension knobs)
 		for (let i=1; i < 19; i++) {
 			target = dom['tb'+i].childNodes[2].children[0].children[0]
 			styles = window.getComputedStyle(target)
 			let suffix = (i+'').padStart(2,'0')
 			data['color'+ suffix] = styles.getPropertyValue('background-color')
 		}
-		// link color
+		// link, visited link
+		aList = [
+			'link', // 0,0,238 blue
+			'visited-link', // 85,26,139 purple
+		]
+		aList.forEach(function(item){
+			target = dom['tzpClr'+item]
+			styles = window.getComputedStyle(target)
+			data[item] = styles.getPropertyValue('color')
+		})
 
 	} catch (e) {
 		data = zErr
-		log_error(14, METRIC +'_'+ metric, e)
+		log_error(14, METRIC, e)
 	}
 	// display
 	let hash = mini(data), btn = addButton(14, METRIC), notation = default_red
-	let expected = ['b87968f9','e1061fd6'] // prefers light/dark
+	let expected = ['e2399c6e','c2a28ecb'] // prefers light/dark
 	if (expected.includes(hash)) {
 		notation = default_green
 		sDetail.document[METRIC] = data
