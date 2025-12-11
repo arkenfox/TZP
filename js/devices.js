@@ -458,23 +458,20 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
 	let tmpData = {}, data = {}, count = 0
 	let aList = [
-		// sorted
+		// gecko
 		'camera','geolocation','microphone','midi','midi_sysex','notifications',
 		'persistent-storage','push','screen-wake-lock',
+		// non-gecko
+		'accelerometer','ambient-light-sensor','background-fetch','background-sync','clipboard-read',
+		'clipboard-write','compute-pressure','gyroscope','local-fonts','magnetometer','payment-handler',
+		'storage-access','top-level-storage-access','window-management',
+		// not listed on mdn: but confirmed in blink as a non error
+		'display-capture','nfc',
+		// other
+		//'accessibility-events', // 
+		'bluetooth','device-info','gamepad','speaker','speaker-selection',
 	]
-	if (!isGecko) {
-		aList.push(
-			'accelerometer','ambient-light-sensor','background-fetch','background-sync','clipboard-read',
-			'clipboard-write','compute-pressure','gyroscope','local-fonts','magnetometer','payment-handler',
-			'storage-access','top-level-storage-access','window-management',
-			// not listed on mdn: but confirmed in blink as a non error
-			'display-capture','nfc',
-			// other
-			//'accessibility-events', // 
-			'bluetooth','device-info','gamepad','speaker','speaker-selection',
-		)
-		aList.sort()
-	}
+	aList.sort()
 	for (let i=0; i < aList.length; i++) {
 		let k = aList[i], key = k
 		// https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus
@@ -486,7 +483,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 			if (count == (aList.length)) {exit()}
 		}
 		try {
-			//if (runSE) {foo++}
+			if (runSE) {foo++}
 			let isSysex = k.includes('sysex')
 			if (isSysex) {key = 'midi'}
 			navigator.permissions.query({name: key, sysex: isSysex}).then(function(r) {
@@ -498,11 +495,16 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 				if (!aValid.includes(state)) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ state}
 				accrue(k, state)
 			}).catch(err => {
-				if (isGecko) {log_error(7, METRIC +'_'+ k, err)} // don't log nonGecko
+				// only log non-standard gecko
+				if (isGecko) {
+					let expected = 'TypeError: \''+ k +'\' (value of \'name\' member of '
+						+ 'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
+					if (err+'' !== expected) {log_error(7, METRIC +'_'+ k, err)}
+				}
 				accrue(k, zErr)
 			})
 		} catch(e) {
-			if (isGecko) {log_error(7, METRIC +'_'+ k, e)} // don't log nonGecko
+			if (isGecko) {log_error(7, METRIC +'_'+ k, e)}
 			accrue(k, zErr)
 		}
 	}
@@ -510,7 +512,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		// sort object
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k]}
 		let hash = mini(data)
-		let notation = 'd417aea2' == hash ? default_green : default_red
+		let notation = '88b7fbf8' == hash ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
 		return resolve()
