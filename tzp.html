@@ -100,9 +100,13 @@
 			<input type="week" id="tzpweek">
 		</div>
 		<div><img id="tzpBrandHidden" src="chrome://branding/content/about-wordmark.svg"></div>
+		<div>
+			<a id="tzpClrlink" href="fake" class="">unvisited</a>
+			<a id="tzpClrvisited-link" href="" class="">visited</a>
+		</div>
 	</div>
 
-	<div id="tzpBase">
+	<div id="tzpBody">
 	<table>
 		<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
 		<tr><td class="blurb" id="index"><a id="tzpLink" class="return" href="index.html">return to TZP index</a></td></tr>
@@ -209,7 +213,7 @@
 		<tr class="togS"><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt cssrange">range 400-2560</span></div>
 			&nbsp; [min-device-] css <sup>1</sup></td>
-			<td class="mono"><span id="S"><span><div class="btn-right s99">screen</div></td>
+			<td class="mono"><span id="S"></span><div class="btn-right s99">screen</div></td>
 		</tr>
 		<tr class="togS"><td>iframe</td><td class="c mono" id="screen_iframe"></td></tr>
 		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="screen_media"></td></tr>
@@ -982,7 +986,6 @@
 			<span class="c" id="elementshash"></span>
 			<div class="btn-right"></div>
 		</td></tr>
-		<tr><td>
 		<tr><td><a class="blue" href="tests/domrectspoof.html" target="blank">[PoC]</a>
 			&nbsp; DOMRect</td><td class="c mono" id="domrect"></td></tr>
 		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="htmlelement_keys"></td></tr>
@@ -1114,7 +1117,6 @@
 	<a name="theend" id="theend"></a><br>
 	</span> <!--end tzpcontent-->
 	<div id='blockmsg' style="display: none;"></div><!--block-->
-	</div> <!-- end tzpBase -->
 
 	<!--overlay-->
 	<div id="modaloverlay" onClick="metricsAction('close')"></div>
@@ -1144,6 +1146,8 @@
 			<br><br><div id="overlayInfo" class='faint spaces'></div>
 		</div>
 	</div>
+	</div> <!-- end tzpBody -->
+
 	<script src="js/prototypeLies.js"></script>
 	<script src="js/region.js"></script>
 	<script src="js/fonts.js"></script>
