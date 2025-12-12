@@ -226,8 +226,6 @@ const promiseRaceFulfilled = async ({
 /*** GLOBAL ONCE ***/
 
 function get_isArch(METRIC) {
-	// chrome limits ArrayBuffer to 2145386496: https://issues.chromium.org/issues/40055619
-	if ('blink' == isEngine) {return}
 	// FYI: 32bit no longer supported for linux FF145+
 	let t0 = nowFn(), value
 	try {
@@ -235,8 +233,13 @@ function get_isArch(METRIC) {
 		let test = new ArrayBuffer(Math.pow(2,32)) // 4294967296
 		value = 64
 	} catch(e) {
-		isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist sect3
-		value = zErr
+		if ('blink' == isEngine && 'RangeError: Array buffer allocation failed' == e+'') {
+			// chrome limits ArrayBuffer to 2145386496: https://issues.chromium.org/issues/40055619
+			isArch = zNA; value = zNA
+		} else {
+			isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist sect3
+			value = zErr
+		}
 	}
 	log_perf(SECTG, METRIC, t0,'', value)
 }
@@ -418,8 +421,8 @@ function get_isEngine(METRIC) {
 				try {
 					if ('blink' == isEngine) {
 						// 109 is the last version supported on win7
-						if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
-						//if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
+						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
+						if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
 						//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129 2024-Sep
 					} else if ('webkit' == isEngine) {
 						// https://en.wikipedia.org/wiki/Safari_(web_browser)#Version_compatibility
@@ -494,7 +497,7 @@ function get_isGecko(METRIC) {
 			[HTMLVideoElement, 'HTMLVideoElement', 'mozDecodedFrames'],
 			[IDBIndex, 'IDBIndex', 'mozGetAllKeys'],
 			[IDBObjectStore, 'IDBObjectStore', 'mozGetAll'],
-			[Screen, 'Screen', 'mozOrientation'],
+			[Screen, 'Screen', 'mozOrientation'], // 1325110: mozOrientation slated for deprecation
 			[SVGElement, 'SVGElement', 'onmozfullscreenchange'] 
 		]
 		let obj, prop, aNo = []
@@ -838,8 +841,6 @@ function get_isVer(METRIC) {
 }
 
 const get_isXML = () => new Promise(resolve => {
-	//if (!isGecko) {isXML = zNA; return resolve()}
-
 	// get once ASAP +clear console: not going to change between tests
 		// gecko change app lang and it requires closing and a new tab
 		// blink changing app lang also asks for a relaunch
@@ -854,43 +855,34 @@ const get_isXML = () => new Promise(resolve => {
 	}
 	try {
 		let parser = new DOMParser
+		let isMethod = isGecko ? 'gecko' : 'other'
+		// determine method to get values if engine is 'undefined'
+		if ('undefined' == isEngine) {
+			// servo fails in both
+				//'gecko': can't access property "firstChild", target is undefined
+				//'other': can't access property "innerText", target is undefined
+			try {
+				let testdoc = parser.parseFromString('a', 'application/xml')
+				let testtarget = testdoc.getElementsByTagName('parsererror')[0]
+				let teststr = testtarget.innerText
+			} catch(e) {
+				// failed 'other' method, so use 'gecko' method
+				isMethod = 'gecko'
+			}
+		}
+
 		for (const k of Object.keys(list)) {
 			let doc = parser.parseFromString(list[k], 'application/xml')
 			let target = doc.getElementsByTagName('parsererror')[0]
 			//if ('n02' == k && !isGecko) {console.log(doc.getElementsByTagName('parsererror')[0])} //debug
 
 			let str, value, parts
-			if (isGecko) {str = target.firstChild.textContent} else {str = target.innerText}
+			if ('gecko' == isMethod) {str = target.firstChild.textContent} else {str = target.innerText}
 			if (runST) {str =''}
 			let typeCheck = typeFn(str)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 
-			if (!isGecko) {
-				// blink + webkit: also catch undefined engines
-				let newtarget = target.children
-				// [0] "This page contains the following errors:"
-				// [1] "error on line X at column Y: " + actual error
-				// [2] "Below is a rendering of the page up to the first error."
-				str = newtarget[1].textContent
-				// cleanup english XML messages: I don't think blink or webkit translate these
-				let isErrorStr = '', isError = 'error on line' == str.slice(0,13)
-				if (isError) {
-					let position = str.indexOf(": ")
-					if (position > 0) {
-						isErrorStr = str.slice(0,28)
-						str = str.slice(position + 2)
-					}
-				}
-				value = str.replace(/\n/g,'')
-				if ('n02' == k) {
-					if (isError) {
-						isXML['n00'] = {0: newtarget[0].textContent, 1: isErrorStr, 2: newtarget[2].textContent}
-					} else {
-						isXML['n00'] = {0: newtarget[0].textContent, 2: newtarget[2].textContent}
-					}
-				}
-				//if ('n02' == k) {console.log(str, '\n', newtarget)} //debug
-			} else {
+			if ('gecko' == isMethod) {
 				// gecko
 				//split into parts: works back to FF52 and works with LTR
 				parts = str.split('\n')
@@ -924,6 +916,31 @@ const get_isXML = () => new Promise(resolve => {
 				value = parts[0]
 				let trimLen = parts[0].split(delimiter)[0].length + 1
 				value = value.slice(trimLen).trim()
+			} else {
+				// blink + webkit
+				let newtarget = target.children
+				// [0] "This page contains the following errors:"
+				// [1] "error on line X at column Y: " + actual error
+				// [2] "Below is a rendering of the page up to the first error."
+				str = newtarget[1].textContent
+				// cleanup english XML messages: I don't think blink or webkit translate these
+				let isErrorStr = '', isError = 'error on line' == str.slice(0,13)
+				if (isError) {
+					let position = str.indexOf(": ")
+					if (position > 0) {
+						isErrorStr = str.slice(0,28)
+						str = str.slice(position + 2)
+					}
+				}
+				value = str.replace(/\n/g,'')
+				if ('n02' == k) {
+					if (isError) {
+						isXML['n00'] = {0: newtarget[0].textContent, 1: isErrorStr, 2: newtarget[2].textContent}
+					} else {
+						isXML['n00'] = {0: newtarget[0].textContent, 2: newtarget[2].textContent}
+					}
+				}
+				//if ('n02' == k) {console.log(str, '\n', newtarget)} //debug
 			}
 			isXML[k] = value
 		}
@@ -2368,7 +2385,8 @@ function run_immediate() {
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		}
 		// set isProtoProxy on known engines
-		isProtoProxy = isGecko ? true : ('blink' == isEngine || 'webkit' == isEngine) ? true : false
+			// we already returned if isEngine == undefined just above
+		isProtoProxy = 'undefined' == isEngine ? false : true 
 		// expand css, record stylesheet info
 		get_isStylesheet(7680)
 		// recursion

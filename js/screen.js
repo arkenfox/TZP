@@ -711,6 +711,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 	if ('square' == check) {check = 'portrait'}
 
 	// screen
+	// 1325110: mozOrientation slated for deprecation
 	let items = ['mozOrientation', 'orientation.angle', 'orientation.type']
 	let targets = ['screen','iframe'], iscreen
 	try {iscreen = dom.tzpIframe.contentWindow.screen} catch {}
@@ -1597,28 +1598,26 @@ const outputFD = () => new Promise(resolve => {
 	addBoth(3, METRIC, value,'','', data)
 
 	// arch: FF110+ pref removed: error means 32bit
-		// also works with servo but we don't specifically detect that yet
-	if (isGecko || 'webkit' == isEngine) {
-		let str = '64bit'; data = 64
-		if (isArch !== true) {
-			if ('RangeError: invalid array length' == isArch) {
-				str = '32bit'; data = 32
-			} else {
-				str = isArch; data = zErr
-			}
+	let str = '64bit'; data = 64
+	if (isArch !== true) {
+		if ('RangeError: invalid array length' == isArch) {
+			str = '32bit'; data = 32
+		} else {
+			str = isArch; data = zErr
+			// blink we set zNA if expected error, so propigate that
+			if ('blink' == isEngine && zNA == isArch) {data = zNA}
 		}
-		addBoth(3, 'browser_architecture', str,'','', data)
 	}
+	addBoth(3, 'browser_architecture', str,'','', data)
 
 	if (!isGecko) {
 		let aList = ['logo','wordmark','version']
 		if (undefined == isOS) {aList.push('os')}
-		if ('blink' == isEngine || 'undefined' == isEngine) {aList.push('browser_architecture')}
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
-		addBoth(3, 'browser', (undefined == isEngine ? zNA : isEngine))
+		addBoth(3, 'browser', isEngine+'')
 		// os
 		if (undefined !== isOS) {addBoth(3, 'os', isOS)}
 		return resolve()

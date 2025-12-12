@@ -1,5 +1,12 @@
 'use strict';
 
+/* Web SQL Database API / openDatabase
+	don't test for this: it was implemented only in blink and safari
+	- https://developer.chrome.com/blog/deprecating-web-sql
+	- blink: API default disabled 119 (oct 2023) removed 124 (april 2024)
+	- safari: removed in 2019
+*/
+
 function lookup_cookie(name) {
 	try {
 		name += '='
