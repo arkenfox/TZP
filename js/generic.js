@@ -760,7 +760,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 147) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 148) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -774,9 +774,10 @@ function get_isVer(METRIC) {
 		let test
 		try {
 			// old-timey check: avoid false postives: must be 128 or higher
-			if (Intl.supportedValuesOf('numberingSystem').includes('tols')) return 147 // 2000225 ?
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
+			if (Intl.supportedValuesOf('numberingSystem').includes('tols')) return 147 // 2000225 ?
 			try {throw new DOMException('a', 'b')} catch(e) {if (0 !== e.columnNumber) return 146} // 1997216
 			if (undefined !== (new ToggleEvent('toggle', null)).source) return 145 // 1968987
 			if (undefined == window.CSS2Properties) return 144 // 144: 1919582
