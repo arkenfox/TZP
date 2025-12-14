@@ -818,7 +818,7 @@ function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
 	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isLies = false
-	let tamperHash = 'n/a', tamperBtn ='', aTampered =''
+	let tamperHash = zNA, tamperBtn ='', aTampered =''
 
 	let id = 'iframe-window-version'
 
@@ -838,8 +838,9 @@ function get_window_props(METRIC) {
 
 		let indexPerf, indexEvent, isConsoleOpen = false
 		if (isGecko) {
-			// FF147+ 543535 changed things up
-			let a147 = ['PerformanceTiming','console','Promise','PageTransitionEvent']
+			// FF148+ 543535 changed things up [backed out in 2003720 but in place for 148 nightly so far]
+			let aExpanded = ['PerformanceTiming','console','Promise','PageTransitionEvent']
+			let isExpanded = isVer > 147
 			if (isSmart) {
 				/* safer closed: Performance ... more items then Event
 				standard closed: Performance + no Event...
@@ -848,13 +849,11 @@ function get_window_props(METRIC) {
 				// tampered: filter items for console open etc
 				indexPerf = data.indexOf('Performance')
 				indexEvent = data.indexOf('Event')
-				isConsoleOpen = indexPerf + 1 == indexEvent // FF147 we could also check if console simply comes after Performance
+				isConsoleOpen = indexPerf + 1 == indexEvent // FF148+ we could also check if console simply comes after Performance
 				if (runSL) {data.push('fake')}
 				aTampered = data.slice(data.indexOf('Performance')+1)
 				let aIgnore = ['Event','Location']
-				if (isVer > 146) {
-					aIgnore = aIgnore.concat(a147)
-				}
+				if (isExpanded) {aIgnore = aIgnore.concat(aExpanded)}
 				aTampered = aTampered.filter(x => !aIgnore.includes(x))
 				if (aTampered.length) {
 					addDetail(METRIC +'_tampered', aTampered.sort())
@@ -878,8 +877,7 @@ function get_window_props(METRIC) {
 				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly',
 				//*/
 			]
-			if (isVer > 146) {
-				// FF147+ 543535 uBO exposes these 5
+			if (isExpanded) { // 543535 uBO exposes these 5
 				aPossible.push('JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget')
 			}
 
@@ -910,7 +908,7 @@ function get_window_props(METRIC) {
 			// move expected Performance, Event, Location to the end
 				// these affect the order if console open and various tabs selected
 			let aCheck = ['Location','Performance','Event']
-			if (isVer > 146) {aCheck = aCheck.concat(a147)}
+			if (isExpanded) {aCheck = aCheck.concat(aExpanded)}
 			let aItems = data.filter(x => aCheck.includes(x))
 			aItems.sort() // because an open console can change the order
 			data = data.filter(x => !aItems.includes(x))
