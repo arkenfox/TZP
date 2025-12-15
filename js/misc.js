@@ -840,6 +840,7 @@ function get_window_props(METRIC) {
 		if (isGecko) {
 			// FF148+ 543535 changed things up [backed out in 2003720 but in place for 148 nightly so far]
 			let aExpanded = ['PerformanceTiming','console','Promise','PageTransitionEvent']
+			if ('android' == isOS) {aExpanded.push('NodeList')}
 			let isExpanded = isVer > 147
 			if (isSmart) {
 				/* safer closed: Performance ... more items then Event
