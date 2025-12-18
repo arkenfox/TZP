@@ -20,7 +20,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 129
+	expectedMetrics = 130
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
