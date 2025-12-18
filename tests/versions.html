@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 104, maxVer = 148, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 105, maxVer = 148, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -284,6 +284,14 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 148: 1085214
+			// fast-path: pref dom.location.ancestorOrigins.enabled (added + default true FF148+)
+		let t148a = performance.now(), ver148a
+		try {
+			ver148a = undefined !== location.ancestorOrigins
+		} catch(e) {}
+		rec(148.1, 148, "1085214", ver148a, performance.now()-t148a, 'PREF') // 0.01ms
 
 		// 148: 2004851
 		let t148 = performance.now(), ver148

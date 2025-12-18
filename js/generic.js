@@ -776,6 +776,8 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
+			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
 			if (Intl.supportedValuesOf('numberingSystem').includes('tols')) return 147 // 2000225 ?
 			try {throw new DOMException('a', 'b')} catch(e) {if (0 !== e.columnNumber) return 146} // 1997216
