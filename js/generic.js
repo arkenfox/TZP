@@ -375,7 +375,6 @@ function get_isEngine(METRIC) {
 				'number' === typeof PERSISTENT,
 				'object' === typeof onappinstalled,
 				'object' === typeof onbeforeinstallprompt,
-				'object' === typeof trustedTypes,
 				'function' === typeof webkitResolveLocalFileSystemURL,
 			],
 			webkit: [

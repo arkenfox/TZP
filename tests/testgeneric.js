@@ -250,7 +250,7 @@ const get_globals = () => new Promise(resolve => {
 			//"object" === typeof onpointerrawupdate,
 			//"object" === typeof onsearch,
 			//"boolean" === typeof originAgentCluster,
-			"object" === typeof trustedTypes,
+			//"object" === typeof trustedTypes,
 			"function" === typeof webkitResolveLocalFileSystemURL,
 		],
 		"webkit": [
