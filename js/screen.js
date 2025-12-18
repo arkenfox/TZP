@@ -1202,7 +1202,9 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 				}
 			} else if ('document' == type) {
 				// using document.documentElement + domrect = the full webcont dimensions
-				// we can only get width as we know that is fixed | height must be clientHeight
+				// we can only get width as we know that is fixed | height must be clientHeight as this reports inner
+				// note quirks mode causes clientHeight to report the element height
+				// see https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/44450#note_3313479
 				target = document.documentElement
 				h = target.clientHeight
 				if (isDomRect == -1) {
@@ -1686,6 +1688,18 @@ const outputFD = () => new Promise(resolve => {
 })
 
 const outputScreen = (isResize = false) => new Promise(resolve => {
+	// compatMode
+		// we'll put this hjere since quirks mode causes issues with document.documentElement
+		// see https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/44450#note_3313479
+	let value, data ='', notation = default_red, METRIC = 'compatMode'
+	try {
+		value = document.compatMode
+		if ('CSS1Compat' == value) {notation = default_green}
+	} catch(e) {
+		value = e, data = zErrLog
+	}
+	addBoth(1, METRIC, value,'', notation, data)
+
 	Promise.all([
 		get_scr_fullscreen('fullscreen'),
 		get_scr_position_screen('position_screen'),
