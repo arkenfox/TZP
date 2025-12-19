@@ -542,47 +542,37 @@ function get_isPointerRawUpdate(event) {
 
 const get_isOS = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
-	if (!isGecko) {
-		// get svh and lvh: if they differ then you have a dynamic urlbar
-		// this is fast - could we leverage it for gecko as well
-			// maybe not since isBB might restrict it for FPing dynamic urlbar
-			// also apps may allow disabling it
-			// also maybe apps will enable it on other devices/tablets/platforms
-			// or extensions might tamper with it
-		// so for now just record the info for non-gecko
-		let aList = ['L','S']
+
+	// 1. widget font: mac/linux
+	function trywidget() {
 		try {
-			let data = {}
-			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
-			/*
-			let diff = Math.abs(data['L'] - data['S'])
-			if (diff > 20) { // allow some wriggle room
-				if ('blink' == isEngine) {isOS = 'android'}
+			if (runSG) {foo++}
+			let aIgnore = [
+				'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+				'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
+			]
+			let font = getComputedStyle(dom.tzpbutton).getPropertyValue('font-family')
+			if ('string' !== typeFn(font) || aIgnore.includes(font)) {
+				throw zErr
+			} else {
+				if (isGecko) {
+					// button
+					if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
+					} else if (font == '-apple-system') {exit('mac')
+					} else {throw zErr}
+				} else {
+				// mac webkit
+					// search and select return -apple-system
+					// mozfonts (e.g. mozbutton) return webkit-standard
+					// status-bar returns -apple-status-bar
+					// menu returns -apple-menu
+					tryfonts()
+				}
 			}
-			//*/
-			log_perf(SECTG, METRIC, t0, '', 'L: '+ data['L'] +' | S: '+ data['S'])
-		} catch(e) {}
-		return resolve()
-	}
-
-	function exit(value) {
-		isOS = value
-		isDesktop = 'android' !== isOS
-		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
-			+ (isDesktop ? '' : 'fav') + "icon64.png')" // set icon
-		log_perf(SECTG, METRIC, t0, '', isOS +'')
-		if (undefined == isOS) {
-			isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
-			log_alert(SECTG, METRIC, "undefined", isScope, true)
+		} catch {
+			tryfonts()
 		}
-		return resolve()
 	}
-
-	function trysomethingelse() {
-		// now what?
-		exit()
-	}
-
 	// 2: fonts
 	function tryfonts() {
 		// check doc fonts
@@ -600,55 +590,97 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		// check fonts
 		get_fonts_size(false).then(res => {
 			if ('object' == typeFn(res, true)) {
-				let aDetected = []
+				let aDetected = [], found
 				for (const k of Object.keys(res)) {aDetected.push(k)}
-				let found = aDetected[0]
-				if (aDetected.length == 1) {
-					if (found == 'MS Shell Dlg \\32') {exit('windows')
-					} else if (found == '-apple-system') {exit('mac')
-					} else if (found == 'Dancing Script') { exit('android')
+				if (isGecko) {
+					found = aDetected[0]
+					if (aDetected.length == 1) {
+						if (found == 'MS Shell Dlg \\32') {exit('windows')
+						} else if (found == '-apple-system') {exit('mac')
+						} else if (found == 'Dancing Script') { exit('android')
+						} else {
+							trysomethingelse()
+						}
+						//console.log('isOS font check', found, isOS)
+					} else if (isGecko && aDetected.length == 0) {
+						exit('linux')
 					} else {
 						trysomethingelse()
 					}
-					//console.log('isOS font check', found, isOS)
-				} else if (isGecko && aDetected.length == 0) {
-					exit('linux')
 				} else {
-					trysomethingelse()
+					console.log(aDetected)
+					// if we detected the fake font then ignore
+					//aDetected.push('--00'+ rnd_string()) // test
+					let aFake = aDetected.filter(x => !fntMaster.platform.all.includes(x)) 
+					if (aFake.length) {trysomethingelse(); return}
+					// get counts
+					let aWindows = aDetected.filter(x => fntMaster.platform.windows.includes(x)),
+						aMac = aDetected.filter(x => fntMaster.platform.mac.includes(x)),
+						aAndroid = aDetected.filter(x => fntMaster.platform.android.includes(x))
+					let intW = aWindows.length, intM = aMac.length, intA = aAndroid.length
+					//console.log(aWindows, intW, aMac, intM, aAndroid, intA)
+					if (intW > 0 && (intM + intA == 0)) {exit('windows')
+					} else if (intM > 0 && (intW + intA == 0)) {exit('mac')
+					} else if (aDetected.length == 0) {exit('linux')
+					} else {
+						//} else if (intA > 0 && (intM + intW == 0)) {exit('android')
+						//} else {exit('linux')}
+						// can't base android vs lionux on a single font
+						trysomethingelse()
+					}
 				}
 			} else {
 				trysomethingelse()
 			}
 		})
 	}
-
-	// widget font: mac/linux
-	try {
-		if (runSG) {foo++}
-		let aIgnore = [
-			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
-			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
-		]
-		let font = getComputedStyle(dom.tzpbutton).getPropertyValue('font-family')
-		if ('string' !== typeFn(font) || aIgnore.includes(font)) {
-			throw zErr
-		} else {
+	// 3. now what? 
+	function trysomethingelse() {
+		exit()
+	}
+	// 4. exit
+	function exit(value) {
+		isOS = value
+		isDesktop = 'android' !== isOS
+		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
+			+ (isDesktop ? '' : 'fav') + "icon64.png')" // set icon
+		log_perf(SECTG, METRIC, t0, '', isOS +'')
+		if (undefined == isOS) {
+			// for now only alert isGecko
 			if (isGecko) {
-				// button
-				if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
-				} else if (font == '-apple-system') {exit('mac')
-				} else {throw zErr}
-			} else {
-			// mac webkit
-				// search and select return -apple-system
-				// mozfonts (e.g. mozbutton) return webkit-standard
-				// status-bar returns -apple-status-bar
-				// menu returns -apple-menu
-				tryfonts()
+				isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
+				log_alert(SECTG, METRIC, "undefined", isScope, true)
 			}
 		}
-	} catch {
+		return resolve()
+	}
+
+	if (isGecko) {
+		trywidget()
+	} else {
+		set_fntList_mini()
 		tryfonts()
+
+		/*
+		// get svh and lvh: if they differ then you have a dynamic urlbar
+		// this is fast - could we leverage it for gecko as well
+			// maybe not since isBB might restrict it for FPing dynamic urlbar
+			// also apps may allow disabling it
+			// also maybe apps will enable it on other devices/tablets/platforms
+			// or extensions might tamper with it
+		// so for now just record the info for non-gecko
+		let aList = ['L','S']
+		try {
+			let data = {}
+			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
+			let diff = Math.abs(data['L'] - data['S'])
+			if (diff > 20) { // allow some wriggle room
+				//if ('blink' == isEngine) {isOS = 'android'}
+			}
+			log_perf(SECTG, METRIC, t0, '', 'L: '+ data['L'] +' | S: '+ data['S'])
+		} catch(e) {}
+		//*/
+		return resolve()
 	}
 })
 
