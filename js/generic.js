@@ -2050,7 +2050,7 @@ function log_section(name, time, scope = isScope) {
 function countJS(item) {
 	jsFiles++
 	if (1 == jsFiles) {
-		// block quirks mode e.g. caused nu NoScript
+		// block quirks mode e.g. caused by NoScript
 		try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
 		// block if iframed
 		if (window.location !== window.parent.location) {run_block('iframe'); return}
@@ -2181,7 +2181,6 @@ function outputPostSection(id) {
 }
 
 function outputSection(id, isResize = false) {
-
 	if (isBlock || !gClick) {
 		output_perf('all')
 		return
@@ -2363,6 +2362,8 @@ function outputSection(id, isResize = false) {
 		]).then(function(){
 			if (isBB && gClear && 'all' == id) {console.clear()}
 			if (isSmart) {log_section(SECTP, gt0)}
+			// WTF NoScript! sometimes we have to catch this later
+			try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
 			output()
 		})
 	}, delay)
