@@ -108,6 +108,7 @@ function dedupeArray(array, toString = false) {
 function run_block(trace) {
 	console.log(trace, 'blocking')
 	log_perf(SECTG, 'isBlock','')
+	isStop = true // prevent further code
 	try {
 		dom.tzpContent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
@@ -116,6 +117,8 @@ function run_block(trace) {
 			msg = 'i\'m in an iframe'
 		} else if ('insecure' == trace) {
 			msg = 'i\'m in an insecure context'
+		} else if ('quirks' == trace) {
+			msg = 'i\'m in quirks mode - try again'
 		} else if (isAllowNonGecko) {
 			if (undefined !== isEngine) {
 				msg = 'update your '+ isEngine +' browser'
@@ -763,7 +766,7 @@ function get_isVer(METRIC) {
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
-	if (isBlock) {run_block('gecko'); return}
+	if (isBlock) {run_block('gecko'); return} // sets isStop
 	// set smarts / modes
 	smartFn('early')
 	if (!isSmart && isVer < isSmartMin) {run_basic()}
@@ -2047,13 +2050,8 @@ function log_section(name, time, scope = isScope) {
 function countJS(item) {
 	jsFiles++
 	if (1 == jsFiles) {
-		if (undefined !== isStylesheet) {
-			// update tooltip
-			try {
-				let items = document.getElementsByClassName('cssrange')
-				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet}
-			} catch(e) {}
-		}
+		// block quirks mode e.g. caused nu NoScript
+		try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
 		// block if iframed
 		if (window.location !== window.parent.location) {run_block('iframe'); return}
 		// block if insecure as this produces very different results e.g. some APIs require secure
@@ -2061,9 +2059,16 @@ function countJS(item) {
 		if (!isFile && 'https:' !== location.protocol) {run_block('insecure'); return}
 		// non-gecko
 		if (!isGecko) {
+			if (isEngineBlocked) {run_block('upgrade'); return}
 			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
 		}
-
+		// update tooltip
+		if (undefined !== isStylesheet) {
+			try {
+				let items = document.getElementsByClassName('cssrange')
+				for (let i=0; i < items.length; i++) {items[i].innerHTML = 'range '+ isStylesheet}
+			} catch(e) {}
+		}
 		// set src's for our l10n iframe tests
 			// setting these inline can cause the wrong contentDocument in the wrong iframes
 			// it's almost random like some sort of race with different results in android vs windows - WTF!!
@@ -2081,15 +2086,8 @@ function countJS(item) {
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
-		// block: gecko (we promised/set isBlock in isVer above)
-		if (isGecko && isBlock) {return}
-		// block: nongecko
-		if (!isGecko) {
-			// not allowed or engine is undefined
-			if (!isAllowNonGecko || undefined == isEngine) {return}
-			// allowed but engine fails a minimum standard
-			if (isEngineBlocked) {run_block('upgrade'); return}
-		}
+		// block: quirks, iframe, insecure, upgrade required, !isAllowNonGecko, undefined isEngine | also if gecko is below min version
+		if (isStop) {return}
 		// otherwise not blocked
 		isBlock = false
 		// tidy up metric overlay symbols to match global symbol used
