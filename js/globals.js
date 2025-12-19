@@ -20,7 +20,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 130
+	expectedMetrics = 129
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -224,7 +224,8 @@ let gt0, gt1,
 	isFontSizesPrevious = false, 
 	isSmart = false,
 	isSmartDataMode = false, // when in data-only mode we still want to run proxy/prototype lies
-	isSmartAllowed = false // data-only mode - do not give off false health signals if not maintained
+	isSmartAllowed = false, // data-only mode - do not give off false health signals if not maintained
+	isStop = false
 
 const isBlockMin = 128,
 	isSmartMin = 140
