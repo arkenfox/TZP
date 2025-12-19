@@ -100,7 +100,8 @@ let fntMaster = {
 			'Courier','Times',
 			// ToDo: document-supported only
 			'Hiragino Kaku Gothic ProN', //'ヒラギノ角ゴ', // mac doesn't seem to do localized
-			// ToDo: in faces: maybe remove when that lands in TB
+			// ToDo: these are weighted but seem to test correctly in mac but I don't like weighted fonts here
+				// These are listed in faces: maybe remove the them from here once fontface is enabled in TB
 			'Arial Black','Arial Narrow',
 		],
 		macfaces: [
@@ -671,17 +672,16 @@ let fntMaster = {
 			'Cascadia Code','Cascadia Mono', // 11
 		],
 	},
-	// isOS gecko
-		// smaller list so it works with BB
-	mini: [
-		// note: '-apple-menu','-apple-status-bar' not detected in gecko
-		'-apple-system',
-		'Dancing Script', // android fallback // 'Roboto'
-		'MS Shell Dlg \\32',
-	],
-	// isOS for non gecko
-	miniother: {
-		// all expected fonts that wouldn't likely be found on other platforms
+	// platform detection
+	platform: {
+		// gecko
+		gecko: [
+			// note: '-apple-menu','-apple-status-bar' not detected in gecko
+			'-apple-system',
+			'Dancing Script', // android fallback // 'Roboto'
+			'MS Shell Dlg \\32',
+		],
+		// non-gecko: all expected fonts that wouldn't likely be found on other platforms
 		android: ['Dancing Script'],
 		mac: [
 			'-apple-menu','-apple-status-bar','-apple-system', // wekbit detects these 3, blink doesn't
@@ -691,7 +691,9 @@ let fntMaster = {
 			'MS Gothic','MS PGothic','MS UI Gothic','Microsoft JhengHei','Microsoft New Tai Lue',
 			'Microsoft PhagsPa','Microsoft Tai Le','Microsoft YaHei','Microsoft Yi Baiti',
 		],
-	}
+		// combined non-gecko
+		all: [],
+	},
 }
 
 function set_fntList() {
@@ -959,6 +961,16 @@ function set_fntList() {
 		addDetail('font_offscreen_'+ isOS, fntData.offscreen.summary, 'lists')
 		addDetail('total_fonts_'+ isOS, fntData.all, 'lists')
 	}
+}
+
+function set_fntList_mini() {
+	// populate fntMaster.platform.all for non-gecko
+	try {
+		let aTemp = fntMaster.platform.android
+		aTemp = aTemp.concat(fntMaster.platform.mac)
+		aTemp = aTemp.concat(fntMaster.platform.windows)
+		fntMaster.platform.all = aTemp.sort()
+	} catch(e) {}
 }
 
 function get_document_fonts(METRIC) {
@@ -1439,7 +1451,8 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			}
 			fntGeneric = fntControl
 			fntTest = ['--00'+ rnd_string()]
-			fntTest = fntTest.concat(fntMaster.mini)
+			let src = isGecko ? 'gecko' : 'all'
+			fntTest = fntTest.concat(fntMaster.platform[src])
 			oTests = {'perspective': {}}
 		}
 
