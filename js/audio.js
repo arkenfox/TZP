@@ -167,7 +167,8 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 					} else {
 						if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
 					}
-					addBoth(11, METRIC, display + btn,'', notation,'', isLies)
+					addData(11, METRIC, display,'', isLies)
+					addDisplay(11, METRIC, display, btn, notation, isLies)
 					log_perf(11, METRIC, t0)
 					return resolve()
 				})
