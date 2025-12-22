@@ -288,6 +288,8 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 		} else if ('blink' !== isEngine) {
 			// non-blink
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
+		} else if ('object' !== typeFn(k, true)) {
+			throw zErrType + typeCheck
 		} else {
 			// blink
 			let expected = '[object Keyboard]'
