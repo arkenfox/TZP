@@ -61,7 +61,7 @@ var aLegend = [],
 	aDates = [],
 	aDays = ["January 1","July 1",],
 	aYears = [],
-	aYearsTZP = [1879,1921,1952,1976,2025],
+	aYearsTZP = [],
 	loopYear = "",
 	loopData = [],
 	tzResolved = ""
@@ -423,7 +423,7 @@ function run_test(isLoopy) {
 			info.push( title("[tzp] hash") + s16 + tzpHash + sc)
 
 			let tzpMatchNotation = ""
-			if (aYears.join() == "1879,1921,1952,1976,2018") {
+			if (aYears.join() == aYearsTZP.join()) {
 				tzpMatchNotation = (matchHash == tzpHash ? sg : sb) +" [matches]" + sc
 			}
 			info.push( title("[toLocale] hash") + matchHash + tzpMatchNotation)
@@ -602,8 +602,12 @@ unique:  48 groups (>1) 171 timezones <- less shared
 
 function start() {
 	get_globals()
+	get_isVer()
 	// chrome has more groups with full vs supported
 	dom.useSupported.checked = true
+
+	aYearsTZP = [1879,1952,1976,2025]
+	if (isVer < 112) {aYearsTZP = [1879,1921,1952,1976,2025]}
 
 	// remove any sloppy duplicates
 	gTimezones = gTimezones.filter(function(item, position) {return gTimezones.indexOf(item) === position})
