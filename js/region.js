@@ -1219,8 +1219,11 @@ function get_timezone(METRIC) {
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
-	let years = [1879, 1921, 1952, 1976, 2025]
-	let days = {'January 1': '01-01','July 1': '07-01'}
+	let years = [1879, 1952, 1976, 2025]
+	let days = {
+		'January 1': {numbers: [1,1], str :'01-01'},
+		'July 1': {numbers: [7,1], str: '07-01'}
+	}
 	
 	// 1879-01-01T13:00Z
 
@@ -1264,7 +1267,7 @@ function get_timezone(METRIC) {
 		try {
 			years.forEach(function(year) {
 				Object.keys(days).forEach(function(day) {
-					let isFirst = (year == years[0] && day == days[0])
+					let isFirst = (year == years[0] && day == 'January 1')
 					let datetime = day +', '+ year +' 13:00:00'
 					let control = new Date(datetime +' UTC')
 					let test = new Date(datetime)
@@ -1290,14 +1293,16 @@ function get_timezone(METRIC) {
 									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
 									// e.g. 1879-01-01T13:00Z
 									let tzid = Temporal.Now.timeZoneId(),
-										instant = Temporal.Instant.from(year +'-'+ days[day] +'T13:00Z'),
-										source = instant.toZonedDateTimeISO(tzid).offsetNanoseconds,
-										target = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
-										offset = (target - source) / 1e6
+										instant = Temporal.Instant.from(year +'-'+ days[day].str +'T13:00Z'),
+										source = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
+									// UTC is always zero, riiight? so we could hard-code this
+									let target = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
+									offset = (target - source) / 1e6
 								}
 							}
 							if (isFirst) {
 								let typeCheck = typeFn(offset)
+								//console.log(method, typeCheck, offset)
 								if ('number' !== typeCheck) {throw zErrType + typeCheck}
 							}
 							oData[method][year].push(offset/k)
