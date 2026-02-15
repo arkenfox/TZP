@@ -52,12 +52,14 @@ let audiolist = [
 	a+'3gpp2', 
 	a+'aac',
 	a+'flac',
+	a+'matroska',
 	a+'mp3',
 	a+'mp4',
 	a+'mp4; codecs=',
 	a+'mp4; codecs=""',
 	a+'mp4; codecs="flac"',
 	a+'mp4; codecs="mp3"',
+	a+'mp4; codecs="opus"',
 	a+'mp4; codecs=\'\'',
 	a+'mpeg',
 	a+'mpeg; codecs="mp3"',
@@ -74,11 +76,11 @@ let audiolist = [
 	a+'x-aac',
 	a+'x-flac',
 	a+'x-m4a',
+	a+'x-matroska',
 	a+'x-pn-wav',
 	a+'x-pn-wav; codecs="1"',
 	a+'x-wav',
 	a+'x-wav; codecs="1"',
-
 	a+'mp4; codecs="mp4a.40"',
 	a+'mp4; codecs="mp4a.40.1"',
 	a+'mp4; codecs="mp4a.40.2"',
@@ -123,15 +125,11 @@ let videolist = [
 	'application/ogg',
 	v+'3gpp',
 	v+'3gpp2',
+	v+'matroska',
 	v+'mp4',
 	v+'mp4; codecs=',
 	v+'mp4; codecs=""',
-	//v+'mp4; codecs="av01.0.00M.12"', // 12bit // get add it below
 	v+'mp4; codecs="avc1"',
-	v+'mp4; codecs="avc1.58000a"', // extended
-	v+'mp4; codecs="avc1.6e000a"', // high 10
-	v+'mp4; codecs="avc1.7a000a"', // high 4:2:2
-	v+'mp4; codecs="avc1.f4000a"', // high 4:4:4
 	v+'mp4; codecs="avc3"',
 	v+'mp4; codecs="flac"',
 	v+'mp4; codecs="hev1.1.6.L93.B0"', // 1853448
@@ -172,6 +170,7 @@ let videomp4 = [
 	"samr","sawb","sawp","sevc","sm2t","sqcp","srtp","ssmv","stpp","stgs","svc1","svc2","svcm","tc64","tmcd",
 	"twos","tx3g","ulaw","unid","urim","vc-1","vp08","vp09","wvtt",
 ]
+
 let videoavc1 = [
 	"42000a","42000b","42000c","42000d","420014","420015","420016","42001e","42001f","420020",
 	"420028","420029","42002a","420032","420033","420034","42400a","42400b","42400c","42400d",
@@ -179,22 +178,23 @@ let videoavc1 = [
 	"424033","424034","4d000a","4d000b","4d000c","4d000d","4d0014","4d0015","4d0016","4d001e",
 	"4d001f","4d0020","4d0028","4d0029","4d002a","4d0032","4d0033","4d0034","4d400a","4d400b",
 	"4d400c","4d400d","4d4014","4d4015","4d4016","4d401e","4d401f","4d4020","4d4028","4d4029",
-	"4d402a","4d4032","4d4033","4d4034","58000b","58000c","58000d","580014","580015","580016",
-	"58001e","58001f","580020","580028","580029","58002a","580032","580033","580034","64000a",
-	"64000b","64000c","64000d","640014","640015","640016","64001e","64001f","640020","640028",
-	"640029","64002a","640032","640033","640034","64080a","64080b","64080c","64080d","640814",
-	"640815","640816","64081e","64081f","640820","640828","640829","64082a","640832","640833",
-	"640834","6e000b","6e000c","6e000d","6e0014","6e0015","6e0016","6e001e","6e001f","6e0020",
-	"6e0028","6e0029","6e002a","6e0032","6e0033","6e0034","6e100a","6e100b","6e100c","6e100d",
-	"6e1014","6e1015","6e1016","6e101e","6e101f","6e1020","6e1028","6e1029","6e102a","6e1032",
-	"6e1033","6e1034","7a000b","7a000c","7a000d","7a0014","7a0015","7a0016","7a001e","7a001f",
-	"7a0020","7a0028","7a0029","7a002a","7a0032","7a0033","7a0034","7a100a","7a100b","7a100c",
-	"7a100d","7a1014","7a1015","7a1016","7a101e","7a101f","7a1020","7a1028","7a1029","7a102a",
-	"7a1032","7a1033","7a1034","f4000b","f4000c","f4000d","f40014","f40015","f40016","f4001e",
-	"f4001f","f40020","f40028","f40029","f4002a","f40032","f40033","f40034","f4100a","f4100b",
-	"f4100c","f4100d","f41014","f41015","f41016","f4101e","f4101f","f41020","f41028","f41029",
-	"f4102a","f41032","f41033","f41034","2c000a","2c000b","2c000c","2c000d","2c0014","2c0015",
-	"2c0016","2c001e","2c001f","2c0020","2c0028","2c0029","2c002a","2c0032","2c0033","2c0034",
+	"4d402a","4d4032","4d4033","4d4034","58000a","58000b","58000c","58000d","580014","580015",
+	"580016","58001e","58001f","580020","580028","580029","58002a","580032","580033","580034",
+	"64000a","64000b","64000c","64000d","640014","640015","640016","64001e","64001f","640020",
+	"640028","640029","64002a","640032","640033","640034","64080a","64080b","64080c","64080d",
+	"640814","640815","640816","64081e","64081f","640820","640828","640829","64082a","640832",
+	"640833","640834","6e000a","6e000b","6e000c","6e000d","6e0014","6e0015","6e0016","6e001e",
+	"6e001f","6e0020","6e0028","6e0029","6e002a","6e0032","6e0033","6e0034","6e100a","6e100b",
+	"6e100c","6e100d","6e1014","6e1015","6e1016","6e101e","6e101f","6e1020","6e1028","6e1029",
+	"6e102a","6e1032","6e1033","6e1034","7a000a","7a000b","7a000c","7a000d","7a0014","7a0015",
+	"7a0016","7a001e","7a001f","7a0020","7a0028","7a0029","7a002a","7a0032","7a0033","7a0034",
+	"7a100a","7a100b","7a100c","7a100d","7a1014","7a1015","7a1016","7a101e","7a101f","7a1020",
+	"7a1028","7a1029","7a102a","7a1032","7a1033","7a1034","f4000a","f4000b","f4000c","f4000d",
+	"f40014","f40015","f40016","f4001e","f4001f","f40020","f40028","f40029","f4002a","f40032",
+	"f40033","f40034","f4100a","f4100b","f4100c","f4100d","f41014","f41015","f41016","f4101e",
+	"f4101f","f41020","f41028","f41029","f4102a","f41032","f41033","f41034","2c000a","2c000b",
+	"2c000c","2c000d","2c0014","2c0015","2c0016","2c001e","2c001f","2c0020","2c0028","2c0029",
+	"2c002a","2c0032","2c0033","2c0034",
 ]
 let a1 = [0, 1, 2],
 	a2 = ["00","01","02","03","04","05","06","07","08","09",10,11,12,13,14,15,16,17,18,19,20,21,22,23,31],
@@ -282,8 +282,8 @@ function get_media(type) {
 				canDisplay = "none"
 			} else {
 				let canobj = {}
-				if (aMaybe.length) {canobj["maybe"] = aMaybe}
-				if (aProbably.length) {canobj["probably"] = aProbably}
+				if (aMaybe.length) {canobj["maybe"] = aMaybe.sort()}
+				if (aProbably.length) {canobj["probably"] = aProbably.sort()}
 				let canHash = mini(canobj)
 				canDisplay = canHash + getButton(METRICcan, aMaybe.length +"/" + aProbably.length)
 				oData[METRICcan] = canobj
@@ -304,8 +304,8 @@ function get_media(type) {
 				typeDisplay = "none"
 			} else {
 				let typeobj = {}
-				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder}
-				if (go3 && aSource.length) {typeobj["MediaSource"] = aSource}
+				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder.sort()}
+				if (go3 && aSource.length) {typeobj["MediaSource"] = aSource.sort()}
 				let typeHash = mini(typeobj)
 				let notation = (go2 ? aRecorder.length : zErr) +"/"+ (go3 ? aSource.length : zErr)
 				typeDisplay = typeHash + getButton(METRICtype, notation)
@@ -313,7 +313,6 @@ function get_media(type) {
 			}
 		}
 		dom[type +"type"].innerHTML = typeDisplay
-
 		// ToDo: media: remove audio/video element?
 		return
 
@@ -352,6 +351,7 @@ let videocount = videolist.length
 //console.log(videolist.join("\n"))
 videolist = videolist.filter(function(item, position) {return videolist.indexOf(item) === position})
 if (videolist.length !== videocount) {console.log("videolist has dupes", videocount, videolist.length)}
+//console.log(videolist.join("\n"))
 
 run()
 
