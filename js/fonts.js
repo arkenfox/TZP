@@ -1390,11 +1390,16 @@ console.log(oSkip)
 			// if one dimension key throws e.g. a Reference Error then the whole lot thows
 			// e.g. clientHeight: foo++, all three size metrics are errors: "font_sizes/_base/_methods": "ReferenceError: foo is not defined"
 			// e.g. uBO's AOPR: *##+js(aopr, Range.prototype.getClientRects)
-			const props = ['height','width']
+			// we already catch TypeErrors
 			let el = dom.tzpRect
 			for (let i=0; i < aSkipCheck.length; i++) {
 				let name = aSkipCheck[i]
 				//console.log(i, name)
+
+				// these need work: try still create a complete meltdown
+				// Range.prototype.getBoundingClientRect)
+				// Element.prototype.getClientRects)
+
 				try {
 					//foo++
 					let obj = {}
@@ -1411,19 +1416,13 @@ console.log(oSkip)
 					} else if ('offset' == name) {
 						obj = {'height': el.offsetHeight, 'width': el.offsetWidth}
 					}
-					//console.log(obj)
-					props.forEach(function(prop){
-						let value = obj[prop]
-						//if (i == 1) {value = 's'} // test
-						let typeCheck = typeFn(value)
-						if ('number' !== typeCheck) {throw zErrType + typeCheck}
-					})
 				} catch(e) {
 					oSkip[i] = true
 					delete oTests[name]
 					addDisplay(12, METRIC +'_'+ name, log_error(12, METRIC +'_'+ name, e))
 				}
 			}
+			console.log(oSkip)
 		} else {
 			fntControl = ['monospace', "sans-serif", "serif"]
 			fntControlObj = {
