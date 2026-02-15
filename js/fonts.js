@@ -565,6 +565,7 @@ let fntMaster = {
 			'Nimbus Sans','P052','Quicksand','Standard Symbols PS',
 			'URW Bookman','URW Gothic','Z003',
 			// ToDo: expand
+			'Inter',
 		],
 		mac: [ //NOT kBase/LangPack
 			'Academy Engraved LET','Adelle Sans Devanagari','AkayaKanadaka','AkayaTelivigala','Annai MN','Arima Koshi','Arima Madurai','Avenir Next Condensed',
@@ -604,6 +605,8 @@ let fntMaster = {
 			'Athelas','Marion','Seravek','Superclarendon',
 			// downloadable but I have it
 			'Iowan Old Style',
+			// NFI
+			'BlinkMacSystemFont',
 		],
 		macfaces: [
 			'Avenir Next Condensed Bold','Avenir Next Condensed Demi Bold',
@@ -1354,23 +1357,104 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		const range = document.createRange()
 		range.selectNode(span)
 
+
+		// set parameters
+		let fntGeneric = [], fntTest = [], fntControl = [], fntControlObj = {}, oTests = {}, aTests = []
+		const aSkipCheck = ['domrectbounding', 'domrectclient','domrectboundingrange','domrectclientrange','client','offset']
+		let oSkip = {}
+		for (let i=0; i < aSkipCheck.length; i++) {oSkip[i] = false}
+console.log(oSkip)
+
+		if (isMain) {
+			fntData.family.control.forEach(function(item) {
+				let key = item.split(',')[0]
+				fntControl.push(key)
+				fntControlObj[key] = item
+			})
+			fntGeneric = fntData.family.generic
+			fntTest = fntData.family.full
+			// match display order so btn links = first of each hash
+			oTests = {
+				'client': {},
+				'offset': {},
+				'scroll': {},
+				'pixel': {},
+				'pixelsize': {},
+				'perspective': {},
+				'transform': {},
+				'domrectbounding': {},
+				'domrectboundingrange': {},
+				'domrectclient': {},
+				'domrectclientrange': {},
+			}
+			// if one dimension key throws e.g. a Reference Error then the whole lot thows
+			// e.g. clientHeight: foo++, all three size metrics are errors: "font_sizes/_base/_methods": "ReferenceError: foo is not defined"
+			// e.g. uBO's AOPR: *##+js(aopr, Range.prototype.getClientRects)
+			const props = ['height','width']
+			let el = dom.tzpRect
+			for (let i=0; i < aSkipCheck.length; i++) {
+				let name = aSkipCheck[i]
+				//console.log(i, name)
+				try {
+					//foo++
+					let obj = {}
+					if (0 == i) {
+						//foo++
+						obj = el.getBoundingClientRect()
+					} else if (1 == i) {
+						obj = el.getClientRects()[0]
+					} else if (i < 4) {
+						let range = document.createRange(); range.selectNode(el)
+						obj = (2 == i ? range.getBoundingClientRect() : range.getClientRects()[0] )
+					} else if ('client' == name) {
+						obj = {'height': el.clientHeight, 'width': el.clientWidth}
+					} else if ('offset' == name) {
+						obj = {'height': el.offsetHeight, 'width': el.offsetWidth}
+					}
+					//console.log(obj)
+					props.forEach(function(prop){
+						let value = obj[prop]
+						//if (i == 1) {value = 's'} // test
+						let typeCheck = typeFn(value)
+						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					})
+				} catch(e) {
+					oSkip[i] = true
+					delete oTests[name]
+					addDisplay(12, METRIC +'_'+ name, log_error(12, METRIC +'_'+ name, e))
+				}
+			}
+		} else {
+			fntControl = ['monospace', "sans-serif", "serif"]
+			fntControlObj = {
+				"monospace": 'monospace, Consolas, Courier, "Courier New", "Lucida Console"',
+				"sans-serif": 'sans-serif, Arial',
+				"serif": 'serif, "Times New Roman\"',
+			}
+			fntGeneric = fntControl
+			fntTest = ['--00'+ rnd_string()]
+			let src = isGecko ? 'gecko' : 'all'
+			fntTest = fntTest.concat(fntMaster.platform[src])
+			oTests = {'perspective': {}}
+		}
+
 		let getDimensions = (span, style) => {
 			const transform = style.transformOrigin.split(' ')
 			const perspective = style.perspectiveOrigin.split(' ')
 			const dimensions = {
 				// keep sorted for font_sizes_base_reported
-				clientHeight: span.clientHeight,
-				clientWidth: span.clientWidth,
-				domrectboundingHeight: span.getBoundingClientRect().height,
-				domrectboundingWidth: span.getBoundingClientRect().width,
-				domrectboundingrangeHeight: range.getBoundingClientRect().height,
-				domrectboundingrangeWidth: range.getBoundingClientRect().width,
-				domrectclientHeight: span.getClientRects()[0].height,
-				domrectclientWidth: span.getClientRects()[0].width,
-				domrectclientrangeHeight: range.getClientRects()[0].height,
-				domrectclientrangeWidth: range.getClientRects()[0].width,
-				offsetHeight: span.offsetHeight,
-				offsetWidth: span.offsetWidth,
+				clientHeight: oSkip[4] ? '' : span.clientHeight,
+				clientWidth: oSkip[4] ? '' : span.clientWidth,
+				domrectboundingHeight: oSkip[0] ? '' : span.getBoundingClientRect().height,
+				domrectboundingWidth: oSkip[0] ? '' : span.getBoundingClientRect().width,
+				domrectboundingrangeHeight: oSkip[1] ? '' : range.getBoundingClientRect().height,
+				domrectboundingrangeWidth: oSkip[1] ? '' : range.getBoundingClientRect().width,
+				domrectclientHeight: oSkip[2] ? '' : span.getClientRects()[0].height,
+				domrectclientWidth: oSkip[2] ? '' : span.getClientRects()[0].width,
+				domrectclientrangeHeight: oSkip[3] ? '' : range.getClientRects()[0].height,
+				domrectclientrangeWidth: oSkip[3] ? '' : range.getClientRects()[0].width,
+				offsetHeight: oSkip[5] ? '' : span.offsetHeight,
+				offsetWidth: oSkip[5] ? '' : span.offsetWidth,
 				perspectiveHeight: originPixelsToNumber(perspective[1]),
 				perspectiveWidth: originPixelsToNumber(perspective[0]),
 				pixelHeight: pixelsToNumber(style.height),
@@ -1416,44 +1500,6 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				}
 				return dimensions
 			}
-		}
-
-		// set parameters
-		let fntGeneric = [], fntTest = [], fntControl = [], fntControlObj = {}, oTests = {}, aTests = []
-		if (isMain) {
-			fntData.family.control.forEach(function(item) {
-				let key = item.split(',')[0]
-				fntControl.push(key)
-				fntControlObj[key] = item
-			})
-			fntGeneric = fntData.family.generic
-			fntTest = fntData.family.full
-			// match display order so btn links = first of each hash
-			oTests = {
-				'client': {},
-				'offset': {},
-				'scroll': {},
-				'pixel': {},
-				'pixelsize': {},
-				'perspective': {},
-				'transform': {},
-				'domrectbounding': {},
-				'domrectboundingrange': {},
-				'domrectclient': {},
-				'domrectclientrange': {},
-			}
-		} else {
-			fntControl = ['monospace', "sans-serif", "serif"]
-			fntControlObj = {
-				"monospace": 'monospace, Consolas, Courier, "Courier New", "Lucida Console"',
-				"sans-serif": 'sans-serif, Arial',
-				"serif": 'serif, "Times New Roman\"',
-			}
-			fntGeneric = fntControl
-			fntTest = ['--00'+ rnd_string()]
-			let src = isGecko ? 'gecko' : 'all'
-			fntTest = fntTest.concat(fntMaster.platform[src])
-			oTests = {'perspective': {}}
 		}
 
 		// base sizes
@@ -1851,7 +1897,7 @@ function get_glyphs(METRIC, isLies) {
 		- so reminder that generally we should always be using https for final testing/analysis
 	*/
 	let t0 = nowFn()
-	/* Notes: math added FF145+
+	/* Notes: math added FF145+ nightly and FF149+
 		use isStyles currently = ['cursive','math','monospace','sans-serif','serif','system-ui']
 
 		unique sizes: win11 all system fonts FF
