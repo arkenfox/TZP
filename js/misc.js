@@ -846,13 +846,24 @@ function get_window_functions(METRIC) {
 		// notation: safer vs standard doesn't seem to affect this
 			// but we need to check webgl click to play
 		if (isBBESR) {
-			if (isMB) {
-				// MB140
-				if ('12add862' == hash) {notation = bb_green} // windows
-			} else {
-				// TB140
-				if ('cdde2f4c' == hash) {notation = bb_green} // windows
- 			}
+			// hashes must be calculated on HTTPS not file schema
+			let oHashes = {
+				// key: [standard, safer]
+				MB : {
+					'linux': ['c99980b4','12add862'],
+					'mac': ['f862f015','df5f9ac3'],
+					'windows': ['c99980b4','12add862']
+				},
+				TB : {
+					'linux': ['0c9aaf28','cdde2f4c'],
+					'mac': ['efef2c31','d2e0c655'],
+					'windows': ['0c9aaf28', 'cdde2f4c']
+				},
+			}
+			let key = isTB ? 'TB' : 'MB'
+			if (undefined !== oHashes[key][isOS]) {
+				if (oHashes[key][isOS].includes(hash)) {notation = bb_green}
+			}
 		}
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -999,13 +1010,13 @@ function get_window_props(METRIC) {
 			// NOTE: hashes can not be computed via file schema as NS does weird shit now
 			let oHashes = {
 				MB : {
-					'linux': ['',''], // 860, 859
-					'mac': ['',''], // 857, 856
+					'linux': ['0a2537c8','3c3cf46a'], // 860, 859
+					'mac': ['cb4fa24b','8be8b02d'], // 857, 856
 					'windows': ['0a2537c8','3c3cf46a'] // 860, 859
 				},
 				TB : {
-					'linux': ['',''], // 837, 836
-					'mac': ['',''], // 834, 833
+					'linux': ['f3fd6bb5','0698db17'], // 837, 836
+					'mac': ['bd279b0a','27f5532c'], // 834, 833
 					'windows': ['f3fd6bb5','0698db17'] // 837, 836
 				},
 			}
