@@ -182,14 +182,18 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 	get_fullScreen('fullScreen')
 	get_mozFullScreenEnabled('mozFullScreenEnabled')
 	addData(1, METRIC, oRes, mini(oRes))
-	return resolve()
+	return resolve(oRes)
 })
 
 const get_scr_measure = () => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm('measure'),
 		get_scr_viewport('sizes_viewport'),
+		get_scr_fullscreen('fullscreen'),
 	]).then(function(res){
+		// get FS status
+		let isDisplayFS = 'fullscreen' == res[2]['display-mode']
+
 		let oTmp = {
 			screen: {height: {}, width: {}},
 			available: {height: {}, width: {}},
@@ -481,17 +485,60 @@ const get_scr_measure = () => new Promise(resolve => {
 		// display only: taskbar/dock + chrome
 			// on android there is no dock and we set a minimum width which means chrome is non-sensical
 			// and can be negative: e.g. outer 427 - inner 500, also display space is at a premium
-		let dockH = oData.screen.height.screen - oData.available.height.screen,
-			dockW = oData.screen.width.screen - oData.available.width.screen,
+		let arW = oData.screen.width.screen,
+			arH = oData.screen.height.screen,
+			dockH = arH - oData.available.height.screen,
+			dockW = arW - oData.available.width.screen,
 			chromeW = oData.outer.width.window - oData.inner.width.window,
-			chromeH = oData.outer.height.window - oData.inner.height.window
+			chromeH = oData.outer.height.window - oData.inner.height.window,
+			aspect = Math.trunc((arW/arH) * 1000)/1000
 		if (isDesktop) {
+			// ToDo: check each platform e.g. mac behavior FS Element vs F11
+			// chrome
+				// note: non-gecko does not resize non-inner (e.g. outer) when zooming, so chrome sizes can get ridiculous, display anyway
+			notation = red_benign
+			let isChromeZero = '00' == chromeW +''+chromeH
+			if (isDisplayFS) {
+				if (isChromeZero) {notation = green_benign}
+			} else {
+				if (!isChromeZero) {notation = green_benign}
+			}
+			sDetail[isScope].lookup['size_chrome'] = chromeW +' x '+ chromeH
+			addDisplay(1, 'size_chrome', '[chrome: '+ chromeW +' x '+ chromeH +']','', notation)
+
+			// docker
+			notation = red_benign
+			let isDockZero = '00' == dockW +''+dockH
+			if (isDisplayFS) {
+				if (isDockZero) {notation = green_benign}
+			} else {
+				if (!isDockZero) {notation = green_benign}
+			}
+
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
 			if (isOS == undefined) {dockStr = 'taskbar/dock/panel'}
-			oDisplay['scr_dock'] = '['+ dockStr +': '+ dockW +' x '+ dockH +']'
-			// note: non-gecko does not resize non-inner (e.g. outer) when zooming, so chrome sizes can get ridiculous, display anyway
-			oDisplay['scr_chrome'] = '[chrome: '+ chromeW +' x '+ chromeH +']'
+			sDetail[isScope].lookup['size_dock'] = dockW +' x '+ dockH
+			addDisplay(1, 'size_dock', '['+ dockStr +': '+ dockW +' x '+ dockH +']','', notation)
 		}
+
+		// aspect ratio
+			// AR is one measurement that would be a finite list: that if not known would mean tampering (or a new AR)
+			// https://en.wikipedia.org/wiki/List_of_common_display_resolutions
+				// we can likely easily cover 95%+ of non android ARs, but the last 5% is a massive long tail. The data itself
+				// redundant: and RFP checks in future will be set sizes e.g. 2k,4k,8k and will have their own halth checks
+			// for now just display the AR
+		notation = ''
+		/*
+		notation = isDesktop ? red_benign : ''
+		sDetail[isScope].lookup['screen_aspect_ratio'] = aspect
+		if ('NaN' !== aspect) {
+			// always get highest over lowest to reduce checks
+			let ar = (arW < arH ? Math.trunc((arH/arW) * 1000)/1000 : aspect)
+			let aGood = [1.6, 1.777, 1.778]
+			if (aGood.includes(ar)) {notation = green_benign}
+		}
+		//*/
+		addDisplay(1, 'screen_aspect_ratio', '[aspect ratio: '+ aspect +']','', notation)
 
 		// data
 		for (const k of Object.keys(oData)) {addData(1, 'sizes_'+ k, oData[k], mini(oData[k]))}
@@ -1458,12 +1505,14 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 	return resolve()
 })
 
-const get_agent_data = (METRIC, os = isOS) => new Promise(resolve => {
+const get_agent_data = (METRIC, os = isOS, isMain = true) => new Promise(resolve => {
 
 	function exit(hash, data ='', btn ='') {
-		sDetail.document['agent_reported'][METRIC] = ('object' == typeof data ? data : hash)
-		addBoth(2, METRIC, hash, btn,'', data)
-		return resolve()
+		if (isMain) {
+			sDetail.document['agent_reported'][METRIC] = ('object' == typeof data ? data : hash)
+			addBoth(2, METRIC, hash, btn,'', data)
+		}
+		return resolve(data)
 	}
 	try {
 		let k = navigator.userAgentData
@@ -1617,7 +1666,7 @@ const outputFD = () => new Promise(resolve => {
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
-		addBoth(3, 'browser', isEngine+'')
+		addBoth(3, 'browser', isBrave ? 'Brave' : isEngine+'')
 		// os
 		if (undefined !== isOS) {addBoth(3, 'os', isOS)}
 		return resolve()
@@ -1636,17 +1685,36 @@ const outputFD = () => new Promise(resolve => {
 	}
 
 	// about-wordmark.svg
-		// record both: if missing = 0x0 (hidden) | = image placeholder size (offscreen)
+		// we were using width/height but in beta/dev 148 (may have started earlier) offscreen would
+		// produce different and unstable results (see below) so instead we will use naturalW/H
+	// ToDo: if I can work ouot how to make w/h stable and different this may help expose other methods
+		// to differentiate channels and PB mode
 	try {
 		let isHidden, isOffscreen
 		// hidden
-		w = dom.tzpBrandHidden.width, h = dom.tzpBrandHidden.height
+		w = dom.tzpBrandHidden.naturalWidth, h = dom.tzpBrandHidden.naturalHeight
 		if (runST) {w = true, h += ''}
 		wType = typeFn(w), hType = typeFn(h)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' x '+ hType}
 		isHidden = w +' x '+ h
 		// offscreen
-		isOffscreen = dom.tzpBrand.width +' x '+ dom.tzpBrand.height
+		/*
+		stable is one line "Firefox Browser" 336 x 48 - stable and matches
+		nightly is two lines "Firefox | Nightly" 300 x 109 - stable and matches
+		dev is two lines "Firefox | Developer"
+			hidden			300 x 109
+			offscreen		628 x 227 <-- 1st time in a session and wtf ALWAYS THIS in PB windows
+			offscreen		615 x 223 <-- thereafter
+		beta is one line: "Firefox"
+			hidden			300 x 67	
+			offscreen		628 x 140 <-- 1st time in a session and wtf ALWAYS THIS in PB windows
+			offscreen		615 x 137 <-- thereafter
+			but offscreen should be 300 x 67
+
+		note: 1 1sec + pause before testing on gLoad solves stability but keeps the nonm-match
+		but I don't think this adds anything entropy wise
+		*/
+		isOffscreen = dom.tzpBrand.naturalWidth +' x '+ dom.tzpBrand.naturalHeight
 		if (isHidden !== isOffscreen) {isHidden += ', ' + isOffscreen}
 		isWordmark = isHidden
 	} catch(e) {
@@ -1664,7 +1732,7 @@ const outputFD = () => new Promise(resolve => {
 	let notation = isBB ? bb_red : ''
 	addBoth(3, 'browser', (isMB ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
 	addBoth(3, 'logo', isLogo,'', (isBB && '24 x 24' == isLogo ? bb_green : notation), isLogoData)
-	addBoth(3, 'wordmark', isWordmark,'', (isBB && '0 x 0, 24 x 24' == isWordmark ? bb_green : notation), isWordData)
+	addBoth(3, 'wordmark', isWordmark,'', (isBB && '0 x 0' == isWordmark ? bb_green : notation), isWordData)
 
 	// eval
 	METRIC = 'eval.toString'
@@ -1687,7 +1755,6 @@ const outputFD = () => new Promise(resolve => {
 
 const outputScreen = (isResize = false) => new Promise(resolve => {
 	Promise.all([
-		get_scr_fullscreen('fullscreen'),
 		get_scr_position_screen('position_screen'),
 		get_scr_position_window('position_window'),
 		get_scr_pixels('pixels'),
