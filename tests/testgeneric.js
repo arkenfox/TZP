@@ -413,10 +413,11 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 148
+		isVerMax = 149
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled (default true)
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
@@ -605,7 +606,7 @@ function buildnav() {
 		'dtfcomponents','dtfdatetimestyle','dtfdayperiod','dtflistformat','dtfrelated','dtftimezonename',
 		'duration',
 		'nfcompact','nfcurrency','nfformattoparts','nfnotation','nfsign','nfunit',
-		'pluralrules','rtf','resolvedoptions','segmenter',
+		'pr','prrange','rtf','resolvedoptions','segmenter',
 	]
 	let oTests = { // just hardcode the prettyy names
 		'dncalendar': 'dn: calendar',
@@ -627,6 +628,8 @@ function buildnav() {
 		'nfnotation': 'nf: notation',
 		'nfsign': 'nf: sign',
 		'nfunit': 'nf: unit',
+		'pr': 'pr: select',
+		'prrange': 'pr: selectrange',
 		'rtf': 'relativetimeformat',
 	}
 	// if not file skip segementer
