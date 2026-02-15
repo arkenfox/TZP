@@ -447,7 +447,7 @@ function set_oIntlTests() {
 				'short': ['chinese','dangi','ethiopic','gregory','islamic-tbla','islamic-umalqura','japanese','roc'],
 			},
 			currency: {'long': ['JPY','NIO','SEK','SZL','TZS','XAF']},
-			dateTimeField: {
+			datetimefield: {
 				'narrow': ['day','dayPeriod','weekOfYear','weekday'],
 				'short': ['era','month','second','timeZoneName'],
 			},
@@ -490,11 +490,15 @@ function set_oIntlTests() {
 			'terabyte': unitL,
 		},
 		// other
-		pluralrules: {
+		'pluralrules.select': {
 			cardinal: [0, 1, 2, 3, 7, 21, 100],
 			ordinal: [1, 2, 3, 4, 5, 6, 8, 10, 81]
 		},
-		relativetimeformat: { // 8 of 12
+		'pluralrules.selectrange': {
+			cardinal: [[0,0],[1,1],[2,1],[2,4]],
+			ordinal: [[0,0],[0,1],[0,6],[1,1],[1,3],[1,5],[3,3]],
+		},
+		relativetimeformat: {
 			always: {'narrow': [[1, 'day'], [0, 'year']]},
 			auto: {
 				'long': [[1, 'second']],
@@ -681,7 +685,7 @@ function get_language_locale() {
 
 function get_language_system(METRIC) {
 	/* systemLanguages: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/systemLanguage
-	populate svg with nav entries to detects if anything added. To detect removals would mean
+	populate svg with nav entries to detect if anything added. To detect removals would mean
 	populating with all supported BCPs (lots) = not worth it: perf and it is unlikely _only_ removal
 	happens, i.e we already detect added. Also prior to FF127 = false positives with prefixs e.g. if
 	you were 'en-US, en', all en-* would be be true. Not worth the footgun or hasssle
@@ -693,22 +697,28 @@ function get_language_system(METRIC) {
 		// populate
 		let aText = ['<switch id="switch">']
 		isLanguagesNav.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
+		aText.push('<text systemLanguage="groot">groot</text>')
 		aText.push('<text>unknown</text></switch>')
 		let el = dom.tzpSwitch
 		el.innerHTML = aText.join('')
 		// walk nodes
-		let aDetected = [], range = new Range()
+		let aDetected = []
 		const walker = document.createTreeWalker(dom['switch'], NodeFilter.SHOW_TEXT, null);
 		while(walker.nextNode() && walker.currentNode) {
-			range.selectNode(walker.currentNode)
-			if (range.getClientRects().length) {aDetected.push(walker.currentNode.textContent)}
+			let target = walker.currentNode
+			//* important: we check range.getClientRects DOMRectList length so only real nav items are detected
+				// we use range due to selectNode (I think)
+				// we can't use range.getBoundingClientRect's DOMRect object (can't get obj keys length)
+				// THIS IS THE WAY: range.getClientRects()
+			// e.g. if isLanguagesNav has a fake 'fr' (e.g. extension) it won't be detected as it
+				// isn't a "rendered" node with a range (cuz it's fake) - IIUIC
+			let range = new Range()
+			range.selectNode(target)
+			if (range.getClientRects().length) {aDetected.push(target.textContent)}
 		}
-		if (0 == aDetected.length) {
-			// should never happen: i.e we should always have unknown as a minimum fallback
-			throw zErrType + 'empty array'
-		} else if (aDetected.length > 1) {
-			aDetected = aDetected.filter(x => !['unknown'].includes(x))
-		}
+		// remove unknown
+		aDetected = aDetected.filter(x => !['unknown'].includes(x))
+		if (0 == aDetected.length) {throw zErrType + 'empty array'}
 		value = aDetected.join(', ')
 	} catch(e) {
 		value = e; data = zErrLog
@@ -906,7 +916,8 @@ function get_locale_intl() {
 					let key = testkeys[i]
 					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) { // for each style
-						let options = {type: key, style: s}
+						let optkey = 'datetimefield' == key ? 'dateTimeField' : key // fix key case
+						let options = {type: optkey, style: s}
 						if ('language' == key) {options = {type: key, languageDisplay: s}}
 						let data = {}, datacheck = {}
 						// displaynames takes an empty array for undefined, but allow oour override for testing
@@ -1040,7 +1051,7 @@ function get_locale_intl() {
 					if (datacheck.length) {objcheck[key] = datacheck}
 				}
 				if (!Object.keys(obj).length) {let trap = Intl.NumberFormat(locTest, {style: 'unit', unit: 'day'})} // trap error
-			} else if ('pluralrules' == m) {
+			} else if ('pluralrules.select' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
 					let data = [], datacheck = []
@@ -1048,12 +1059,41 @@ function get_locale_intl() {
 					if (isCheck) {checker = new Intl.PluralRules(locCheck, {type: key}); countC++}
 					let prev='', current='', prevchk='', currentchk=''
 					tests[key].forEach(function(n) {
-						current = formatter.select(n); if (prev !== current) {data.push(n +': '+ current)}; prev = current
+						current = formatter.select(n); if (prev !== current) {data.push(n +': '+ current); prev = current}
 						if (isCheck) {
-							currentchk = checker.select(n); if (prevchk !== currentchk) {datacheck.push(n +': '+ currentchk)}; prevchk = currentchk
+							currentchk = checker.select(n); if (prevchk !== currentchk) {datacheck.push(n +': '+ currentchk); prevchk = currentchk}
 						}
 					})
 					obj[key] = data; objcheck[key] = datacheck
+				}
+			} else if ('pluralrules.selectrange' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let data = {}, datacheck = {}
+					formatter = new Intl.PluralRules(locTest, {type: key}); countC++
+					if (isCheck) {checker = new Intl.PluralRules(locCheck, {type: key}); countC++}
+					let prev='', current='', prevchk='', currentchk=''
+					tests[key].forEach(function(n) {
+						current = formatter.selectRange(n[0], n[1])
+						if (prev !== current) {
+							let datakey =  formatter.select(n[0]) +'-'+ formatter.select(n[1])
+							if (undefined == data[datakey]) {data[datakey] = current}
+							prev = current
+						}
+						if (isCheck) {
+							currentchk = checker.selectRange(n[0], n[1])
+							if (prevchk !== currentchk) {
+								let checkkey =  checker.select(n[0]) +'-'+ checker.select(n[1])
+								if (undefined == datacheck[checkkey]) {datacheck[checkkey] = currentchk}
+								prevchk = currentchk
+							}
+						}
+					})
+					// sort obj keys
+					let newdata = {}, newdatacheck = {}
+					for (const k of Object.keys(data).sort()) {newdata[k] = data[k]}
+					for (const k of Object.keys(datacheck).sort()) {newdatacheck[k] = datacheck[k]}
+					obj[key] = newdata; objcheck[key] = newdatacheck
 				}
 			} else if ('relativetimeformat' == m) {
 				for (let i=0; i < testkeys.length; i++) {
@@ -1129,7 +1169,7 @@ function get_locale_intl() {
 			'displaynames','durationformat',
 			'numberformat.compact','numberformat.currency','numberformat.formattoparts',
 				'numberformat.notation','numberformat.sign','numberformat.unit',
-			'pluralrules','relativetimeformat','resolvedoptions',
+			'pluralrules.select','pluralrules.selectrange','relativetimeformat','resolvedoptions',
 		],
 		tolocalestring: [
 			'datetimeformat.components','datetimeformat.relatedyear','datetimeformat.timezonename',
