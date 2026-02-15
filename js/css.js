@@ -57,7 +57,7 @@ function get_colors() {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
 	} else {
-	// with forced coloes, removed -moz named colors will be false positives (and our alpha setting is retained)
+	// with forced colors, removed -moz named colors will be false positives (and our alpha setting is retained)
 		// wrecking our RFP deterministic hash: to solve this we will add them if we expect them
 		let aAdd = []
 		if (isVer < 141) {aAdd.push('-moz-buttonhoverface','-moz-buttonhovertext')} // removed FF141: 1968925
