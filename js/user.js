@@ -358,9 +358,16 @@ const outputUserPointer = (METRIC, event) => new Promise(resolve => {
 		altitudeAngle: 'number',
 		azimuthAngle: 'number',
 	}
+	if (!isGecko) {
+		oList.mozPressure = 'undefined'
+		oList.mozInputSource = 'undefined'
+	}
 	for (const k of Object.keys(oList).sort()) {
-		let value = event[k], expected = oList[k]
-		if (typeFn(value) !== expected) {value = 'err'}
+		let value = event[k], expected = oList[k], typeCheck = typeFn(value)
+		if (typeCheck !== expected) {
+			value = zErrType + typeCheck
+		}
+		if ('undefined' == typeCheck) {value += ''}
 		oData['pointerdown'][k] = value
 	}
 	let hash = mini(oData), btn = addButton(7, METRIC)
@@ -461,7 +468,17 @@ const outputUserTimingAudio = (METRIC) => new Promise(resolve => {
 
 function outputUser(x, event) {
 	// manual tests: require user initiated, permissions, transient activity
+
+	// do nothing
 	if (isBlock || !gClick) {return}
+	// if already in fullscreenElement, nothing to do
+		// we already did it when entering and resize picks up changes
+	if ('fullscreenElement' == x) {
+		if (document.fullscreen || document.webkitIsFullscreen) {
+			return
+		}
+	}
+
 	sDataTemp.display.manual = {} // reset display data
 	gClick = false // prevent other tests
 	gRun = false // reset
@@ -483,14 +500,6 @@ function outputUser(x, event) {
 	if ('all' == x) {
 
 	} else {
-		// if already in fullscreenElement, nothing to do
-			// we already did it when entering and resize picks up changes
-		if ('fullscreenElement' == x) {
-			if (document.fullscreen || document.webkitIsFullscreen) {
-				gClick = true
-				return resolve()
-			}
-		}
 		try {dom[x] = ''} catch {} // clear
 		// clear additional
 		try {

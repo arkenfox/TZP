@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 105, maxVer = 148, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 106, maxVer = 149, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -228,7 +228,7 @@ function outputVersion() {
 		gTZP = performance.now()
 		// record
 		function rec(order, version, bug, result, perf, note = '') {
-			dom.perf.innerHTML = 'main: '+ order
+			//dom.perf.innerHTML = 'main: '+ order
 			oResults[order] = [version, (performance.now() - gTZP) +" ms", result]
 			// do as little as possible to not affect perf
 			if (result === true) {
@@ -284,6 +284,15 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 149: 2009792
+		let t149 = performance.now(), ver149
+		try {
+			Temporal.PlainDate.from({calendar: 'gregory', monthCode: 'M12', month: 13, year: 2019, day: 1})
+		} catch(e) {
+			if ('RangeError' == e.name) {ver149 = true}
+		}
+		rec(149, 149, "2009792", ver149, performance.now()-t149, 'DATE') // 0.02 !temporal, 0.05 false, 0.07 true
 
 		// 148: 1085214
 			// fast-path: pref dom.location.ancestorOrigins.enabled (added + default true FF148+)
@@ -906,7 +915,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 66, oOther = {}
+	let countOther = 0, expectOther = 67, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -923,6 +932,13 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 149: 1999917 = SLOW
+		let t149 = performance.now(), ver149
+		try {
+			ver149 = '/' !== new Intl.DateTimeFormat("en-u-ca-chinese", {timeZone:"UTC"}).format(new Date("+100000-01-01T00:00:00.000Z"))
+		} catch(e) {}
+		rec(149, 149, "1999917", ver149, performance.now()-t149, 'DATE') // 6.5ms
 
 		// 140: 1965802 SLOW
 		let t140 = performance.now(), ver140

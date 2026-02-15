@@ -64,7 +64,65 @@
 <script>
 'use strict';
 
+let canvasTDU = dom.control1, base64DTU
+// //https://stackoverflow.com/questions/37992117/how-to-get-image-color-mode-cmyk-rgb-in-javascript
+	// ^ can I use this to rea the chunks and remove comment fields
+
+function test(b64 = '', sliceSize = 512) {
+	// https://stackoverflow.com/questions/16968945/convert-base64-png-data-to-javascript-file-objects
+	// https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+	/*
+		the 'file' variable gives me insight into hexidecimal? e.g. PNG ... IEND
+		https://en.wikipedia.org/wiki/PNG#File_format
+	*/
+	if ('' == b64) {
+		b64 = base64DTU
+		if (undefined == base64DTU) {return}
+	} 
+
+	try {
+		//foo++
+		let png = b64.split(',')[1]
+		console.log('input\n-----\n', png)
+		const byteCharacters = window.atob(png)
+		const byteArrays = []
+		for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+			const slice = byteCharacters.slice(offset, offset + sliceSize)
+			const byteNumbers = new Array(slice.length)
+			for (let i = 0; i < slice.length; i++) {
+				byteNumbers[i] = slice.charCodeAt(i)
+			}
+			const byteArray = new Uint8Array(byteNumbers)
+			byteArrays.push(byteArray)
+		}
+		console.log('byteArrays\n-----\n', byteArrays)
+
+		// this doesn't tell me anything as they always match
+		let file = new Blob([window.atob(png)],  {type: 'image/png', encoding: 'utf-8'})
+		console.log('file\n-----\n',file)
+		let fr = new FileReader()
+		fr.onload = function (oFREvent) {
+			try {
+			//foo++
+			var v = oFREvent.target.result.split(',')[1]; // encoding is messed up here, so we fix it
+			v = atob(v)
+			console.log('atob\n-----\n',v)
+			let good_b64 = btoa(decodeURIComponent(escape(v)))
+			console.log('match', good_b64 == png)
+			//'data:image/png;base64,'+ good_b64
+			} catch(e) {
+				console.log(e)
+			}
+		}
+		fr.readAsDataURL(file)
+	} catch(e) {
+		console.log(e)
+	} 
+}
+
 function analyse(data, type) {
+	if ('DataURL' == type) {base64DTU = data}
+
 	let len = data.length,
 		slice1 = data.slice(69,70),
 		slice2 = data.slice(70,72),
@@ -93,7 +151,7 @@ function run() {
 	}
 	// vars
 	let oKnown = {
-		// also FF137nightly: 1918690: Enable libz-rs on nightly: this changes our known hashes
+		// also FF137nightly: 1910796: Enable libz-rs on nightly: this changes our known hashes
 		getImageData: [
 			'c7f2099a',
 		],
@@ -216,12 +274,15 @@ function run() {
 			function getKnown(){
 				let canvas = document.getElementById("control1")
 				let ctx = canvas.getContext('2d')
+				//let aPixels = []
 				for (let x=0; x < sizeW; x++) {
 					for (let y=0; y < sizeH; y++) {
+						//aPixels.push("rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)")
 						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
 						ctx.fillRect(x, y, 1, 1)
 					}
 				}
+				//console.log(aPixels)
 				return ctx
 			}
 			function getKnownPath(){

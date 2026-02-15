@@ -155,7 +155,7 @@ function run_checks(max) {
 		aBypass.push("this is not Firefox 96+, as per the test description")
 	}
 	// isFile
-	if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
+	//if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
 	// heh
 	if (runningTotal >= 500000) {dom.results = "that's enough tests for now... go take a break"; return}
 	// create canvas once per run

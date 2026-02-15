@@ -32,6 +32,11 @@ const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function nowFn() {if (isPerf) {return performance.now()}; return}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
+function rnd_word(len = 5) {
+	let str = ''
+	for (let i=0; i < len; i++) {str += Math.floor(Math.random() * 25 + 10).toString(36)}
+	return str
+}
 function removeElementFn(id) {try {dom[id].remove()} catch {}}
 function addProxyLie(value) {sData[SECT99].push(value)}
 function isProxyLie(value) {
@@ -352,6 +357,66 @@ const get_isBB = (METRIC) => new Promise(resolve => {
 			log_alert(SECTG, METRIC, e.name, isScope, true)
 			exit(zErr)
 		}
+	}
+})
+
+const get_isBrave = (METRIC) => new Promise(resolve => {
+	if ('blink' !== isEngine) return resolve()
+
+	let t0 = nowFn()
+	function exit(value = false) {
+		log_perf(SECTG, METRIC, t0, '', value)
+		return resolve()
+	}
+	try {
+		// first determine isBrave
+			// keeping in mind that extensions etc could mess with these
+		if ('object' == typeof opr) return resolve() // opera
+		// navigator
+		let braveInN = 'brave' in navigator &&
+			Object.getPrototypeOf(navigator.brave).constructor.name == 'Brave' &&
+			navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }' &&
+			'brave' in navigator ? Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)).indexOf("brave") < 20 : false
+		if (!braveInN) {
+			exit()
+		} else {
+			// userAgentData
+			Promise.all([
+				get_agent_data('', isOS, false)
+			]).then(function(res){
+				try {
+					let data = res[0]
+					if ('object' !== typeof data) {exit()}
+					// we already have braveInN, now we want braveInU
+					isBrave = 'Brave' == data.brands[0].brand && 'Brave' == data.fullVersionList[0].brand
+					// if isBrave, we can check if FP protection is enabled: telltale signs we can easily check include
+						// null keyboard
+						// gibberish in plugins
+						// canvas
+					// other possibles are: tiny chrome + tiny screen positions
+					// others: extendedscreen can't be true
+
+					// plugins gibberish
+						// items are always in a set order (check each platform) - brave mixes this ip
+						// one of the five is always missing - brave tends to overwrite one of them
+						// non expected items have no spaces e.g. 
+					/* examples
+						"aZMOPuXT: qdWTwBAIjRnTRQnb: WyhQIMtePHDBnyCJMtWyhYrdWTw3j47d",		8, 16, 32
+						"4k5k5cO:  BMteXyhQQv268mb:  FCgYzCBn6dt15FCo7GDJEKFpct9mbse",		7, 15, 31
+					*/
+					let aOrder = ['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer','WebKit built-in PDF']
+					// 2 out of 3 should be enough to determine gibberish
+
+					exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
+				} catch(e) {
+					log_error(3, METRIC, e, isScope, true) // persist sect3
+					exit(zErr)
+				}
+			})
+		}
+	} catch(e) {
+		log_error(3, METRIC, e, isScope, true) // persist sect3
+		exit(zErr)
 	}
 })
 
@@ -794,7 +859,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 148) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 149) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -810,6 +875,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
@@ -1020,9 +1086,10 @@ function get_isDomRect() {
 			}
 			props.forEach(function(prop){
 				let value = obj[prop]
-				if (runSL) {value += 0.1}
+				if (runST && i == 0) {value = 's'}
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				if (runSL) {value += 0.1}
 				tmpobj[prop] = value
 			})
 			hash = mini(tmpobj)
@@ -1336,8 +1403,12 @@ function metricsShow(name, scope) {
 		}
 	}
 	metricsData = data
-	let isCache = (target == 'fingerprint' || target == 'fingerprint_flat')
-	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][scope + overlayFP] : json_highlight(data, true)): ''
+	let aCached = ['fingerprint','fingerprint_flat','misc']
+	let isCache = aCached.includes(target)
+	let cTarget = scope + ('misc' == target ? '_'+ target : overlayFP)
+
+	let isColor = !(target == 'window_functions')
+	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor)): ''
 	dom.overlayInfo.innerHTML = overlayInfo
 
 	//add btn, show/hide options, display
@@ -1728,15 +1799,20 @@ function output_section(section, scope) {
 		// recalculate overlayCharLen for cached big jsons
 		try {
 			// at a minimum this is 10 chars "0, 0, 0, 0" all platforms/engines
-			let target = dom.window_positions
+			let target = dom.position_screen
 			overlayCharLen = target.offsetWidth/target.innerText.length
 		} catch(e) {
 			overlayCharLen = 7
+			console.error(e)
 		}
 		// cache big json displays
-		sDataTemp["cache"] = {}
-		sDataTemp["cache"][scope] = json_highlight(gData[zFP][scope])
-		sDataTemp["cache"][flat] = json_highlight(gData[zFP][flat])
+		sDataTemp['cache'] = {}
+		sDataTemp['cache'][scope] = json_highlight(gData[zFP][scope])
+		sDataTemp['cache'][flat] = json_highlight(gData[zFP][flat])
+	}
+	if (gRun || 18 == section) {
+		// cache misc
+		sDataTemp['cache'][scope +'_misc'] = json_highlight(gData[zFP][scope]['misc'])
 	}
 }
 
@@ -1806,7 +1882,7 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 		notation = notation.replace(tick, cross)
 	}
 	str += ''
-	if (8 == str.length) { // limit to hopefully just hashes
+	if (isSmart && !isLies && 8 == str.length && !str.includes(' ')) { // limit to hopefully just hashes
 		if (str.includes('6') && str.includes('7')) {
 			if (str.indexOf('6') < str.indexOf('7')) {
 				str = str.replace('7','<span class="s67">7</span>')
@@ -1827,12 +1903,6 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 			gData['health'][isScope +'_collect'][metric] = [sectionMap[section], isPass]
 		}
 	}
-}
-
-function log_display(section, metric, str, btn ='', notation ='', isLies = false) {
-	if (!isSmart) {isLies = false; notation =''}
-	if (isLies) {str = "<span class='lies'>"+ str +"</span>"}
-	sDataTemp['display'][isScope][section][metric] = str + btn + notation
 }
 
 function addDetail(metric, data, scope = isScope) {
@@ -2003,6 +2073,11 @@ function log_section(name, time, scope = isScope) {
 
 	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
 	if (gCount == gSectionsExpected) {
+		// NoScript can be slow - check quirks mode at the end - we only need do this once
+		if (gLoad) {
+			try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
+		}
+
 		gt1 = gt0
 		if (isPerf) {dom.perfAll = " "+ (performance.now()-gt0).toFixed(isDecimal ? 2 : 0) +" ms"}
 		output_section("all", scope)
@@ -2129,6 +2204,7 @@ function countJS(item) {
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 		Promise.all([
 			get_isBB('isBB'),
+			get_isBrave('isBrave'),
 			get_isFileSystem('isFileSystem'),
 			get_isAutoplay('getAutoplayPolicy'),
 		]).then(function(){
@@ -2140,12 +2216,14 @@ function countJS(item) {
 				// tweak monospace size
 					// ToDo: this is bad design: we need a better way to get nice consistent sizes across
 					// TB vs linux vs other linux vs other platforms
+				/*
 				if ('windows' == isOS) {
 					try {
-						document.documentElement.style.setProperty('--txtSize', '12px')
-						document.documentElement.style.setProperty('--txtSizeBigger', '24px')
+						document.body.style.setProperty('--txtSize', '12px')
+						document.body.style.setProperty('--txtSizeBigger', '24px')
 					} catch(e) {console.log(e)}
 				}
+				//*/
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {outputUser('pointer_event', event)})
 				dom.tzpPointer.addEventListener('pointerrawupdate', (event) => {get_isPointerRawUpdate(event)})
@@ -2217,18 +2295,8 @@ function outputSection(id, isResize = false) {
 		output_perf('all')
 		return
 	}
-	// reset scope
-	isScope = zDOC
-	if ('load' == id) {
-		// set sectionOrder/Names/Nos
-		let tmpObj = {}
-		for (const k of Object.keys(sectionMap)) {sectionNos[sectionMap[k]] = k; tmpObj[sectionMap[k]] = k; sectionNames.push(sectionMap[k])}
-		for (const n of Object.keys(tmpObj).sort()) {sectionOrder.push(tmpObj[n])}
-		sectionNames.sort()
-	}
-
 	// set the onion skin pattern background if TB and dark
-	if (isTB && 'android' !== isOS) {
+	if (gLoad && isTB && 'android' !== isOS) {
 		try {
 			let target = document.body
 			let bgcolor = window.getComputedStyle(target).getPropertyValue('background-color')
@@ -2238,6 +2306,16 @@ function outputSection(id, isResize = false) {
 				target.classList.remove('tzpBody')
 			}
 		} catch(e) {}
+	}
+
+	// reset scope
+	isScope = zDOC
+	if ('load' == id) {
+		// set sectionOrder/Names/Nos
+		let tmpObj = {}
+		for (const k of Object.keys(sectionMap)) {sectionNos[sectionMap[k]] = k; tmpObj[sectionMap[k]] = k; sectionNames.push(sectionMap[k])}
+		for (const n of Object.keys(tmpObj).sort()) {sectionOrder.push(tmpObj[n])}
+		sectionNames.sort()
 	}
 
 	gClick = false
@@ -2379,10 +2457,13 @@ function outputSection(id, isResize = false) {
 
 	// reset smarts
 	smartFn('final')
-	if (gLoad && isFontDelay) {
-		delay = 2000
-		dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
-		dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
+	if (gLoad) {
+		// if we wanted to force an initial delay regardless do it here
+		delay = isFontDelay ? 2000 : 0
+		if (isFontDelay) {
+			dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
+			dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
+		}
 	}
 	setTimeout(function() {
 		get_isPerf()
@@ -2419,7 +2500,7 @@ function run_immediate() {
 		}
 		// set isProtoProxy on known engines
 			// we already returned if isEngine == undefined just above
-		isProtoProxy = 'undefined' == isEngine ? false : true 
+		isProtoProxy = 'undefined' == isEngine ? false : true
 		// expand css, record stylesheet info
 		get_isStylesheet(7680)
 		// recursion

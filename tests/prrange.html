@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>pr: selectrange</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">pluralrules: selectrange
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+				<span id="maxsettings">
+					<input type="checkbox" name="maximum" style="margin: 0; height: 12px">
+					<span class="no_color">test 0-100 (slow... 3-5 secs)</span>
+				</span>
+				<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	oLocaleChanges = {},
+	oChanges = {},
+	aAll = [],
+	isMax = false,
+	isSupported = false,
+	localesHashAll = "" // to compare min to
+
+function generatePairs(max){
+	aAll = []
+	for (let i=0; i <= max; i++) {
+		for (let j=0; j <= max; j++) {
+			aAll.push([i, j])
+		}
+	}
+}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
+			let go = true
+			if (isSupported) {
+				go = Intl.PluralRules.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method) {
+	let t0 = performance.now()
+	let spacer = "<br><br>"
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/selectRange
+	/* using generated pairs _should_ catch all combos of "words"
+			NOTE: blink is very slow and may prompt to kill the script and can hang: tested 100 cardinal but will set at 21 for PoC
+		100 = 30 unique hashes
+		 21 = 30
+		https://github.com/unicode-org/cldr/blob/main/common/supplemental/pluralRanges.xml
+	*/
+
+	let testC = aAll, testO = aAll
+	if (method == 'min') {
+		//test = [[0,1],[0,2],[1,1],[2,2]] // 20 - but not the same locale groupings
+		// 50 + 33 items from oChanges (deduped all number pairs per pr option)
+		testC = [
+			[0,0],[0,1],[0,2],[0,3],[0,4],      [0,6],[0,7],[0,11],[0,20],
+			[1,0],[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,11],[1,20],
+			[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[2,6],[2,7],[2,11],
+			[3,0],[3,1],[3,2],[3,3],      [3,5],[3,6],[3,7],[3,11],
+			      [4,1],[4,2],[4,3],[4,4],[4,5],[4,6],[7,7],[7,11],
+			[11,0],[11,3],[11,11],
+			[20,0],[20,1],[20,20],
+		]
+		testO = [
+			[0,0],[0,1],[0,2],[0,3],[0,5],[0,6],
+			[1,1],[1,2],[1,3],[1,5],[1,6],[1,7],[1,11],[1,21],
+			[2,2],[2,3],[2,4],[2,5],[2,7],
+			[3,3],[3,4],[3,5],[3,7],
+			[9,1],[9,3],[9,6],[9,9],
+			[10,1],[10,2],[10,3],[10,5],[10,7],
+			[11,0],
+		]
+		// let's play
+		// ok, what am I missing: I can get more than 30 if I exclude some of the 50/33
+		testC = [[0,0],[1,1],[2,1],[2,4],]
+		testO = [[0,0],[0,1],[0,6],[1,1],[1,3],[1,5],[3,3],]
+	}
+
+	let oData = {}, oTempData = {}, oChanges = {} // reset
+	oLocaleChanges = {'C': {}, 'O': {}}
+	try {
+		aLocales.forEach(function(code) {
+			let oTmp = {'C': {}, 'O': {}}, prevC = '', prevO = ''
+			// cardinal
+			let formatterC = new Intl.PluralRules(code, {type:'cardinal'})
+			oLocaleChanges['C'][code] = []
+			testC.forEach(function(t){
+				let rC = formatterC.selectRange(t[0], t[1])
+				if (rC !== prevC) {
+					let keyC = formatterC.select(t[0]) +'-'+ formatterC.select(t[1])
+					if (oTmp['C'][keyC] == undefined) {
+						oTmp['C'][keyC] = rC
+						oLocaleChanges['C'][code].push([t[0], t[1]]) // changes
+					}
+					prevC = rC
+				}
+			})
+			// ordinal
+			let formatterO = new Intl.PluralRules(code, {type:'ordinal'})
+			oLocaleChanges['O'][code] = []
+			testO.forEach(function(t){
+				let rO = formatterO.selectRange(t[0], t[1])
+				if (rO !== prevO) {
+					let keyO = formatterO.select(t[0]) +'-'+ formatterO.select(t[1])
+					// rules are the same between cardinal and ordinal
+					// we test ordinal because it gioves us more "words", e.g. "two" in hebrew
+					if (oTmp['O'][keyO] == undefined) {
+						oTmp['O'][keyO] = rO
+						oLocaleChanges['O'][code].push([t[0], t[1]]) // changes
+					}
+					prevO = rO
+				}
+			})
+			// sort oTmp by keys
+			let newObj = {}
+			for (const k of Object.keys(oTmp).sort()) {
+				newObj[k] = {}
+				for (const j of Object.keys(oTmp[k]).sort()) {
+					newObj[k][j] = oTmp[k][j]
+				}
+			}
+
+			// hash + add
+			let hash = mini(newObj)
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {'data': newObj, 'locales': [code]}
+			} else {
+				oTempData[hash].locales.push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +': '+ sc + ' try again'
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == 'locales') {
+					oData[n][p] = oTempData[n][p].join(', ')
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
+		}
+		//console.log(oData)
+
+		let localeGroups = [], displaylist = []
+		for (const hash of Object.keys(oData)) {
+			localeGroups.push(oData[hash]['locales'])
+			let localeCount = oData[hash]['locales'].split(',').length
+
+			let str = ''
+			for (const p of Object.keys(oData[hash])) {
+				if (p !== 'locales') {
+					for (const type of Object.keys(oData[hash][p])) {
+						// type: C(ardinal) or O(rdinal)
+						let aTmp = []
+						for (const key of Object.keys(oData[hash][p][type])) {
+							aTmp.push(s99 + key + ': '+ sc + oData[hash][p][type][key])
+						}
+						str += '<li>'+ s14 + (type == 'C' ? 'cardinal' : 'ordinal') + sc +'<br>' + aTmp.join('<br>') +'</li>'
+					}
+				}
+			}
+			displaylist.push(
+				s12 + hash + sc + s4 + ' ['+ localeCount +']'+ sc
+				+ "<ul class='main'>"+ str
+				+ '<li>'+ s12 +'L: '+ sc + oData[hash]['locales'] +'</li></ul>'
+			)
+		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all" & !isMax) {
+			localesHashAll = localesHash
+			// notate new if 140+
+			if (isVer > 139) {
+				// results
+				if (resultsHash == "fd71342c") { // FF147+
+				} else if (resultsHash == "deeeb2ad") { // FF140-146
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "ce9ce45f") { // FF147+: 30
+				} else if (localesHash == "d3b22832") { // FF140-146: 30
+				} else {localesHash += ' '+ zNEW
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let countC = testC.length, countO = testO.length
+		let testCount = 'all' == method ? countC*2 : (countC + countO) +': '+ testC.length +' cardinal + '+ testO.length +' ordinal'
+		let testInfo = '', testRange = ''
+		if (isFF && 'all' == method) {
+			testRange = 'nos: 0-'+ (isMax ? '100' : '21') +' | '
+		}
+		testInfo = ' [' + testRange + 'tests: '+ testCount + ']'
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc + testInfo
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
+		// unique changes
+		//console.log(oLocaleChanges)
+		for (const k of Object.keys(oLocaleChanges)) { // cardinal/ordinal
+			let tmpChanges = [], strChanges = ''
+			oChanges[k] = []
+			for (const l of Object.keys(oLocaleChanges[k])) { // each locale
+				for (const a of Object.keys(oLocaleChanges[k][l])) { // each array
+					tmpChanges.push(oLocaleChanges[k][l][a].join('-'))
+				}
+			}
+			// dedupe
+			tmpChanges = tmpChanges.filter(function(item, position) {return tmpChanges.indexOf(item) === position})
+			tmpChanges.forEach(function(c) {
+				let parts = c.split('-')
+				oChanges[k].push([parts[0]*1, parts[1]*1])
+				strChanges += '['+ parts[0] +','+ parts[1]+'],'
+			})
+			oChanges[k +'_string'] = strChanges
+		}
+		//console.log(oChanges)
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		if ('all' == method) {
+			isMax = dom.maximum.checked
+			let max = isMax ? 100 : 21
+			generatePairs(max)
+		}
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_isVer()
+	buildnav()
+	dom.maximum.checked = false
+	if (!isFF) {
+		dom.maxsettings.style.display = 'none'
+	}
+
+	try {
+		let test = new Intl.PluralRules(undefined)
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	let aListExtra = []
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	// test
+	//list = ['de,german','en,english',]
+	//list = ['uk,ukrainian',]
+
+	legend()
+	if (isSupported) {
+		generatePairs(21) // default
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>

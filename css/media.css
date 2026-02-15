@@ -68,7 +68,6 @@
 /*
 	always return none with a traling space so we can differentiate between this
 	and default none: https://www.w3.org/TR/CSS21/generate.html#content
-	and default none: https://www.w3.org/TR/CSS21/generate.html#content
 */
 #cssH:after{content:"n/a";}
 @media (hover:hover){#cssH:after{content:"hover";}}

@@ -601,7 +601,6 @@ function run() {
 		rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
 		rec(typeof sharedStorage, "sharedStorage", code, "object")
 		// newish: since last check; testing chrome 119
-		rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object")
 		rec(typeof fence, "fence", code, "object")
 		rec(typeof credentialless, "credentialless", code, "boolean")
 			// other
@@ -713,6 +712,7 @@ function run() {
 		rec(typeof oncontextrestored, "oncontextrestored", code, "object")
 		rec(typeof originAgentCluster, "originAgentCluster", code, "boolean") // FF138+ 1665474
 		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object") // FF140+ 1550462
+		rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object") // FF148n 1858562
 
 		// blink + webkit (not seen in gecko)
 		code = 52

@@ -422,7 +422,7 @@ const get_canvas = () => new Promise(resolve => {
 						if (supported){
 							displayValue = output.value()
 						} else {
-							oErrors[output.name] = 'Error'
+							oErrors[output.name] = zErr
 							displayValue = zErr
 						}
 					} catch(e) {
@@ -566,7 +566,7 @@ const get_canvas = () => new Promise(resolve => {
 			}
 			oFP[name] = {'value': value, 'notation': notation, 'chunk': hasChunk, 'data': data}
 		})
-		/*
+		//*
 		console.log(aSkip)
 		console.log(oData)
 		console.log(oFP)

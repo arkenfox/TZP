@@ -7,6 +7,14 @@
 	- safari: removed in 2019
 */
 
+/*
+	ToDo: leverage expires to get real date/time (substract our constant - e.g 2 days)
+	cookieStore.getAll().then(cookies=>console.log(cookies))
+	some engines return more information
+	e.g. chrome includes
+		expires: 1765940558000
+*/
+
 function lookup_cookie(name) {
 	try {
 		name += '='
@@ -262,7 +270,9 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 	]).then(function(res){
 		if ('granted' == res[0] || 'denied' == res[0]) {isAuto = true} // no prompt
 		try {
-			if (undefined == navigator.storage) {
+			let test = 'storage_quota' == METRIC ? navigator.storage : navigator.webkitTemporaryStorage
+
+			if (undefined == test) {
 				exit('undefined')
 			} else {
 				navigator.storage.estimate().then(estimate => {
