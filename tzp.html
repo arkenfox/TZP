@@ -23,10 +23,15 @@
 </head>
 
 <body>
-	<span translate="no">
 	<div id="tzpRect"></div>
 	<div id="tzpLV"></div>
 	<div id="tzpSV"></div>
+
+	<!-- keep tzpBody first: contains scrollbar but MUST come after tzpLV and tzpSV
+		in order to be able to be able to select and drag non-overlays -->
+	<div id="tzpBody">
+	<span translate="no">
+
 	<!--offscreen-->
 	<div class="offscreen">
 		<div id="tzpFS" width=0 height=0></div>
@@ -65,6 +70,8 @@
 	</div>
 	<!--hidden-->
 	<div class="hidden">
+		<div><img id="tzpBrandHidden" src="chrome://branding/content/about-wordmark.svg"></div>
+		<!--<div><img id="tzpBrandHidden" src="images/about-wordmark.svg"></div>-->
 		<canvas id="tzpCanvasGet"></canvas>
 		<canvas id="tzpCanvasGetSolid"></canvas>
 		<canvas id="tzpCanvasPath"></canvas>
@@ -99,14 +106,12 @@
 			<input type="url">
 			<input type="week" id="tzpweek">
 		</div>
-		<div><img id="tzpBrandHidden" src="chrome://branding/content/about-wordmark.svg"></div>
 		<div>
 			<a id="tzpClrlink" href="fake" class="">unvisited</a>
 			<a id="tzpClrvisited-link" href="" class="">visited</a>
 		</div>
 	</div>
 
-	<div id="tzpBody">
 	<table>
 		<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
 		<tr><td class="blurb" id="index"><a id="tzpLink" class="return" href="index.html">return to TZP index</a></td></tr>
@@ -161,7 +166,7 @@
 		<!--position-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div> &nbsp; screen</td>
-			<td class="mono"><span class="c" id="position_screen"></span>
+			<td class="mono"><span class="c" id="position_screen"></span> <!-- used to calculate overlayCharLen -->
 			<div class="btn-right s99">positions</div></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
@@ -209,6 +214,7 @@
 		<tr><td>screen</td><td class="mono">
 			<span class="c" id="screen_summary"></span>
 			<span class="c" id="sizes_screen"></span>
+			<span class="c" id="screen_aspect_ratio"></span>
 		</td></tr>
 		<tr class="togS"><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt cssrange">range 400-2560</span></div>
@@ -222,7 +228,7 @@
 		<tr><td>available</td><td class="mono">
 			<span class="c" id="available_summary"></span>
 			<span class="c" id="sizes_available"></span>
-			<span class="c" id="scr_dock"></span>
+			<span class="c" id="size_dock"></span>
 		</td></tr>
 		<tr class="togS"><td>iframe</td><td class="mono">
 			<span class="c" id="available_iframe"></span>
@@ -237,7 +243,7 @@
 		<tr><td>outer</td><td class="mono">
 				<span class="c" id="outer_summary"></span>
 				<span class="c" id="sizes_outer"></span>
-				<span class="c" id="scr_chrome"></span>
+				<span class="c" id="size_chrome"></span>
 		</td></tr>
 		<tr class="togS"><td>iframe</td><td class="mono">
 			<span class="c" id="outer_iframe"></span>
@@ -876,9 +882,11 @@
 		<tr><td>[user] autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy_user"></td></tr>
 		<tr><td>EME</td><td class="c mono" id="eme"></td></tr>
 		<tr><td>canPlayType</td><td class="mono">
-			<span class="c" id="audiocan"></span> | <span class="c" id="videocan"></span></td></tr>
+			<span class="c" id="audio_canPlayType"></span> | <span class="c" id="video_canPlayType"></span></td></tr>
+		<tr><td>[RTC] getCapabilities</td><td class="mono">
+			<span class="c" id="audio_getCapabilities_rtc"></span> | <span class="c" id="video_getCapabilities_rtc"></span></td></tr>
 		<tr><td>isTypeSupported</td><td class="mono">
-			<span class="c" id="audiotype"></span> | <span class="c" id="videotype"></span></td></tr>
+			<span class="c" id="audio_isTypeSupported"></span> | <span class="c" id="video_isTypeSupported"></span></td></tr>
 		<tr><td>preload</td><td class="c mono" id="preload_htmlmediaelement"></td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
@@ -1093,6 +1101,7 @@
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp; wasm</td><td class="c mono" id="wasm"></td></tr>
 		<tr><td>webdriver</td><td class="c mono" id="webdriver"></td></tr>
+		<tr><td>window functions</td><td class="c mono" id="window_functions"></td></tr>
 		<tr><td>window properties <sup>1</sup></td>
 			<td class="mono"><span class="c" id="window_properties"></span><span class="c" id="consolestatus"></span></td></tr>
 		<tr><td>[tampered] window properties <sup>1</sup></td>
@@ -1146,6 +1155,8 @@
 			<br><br><div id="overlayInfo" class='faint spaces'></div>
 		</div>
 	</div>
+
+	</span> <!-- end translate -->
 	</div> <!-- end tzpBody -->
 
 	<script src="js/prototypeLies.js"></script>
@@ -1164,6 +1175,5 @@
 	<script src="js/iframes.js"></script>
 	<script src="js/user.js"></script>
 
-	</span>
 </body>
 </html>
