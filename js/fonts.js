@@ -1440,16 +1440,16 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		let getDimensions = (span, style) => {
 			const transform = style.transformOrigin.split(' ')
 			const perspective = style.perspectiveOrigin.split(' ')
-			let oDim = {
+			const dimensions = {
 				// keep sorted for font_sizes_base_reported
 				clientHeight: oSkip[4] ? '' : span.clientHeight,
 				clientWidth: oSkip[4] ? '' : span.clientWidth,
 				domrectboundingHeight: oSkip[0] ? '' : span.getBoundingClientRect().height,
 				domrectboundingWidth: oSkip[0] ? '' : span.getBoundingClientRect().width,
-				domrectboundingrangeHeight: '',
-				domrectboundingrangeWidth: '',
-				domrectclientHeight: '',
-				domrectclientWidth: '',
+				domrectboundingrangeHeight: oSkip[1] ? '' : range.getBoundingClientRect().height,
+				domrectboundingrangeWidth: oSkip[1] ? '' : range.getBoundingClientRect().width,
+				domrectclientHeight: oSkip[2] ? '' : span.getClientRects()[0].height,
+				domrectclientWidth: oSkip[2] ? '' : span.getClientRects()[0].width,
 				domrectclientrangeHeight: oSkip[3] ? '' : range.getClientRects()[0].height,
 				domrectclientrangeWidth: oSkip[3] ? '' : range.getClientRects()[0].width,
 				offsetHeight: oSkip[5] ? '' : span.offsetHeight,
@@ -1465,15 +1465,6 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				transformHeight: originPixelsToNumber(transform[1]),
 				transformWidth: originPixelsToNumber(transform[0]),
 			}
-			if (!oSkip[1]) {
-				oDim.domrectboundingrangeHeight = range.getBoundingClientRect().height
-				oDim.domrectboundingrangeWidth = range.getBoundingClientRect().width
-			}
-			if (!oSkip[2]) {
-				oDim.domrectclientHeight = span.getClientRects()[0].height
-				oDim.domrectclientWidth = span.getClientRects()[0].width
-			}
-			const dimensions = oDim
 			return dimensions
 		}
 		// simulate errors: don't test isFontSizesMore not used in production
@@ -1518,7 +1509,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				span.style.font =''
 				span.style.setProperty('--font', font)
 			}
-			const dimensions = getDimensions(span, style) // this line is AOPR has a meltdown
+			const dimensions = getDimensions(span, style) // this line is where it errors
 			acc[font.split(',')[0]] = dimensions // use only first name, i.e w/o fallback
 			return acc
 		}, {})
