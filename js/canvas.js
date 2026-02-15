@@ -566,12 +566,10 @@ const get_canvas = () => new Promise(resolve => {
 			}
 			oFP[name] = {'value': value, 'notation': notation, 'chunk': hasChunk, 'data': data}
 		})
-		//*
+		/*
 		console.log(aSkip)
 		console.log(oData)
 		console.log(oFP)
-		exit()
-		return resolve()
 		//*/
 
 		// test
