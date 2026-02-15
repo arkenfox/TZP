@@ -159,16 +159,16 @@ function get_element_font(METRIC, isLies) {
 				dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ k +"'>...</div>"
 				let target = div.firstChild
 				method = measureFn(target, METRIC)
-				// width+height = max entropy
+				// width+height = max entropy AFAICT but lets add x and y becuz we can
 				if (isTypeCheck) {
 					if (undefined !== method.error) {throw method.errorstring}
-					[method.width, method.height].forEach(function(item) {
+					[method.width, method.height, method.x, method.y].forEach(function(item) {
 						if (runST) {item = isLine ? undefined : '1'}
 						let typeCheck = typeFn(item)
 						if ('number' !== typeCheck) {throw zErrType + typeCheck}
 					})
 				}
-				tmpsizes.push([size, method.width, method.height])
+				tmpsizes.push([size, method.width, method.height, method.x, method.y])
 			})
 			let sizehash = mini(tmpsizes)
 			if (oData[sizehash] == undefined) {oData[sizehash] = {data: tmpsizes, group: [k]}
@@ -191,6 +191,10 @@ function get_element_forms(METRIC, isLies) {
 	let t0 = nowFn()
 	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
 	let oList = {
+		// ignore: hidden
+		// redundant: (drop 2) directory, file, files
+		// redundant: (drop 9) datetime, email, month, number, password, search, tel, text, url, week
+			// BUT (bring back 2) month + week differ from number-etc in blink | gecko may follow suit so keep those
 		'native': {
 			button: '',
 			checkbox: '',
@@ -219,7 +223,6 @@ function get_element_forms(METRIC, isLies) {
 			textarea_3x5: '<textarea cols="5" rows="3"></textarea>',
 			time: '',
 			week: '',
-			// month + week are same as number but not in chrome | gecko may follow suit
 		},
 		'unstyled': {
 			// differ on windows
