@@ -782,6 +782,86 @@ function get_svg(METRIC) {
 	return
 }
 
+function get_webdriver(METRIC) {
+	// expected FF60+
+	let value, data =''
+	try {
+		value = navigator[METRIC]
+		if (runST) {value = null}
+		let typeCheck = typeFn(value)
+		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	addBoth(18, METRIC, value,'','', data, isProxyLie('Navigator.'+ METRIC))
+	return
+}
+
+function get_window_functions(METRIC) {
+	// isProps was generated n+ sorted in get_window_props
+	let t0 = nowFn()
+	let hash, btn='', tamperBtn ='', data = {}, oPost = (isGecko ? {} : ''), notation = isBBESR ? bb_red : ''
+	let typeCheck = typeFn(isProps)
+	// propagate errors
+	if ('string' == typeCheck) {
+		addBoth(18, METRIC, isProps, '', notation, zErrLog)
+		return
+	}
+	// isProps _should_ be an error string of a populated array, but let's cover it
+	if ('array' !== typeCheck) {
+		addBoth(18, METRIC, zErrType + typeCheck, '', notation, zErrLog)
+		return
+	}
+	// remove Navigator, CSSStyleProperties (+ CSS2Properties Gecko 143 or lower)
+	isProps = isProps.filter(x => !['CSS2Properties','CSSStyleProperties','Navigator'].includes(x)) 
+
+	// reduce to functions only
+	try {
+		let intPost = 0
+		isProps.forEach(function(f){
+			if (window[f] !== undefined) {
+				try {
+					let array = Object.getOwnPropertyNames(window[f].prototype)
+					// ignore constructor only
+					if (1 == array.length && 'constructor' == array[0]) {
+					} else {
+						data[f] = array
+						if (isGecko && 'constructor' !== array[array.length -1]) {
+							oPost[f] = array.slice(array.indexOf('constructor')+1)
+							intPost += oPost[f].length
+						}
+					}
+				} catch(e) {}
+			}
+		})
+		hash = mini(data); btn = addButton(18, METRIC, Object.keys(data).length)
+
+		// tampered (or rather post constructor items)
+		let intKeys = Object.keys(oPost).length
+		if (intKeys > 0) {
+			let postName = '_post_constructor'
+			sDetail.document[METRIC + postName] = oPost
+			tamperBtn = addButton(18, METRIC + postName, intKeys +'/'+ intPost)
+		}
+		// notation: safer vs standard doesn't seem to affect this
+			// but we need to check webgl click to play
+		if (isBBESR) {
+			if (isMB) {
+				// MB140
+				if ('12add862' == hash) {notation = bb_green} // windows
+			} else {
+				// TB140
+				if ('cdde2f4c' == hash) {notation = bb_green} // windows
+ 			}
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(18, METRIC, hash, btn + tamperBtn, notation, data)
+	log_perf(18, METRIC, t0)
+	return
+}
+
 function get_window_prop(METRIC) {
 	// BB: display only: wasm
 	let str, notation = isBB ? bb_slider_red : ''
@@ -799,26 +879,12 @@ function get_window_prop(METRIC) {
 	return
 }
 
-function get_webdriver(METRIC) {
-	// expected FF60+
-	let value, data =''
-	try {
-		value = navigator[METRIC]
-		if (runST) {value = null}
-		let typeCheck = typeFn(value)
-		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-	} catch(e) {
-		value = e; data = zErrLog
-	}
-	addBoth(18, METRIC, value,'','', data, isProxyLie('Navigator.'+ METRIC))
-	return
-}
-
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
 	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isLies = false
 	let tamperHash = zNA, tamperBtn ='', aTampered =''
+	isProps = [] // reset: used to build function proprties
 
 	let id = 'iframe-window-version'
 
@@ -832,7 +898,8 @@ function get_window_props(METRIC) {
 		iframe = dom[id]
 		let contentWindow = iframe.contentWindow
 		data = Object.getOwnPropertyNames(contentWindow)
-		dataSorted = Object.getOwnPropertyNames(contentWindow)
+		isProps = Object.getOwnPropertyNames(contentWindow)
+		isProps.sort() // sort, we use this in function_props
 		//let data2 = Object.getOwnPropertyNames(contentWindow)
 		//console.log(data2)
 
@@ -876,12 +943,15 @@ function get_window_props(METRIC) {
 				'Error',
 				// other
 				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly',
+				// other new
+				'Crypto','CustomEvent','HTMLHtmlElement','HTMLVideoElement','NodeList','SecurityPolicyViolationEvent'
 				//*/
 			]
 			if (isExpanded) { // 543535 uBO exposes these 5
+				// TB146/147 is based on beta where and may not be rolled back, so produces a false positive isLies
+					// we do not F care about TB146
 				aPossible.push('JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget')
 			}
-
 			let aHas = aPossible.filter(x => data.includes(x))
 			aHas = dedupeArray(aHas)
 			aHas.sort()
@@ -920,22 +990,23 @@ function get_window_props(METRIC) {
 		hash = mini(data); btn = addButton(18, METRIC, data.length)
 		if (isGecko) {
 			btn += addButton(18, METRIC +'_sorted', 'sorted')
-			sDetail.document[METRIC +'_sorted'] = dataSorted.sort()
+			sDetail.document[METRIC +'_sorted'] = isProps
 		}
 		// health: BB only if ESR
 		if (isBBESR) {
 			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
 			// funfact: 1419501 (backported from FF144) radically altered the order of items in the unordered list
+			// NOTE: hashes can not be computed via file schema as NS does weird shit now
 			let oHashes = {
 				MB : {
-					'linux': ['b4fd3924','34f246c6'], // 860, 859
-					'mac': ['a668f9dd','2436cf3f'], // 857, 856
-					'windows': ['b4fd3924','34f246c6'] // 860, 859
+					'linux': ['',''], // 860, 859
+					'mac': ['',''], // 857, 856
+					'windows': ['0a2537c8','3c3cf46a'] // 860, 859
 				},
 				TB : {
-					'linux': ['4cf37ce5','32dfc047'], // 837, 836
-					'mac': ['6fa6983a','2092245c'], // 834, 833
-					'windows': ['4cf37ce5','32dfc047'] // 837, 836
+					'linux': ['',''], // 837, 836
+					'mac': ['',''], // 834, 833
+					'windows': ['f3fd6bb5','0698db17'] // 837, 836
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
@@ -946,11 +1017,13 @@ function get_window_props(METRIC) {
 
 	} catch(e) {
 		hash = e; data = zErrLog
+		if (isProps.length == 0) {isProps = e+''}
 	}
 	removeElementFn(id)
 	addBoth(18, METRIC +'_tampered', tamperHash, tamperBtn, '', aTampered)
 	addBoth(18, METRIC, hash, btn, notation, data, isLies)
 	log_perf(18, METRIC, t0)
+
 	return
 }
 
@@ -999,7 +1072,11 @@ const outputMisc = () => new Promise(resolve => {
 		get_pdf('pdf'),
 		get_speech_engines('speech_engines'),
 	]).then(function(){
-		return resolve()
+		Promise.all([
+			get_window_functions('window_functions')
+		]).then(function(){
+			return resolve()
+		})
 	})
 })
 
