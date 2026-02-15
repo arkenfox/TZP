@@ -1357,13 +1357,11 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		const range = document.createRange()
 		range.selectNode(span)
 
-
 		// set parameters
 		let fntGeneric = [], fntTest = [], fntControl = [], fntControlObj = {}, oTests = {}, aTests = []
 		const aSkipCheck = ['domrectbounding', 'domrectclient','domrectboundingrange','domrectclientrange','client','offset']
-		let oSkip = {}
+		let oSkip = {}, isSkip = false
 		for (let i=0; i < aSkipCheck.length; i++) {oSkip[i] = false}
-
 		if (isMain) {
 			fntData.family.control.forEach(function(item) {
 				let key = item.split(',')[0]
@@ -1390,17 +1388,17 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			// e.g. clientHeight: foo++, all three size metrics are errors: "font_sizes/_base/_methods": "ReferenceError: foo is not defined"
 			// e.g. uBO's AOPR: *##+js(aopr, Range.prototype.getClientRects)
 			// note:: we already catch TypeErrors in validity tests later
-			let el = dom.tzpRect, isSkip = false
+			let el = dom.tzpRect
 			for (let i=0; i < aSkipCheck.length; i++) {
 				let name = aSkipCheck[i]
 				// Hmmm: these still create a complete meltdown instead of trapping individual errors
-					// 1: Element.prototype.getClientRects)
-					// 2: Range.prototype.getBoundingClientRect)
+					// 1: *##+js(aopr, Element.prototype.getClientRects)
+					// 2: !*##+js(aopr, Range.prototype.getBoundingClientRect)
 				try {
 					//foo++
 					let obj = {}
 					if (0 == i) {
-						// foo++
+						//foo++
 						obj = el.getBoundingClientRect()
 					} else if (1 == i) {
 						obj = el.getClientRects()[0] //
@@ -1438,6 +1436,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			fntTest = fntTest.concat(fntMaster.platform[src])
 			oTests = {'perspective': {}}
 		}
+if (isSkip) {console.log('a')}
 
 		let getDimensions = (span, style) => {
 			const transform = style.transformOrigin.split(' ')
@@ -1469,7 +1468,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			}
 			return dimensions
 		}
-
+if (isSkip) {console.log('b')}
 		// simulate errors: don't test isFontSizesMore not used in production
 		if (runSF && isMain && !isFontSizesMore) {
 			getDimensions = (span, style) => {
@@ -1502,7 +1501,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				return dimensions
 			}
 		}
-
+if (isSkip) {console.log('c')}
 		// base sizes
 		fntBase = fntGeneric.reduce((acc, font) => {
 			if (isSystemFont.includes(font)) { // not a family
@@ -1512,11 +1511,14 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				span.style.font =''
 				span.style.setProperty('--font', font)
 			}
+if (isSkip) {console.log('d')}
 			const dimensions = getDimensions(span, style)
+if (isSkip) {console.log('e', dimensions)}
 			acc[font.split(',')[0]] = dimensions // use only first name, i.e w/o fallback
 			return acc
 		}, {})
 		span.style.font ='' // reset
+if (isSkip) {console.log('f')}
 
 		// test validity
 		for (const k of Object.keys(oTests)) {
@@ -1543,6 +1545,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				return resolve('baseonly')
 			}
 		}
+if (isSkip) {console.log('g')}
 
 		// measure
 		if (aTests.length) {
@@ -1578,6 +1581,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			removeElementFn(id)
 			return resolve(oTests['perspective'])
 		}
+if (isSkip) {console.log('h')}
 
 		// sim fake font + same sizes
 		if (runSF && !isFontSizesMore) {
@@ -1612,9 +1616,11 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			}
 		}
 		// if we got this far we can add oSkip
-		for (const k of Object.keys(oSkip)) {
-			let skipErr = oSkip[k], m = aSkipCheck[k]
-			if ('string' === typeof skipErr) {addDisplay(12, METRIC +'_'+ m, log_error(12, METRIC +'_'+ m, skipErr))}
+		if (isSkip) {
+			for (const k of Object.keys(oSkip)) {
+				let skipErr = oSkip[k], m = aSkipCheck[k]
+				if ('string' === typeof skipErr) {addDisplay(12, METRIC +'_'+ m, log_error(12, METRIC +'_'+ m, skipErr))}
+			}
 		}
 		removeElementFn(id)
 		return resolve(oTests)
