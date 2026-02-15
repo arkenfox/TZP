@@ -98,9 +98,9 @@ get_scr_initial()
 const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	cross = '✗', // ✗ u2717, 🗴 u!F5F4, 🞩 u1F7A9
 	green_tick = sg+"<span class='health'>"+ tick +'</span>'+sc,
-	green_benign = sg+"[<span class='health'>"+ tick +' benign</span>]'+sc,
+	green_benign = sg+"[<span class='health'>"+ tick +'</span> benign]'+sc,
 	red_cross = sb+"<span class='health'>"+ cross +'</span>'+ sc,
-	red_benign = sb+"[<span class='health'>"+ cross +' benign</span>]'+ sc,
+	red_benign = sb+"[<span class='health'>"+ cross +'</span> benign]'+ sc,
 	sgtick = sg +"[<span class='health'>"+ tick +'</span> ', 
 	sbx = sb +"[<span class='health'>" + cross +'</span> ',
 	rfp_green = sgtick+'RFP]'+sc,
