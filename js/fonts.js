@@ -1363,7 +1363,6 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		const aSkipCheck = ['domrectbounding', 'domrectclient','domrectboundingrange','domrectclientrange','client','offset']
 		let oSkip = {}
 		for (let i=0; i < aSkipCheck.length; i++) {oSkip[i] = false}
-console.log(oSkip)
 
 		if (isMain) {
 			fntData.family.control.forEach(function(item) {
@@ -1390,39 +1389,42 @@ console.log(oSkip)
 			// if one dimension key throws e.g. a Reference Error then the whole lot thows
 			// e.g. clientHeight: foo++, all three size metrics are errors: "font_sizes/_base/_methods": "ReferenceError: foo is not defined"
 			// e.g. uBO's AOPR: *##+js(aopr, Range.prototype.getClientRects)
-			// we already catch TypeErrors
-			let el = dom.tzpRect
+			// note:: we already catch TypeErrors in validity tests later
+			let el = dom.tzpRect, isSkip = false
 			for (let i=0; i < aSkipCheck.length; i++) {
 				let name = aSkipCheck[i]
-				//console.log(i, name)
-
-				// these need work: try still create a complete meltdown
-				// Range.prototype.getBoundingClientRect)
-				// Element.prototype.getClientRects)
-
+				// Hmmm: these still create a complete meltdown instead of trapping individual errors
+					// 1: Element.prototype.getClientRects)
+					// 2: Range.prototype.getBoundingClientRect)
 				try {
 					//foo++
 					let obj = {}
 					if (0 == i) {
-						//foo++
+						// foo++
 						obj = el.getBoundingClientRect()
 					} else if (1 == i) {
-						obj = el.getClientRects()[0]
+						obj = el.getClientRects()[0] //
 					} else if (i < 4) {
 						let range = document.createRange(); range.selectNode(el)
-						obj = (2 == i ? range.getBoundingClientRect() : range.getClientRects()[0] )
+						if (2 == i) {
+							obj = range.getBoundingClientRect() //
+						} else {
+							obj = range.getClientRects()[0] 
+						}
 					} else if ('client' == name) {
 						obj = {'height': el.clientHeight, 'width': el.clientWidth}
 					} else if ('offset' == name) {
 						obj = {'height': el.offsetHeight, 'width': el.offsetWidth}
 					}
 				} catch(e) {
-					oSkip[i] = true
+					// if we susccessfully complete _something_ then we can add
+					// errors and display for each skipped item later
+					oSkip[i] = e+''
 					delete oTests[name]
-					addDisplay(12, METRIC +'_'+ name, log_error(12, METRIC +'_'+ name, e))
+					isSkip = true
 				}
 			}
-			console.log(oSkip)
+			if (isSkip) {'skipped', console.log(oSkip)}
 		} else {
 			fntControl = ['monospace', "sans-serif", "serif"]
 			fntControlObj = {
@@ -1609,7 +1611,11 @@ console.log(oSkip)
 				if (!aDomRect[i] && undefined == fntBaseInvalid[name]) {fntBaseInvalid[name] = zLIE}
 			}
 		}
-
+		// if we got this far we can add oSkip
+		for (const k of Object.keys(oSkip)) {
+			let skipErr = oSkip[k], m = aSkipCheck[k]
+			if ('string' === typeof skipErr) {addDisplay(12, METRIC +'_'+ m, log_error(12, METRIC +'_'+ m, skipErr))}
+		}
 		removeElementFn(id)
 		return resolve(oTests)
 	} catch(e) {
