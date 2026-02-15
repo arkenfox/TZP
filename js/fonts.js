@@ -1436,21 +1436,20 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			fntTest = fntTest.concat(fntMaster.platform[src])
 			oTests = {'perspective': {}}
 		}
-if (isSkip) {console.log('a')}
 
 		let getDimensions = (span, style) => {
 			const transform = style.transformOrigin.split(' ')
 			const perspective = style.perspectiveOrigin.split(' ')
-			const dimensions = {
+			let oDim = {
 				// keep sorted for font_sizes_base_reported
 				clientHeight: oSkip[4] ? '' : span.clientHeight,
 				clientWidth: oSkip[4] ? '' : span.clientWidth,
 				domrectboundingHeight: oSkip[0] ? '' : span.getBoundingClientRect().height,
 				domrectboundingWidth: oSkip[0] ? '' : span.getBoundingClientRect().width,
-				domrectboundingrangeHeight: oSkip[1] ? '' : range.getBoundingClientRect().height,
-				domrectboundingrangeWidth: oSkip[1] ? '' : range.getBoundingClientRect().width,
-				domrectclientHeight: oSkip[2] ? '' : span.getClientRects()[0].height,
-				domrectclientWidth: oSkip[2] ? '' : span.getClientRects()[0].width,
+				domrectboundingrangeHeight: '',
+				domrectboundingrangeWidth: '',
+				domrectclientHeight: '',
+				domrectclientWidth: '',
 				domrectclientrangeHeight: oSkip[3] ? '' : range.getClientRects()[0].height,
 				domrectclientrangeWidth: oSkip[3] ? '' : range.getClientRects()[0].width,
 				offsetHeight: oSkip[5] ? '' : span.offsetHeight,
@@ -1466,9 +1465,17 @@ if (isSkip) {console.log('a')}
 				transformHeight: originPixelsToNumber(transform[1]),
 				transformWidth: originPixelsToNumber(transform[0]),
 			}
+			if (!oSkip[1]) {
+				oDim.domrectboundingrangeHeight = range.getBoundingClientRect().height
+				oDim.domrectboundingrangeWidth = range.getBoundingClientRect().width
+			}
+			if (!oSkip[2]) {
+				oDim.domrectclientHeight = span.getClientRects()[0].height
+				oDim.domrectclientWidth = span.getClientRects()[0].width
+			}
+			const dimensions = oDim
 			return dimensions
 		}
-if (isSkip) {console.log('b')}
 		// simulate errors: don't test isFontSizesMore not used in production
 		if (runSF && isMain && !isFontSizesMore) {
 			getDimensions = (span, style) => {
@@ -1501,7 +1508,7 @@ if (isSkip) {console.log('b')}
 				return dimensions
 			}
 		}
-if (isSkip) {console.log('c')}
+
 		// base sizes
 		fntBase = fntGeneric.reduce((acc, font) => {
 			if (isSystemFont.includes(font)) { // not a family
@@ -1511,14 +1518,11 @@ if (isSkip) {console.log('c')}
 				span.style.font =''
 				span.style.setProperty('--font', font)
 			}
-if (isSkip) {console.log('d')}
-			const dimensions = getDimensions(span, style)
-if (isSkip) {console.log('e', dimensions)}
+			const dimensions = getDimensions(span, style) // this line is AOPR has a meltdown
 			acc[font.split(',')[0]] = dimensions // use only first name, i.e w/o fallback
 			return acc
 		}, {})
 		span.style.font ='' // reset
-if (isSkip) {console.log('f')}
 
 		// test validity
 		for (const k of Object.keys(oTests)) {
@@ -1545,7 +1549,6 @@ if (isSkip) {console.log('f')}
 				return resolve('baseonly')
 			}
 		}
-if (isSkip) {console.log('g')}
 
 		// measure
 		if (aTests.length) {
@@ -1581,7 +1584,6 @@ if (isSkip) {console.log('g')}
 			removeElementFn(id)
 			return resolve(oTests['perspective'])
 		}
-if (isSkip) {console.log('h')}
 
 		// sim fake font + same sizes
 		if (runSF && !isFontSizesMore) {
