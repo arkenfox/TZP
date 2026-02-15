@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>pr: select</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">pluralrules: select
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-down"><span class="c perf" id="perf1st"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm the minimum set of numbers to return maximum entropy in Intl.PluralRules.
+			The first test checks all numbers from 0 to 102 inclusive. A second test checks only those numbers the first instance
+			we saw them, per option (cardinal, ordinal). An empty custom test will instead run the minimal example</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span class="btn4 btnfirst" onClick="run()">[ run ]</span>
+				<span class="btn4 btn" onClick="clearcustom()">[ clear input ]</span>
+				<br><br>
+				<textarea rows="2" placeholder="" style="width: 98%; resize: vertical" id="custom"></textarea>
+				<br><br><hr>
+				<br><span class="spaces" id="numbers2"></span>
+				<br><span class="spaces" id="results2"></span>
+				<br><span class="spaces" id="numbers1"></span>
+				<br><span class="spaces" id="results1"></span>
+				<br><span class="spaces" id="numbers0"></span>
+				<br><span class="spaces" id="results0"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = []
+
+
+let aFirstCardinal = [],
+	aFirstOrdinal = [],
+	main_buckets = [],
+	useSupportedOnly = true,
+	perf = "",
+	isSupported = false
+
+function clearcustom() {
+	dom.custom.value = ""
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
+			let go = true
+			if (isSupported) {
+				go = Intl.PluralRules.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_test(type) {
+	// vars
+	let t0 = performance.now()
+	let aNosCardinal = [], // numbers used
+		aNosOrdinal = []
+
+	let test_all = [], // result hash + locale code + result
+		blinkStr = "",
+		str = ""
+
+	let	element = document.getElementById("results" + type)
+	let	elperf = document.getElementById("perf" + type)
+	let aTemp = []
+
+	// main test
+	if (type == "0") {
+		aTemp = []
+		for (let i=0; i < 101; i++) {aTemp.push(i)}
+		aNosCardinal = aTemp
+		aNosOrdinal = aTemp
+		main_buckets = []
+	}
+	// first changes
+	if (type == "1") {
+		aNosCardinal = aFirstCardinal
+		aNosOrdinal = aFirstOrdinal
+		// FF121: 1859752 ICU 74 : lij
+			// to keep lij unique from it,sc in ordinal (bug?)
+		if (!isFF || "lij" === Intl.Collator.supportedLocalesOf("lij").join()) {
+			if (!aNosOrdinal.includes(81)) {
+				aNosOrdinal.push(81) // chromium 
+			}
+		}
+	}
+	// custom
+	if (type == "2") {
+		let value = dom.custom.value
+		let go = false
+		value = value.trim()
+
+		if (value == "") {
+			// our minimal example
+			aNosCardinal = [0, 1, 2, 3, 7, 21, 100] // redundant: 4, 6, 11, 20
+			aNosOrdinal = [1, 2, 3, 4, 5, 6, 8, 10, 81] // redundant: 0, 6, 7, 9, 21 || FF147+ we need 6
+			// display
+			dom.custom.value = "[" + aNosCardinal.join(", ") +"]"
+				+ "\n[" + aNosOrdinal.join(", ") +"]"
+		} else {
+			aNosCardinal = []
+			aNosOrdinal = []
+			// cardinal
+			let start1 = value.indexOf("["),
+				start2 = value.indexOf("]")
+			let str1 = value.slice(start1+1, start2)
+			aTemp = []
+			aTemp = str1.split(",")
+			aTemp.forEach(function(item) {
+				item = item.trim()
+				if (item !== "") {
+					item = item * 1
+					if (Number.isInteger(item)) {
+						aNosCardinal.push(item)
+					}
+				}
+			})
+			// ordinal
+			value = value.slice(start2+1, value.length)
+			start1 = value.indexOf("["),
+				start2 = value.indexOf("]")
+			let str2 = value.slice(start1+1, start2)
+			aTemp = []
+			aTemp = str2.split(",")
+			aTemp.forEach(function(item) {
+				item = item.trim()
+				if (item !== "") {
+					item = item * 1
+					if (Number.isInteger(item)) {
+						aNosOrdinal.push(item)
+					}
+				}
+			})
+			if (aNosCardinal.length || aNosOrdinal.length) {go = true}
+		}
+
+		if (go) {
+			// dedupe
+			aNosCardinal = aNosCardinal.filter(function(item, position) {return aNosCardinal.indexOf(item) === position})
+			aNosOrdinal = aNosOrdinal.filter(function(item, position) {return aNosOrdinal.indexOf(item) === position})
+			// sort
+			aNosCardinal.sort((a,b) => a-b)
+			aNosOrdinal.sort((a,b) => a-b)
+
+		}
+	}
+	// always sort the arrays
+	aNosCardinal.sort((a,b) => a-b)
+	aNosOrdinal.sort((a,b) => a-b)
+
+	if (aNosCardinal.length == 0 && aNosOrdinal == 0) {
+		let header = "CUSTOM TEST"
+		if (type == "1") {header = "<hr><br>FIRST CHANGES ONLY"}
+		document.getElementById("numbers" + type).innerHTML = s4 + header + sc
+		element.innerHTML = "<br>there are no numbers to check<br>"
+		return
+	}
+
+	for (let j=0; j < aLocales.length; j++) {
+		// reset cardinal
+		let prevC = "", currentC = "", tmp_resultC = []
+		let c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
+		// reset ordinal
+		let prevO = "", currentO = "", tmp_resultO = []
+		let o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
+
+		let code = aLocales[j]
+		let intlPRcardinal = new Intl.PluralRules(code, {type:"cardinal"})
+		let intlPRordinal = new Intl.PluralRules(code, {type:"ordinal"})
+
+		// cardinal
+		for (let k=0; k < aNosCardinal.length; k++) {
+			let n = aNosCardinal[k]
+			try {
+				currentC = intlPRcardinal.select(n)
+				if (type == "0") {
+					// catch first change only: not EVERY change
+					if (c0 && currentC == "zero") {c0 = false; aFirstCardinal.push(n)}
+					if (c1 && currentC == "one") {c1 = false; aFirstCardinal.push(n)}
+					if (c2 && currentC == "two") {c2 = false; aFirstCardinal.push(n)}
+					if (c3 && currentC == "few") {c3 = false; aFirstCardinal.push(n)}
+					if (c4 && currentC == "many") {c4 = false; aFirstCardinal.push(n)}
+					if (c5 && currentC == "other") {c5 = false; aFirstCardinal.push(n)}
+				}
+			} catch(e) {
+				currentC = "error"
+			}
+			// record all changes
+			if (prevC !== currentC) {
+				tmp_resultC.push(n +": "+ currentC)
+			}
+			prevC = currentC
+		}
+		// ordinal
+		for (let k=0; k < aNosOrdinal.length; k++) {
+			let n = aNosOrdinal[k]
+			try {
+				currentO = intlPRordinal.select(n)
+				if (type == "0") {
+					// catch first change only: not EVERY change
+					if (o0 && currentO == "zero") {o0 = false; aFirstOrdinal.push(n)}
+					if (o1 && currentO == "one") {o1 = false; aFirstOrdinal.push(n)}
+					if (o2 && currentO == "two") {o2 = false; aFirstOrdinal.push(n)}
+					if (o3 && currentO == "few") {o3 = false; aFirstOrdinal.push(n)}
+					if (o4 && currentO == "many") {o4 = false; aFirstOrdinal.push(n)}
+					if (o5 && currentO == "other") {o5 = false; aFirstOrdinal.push(n)}
+				}
+			} catch(e) {
+				currentO = "error"
+			}
+			// record all changes
+			if (prevO !== currentO) {
+				tmp_resultO.push(n +": "+ currentO)
+			}
+			prevO = currentO
+		}
+		// array: hash-combined + code + resultC + resultO
+		let hashC = mini(tmp_resultC)
+		let hashO = mini(tmp_resultO)
+		let hashCombined = mini(hashC + hashO)
+		let strC = tmp_resultC.join(", ")
+		let strO = tmp_resultO.join(", ")
+		test_all.push(hashCombined +"~"+ code +"~"+ strC +"~"+ strO)
+	}
+
+	// clean up first changes
+	if (type == "0") {
+		aFirstCardinal = aFirstCardinal.filter(function(item, position) {return aFirstCardinal.indexOf(item) === position})
+		aFirstCardinal.sort((a,b) => a-b)
+		aFirstOrdinal = aFirstOrdinal.filter(function(item, position) {return aFirstOrdinal.indexOf(item) === position})
+		aFirstOrdinal.sort((a,b) => a-b)
+	}
+
+	if (type == "1" || type == "2") {
+		let typename = (type == "1" ? "first changes only" : "custom test")
+		let target = document.getElementById("numbers"+ type)
+		target.innerHTML = (type == "1" ? "<hr><br>" : "")
+			+ s4 + typename.toUpperCase() + sc
+			+ "<br><br>"+ s4 +"["+ aNosCardinal.length +"]" + sc
+			+ s12 + " cardinal: "+ sc +"["+ aNosCardinal.join(", ")
+			+ "] <br>"+ s4 +"["+ aNosOrdinal.length +"]" + sc
+			+ s12 + "  ordinal: "+ sc +"["+ aNosOrdinal.join(", ") +"]"
+			+ blinkStr
+	}
+
+	// perf
+	if (type == "1") {
+		dom.perf1st.innerHTML = '1st: '+ Math.round(performance.now()-t0) +" ms"
+	} else {
+		dom.perf.innerHTML = Math.round(performance.now()-t0) +" ms"
+	}
+
+	// sort array & loop: get hash + code + result buckets, and code_total
+	test_all.sort()
+	let bucket_hash = [], bucket_code = [], bucket_resC = [], bucket_resO = []
+	let tmp_code = [], nextHash = "", code_total = 0
+	for (let i=0; i < test_all.length; i++) {
+		let part1 = test_all[i].split("~")[0],
+			part2 = test_all[i].split("~")[1],
+			part3 = test_all[i].split("~")[2],
+			part4 = test_all[i].split("~")[3]
+		// build code string
+		tmp_code.push(part2)
+		// grab next item
+		if (i < test_all.length - 1) {
+			nextHash = test_all[(i+1)].split("~")[0]
+		} else {
+			nextHash = "end"
+		}
+		// next hash is diff: write data
+		if (nextHash !== part1) {
+			bucket_hash.push(part1 + s4 +" ["+ tmp_code.length +"]"+ sc)
+			bucket_resC.push(part3)
+			bucket_resO.push(part4)
+			bucket_code.push(tmp_code.join(", "))
+			code_total += tmp_code.length
+			tmp_code = [] // reset tmp_code
+		}
+	}
+
+	// main
+	if (type == "0") {
+		// build pretty BEFORE sorting
+		let pretty = []
+		for (let i=0; i < bucket_hash.length; i++) {
+			let part1 = s4 +"hash: "+ sc + bucket_hash[i]
+			let part2 = "<ul class='main'><li>" + s12 +"cardinal: "+ sc + bucket_resC[i] +"</li>"
+			let part3 = "<li>" + s12 +"ordinal: "+ sc + bucket_resO[i] +"</li>"
+			let part4 = "<li>" + s12 +"locale: "+ sc + bucket_code[i] +"</li></ul>"
+			pretty.push(part1 + part2 + part3 + part4)
+		}
+		// remember main details
+		main_buckets = bucket_code
+		main_buckets.sort()
+		// output
+		str = code_total + (code_total == aLocales.length ? sg : sb) +" [match]"+ sc
+		str = "<hr><br>"+ s4 +"ALL NUMBERS ["+ aNosCardinal.length +"]"+ sc +"<br>"
+			+"<ul class='main'><li>"+ s12 +"unique hashes: "+ sc + s16 + main_buckets.length +sc + "</li>"
+			+"<li>"+ s12 +" locales hash: "+ sc + mini(main_buckets) +"</li>"
+			+"<li>"+ s12 +" locale check: "+ sc + str +"</li></ul>"
+		dom.numbers0.innerHTML = str
+		element.innerHTML = pretty.join("")
+	}
+
+	// first changes
+	if (type == "1" || type == "2") {
+		// set vars to compare to main
+		bucket_code.sort()
+		let check_count = bucket_code.length
+		let check_hash = mini(bucket_code)
+		let main_hash = mini(main_buckets)
+		// append results
+		let matchbad = sb +" [match]"+ sc, matchgood = sg +" [match]"+ sc
+		str = "<ul class='main'><li>" + s12 +"unique hashes:"+ sc
+		str += " "+ s16 + check_count + sc + (check_count == main_buckets.length ? matchgood : matchbad)
+		str += "</li><li>"+ s12 +" locales hash: "+ sc + check_hash + (check_hash == main_hash ? matchgood : matchbad)
+		str += "</li></ul>"
+		element.innerHTML = str
+		if (check_hash !== main_hash) {
+			let testName = (type == "1" ? "FIRST CHANGES ONLY": "CUSTOM TEST" )
+			console.debug("MISMATCH\n" + "101 TEST buckets\n", main_buckets, testName +" buckets\n", bucket_code)
+		}
+	}
+}
+
+function run() {
+	if (isSupported) {
+		perf = ""
+		dom.perf = ""
+		dom.numbers2 = ""
+		dom.numbers1 = ""
+		dom.numbers0 = ""
+		dom.results2 = ""
+		dom.results1 = ""
+		dom.results0 = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_test("0") // main test
+			run_test("1") // 1st changes only
+			run_test("2") // custom
+		}, 1)
+	}
+}
+
+dom.custom.placeholder = "two arrays [cardinal] then [ordinal] e.g."
+	+ "\n[0, 1, , ,  7  , 21, 100  ]"
+ 	+ "\n[1,2,  3  , 5, 8, 45 ,non integers ignored ]"
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	buildnav()
+	// support
+	try {
+		let test = new Intl.PluralRules(undefined)
+		isSupported = true
+	} catch(e) {
+		dom.numbers2.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = []
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+
+	legend()
+	if (isSupported) {
+		setTimeout(function() {
+			run()
+		}, 1)
+	}
+})
+
+</script>
+</body>
+</html>
