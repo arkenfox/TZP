@@ -56,6 +56,7 @@ let oList = {
 	'emoji': sizeA, // windows: emoji = serif
 	'fangsong': sizeA,
 	'fantasy': sizeA, // windows: fantasy = sans
+	'math': sizeA,
 	'monospace': sizeB,
 	'sans-serif': sizeB,
 	'serif': sizeB,
@@ -63,7 +64,6 @@ let oList = {
 }
 let aExpand = [
 	'none',
-	'math',
 	'ui-monospace',
 	"ui-sans-serif",
 	'ui-serif',
@@ -137,7 +137,16 @@ function run_lang() {
 	let oUsed = {}
 	// unique measurement sets per style: this is all we need: = same on windows FF as sizeB
 		// windows TB almost the same: 'x-large' = +1 sans-serif | 'xxx-large' = +1 monospace
-	let sizes = ['3.9pt','266.6pt']
+	// the bigger the better it seems
+
+	// perf is atrocious at 100ms
+	let sizes = ['3.6pt','947.7pt']
+	// one small helps, and one large but not too large seems sufficient (at least on windows)
+		// 947.7pt is better than 862.3 - but 10k+ is a disaster and 1137.7pt is slightly worse than 947.7
+		// it's just going to vary slightly with DPR and locale/language and platform/fonts
+		// the above is good: 1 small, 1 large
+
+
 	for (const k of Object.keys(oList)) {oUsed[k] = oList[k]}
 
 	// one of each script (from default script sizes)
