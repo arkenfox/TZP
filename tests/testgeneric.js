@@ -602,8 +602,8 @@ function buildnav() {
 	// add prev/next nav links in all the intl tests so it's easy to loop thru them
 	let aTests = [ // filenames: in order as per listed, not necerssarily alphabetical
 		'collation',
-		'dncalendar','dncurrency','dndatetime','dnlanguage','dnregion','dnscript',
 		'dtfcomponents','dtfdatetimestyle','dtfdayperiod','dtflistformat','dtfrelated','dtftimezonename',
+		'dncalendar','dncurrency','dndatetime','dnlanguage','dnregion','dnscript',
 		'duration',
 		'nfcompact','nfcurrency','nfformattoparts','nfnotation','nfsign','nfunit',
 		'pr','prrange','rtf','resolvedoptions','segmenter',
