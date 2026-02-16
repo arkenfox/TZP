@@ -385,13 +385,19 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				get_agent_data('', isOS, false)
 			]).then(function(res){
 				try {
+					// we already have braveInN, now we want braveInU
 					let data = res[0]
 					if ('object' !== typeof data) {exit()}
-					// we already have braveInN, now we want braveInU
-					isBrave = 'Brave' == data.brands[0].brand && 'Brave' == data.fullVersionList[0].brand
+					// the position of 'Brave' can/might vary (seems like a patch not randomizing)
+					// so we need to loop: assumes same position in brand + fullVersionList
+					for (let i = 0; i < data.brands.length; i++) {
+						if ('Brave' == data.brands[i].brand && 'Brave' == data.fullVersionList[i].brand) {
+							isBrave = true; break
+						}
+					}
 					// if isBrave, we can check if FP protection is enabled: telltale signs we can easily check include
 						// null keyboard
-						// gibberish in plugins
+						// gibberish in plugins (if pdf enabled)
 						// canvas
 					// other possibles are: tiny chrome + tiny screen positions
 					// others: extendedscreen can't be true
