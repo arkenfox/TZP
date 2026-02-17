@@ -217,47 +217,48 @@ function set_isLanguageSmart() {
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
 		// c = css | m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort
-		'ar': {   m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '5cee96ec', xsort: '352c4e34'},
-		'be': {   m: '076d68e6', v: '4edeafab', x: '42583d22', xs: 'c28dba41', xsort: '74053574'},
-		'bg': {   m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: 'b964cfe0', xsort: '7d747674'},
-		'ca': {   m: 'd856d812', v: '6b3bb3d8', x: '77a62a49', xs: 'ad2e7060', xsort: xsEN},
-		'cs': {   m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: '7c010d86', xsort: 'a7ddfef4'},
-		'da': {   m: '39169214', v: '479797a1', x: 'a30818e8', xs: '8654b0f1', xsort: '88f55cfa'},
-		'de': {   m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: '5ab0cbb9', xsort: xsEN},
-		'el': {   m: '7053311d', v: 'fb391308', x: '493f7225', xs: '4ab6bd1f', xsort: 'cae41bf4'},
-		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN},
-		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: 'd9a6e947', xsort: '32fce55a'},
-		'fa': {   m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: '47876cea', xsort: 'ff0f7334'},
-		'fi': {   m: '82d079c7', v: '3e29e6e7', x: '859efc32', xs: '67b222db', xsort: '26f7a3f8'},
-		'fr': {   m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: 'f09eacaa', xsort: xsEN},
-		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: '021b6b57', xsort: xsEN},
-		'he': {   m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: '35d1f35c', xsort: 'a0fcc2b4'},
-		'hu': {   m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: 'ffae360e', xsort: '2fe650b4'},
-		'id': {   m: '1e275882', v: '5dda18f3', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN},
-		'is': {   m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '3d227a5a', xsort: '93b575f8'},
-		'it': {   m: '716e7242', v: '3b781f09', x: 'c567f479', xs: '7d0eba5c', xsort: xsEN},
-		'ja': {   m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: 'a0fa98ad', xsort: '22ec9486'},
-		'ka': {   m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '460ae32f', xsort: '7a65b6b4'},
-		'ko': {   m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '1d314216', xsort: '9c39494c'},
-		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'ca28b814', xsort: 'f26c6ff4'},
-		'mk': {   m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: '36e30ccb', xsort: 'f9e81474'},
-		'ms': {   m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: '421d606a', xsort: xsEN},
-		'my': {   m: '939f2013', v: '43cc3aa3', x: 'a6571ec7', xs: 'bfc734fe', xsort: 'fbfb1d8c'},
-		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '19e8e2a5', xsort: '88f55cfa'},
-		'nl': {   m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: '8a47ae1a', xsort: xsEN},
-		'pl': {   m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '4740c17a', xsort: '01902794'},
-		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: 'e710618b', xsort: xsEN},
-		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: '025ca23b', xsort: xsEN},
-		'ro': {   m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '61b5e498', xsort: '2a01a4d8'},
-		'ru': {   m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '4445d36a', xsort: '7d747674'},
-		'sq': {   m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: '569be7bb', xsort: 'f45c6af8'},
-		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '701cd8c7', xsort: '1ca25322'},
-		'th': {   m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: '7e968207', xsort: 'a0bff3b4'},
-		'tr': {   m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'd8e92945', xsort: 'e9fda72a'},
-		'uk': {   m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: 'e62ccf4f', xsort: 'ae65fe74'},
-		'vi': {   m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '959b2e31', xsort: '2a01a4d8'},
-		'zh-Hans-CN': {m: '550ea53e', v: '0e58f82a', x: '536abb21', xs: '1feed45e', xsort: '42d5bac6'},
-		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '8aa6bfbf', xsort: '6d106412'},
+		// r = reporting (if blank we use the english hash)
+		'ar': {   m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '5cee96ec', xsort: '352c4e34', r: ''},
+		'be': {   m: '076d68e6', v: '4edeafab', x: '42583d22', xs: 'c28dba41', xsort: '74053574', r: 'cae6266c'},
+		'bg': {   m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: 'b964cfe0', xsort: '7d747674', r: ''},
+		'ca': {   m: 'd856d812', v: '6b3bb3d8', x: '77a62a49', xs: 'ad2e7060', xsort: xsEN,       r: ''},
+		'cs': {   m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: '7c010d86', xsort: 'a7ddfef4', r: '24131cee'},
+		'da': {   m: '39169214', v: '479797a1', x: 'a30818e8', xs: '8654b0f1', xsort: '88f55cfa', r: '433a21bb'},
+		'de': {   m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: '5ab0cbb9', xsort: xsEN,       r: 'f0ee8654'},
+		'el': {   m: '7053311d', v: 'fb391308', x: '493f7225', xs: '4ab6bd1f', xsort: 'cae41bf4', r: 'ede2433f'},
+		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN,       r: '79bab8c6'},
+		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: 'd9a6e947', xsort: '32fce55a', r: '466b6f7d'},
+		'fa': {   m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: '47876cea', xsort: 'ff0f7334', r: ''},
+		'fi': {   m: '82d079c7', v: '3e29e6e7', x: '859efc32', xs: '67b222db', xsort: '26f7a3f8', r: ''},
+		'fr': {   m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: 'f09eacaa', xsort: xsEN,       r: '175625d2'},
+		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: '021b6b57', xsort: xsEN,       r: ''},
+		'he': {   m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: '35d1f35c', xsort: 'a0fcc2b4', r: '04789116'},
+		'hu': {   m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: 'ffae360e', xsort: '2fe650b4', r: '4e350caa'},
+		'id': {   m: '1e275882', v: '5dda18f3', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN,       r: '7b6a2693'},
+		'is': {   m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '3d227a5a', xsort: '93b575f8', r: '58e32135'},
+		'it': {   m: '716e7242', v: '3b781f09', x: 'c567f479', xs: '7d0eba5c', xsort: xsEN,       r: 'd193700b'},
+		'ja': {   m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: 'a0fa98ad', xsort: '22ec9486', r: '114ff1c8'},
+		'ka': {   m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '460ae32f', xsort: '7a65b6b4', r: '2a088b49'},
+		'ko': {   m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '1d314216', xsort: '9c39494c', r: '7c61c909'},
+		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'ca28b814', xsort: 'f26c6ff4', r: 'ddf91884'},
+		'mk': {   m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: '36e30ccb', xsort: 'f9e81474', r: '79bab8c6'},
+		'ms': {   m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: '421d606a', xsort: xsEN,       r: 'c2900436'},
+		'my': {   m: '939f2013', v: '43cc3aa3', x: 'a6571ec7', xs: 'bfc734fe', xsort: 'fbfb1d8c', r: ''},
+		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '19e8e2a5', xsort: '88f55cfa', r: '5c68346f'},
+		'nl': {   m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: '8a47ae1a', xsort: xsEN,       r: 'ad0ddebd'},
+		'pl': {   m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '4740c17a', xsort: '01902794', r: 'dd2d5b20'},
+		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: 'e710618b', xsort: xsEN,       r: '70941e15'},
+		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: '025ca23b', xsort: xsEN,       r: 'cd39aed6'},
+		'ro': {   m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '61b5e498', xsort: '2a01a4d8', r: 'a97a9a93'},
+		'ru': {   m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '4445d36a', xsort: '7d747674', r: '3a78699e'},
+		'sq': {   m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: '569be7bb', xsort: 'f45c6af8', r: '307fffc7'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '701cd8c7', xsort: '1ca25322', r: 'b909e220'},
+		'th': {   m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: '7e968207', xsort: 'a0bff3b4', r: '3c017e6d'},
+		'tr': {   m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'd8e92945', xsort: 'e9fda72a', r: 'dcad318b'},
+		'uk': {   m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: 'e62ccf4f', xsort: 'ae65fe74', r: 'f106005d'},
+		'vi': {   m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '959b2e31', xsort: '2a01a4d8', r: '77cddcae'},
+		'zh-Hans-CN': {m: '550ea53e', v: '0e58f82a', x: '536abb21', xs: '1feed45e', xsort: '42d5bac6', r: '52bd48cc'},
+		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '8aa6bfbf', xsort: '6d106412', r: '6dd478d6'},
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
@@ -1821,6 +1822,54 @@ function get_l10n_parsererror_direction(METRIC) {
 	return
 }
 
+const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API
+	// dom.reporting.enabled
+	// ToDo: replace with something more permanent and/or additional messages even from other types?
+	let t0 = nowFn()
+	function exit(res) {
+		try {observer.disconnect()} catch(e) {}
+		if ('string' == typeFn(res)) {
+			hash = res
+		} else {
+			// get unique deprecated messages
+			// reruns add additonal items to the array so limit to the first x
+			let aSet = new Set(), max = res.length < 6 ? res.length : 6
+			for (let i=0; i < max; i++) {aSet.add(res[i].body.message)}
+			data = Array.from(aSet)
+			data.sort()
+			hash = mini(data); btn = addButton(4, METRIC)
+			if (isLanguageSmart) {
+				if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+					let check = localesSupported[isLocaleAlt].r
+					// if blank then it hasn't been translated yet
+					if ('' == check) {check = localesSupported['en-US'].r}
+					if (hash === check) {notation = locale_green}
+				}
+			}
+		}
+		addBoth(4, METRIC, hash, btn, notation, data)
+		return resolve()
+	}
+	// note: we don't need to notate if the API is enabled or not, as that's covered by window properties
+	let hash, data ='', btn ='', notation = '', observer
+	try {
+		if (runSE) {foo++}
+		if (!isGecko) {
+			exit(zNA)
+		} else if (undefined == window.ReportingObserver) {
+			exit('undefined')
+		} else {
+			// but we do notate when it is on to match locale
+			notation = isLanguageSmart ? locale_red : ''
+			observer = new ReportingObserver((reports, observer) => {exit(reports)}, {types: ['deprecation'], buffered: true})
+			observer.observe()
+		}
+	} catch(e) {
+		data = zErrLog; exit(e+'')
+	}
+})
+
 function get_l10n_validation_messages(METRIC) {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
 
@@ -2122,6 +2171,7 @@ const outputRegion = () => new Promise(resolve => {
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
+				get_l10n_reporting_messages('l10n_reporting_messages'),
 				get_l10n_media_messages('l10n_media_messages'),
 			]).then(function(){
 				// microperf: add totals, re-order into anew obj
