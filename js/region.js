@@ -225,7 +225,7 @@ function set_isLanguageSmart() {
 		'cs': {   m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: '7c010d86', xsort: 'a7ddfef4', r: '24131cee'},
 		'da': {   m: '39169214', v: '479797a1', x: 'a30818e8', xs: '8654b0f1', xsort: '88f55cfa', r: '433a21bb'},
 		'de': {   m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: '5ab0cbb9', xsort: xsEN,       r: 'f0ee8654'},
-		'el': {   m: '7053311d', v: 'fb391308', x: '493f7225', xs: '4ab6bd1f', xsort: 'cae41bf4', r: 'ede2433f'},
+		'el': {   m: '39712e09', v: 'fb391308', x: '493f7225', xs: '33a4584c', xsort: 'cae41bf4', r: 'ede2433f'},
 		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN,       r: '79bab8c6'},
 		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: 'd9a6e947', xsort: '32fce55a', r: '466b6f7d'},
 		'fa': {   m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: '47876cea', xsort: 'ff0f7334', r: ''},
@@ -263,9 +263,8 @@ function set_isLanguageSmart() {
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
 		languagesSupported['ja'].push('ja-JP')
-		let macvalue = localesSupported.ja
+		localesSupported['ja-JP'] = localesSupported.ja
 		delete localesSupported['ja']
-		localesSupported['ja-JP'] = macvalue
 	}
 	if (isMB) {
 		// 22 of 38 supported
