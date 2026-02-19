@@ -212,53 +212,58 @@ function set_isLanguageSmart() {
 	}
 	// these are current stable BB hashes since last checked
 		// note: upstream ESR seems to pick up stable l10n changes
-	// last checked TB15.0a1
+	// last checked TB15.06
+
+	// NOTE: these hashes are only designed to work with BB ESR (stable) and FF en-US
+	// we can use an array if necessary so as to not get false positives in FF
+	// using an array (test is .includes) means we're not super tight on our health check i.e per isVer
+
 	let xsEN = '6cc5a8b4'
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
 		// c = css | m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort
 		// r = reporting (if blank we use the english hash)
 		'ar': {   m: '1f9a06e3', v: '7262bcc6', x: '71982b47', xs: '5cee96ec', xsort: '352c4e34', r: ''},
-		'be': {   m: '076d68e6', v: '4edeafab', x: '42583d22', xs: 'c28dba41', xsort: '74053574', r: 'cae6266c'},
+		'be': {   m: '076d68e6', v: '4edeafab', x: '42583d22', xs: 'c28dba41', xsort: '74053574', r: '6de2f0b7'},
 		'bg': {   m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98', xs: 'b964cfe0', xsort: '7d747674', r: ''},
 		'ca': {   m: 'd856d812', v: '6b3bb3d8', x: '77a62a49', xs: 'ad2e7060', xsort: xsEN,       r: ''},
-		'cs': {   m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: '7c010d86', xsort: 'a7ddfef4', r: '24131cee'},
-		'da': {   m: '39169214', v: '479797a1', x: 'a30818e8', xs: '8654b0f1', xsort: '88f55cfa', r: '433a21bb'},
-		'de': {   m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: '5ab0cbb9', xsort: xsEN,       r: 'f0ee8654'},
-		'el': {   m: '39712e09', v: 'fb391308', x: '493f7225', xs: '33a4584c', xsort: 'cae41bf4', r: 'ede2433f'},
-		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN,       r: '79bab8c6'},
-		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: 'd9a6e947', xsort: '32fce55a', r: '466b6f7d'},
+		'cs': {   m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49', xs: '7c010d86', xsort: 'a7ddfef4', r: '39eac55d'},
+		'da': {   m: '39169214', v: '479797a1', x: 'a30818e8', xs: '8654b0f1', xsort: '88f55cfa', r: '266a324b'},
+		'de': {   m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571', xs: '5ab0cbb9', xsort: xsEN,       r: '8c11ce07'},
+		'el': {   m: '39712e09', v: 'fb391308', x: '493f7225', xs: '33a4584c', xsort: 'cae41bf4', r: '71191fa1'},
+		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN,       r: ['8c954475','4a9afc22']},
+		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70', xs: 'd9a6e947', xsort: '32fce55a', r: '7fc42e10'},
 		'fa': {   m: '6648d919', v: '8ef57409', x: '1ed34bca', xs: '47876cea', xsort: 'ff0f7334', r: ''},
 		'fi': {   m: '82d079c7', v: '3e29e6e7', x: '859efc32', xs: '67b222db', xsort: '26f7a3f8', r: ''},
-		'fr': {   m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: 'f09eacaa', xsort: xsEN,       r: '175625d2'},
+		'fr': {   m: '024d0fce', v: '34e28fa2', x: '1d2050d3', xs: 'f09eacaa', xsort: xsEN,       r: '7ebbf4b3'},
 		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8', xs: '021b6b57', xsort: xsEN,       r: ''},
-		'he': {   m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: '35d1f35c', xsort: 'a0fcc2b4', r: '04789116'},
-		'hu': {   m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: 'ffae360e', xsort: '2fe650b4', r: '4e350caa'},
-		'id': {   m: '1e275882', v: '5dda18f3', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN,       r: '7b6a2693'},
-		'is': {   m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '3d227a5a', xsort: '93b575f8', r: '58e32135'},
-		'it': {   m: '716e7242', v: '3b781f09', x: 'c567f479', xs: '7d0eba5c', xsort: xsEN,       r: 'd193700b'},
-		'ja': {   m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: 'a0fa98ad', xsort: '22ec9486', r: '114ff1c8'},
-		'ka': {   m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '460ae32f', xsort: '7a65b6b4', r: '2a088b49'},
-		'ko': {   m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '1d314216', xsort: '9c39494c', r: '7c61c909'},
-		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'ca28b814', xsort: 'f26c6ff4', r: 'ddf91884'},
-		'mk': {   m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: '36e30ccb', xsort: 'f9e81474', r: '79bab8c6'},
-		'ms': {   m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: '421d606a', xsort: xsEN,       r: 'c2900436'},
+		'he': {   m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e', xs: '35d1f35c', xsort: 'a0fcc2b4', r: 'cadeed05'},
+		'hu': {   m: 'db7366e6', v: 'b72d316d', x: 'e4f85168', xs: 'ffae360e', xsort: '2fe650b4', r: '4b0d44d0'},
+		'id': {   m: '1e275882', v: '5dda18f3', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN,       r: '93c32eba'},
+		'is': {   m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212', xs: '3d227a5a', xsort: '93b575f8', r: 'ce6ce0a6'},
+		'it': {   m: '716e7242', v: '3b781f09', x: 'c567f479', xs: '7d0eba5c', xsort: xsEN,       r: '514ebfe9'},
+		'ja': {   m: 'ab56d7cb', v: '48645d06', x: 'a58f6165', xs: 'a0fa98ad', xsort: '22ec9486', r: '64e8a6a1'},
+		'ka': {   m: '6961b7e4', v: '40feb44f', x: '765afcb4', xs: '460ae32f', xsort: '7a65b6b4', r: '778bc94a'},
+		'ko': {   m: 'c758b027', v: 'd3b54047', x: '1235e26d', xs: '1d314216', xsort: '9c39494c', r: 'c81a1027'},
+		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'ca28b814', xsort: 'f26c6ff4', r: 'e58fc47e'},
+		'mk': {   m: '78274f1b', v: '333aae58', x: 'b6020ec1', xs: '36e30ccb', xsort: 'f9e81474', r: ''},
+		'ms': {   m: '3e26c6be', v: '9dadbc64', x: '15e6148f', xs: '421d606a', xsort: xsEN,       r: '411351e5'},
 		'my': {   m: '939f2013', v: '43cc3aa3', x: 'a6571ec7', xs: 'bfc734fe', xsort: 'fbfb1d8c', r: ''},
-		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '19e8e2a5', xsort: '88f55cfa', r: '5c68346f'},
-		'nl': {   m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: '8a47ae1a', xsort: xsEN,       r: 'ad0ddebd'},
-		'pl': {   m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '4740c17a', xsort: '01902794', r: 'dd2d5b20'},
-		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: 'e710618b', xsort: xsEN,       r: '70941e15'},
-		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: '025ca23b', xsort: xsEN,       r: 'cd39aed6'},
-		'ro': {   m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '61b5e498', xsort: '2a01a4d8', r: 'a97a9a93'},
-		'ru': {   m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '4445d36a', xsort: '7d747674', r: '3a78699e'},
-		'sq': {   m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: '569be7bb', xsort: 'f45c6af8', r: '307fffc7'},
-		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '701cd8c7', xsort: '1ca25322', r: 'b909e220'},
-		'th': {   m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: '7e968207', xsort: 'a0bff3b4', r: '3c017e6d'},
-		'tr': {   m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'd8e92945', xsort: 'e9fda72a', r: 'dcad318b'},
-		'uk': {   m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: 'e62ccf4f', xsort: 'ae65fe74', r: 'f106005d'},
-		'vi': {   m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '959b2e31', xsort: '2a01a4d8', r: '77cddcae'},
-		'zh-Hans-CN': {m: '550ea53e', v: '0e58f82a', x: '536abb21', xs: '1feed45e', xsort: '42d5bac6', r: '52bd48cc'},
-		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '8aa6bfbf', xsort: '6d106412', r: '6dd478d6'},
+		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04', xs: '19e8e2a5', xsort: '88f55cfa', r: 'b32738cf'},
+		'nl': {   m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc', xs: '8a47ae1a', xsort: xsEN,       r: '2a725fb7'},
+		'pl': {   m: '0bd88e98', v: '95ad4851', x: '2a45177d', xs: '4740c17a', xsort: '01902794', r: '2678c528'},
+		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66', xs: 'e710618b', xsort: xsEN,       r: '21ee14c6'},
+		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309', xs: '025ca23b', xsort: xsEN,       r: 'e6a7d6ff'},
+		'ro': {   m: '3e321768', v: 'd72a350b', x: 'a9da3416', xs: '61b5e498', xsort: '2a01a4d8', r: '9b675c63'},
+		'ru': {   m: '8e9b7945', v: '2391fbec', x: '26f663da', xs: '4445d36a', xsort: '7d747674', r: '0bf2516d'},
+		'sq': {   m: '91943e67', v: 'e0259277', x: '4e0bbdcd', xs: '569be7bb', xsort: 'f45c6af8', r: 'a75d2c6f'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '701cd8c7', xsort: '1ca25322', r: '3ed80374'},
+		'th': {   m: 'a32d70a7', v: '07358a87', x: '2a04071a', xs: '7e968207', xsort: 'a0bff3b4', r: '65ade427'},
+		'tr': {   m: '4217ef80', v: '5048d312', x: '55daef93', xs: 'd8e92945', xsort: 'e9fda72a', r: 'd62d2c72'},
+		'uk': {   m: '4bea2a13', v: '0163f51d', x: '4f817ea3', xs: 'e62ccf4f', xsort: 'ae65fe74', r: '2049852a'},
+		'vi': {   m: 'bba6c980', v: 'b8137d59', x: '80da1efb', xs: '959b2e31', xsort: '2a01a4d8', r: 'ef6841d7'},
+		'zh-Hans-CN': {m: '550ea53e', v: '0e58f82a', x: '536abb21', xs: '1feed45e', xsort: '42d5bac6', r: '135f1290'},
+		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c', xs: '8aa6bfbf', xsort: '6d106412', r: '62cefab7'},
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
@@ -351,7 +356,7 @@ function set_oIntlTests() {
 
 	// all dates (days/months/am-pm) must be timezone resistent
 	// we do not want the noise or extra checks we are checking locale only
-	// reported timezonename (andlocale) is tested set_oIntlDateTests section
+	// reported timezonename (and locale) is tested set_oIntlDateTests section
 
 	// checking timezone resistance
 	/* all identical hashes
@@ -489,7 +494,7 @@ function set_oIntlTests() {
 			'second': {'long': [1], 'narrow': [1], 'short': [987654]},
 			'terabyte': unitL,
 		},
-		// other
+		// PR
 		'pluralrules.select': {
 			cardinal: [0, 1, 2, 3, 7, 21, 100],
 			ordinal: [1, 2, 3, 4, 5, 6, 8, 10, 81]
@@ -498,6 +503,7 @@ function set_oIntlTests() {
 			cardinal: [[0,0],[1,1],[2,1],[2,4]],
 			ordinal: [[0,0],[0,1],[0,6],[1,1],[1,3],[1,5],[3,3]],
 		},
+		// other
 		relativetimeformat: {
 			always: {'narrow': [[1, 'day'], [0, 'year']]},
 			auto: {
@@ -1784,7 +1790,7 @@ const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
 	hash = mini(data); btn = addButton(4, METRIC)
 	if (isLanguageSmart) {
 		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-			if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
+			if (localesSupported[isLocaleAlt].m.includes(hash)) {notation = locale_green}
 		}
 	}
 	addBoth(4, METRIC, hash, btn, notation, data)
@@ -1824,48 +1830,72 @@ function get_l10n_parsererror_direction(METRIC) {
 const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API
 	// dom.reporting.enabled
-	// ToDo: replace with something more permanent and/or additional messages even from other types?
+
+	// note: if/when the API is enabled, BB alpha can differ as deprecation warnings change
+	// since we use isLanguageSmart (which can include non isBBESR), it's not worth coding
+	// around that to remove false positives - we don't care about BB alpha health
 	let t0 = nowFn()
 	function exit(res) {
 		try {observer.disconnect()} catch(e) {}
 		if ('string' == typeFn(res)) {
+			// undefined, n/a, errors
 			hash = res
 		} else {
-			// get unique deprecated messages
-			// reruns add additonal items to the array so limit to the first x
-			let aSet = new Set(), max = res.length < 6 ? res.length : 6
-			for (let i=0; i < max; i++) {aSet.add(res[i].body.message)}
-			data = Array.from(aSet)
-			data.sort()
-			hash = mini(data); btn = addButton(4, METRIC)
+			if (hasReporting) {
+				data = isReporting
+			} else {
+				//console.log(res)
+				// get up to x unique deprecated messages
+				let max = 10
+				let aSet = new Set()
+				for (let i=0; i < res.length; i++) {
+					let msg = res[i].body.message
+					msg = msg.replace('https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture','').trim()
+					aSet.add(msg)
+					if (max == aSet.size) {break} // reruns accrue messages so break
+				}
+				data = Array.from(aSet).sort()
+				isReporting = data // cache the result for reruns
+			}
+			if (data.length) {
+				hash = mini(data); btn = addButton(4, METRIC) // + (hasReporting ? ' [cached]' : ' [generated]')
+			} else {
+				hash = 'none'
+			}
+			// notate
 			if (isLanguageSmart) {
 				if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
 					let check = localesSupported[isLocaleAlt].r
 					// if blank then it hasn't been translated yet
 					if ('' == check) {check = localesSupported['en-US'].r}
-					if (hash === check) {notation = locale_green}
+					if (check.includes(hash)) {notation = locale_green}
 				}
 			}
 		}
 		addBoth(4, METRIC, hash, btn, notation, data)
+		if (!hasReporting) {log_perf(4, METRIC, t0)}
 		return resolve()
 	}
+
 	// note: we don't need to notate if the API is enabled or not, as that's covered by window properties
 	let hash, data ='', btn ='', notation = '', observer
-	try {
-		if (runSE) {foo++}
-		if (!isGecko) {
-			exit(zNA)
-		} else if (undefined == window.ReportingObserver) {
-			exit('undefined')
+	let hasReporting = 'array' == typeFn(isReporting, true)
+	if (!isGecko) {exit(zNA)
+	} else if (undefined == isReporting && undefined == window.ReportingObserver) {exit('undefined')
+	} else {
+		// but we do notate when it is on to match locale
+		notation = isLanguageSmart ? locale_red : ''
+		if (hasReporting) {
+			exit()
 		} else {
-			// but we do notate when it is on to match locale
-			notation = isLanguageSmart ? locale_red : ''
-			observer = new ReportingObserver((reports, observer) => {exit(reports)}, {types: ['deprecation'], buffered: true})
-			observer.observe()
+			try {
+				if (runSE) {foo++}
+				observer = new ReportingObserver((reports, observer) => {exit(reports)}, {types: ['deprecation'], buffered: true})
+				observer.observe()
+			} catch(e) {
+				data = zErrLog; exit(e+'')
+			}
 		}
-	} catch(e) {
-		data = zErrLog; exit(e+'')
 	}
 })
 
@@ -1908,7 +1938,7 @@ function get_l10n_validation_messages(METRIC) {
 		btn = addButton(4, METRIC, details)
 		if (isLanguageSmart) {
 			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].v) {notation = locale_green}
+				if (localesSupported[isLocaleAlt].v.includes(hash)) {notation = locale_green}
 			}
 		}
 	} catch(e) {
@@ -1928,7 +1958,7 @@ function get_l10n_xml_messages(METRIC) {
 		hash = mini(isXML); btn = addButton(4, METRIC)
 		if (isLanguageSmart) {
 			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].x) {notation = locale_green}
+				if (localesSupported[isLocaleAlt].x.includes(hash)) {notation = locale_green}
 			}
 		}
 	}
@@ -1979,7 +2009,7 @@ function get_l10n_xslt_messages(METRIC) {
 	}
 	if (isLanguageSmart) {
 		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-			if (hash === localesSupported[isLocaleAlt].xs) {notation = locale_green}
+			if (localesSupported[isLocaleAlt].xs.includes(hash)) {notation = locale_green}
 		}
 	}
 	addBoth(4, METRIC, hash, btn, notation, data)
@@ -2017,7 +2047,7 @@ function get_l10n_xslt_sort(METRIC) {
 		if (isLanguageSmart) {
 			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
 				// compare the string hash
-				if (mini(dataStr) === localesSupported[isLocaleAlt].xsort) {notation = locale_green}
+				if (localesSupported[isLocaleAlt].xsort.includes(mini(dataStr))) {notation = locale_green}
 			}
 		}
 	} catch(e) {
@@ -2149,10 +2179,17 @@ const outputRegion = () => new Promise(resolve => {
 		get_geo('geolocation'),
 		get_language_locale(), // sets isLocaleValid/Value, isLanguagesNav
 	]).then(function(){
-		// add smarts if locale matches: i.e we can notate messages in FF
-		if (isGecko && isSmart && isDesktop) {
-			if (localesSupported[isLocaleValue] !== undefined) {isLanguageSmart = true}
+		// add smarts if locale matches: i.e we can notate messages for FF
+		// isLanguageSmart controls health for l10n (and language/locale but we also check isBB in those)
+		if (isGecko && !isLanguageSmart && isSmart && isDesktop) {
+			// this becomes problematic to maintain for all those 40+ locales over a full ESR cycle as translations
+			// change or deprecated warnings etc come and go: the health check only really matters if you're spoofing
+			// en-US anyway, so let's limit to en-US for non-BB to avoid non-BB false positivess
+			if ('en-US' == isLocaleValue) {
+				if (localesSupported[isLocaleValue] !== undefined) {isLanguageSmart = true}
+			}
 		}
+		
 		let isLies = isDomRect == -1
 		Promise.all([
 			get_language_system('languages_system'), // uses isLanguagesNav

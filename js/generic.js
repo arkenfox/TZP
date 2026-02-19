@@ -2206,7 +2206,6 @@ function countJS(item) {
 		// tidy up metric overlay symbols to match global symbol used
 		dom.overlay_tick.innerHTML = tick +' '
 		dom.overlay_cross.innerHTML = cross +' '
-
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 		Promise.all([
 			get_isBB('isBB'),
@@ -2503,6 +2502,18 @@ function run_immediate() {
 			get_isEngine('isEngine')
 			// return if not supported
 			if (!isAllowNonGecko || undefined === isEngine) {return}
+		} else {
+			// search https://searchfox.org/firefox-main/source/dom/locales/en-US/chrome/dom/dom.properties for 'is deprecated'
+			// trigger some gecko deprecated items
+			// if the API is disabled, they are still reported when it is toggled enabled
+			try {window.InstallTrigger} catch(e) {} // FF100 1754441 deprecate InstallTrigger
+				// X is deprecated and will be removed in the future.
+			try {screen.mozOrientation} catch(e) {} // FF147 2003169 deprecate mozOrientation
+				// X attribute is deprecated and will be removed in the future.
+			try {window.fullScreen} catch(e) {} // FF65 1504946
+				// X is deprecated. Use Y instead.
+			try {document.releaseCapture()} catch(e) {} // FF90 973604 mark set/releaseCapture() as deprecated
+				// X is deprecated. Use Y instead. For more help
 		}
 		// set isProtoProxy on known engines
 			// we already returned if isEngine == undefined just above
