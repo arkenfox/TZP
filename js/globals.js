@@ -156,6 +156,7 @@ let isArch = true,
 	isProps, // window properties
 	isProtoProxy = false,
 	isRecursion,
+	isReporting, // ReportingAPI
 	isScrollbar,
 	isStyles = ['cursive','math','monospace','sans-serif','serif','system-ui'],
 		// FF145+ nightly 1788937 math | 2014703 FF149+
