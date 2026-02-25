@@ -881,8 +881,15 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
-			if ('Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)) return 150 // 2018544
-			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
+			try {
+				Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})
+			} catch(e) {
+				if ('RangeError' == e.name) {
+					// 150: 2018544: false postives FF134-147
+					if ('Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)) return 150 // 2018544
+					return 149 // 2009792
+				}
+			}
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
