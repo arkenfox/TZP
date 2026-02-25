@@ -286,10 +286,15 @@ function outputVersion() {
 		}
 
 		// 150: 2018544
+			// false positives if FF134-146 so check for 149 first
 		let t150 = performance.now(), ver150
 		try {
-			ver150 = 'Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)
-		} catch(e) {}
+			Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})
+		} catch(e) {
+			if ('RangeError' == e.name) { // FF149+
+				ver150 = 'Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)
+			}
+		}
 		rec(150, 150, "2018544", ver150, performance.now()-t150, 'DATE') // ~1+ ms
 
 		// 149: 2009792
