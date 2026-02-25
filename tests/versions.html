@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 106, maxVer = 149, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 107, maxVer = 150, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -284,6 +284,13 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 150: 2018544
+		let t150 = performance.now(), ver150
+		try {
+			ver150 = 'Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)
+		} catch(e) {}
+		rec(150, 150, "2018544", ver150, performance.now()-t150, 'DATE') // ~1+ ms
 
 		// 149: 2009792
 		let t149 = performance.now(), ver149
