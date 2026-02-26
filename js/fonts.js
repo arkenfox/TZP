@@ -645,6 +645,7 @@ let fntMaster = {
 				// ^ not added: windows only installs region-specific e.g. Noto Sans TC, not language-specific e.g. Noto Sans CJK TC
 			// other
 			'Sans Serif Collection', // win11
+			'MingLiU_MSCS','MingLiU_MSCS-ExtB', // 2016678
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT', // MS products
 			'OpenSymbol', // openoffice
