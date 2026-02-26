@@ -644,8 +644,8 @@ let fntMaster = {
 			// 1957317: Noto Sans CJK HK/JP/KR/SC/TC and Noto Serif CJK HK/JP/KR/SC/TC
 				// ^ not added: windows only installs region-specific e.g. Noto Sans TC, not language-specific e.g. Noto Sans CJK TC
 			// other
-			'Sans Serif Collection', // win11
-			'MingLiU_MSCS','MingLiU_MSCS-ExtB', // 2016678
+			'Sans Serif Collection', // win11 only: 1858357
+			'MingLiU_MSCS','細明體_MSCS','MingLiU_MSCS-ExtB','細明體_MSCS', // win11 only? 2016678
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT', // MS products
 			'OpenSymbol', // openoffice
