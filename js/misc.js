@@ -540,6 +540,38 @@ function get_math(METRIC, isLies) {
 	return
 }
 
+function get_math_css(METRIC) {
+	// 1881277: ToDo: expand this
+		// This should just be equivalancy of Math but IDK what libraries CSS uses
+		// and Math has entropy beyond platform architecture
+	// We could also try to replicate
+		// - math_trig: RFP doesn't cover this IIUIC so a leak?
+		// - math_other
+		// both would add more methods and expose lies/leaks
+	let hash, btn='', data = {}, isLies = isDomRect == -1
+	let aList = ['A']
+	try {
+		let wrapper = dom.tzpCalc, target = dom.tzpCalcTarget, method
+		aList.forEach(function(k){
+			target.className = '' // remove any classes
+			target.classList.add('tzpCalc' +k) // add class
+			method = measureFn(wrapper, METRIC)
+			if (k == aList[0]) { // typeCheck first itemn
+				if (undefined !== method.error) {throw method.errorstring}
+				let value = method.width
+				if (runST) {value = undefined}
+				let typeCheck = typeFn(value)
+				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			}
+			data[k] = method.width
+		})
+		hash = mini(data); btn = addButton(18, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(18, METRIC, hash, btn, '', data, isLies)
+}
+
 function get_navigator_keys(METRIC) {
 	let hash, btn='', aNav = [], notation = isBBESR ? bb_red : '', isLies = false
 	try {
@@ -1080,6 +1112,7 @@ const outputMisc = () => new Promise(resolve => {
 		get_svg('svg_enabled'),
 		get_math('math_trig', isMathLies),
 		get_math('math_other', isMathLies),
+		get_math_css('math_css'),
 		get_component_shims('component_interfaces'),
 		get_window_prop('wasm'),
 		get_window_props('window_properties'),

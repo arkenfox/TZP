@@ -20,7 +20,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 133
+	expectedMetrics = 134
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -162,6 +162,7 @@ let isArch = true,
 		// FF145+ nightly 1788937 math | 2014703 FF149+
 		// 'emoji','ui-monospace','ui-rounded','ui-serif' = currently at least gecko + blink redundant (windows)
 		// 'emoji' = better covered in special metric/test targeting emojis/unicode
+		// 'fantasy' = not set in gecko (checked Feb 2026) see 536004#c2
 	isStylesAll = [
 		'cursive','emoji','fangsong','fantasy','math','monospace',
 		'sans-serif','serif','system-ui','ui-monospace','ui-rounded','ui-serif'

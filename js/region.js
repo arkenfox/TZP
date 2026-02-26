@@ -1877,11 +1877,14 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 		return resolve()
 	}
 
-	// note: we don't need to notate if the API is enabled or not, as that's covered by window properties
+	// shipped in FF149+ 1976074
+	// note: we don't need to notate for BB if the API is enabled or not, as that's covered by window properties
 	let hash, data ='', btn ='', notation = '', observer
 	let hasReporting = 'array' == typeFn(isReporting, true)
-	if (!isGecko) {exit(zNA)
-	} else if (undefined == isReporting && undefined == window.ReportingObserver) {exit('undefined')
+	if (!isGecko) {
+		exit(zNA)
+	} else if (undefined == isReporting && undefined == window.ReportingObserver) {
+		exit('undefined')
 	} else {
 		// but we do notate when it is on to match locale
 		notation = isLanguageSmart ? locale_red : ''
@@ -1972,10 +1975,13 @@ function get_l10n_xml_prettyprint(METRIC, isLies) {
 	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom = XMLPrettyPrint
 		// note file schema errors due to CORS
 	// by using a narrow iframe width, word segmentation line breaks determine the height,
-		// and the content varies per app locale: height is not deterministic due to
-		// subpixels (system + other scaling) and fonts (per platform + language)
+		// and the content varies per app locale. It's imperative that the iframe be very
+		// narrow (TZP uses 20px) as this ensure all scripts return the maximum number of lines
+	// Deterministic health checks can't be hardcoded due to subpixels (system + other scaling)
+			// and fonts (per platform + language), but we could simulate + compare
 	let value, data ='', notation=''
 	try {
+		if (gRun) {dom.tzpXMLunstyled.width = 20} // ensure narrow width for max lines
 		let target = dom.tzpXMLunstyled.contentDocument.firstChild
 		let method = measureFn(target, METRIC)
 		if (undefined !== method.error) {throw method.errorstring}

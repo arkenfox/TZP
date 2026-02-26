@@ -761,6 +761,7 @@ function set_fntList() {
 		
 		// generic: expand baseSize
 			// don't use isStyles as that will duplicate and complicate existing entries with fallbacks
+			// note: 'fantasy' = not set in gecko (checked Feb 2026) see 536004#c2 but lets cover other engines
 		baseSize = baseSize.concat(['cursive','fantasy','fangsong','math','system-ui'])
 		baseSize = baseSize.concat(isSystemFont)
 		if (fntPlatformFont !== undefined) {baseSize.push(fntPlatformFont)}

@@ -26,6 +26,8 @@
 	<div id="tzpRect"></div>
 	<div id="tzpLV"></div>
 	<div id="tzpSV"></div>
+	<!-- calc must be outside our tzpBody -->
+  <div id="tzpCalc" class="offscreen"><div id="tzpCalcTarget"></div><div class="tzpCalcContainer"></div></div>
 
 	<!-- keep tzpBody first: contains scrollbar but MUST come after tzpLV and tzpSV
 		in order to be able to be able to select and drag non-overlays -->
@@ -37,7 +39,7 @@
 		<div id="tzpFS" width=0 height=0></div>
 		<iframe id="tzpInvalidImage" width="100" height="30"></iframe>
 		<iframe id="tzpScaledImage" width="100" height="30"></iframe>
-		<iframe id="tzpXMLunstyled" width="40" height="30"></iframe>
+		<iframe id="tzpXMLunstyled" width="20" height="30"></iframe>
 		<iframe id="tzpXSLT" width="40" height="30"></iframe>
 		<iframe id="tzpIframe" width="0" height="0"></iframe>
 		<audio id="tzpAudio"></audio><video id="tzpVideo" width="20px"></video>
@@ -1089,6 +1091,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 74+ : javascript.options.<br>property_error_message_fix</span></div>
 			&nbsp; error message fix</td><td class="c mono" id="error_message_fix"></td></tr>
+		<tr><td>[css] math</td><td class="c mono" id="math_css"></td></tr>
 		<tr><td><a class="blue" target="blank" href="tests/math.html">[PoC]</a>
 			&nbsp; [other] math</td><td class="c mono" id="math_other"></td></tr>
 		<tr><td>[trigonometric] math</td><td class="c mono" id="math_trig"></td></tr>
