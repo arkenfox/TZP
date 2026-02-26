@@ -799,6 +799,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 				'log',
 				'log10',
 				'log1p',
+				'pow',
 				'sin',
 				'sinh',
 				'sqrt',
