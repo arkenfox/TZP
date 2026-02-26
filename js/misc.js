@@ -460,12 +460,16 @@ function get_timing(METRIC) {
 
 /* MISC */
 
-function check_mathLies() {
-	const mathList = [
-		'Math.acos','Math.acosh','Math.asinh','Math.atan','Math.atan2','Math.atanh',
-		'Math.cbrt','Math.cos','Math.cosh','Math.exp','Math.expm1','Math.log','Math.log10',
-		'Math.log1p','Math.sin','Math.sinh','Math.sqrt','Math.tan','Math.tanh'
-	]
+function check_mathLies(type) {
+	let mathList = ['Math.cos','Math.sin','Math.tan'] // trig
+	if ('other' == type) {
+		mathList = ['Math.cosh','Math.exp','Math.log','Math.pow']
+	}
+	/*
+	// not used
+	'Math.acos','Math.acosh','Math.asinh','Math.atan','Math.atan2','Math.atanh',
+	'Math.cbrt','Math.expm1','Math.log10','Math.log1p','Math.sinh','Math.sqrt','Math.tanh'
+	*/
 	return mathList.some(lie => sData[SECT99].indexOf(lie) >= 0)
 }
 
@@ -1093,8 +1097,12 @@ const outputTiming = () => new Promise(resolve => {
 })
 
 const outputMisc = () => new Promise(resolve => {
-	if (runSL) {addProxyLie('Math.sin')}
-	let isMathLies = check_mathLies()
+	if (runSL) {
+		addProxyLie('Math.sin')
+		addProxyLie('Math.log')
+	}
+	let isMathTrigLies = check_mathLies('trig')
+	let isMathOtherLies = check_mathLies('other')
 
 	let notation = '', value = zNA
 	if (isGecko) {
@@ -1110,8 +1118,8 @@ const outputMisc = () => new Promise(resolve => {
 
 	Promise.all([
 		get_svg('svg_enabled'),
-		get_math('math_trig', isMathLies),
-		get_math('math_other', isMathLies),
+		get_math('math_trig', isMathTrigLies),
+		get_math('math_other', isMathOtherLies),
 		get_math_css('math_css'),
 		get_component_shims('component_interfaces'),
 		get_window_prop('wasm'),
