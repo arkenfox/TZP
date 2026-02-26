@@ -929,7 +929,7 @@ function get_window_prop(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isLies = false, isAlert = false
+	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isAlert = false
 	let tamperHash = zNA, tamperBtn ='', aTampered =''
 	isProps = [] // reset: used to build function proprties
 
@@ -979,8 +979,8 @@ function get_window_props(METRIC) {
 					tamperHash = 'none'
 				}
 			}
-			// all the properties that can be tampered with by NS
-				// safer (no webgl-clicktoplay): 24 items
+			// all the properties that can be tampered with by NS/uBO
+				// this so we can get a stable hash across security levels in Base Barowser
 			let aPossible = [
 				//*
 				'Blob','Element','HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLIFrameElement',
@@ -995,8 +995,6 @@ function get_window_props(METRIC) {
 				//*/
 			]
 			if (isExpanded) { // 543535 uBO exposes these 5
-				// TB146/147 is based on beta where and may not be rolled back, so produces a false positive isLies
-					// we do not F care about TB alpha
 				aPossible.push('JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget')
 			}
 			let aHas = aPossible.filter(x => data.includes(x))
@@ -1013,14 +1011,14 @@ function get_window_props(METRIC) {
 					let aTamperedNotInPossible = aTampered.filter(x => !aPossible.includes(x))
 					if (aTamperedNotInPossible.length) {
 						isAlert = true
-						// don't record untrustworthy/isLies - we collect tampered items
-						// and wiping out all this data and/or false negatives sucks
-						//isLies = true
+						// don't record untrustworthy/lies - just collect tampered items
+							// maintaining is too burdensome: also many extensions can add extra tampered items
+							// e.g. AutocopySelection2Clipboard can trigger 'HTMLBodyElement','HTMLHeadElement','Selection'
 						console.log(mini(aTamperedNotInPossible), aTamperedNotInPossible)
 					}
 				}
-				// notate console
-				if (!isLies && isDesktop && isOS !== undefined) {
+				// notate console: don't notate if extra tampering otehrwise our console PoC breaks
+				if (!isAlert && isDesktop && isOS !== undefined) {
 					let strConsole = ' [devtools ' + (isConsoleOpen ? 'open' : 'closed') +']'
 					addDisplay(18, 'consolestatus', strConsole)
 				}
@@ -1071,9 +1069,8 @@ function get_window_props(METRIC) {
 	}
 	removeElementFn(id)
 	addBoth(18, METRIC +'_tampered', tamperHash, tamperBtn, '', aTampered)
-	// alert unexpected new itemshave turned up in tampered since we no longer currently use isLies
 	if (isAlert) {notation += sb +' *'+ sc}
-	addBoth(18, METRIC, hash, btn, notation, data, isLies)
+	addBoth(18, METRIC, hash, btn, notation, data)
 	log_perf(18, METRIC, t0)
 
 	return
