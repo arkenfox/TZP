@@ -1433,7 +1433,9 @@ function metricsShow(name, scope) {
 		// avoid reflow
 		dom.metricsDisplay.innerHTML = display
 	} else {
-		dom.metricDownload.style.display = isShowFormat ? 'inline' : 'none'
+		//dom.metricDownload.style.display = isShowFormat ? 'inline' : 'none'
+		//^allow download everwhere
+
 		dom.metricOptions.style.display = isShowFormat ? 'block' : 'none'
 		dom.modaloverlay.style.display = 'block'
 		dom.overlay.style.display = 'block'
