@@ -771,7 +771,7 @@ const get_isRecursion = () => new Promise(resolve => {
 		isRecursion = [level +" [stack length: "+ stacklen +']']
 		log_perf(SECTG, METRIC, t0, "", isRecursion.join())
 		// metric values: only collect level
-			// https://github.com/arkenfox/user.js/issues/1789: round down: level to 1000's
+			// https://github.com/arkenfox/user.js/issues/1789: round down to 1000's
 		isRecursion.push(Math.floor(level/1000))
 		return resolve()
 	}
