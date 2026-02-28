@@ -573,6 +573,49 @@ function get_touc_h(METRIC) {
 		data[m] = value
 	}
 
+	function get_elements_touch() {
+		// gecko: ontouch* only exists in android: desktop blocks these to avoid being identified as mobile
+			// and onkly android has createTouch and createTouchList in Document
+			// ~0.06ms
+		let eList = ['Document','HTMLElement','MathMLElement','SVGElement']
+		eList.forEach(function(m){
+			let value
+			try {
+				if (runSE) {foo++}
+				let target = window[m]
+				let typeCheck = typeFn(target)
+				if (runST) {typeCheck = undefined}
+				if ('function' !== typeCheck) {throw zErrType + typeCheck}
+				let props = Object.getOwnPropertyNames(target.prototype)
+				value = props.filter(x => x.includes('ouch'))
+				value.sort() // we already capture order in window function properties
+				if (0 == value.length) {value = 'none'}
+				if (isGecko) {
+					// gecko: ontouch* only exists in android: desktop blocks these to avoid being identified as mobile
+					let got = 'none' == value ? value : value.join(', ')
+					if (!isDesktop) {
+						// android
+						let expected = ['ontouchcancel','ontouchend','ontouchmove','ontouchstart']
+						if ('Document' == item) {expected.push('createTouch','createTouchList'); expected.sort()}
+						let minihash = mini(value), miniexpected = mini(expected)
+						if (minihash !== miniexpected) {
+							throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
+						}
+					} else if ('none' !== value) {
+						// desktop
+						throw zErrInvalid +'expected none: got '+ got
+					}
+				}
+
+
+			} catch(e) {
+				log_error(7, METRIC +'_'+ m, e)
+				value = zErr
+			}
+			data[m] = value
+		})
+	}
+
 	function get_element_touch(m) {
 		// domparser: 0.12ms | dom: 0.08 | just use domparser
 		let value = []
@@ -585,7 +628,7 @@ function get_touc_h(METRIC) {
 			value.sort() // we already capture order in window properties
 			if (0 == value.length) {value = 'none'}
 			if (isGecko) {
-				// gecko: ontouch only exists in android: desktop blocks these to avoid being identified as mobile
+
 				let got = 'none' == value ? value : value.join(', ')
 				if (!isDesktop) {
 					// android
@@ -639,9 +682,10 @@ function get_touc_h(METRIC) {
 		data[m] = value
 	}
 
-	// do in alphabetical order
-	let data = {}, notation = ''
-	get_element_touch('element')
+	let data = {'Document': '', 'HTMLElement': '','MathMLElement': '','SVGElement': '','maxTouchPoints': '','window': ''} // pre-ordered
+	let notation = ''
+	//get_element_touch('element') // skip this for now since we have HTMLElement (+ Mathml + SVG)
+	get_elements_touch()
 	get_maxTouchPoints('maxTouchPoints')
 	get_window_touch('window')
 
@@ -650,30 +694,76 @@ function get_touc_h(METRIC) {
 		// 1957658: FF143+, ESR140.2: 5 android, 10 windows, 0 mac and linux
 		// 1991701: FF146+ (and BB15): Re-enable touch on Linux (and remove RFPTarget::PointerId)
 	let rfpHashes = {
-		'android': '725ba69f',
+		'android': 'c51b1822',
 			/*
-			{	"element": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+			{
+				"Document": ['createTouch','createTouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+				"HTMLElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+				"MathMLElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+				"SVGElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
 				"maxTouchPoints": 5,
 				"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
 			}
 			*/
-		'linux': 'ddf52610', // {"element": "none", "maxTouchPoints": 0, "window": ["Touch", "TouchEvent", "TouchList"]}
-			/* linux gecko with touch doesn't have maxTouchPoints */
-		'mac': 'd539fa63',
-		'windows': 'dee1c4c9', // {"element": "none", "maxTouchPoints": 10, "window": ['Touch','TouchEvent','TouchList']}
+		'linux': '553ce3d9',
+			/* linux gecko with touch doesn't have maxTouchPoints
+			{
+				"Document": 'none',
+				"HTMLElement": 'none',
+				"MathMLElement": 'none',
+				"SVGElement": 'none',
+				"maxTouchPoints": 0,
+				"window": ['Touch','TouchEvent','TouchList']
+			}
+			*/
+		'mac': '727b0fac',
+			/*
+			{
+				"Document": 'none',
+				"HTMLElement": 'none',
+				"MathMLElement": 'none',
+				"SVGElement": 'none',
+				"maxTouchPoints": 0,
+				"window": 'none',
+			}
+			*/
+		'windows': '5091c020',
+			/*
+			{"Document": 'none',
+				"HTMLElement": 'none',
+				"MathMLElement": 'none',
+				"SVGElement": 'none',
+				"maxTouchPoints": 10,
+				"window": ['Touch','TouchEvent','TouchList']
+			}
+			*/
 	}
 	notation = rfpHashes[isOS] == hash ? rfp_green : rfp_red
 
 	// non-BB: fails RFP but may match FPP
 	if (isFPPFallback && undefined !== isOS && notation == rfp_red) {
 		// FPP
-			// 1977836 FF143: 0 or 1, everything else as 5
+			// 1977836 FF142: 0 or 1, everything else as 5
 			// 1978414: ship touch points
 		let fppHashes = {
-			'android': ['725ba69f'], // everything + 5
-			'mac': ['d539fa63'], // nothing
-			'linux': ['d539fa63', '976cb3af', '7d4aea2b'], // 0,1,5
-			'windows': ['d539fa63', '976cb3af', '7d4aea2b'], // same as linux
+			'android': ['c51b1822'], // everything + 5
+			'mac': ['727b0fac'], // nothing
+			'linux': ['727b0fac', '0eb47178', 'f492a7f4'], // 0,1,5
+			/* same as windows
+				// if (aMaxTouchPoints <= 1) {return aMaxTouchPoints;}
+				// linux always reports 0 maxTouchPoints (for now), so 1 or 5 shouldn't be a thing IIUIC
+			*/
+			'windows': ['727b0fac', '0eb47178', 'f492a7f4'], // 0,1,5
+			/* // 0 is same as nothing, otherwise 1 or 5 as below
+			{
+				"Document": 'none',
+				"HTMLElement": 'none',
+				"MathMLElement": 'none',
+				"SVGElement": 'none',
+				"maxTouchPoints": 1,
+				"window": ['Touch','TouchEvent','TouchList']
+			}
+			*/
 		}
 		if (fppHashes[isOS].includes(hash)) {notation = fpp_green}
 	}
@@ -718,7 +808,6 @@ function get_viewport_segments(METRIC) {
 
 const outputDevices = () => new Promise(resolve => {
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
-
 	Promise.all([
 		get_media_devices('mediaDevices'),
 		get_touc_h('touch'),
