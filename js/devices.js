@@ -596,7 +596,7 @@ function get_touc_h(METRIC) {
 					if (!isDesktop) {
 						// android
 						let expected = ['ontouchcancel','ontouchend','ontouchmove','ontouchstart']
-						if ('Document' == item) {expected.push('createTouch','createTouchList'); expected.sort()}
+						if ('Document' == m) {expected.push('createTouch','createTouchList'); expected.sort()}
 						let minihash = mini(value), miniexpected = mini(expected)
 						if (minihash !== miniexpected) {
 							throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
