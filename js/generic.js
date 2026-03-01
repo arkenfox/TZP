@@ -2473,11 +2473,15 @@ function outputSection(id, isResize = false) {
 	// reset smarts
 	smartFn('final')
 	if (gLoad) {
-		// if we wanted to force an initial delay regardless do it here
-		delay = isFontDelay ? 2000 : 0
+		// force an initial delay regardless | moreso if it it's BB with font.vis
+		// e.g. some extensions can be slow to inject etc
+		// e.g. will help with resources such as XML/images and
+		delay = isFontDelay ? 2000 : (isFile ? 0 : 1000)
 		if (isFontDelay) {
 			dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
 			dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
+		} else if (delay > 0) {
+			dom.documenthash.innerHTML = '<span class="spaces">  AWAITING '+ delay +' ms ARTIFICIAL DELAY</span>'
 		}
 	}
 	setTimeout(function() {
