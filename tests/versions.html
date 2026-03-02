@@ -927,7 +927,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 67, oOther = {}
+	let countOther = 0, expectOther = 68, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -951,6 +951,14 @@ function outputVersion() {
 			ver149 = '/' !== new Intl.DateTimeFormat("en-u-ca-chinese", {timeZone:"UTC"}).format(new Date("+100000-01-01T00:00:00.000Z"))
 		} catch(e) {}
 		rec(149, 149, "1999917", ver149, performance.now()-t149, 'DATE') // 6.5ms
+
+		// 147: 1666613: can't be used with base browser for when they backport it to ESR140
+		let t147 = performance.now(), ver147
+		try {
+			let test147 = ((new DOMParser()).parseFromString('INVALID', 'text/xml')).firstChild.attributes[0].nodeValue
+			ver147 = true
+		} catch(e) {}
+		rec(147, 147, "1666613", ver147, performance.now()-t147) // 0.17ms
 
 		// 140: 1965802 SLOW
 		let t140 = performance.now(), ver140
