@@ -893,7 +893,7 @@ function get_isVer(METRIC) {
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
-			if (Intl.supportedValuesOf('numberingSystem').includes('tols')) return 147 // 2000225 ?
+			try {test = ((new DOMParser()).parseFromString('INVALID', 'text/xml')).firstChild.attributes[0].nodeValue; return 147} catch(e) {} // 1666613
 			try {throw new DOMException('a', 'b')} catch(e) {if (0 !== e.columnNumber) return 146} // 1997216
 			if (undefined !== (new ToggleEvent('toggle', null)).source) return 145 // 1968987
 			if (undefined == window.CSS2Properties) return 144 // 144: 1919582
