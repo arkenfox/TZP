@@ -1798,15 +1798,22 @@ const get_l10n_media_messages = (METRIC) => new Promise(resolve => {
 })
 
 function get_l10n_parsererror_direction(METRIC) {
-	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+	//if (!isGecko) {addBoth(4, METRIC, zNA); return}
 	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString#error_handling
 		// 1954813: 
 		// 1666613: currently relies on chrome://global/locale/intl.css
 	let value, data = '', notation = isLanguageSmart ? locale_red : ''
 	try {
-		let target = dom.tzpDirection
-		target.innerHTML = '<parsererror></parsererror>'
-		value = getComputedStyle(target.children[0]).direction
+		if (isGecko && isVer > 146) {
+			// 1666613: no need to touch the dom in gecko: 0.17ms
+			let parser = (new DOMParser()).parseFromString('INVALID', 'text/xml')
+			value = parser.firstChild.attributes[0].nodeValue
+		} else {
+			// 0.23ms
+			let target = dom.tzpDirection
+			target.innerHTML = '<parsererror></parsererror>'
+			value = getComputedStyle(target.children[0]).direction
+		}
 		// check
 		if (runST) {value = ''} else if (runSI) {value = 'upsidedown'}
 		let typeCheck = typeFn(value)
