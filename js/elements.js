@@ -387,13 +387,17 @@ function get_element_other(METRIC, isLies) {
 			fieldset: '<fieldset></fieldset>', // don't include char
 			figcaption: '<figure><figcaption>.</figcaption></figure>',
 			hr: '<hr>',
-			//hr2: '<hr>', // test grouping
 			legend: '<fieldset><legend>.</legend></fieldset>',
+			// for android chrome
+			noembded: '<embed><noembed>.</noembed>',
 		}
 	}
-
-	let aVerticalAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
+	let aVerticalAdd = [
+		// desktop
+		'big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
 		'iframe','meter','small','sub','sup',
+		// for android
+		'i','b',
 	]
 	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
