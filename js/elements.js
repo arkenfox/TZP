@@ -363,31 +363,42 @@ function get_element_mathml(METRIC, isLies) {
 
 function get_element_other(METRIC, isLies) {
 	let t0 = nowFn()
-	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
+	let hash, btn ='', data = {}, strBtn = ''
 
 	// note: some elements we insert a char "." to force a height: always use the same char
 	let oList = {
-		a: '<a href="">.</a>',
-		audio: '<audio controls=""></audio>',
-		base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
-		big_x2: '<big><big>.</big></big>',
-		big_x3: '<big><big><big>.</big></big></big>',
-		br: '<br>',
-		canvas: '<canvas></canvas>',
-		// always revert tables because we have that in our inline style in the plain test
-		caption: '<table class="revert"><caption>.</caption></table>',
-		dd: '<dl><dd>.</dd></dl>',
-		dialog: '<dialog open=""></dialog>',
-		dt: '<dl><dt>.</dt></dl>',
-		fieldset: '<fieldset></fieldset>', // don't include char
-		figcaption: '<figure><figcaption>.</figcaption></figure>',
-		hr: '<hr>',
-		legend: '<fieldset><legend>.</legend></fieldset>',
+		'horizontal-tb' : {
+			base: '<base href=""/>', // to get max unique results otherwise totally boring all 0's
+			figure: '<figure></figure>',
+		},
+		'vertical-lr' : {
+			a: '<a href="">.</a>',
+			audio: '<audio controls=""></audio>',
+			base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+			big_x2: '<big><big>.</big></big>',
+			big_x3: '<big><big><big>.</big></big></big>',
+			br: '<br>',
+			canvas: '<canvas></canvas>',
+			// always revert tables because we have that in our inline style in the plain test
+			caption: '<table class="revert"><caption>.</caption></table>',
+			dd: '<dl><dd>.</dd></dl>',
+			dialog: '<dialog open=""></dialog>',
+			dt: '<dl><dt>.</dt></dl>',
+			fieldset: '<fieldset></fieldset>', // don't include char
+			figcaption: '<figure><figcaption>.</figcaption></figure>',
+			hr: '<hr>',
+			//hr2: '<hr>', // test grouping
+			legend: '<fieldset><legend>.</legend></fieldset>',
+		}
 	}
-	let aListAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','iframe','small','sub','sup',]
-	aListAdd.forEach(function(item){oList[item] = '<'+item+'>.</'+item+'>'})
 
-	let width, height, x, y, method
+	let aVerticalAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
+		'iframe','meter','small','sub','sup',
+	]
+	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
+
+	let width, height, x, y, method, tmpdata = {}
+	let setHash = new Set(), setElements = new Set(), testCount = 0
 	const id = 'element-fp'
 	try {
 		const doc = document
@@ -395,39 +406,64 @@ function get_element_other(METRIC, isLies) {
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
 		let parent = dom[id], isFirst = true
-		for (const k of Object.keys(oList).sort()) {
-			// set parent, determine target to measure and as we walk
-			// the children, ensure no other css affects any element
-			//parent.innerHTML = ''
-			parent.innerHTML = oList[k]
-			let target = parent.firstChild
-			target.classList.add('revert')
-			let newtarget = target.children[0]
-			if (undefined !== newtarget) {
-				target = newtarget
+		for (const s of Object.keys(oList).sort()) {
+			let style = s.slice(0,-3)
+			tmpdata[style] = {}
+			for (const k of Object.keys(oList[s]).sort()) {
+				testCount++ // measurments taken
+				setElements.add(k) // unique elements
+
+				// set parent, determine target to measure and as we walk
+				// the children, ensure no other css affects any element
+				//parent.innerHTML = ''
+				parent.innerHTML = oList[s][k]
+				let target = parent.firstChild
 				target.classList.add('revert')
-				newtarget = target.children[0]
+				let newtarget = target.children[0]
 				if (undefined !== newtarget) {
 					target = newtarget
 					target.classList.add('revert')
+					newtarget = target.children[0]
+					if (undefined !== newtarget) {
+						target = newtarget
+						target.classList.add('revert')
+					}
 				}
+				target.setAttribute('style','display:inline; writing-mode: '+ s +';')
+				method = measureFn(target, METRIC)
+				// typecheck
+				let itemdata = [method.width, method.height, method.x, method.y]
+				if (isFirst) {
+					isFirst = false
+					if (undefined !== method.error) {throw method.errorstring}
+					itemdata.forEach(function(item){
+						if (runST) {item = null}
+						let typeCheck = typeFn(item)
+						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					})
+				}
+				let itemhash = mini(itemdata)
+				setHash.add(itemhash) // unique measurements
+				if (undefined == tmpdata[style][itemhash]) {tmpdata[style][itemhash] = {'data': itemdata, 'group': [k]}
+				} else {tmpdata[style][itemhash]['group'].push(k)}
 			}
-			target.setAttribute('style','display:inline; writing-mode: vertical-lr;')
-			method = measureFn(target, METRIC)
-			// typecheck
-			let itemdata = [method.width, method.height, method.x, method.y]
-			if (isFirst) {
-				isFirst = false
-				if (undefined !== method.error) {throw method.errorstring}
-				itemdata.forEach(function(item){
-					if (runST) {item = null}
-					let typeCheck = typeFn(item)
-					if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				})
-			}
-			data[k] = itemdata
+			let aHash = Array.from(setHash), aElements = Array.from(setElements)
+			strBtn = aElements.length +'/'+ testCount +'/'+ aHash.length
 		}
-		hash = mini(data); btn = addButton(15, METRIC)
+		// group by results
+		let newobj = {}
+		for (const s of Object.keys(tmpdata)) {
+			newobj[s] = {}
+			for (const k of Object.keys(tmpdata[s])) {
+				let keydata = tmpdata[s][k].group.sort()
+				newobj[s][keydata.join(' ')] = tmpdata[s][k]['data']
+			}
+		}
+		for (const s of Object.keys(newobj)) {
+			data[s] = {}
+			for (const k of Object.keys(newobj[s]).sort()) {data[s][k] = newobj[s][k]}
+		}
+		hash = mini(data); btn = addButton(15, METRIC, strBtn)
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -448,6 +484,8 @@ function get_element_scrollbars(METRIC, isLies) {
 			// this bypasses TB and changes thin to match auto
 		// widget.non-native-theme.win.scrollbar.use-system-size = boolean
 
+	// FF143+ layout.testing.scrollbars.always-hidden has no effect on measurements
+		// maybe it only affects the viewport?
 	let oData = {'auto': {}, 'thin': {}}
 	let aAuto = [], aThin = [], aWindow = []
 	let list = ['auto','thin']
