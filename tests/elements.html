@@ -171,6 +171,7 @@ let oTZP = {
 		figure: '<figure></figure>',
 	},
 	'vertical-lr' : {
+		// desktop
 		a: '<a href="">.</a>',
 		audio: '<audio controls=""></audio>',
 		base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
@@ -187,10 +188,16 @@ let oTZP = {
 		figcaption: '<figure><figcaption>.</figcaption></figure>',
 		hr: '<hr>',
 		legend: '<fieldset><legend>.</legend></fieldset>',
+		// for android chrome
+		noembded: '<embed><noembed>.</noembed>',
 	}
 }
-let aVerticalAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
+let aVerticalAdd = [
+	// desktop
+	'big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
 	'iframe','meter','small','sub','sup',
+	// for android
+	'i','b',
 ]
 aVerticalAdd.forEach(function(item){oTZP['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
