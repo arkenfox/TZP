@@ -72,11 +72,9 @@
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Element sizes not covered in
 				<a class="blue" target="_blank" href="elementforms.html">elememt forms</a></span><br><br>
-			<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
-			<span class="no_color" id="custom">
-				<input id="optVertical" checked type="checkbox"> &nbsp; vertical  &nbsp;
-				<input id="optEverything" type="checkbox" onChange="style_everything()"> &nbsp; everything
-			</span>
+			<span class="btn15 btnfirst" onClick="run(`everything`)">[ everything ]</span>
+			<span class="btn15 btnfirst" onClick="run(`TZP`)">[ TZP ]</span>
+
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
 		<tr><td colspan="2" style="text-align: left;">
@@ -90,6 +88,7 @@
 /*
 	// ignore
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+	form: all forms covered in another metric
 	area: used in map and sets it's own size
 	bdi/bdo: bidirectional elements
 
@@ -97,21 +96,21 @@
 	col colgroup
 	datalist dir
 	element-details em
-	figure form frame frameset
+	frame frameset
 	head header hgroup
-	img ins isindex
+	ins isindex
 	kbd keygen
-	label li link
-	main map mark marquee menu menuitem meter
-	nav nextid nobr noembed noframes noscript
+	li link
+	main map mark marquee menu menuitem
+	nav nextid nobr noframes noscript
 	object ol optgroup option output
-	param picture plaintext portal pre
+	param plaintext portal pre
 	q
 	rb rbc rp rt rtc ruby
-	s samp script search section slot source style summary
+	s samp script search section slot source style
 	table tbody td template tfoot th thead time title tr track tt
 	ul
-	var video
+	var
 	wbr xmp
 */
 
@@ -119,6 +118,7 @@ let isLocale = ""
 let isRevert = true
 let isNotateStyle = false
 let oData = {}
+let oList = {}
 
 // note: some elements we insert a char "." to force a height
 	// always use the same char
@@ -137,20 +137,24 @@ let oListBase = {
 	dt: '<dl><dt>.</dt></dl>',
 	fieldset: '<fieldset></fieldset>', // don't include char
 	figcaption: '<figure><figcaption>.</figcaption></figure>',
+	figure: '<figure></figure>',
 	hr: '<hr>',
+	img: '<img></img>', // adds to unique results when horizontal else same as base
 	legend: '<fieldset><legend>.</legend></fieldset>',
+	// redundant
+	basefont: '<basefont color="#FF0000"/>',
+	noembded: '<embed><noembed>.</noembed>',
+	label: '<div id="elementlabel"><label for="elementlabel">.</label></div<',
+	summary: '<details><summary>.</summary></details>',
+	picture: '<picture></picture>',
+	video: '<video></video>',
+
 }
 let aListBaseAdd = [
 	'big','blockquote','code','dl',
 	'h1','h2','h3','h4','h5','h6',
-	'iframe','small','sub','sup',
-]
-
-// redundant
-let oListExtra = {
-	basefont: '<basefont color="#FF0000"/>',
-}
-let oListExtraAdd = [
+	'iframe','meter','small','sub','sup',
+	// redundant
 	'abbr','acronym','address','applet','article','aside',
 	'b','center','cite',
 	'data','del','div','dfn','em','footer','i',
@@ -158,131 +162,212 @@ let oListExtraAdd = [
 	'u',
 ]
 aListBaseAdd.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
-oListExtraAdd.forEach(function(item){oListExtra[item] = '<'+item+'>.</'+item+'>'})
 
-function style_everything() {
-	let isEverything = dom.optEverything.checked
-	dom.optVertical.disabled = isEverything
-}
-style_everything()
 
-function get_elements() {
-	let t0 = performance.now()
-	oData = {}
-
-	let isVertical = dom.optVertical.checked
-	let isEverything = dom.optEverything.checked
-	let params = []
-
-	if (isEverything) {
-		params.push("all")
-	} else {
-		if (isVertical) {params.push("vertical")} else {params.push("horizontal")}
+// TZP
+let oTZP = {
+	'horizontal-tb' : {
+		base: '<base href=""/>', // to get max unique results otherwise totally boring all 0's
+		figure: '<figure></figure>',
+	},
+	'vertical-lr' : {
+		a: '<a href="">.</a>',
+		audio: '<audio controls=""></audio>',
+		base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+		big_x2: '<big><big>.</big></big>',
+		big_x3: '<big><big><big>.</big></big></big>',
+		br: '<br>',
+		canvas: '<canvas></canvas>',
+		// always revert tables because we have that in our inline style in the plain test
+		caption: '<table class="revert"><caption>.</caption></table>',
+		dd: '<dl><dd>.</dd></dl>',
+		dialog: '<dialog open=""></dialog>',
+		dt: '<dl><dt>.</dt></dl>',
+		fieldset: '<fieldset></fieldset>', // don't include char
+		figcaption: '<figure><figcaption>.</figcaption></figure>',
+		hr: '<hr>',
+		legend: '<fieldset><legend>.</legend></fieldset>',
 	}
-	style_everything()
+}
+let aVerticalAdd = ['big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
+	'iframe','meter','small','sub','sup',
+]
+aVerticalAdd.forEach(function(item){oTZP['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
-	let oList = {}
-	for (const k of Object.keys(oListBase)) {oList[k] = oListBase[k]}
-	if (isEverything) {
-		for (const k of Object.keys(oListExtra)) {
-			if (undefined == oList[k]) {
-				oList[k] = oListExtra[k]
-			} else {
-				for (const n of Object.keys(oListExtra[k])) {
-					oList[k][n] = oListExtra[k][n]
-				}
-			}
+
+let testTarget
+function create_element(str, style ='vertical-lr') {
+	// create an element so I can inspect it
+	const parent = dom['element-fp']
+	parent.innerHTML = str
+	let target = parent.firstChild
+	if (isRevert) {target.classList.add('revert')}
+	let newtarget = target.children[0]
+	if (undefined !== newtarget) {
+		target = newtarget
+		if (isRevert) {target.classList.add('revert')}
+		newtarget = target.children[0]
+		if (undefined !== newtarget) {
+			target = newtarget
+			if (isRevert) {target.classList.add('revert')}
 		}
 	}
-	//console.log(oList)
-	let tmpdata = {}
+	target.setAttribute("style","display:inline; writing-mode: "+ style +";")
+	let method = target.getBoundingClientRect()
+	let itemdata = [method.width, method.height, method.x, method.y]
+
+	testTarget = target
+	console.log('testTarget', style, '\n', testTarget)
+	console.log(method)
+	console.log(itemdata)
+}
+
+
+function get_elements(type) {
+	if (undefined == type) {type = isFF ? 'TZP' : 'everything'}
+	let t0 = performance.now()
+	oData = {}
+	let params = [s15 + type + sc]
+	oList = {}
+	if ('TZP' == type) {
+		oList = oTZP
+	} else {
+		oList = {everything: oListBase}
+	}
+
+	let tmpdata = {}, newobj = {}
 	const parent = dom['element-fp']
 	try {
 		let target
 		let testCount = 0
-		for (const k of Object.keys(oList)) {
-			testCount++
-			let aStyle = isVertical ? ['vertical-lr'] : ['horizontal-tb']
-			if (isEverything) {
-				aStyle = ['horizontal-tb','vertical-lr']
-			}
-			let elementdata = isEverything ? {} : []
+		if ('everything' == type) {
+			// we list items with no writing mode
+			// but apply both and hash together to calculate unique elements
+			for (const t of Object.keys(oList)) {
+				for (const k of Object.keys(oList[t])) {
+					testCount++
+					let aStyle = ['horizontal-tb','vertical-lr']
+					let elementdata = {}
 
-			// set parent, determine target to measure and as we walk
-			// the children, ensure no other css affects any element
-			parent.innerHTML = ''
-			parent.innerHTML = oList[k]
-			target = parent.firstChild
-			if (isRevert) {target.classList.add('revert')}
-			let newtarget = target.children[0]
-			if (undefined !== newtarget) {
-				target = newtarget
-				if (isRevert) {target.classList.add('revert')}
-				newtarget = target.children[0]
-				if (undefined !== newtarget) {
-					target = newtarget
+					// set parent, determine target to measure and as we walk
+					// the children, ensure no other css affects any element
+					parent.innerHTML = ''
+					parent.innerHTML = oList[t][k]
+					target = parent.firstChild
 					if (isRevert) {target.classList.add('revert')}
-				}
-			}
-			//console.log(k, target)
-
-			aStyle.sort()
-			let isOneStyle = aStyle.length == 1
-			for (let i=0; i < aStyle.length; i++) {
-				let style = aStyle[i]
-				let styleCode = style.slice(0, 1)
-				try {
-					target.setAttribute("style","display:inline; writing-mode: "+ style +";")
-					let method = target.getBoundingClientRect()
-					let data = [method.width, method.height, method.x, method.y]
-					data = isNotateStyle ? [styleCode].concat(data) : data
-					// always use x as this helps ensure entropy regardless of isVertical
-					let dataExtra = isNotateStyle ? [styleCode, method.x] : [method.x]
-					if (isEverything) {
-						style = style.slice(0, -3)
-						elementdata[style] = data
-					} else {
-						// the order is always horizontal then vertical
-						if (i == 0) {
-							// this is always horizontal
-							if (isVertical && !isOneStyle) {
-								// if we are doing vertical then we only
-								// want the horizontal x value
-								data = dataExtra
-							}
-							elementdata = data
-						} else {
-							// this is always vertical
-							if (isVertical) {
-								// if we are doing vertical then we want all values put first
-								elementdata = data.concat(elementdata)
-							} else {
-								// otherwise we just want to add the vertical x value
-								elementdata = elementdata.concat(dataExtra)
-							}
+					let newtarget = target.children[0]
+					if (undefined !== newtarget) {
+						target = newtarget
+						if (isRevert) {target.classList.add('revert')}
+						newtarget = target.children[0]
+						if (undefined !== newtarget) {
+							target = newtarget
+							if (isRevert) {target.classList.add('revert')}
 						}
 					}
-				} catch(e) {
-					elementdata = 'error'
-					console.log(k, e+'')
+					for (let i=0; i < aStyle.length; i++) {
+						let style = aStyle[i]
+						let styleCode = style.slice(0, 1)
+						try {
+							target.setAttribute("style","display:inline; writing-mode: "+ style +";")
+							let method = target.getBoundingClientRect()
+							let data = [method.width, method.height, method.x, method.y]
+							data = isNotateStyle ? [styleCode].concat(data) : data
+							// always use x as this helps ensure entropy regardless of isVertical
+							let dataExtra = isNotateStyle ? [styleCode, method.x] : [method.x]
+							style = style.slice(0, -3)
+							elementdata[style] = data
+						} catch(e) {
+							elementdata = 'error'
+							console.log(k, e+'')
+						}
+					}
+					let elementhash = mini(elementdata)
+					if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
+					} else {tmpdata[elementhash]['group'].push(k)}
 				}
 			}
-			let elementhash = mini(elementdata)
-			if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
-			} else {tmpdata[elementhash]['group'].push(k)}
+			// group by results
+			let newobj = {}
+			for (const k of Object.keys(tmpdata)) {
+				newobj[tmpdata[k].group[0]] = {
+					'data': tmpdata[k]['data'],
+					'elements': tmpdata[k].group.sort(),
+					'hash': k
+				}
+			}
+			console.log(newobj)
+			for (const k of Object.keys(newobj).sort()) {
+				let displayhash = newobj[k]['hash']
+				oData[displayhash] = {
+					'elements': newobj[k]['elements'],
+					'data': newobj[k]['data']
+				}
+			}
+			// counts
+			params.push(testCount +' elements')
+			params.push(Object.keys(oData).length +' results')
+		} else {
+			// count unique hashes per element+writingstyle + unique element names
+			let setHash = new Set(), setElements = new Set()
+			// tzp style we group by writing style then element hashes
+			for (const s of Object.keys(oList).sort()) {
+				let style = s.slice(0,-3)
+				tmpdata[style] = {}
+				for (const k of Object.keys(oList[s]).sort()) {
+					// count measurments taken
+					testCount++
+					// unique elements tested
+					setElements.add(k)
+					// set parent, determine target to measure and as we walk
+					// the children, ensure no other css affects any element
+					//parent.innerHTML = ''
+					parent.innerHTML = oList[s][k]
+					let target = parent.firstChild
+					target.classList.add('revert')
+					let newtarget = target.children[0]
+					if (undefined !== newtarget) {
+						target = newtarget
+						target.classList.add('revert')
+						newtarget = target.children[0]
+						if (undefined !== newtarget) {
+							target = newtarget
+							target.classList.add('revert')
+						}
+					}
+					target.setAttribute('style','display:inline; writing-mode: '+ s +';')
+					let method = target.getBoundingClientRect()
+					// typecheck
+					let itemdata = [method.width, method.height, method.x, method.y]
+					let itemhash = mini(itemdata)
+					// unique measurments
+					setHash.add(itemhash)
+					// record
+					if (undefined == tmpdata[style][itemhash]) {tmpdata[style][itemhash] = {'data': itemdata, 'group': [k]}
+					} else {tmpdata[style][itemhash]['group'].push(k)}
+				}
+			}
+			// group by results
+			for (const s of Object.keys(tmpdata)) {
+				newobj[s] = {}
+				for (const k of Object.keys(tmpdata[s])) {
+					let keydata = tmpdata[s][k].group.sort()
+					newobj[s][keydata.join(' ')] = tmpdata[s][k]['data']
+				}
+			}
+			for (const s of Object.keys(newobj)) {
+				oData[s] = {}
+				for (const k of Object.keys(newobj[s]).sort()) {oData[s][k] = newobj[s][k]}
+			}
+			// counts
+			let aHash = Array.from(setHash), aElements = Array.from(setElements)
+			params.push(aElements.length +' elements')
+			params.push(testCount +' measurements')
+			params.push(aHash.length +' results')
 		}
-		parent.innerHTML = "" // clear display
 		//console.log(tmpdata)
+		parent.innerHTML = "" // clear display
 
-		// group by results
-		let newobj = {}
-		for (const k of Object.keys(tmpdata)) {
-			let keydata = tmpdata[k].group.sort()
-			newobj[keydata.join(' ')] = tmpdata[k]['data']
-		}
-		for (const k of Object.keys(newobj).sort()) {oData[k] = newobj[k]}
-		params.push(testCount +' elements')
-		params.push(Object.keys(oData).length +' results')
 		let hash = mini(oData), notation = ""
 		let t1 = performance.now()
 		try {dom.perf.innerHTML = Math.round(t1 - t0) +" ms"} catch(e) {}
@@ -298,12 +383,12 @@ function get_elements() {
 	}
 }
 
-function run() {
+function run(type) {
 	// clear
 	dom.elements.innerHTML = " &nbsp; "
 	// pause so users see change
 	setTimeout(function() {
-		get_elements()
+		get_elements(type)
 	}, 170)
 }
 
@@ -313,7 +398,6 @@ try {dom.locale.innerHTML = isLocale} catch(e) {}
 Promise.all([
 	get_globals()
 ]).then(function(){
-	dom.optEverything.checked = false
 	run()
 })
 
