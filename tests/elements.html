@@ -143,7 +143,7 @@ let oListBase = {
 	legend: '<fieldset><legend>.</legend></fieldset>',
 	// redundant
 	basefont: '<basefont color="#FF0000"/>',
-	noembded: '<embed><noembed>.</noembed>',
+	noembed: '<embed><noembed>.</noembed>',
 	label: '<div id="elementlabel"><label for="elementlabel">.</label></div<',
 	summary: '<details><summary>.</summary></details>',
 	picture: '<picture></picture>',
@@ -189,7 +189,7 @@ let oTZP = {
 		hr: '<hr>',
 		legend: '<fieldset><legend>.</legend></fieldset>',
 		// for android chrome
-		noembded: '<embed><noembed>.</noembed>',
+		noembed: '<embed><noembed>.</noembed>',
 	}
 }
 let aVerticalAdd = [
@@ -303,7 +303,7 @@ function get_elements(type) {
 					'hash': k
 				}
 			}
-			console.log(newobj)
+			//console.log(newobj)
 			for (const k of Object.keys(newobj).sort()) {
 				let displayhash = newobj[k]['hash']
 				oData[displayhash] = {
@@ -313,10 +313,21 @@ function get_elements(type) {
 			}
 			// counts
 			params.push(testCount +' elements')
-			params.push(Object.keys(oData).length +' results')
+			params.push(testCount * 2 +' measurements')
+			params.push(Object.keys(oData).length +' unique elements')
 		} else {
 			// count unique hashes per element+writingstyle + unique element names
 			let setHash = new Set(), setElements = new Set()
+
+			// create a shadow data object to track unique elements
+				// note: it would be easy to create misleading uniqueness given
+				// 30+ unqiue elements in everything x 2 writing-modes but
+				// we can be diligent in spotting points of difference (e.g. see
+				// noembed vertical for blink) and it would be nice to match up
+				// the numbers across the two tests
+			let shadowData = {}
+
+
 			// tzp style we group by writing style then element hashes
 			for (const s of Object.keys(oList).sort()) {
 				let style = s.slice(0,-3)
@@ -347,6 +358,9 @@ function get_elements(type) {
 					// typecheck
 					let itemdata = [method.width, method.height, method.x, method.y]
 					let itemhash = mini(itemdata)
+					// add shadowData
+					if (undefined == shadowData[k]) {shadowData[k] = {}}
+					shadowData[k][style] = itemdata
 					// unique measurments
 					setHash.add(itemhash)
 					// record
@@ -370,7 +384,17 @@ function get_elements(type) {
 			let aHash = Array.from(setHash), aElements = Array.from(setElements)
 			params.push(aElements.length +' elements')
 			params.push(testCount +' measurements')
-			params.push(aHash.length +' results')
+			params.push(aHash.length +' unique measurements')
+
+			// shadowData
+			//console.log(shadowData)
+			let setShadow = new Set()
+			for (const k of Object.keys(shadowData)) {
+				let elementhash = mini(shadowData[k])
+				setShadow.add(elementhash)
+			}
+			let aShadow = Array.from(setShadow)
+			params.push(aShadow.length +' unique elements')
 		}
 		//console.log(tmpdata)
 		parent.innerHTML = "" // clear display
