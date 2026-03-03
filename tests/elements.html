@@ -165,16 +165,25 @@ aListBaseAdd.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
 
 
 // TZP
+// we can't get more unique elements than actual elements used
+// so don't double up: e.g. in blink android we have 35 unique elements in
+// everything but only 34 elements used in tzp (at the time): so we need to
+// add a new element: the point of difference was in "base, basefont, picture"
+// (grouped in everything) - we already use base, so instead add basefont or picture 
+
 let oTZP = {
 	'horizontal-tb' : {
-		base: '<base href=""/>', // to get max unique results otherwise totally boring all 0's
+		base: '<base href=""/>',
 		figure: '<figure></figure>',
+		// for android blink
+		picture: '<picture></picture>',
+			// ^ redundant with base above, but gives us the max unique elements
 	},
 	'vertical-lr' : {
 		// desktop
 		a: '<a href="">.</a>',
 		audio: '<audio controls=""></audio>',
-		base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+		base: '<base href=""/>',
 		big_x2: '<big><big>.</big></big>',
 		big_x3: '<big><big><big>.</big></big></big>',
 		br: '<br>',
@@ -188,7 +197,8 @@ let oTZP = {
 		figcaption: '<figure><figcaption>.</figcaption></figure>',
 		hr: '<hr>',
 		legend: '<fieldset><legend>.</legend></fieldset>',
-		// for android chrome
+
+		// for android blink
 		noembed: '<embed><noembed>.</noembed>',
 	}
 }
