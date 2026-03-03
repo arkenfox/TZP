@@ -1834,8 +1834,9 @@ function output_section(section, scope) {
 
 /*** RECORD ***/
 
-function addButton(color, name, text = "details", btn = "btnc", scope = isScope) {
-	return " <span class='btn"+ color +" "+ btn +"' onClick='metricsShow(`"+ name +"`,`" + scope +"`)'>["+ text +"]</span>"
+function addButton(color, name, text = 'details', btn = 'btnc', scope = isScope) {
+	if ('' == text) {text = 'details'}
+	return " <span class='btn"+ color +' '+ btn +"' onClick='metricsShow(`"+ name +"`,`" + scope +"`)'>["+ text +"]</span>"
 }
 
 function addBoth(section, metric, str, btn ='', notation ='', data ='', isLies = false, donotuse ='x') {
