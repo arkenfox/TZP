@@ -363,7 +363,7 @@ function get_element_mathml(METRIC, isLies) {
 
 function get_element_other(METRIC, isLies) {
 	let t0 = nowFn()
-	let hash, btn ='', data = {}, strBtn = ''
+	let hash, btn ='', data = {}
 
 	// note: some elements we insert a char "." to force a height: always use the same char
 	let oList = {
@@ -389,7 +389,9 @@ function get_element_other(METRIC, isLies) {
 			hr: '<hr>',
 			legend: '<fieldset><legend>.</legend></fieldset>',
 			// for android chrome
-			noembded: '<embed><noembed>.</noembed>',
+			noembed: '<embed><noembed>.</noembed>',
+				// ^ all zeros: point of diferrence in blink but not a unique measurement (TZP test)
+				// but in "everything" it creates a unique pair
 		}
 	}
 	let aVerticalAdd = [
@@ -402,7 +404,6 @@ function get_element_other(METRIC, isLies) {
 	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
 	let width, height, x, y, method, tmpdata = {}
-	let setHash = new Set(), setElements = new Set(), testCount = 0
 	const id = 'element-fp'
 	try {
 		const doc = document
@@ -414,9 +415,6 @@ function get_element_other(METRIC, isLies) {
 			let style = s.slice(0,-3)
 			tmpdata[style] = {}
 			for (const k of Object.keys(oList[s]).sort()) {
-				testCount++ // measurments taken
-				setElements.add(k) // unique elements
-
 				// set parent, determine target to measure and as we walk
 				// the children, ensure no other css affects any element
 				//parent.innerHTML = ''
@@ -447,12 +445,9 @@ function get_element_other(METRIC, isLies) {
 					})
 				}
 				let itemhash = mini(itemdata)
-				setHash.add(itemhash) // unique measurements
 				if (undefined == tmpdata[style][itemhash]) {tmpdata[style][itemhash] = {'data': itemdata, 'group': [k]}
 				} else {tmpdata[style][itemhash]['group'].push(k)}
 			}
-			let aHash = Array.from(setHash), aElements = Array.from(setElements)
-			strBtn = aElements.length +'/'+ testCount +'/'+ aHash.length
 		}
 		// group by results
 		let newobj = {}
@@ -467,7 +462,7 @@ function get_element_other(METRIC, isLies) {
 			data[s] = {}
 			for (const k of Object.keys(newobj[s]).sort()) {data[s][k] = newobj[s][k]}
 		}
-		hash = mini(data); btn = addButton(15, METRIC, strBtn)
+		hash = mini(data); btn = addButton(15, METRIC)
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
