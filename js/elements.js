@@ -368,33 +368,34 @@ function get_element_other(METRIC, isLies) {
 	// note: some elements we insert a char "." to force a height: always use the same char
 	let oList = {
 		'horizontal-tb' : {
-			base: '<base href=""/>', // to get max unique results otherwise totally boring all 0's
+			base: '<base href=""/>', // all 0's: to get max unique measurements in gecko
 			figure: '<figure></figure>',
+			// for android blink
+			picture: '<picture></picture>',// redundant with base above, but gives us the max unique elements: see PoC
 		},
 		'vertical-lr' : {
 			a: '<a href="">.</a>',
 			audio: '<audio controls=""></audio>',
-			base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+			base: '<base href=""/>',
 			big_x2: '<big><big>.</big></big>',
 			big_x3: '<big><big><big>.</big></big></big>',
 			br: '<br>',
 			canvas: '<canvas></canvas>',
-			// always revert tables because we have that in our inline style in the plain test
 			caption: '<table class="revert"><caption>.</caption></table>',
 			dd: '<dl><dd>.</dd></dl>',
 			dialog: '<dialog open=""></dialog>',
 			dt: '<dl><dt>.</dt></dl>',
-			fieldset: '<fieldset></fieldset>', // don't include char
+			fieldset: '<fieldset></fieldset>',
 			figcaption: '<figure><figcaption>.</figcaption></figure>',
 			hr: '<hr>',
 			legend: '<fieldset><legend>.</legend></fieldset>',
-			// for android chrome
-			noembed: '<embed><noembed>.</noembed>',
-				// ^ all zeros: point of diferrence in blink but not a unique measurement (TZP test)
-				// but in "everything" it creates a unique pair
+
+			// for android blink
+			noembed: '<embed><noembed>.</noembed>', // ^ all zeros: point of difference in blink but not a unique measurement
 		}
 	}
 	let aVerticalAdd = [
+		// these all get a char inserted
 		// desktop
 		'big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
 		'iframe','meter','small','sub','sup',
