@@ -71,7 +71,11 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Element sizes not covered in
-				<a class="blue" target="_blank" href="elementforms.html">elememt forms</a></span><br><br>
+				<a class="blue" target="_blank" href="elementforms.html">elememt forms</a>.
+				Counts for unique elements across the two tests are not directly comparable.
+				In everything all elements are treated equally with both <code>writing modes</code>,
+				which is not the case in the TZP test.
+				</span><br><br>
 			<span class="btn15 btnfirst" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn15 btnfirst" onClick="run(`TZP`)">[ TZP ]</span>
 
@@ -85,6 +89,13 @@
 
 <script>
 'use strict';
+/*
+changing app language has no effect (the only char we're using is '.')
+otherwise looks like everything is pretty much fixed/hardcoded/set due to widgets
+and defaults - so this is exposing subpixels (and version changes) only IIUIC
+*/
+
+
 /*
 	// ignore
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
@@ -151,15 +162,12 @@ let oListBase = {
 
 }
 let aListBaseAdd = [
-	'big','blockquote','code','dl',
-	'h1','h2','h3','h4','h5','h6',
-	'iframe','meter','small','sub','sup',
-	// redundant
 	'abbr','acronym','address','applet','article','aside',
-	'b','center','cite',
-	'data','del','div','dfn','em','footer','i',
-	'p','span','strike','strong',
-	'u',
+	'b','big','blockquote','center','cite','code',
+	'data','del','div','dfn','dl','em','footer',
+	'h1','h2','h3','h4','h5','h6',
+	'i','iframe','meter',	'p',
+	'small','span','strike','strong','sub','sup','u',
 ]
 aListBaseAdd.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
 
@@ -173,11 +181,8 @@ aListBaseAdd.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
 
 let oTZP = {
 	'horizontal-tb' : {
-		base: '<base href=""/>',
+		base: '<base href=""/>', // all 0's: to get max unique measurements in gecko
 		figure: '<figure></figure>',
-		// for android blink
-		picture: '<picture></picture>',
-			// ^ redundant with base above, but gives us the max unique elements
 	},
 	'vertical-lr' : {
 		// desktop
@@ -188,8 +193,10 @@ let oTZP = {
 		big_x3: '<big><big><big>.</big></big></big>',
 		br: '<br>',
 		canvas: '<canvas></canvas>',
-		// always revert tables because we have that in our inline style in the plain test
 		caption: '<table class="revert"><caption>.</caption></table>',
+			// always revert table because we table that in our inline style in the elements_nocss.html test
+			// which is an oxymoron: we have css to mess with everything, but we want to bypass custom styles
+			// hence "no css" wording - and both tests shoudl match
 		dd: '<dl><dd>.</dd></dl>',
 		dialog: '<dialog open=""></dialog>',
 		dt: '<dl><dt>.</dt></dl>',
@@ -200,6 +207,8 @@ let oTZP = {
 
 		// for android blink
 		noembed: '<embed><noembed>.</noembed>',
+			// ^ all zeros: point of difference in blink but not a unique measurement (TZP test)
+			// but in "everything" it creates a unique pair
 	}
 }
 let aVerticalAdd = [
