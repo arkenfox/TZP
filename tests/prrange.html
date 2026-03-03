@@ -32,7 +32,12 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy</span>
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy. Both tests are not "equal": ALL
+			calculates every single combination of words (using all numbers) which creates an exact number of
+			hashes in <code>selectRange</code>. Languages that share selectRanges can differ in <code>select</code>
+			(see previous test) and MIN uses minimal numbers, which means languages that share selectRange can now
+			end up with different word combos, creating more differences. The key is for MIN to match ALL, not exceed it.
+			</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
