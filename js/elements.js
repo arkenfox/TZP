@@ -370,8 +370,6 @@ function get_element_other(METRIC, isLies) {
 		'horizontal-tb' : {
 			base: '<base href=""/>', // all 0's: to get max unique measurements in gecko
 			figure: '<figure></figure>',
-			// for android blink
-			picture: '<picture></picture>',// redundant with base above, but gives us the max unique elements: see PoC
 		},
 		'vertical-lr' : {
 			a: '<a href="">.</a>',
@@ -389,7 +387,6 @@ function get_element_other(METRIC, isLies) {
 			figcaption: '<figure><figcaption>.</figcaption></figure>',
 			hr: '<hr>',
 			legend: '<fieldset><legend>.</legend></fieldset>',
-
 			// for android blink
 			noembed: '<embed><noembed>.</noembed>', // ^ all zeros: point of difference in blink but not a unique measurement
 		}
