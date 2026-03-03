@@ -56,7 +56,7 @@ const get_battery = (METRIC) => new Promise(resolve => {
 				// record object for clicking
 				let btn = addButton(7, METRIC +'_reported')
 				sDetail.document[METRIC +'_reported'] = data
-				addDisplay(7, METRIC +'_reported', fpvalue +' '+ btn + (true == fpvalue ? '' : ' [false or 100% charged]'))
+				addDisplay(7, METRIC, fpvalue +' '+ btn + (true == fpvalue ? '' : ' [false or 100% charged]'))
 				return resolve()
 			}).catch(e => {
 				exit(e, zErrLog)
