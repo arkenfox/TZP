@@ -16,9 +16,7 @@
 			all: revert;
 		}
 		/*** custom styles so we can check they are removed ***/
-		/* this covers everything so far: they all change
-			but caption and legend are off to begin with .. again
-		*/
+		/* you can run check_revert() to test */
 
 		#element-fp a {margin: 2px; padding: 2px;}
 		#element-fp b {margin: 2px; padding: 2px;}
@@ -118,7 +116,7 @@ let aRemainder = [
 	'li', 'link',
 	'main', 'map', 'mark', 'marquee', 'menu', 'menuitem',
 	'nextid', 'nobr', 'noframes', 
-	'ol', 'optgroup',' option', 'output',
+	'ol', 'optgroup','option', 'output',
 	'plaintext', 'portal',
 	'rb','rbc','rp','rt','rtc','ruby',
 	's','samp','script','search','slot','source','style',
@@ -397,7 +395,7 @@ function get_elements(type) {
 							console.log(k, e+'')
 						}
 					}
-					let elementhash = mini(elementdata)
+					let elementhash = mini(elementdata) +''
 					if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
 					} else {tmpdata[elementhash]['group'].push(k)}
 				}
@@ -434,8 +432,6 @@ function get_elements(type) {
 				// noembed vertical for blink) and it would be nice to match up
 				// the numbers across the two tests
 			let shadowData = {}
-
-
 			// tzp style we group by writing style then element hashes
 			for (const s of Object.keys(oList).sort()) {
 				let style = s.slice(0,-3)
