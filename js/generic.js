@@ -2484,7 +2484,8 @@ function outputSection(id, isResize = false) {
 		delay = 0
 		let msg = isFontDelay ? 'awaiting async font fallback' : '   artifical delay'
 		dom.protohash.innerHTML = '<span class="spaces">     '+ msg +'</span>'
-		let remainder = enforcedDelay, increment = 5
+		let remainder = enforcedDelay
+		let increment = 17 // was 5 - but use 17 for RFP otherwise it takes longer
 		function countdown() {
 			remainder = remainder - increment
 			let display = (remainder > 0 ? '<span class="spaces">     loading in ... ' + (remainder+'') + ' ms' : '') +'</span>'
