@@ -2473,33 +2473,50 @@ function outputSection(id, isResize = false) {
 
 	// reset smarts
 	smartFn('final')
+	let enforcedDelay = 0
 	if (gLoad) {
 		// force an initial delay regardless | moreso if it it's BB with font.vis
 		// e.g. some extensions can be slow to inject etc
 		// e.g. will help with resources such as XML/images and
-		delay = isFontDelay ? 2000 : (isFile ? 0 : 1000)
-		if (isFontDelay) {
-			dom.protohash.innerHTML = '<span class="spaces"><b>     AWAITING ASYNC</b></span>'
-			dom.documenthash.innerHTML = '<span class="spaces"><b>     FONT FALLBACK</b></span>'
-		} else if (delay > 0) {
-			dom.documenthash.innerHTML = '<span class="spaces">  AWAITING '+ delay +' ms ARTIFICIAL DELAY</span>'
-		}
+		enforcedDelay = isFontDelay ? 2000 : (isFile ? 0 : 1000)
 	}
-	setTimeout(function() {
-		get_isPerf()
-		if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
-		gt0 = nowFn()
-		Promise.all([
-			get_isDomRect(),
-			outputPrototypeLies(isResize),
-		]).then(function(){
-			if (isBB && gClear && 'all' == id) {console.clear()}
-			if (isSmart) {log_section(SECTP, gt0)}
-			// WTF NoScript! sometimes we have to catch this later
-			try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
-			output()
-		})
-	}, delay)
+	if (enforcedDelay > 0) {
+		delay = 0
+		let msg = isFontDelay ? 'awaiting async font fallback' : '   artifical delay'
+		dom.protohash.innerHTML = '<span class="spaces">     '+ msg +'</span>'
+		let remainder = enforcedDelay, increment = 5
+		function countdown() {
+			remainder = remainder - increment
+			let display = (remainder > 0 ? '<span class="spaces">     loading in ... ' + (remainder+'') + ' ms' : '') +'</span>'
+			dom.documenthash.innerHTML = display
+			if (remainder < 0) {
+				dom.protohash.innerHTML = ''
+				clearInterval(timer)
+				proceed()
+			}
+		}
+		let timer = setInterval(countdown, increment)
+	} else {
+		proceed()
+	}
+
+	function proceed() {
+		setTimeout(function() {
+			get_isPerf()
+			if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
+			gt0 = nowFn()
+			Promise.all([
+				get_isDomRect(),
+				outputPrototypeLies(isResize),
+			]).then(function(){
+				if (isBB && gClear && 'all' == id) {console.clear()}
+				if (isSmart) {log_section(SECTP, gt0)}
+				// WTF NoScript! sometimes we have to catch this later
+				try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
+				output()
+			})
+		}, delay)
+	}
 }
 
 function run_immediate() {
