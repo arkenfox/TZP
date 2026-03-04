@@ -368,7 +368,7 @@ function get_element_other(METRIC, isLies) {
 	// note: some elements we insert a char "." to force a height: always use the same char
 	let oList = {
 		'horizontal-tb' : {
-			base: '<base href=""/>', // all 0's: to get max unique measurements in gecko
+			base: '<base href=""/>',
 			figure: '<figure></figure>',
 		},
 		'vertical-lr' : {
@@ -385,19 +385,20 @@ function get_element_other(METRIC, isLies) {
 			dt: '<dl><dt>.</dt></dl>',
 			fieldset: '<fieldset></fieldset>',
 			figcaption: '<figure><figcaption>.</figcaption></figure>',
+			geolocation: '<geolocation></geolocation>',
 			hr: '<hr>',
+			img: '<img></img>',
 			legend: '<fieldset><legend>.</legend></fieldset>',
-			// for android blink
-			noembed: '<embed><noembed>.</noembed>', // ^ all zeros: point of difference in blink but not a unique measurement
+			noembed: '<embed><noembed>.</noembed>',
+			'q_empty': '<q></q>',
 		}
 	}
 	let aVerticalAdd = [
 		// these all get a char inserted
 		// desktop
-		'big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
-		'iframe','meter','small','sub','sup',
-		// for android
-		'i','b',
+		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
+		'iframe','meter','noscript','pre','q','small','sub','sup',
+		
 	]
 	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
