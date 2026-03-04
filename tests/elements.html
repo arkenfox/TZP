@@ -19,19 +19,15 @@
 		/* this covers everything so far: they all change
 			but caption and legend are off to begin with .. again
 		*/
-		#element-fp a,
-		#element-fp b,
-		#element-fp code,
-		#element-fp div,
-		#element-fp hr,
-		#element-fp i,
-		#element-fp span,
-		audio, abbr, acronym, address, applet, article, aside,
-		base, basefont,
-		center, cite, data, del, dfn, em, footer,
-		strike, strong, u {
-			margin: 2px; padding: 2px;
-		}
+
+		#element-fp a {margin: 2px; padding: 2px;}
+		#element-fp b {margin: 2px; padding: 2px;}
+		#element-fp br {margin: 2px; padding: 2px;}
+		#element-fp code {margin: 2px; padding: 2px;}
+		#element-fp div {margin: 2px; padding: 2px;}
+		#element-fp hr {margin: 2px; padding: 2px;}
+		#element-fp i {margin: 2px; padding: 2px;}
+		#element-fp span {margin: 2px; padding: 2px;}
 		#element-fp div>span {font-size: 2.9em;}
 		#element-fp font[size="1"] {font-size: 1.1em;}
 		#element-fp font[size="2"] {font-size: 1.2em;}
@@ -40,15 +36,29 @@
 		#element-fp font[size="5"] {font-size: 1.5em;}
 		#element-fp font[size="6"] {font-size: 1.6em;}
 		#element-fp font[size="7"] {font-size: 1.7em;}
+		#element-fp h1 {margin: 2px; padding: 2px;}
+		#element-fp h2 {margin: 2px; padding: 2px;}
+		#element-fp h3 {margin: 2px; padding: 2px;}
+		#element-fp h4 {margin: 2px; padding: 2px;}
+		#element-fp h5 {margin: 2px; padding: 2px;}
+		#element-fp h6 {margin: 2px; padding: 2px;}
+		#element-fp p {margin: 2px; padding: 2px;}
+		#element-fp small {margin: 2px; padding: 2px;}
+		#element-fp sub {margin: 2px; padding: 2px;}
+		#element-fp sup {margin: 2px; padding: 2px;}
 
-		#element-fp br, #element-fp small, #element-fp sub,
-		#element-fp sup, #element-fp h1, #element-fp h2, #element-fp h3,
-		#element-fp h4, #element-fp h5, #element-fp h6, big, blockquote,
-		caption, dd, dialog, dl, dt, figcaption, fieldset, legend {
- 			margin: 2px;
-			padding: 2px;
+		/* these are 0x0 so no effect */
+		#element-fp noembed {margin: 2px; padding: 2px;}
+		#element-fp noscript {margin: 2px; padding: 2px;}
+
+		abbr, acronym, address, applet, article, aside, audio, base, basefont, big,
+		blockquote, caption, center, cite, data, dd, del, dfn, dialog, dl, dt, em,
+		figcaption, fieldset, figure, footer, geolocation, label, legend, link,
+		nav, pre, q, section, strike, strong, summary, u, xmp {
+			margin: 2px; padding: 2px;
 		}
-		canvas, iframe {width: 75px;}
+
+		canvas, iframe, img, meter, object, picture, video {width: 75px;}
 
 	</style>
 </head>
@@ -78,6 +88,7 @@
 				</span><br><br>
 			<span class="btn15 btnfirst" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn15 btnfirst" onClick="run(`TZP`)">[ TZP ]</span>
+			<span class="btn15 btnfirst" onClick="list_elements()">[ list elements ]</span>
 
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
@@ -96,40 +107,41 @@ and defaults - so this is exposing subpixels (and version changes) only IIUIC
 */
 
 
-/*
-	// ignore
-	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-	form: all forms covered in another metric
-	area: used in map and sets it's own size
-	bdi/bdo: bidirectional elements
+let aRemainder = [
+	'col','colgroup',
+	'datalist','dir',
+	'element-details',
+	'frame','frameset',
+	'head','header','hgroup',
+	'ins','isindex',
+	'kbd','keygen',
+	'li', 'link',
+	'main', 'map', 'mark', 'marquee', 'menu', 'menuitem',
+	'nextid', 'nobr', 'noframes', 
+	'ol', 'optgroup',' option', 'output',
+	'plaintext', 'portal',
+	'rb','rbc','rp','rt','rtc','ruby',
+	's','samp','script','search','slot','source','style',
+	'table','tbody','td','template','tfoot','th','thead',
+	'time','title','tr','track','tt',
+	'ul','var','wbr',
+]
 
-	// the rest
-	col colgroup
-	datalist dir
-	element-details em
-	frame frameset
-	head header hgroup
-	ins isindex
-	kbd keygen
-	li link
-	main map mark marquee menu menuitem
-	nav nextid nobr noframes noscript
-	object ol optgroup option output
-	param plaintext portal pre
-	q
-	rb rbc rp rt rtc ruby
-	s samp script search section slot source style
-	table tbody td template tfoot th thead time title tr track tt
-	ul
-	var
-	wbr xmp
-*/
-
+let sKey = '<span class="key">'
+let sNumber = '<span class="number">'
+let sString = '<span class="string">'
 let isLocale = ""
 let isRevert = true
 let isNotateStyle = false
 let oData = {}
 let oList = {}
+let aIgnored = [
+	// ignore
+	'form', // all forms covered in another metric
+	'area', // used in map and sets it's own size
+	'bdi','bdo', //: bidirectional elements
+	'param',
+]
 
 // note: some elements we insert a char "." to force a height
 	// always use the same char
@@ -137,40 +149,40 @@ let oListBase = {
 	a: '<a href="">.</a>',
 	audio: '<audio controls=""></audio>',
 	base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+	basefont: '<basefont color="#FF0000"/>',
 	big_x2: '<big><big>.</big></big>',
 	big_x3: '<big><big><big>.</big></big></big>',
 	br: '<br>',
-	canvas: '<canvas></canvas>',
 	// always revert tables because we have that in our inline style in the plain test
 	caption: '<table class="revert"><caption>.</caption></table>',
 	dd: '<dl><dd>.</dd></dl>',
 	dialog: '<dialog open=""></dialog>',
 	dt: '<dl><dt>.</dt></dl>',
-	fieldset: '<fieldset></fieldset>', // don't include char
 	figcaption: '<figure><figcaption>.</figcaption></figure>',
-	figure: '<figure></figure>',
 	hr: '<hr>',
-	img: '<img></img>', // adds to unique results when horizontal else same as base
-	legend: '<fieldset><legend>.</legend></fieldset>',
-	// redundant
-	basefont: '<basefont color="#FF0000"/>',
-	noembed: '<embed><noembed>.</noembed>',
 	label: '<div id="elementlabel"><label for="elementlabel">.</label></div<',
+	legend: '<fieldset><legend>.</legend></fieldset>',
+	link: '<link href="" rel="stylesheet">',
+	noembed: '<embed><noembed>.</noembed>',
 	summary: '<details><summary>.</summary></details>',
-	picture: '<picture></picture>',
-	video: '<video></video>',
-
+	object: '<object>',
+	'q_empty': '<q></q>',
 }
-let aListBaseAdd = [
+let aListAddWithChar = [
 	'abbr','acronym','address','applet','article','aside',
 	'b','big','blockquote','center','cite','code',
 	'data','del','div','dfn','dl','em','footer',
 	'h1','h2','h3','h4','h5','h6',
-	'i','iframe','meter',	'p',
-	'small','span','strike','strong','sub','sup','u',
+	'i','iframe','meter',
+	'noscript','p','pre','q',
+	'section','small','span','strike','strong','sub','sup',
+	'u','xmp',
 ]
-aListBaseAdd.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
-
+let aListAddWithoutChar = [
+	'canvas','fieldset','figure','geolocation','img','nav','picture','video',
+]
+aListAddWithChar.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
+aListAddWithoutChar.forEach(function(item){oListBase[item] = '<'+item+'></'+item+'>'})
 
 // TZP
 // we can't get more unique elements than actual elements used
@@ -194,7 +206,7 @@ let oTZP = {
 		br: '<br>',
 		canvas: '<canvas></canvas>',
 		caption: '<table class="revert"><caption>.</caption></table>',
-			// always revert table because we table that in our inline style in the elements_nocss.html test
+			// ^ always revert table because we table that in our inline style in the elements_nocss.html test
 			// which is an oxymoron: we have css to mess with everything, but we want to bypass custom styles
 			// hence "no css" wording - and both tests shoudl match
 		dd: '<dl><dd>.</dd></dl>',
@@ -202,27 +214,99 @@ let oTZP = {
 		dt: '<dl><dt>.</dt></dl>',
 		fieldset: '<fieldset></fieldset>', // don't include char
 		figcaption: '<figure><figcaption>.</figcaption></figure>',
+		figure: '<figure></figure>',
+		geolocation: '<geolocation></geolocation>',
 		hr: '<hr>',
 		legend: '<fieldset><legend>.</legend></fieldset>',
-
-		// for android blink
+		'q_empty': '<q></q>',
+		img: '<img></img>',
 		noembed: '<embed><noembed>.</noembed>',
-			// ^ all zeros: point of difference in blink but not a unique measurement (TZP test)
-			// but in "everything" it creates a unique pair
 	}
 }
 let aVerticalAdd = [
 	// desktop
 	'big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
-	'iframe','meter','small','sub','sup',
+	'iframe','meter','noscript','pre','q','small','sub','sup',
 	// for android
 	'i','b',
 ]
 aVerticalAdd.forEach(function(item){oTZP['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
+// messy as F but who cares .. track element use and display
+let tzpSet = new Set(), aRedundant = []
+for (const t of Object.keys(oTZP)) {for (const k of Object.keys(oTZP[t])) {tzpSet.add(k)}}
+let aTZP = Array.from(tzpSet).sort()
+for (const k of Object.keys(oListBase)) {
+	if (!aTZP.includes(k)) {aRedundant.push(k)}
+}
+let countTotal = aRedundant.length + aTZP.length + aIgnored.length + aRemainder.length
+let strElement = '<u>ELEMENTS</u> [' + countTotal +']<br><br>'
+let oElements = {
+	'ignored': aIgnored.sort(),
+	'redundant': aRedundant.sort(),
+	'tzp': aTZP.sort(),
+	'remainder': aRemainder.sort(),
+}
+strElement += '{<br><div class="indent">'+
+	sKey +'ignored [not tested]: ' + sc +'{ ' + sNumber + aIgnored.length + sc
+		+'<br><div class="indent">'+ sString + aIgnored.join(', ') + sc +'</div><br>}'
+	+'</div><br>}'
+strElement += '<br>{<br><div class="indent">'+
+	sKey +'redundant: ' + sc +'{ ' + sNumber + aRedundant.length + sc
+		+'<br><div class="indent">'+ sString + aRedundant.join(', ') + sc +'</div><br>}'
+	+'</div><br>}'
+strElement += '<br>{<br><div class="indent">'+
+	sKey +'TZP: ' + sc +'{ ' + sNumber + aTZP.length + sc
+		+'<br><div class="indent">'+ sString + aTZP.join(', ') + sc +'</div><br>}'
+	+'</div><br>}'
+strElement += '<br>{<br><div class="indent">'+
+	sKey +'TBA:: work in progres: ' + sc +'{ ' + sNumber + aRemainder.length + sc
+		+'<br><div class="indent">'+ sString + aRemainder.join(', ') + sc +'</div><br>}'
+	+'</div><br>}'
+
+function list_elements() {
+	dom.perf.innerHTML = ''
+	dom.elements.innerHTML = strElement
+}
+
+let oChecks = {}, oCheckSummary = {}
+function check_revert(vertical = true) {
+	// with our inline styles messing with things everything should be false (no matches)
+	// if we comment out the inline styles, everything should match
+	let style = vertical ? 'vertical' : 'horizontal'
+	// remember isRevert
+	let isRevertState = isRevert
+	// reset
+	oChecks = {}
+	oCheckSummary = {}
+	// cycle thru each element and measure with and
+	// without revert to ensure we are changing it
+	for (const k of Object.keys(oListBase)) {
+		let str = oListBase[k]
+		isRevert = true
+		let data = create_element(str, vertical, true)
+		let hashR = data[0]
+		oChecks[k] = {
+			'normal': '',
+			'revert': data,
+		}
+		isRevert = false
+		data = create_element(str, vertical, true)
+		let hashN = data[0]
+		oChecks[k].normal = data
+		let test = hashR == hashN
+		if (undefined == oCheckSummary[test]) {oCheckSummary[test] = []}
+		oCheckSummary[test].push(k)
+	}
+	console.log(style)
+	console.log('summary\n' ,oCheckSummary)
+	console.log('data\n', oChecks)
+	// restore isRevert
+	isRevert = 	isRevertState
+}
 
 let testTarget
-function create_element(str, style ='vertical-lr') {
+function create_element(str, vertical = true, isLoop = false) {
 	// create an element so I can inspect it
 	const parent = dom['element-fp']
 	parent.innerHTML = str
@@ -238,14 +322,19 @@ function create_element(str, style ='vertical-lr') {
 			if (isRevert) {target.classList.add('revert')}
 		}
 	}
+	let style = vertical ? 'vertical-lr' : 'horizontal-tb'
 	target.setAttribute("style","display:inline; writing-mode: "+ style +";")
 	let method = target.getBoundingClientRect()
 	let itemdata = [method.width, method.height, method.x, method.y]
 
-	testTarget = target
-	console.log('testTarget', style, '\n', testTarget)
-	console.log(method)
-	console.log(itemdata)
+	if (!isLoop) {
+		testTarget = target
+		console.log('testTarget', style, '\n', testTarget)
+		console.log(method)
+		console.log('isRevert', isRevert, mini(itemdata), itemdata)
+	} else {
+		return [mini(itemdata), itemdata]
+	}
 }
 
 
@@ -326,7 +415,7 @@ function get_elements(type) {
 			for (const k of Object.keys(newobj).sort()) {
 				let displayhash = newobj[k]['hash']
 				oData[displayhash] = {
-					'elements': newobj[k]['elements'],
+					'elements': newobj[k]['elements'].join(', '),
 					'data': newobj[k]['data']
 				}
 			}
@@ -361,15 +450,15 @@ function get_elements(type) {
 					//parent.innerHTML = ''
 					parent.innerHTML = oList[s][k]
 					let target = parent.firstChild
-					target.classList.add('revert')
+					if (isRevert) {target.classList.add('revert')}
 					let newtarget = target.children[0]
 					if (undefined !== newtarget) {
 						target = newtarget
-						target.classList.add('revert')
+						if (isRevert) {target.classList.add('revert')}
 						newtarget = target.children[0]
 						if (undefined !== newtarget) {
 							target = newtarget
-							target.classList.add('revert')
+							if (isRevert) {target.classList.add('revert')}
 						}
 					}
 					target.setAttribute('style','display:inline; writing-mode: '+ s +';')
