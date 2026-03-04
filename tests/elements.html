@@ -212,7 +212,6 @@ let oTZP = {
 		dt: '<dl><dt>.</dt></dl>',
 		fieldset: '<fieldset></fieldset>', // don't include char
 		figcaption: '<figure><figcaption>.</figcaption></figure>',
-		figure: '<figure></figure>',
 		geolocation: '<geolocation></geolocation>',
 		hr: '<hr>',
 		legend: '<fieldset><legend>.</legend></fieldset>',
@@ -222,11 +221,8 @@ let oTZP = {
 	}
 }
 let aVerticalAdd = [
-	// desktop
-	'big','blockquote','code','dl','h1','h2','h3','h4','h5','h6',
+	'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
 	'iframe','meter','noscript','pre','q','small','sub','sup',
-	// for android
-	'i','b',
 ]
 aVerticalAdd.forEach(function(item){oTZP['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
