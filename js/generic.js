@@ -2479,24 +2479,23 @@ function outputSection(id, isResize = false) {
 		// e.g. some extensions can be slow to inject etc
 		// e.g. will help with resources such as XML/images and
 		enforcedDelay = isFontDelay ? 2000 : (isFile ? 0 : 1000)
-enforcedDelay = 1000
 	}
 	if (enforcedDelay > 0) {
 		delay = 0
-		let msg = isFontDelay ? 'awaiting async font fallback' : '   artifical delay'
-		dom.protohash.innerHTML = '<span class="spaces">     '+ msg +'</span>'
-		let t0 = nowFn(), increment = 5, remainder = enforcedDelay
+		let msg = isFontDelay ? 'async font fallback' : ''
+		if (isFontDelay) {dom.protohash.innerHTML = '<span class="spaces">     awaiting '+ msg}
+		let t0 = nowFn(), increment = 5
 		function countdown() {
 			let timetaken = Math.floor(nowFn() - t0)
 			if (timetaken > enforcedDelay) {
 				dom.protohash.innerHTML = ''
 				clearInterval(timer)
-				log_perf(SECTG, 'enforced delay', t0,'', msg.trim())
+				log_perf(SECTG, 'enforced delay', t0,'', msg)
 				proceed()
 			} else {
 				let remainder = enforcedDelay - timetaken
-				let display = (remainder > 0 ? '<span class="spaces">     loading in ... ' + (remainder+'') + ' ms' : '') +'</span>'
-				dom.documenthash.innerHTML = display
+				if (remainder > (increment * 2)) {remainder ='<span class="spaces">     running in ... ' + remainder +' ms</span>'} else (remainder = '')
+				dom.documenthash.innerHTML = remainder
 			}
 		}
 		let timer = setInterval(countdown, increment)
