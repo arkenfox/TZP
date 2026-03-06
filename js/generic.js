@@ -1929,7 +1929,7 @@ function addDetail(metric, data, scope = isScope) {
 }
 
 function addTiming(metric) {
-	let remainder = gCountTiming % 9, key, value
+	let remainder = gCountTiming % 8, key, value
 	if (0 == gCountTiming % 5) {
 		// get extra dates
 		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
@@ -2436,8 +2436,10 @@ function outputSection(id, isResize = false) {
 
 	function output() {
 		if ('all' == id) {
-			gCountTiming = 0 // reset
-			addTimings()
+			if (!gLoad) {
+				gCountTiming = 0 // reset
+				addTimings()
+			}
 			// run sequentially awaiting each before running the next
 			// order: use number or section name
 			let order = [
@@ -2475,17 +2477,23 @@ function outputSection(id, isResize = false) {
 	smartFn('final')
 	let enforcedDelay = 0
 	if (gLoad) {
+		// initiate timings
+		gCountTiming = 0
+		addTimings()
 		// force an initial delay regardless | moreso if it it's BB with font.vis
 		// e.g. some extensions can be slow to inject etc
 		// e.g. will help with resources such as XML/images and
 		enforcedDelay = isFontDelay ? 2000 : (isFile ? 0 : 1000)
 	}
+	//if (gLoad) {enforcedDelay = 1000}
 	if (enforcedDelay > 0) {
 		delay = 0
 		let msg = isFontDelay ? 'async font fallback' : ''
+		let padLength = (enforcedDelay+'').length
 		if (isFontDelay) {dom.protohash.innerHTML = '<span class="spaces">     awaiting '+ msg}
-		let t0 = nowFn(), increment = 5
+		let t0 = nowFn(), increment = 16 // 5 is too fast to read
 		function countdown() {
+			addTiming() // add loads of various timing measurements during our delay
 			let timetaken = Math.floor(nowFn() - t0)
 			if (timetaken > enforcedDelay) {
 				dom.protohash.innerHTML = ''
@@ -2494,7 +2502,9 @@ function outputSection(id, isResize = false) {
 				proceed()
 			} else {
 				let remainder = enforcedDelay - timetaken
-				if (remainder > (increment * 2)) {remainder ='<span class="spaces">     running in ... ' + remainder +' ms</span>'} else (remainder = '')
+				if (remainder > (increment * 2)) {
+					remainder ='<span class="spaces">     running in ... ' + (remainder+'').padStart(padLength) +' ms</span>'
+				} else (remainder = '')
 				dom.documenthash.innerHTML = remainder
 			}
 		}
