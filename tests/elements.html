@@ -45,18 +45,35 @@
 		#element-fp sub {margin: 2px; padding: 2px;}
 		#element-fp sup {margin: 2px; padding: 2px;}
 
-		/* these are 0x0 so no effect */
-		#element-fp noembed {margin: 2px; padding: 2px;}
-		#element-fp noscript {margin: 2px; padding: 2px;}
-
-		abbr, acronym, address, applet, article, aside, audio, base, basefont, big,
-		blockquote, caption, center, cite, data, dd, del, dfn, dialog, dl, dt, em,
-		figcaption, fieldset, figure, footer, geolocation, label, legend, link,
-		nav, pre, q, section, strike, strong, summary, u, xmp {
+		abbr, acronym, address, applet, article, aside, audio,
+		base, basefont, big, blockquote, caption, center, cite,
+		data, dd, del, dfn, dialog, dir, dl, dt {
 			margin: 2px; padding: 2px;
 		}
 
-		canvas, iframe, img, meter, object, picture, video {width: 75px;}
+		em, figcaption, fieldset, figure, footer, geolocation,
+		header, ins, isindex, keygen, kbd, label, legend, li,
+		link, main, mark, marquee, menu, nav, nobr, noframes {
+			margin: 2px; padding: 2px;
+		}
+
+		ol, optgroup, option, plaintext, pre, q, ruby,
+		s, samp, search, section, strike, strong, summary, time, title, u,
+		ul, var, xmp {
+			margin: 2px; padding: 2px;
+		}
+
+		canvas, iframe, img, meter, object, picture, video {
+			width: 75px;
+		}
+
+		/* don't think I can affect style these
+			noembed, noscript = 0x0
+			tbody, tfoot, thead = IDK
+			// hmmmm ... tbody difers in no_css
+		*/
+		#element-fp noembed {margin: 2px; padding: 2px;}
+		#element-fp noscript {margin: 2px; padding: 2px;}
 
 	</style>
 </head>
@@ -79,7 +96,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Element sizes not covered in
-				<a class="blue" target="_blank" href="elementforms.html">elememt forms</a>.
+				<a class="blue" target="_blank" href="elementforms.html">element forms</a>.
 				Counts for unique elements across the two tests are not directly comparable.
 				In everything all elements are treated equally with both <code>writing modes</code>,
 				which is not the case in the TZP test.
@@ -87,7 +104,6 @@
 			<span class="btn15 btnfirst" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn15 btnfirst" onClick="run(`TZP`)">[ TZP ]</span>
 			<span class="btn15 btnfirst" onClick="list_elements()">[ list elements ]</span>
-
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
 		<tr><td colspan="2" style="text-align: left;">
@@ -102,27 +118,21 @@
 changing app language has no effect (the only char we're using is '.')
 otherwise looks like everything is pretty much fixed/hardcoded/set due to widgets
 and defaults - so this is exposing subpixels (and version changes) only IIUIC
+
+edit: except maybe french and quote
 */
 
 
 let aRemainder = [
 	'col','colgroup',
-	'datalist','dir',
 	'element-details',
-	'frame','frameset',
-	'head','header','hgroup',
-	'ins','isindex',
-	'kbd','keygen',
-	'li', 'link',
-	'main', 'map', 'mark', 'marquee', 'menu', 'menuitem',
-	'nextid', 'nobr', 'noframes', 
-	'ol', 'optgroup','option', 'output',
-	'plaintext', 'portal',
-	'rb','rbc','rp','rt','rtc','ruby',
-	's','samp','script','search','slot','source','style',
-	'table','tbody','td','template','tfoot','th','thead',
-	'time','title','tr','track','tt',
-	'ul','var','wbr',
+	'nextid',
+	'output',
+	'portal',
+	'rb','rbc','rp','rt','rtc',
+	'slot',
+	'td','template','th',
+	'tr','track','tt',
 ]
 
 let sKey = '<span class="key">'
@@ -135,14 +145,24 @@ let oData = {}
 let oList = {}
 let aIgnored = [
 	// ignore
-	'form', // all forms covered in another metric
 	'area', // used in map and sets it's own size
 	'bdi','bdo', //: bidirectional elements
-	'param',
+	'datalist',
+	'form', // all forms covered in another metric
+	'frame','frameset', // deprecated
+	'head', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head
+	'map',
+	'menuitem', // deprecated
+	'param', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/param
+	'script',
+	'source',
+	'style',
+	'wbr', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/wbr
 ]
 
-// note: some elements we insert a char "." to force a height
-	// always use the same char
+// note: some elements we insert a char "." to a) force a height
+// or b) for unique measurements without a char to get more precision/decimal places
+// always use the same char
 let oListBase = {
 	a: '<a href="">.</a>',
 	audio: '<audio controls=""></audio>',
@@ -150,37 +170,70 @@ let oListBase = {
 	basefont: '<basefont color="#FF0000"/>',
 	big_x2: '<big><big>.</big></big>',
 	big_x3: '<big><big><big>.</big></big></big>',
-	br: '<br>',
 	// always revert tables because we have that in our inline style in the plain test
-	caption: '<table class="revert"><caption>.</caption></table>',
+	caption: '<table><caption>.</caption></table>',
 	dd: '<dl><dd>.</dd></dl>',
 	dialog: '<dialog open=""></dialog>',
 	dt: '<dl><dt>.</dt></dl>',
 	figcaption: '<figure><figcaption>.</figcaption></figure>',
-	hr: '<hr>',
+	hgroup: '<hgroup><h1>.</h1><p class="revert">.</p></hgroup>', // revert 2nd child (p)
+	isindex: '<isindex prompt="search"></isindex>',
+	keygen: '<form method="POST"><keygen></keygen></form>',
 	label: '<div id="elementlabel"><label for="elementlabel">.</label></div<',
 	legend: '<fieldset><legend>.</legend></fieldset>',
+	li: '<ul><li></li></ul>',
 	link: '<link href="" rel="stylesheet">',
 	noembed: '<embed><noembed>.</noembed>',
 	summary: '<details><summary>.</summary></details>',
-	object: '<object>',
 	'q_empty': '<q></q>',
+	tbody: '<table><tbody></tbody></table>',
+	tfoot: '<table><tfoot></tfoot></table>',
+	thead: '<table><thead></thead></table>',
+	// other
+	'ol_li': '<ol><li>.</li></ol>',
+	'menu_li': '<menu>.<li></li></menu>',
+	'ul_li': '<ul><li>.</li></ul>',
+
+	// test error
+	//'error': '<frame></frame>'
 }
-let aListAddWithChar = [
-	'abbr','acronym','address','applet','article','aside',
-	'b','big','blockquote','center','cite','code',
-	'data','del','div','dfn','dl','em','footer',
-	'h1','h2','h3','h4','h5','h6',
-	'i','iframe','meter',
-	'noscript','p','pre','q',
-	'section','small','span','strike','strong','sub','sup',
-	'u','xmp',
-]
-let aListAddWithoutChar = [
-	'canvas','fieldset','figure','geolocation','img','nav','picture','video',
-]
-aListAddWithChar.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
-aListAddWithoutChar.forEach(function(item){oListBase[item] = '<'+item+'></'+item+'>'})
+let oListExtra = {
+	'char': [
+		'abbr','acronym','address','applet','article','aside',
+		'b','big','blockquote','center','cite','code',
+		'data','del','dir','div','dfn','dl','em','footer',
+		'h1','h2','h3','h4','h5','h6','header',
+		'i','ins','iframe','kbd',
+		'main','mark','marquee','menu','meter',
+		'nobr','noframes','noscript','ol','option','p','pre','q',
+		'ruby',
+		's','samp','section','small','span','strike','strong','sub','sup',
+		'time','title',
+		'u','ul','var','xmp',
+	],
+	nochar: [
+		'canvas','fieldset','figure','geolocation','img',
+		'nav','optgroup','picture',
+		'search','table','video',
+	],
+	standalone: [
+		'br','hr','object','plaintext',
+	]
+}
+
+for (const type of Object.keys(oListExtra)) {
+	for (const k of Object.keys(oListExtra[type])) {
+		let array = oListExtra[type]
+		array.forEach(function(item) {
+			if ('standalone' == type) {
+				oListBase[item] = '<'+ item +'>'
+			} else {
+				let str = 'char' == type ? '.' : ''
+				oListBase[item] = '<'+ item +'>'+ str +'</'+ item +'>'
+			}
+		})
+	}
+}
 
 // TZP
 // we can't get more unique elements than actual elements used
@@ -189,13 +242,17 @@ aListAddWithoutChar.forEach(function(item){oListBase[item] = '<'+item+'></'+item
 // add a new element: the point of difference was in "base, basefont, picture"
 // (grouped in everything) - we already use base, so instead add basefont or picture 
 
+let aUseFirstChild = ['hgroup'] // we want to measure the first element, not the last
+let oExtraStyles = {
+	'marquee': '; width: 20px; height: 20px', // if we don't constrain it, it changes with inner window sizes
+}
+
 let oTZP = {
 	'horizontal-tb' : {
 		base: '<base href=""/>', // all 0's: to get max unique measurements in gecko
 		figure: '<figure></figure>',
 	},
 	'vertical-lr' : {
-		// desktop
 		a: '<a href="">.</a>',
 		audio: '<audio controls=""></audio>',
 		base: '<base href=""/>',
@@ -203,28 +260,37 @@ let oTZP = {
 		big_x3: '<big><big><big>.</big></big></big>',
 		br: '<br>',
 		canvas: '<canvas></canvas>',
-		caption: '<table class="revert"><caption>.</caption></table>',
-			// ^ always revert table because we table that in our inline style in the elements_nocss.html test
-			// which is an oxymoron: we have css to mess with everything, but we want to bypass custom styles
-			// hence "no css" wording - and both tests shoudl match
+		caption: '<table><caption>.</caption></table>',
 		dd: '<dl><dd>.</dd></dl>',
 		dialog: '<dialog open=""></dialog>',
 		dt: '<dl><dt>.</dt></dl>',
-		fieldset: '<fieldset></fieldset>', // don't include char
+		fieldset: '<fieldset></fieldset>',
 		figcaption: '<figure><figcaption>.</figcaption></figure>',
 		geolocation: '<geolocation></geolocation>',
+		hgroup: '<hgroup><h1>.</h1><p class="revert">.</p></hgroup>', // code doesn't revert 2nd child so hardcode it
 		hr: '<hr>',
-		legend: '<fieldset><legend>.</legend></fieldset>',
-		'q_empty': '<q></q>',
 		img: '<img></img>',
+		legend: '<fieldset><legend>.</legend></fieldset>',
+		li: '<ul><li></li></ul>',
+		'q_empty': '<q></q>',
+		'menu_li': '<menu>.<li></li></menu>',
 		noembed: '<embed><noembed>.</noembed>',
+		'ol_li': '<ol><li>.</li></ol>',
+		optgroup: '<optgroup></optgroup>',
+		plaintext: '<plaintext>',
+		tbody: '<table><tbody></tbody></table>',
+		tfoot: '<table><tfoot></tfoot></table>',
+		// test error
+		//'error': '<frame></frame>'
 	}
 }
 let aVerticalAdd = [
 	'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
-	'iframe','meter','noscript','pre','q','small','sub','sup',
+	'iframe','marquee','meter','noscript','option','pre','q','small','sub','sup','ul',
 ]
 aVerticalAdd.forEach(function(item){oTZP['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
+
+
 
 // messy as F but who cares .. track element use and display
 let tzpSet = new Set(), aRedundant = []
@@ -233,16 +299,26 @@ let aTZP = Array.from(tzpSet).sort()
 for (const k of Object.keys(oListBase)) {
 	if (!aTZP.includes(k)) {aRedundant.push(k)}
 }
-let countTotal = aRedundant.length + aTZP.length + aIgnored.length + aRemainder.length
-let strElement = '<u>ELEMENTS</u> [' + countTotal +']<br><br>'
 let oElements = {
 	'ignored': aIgnored.sort(),
 	'redundant': aRedundant.sort(),
 	'tzp': aTZP.sort(),
 	'remainder': aRemainder.sort(),
 }
+// sanity check
+let aAll = []
+for (const k of Object.keys(oElements)) {aAll = aAll.concat(oElements[k])}
+aAll.sort()
+let aAllCheck = aAll.filter(function(item, position) {return aAll.indexOf(item) === position})
+let sanityStr = ''
+if (aAll.length !== aAllCheck.length) {
+	sanityStr = sb+' [duplicates]'+sc
+	console.log('duplicates\n', aAll)
+}
+let countTotal = aRedundant.length + aTZP.length + aIgnored.length + aRemainder.length
+let strElement = '<u>ELEMENTS</u> [' + countTotal +']' + sanityStr + '<br><br>'
 strElement += '{<br><div class="indent">'+
-	sKey +'ignored [not tested]: ' + sc +'{ ' + sNumber + aIgnored.length + sc
+	sKey +'ignored: ' + sc +'{ ' + sNumber + aIgnored.length + sc
 		+'<br><div class="indent">'+ sString + aIgnored.join(', ') + sc +'</div><br>}'
 	+'</div><br>}'
 strElement += '<br>{<br><div class="indent">'+
@@ -301,39 +377,44 @@ function check_revert(vertical = true) {
 
 let testTarget
 function create_element(str, vertical = true, isLoop = false) {
+	// create_element('<div><div><div><div><div><div>hello</div></div></div></div></div></div>')
 	// create an element so I can inspect it
 	const parent = dom['element-fp']
 	parent.innerHTML = str
-	let target = parent.firstChild
-	if (isRevert) {target.classList.add('revert')}
-	let newtarget = target.children[0]
-	if (undefined !== newtarget) {
-		target = newtarget
-		if (isRevert) {target.classList.add('revert')}
-		newtarget = target.children[0]
-		if (undefined !== newtarget) {
-			target = newtarget
+	try {
+		let style = vertical ? 'vertical-lr' : 'horizontal-tb'
+		let target = parent.firstChild
+		// revert everything
+		for (let i = 0; i < 10; i++) {
 			if (isRevert) {target.classList.add('revert')}
+			let newtarget = target.children[0]
+			if (undefined == newtarget) {break}
+			target = newtarget
 		}
-	}
-	let style = vertical ? 'vertical-lr' : 'horizontal-tb'
-	target.setAttribute("style","display:inline; writing-mode: "+ style +";")
-	let method = target.getBoundingClientRect()
-	let itemdata = [method.width, method.height, method.x, method.y]
+		// choose target
+		if (str.includes('hgroup')) {target = parent.firstChild}
+		// style target
+		let extraStyle = str.includes('marquee') ? oExtraStyles['marquee'] : ''
+		target.setAttribute("style","display:inline; writing-mode: "+ style + extraStyle +";")
 
-	if (!isLoop) {
-		testTarget = target
-		console.log('testTarget', style, '\n', testTarget)
-		console.log(method)
-		console.log('isRevert', isRevert, mini(itemdata), itemdata)
-	} else {
-		return [mini(itemdata), itemdata]
+		let method = target.getBoundingClientRect()
+		let itemdata = [method.width, method.height, method.x, method.y]
+
+		if (!isLoop) {
+			testTarget = target
+			console.log('testTarget', style, '\n', testTarget)
+			console.log(method)
+			console.log('isRevert', isRevert, mini(itemdata), itemdata)
+		} else {
+			return [mini(itemdata), itemdata]
+		}
+	} catch(e) {
+		return e
 	}
 }
 
-
 function get_elements(type) {
-	if (undefined == type) {type = isFF ? 'TZP' : 'everything'}
+	if (undefined == type) {type = 'TZP'}
 	let t0 = performance.now()
 	oData = {}
 	let params = [s15 + type + sc]
@@ -362,35 +443,32 @@ function get_elements(type) {
 					// the children, ensure no other css affects any element
 					parent.innerHTML = ''
 					parent.innerHTML = oList[t][k]
-					target = parent.firstChild
-					if (isRevert) {target.classList.add('revert')}
-					let newtarget = target.children[0]
-					if (undefined !== newtarget) {
-						target = newtarget
-						if (isRevert) {target.classList.add('revert')}
-						newtarget = target.children[0]
-						if (undefined !== newtarget) {
-							target = newtarget
+					try {
+						target = parent.firstChild
+						// revert everything
+						for (let i = 0; i < 10; i++) {
 							if (isRevert) {target.classList.add('revert')}
+							let newtarget = target.children[0]
+							if (undefined == newtarget) {break}
+							target = newtarget
 						}
-					}
-					for (let i=0; i < aStyle.length; i++) {
-						let style = aStyle[i]
-						let styleCode = style.slice(0, 1)
-						try {
-							target.setAttribute("style","display:inline; writing-mode: "+ style +";")
+						// choose target
+						if (aUseFirstChild.includes(k)) {target = parent.firstChild}
+						for (let i=0; i < aStyle.length; i++) {
+							let style = aStyle[i]
+							let styleCode = style.slice(0, 1)
+							let extraStyle = undefined == oExtraStyles[k] ? '' : oExtraStyles[k]
+							target.setAttribute("style","display:inline; writing-mode: "+ style + extraStyle +";")
 							let method = target.getBoundingClientRect()
 							let data = [method.width, method.height, method.x, method.y]
 							data = isNotateStyle ? [styleCode].concat(data) : data
-							// always use x as this helps ensure entropy regardless of isVertical
-							let dataExtra = isNotateStyle ? [styleCode, method.x] : [method.x]
 							style = style.slice(0, -3)
 							elementdata[style] = data
-						} catch(e) {
-							elementdata = 'error'
-							console.log(k, e+'')
 						}
-					}
+					} catch(e) {
+						elementdata = zErr
+						console.log(k, e+'')
+					}			
 					let elementhash = mini(elementdata) +''
 					if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
 					} else {tmpdata[elementhash]['group'].push(k)}
@@ -433,6 +511,7 @@ function get_elements(type) {
 				let style = s.slice(0,-3)
 				tmpdata[style] = {}
 				for (const k of Object.keys(oList[s]).sort()) {
+					let itemdata = {}
 					// count measurments taken
 					testCount++
 					// unique elements tested
@@ -441,22 +520,26 @@ function get_elements(type) {
 					// the children, ensure no other css affects any element
 					//parent.innerHTML = ''
 					parent.innerHTML = oList[s][k]
-					let target = parent.firstChild
-					if (isRevert) {target.classList.add('revert')}
-					let newtarget = target.children[0]
-					if (undefined !== newtarget) {
-						target = newtarget
-						if (isRevert) {target.classList.add('revert')}
-						newtarget = target.children[0]
-						if (undefined !== newtarget) {
-							target = newtarget
+					try {
+						target = parent.firstChild
+						// revert everything
+						for (let i = 0; i < 10; i++) {
 							if (isRevert) {target.classList.add('revert')}
+							let newtarget = target.children[0]
+							if (undefined == newtarget) {break}
+							target = newtarget
 						}
+						// choose target
+						if (aUseFirstChild.includes(k)) {target = parent.firstChild}
+						// set style
+						let extraStyle = undefined == oExtraStyles[k] ? '' : oExtraStyles[k]
+						target.setAttribute("style","display:inline; writing-mode: "+ s + extraStyle +";")
+						let method = target.getBoundingClientRect()
+						itemdata = [method.width, method.height, method.x, method.y]
+					} catch(e) {
+						itemdata = zErr
+						console.log(k, e+'')
 					}
-					target.setAttribute('style','display:inline; writing-mode: '+ s +';')
-					let method = target.getBoundingClientRect()
-					// typecheck
-					let itemdata = [method.width, method.height, method.x, method.y]
 					let itemhash = mini(itemdata)
 					// add shadowData
 					if (undefined == shadowData[k]) {shadowData[k] = {}}
