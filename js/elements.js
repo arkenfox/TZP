@@ -365,7 +365,14 @@ function get_element_other(METRIC, isLies) {
 	let t0 = nowFn()
 	let hash, btn ='', data = {}
 
-	// note: some elements we insert a char "." to force a height: always use the same char
+	// note: some elements we insert a char "." to a) force a height
+	// or b) for unique measurements without a char to get more precision/decimal places
+	// always use the same char
+	let aUseFirstChild = ['hgroup'] // sometimes we want the first child
+	let oExtraStyles = {
+		'marquee': '; width: 20px; height: 20px', // if we don't constrain it, it changes with inner window sizes
+	}
+
 	let oList = {
 		'horizontal-tb' : {
 			base: '<base href=""/>',
@@ -379,26 +386,33 @@ function get_element_other(METRIC, isLies) {
 			big_x3: '<big><big><big>.</big></big></big>',
 			br: '<br>',
 			canvas: '<canvas></canvas>',
-			caption: '<table class="revert"><caption>.</caption></table>',
+			caption: '<table><caption>.</caption></table>',
 			dd: '<dl><dd>.</dd></dl>',
 			dialog: '<dialog open=""></dialog>',
 			dt: '<dl><dt>.</dt></dl>',
 			fieldset: '<fieldset></fieldset>',
 			figcaption: '<figure><figcaption>.</figcaption></figure>',
 			geolocation: '<geolocation></geolocation>',
+			hgroup: '<hgroup><h1>.</h1><p class="revert">.</p></hgroup>', // code doesn't revert 2nd child so hardcode it
 			hr: '<hr>',
 			img: '<img></img>',
 			legend: '<fieldset><legend>.</legend></fieldset>',
-			noembed: '<embed><noembed>.</noembed>',
+			li: '<ul><li></li></ul>',
 			'q_empty': '<q></q>',
+			'menu_li': '<menu>.<li></li></menu>',
+			noembed: '<embed><noembed>.</noembed>',
+			'ol_li': '<ol><li>.</li></ol>',
+			optgroup: '<optgroup></optgroup>',
+			plaintext: '<plaintext>',
+			tbody: '<table><tbody></tbody></table>',
+			tfoot: '<table><tfoot></tfoot></table>',
+			// test error
+			//'error': '<frame></frame>'
 		}
 	}
 	let aVerticalAdd = [
-		// these all get a char inserted
-		// desktop
 		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
-		'iframe','meter','noscript','pre','q','small','sub','sup',
-		
+		'iframe','marquee','meter','noscript','option','pre','q','small','sub','sup','ul',
 	]
 	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 
@@ -411,37 +425,41 @@ function get_element_other(METRIC, isLies) {
 		doc.body.appendChild(div)
 		let parent = dom[id], isFirst = true
 		for (const s of Object.keys(oList).sort()) {
-			let style = s.slice(0,-3)
+			let style = s.slice(0,-3), itemdata
 			tmpdata[style] = {}
 			for (const k of Object.keys(oList[s]).sort()) {
 				// set parent, determine target to measure and as we walk
 				// the children, ensure no other css affects any element
-				//parent.innerHTML = ''
 				parent.innerHTML = oList[s][k]
-				let target = parent.firstChild
-				target.classList.add('revert')
-				let newtarget = target.children[0]
-				if (undefined !== newtarget) {
-					target = newtarget
-					target.classList.add('revert')
-					newtarget = target.children[0]
-					if (undefined !== newtarget) {
-						target = newtarget
+				try {
+					let target = parent.firstChild
+					// revert everything
+					for (let i = 0; i < 10; i++) {
 						target.classList.add('revert')
+						let newtarget = target.children[0]
+						if (undefined == newtarget) {break}
+						target = newtarget
 					}
-				}
-				target.setAttribute('style','display:inline; writing-mode: '+ s +';')
-				method = measureFn(target, METRIC)
-				// typecheck
-				let itemdata = [method.width, method.height, method.x, method.y]
-				if (isFirst) {
-					isFirst = false
-					if (undefined !== method.error) {throw method.errorstring}
-					itemdata.forEach(function(item){
-						if (runST) {item = null}
-						let typeCheck = typeFn(item)
-						if ('number' !== typeCheck) {throw zErrType + typeCheck}
-					})
+					// choose target
+					if (aUseFirstChild.includes(k)) {target = parent.firstChild}
+					// set writing-mode and style
+					let extraStyle = undefined == oExtraStyles[k] ? '' : oExtraStyles[k]
+					target.setAttribute('style','display:inline; writing-mode: '+ s + extraStyle +';')
+					method = measureFn(target, METRIC)
+					// typecheck
+					itemdata = [method.width, method.height, method.x, method.y]
+					if (isFirst) {
+						isFirst = false
+						if (undefined !== method.error) {throw method.errorstring}
+						itemdata.forEach(function(item){
+							if (runST) {item = null}
+							let typeCheck = typeFn(item)
+							if ('number' !== typeCheck) {throw zErrType + typeCheck}
+						})
+					}
+				} catch(e) {
+					itemdata = zErr
+					log_error(15, METRIC +'_'+k, e)
 				}
 				let itemhash = mini(itemdata)
 				if (undefined == tmpdata[style][itemhash]) {tmpdata[style][itemhash] = {'data': itemdata, 'group': [k]}
