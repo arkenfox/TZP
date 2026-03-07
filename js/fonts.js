@@ -159,6 +159,8 @@ let fntMaster = {
 			'Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Serif Greek','Small Fonts Greek',
 			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier -> Courier New
+			// see 44461: FF135+ windows 10 UX issues (1947324) fixed in FF147 (1996961)
+			'Segoe MDL2 Assets',
 		],
 		windowsfaces: [
 			// weighted/styles
