@@ -694,7 +694,7 @@ function get_touc_h(METRIC) {
 		// 1957658: FF143+, ESR140.2: 5 android, 10 windows, 0 mac and linux
 		// 1991701: FF146+ (and BB15): Re-enable touch on Linux (and remove RFPTarget::PointerId)
 	let rfpHashes = {
-		'android': 'c51b1822',
+		'android': ['c51b1822'],
 			/*
 			{
 				"Document": ['createTouch','createTouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
@@ -705,7 +705,8 @@ function get_touc_h(METRIC) {
 				"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
 			}
 			*/
-		'linux': '553ce3d9',
+		'linux': ['553ce3d9'],
+			// NOTE: FF150+ 2020170 Return five touch points on Wayland when touch device is present
 			/* linux gecko with touch doesn't have maxTouchPoints
 			{
 				"Document": 'none',
@@ -716,7 +717,7 @@ function get_touc_h(METRIC) {
 				"window": ['Touch','TouchEvent','TouchList']
 			}
 			*/
-		'mac': '727b0fac',
+		'mac': ['727b0fac'],
 			/*
 			{
 				"Document": 'none',
@@ -727,9 +728,10 @@ function get_touc_h(METRIC) {
 				"window": 'none',
 			}
 			*/
-		'windows': '5091c020',
+		'windows': ['5091c020'],
 			/*
-			{"Document": 'none',
+			{
+				"Document": 'none',
 				"HTMLElement": 'none',
 				"MathMLElement": 'none',
 				"SVGElement": 'none',
@@ -738,7 +740,7 @@ function get_touc_h(METRIC) {
 			}
 			*/
 	}
-	notation = rfpHashes[isOS] == hash ? rfp_green : rfp_red
+	notation = rfpHashes[isOS].includes(hash) ? rfp_green : rfp_red
 
 	// non-BB: fails RFP but may match FPP
 	if (isFPPFallback && undefined !== isOS && notation == rfp_red) {
@@ -748,10 +750,10 @@ function get_touc_h(METRIC) {
 		let fppHashes = {
 			'android': ['c51b1822'], // everything + 5
 			'mac': ['727b0fac'], // nothing
-			'linux': ['727b0fac', '0eb47178', 'f492a7f4'], // 0,1,5
+			'linux': ['727b0fac'],
 			/* same as windows
 				// if (aMaxTouchPoints <= 1) {return aMaxTouchPoints;}
-				// linux always reports 0 maxTouchPoints (for now), so 1 or 5 shouldn't be a thing IIUIC
+				// linux always reports 0 maxTouchPoints until FF150, see below
 			*/
 			'windows': ['727b0fac', '0eb47178', 'f492a7f4'], // 0,1,5
 			/* // 0 is same as nothing, otherwise 1 or 5 as below
@@ -765,6 +767,8 @@ function get_touc_h(METRIC) {
 			}
 			*/
 		}
+		// NOTE: FF150+ 2020170 Return five touch points on Wayland when touch device is present
+		if (isVer > 149) {fppHashes.linux.push('f492a7f4')}
 		if (fppHashes[isOS].includes(hash)) {notation = fpp_green}
 	}
 
