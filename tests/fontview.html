@@ -68,6 +68,8 @@ let oSentence = {
 
 	// TB supported
 	"ar (arabic)": "امسح تأريخ جلسة التصفح كله و كلمات السر و الكعكات في أي وقت بنقرة واحدة.",
+	"be (belarusian)": "Сцірайце ўсю гісторыю аглядання, паролі і кукі калі захочаце ў адзін націск.",
+	"bg (bulgarian)": "Изчистване по всяко време с едно докосване на цялата сесия на разглеждане: история, пароли и бисквитки.",
 	"ca (catalan)": "Esborreu l'historial de navegació, les contrasenyes i les galetes quan vulgueu amb un sol toc.",
 	"cs (czech)": "Vyčistěte kdykoli celou vaši historii prohlížení, hesla a soubory cookie jedním klepnutím.",
 	"da (danish)": "Du kan når som helst slette hele din browserhistorik, dine gemte adgangskoder og dine cookies med et enkelt tryk.",
@@ -94,7 +96,8 @@ let oSentence = {
 	"nl (dutch)": "Wis uw volledige surfgeschiedenis, wachtwoorden en cookies wanneer u wilt met één tik.",
 	"nn (norwegian nynorsk)": "Slett hele nettleserhistorikken din, passord, infokapsler når som helst med ett trykk.", // tb is actually nb-no = norwegian bokmål
 	"pl (polish)": "Usuwaj całą historię przeglądania, hasła i ciasteczka jednym stuknięciem.",
-	"pt-BR (portuguese brazil": "Limpe todo o histórico, senhas e cookies da sessão de navegação quando quiser, com um simples toque.",
+	"pt-BR (portuguese brazil)": "Limpe todo o histórico, senhas e cookies da sessão de navegação quando quiser, com um simples toque.",
+	"pt-PT (portuguese portual)": "Limpe o seu histórico de sessão de navegação inteiro, palavras-passe, cookies a qualquer altura com um simples toque.",
 	"ro (romanian)": "Șterge întregul istoric al sesiunii, parolele și cookie-urile oricând, cu o singură atingere.",
 	"ru (russian)": "В любой момент стирайте одним нажатием всю историю просмотров, пароли и куки.",
 	"sq (albanian)": "Fshini kurdo, me një prekje të vetme, historikun e shfletimit për sesionin, fjalëkalimet, cookie-t.",
@@ -107,12 +110,10 @@ let oSentence = {
 	"zh-tw (chinese taiwan": "只要輕鬆一點，就能清除這次上網的所有瀏覽紀錄、儲存密碼、Cookie 等資料。",
 
 	// other
-	"am (amharic)": "በአንድ ጊዜ መታ በማድረግ ሁሉንም የአሰሳ ክፍለ ጊዜ ታሪክዎን ፣ የይለፍ ቃሎችን ፣ ኩኪዎችን በማንኛውም ጊዜ ያጽዱ።</",
+	"am (amharic)": "በአንድ ጊዜ መታ በማድረግ ሁሉንም የአሰሳ ክፍለ ጊዜ ታሪክዎን ፣ የይለፍ ቃሎችን ፣ ኩኪዎችን በማንኛውም ጊዜ ያጽዱ።",
 	"an (aragonese)": "Borra l'historial completo d'a sesión de navegación, claus, cookies, en qualsequier momento con un simple toque.",
 	"ast (asturian)": "Llimpia cuando quieras y con un calcu les cookies, l'historial de restolar y les contraseñes.",
 	"az (azerbaijani)": "Tək bir toxunuşla istədiyiniz vaxt səyahət sessiyanızın tarixçəsini, parolları və çərəzləri təmizləyin.",
-	"be (belarusian)": "Сцірайце ўсю гісторыю аглядання, паролі і кукі калі захочаце ў адзін націск.",
-	"bg (bulgarian)": "Изчистване по всяко време с едно докосване на цялата сесия на разглеждане: история, пароли и бисквитки.",
 	"bn (bengali)": "আপনার সম্পূর্ণ ব্রাউজিং সেশনের ইতিহাস, পাসওয়ার্ডগুলি, কুকিকে একবার ট্যাপ করে যে কোনো সময় সাফ করুন।",
 	"bs (bosnian)": "Izbrišite svoju historiju pretraživanja, lozinke i kolačiće bilo kada s jednim dodirom.",
 	"co (corsican)": "Squassate a vostra cronolugia di navigazione, e vostre parolle d’intesa, i vostri canistrelli, à ogni mumentu, cù un’incalcata simplice.",
@@ -988,6 +989,9 @@ function run_next(type) {
 
 function run(type) {
 	let name = document.getElementById(type).value
+	const lang = name.split(' ')[0]
+	const nolang = '<span class="faint">lang=""</span><div class="indent">'
+
 	let display = ""
 	if (type == "scripts") {
 		if (oDisplay[name] !== undefined) {
@@ -995,7 +999,10 @@ function run(type) {
 			display = "<span class='chars'>"+ spacer + oDisplay[name].join(ZWNJ + spacer) + "</span>"
 		}
 	} else if (type == "languages") {
-		display = oSentence[name]
+		let str = oSentence[name]
+		display = nolang + str +'</div>'
+			+ '<br><span class="faint" lang=\"'+ lang +'\">'+ 'lang="'+ lang +'"</span>'
+			+ '<div class="indent" lang="' + lang +'">' + str +'</div>'
 	}
 	dom.divInfo.innerHTML = name.toUpperCase()
 	dom.divMono.innerHTML = display
