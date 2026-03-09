@@ -28,7 +28,11 @@
 	</table>
 
 	<table id="tb12">
-		<thead><tr><th colspan="2"><div class="nav-title">script/language view</div></th></tr></thead>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">script/language view
+				<div class="nav-up"><span class="perf" id="lang"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr>
 			<td style="text-align: center; vertical-align: bottom;">
 					<form>
@@ -627,6 +631,8 @@ function generate() {
 	// get display string per script
 	// build combobox contents
 	// display first option
+	try {dom.lang.innerHTML = navigator.language} catch(e){console.log(e)}
+
 	return new Promise(resolve => {
 		let oMaxChars = {}
 		let aSuffix = [0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F']
@@ -715,7 +721,7 @@ function run(type) {
 		// language
 		let str = oSentence[name]
 		display = nolang + str +'</div>'
-			+ '<br><span class="faint" lang=\"'+ lang +'\">'+ 'lang="'+ lang +'"</span>'
+			+ '<br><div class="faint" lang=\"'+ lang +'\">'+ 'lang="'+ lang +'"</div>'
 			+ '<div class="indent" lang="' + lang +'">' + str +'</div>'
 	}
 	dom.divInfo.innerHTML = name
