@@ -442,7 +442,7 @@ body.tzpBody::after {
 .tzpCalcContainer {container: calccontainer / inline-size;}
 .tzpCalcA {
 	width: calc(1px *
-		((e  * 0.06314882636070251 - 0.06699182000011206 / (327510.10546596383 * 101099.74005273856 ))
+		((e * 0.06314882636070251 - 0.06699182000011206 / (327510.10546596383 * 101099.74005273856 ))
 			+ 0.9363944577053189 / sin( sin( 86911.80023335948 *  tan(122224.59393033749) / tan(250486.18265094055)
 			+ (169617.27745474092) / pi * 19.00493122072233 - 0.22360279853455722 ) / 50590.01594434995 + tan(( 
 			110958.53977223029) + 109345.15143883083 * 99223.79864865377 + 0.05425928323529661)  / 94812.65262083427
@@ -504,7 +504,12 @@ body.tzpBody::after {
 	-webkit-appearance: none;
 	appearance: none;
 }
+#element-fp tbody:before {
+	content: none;
+	line-height: normal;
+}
 #element-fp .revert {
+	/* https://developer.mozilla.org/en-US/docs/Web/CSS/all */ 
 	all: revert;
 }
 .skew {transform: skew(1.787542deg,3.263901deg);}
