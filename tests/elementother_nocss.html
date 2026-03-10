@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements: other [no css]</title>
+  <!--<link rel="stylesheet" type="text/css" href="testindex.css"> <!-- -->
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<style>
+		.mono {font-family: monospace, "Courier New"; font-size: 12px;}
+		.spaces {white-space: pre-wrap;}
+		#tb15 {
+			width: 97%;
+			min-width: 780px;
+			max-width: 780px;
+		}
+		#element-fp {
+			position: fixed;
+			top: 0;
+			left: 0;
+			font-family: none;
+			font-size: initial;
+			font-style: normal;
+			font-variant: normal;
+			font-weight: normal;
+			line-height: normal;
+			text-transform: none;
+			text-align: left;
+			text-decoration: none;
+			text-shadow: none;
+			white-space: nowrap;
+			transform: skew(1.787542deg,3.263901deg);
+		}
+	</style>
+</head>
+
+<body>
+	<div id="element-fp"></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="25%"><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">elements: other [no css]</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span>The <a href="elementother.html">elements: other</a> hash should match the one here - to ensure
+			that custom styles don't affect the fingerprint.</span><br><br>
+				<span class="btn15 btnfirst" style="cursor: pointer;" onClick="run(`everything`)">[ everything ]</span>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="c mono spaces no_color" id="elements"></div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let isRevert = false
+let oData = {}, oList = {}, oListBase = {}
+let testTarget
+
+let aUseFirstChild = ['hgroup'] // we want to measure the first element, not the last
+let oExtraStyles = {
+	'marquee': '; width: 20px; height: 20px', // if we don't constrain it, it changes with inner window sizes
+}
+
+function build_lists() {
+	// note: some elements we insert a char "." to a) force a height
+	// or b) for unique measurements without a char to get more precision/decimal places
+	// always use the same char
+	let oTmp = {
+		a: '<a href="">.</a>',
+		audio: '<audio controls=""></audio>',
+		base: '<base href=""/>', // empty: width/x are zero but height/y are interesting
+		basefont: '<basefont color="#FF0000"/>',
+		big_x2: '<big><big>.</big></big>',
+		big_x3: '<big><big><big>.</big></big></big>',
+		// always revert tables because we have that in our inline style in the plain test
+		caption: '<table><caption>.</caption></table>',
+		dd: '<dl><dd>.</dd></dl>',
+		dialog: '<dialog open=""></dialog>',
+		dt: '<dl><dt>.</dt></dl>',
+		figcaption: '<figure><figcaption>.</figcaption></figure>',
+		hgroup: '<hgroup><h1>.</h1><p class="revert">.</p></hgroup>', // revert 2nd child (p)
+		isindex: '<isindex prompt="search"></isindex>',
+		keygen: '<form method="POST"><keygen></keygen></form>',
+		label: '<div id="elementlabel"><label for="elementlabel">.</label></div<',
+		legend: '<fieldset><legend>.</legend></fieldset>',
+		li: '<ul><li></li></ul>',
+		link: '<link href="" rel="stylesheet">',
+		noembed: '<embed><noembed>.</noembed>',
+		output: '<form><input>=<output class="revert"></output></form>',
+			// '<form><input id="a" value="."> = <output id="x" name="x" for="a"></output></form>',
+			// we don't actually need to calculate any values
+		rb: '<ruby><rb>.</rb></ruby>',
+		rbc: '<ruby><rbc>.</rbc></ruby>',
+		rp: '<ruby><rp>.</rp></ruby>',
+		rt: '<ruby><rt>.</rt></ruby>',
+		rtc: '<ruby><rtc>.</rtc></ruby>',
+		summary: '<details><summary>.</summary></details>',
+		'q_empty': '<q></q>',
+		// tables
+		tbody: '<table><tbody></tbody></table>', 
+		td: '<table><tr><td></td></tr></table>',
+		tfoot: '<table><tfoot></tfoot></table>',
+		th: '<table><thead><tr><th></th></tr></thead></table>',
+		thead: '<table><thead></thead></table>',
+		tr: '<table><tr></tr></table>',
+		// other
+		'ol_li': '<ol><li>.</li></ol>',
+		'menu_li': '<menu>.<li></li></menu>',
+		'ul_li': '<ul><li>.</li></ul>',
+		// test error
+		//'error': '<frame></frame>'
+	}
+	// programatically add more
+	let oExtra = {
+		'char': [
+			'abbr','acronym','address','applet','article','aside',
+			'b','big','blockquote','center','cite','code',
+			'data','del','dir','div','dfn','dl','em','footer',
+			'h1','h2','h3','h4','h5','h6','header',
+			'i','ins','iframe','kbd',
+			'main','mark','marquee','menu','meter',
+			'nobr','noframes','noscript','ol','option','p','pre','q',
+			'ruby',
+			's','samp','section','slot','small','span','strike','strong','sub','sup',
+			'time','title','tt',
+			'u','ul','var','xmp',
+		],
+		nochar: [
+			'canvas','fieldset','figure','geolocation','img',
+			'nav','optgroup','picture',
+			'portal', // https://wicg.github.io/portals/#the-portal-element
+			'search','table','video',
+		],
+		standalone: [
+			'br','hr','object','plaintext',
+		]
+	}
+	for (const type of Object.keys(oExtra)) {
+		for (const k of Object.keys(oExtra[type])) {
+			let array = oExtra[type]
+			array.forEach(function(item) {
+				if ('standalone' == type) {
+					oTmp[item] = '<'+ item +'>'
+				} else {
+					let str = 'char' == type ? '.' : ''
+					oTmp[item] = '<'+ item +'>'+ str +'</'+ item +'>'
+				}
+			})
+		}
+	}
+	// sort into final object
+	for (const k of Object.keys(oTmp).sort()) {
+		oListBase[k] = oTmp[k]
+	}
+}
+
+function create_element(str, vertical = true) {
+	let style = vertical ? 'vertical-lr' : 'horizontal-tb'
+	oList = {}
+	oList[style] = {'test': str}
+	let oRes = get_elements('everything', true) // returned tmpdata, target
+	let itemdata = oRes[0]['test'][style.slice(0,-3)]
+	testTarget = oRes[1]
+	console.log('testTarget', style, '\n', testTarget)
+	console.log('isRevert', isRevert, mini(itemdata), itemdata)
+}
+
+function get_elements(type, isTest = false) {
+	type = 'everything'
+	let t0 = performance.now()
+	oData = {}
+	let params = [s15 + type + sc]
+	if (!isTest) {
+		oList = {'horizontal-tb': oListBase, 'vertical-lr': oListBase}
+	}
+
+	let tmpdata = {}, newobj = {}
+	let target, testCount = 0, shadowData = {}
+	const parent = dom['element-fp']
+	try {
+		// count unique hashes per element+writingstyle + unique element names
+		let setHash = new Set(), setElements = new Set()
+
+		// create a shadow data object to track unique elements
+			// note: it would be easy to create misleading uniqueness given
+			// 30+ unqiue elements in everything x 2 writing-modes but
+			// we can be diligent in spotting points of difference (e.g. see
+			// noembed vertical for blink) and it would be nice to match up
+			// the numbers across the two tests
+		// ^ use shadowData
+
+		for (const s of Object.keys(oList).sort()) {
+			let style = s.slice(0,-3)
+			for (const k of Object.keys(oList[s]).sort()) {
+				let itemdata = {}
+				// count measurments taken
+				testCount++
+				// unique elements tested
+				setElements.add(k)
+				// set parent, determine target to measure and as we walk
+				// the children, ensure no other css affects any element
+				//parent.innerHTML = ''
+				parent.innerHTML = oList[s][k]
+				try {
+					target = parent.firstChild
+					// revert everything
+					for (let i = 0; i < 10; i++) {
+						if (isRevert) {target.classList.add('revert')}
+						let newtarget = target.children[0]
+						if (undefined == newtarget) {break}
+						target = newtarget
+					}
+					// choose target
+					if (aUseFirstChild.includes(k)) {target = parent.firstChild}
+					// set style
+					let extraStyle = undefined == oExtraStyles[k] ? '' : oExtraStyles[k]
+					target.setAttribute("style","display:inline; writing-mode: "+ s + extraStyle +";")
+					let method = target.getBoundingClientRect()
+					itemdata = [method.width, method.height, method.x, method.y]
+				} catch(e) {
+					itemdata = zErr
+					//console.log(k, e+'')
+				}
+				if (undefined == tmpdata[k]) {tmpdata[k] = {}}
+				tmpdata[k][style] = itemdata
+			}
+		}
+
+		if (isTest) {
+			return [tmpdata, target]
+		}
+
+		// counts
+		let aElements = Array.from(setElements)
+		params.push(aElements.length +' elements')
+		params.push(testCount +' measurements')
+
+		//console.log(tmpdata)
+		let aHash
+		// group by element hash
+		for (const k of Object.keys(tmpdata)) {
+			let elementhash = mini(tmpdata[k])
+			setHash.add(elementhash)
+			if (undefined == newobj[elementhash]) {newobj[elementhash] = {'data': tmpdata[k], 'elements': [k]}
+			} else {newobj[elementhash]['elements'].push(k)}
+		}
+		//
+		for (const k of Object.keys(newobj)) { // don't sort
+			oData[k] = {
+				'elements': newobj[k]['elements'].join(', '),
+				'data': newobj[k]['data']
+			}
+		}
+		aHash = Array.from(setHash)
+		params.push(aHash.length +' unique elements')
+
+		//console.log(tmpdata)
+		parent.innerHTML = "" // clear display
+
+		let hash = mini(oData), notation = ""
+		let t1 = performance.now()
+		try {dom.perf.innerHTML = Math.round(t1 - t0) +" ms"} catch(e) {}
+
+		let strParam = (params.length ? " ["+ params.join(" | ") +"]" : "")
+		let display = [], tmphash = ""
+		dom.elements.innerHTML = hash + strParam +"<br><br>"+ json_highlight(oData, 120)
+
+		return
+	} catch(e) {
+		parent.innerHTML = "" // clear display
+		dom.elements = e+""
+		return
+	}
+}
+
+function run(type) {
+	// clear
+	dom.elements.innerHTML = " &nbsp; "
+	// pause so users see change
+	setTimeout(function() {
+		get_elements(type)
+	}, 170)
+}
+
+Promise.all([
+	get_globals(),
+	build_lists(),
+]).then(function(){
+	isRevert = false
+	run()
+})
+
+</script>
+</body>
+</html>
