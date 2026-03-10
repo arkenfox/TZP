@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>element font</title>
+	<title>elements: fonts</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -22,8 +22,9 @@
 	<table id="tb15">
 		<col width="15%"><col width="85%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">element font
+			<div class="nav-title">elements: fonts
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+				<div class="nav-down"><span class="perf" id="locale"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
@@ -46,6 +47,7 @@
 
 <script>
 'use strict';
+let isLanguage = '', isLocale = ''
 let sizeA = ['3.9pt','141.7pt','266.6pt',]
 let sizeB = ['3.9pt','xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large','141.7pt','266.6pt']
 
@@ -115,6 +117,10 @@ function get_element_font(lang = '') {
 	removeElementFn(id)
 	dom.perf.innerHTML = Math.round(performance.now() -t0) +" ms"
 }
+
+try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLocale = zErr}
+try {isLanguage = navigator.language} catch(e) {isLanguage = zErr}
+try {dom.locale.innerHTML = isLanguage +' | '+ isLocale} catch(e) {console.log(e)}
 
 function run() {
 	dom.results = ""

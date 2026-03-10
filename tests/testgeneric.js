@@ -417,6 +417,8 @@ const get_isVer = () => new Promise(resolve => {
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 150: fast-path: requires WebRTC
+			if('function' == typeof window.RTCPeerConnectionIceErrorEvent) return 150 // 1561441
 			try {
 				Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})
 			} catch(e) {

@@ -539,9 +539,11 @@ const get_isFileSystem = (METRIC, isWarmup = false) => new Promise(resolve => {
 })
 
 const get_isFontDelay = () => new Promise(resolve => {
-	if (!isBB || !isGecko || isVer < 139) {return resolve()}
-	if ('windows' !== isOS && 'mac' !== isOS) {return resolve()}
+	if (!isBB || !isGecko || isVer < 139 || 'android' == isOS) {return resolve()}
 
+	//if ('windows' !== isOS && 'mac' !== isOS) {return resolve()}
+		// ^ linux shouldn't have any delay since it's dets the font dir as system font dir?
+		// ^ but for now lets treat all desktop as suspect and force TB tro address this perf cliff
 	// BB: font.vis + bundled fonts
 		// very slow to async fallback | on linux the bundled fonts IS the system font dir and is not affected
 		// not the case when using font.system.whitelist | we should see if we can get this fixed upstream
@@ -881,6 +883,8 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			// 150: fast-path: requires WebRTC
+			if('function' == typeof window.RTCPeerConnectionIceErrorEvent) return 150 // 1561441
 			try {
 				Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})
 			} catch(e) {
@@ -1201,7 +1205,7 @@ function json_highlight(json, clrValues = false) {
 		let minLen = 50, len = isDesktop ? 95 : minLen
 		overlayInfo = ''
 		try {
-			// we use the table because it is visible
+			// we use the table width because it is visible
 				// overlaycontent available width is 100px less
 			let contentWidth = dom.tbfp.clientWidth - (100 + isScrollbar) 
 			len = (contentWidth/overlayCharLen) - 2 // give us some wiggle room
@@ -1423,7 +1427,8 @@ function metricsShow(name, scope) {
 
 	let isColor = !(target == 'window_functions')
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor)): ''
-	dom.overlayInfo.innerHTML = overlayInfo
+	// dev: no n3eed to display overlayInfo everywhere, limit
+	if ('agent' == name) {dom.overlayInfo.innerHTML = overlayInfo}
 
 	//add btn, show/hide options, display
 	let hash = mini(data)
@@ -2483,7 +2488,7 @@ function outputSection(id, isResize = false) {
 		// force an initial delay regardless | moreso if it it's BB with font.vis
 		// e.g. some extensions can be slow to inject etc
 		// e.g. will help with resources such as XML/images and
-		enforcedDelay = isFontDelay ? 2000 : (isFile ? 0 : 1000)
+		enforcedDelay = isFontDelay ? 3000 : (isFile ? 0 : 1200)
 	}
 	//if (gLoad) {enforcedDelay = 1000}
 	if (enforcedDelay > 0) {

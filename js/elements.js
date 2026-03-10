@@ -1,6 +1,12 @@
 'use strict';
 
 // element results always in this order: width, height, x, y
+/*
+ it is up to the fingerprinter to ensure custom/website css doesn't influence
+ measurements. TZP uses careful site css rules and revert as a PoC - more than
+ enough to ensure defaults, but trying to mitigate all possible css rules is
+ prohibitive. Perhaps one method could be to create and use an iframe on demand
+*/
 
 function get_domrect(METRIC) {
 	// quick exits
@@ -403,16 +409,18 @@ function get_element_other(METRIC, isLies) {
 			noembed: '<embed><noembed>.</noembed>',
 			'ol_li': '<ol><li>.</li></ol>',
 			optgroup: '<optgroup></optgroup>',
+			output: '<form><input>=<output class="revert"></output></form>',
 			plaintext: '<plaintext>',
-			tbody: '<table><tbody></tbody></table>',
+			rt: '<ruby><rt>.</rt></ruby>',
+			td: '<table><tr><td></td></tr></table>',
 			tfoot: '<table><tfoot></tfoot></table>',
 			// test error
 			//'error': '<frame></frame>'
 		}
 	}
 	let aVerticalAdd = [
-		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
-		'iframe','marquee','meter','noscript','option','pre','q','small','sub','sup','ul',
+		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i','iframe',
+		'marquee','meter','noscript','option','pre','q','small','sub','sup','ul',
 	]
 	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
 

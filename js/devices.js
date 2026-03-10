@@ -690,85 +690,51 @@ function get_touc_h(METRIC) {
 	get_window_touch('window')
 
 	let hash = mini(data), btn = addButton(7, METRIC)
+	let hash0 ='727b0fac', hash1 ='0eb47178', hash5 ='f492a7f4', hash10 ='5091c020', hashA5 = 'c51b1822'
+	/*
+		// desktop: note: if maxTouchPoints == 0 windows = 'none'
+		{
+			"Document": 'none',
+			"HTMLElement": 'none',
+			"MathMLElement": 'none',
+			"SVGElement": 'none',
+			"maxTouchPoints": 5,
+			"window": ['Touch','TouchEvent','TouchList']
+		}
+		//android + 5
+		{
+			"Document": ['createTouch','createTouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+			"HTMLElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+			"MathMLElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+			"SVGElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
+			"maxTouchPoints": 5,
+			"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
+		}
+	*/
+
 	// RFP
 		// 1957658: FF143+, ESR140.2: 5 android, 10 windows, 0 mac and linux
 		// 1991701: FF146+ (and BB15): Re-enable touch on Linux (and remove RFPTarget::PointerId)
+		// 2021715: FF150+ 5 on linux
 	let rfpHashes = {
-		'android': ['c51b1822'],
-			/*
-			{
-				"Document": ['createTouch','createTouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
-				"HTMLElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
-				"MathMLElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
-				"SVGElement": ['ontouchcancel','ontouchend','ontouchmove','ontouchstart'],
-				"maxTouchPoints": 5,
-				"window": ['Touch','TouchEvent','TouchList','ontouchcancel','ontouchend','ontouchmove','ontouchstart']
-			}
-			*/
-		'linux': ['553ce3d9'],
-			// NOTE: FF150+ 2020170 Return five touch points on Wayland when touch device is present
-			/* linux gecko with touch doesn't have maxTouchPoints
-			{
-				"Document": 'none',
-				"HTMLElement": 'none',
-				"MathMLElement": 'none',
-				"SVGElement": 'none',
-				"maxTouchPoints": 0,
-				"window": ['Touch','TouchEvent','TouchList']
-			}
-			*/
-		'mac': ['727b0fac'],
-			/*
-			{
-				"Document": 'none',
-				"HTMLElement": 'none',
-				"MathMLElement": 'none',
-				"SVGElement": 'none',
-				"maxTouchPoints": 0,
-				"window": 'none',
-			}
-			*/
-		'windows': ['5091c020'],
-			/*
-			{
-				"Document": 'none',
-				"HTMLElement": 'none',
-				"MathMLElement": 'none',
-				"SVGElement": 'none',
-				"maxTouchPoints": 10,
-				"window": ['Touch','TouchEvent','TouchList']
-			}
-			*/
+		'android': [hashA5],
+		'linux': [hash5], // FF150+
+		'mac': [hash0],
+		'windows': [hash10],
 	}
+	if (isVer < 150) {rfpHashes.linux = '553ce3d9'} // maxTouchPoints = 0
 	notation = rfpHashes[isOS].includes(hash) ? rfp_green : rfp_red
 
 	// non-BB: fails RFP but may match FPP
 	if (isFPPFallback && undefined !== isOS && notation == rfp_red) {
-		// FPP
-			// 1977836 FF142: 0 or 1, everything else as 5
-			// 1978414: ship touch points
+		// FPP: 1977836 FF142: 0 or 1, everything else as 5 | 1978414: ship touch points
 		let fppHashes = {
-			'android': ['c51b1822'], // everything + 5
-			'mac': ['727b0fac'], // nothing
-			'linux': ['727b0fac'],
-			/* same as windows
-				// if (aMaxTouchPoints <= 1) {return aMaxTouchPoints;}
-				// linux always reports 0 maxTouchPoints until FF150, see below
-			*/
-			'windows': ['727b0fac', '0eb47178', 'f492a7f4'], // 0,1,5
-			/* // 0 is same as nothing, otherwise 1 or 5 as below
-			{
-				"Document": 'none',
-				"HTMLElement": 'none',
-				"MathMLElement": 'none',
-				"SVGElement": 'none',
-				"maxTouchPoints": 1,
-				"window": ['Touch','TouchEvent','TouchList']
-			}
-			*/
+			'android': [hashA5],
+			'mac': [hash0],
+			'linux': [hash0],
+			'windows': [hash0, hash1, hash5],
 		}
-		// NOTE: FF150+ 2020170 Return five touch points on Wayland when touch device is present
-		if (isVer > 149) {fppHashes.linux.push('f492a7f4')}
+		if (isVer > 149) {fppHashes.linux.push(hash5)} // FF150+: 2020170: linux wayland can now report 5
 		if (fppHashes[isOS].includes(hash)) {notation = fpp_green}
 	}
 

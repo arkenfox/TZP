@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 107, maxVer = 150, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 108, maxVer = 150, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -284,6 +284,13 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 150: 1561441: fast-path: requires webRTC
+		let t150a = performance.now(), ver150a
+		try {
+			ver150a = 'function' == typeof window.RTCPeerConnectionIceErrorEvent
+		} catch(e) {}
+		rec(150.1, 150, "1561441", ver150a, performance.now()-t150a, 'RTC') // 0.004ms
 
 		// 150: 2018544
 			// false positives if FF134-146 so check for 149 first

@@ -238,7 +238,12 @@ table {
 	margin: 0 auto 10px auto;
 	font-size: 12px;
 }
-tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
+tbody:before {
+	content: "-"; /* this line affects table tests in elements_other but we add an elements-fp rule */
+	display: block;
+	line-height: 1em;
+	color: transparent;
+}
 td {padding-top: 2px; padding-bottom: 3px;}
 th {color: black; font-size: 14px; padding: 3px 0;}
 
@@ -309,9 +314,6 @@ table td.bottom {vertical-align: bottom;}
 #tb17 hr {color: var(--test17);}
 #tb18 hr {color: var(--test18);}
 
-#tb4 hr {color: var(--test4);}
-#tb18 hr {color: var(--test18);}
-
 #element-fp {
 	position: fixed;
 	top: 0;
@@ -335,6 +337,13 @@ table td.bottom {vertical-align: bottom;}
 	-moz-appearance: none;
 	-webkit-appearance: none;
 	appearance: none;
+}
+#element-fp tbody:before {
+	content: none;
+	line-height: normal;
+}
+#element-fp .revert {
+	all: revert;
 }
 .skew {
 	transform: skew(1.787542deg,3.263901deg);
