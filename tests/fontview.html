@@ -18,10 +18,20 @@
 		.btn-right {float: right; position: relative; right: -9px; top: 3px; text-align: right;}
 		.btn-left {float: left; position: relative; left: -9px; top: 3px;}
 		.type-right {float: right; position: relative; right: 0px; top: -12px}
+
+		/* make sure element is super wide so text is always on one line */
+		.measure {
+			position: absolute;
+			left: -5000px;
+			top: 0px;
+		}
 	</style>
 </head>
 
 <body>
+	<div id="dMeasure" class="measure"><span id="sMeasure"></span></div>
+	<div id="fallback" class="offscreen"></div>
+
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
@@ -60,11 +70,11 @@
 				<div class="s14 type-right mono spaces" id="divType"></div>
 				<br>
 				<div class="no_color" align="left">
-					<div class="s12">monospace</div><br>
+					<div class="s12 mono spaces">monospace <span class="no_color" id="cmono"></span></div><br>
 					<div class="spaces monospace viewchars" id="divMono">hello world</div><br>
-					<div class="s12">sans-serif</div><br>
+					<div class="s12 mono spaces">sans-serif <span class="no_color" id="csans"></span></div><br>
 					<div class="spaces sans-serif viewchars" id="divSans">hello world</div><br>
-					<div class="s12">serif</div><br>
+					<div class="s12 mono spaces">serif <span class="no_color" id="cseri"></span></div><br>
 					<div class="spaces serif viewchars" id="divSerif">hello world</div><br>
 				</div>
 			</td></tr>
@@ -592,9 +602,9 @@ let oBlocks = {
 
 let oDisplay = {}, aSpacer = []
 let ZWNJ = String.fromCodePoint('0x200C') +' '
-let maxChars = 260, lastUsed, maxLanguages, maxScripts
-
-document.addEventListener('keydown', shortcutKey)
+let maxChars = 260, lastUsed, lastName, maxLanguages, maxScripts
+const dTarget = dom.dMeasure
+const sTarget = dom.sMeasure
 
 function strip(value) {return value.replace(/ /g,'')} // strip all spaces
 function shortcutKey(evt) {
@@ -609,6 +619,7 @@ function shortcutKey(evt) {
 		run(type)
 	}
 }
+
 function cycle(dir, type) {
 	// on android it's a PITA to use comboboxes
 	// and we can add shortcut keys for desktop
@@ -626,92 +637,125 @@ function cycle(dir, type) {
 	run(type)
 }
 
-function generate() {
-	// do once
-	// get display string per script
-	// build combobox contents
-	// display first option
-	try {dom.lang.innerHTML = navigator.language} catch(e){console.log(e)}
+function compare(lang, str) {
+	sTarget.innerHTML = str
+	let aLang = ['', lang]
+	let aStyles = ['monospace','sans-serif','serif']
 
-	return new Promise(resolve => {
-		let oMaxChars = {}
-		let aSuffix = [0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F']
-		oDisplay = {}
-		aSpacer = []
-		let aOptions = []
-		for (const group of Object.keys(oBlocks).sort()) {
-			let anchor = strip(group)
-			aOptions.push('<optgroup label = "'+ anchor.toUpperCase() +'">')
-			for (const script of Object.keys(oBlocks[group]).sort()) {
-				let name = script.toLowerCase()
-				aOptions.push('<option value = "'+ name +'"> '+ name +'</option>')
-				// set vars
-				let data = oBlocks[group][script]
-				let prefix = data.prefix,
-					range = data.blocks,
-					remove = data['trim'],
-					reserved = data.reserved,
-					ignored = data.ignored,
-					spacer = data.spacer
-				if (spacer) {aSpacer.push(name)}
-				// fixup vars
-				if (reserved == undefined) {reserved = []}
-				if (ignored == undefined) {ignored = []}
-				if (remove == undefined) {remove = 0} else (remove = (Math.abs(remove)) * -1) // ensure negative
-				// loop
-				let aChars = []
-				let tmpCodes = [], tmpChars = [], tmpReserved = []
-				for (let i = 0; i < range.length; i++) {
-					for (let j = 0; j < aSuffix.length; j++) {
-						let string = "0x"+ prefix + range[i] + aSuffix[j]
-						let match = ""+ range[i] + aSuffix[j]
-						if (!ignored.includes(match) && !reserved.includes(match)) {
-							aChars.push(String.fromCodePoint(string))
-						}
-					}
-				}
-				// trim results
-				if (remove < 0) {aChars = aChars.slice(0, remove)}
-				// limit size for display
-				if (aChars.length > maxChars) {
-					oMaxChars[name] = { 
-						'count': aChars.length,
-						'discarded': aChars.slice(maxChars - aChars.length),
-						'kept': aChars.slice(0, maxChars)
-					}
-					aChars = aChars.slice(0, maxChars)
-				}
-				oDisplay[name] = aChars
-			}
-		}
-		maxScripts = Object.keys(oDisplay).length
-		if (Object.keys(oMaxChars).length) {
-			console.log('scripts limited to first ' + maxChars +' chars\n', oMaxChars)
-		}
-
-		// populate options
-		dom.scripts.innerHTML = aOptions.join('')
-		run('scripts')
-		// populate languages
-		let aLang = []
-		for (const k of Object.keys(oSentence).sort()) {
-			aLang.push('<option value = "'+ k +'"> '+ k +'</option>')
-		}
-		maxLanguages = aLang.length
-		dom.languages.innerHTML = aLang.join('')
-		// return
-		return resolve()
+	let data = {}
+	aStyles.forEach(function(s){
+		data[s] = []
+		dTarget.style.setProperty('font-family', s)
+		aLang.forEach(function(l){
+			dTarget.setAttribute('lang', l)
+			// div height, span width
+			let h = dTarget.getBoundingClientRect().height
+			let w = sTarget.getBoundingClientRect().width
+			data[s].push(w +' x '+ h)
+		})
 	})
+	return data
+}
+
+function run_once() {
+	// do once
+	// populate languages
+	let aLang = [], aFallback = []
+	for (const k of Object.keys(oSentence).sort()) {
+		aLang.push('<option value = "'+ k +'"> '+ k +'</option>')
+		aFallback.push(oSentence[k])
+	}
+	maxLanguages = aLang.length
+	dom.languages.innerHTML = aLang.join('')
+
+	// display sentences to help somewhat with async font fasllback
+	// since we measure languages
+	let sentences = aFallback.join(' '+ ZWNJ +'<br>')
+	dom.fallback.innerHTML = '<p class="mono s4">'+ sentences +'</p>'
+		+ '<p class="sans s8">'+ sentences +'</p>'
+		+ '<p class="serif s12">'+ sentences +'</p>'
+
+	// get display string per script
+	let oMaxChars = {}
+	let aSuffix = [0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F']
+	oDisplay = {}
+	aSpacer = []
+	let aOptions = []
+	for (const group of Object.keys(oBlocks).sort()) {
+		let anchor = strip(group)
+		aOptions.push('<optgroup label = "'+ anchor.toUpperCase() +'">')
+		for (const script of Object.keys(oBlocks[group]).sort()) {
+			let name = script.toLowerCase()
+			aOptions.push('<option value = "'+ name +'"> '+ name +'</option>')
+			// set vars
+			let data = oBlocks[group][script]
+			let prefix = data.prefix,
+				range = data.blocks,
+				remove = data['trim'],
+				reserved = data.reserved,
+				ignored = data.ignored,
+				spacer = data.spacer
+			if (spacer) {aSpacer.push(name)}
+			// fixup vars
+			if (reserved == undefined) {reserved = []}
+			if (ignored == undefined) {ignored = []}
+			if (remove == undefined) {remove = 0} else (remove = (Math.abs(remove)) * -1) // ensure negative
+			// loop
+			let aChars = []
+			let tmpCodes = [], tmpChars = [], tmpReserved = []
+			for (let i = 0; i < range.length; i++) {
+				for (let j = 0; j < aSuffix.length; j++) {
+					let string = "0x"+ prefix + range[i] + aSuffix[j]
+					let match = ""+ range[i] + aSuffix[j]
+					if (!ignored.includes(match) && !reserved.includes(match)) {
+						aChars.push(String.fromCodePoint(string))
+					}
+				}
+			}
+			// trim results
+			if (remove < 0) {aChars = aChars.slice(0, remove)}
+			// limit size for display
+			if (aChars.length > maxChars) {
+				oMaxChars[name] = { 
+					'count': aChars.length,
+					'discarded': aChars.slice(maxChars - aChars.length),
+					'kept': aChars.slice(0, maxChars)
+				}
+				aChars = aChars.slice(0, maxChars)
+			}
+			oDisplay[name] = aChars
+		}
+	}
+	maxScripts = Object.keys(oDisplay).length
+	if (Object.keys(oMaxChars).length) {
+		console.log('scripts limited to first ' + maxChars +' chars\n', oMaxChars)
+	}
+	// populate scripts options
+	dom.scripts.innerHTML = aOptions.join('')
+	// display language
+	try {dom.lang.innerHTML = navigator.language} catch(e){console.log(e)}
+	// add listener
+	document.addEventListener('keydown', shortcutKey)
+	// run first option
+		// use scripts to allow more time for font fallback for languages
+	run('scripts')
 }
 
 function run(type) {
 	lastUsed = type
 	let name = document.getElementById(type).value
+	if (lastName == name) {return}
+	lastName = name
+
 	const lang = name.split(' ')[0]
 	const nolang = '<div class="faint">lang=""</div><div class="indent">'
 
-	let display = ''
+	let display = '', str
 	if ('scripts' == type) {
+		dom.cmono.innerHTML = ''
+		dom.csans.innerHTML = ''
+		dom.cseri.innerHTML = ''
+
 		// script
 		if (oDisplay[name] !== undefined) {
 			let spacer = aSpacer.includes(name) ? ' ' : ''
@@ -719,7 +763,7 @@ function run(type) {
 		}
 	} else {
 		// language
-		let str = oSentence[name]
+		str = oSentence[name]
 		display = nolang + str +'</div>'
 			+ '<br><div class="faint" lang=\"'+ lang +'\">'+ 'lang="'+ lang +'"</div>'
 			+ '<div class="indent" lang="' + lang +'">' + str +'</div>'
@@ -729,9 +773,21 @@ function run(type) {
 	dom.divMono.innerHTML = display
 	dom.divSans.innerHTML = display
 	dom.divSerif.innerHTML = display
+
+	if ('languages' == type) {
+		let data = compare(lang, str)
+		for (const k of Object.keys(data)) {
+			let isMatch = data[k][0] == data[k][1]
+			let key = 'c' + k.slice(0,4)
+			let target = dom[key]
+			let datastr = isMatch ? data[k][0] : data[k].join(' | ')
+			target.innerHTML = (isMatch ? s99 : s3) +'['+ datastr +']'+ sc
+		}
+	}
+
 }
 
-generate()
+run_once()
 
 </script>
 </body>
