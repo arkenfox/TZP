@@ -59,7 +59,10 @@ var aLegend = [],
 	aLegendFull = [],
 	oLists = {},
 	aDates = [],
-	aDays = ["January 1","July 1",],
+	aDays = ["January 15","July 15"],
+		// to match TZP min test
+			// to make sure we don't change years or months when a day or two ticks over
+			// use the 15th - this makes get* and getUTC* PoCs possible
 	aYears = [],
 	aYearsTZP = [],
 	loopYear = "",
@@ -608,6 +611,12 @@ function start() {
 
 	aYearsTZP = [1879,1952,1976,2025]
 	if (isVer < 112) {aYearsTZP = [1879,1921,1952,1976,2025]}
+	/*
+	aYearsTZP = []
+	for (let i = 1879; i < 2030; i++) {
+		aYearsTZP.push(i)
+	}
+	*/
 
 	// remove any sloppy duplicates
 	gTimezones = gTimezones.filter(function(item, position) {return gTimezones.indexOf(item) === position})
