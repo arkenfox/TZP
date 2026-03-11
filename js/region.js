@@ -1267,15 +1267,29 @@ function get_timezone(METRIC) {
 	isTimeZoneValue = undefined
 	let years = [1879, 1952, 1976, 2025]
 	let days = {
-		'January 1': {numbers: [1,1], str :'01-01'},
-		'July 1': {numbers: [7,1], str: '07-01'}
+		// to make sure we don't change years or months when a day or two ticks over
+		// use the 15th - this makes get* and getUTC* PoCs possible
+		'January 15': {numbers: [1,15], str :'01-15'},
+		'July 15': {numbers: [7,15], str: '07-15'}
 	}
-	
 	// 1879-01-01T13:00Z
 
 	let aMethods = [
-		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','offsetNanoseconds','Symbol.toPrimitive',
+		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_components_and_time_zones
+		'components','components_utc','date','date.parse','date.valueOf','getTime',
+		'getTimezoneOffset','offsetNanoseconds','Symbol.toPrimitive',
 	]
+	let oMultiplier = {
+		// year + month, we're not going to calculate leap years and months let alone multiple of them
+		// instread just calculate some default number and it will show up as garbage vs the other items
+		'1': 60000 * 60 * 24 * 365, // year: just use 365 days
+		'2': 60000 * 60 * 24 * 31, // month: just use 31 days
+		'3': 60000 * 60 * 24, // day
+		'4': 60000 * 60, // hour
+		'5': 60000, // minute
+		'6': 1000, // second
+		'7': 1, // ms
+	}
 
 	function get_tz() {
 		let methods = ['timeZone','timeZoneId','zonedDateTime']
@@ -1313,13 +1327,13 @@ function get_timezone(METRIC) {
 		try {
 			years.forEach(function(year) {
 				Object.keys(days).forEach(function(day) {
-					let isFirst = (year == years[0] && day == 'January 1')
+					let isFirst = (year == years[0] && day == 'January 15')
 					let datetime = day +', '+ year +' 13:00:00'
 					let control = new Date(datetime +' UTC')
 					let test = new Date(datetime)
 					if (runSE) {foo++} else if (runST) {test = NaN}
 					aMethods.forEach(function(method) {
-						let offset, k = 60000
+						let offset, k = 60000, oDiffs
 						try {
 							if ('getTimezoneOffset' == method) {
 								offset = test.getTimezoneOffset()
@@ -1344,6 +1358,30 @@ function get_timezone(METRIC) {
 									// UTC is always zero, riiight? so we could hard-code this
 									let target = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
 									offset = (target - source) / 1e6
+								} else if ('components' == method) {
+									oDiffs = {
+										'1': test.getUTCFullYear() - control.getUTCFullYear(),
+										'2': test.getUTCMonth() - control.getUTCMonth(),
+										'3': test.getUTCDate() - control.getUTCDate(),
+										'4': test.getUTCHours() - control.getUTCHours(),
+										'5': test.getUTCMinutes() - control.getUTCMinutes(),
+										'6': test.getUTCSeconds() - control.getUTCSeconds(),
+										'7': test.getUTCMilliseconds() - control.getUTCMilliseconds(),
+									}
+									offset = 0
+									for (const k of Object.keys(oDiffs)) {offset += (oMultiplier[k] * oDiffs[k])}
+								} else if ('components_utc' == method) {
+									oDiffs = {
+										'1': test.getFullYear() - control.getFullYear(),
+										'2': test.getMonth() - control.getMonth(),
+										'3': test.getDate() - control.getDate(),
+										'4': test.getHours() - control.getHours(),
+										'5': test.getMinutes() - control.getMinutes(),
+										'6': test.getSeconds() - control.getSeconds(),
+										'7': test.getMilliseconds() - control.getMilliseconds(),
+									}
+									offset = 0
+									for (const k of Object.keys(oDiffs)) {offset += (oMultiplier[k] * oDiffs[k])}
 								}
 							}
 							if (isFirst) {
@@ -2275,3 +2313,4 @@ const outputHeaders = () => new Promise(resolve => {
 set_oIntlDateTests()
 set_oIntlTests()
 countJS(4)
+
