@@ -35,7 +35,8 @@
 			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="InvalidImage" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="ScaledImage" width="100" height="30" src="applang-image.png"></iframe>
-			<!--<iframe id="UnsupportedImage" width="100" height="30" src="applang-unsupported.png"></iframe>-->
+			<iframe id="tzpXSLT" width="40" height="30" src="applang-xslterror.xml"></iframe>
+			<div id='tzpDirection'></div>
 			<div><input id="enumber" type="number" min="6" step="2"></div>
 		</div>
 	</div>
@@ -90,19 +91,29 @@
 				<span class='blue'>chrome://global/locale/intl.css</span>
 				<p class="c mono spaces no_color" id="css"> &nbsp; </p>
 			</div>
+			<div>DIRECTION
+				<p class="c mono spaces no_color" id="parsererror_direction"> &nbsp; </p>
+			</div>
 			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties' target='blank'>searchfox MediaDocument</a>
 				<p class="c mono spaces no_color" id="media_messages"> &nbsp; </p>
+			</div>
+			<div>REPORTING MESSAGES
+				<p class="c mono spaces no_color" id="reporting_messages"> &nbsp; </p>
 			</div>
 			<div>VALIDATION MESSAGES &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties' target='blank'>searchfox dom.properties</a>
 				<p class="c mono spaces no_color" id="validation_messages"> &nbsp; </p>
 			</div>
-			<div>XML ERRORS &nbsp; 
+			<div>XML MESSAGES &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties' target='blank'>searchfox xmlparser</a>
-				<p class="c mono spaces no_color" id="xml_errors"> &nbsp; </p>
+				<p class="c mono spaces no_color" id="xml_messages"> &nbsp; </p>
 			</div>
-			<div>XSLT SORT
+			<div>XSLT MESSAGES
+				<p class="c mono spaces no_color" id="xslt_messages"> &nbsp; </p>
+			</div>
+			<div>XSLT SORT &nbsp; 
+				<a class='blue' href='https://bugzilla.mozilla.org/show_bug.cgi?id=1978383' target='blank'>1978383: xsl:sort uses base sensitivity</a>
 				<p class="c mono spaces no_color" id="xslt_sort"> &nbsp; </p>
 			</div>
 
@@ -117,10 +128,6 @@
 		<!--credits-->
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
-			<!--DTD
-				https://acatarineu.github.io/fp/locale.html"
-				https://acatarineu.github.io/fp/locale_nullprincipal.html
-			-->
 			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>1</sup>
 			</td>
 		</tr>
@@ -131,95 +138,12 @@
 'use strict';
 let isLocale
 
-let isLoaded = {}
-function loadFn(item) {
-	isLoaded[item] = performance.now()
-}
-
-function loadIframes() {
-	let iframe
-	try {
-		iframe = dom.InvalidImage
-		iframe.addEventListener("load", loadFn('Invalid'), {once: true})
-		iframe.src = "applang-invalid.png"
-	} catch(e) {}
-	try {
-		iframe = dom.ScaledImage
-		iframe.addEventListener("load", loadFn('Scaled'), {once: true})
-		iframe.src = "applang-image.png"
-	} catch(e) {}
-}
-loadIframes()
-
-function get_dtd1() {
-	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
-	// if spoofing english we would expect "Problem loading page"
-	let isDone = false
-	setTimeout(() => output("timed out"), 600)
-	function output(value) {
-		if (!isDone) {
-			isDone = true
-			dom.dtd1 = value
-			return
-		}
-	}
-	function next() {
-		try {
-			let iframe = dom.iframedtd1
-			iframe.src="applang.xml"
-			iframe.addEventListener('load', () => {
-				try {
-					let res = iframe.contentDocument.getElementById("DTD1").innerText
-					output(res)
-				} catch(e) {
-					output(e+"")
-				}
-			})
-		} catch(e) {
-			output(e+"")
-		}
-	}
-}
-
-function get_dtd2() {
-	// dtd nullprinciple
-	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
-	// if spoofing english we would expect "Problem loading page"
-
-	// on my FF i get "[object Object]" Object is { msg: "getUrlParent" }
-	// on test suites I get timed out
-
-	let dtd2
-	function output(value) {
-		//console.log(dtd2)
-		dom.dtd2.innerHTML = value
-		return
-	}
-	// set source
-	let iframe = dom.iframedtd2
-	// ? chrome://global/locale/netError.dtd
-	iframe.src="data:application/xml;charset=utf-8,%3C%21DOCTYPE%20html%20SYSTEM%20%22chrome%3A%2F%2Fglobal%2Flocale%2FnetError.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Cmeta%20charset%3D%22utf-8%22%2F%3E%0D%0A%20%20%3C%2Fhead%3E%0D%0A%20%20%3Cbody%3E%3Cspan%20id%3D%22text-container%22%3E%26loadError.label%3B%3C%2Fspan%3E%0D%0A%20%20%3Cscript%3E%0D%0A%20%20window.addEventListener%28%27message%27%2C%20%28e%29%20%3D%3E%20%7B%0D%0A%20%20%20%20e.source.postMessage%28document.getElementById%28%27text-container%27%29.innerText%2C%20%27%2A%27%29%3B%0D%0A%20%20%7D%29%3B%0D%0A%20%20%3C%2Fscript%3E%0D%0A%20%20%3C%2Fbody%3E%0D%0A%3C%2Fhtml%3E";
-	iframe.addEventListener('load', () => {
-		window.addEventListener('message', ({ data }) => dtd2 = data)
-		iframe.contentWindow.postMessage('foo', '*')
-	})
-
-	// keep checking dtd2 not undefined, but stop after x tries
-	let counter = 0
-	function check_dtd2() {
-		//console.log(counter, "dtd2 is", dtd2)
-		if (counter < 30) {
-			if (dtd2 !== undefined) {
-				clearInterval(checking)
-				output(dtd2 +"")
-			}
-		} else {
-			clearInterval(checking)
-			output("timed out")
-		}
-		counter++
-	}
-	let checking = setInterval(check_dtd2, 50)
+// trigger some gecko deprecated items
+function set_reporting_items() {
+	let aItems = ['InstallTrigger', 'fullScreen', 'onmozfullscreenchange', 'onmozfullscreenerror']
+	aItems.forEach(function(n) {try {window[n]} catch(e) {}})
+	try {screen.mozOrientation} catch(e) {}
+	try {document.releaseCapture()} catch(e) {}
 }
 
 function get_css() {
@@ -227,7 +151,6 @@ function get_css() {
 		// e.g. chrome://global/skin/richlistbox.css
 	const parent = dom.elementsdiv
 	let oList = {
-		"parsererror": "<parsererror></parsererror>",
 		"quote-fr": "<q lang='fr'></q>",
 	}
 	try {
@@ -238,12 +161,8 @@ function get_css() {
 			let data = []
 			try {
 				parent.innerHTML = oList[k] //+" "+ k
-				if ('parsererror' == k) {
-					oData[k] = getComputedStyle(document.querySelector(k)).direction
-				} else {
-					target = parent.children[0]
-					oData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
-				}
+				target = parent.children[0]
+				oData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
 			} catch(e) {
 				console.log(e)
 				oData[k] = zErr
@@ -258,6 +177,18 @@ function get_css() {
 		dom.css = e+""
 		return
 	}
+}
+
+function get_direction() {
+	let value
+	try {
+		let target = dom.tzpDirection
+		target.innerHTML = '<parsererror></parsererror>'
+		value = getComputedStyle(target.children[0]).direction
+	} catch(e) {
+		value = e
+	}
+	dom.parsererror_direction.innerHTML = value
 }
 
 function get_locale() {
@@ -297,6 +228,39 @@ function get_media_messages() {
 	} catch(e) {
 		dom.media_messages = e+""
 		return
+	}
+}
+
+function get_reporting_messages() {
+	if (!isFF) {return}
+	let observer
+	function exit(res) {
+		try {observer.disconnect()} catch(e) {}
+		if ('string' == typeof res) {
+			dom.reporting_messages.innerHTML = res
+			return
+		}
+		let max = 10
+		let aSet = new Set()
+		for (let i=0; i < res.length; i++) {
+			let msg = res[i].body.message
+			msg = msg.replace('https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture','').trim()
+			aSet.add(msg)
+			if (max == aSet.size) {break} // reruns accrue messages so break
+		}
+		let data = Array.from(aSet).sort()
+		if (data.length) {
+			let hash = mini(data)
+			dom.reporting_messages.innerHTML = hash +"<br>"+ json_highlight(data)
+		} else {
+			dom.reporting_messages.innerHTML = 'none'
+		}
+	}
+	try {
+		observer = new ReportingObserver((reports, observer) => {exit(reports)}, {types: ['deprecation'], buffered: true})
+		observer.observe()
+	} catch(e) {
+		exit(e+'')
 	}
 }
 
@@ -441,7 +405,7 @@ function get_validation_messages() {
 	dom.validation_messages.innerHTML = parservalue +"<br><br>"+ domvalue
 }
 
-function get_xml_errors() {
+function get_xml_messages() {
 	if (!isFF) {return}
 	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString
 		// https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction
@@ -449,19 +413,20 @@ function get_xml_errors() {
 		// https://www.w3.org/TR/xml/
 	console.clear()
 	const xmlList = {
-		n02: 'a', // syntax error
-		n03: '', // no root element found
-		n04: '<>', // not well-formed
-		n05: '<', // unclosed token
-		n07: '<x></X>', // mismatched tag
-		n08: '<x x:x="" x:x="">', // duplicate attribute
-		n09: '<x></x><x', // junk after document element
-		n11: '<x>&x;', // undefined entity
-		n14: '<x>&#x0;', // reference to invalid character number
-		n20: '<x><![CDATA[', // unclosed CDATA section
-		n27: '<x:x>', // prefix not bound to a namespace
-		n28: '<x xmlns:x=""></x>', // must not undeclare prefix
-		n30: '<?xml v=""?>', // XML declaration not well-formed
+		n02: "a", // syntax error
+		n03: "", // no root element found
+		n04: "<>", // not well-formed
+		n05: "<", // unclosed token
+		n07: "<x></X>", // mismatched tag
+		n08: "<x x:x='' x:x=''>", // duplicate attribute
+		n09: "<x></x><x", // junk after document element
+		n11: "<x>&x;", // undefined entity
+		n14: "<x>&#x0;", // reference to invalid character number
+		n20: "<x><![CDATA[", // unclosed CDATA section
+		n27: "<x:x>", // prefix not bound to a namespace
+		n28: "<x xmlns:x=''></x>", // must not undeclare prefix
+		n30: "<"+"?xml v=''?>", // XML declaration not well-formed
+			// split "<"+"?" othersize notepad++s gets uposet with collapsing
 	}
 
 	let oMimeTypes = ['application/xml','application/xhtml+xml','image/svg+xml','text/xml',] // 'text/html',
@@ -521,36 +486,26 @@ function get_xml_errors() {
 			}
 		})
 		let hash = mini(xmlData)
-		dom.xml_errors.innerHTML = hash +"<br>"+ json_highlight(xmlData)
+		dom.xml_messages.innerHTML = hash +"<br>"+ json_highlight(xmlData)
 		console.clear()
 		return
 	} catch(e) {
-		dom.xml_errors = e+""
+		dom.xml_messages = e+""
 		console.clear()
 		return
 	}
 }
 
-function run() {
-	// clear
-	let items = document.getElementsByClassName("c")
-	for(let i=0; i < items.length; i++) {
-		items[i].innerHTML = " &nbsp; "
+function get_xslt_messages() {
+	if (!isFF) {return}
+	let hash, data =''
+	try {
+		let data = {'xslt-parse-failure': dom.tzpXSLT.contentDocument.children[0].textContent} 
+		hash = mini(data)
+		dom.xslt_messages.innerHTML = hash + '<br>'+ json_highlight(data)
+	} catch(e) {
+		dom.xslt_messages.innerHTML = e+''
 	}
-	if (!isFF) {
-		dom.xml_errors = "gecko only"
-		dom.xslt_sort = "gecko only"
-	}
-	// pause so users see change
-	setTimeout(function() {
-		get_locale()
-		get_xml_errors()
-		get_xslt_sort()
-		get_numeric_inputs()
-		get_validation_messages()
-		get_media_messages()
-		get_css()
-	}, 170)
 }
 
 function get_xslt_sort(aChars = []) {
@@ -571,13 +526,14 @@ function get_xslt_sort(aChars = []) {
 				'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A'
 			]
 		}
+
 		// DONE: matches collator PoC
 		aChars.sort() // always resort: default is already sorted, but in TZP we'll reuse the oIntl.collator.sort array
 		//oData['chars'] = {'hash': mini(aChars.join(' , ').trim()), 'data': aChars.join(' , ').trim()}
 
 		// build xslt
 		aChars.forEach(function(item){aData.push('<a>'+ item +'</a>')})
-		const xData = '<?xml version="1.0" encoding="UTF-8"?><doc>'+ aData.join('') +'</doc>'
+		const xData = '<'+'?xml version="1.0" encoding="UTF-8"?><doc>'+ aData.join('') +'</doc>'
 		//console.log(mini(xData)) // 8f0f6080
 
 		// DONE: matches collator PoC
@@ -585,11 +541,12 @@ function get_xslt_sort(aChars = []) {
 		let control = aChars.sort(Intl.Collator(code, {usage: 'sort'}).compare).join(' , ').trim() // spaces before and to help LTR/RTL
 		oData['collator'] = {'hash': mini(control), 'data': control}
 
+
 		//console.log(xData)
-		const xslText = '<?xml version="1.0" encoding="UTF-8"?>'
-			+'<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">'
-			+'<xsl:template match="/"><xsl:for-each select="doc/a"><xsl:sort select="text()"/>'
-			+'<xsl:value-of select="text()"/>,</xsl:for-each></xsl:template></xsl:stylesheet>'
+		const xslText = '<'+'?xml version="1.0" encoding="UTF-8"?>'
+			+ '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">'
+			+ '<xsl:template match="/"><xsl:for-each select="doc/a"><xsl:sort select="text()"/>'
+			+ '<xsl:value-of select="text()"/>,</xsl:for-each></xsl:template></xsl:stylesheet>'
 		//console.log(mini(xslText)) // 97940905
 
 		const parser = new DOMParser()
@@ -602,32 +559,58 @@ function get_xslt_sort(aChars = []) {
 		let aTest = styledDoc.firstChild.textContent.split(/[\s,\n]+/);
 		data = aTest.slice(0, -1)
 		oData['xslt'] = {'hash': mini(data.join(' , ').trim()), 'data': data.join(' , ').trim()}
-		console.log(oData)
+
 		let isMatch = oData.collator.hash == oData.xslt.hash
 		if (isFF) {
 			notation = isMatch ? collatormatch_green : collatormatch_red
 			notation = ''
 		}
 		dom.xslt_sort.innerHTML = oData.xslt.hash +' '+ notation +"<br>"+ json_highlight(oData)
+
 	} catch(e) {
 		dom.xslt_sort = e+""
 	}
+}
+
+function run() {
+	// clear
+	let items = document.getElementsByClassName('c')
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = ' &nbsp; '
+	}
+	// pause so users see change
+	setTimeout(function() {
+		get_locale()
+		get_xml_messages()
+		get_xslt_sort()
+		get_numeric_inputs()
+		get_validation_messages()
+		get_media_messages()
+		get_reporting_messages()
+		get_direction()
+		get_css()
+		get_xslt_messages()
+	}, 170)
 }
 
 Promise.all([
 	get_globals()
 ]).then(function(){
 	get_locale()
-	if (!isFF) {
-		dom.xml_errors = "gecko only"
-		dom.xslt_sort = "gecko only"
-
+	if (isFF) {
+		set_reporting_items()
 	} else {
-		// tmp
-		//if (isFile) {get_xslt_sort()}
+		let aList = ['reporting_messages','xml_messages','xslt_messages','xslt_sort']
+		aList.forEach(function(n) {
+			let el = dom[n]
+			el.innerHTML = 'gecko only'
+			el.classList.remove('c')
+		})
 	}
 })
 
 </script>
 </body>
 </html>
+
+
