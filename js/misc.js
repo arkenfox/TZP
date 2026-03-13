@@ -981,7 +981,15 @@ function get_window_props(METRIC) {
 			}
 
 			if (isSmart) {
-				// determine console state before we start messing around with the array
+				/* determine console state before we start messing around with the array
+				FF147 and lower 'Event' and FF148+ 'console' is low=closed high=open
+				- e.g. FF141 event moves from ~175 to ~935, FF145 from ~417 to ~944
+				- e.g. FF148 console moves from ~241 to ~962
+				So checking if it is within 150 or so from the end is a loose ranged check that allows
+				for loads of tampered items. Unfortunately NS + webgl-click-to-play (i.e no exception)
+				and probably other extensions break this rule, so we have to stick with the more rigid
+				position is off-by-one diff checks, and use isAlert to add a 'likely' qualifier
+				*/
 				if (!isExpanded) {
 					if (oIndex.Event[0] !== -1 && oIndex.Performance[0] !== -1) {
 						isConsoleOpen = oIndex.Event[0] == oIndex.Performance[0] + 1; allowConsole = true // old method
