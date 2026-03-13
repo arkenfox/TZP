@@ -931,6 +931,7 @@ function get_window_props(METRIC) {
 	let t0 = nowFn(), iframe
 	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isAlert = false
 	let tamperHash = zNA, tamperBtn ='', aTampered =''
+	let oIndex = {}, isConsoleOpen = false
 	isProps = [] // reset: used to build function proprties
 
 	let id = 'iframe-window-version'
@@ -947,26 +948,53 @@ function get_window_props(METRIC) {
 		data = Object.getOwnPropertyNames(contentWindow)
 		isProps = Object.getOwnPropertyNames(contentWindow)
 		isProps.sort() // sort, we use this in function_props
-		//let data2 = Object.getOwnPropertyNames(contentWindow)
-		//console.log(data2)
 
-		let indexPerf, indexEvent, isConsoleOpen = false
 		if (isGecko) {
-			// FF148+ 543535 changed things up [backed out in 2003720 but in place for 148 nightly so far]
-			let aExpanded = ['PerformanceTiming','console','Promise','PageTransitionEvent']
-			if ('android' == isOS) {aExpanded.push('NodeList')}
+			// get index positions
+			let indexPerf = data.indexOf('Performance'),
+				indexEvent = data.indexOf('Event'),
+				indexConsole = data.indexOf('console')
+			let aIndex = ['Event','PageTransitionEvent','Performance','PerformanceTiming','console']
+			aIndex.forEach(function(item){oIndex[item] = [data.indexOf(item), data.length - data.indexOf(item)]})
+			oIndex['total_count'] = data.length
+
+			// all the properties that can be tampered with by NS/uBO
+				// ultimately we move those present (sorted) to the end of the data so we can get a stable hash across security levels in Base Barowser
+				// FF148+ 543435 changed things up
 			let isExpanded = isVer > 147
+			let aExpanded = ['PerformanceTiming','console','Promise','PageTransitionEvent','NodeList'] // nodelist from android
+			let aPossible = [
+				'Audio','Blob','Crypto','CustomEvent','Element','Error','HTMLAudioElement','HTMLCanvasElement',
+				'HTMLElement','HTMLFrameElement','HTMLHtmlElement','HTMLIFrameElement','HTMLImageElement',
+				'HTMLMediaElement','HTMLObjectElement','HTMLVideoElement','Image','MediaSource','NodeList',
+				'OffscreenCanvas','Promise','Proxy','SecurityPolicyViolationEvent','SharedWorker','String','URL',
+				'WebAssembly','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI','decodeURIComponent',
+				'encodeURI','encodeURIComponent','escape','unescape','webkitURL',
+			]
+			if (isExpanded) {
+				aPossible.push(
+					'JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget', // 543435 uBO exposes these 5
+					'Navigator', // NoScript aded this around 148alpha
+				)
+			}
+
 			if (isSmart) {
-				/* safer closed: Performance ... more items then Event
-				standard closed: Performance + no Event...
-				BB/FF/ALL open: Performance then Event...
-				*/
+				// determine console state before we start messing around with the array
+				if (!isExpanded) {
+					// old method: can't use a range even if we know it's standard mode because
+					// that's only BB, or if proxylies cuz they remain after allowing
+					isConsoleOpen = indexEvent == indexPerf + 1
+				} else {
+					// new method
+					isConsoleOpen = indexConsole > (data.length - 150) // 150 allows for loads of tampering
+				}
+
 				// tampered: filter items for console open etc
-				indexPerf = data.indexOf('Performance')
-				indexEvent = data.indexOf('Event')
-				isConsoleOpen = indexPerf + 1 == indexEvent // FF148+ we could also check if console simply comes after Performance
+				//    safer closed: Performance ... more items then Event
+				// standard closed: Performance + no Event...
+				//  BB/FF/ALL open: Performance then Event...
 				if (runSL) {data.push('fake')}
-				aTampered = data.slice(data.indexOf('Performance')+1)
+				aTampered = data.slice(indexPerf +1)
 				let aIgnore = ['Event','Location']
 				if (isExpanded) {aIgnore = aIgnore.concat(aExpanded)}
 				aTampered = aTampered.filter(x => !aIgnore.includes(x))
@@ -979,24 +1007,7 @@ function get_window_props(METRIC) {
 					tamperHash = 'none'
 				}
 			}
-			// all the properties that can be tampered with by NS/uBO
-				// this so we can get a stable hash across security levels in Base Barowser
-			let aPossible = [
-				//*
-				'Blob','Element','HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLIFrameElement',
-				'HTMLObjectElement','MediaSource','OffscreenCanvas','Promise','Proxy','SharedWorker',
-				'String','URL','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI',
-				'decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','webkitURL',
-				'Error',
-				// other
-				'Audio','HTMLAudioElement','HTMLImageElement','HTMLMediaElement','Image','WebAssembly',
-				// other new
-				'Crypto','CustomEvent','HTMLHtmlElement','HTMLVideoElement','NodeList','SecurityPolicyViolationEvent'
-				//*/
-			]
-			if (isExpanded) { // 543535 uBO exposes these 5
-				aPossible.push('JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget')
-			}
+
 			let aHas = aPossible.filter(x => data.includes(x))
 			aHas = dedupeArray(aHas)
 			aHas.sort()
@@ -1038,7 +1049,14 @@ function get_window_props(METRIC) {
 		hash = mini(data); btn = addButton(18, METRIC, data.length)
 		if (isGecko) {
 			btn += addButton(18, METRIC +'_sorted', 'sorted')
+				+ addButton(18, METRIC +'_index', 'index')
 			sDetail.document[METRIC +'_sorted'] = isProps
+			sDetail.document[METRIC +'_index'] = oIndex
+			/* recored original order for analysis
+			let dataOriginal = Object.getOwnPropertyNames(contentWindow)
+			btn += addButton(18, METRIC +'_original', 'original')
+			sDetail.document[METRIC +'_original'] = dataOriginal
+			//*/
 		}
 		// health: BB only if ESR
 		if (isBBESR) {
@@ -1077,7 +1095,7 @@ function get_window_props(METRIC) {
 }
 
 const outputTiming = () => new Promise(resolve => {
-	if (!gRun) {return}
+	if (!gRun) {return resolve()}
 	/* other perf prefs are in window properties
 		dom.enable_performance_observer: PerformanceObserver, PerformanceObserverEntryList
 		dom.enable_performance_navigation_timing: PerformanceNavigationTiming
