@@ -929,9 +929,9 @@ function get_window_prop(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, dataSorted, notation = isBBESR ? bb_red : '', isAlert = false
+	let hash, btn='', data, dataLen, dataSorted, dataOriginal, notation = isBBESR ? bb_red : '', isAlert = false
 	let tamperHash = zNA, tamperBtn ='', aTampered =''
-	let oIndex = {}, isConsoleOpen = false
+	let oIndex = {}, isConsoleOpen = false, allowConsole = false
 	isProps = [] // reset: used to build function proprties
 
 	let id = 'iframe-window-version'
@@ -945,19 +945,21 @@ function get_window_props(METRIC) {
 		// get props
 		iframe = dom[id]
 		let contentWindow = iframe.contentWindow
+		// data to manipulate
 		data = Object.getOwnPropertyNames(contentWindow)
+		dataLen = data.length
+		// original: useful for analysis
+		dataOriginal = Object.getOwnPropertyNames(contentWindow)
+		sDetail.document[METRIC +'_original'] = dataOriginal
+		// sorted: we use this in function_props
 		isProps = Object.getOwnPropertyNames(contentWindow)
-		isProps.sort() // sort, we use this in function_props
+		isProps.sort()
 
 		if (isGecko) {
 			// get index positions
-			let indexPerf = data.indexOf('Performance'),
-				indexEvent = data.indexOf('Event'),
-				indexConsole = data.indexOf('console')
 			let aIndex = ['Event','PageTransitionEvent','Performance','PerformanceTiming','console']
-			aIndex.forEach(function(item){oIndex[item] = [data.indexOf(item), data.length - data.indexOf(item)]})
-			oIndex['total_count'] = data.length
-
+			aIndex.forEach(function(item){let x = data.indexOf(item); oIndex[item] = [x, dataLen - x]})
+			oIndex['total_count'] = dataLen
 			// all the properties that can be tampered with by NS/uBO
 				// ultimately we move those present (sorted) to the end of the data so we can get a stable hash across security levels in Base Barowser
 				// FF148+ 543435 changed things up
@@ -981,12 +983,13 @@ function get_window_props(METRIC) {
 			if (isSmart) {
 				// determine console state before we start messing around with the array
 				if (!isExpanded) {
-					// old method: can't use a range even if we know it's standard mode because
-					// that's only BB, or if proxylies cuz they remain after allowing
-					isConsoleOpen = indexEvent == indexPerf + 1
+					if (oIndex.Event[0] !== -1 && oIndex.Performance[0] !== -1) {
+						isConsoleOpen = oIndex.Event[0] == oIndex.Performance[0] + 1; allowConsole = true // old method
+					}
 				} else {
-					// new method
-					isConsoleOpen = indexConsole > (data.length - 150) // 150 allows for loads of tampering
+					if (oIndex.console[0] !== -1 && oIndex.PerformanceTiming[0] !== -1) {
+						allowConsole = true; isConsoleOpen = oIndex.console[0] == oIndex.PerformanceTiming[0] + 1 // new method
+					}
 				}
 
 				// tampered: filter items for console open etc
@@ -994,7 +997,7 @@ function get_window_props(METRIC) {
 				// standard closed: Performance + no Event...
 				//  BB/FF/ALL open: Performance then Event...
 				if (runSL) {data.push('fake')}
-				aTampered = data.slice(indexPerf +1)
+				aTampered = data.slice(oIndex.Performance[0] +1)
 				let aIgnore = ['Event','Location']
 				if (isExpanded) {aIgnore = aIgnore.concat(aExpanded)}
 				aTampered = aTampered.filter(x => !aIgnore.includes(x))
@@ -1028,9 +1031,9 @@ function get_window_props(METRIC) {
 						console.log(mini(aTamperedNotInPossible), aTamperedNotInPossible)
 					}
 				}
-				// notate console: don't notate if extra tampering otehrwise our console PoC breaks
-				if (!isAlert && isDesktop && isOS !== undefined) {
-					let strConsole = ' [devtools ' + (isConsoleOpen ? 'open' : 'closed') +']'
+				// notate console: mark as likely if additional tampering
+				if (allowConsole && isDesktop && isOS !== undefined) {
+					let strConsole = ' [devtools ' + (isAlert ? ' likely ': '') + (isConsoleOpen ? 'open' : 'closed') +']'
 					addDisplay(18, 'consolestatus', strConsole)
 				}
 			}
@@ -1049,14 +1052,16 @@ function get_window_props(METRIC) {
 		hash = mini(data); btn = addButton(18, METRIC, data.length)
 		if (isGecko) {
 			btn += addButton(18, METRIC +'_sorted', 'sorted')
+				+ (isDesktop ? addButton(18, METRIC +'_original', 'original') : '')
 				+ addButton(18, METRIC +'_index', 'index')
 			sDetail.document[METRIC +'_sorted'] = isProps
 			sDetail.document[METRIC +'_index'] = oIndex
 			/* recored original order for analysis
-			let dataOriginal = Object.getOwnPropertyNames(contentWindow)
-			btn += addButton(18, METRIC +'_original', 'original')
-			sDetail.document[METRIC +'_original'] = dataOriginal
+			btn += 
+			
 			//*/
+		} else {
+			btn += addButton(18, METRIC +'_original', 'original')
 		}
 		// health: BB only if ESR
 		if (isBBESR) {
