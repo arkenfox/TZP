@@ -1546,6 +1546,7 @@ const get_agent_data = (METRIC, os = isOS, isMain = true) => new Promise(resolve
 })
 
 function get_agent_workers() {
+	if (gRun && sectionIgnore.includes('agent')) {return}
 	// control
 	let list = ['appCodeName','appName','appVersion','platform','product','userAgent']
 	let oCtrl = {}, r
@@ -1637,6 +1638,8 @@ function get_agent_workers() {
 /* OUTPUT */
 
 const outputFD = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('feature')) {return resolve()}
+
 	let METRIC = 'infinity_architecture', value, data =''
 	try {
   	const f = new Float32Array([Infinity - Infinity])
@@ -1754,6 +1757,8 @@ const outputFD = () => new Promise(resolve => {
 })
 
 const outputScreen = (isResize = false) => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('screen')) {return resolve()}
+
 	Promise.all([
 		get_scr_position_screen('position_screen'),
 		get_scr_position_window('position_window'),
@@ -1770,6 +1775,8 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 })
 
 const outputAgent = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('agent')) {return resolve()}
+
 	Promise.all([
 		// keep order: useragent creates agent_reported lookup, and the others add to it
 		get_agent('useragent'), // 
