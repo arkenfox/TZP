@@ -575,6 +575,8 @@ function get_element_scrollbars(METRIC, isLies) {
 }
 
 const outputElements = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('elements')) {return resolve()}
+
 	let isLies = isDomRect == -1
 	Promise.all([
 		get_domrect('domrect'),
