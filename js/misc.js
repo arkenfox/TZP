@@ -929,9 +929,9 @@ function get_window_prop(METRIC) {
 function get_window_props(METRIC) {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
-	let hash, btn='', data, dataLen, dataSorted, dataOriginal, notation = isBBESR ? bb_red : '', isAlert = false
+	let hash, btn='', data, dataLen, dataSorted, dataOriginal, notation = isBBESR ? bb_red : ''
 	let tamperHash = zNA, tamperBtn ='', aTampered =''
-	let oIndex = {}, isConsoleOpen = false, allowConsole = false
+	let oIndex = {}, isConsoleOpen = false, allowConsole = false, isAlert = false, skipAlert = false
 	isProps = [] // reset: used to build function proprties
 
 	let id = 'iframe-window-version'
@@ -990,13 +990,25 @@ function get_window_props(METRIC) {
 				and probably other extensions break this rule, so we have to stick with the more rigid
 				position is off-by-one diff checks, and use isAlert to add a 'likely' qualifier
 				*/
+				let threshold = dataLen - 150
 				if (!isExpanded) {
 					if (oIndex.Event[0] !== -1 && oIndex.Performance[0] !== -1) {
-						isConsoleOpen = oIndex.Event[0] == oIndex.Performance[0] + 1; allowConsole = true // old method
+						// if event hasn't moved (no tampering) then you are definitely closed
+						if (oIndex.Event[0] < threshold) {
+							isConsoleOpen = false; skipAlert = true
+						} else {
+							isConsoleOpen = oIndex.Event[0] == oIndex.Performance[0] + 1; allowConsole = true // old method
+						}
 					}
 				} else {
 					if (oIndex.console[0] !== -1 && oIndex.PerformanceTiming[0] !== -1) {
-						allowConsole = true; isConsoleOpen = oIndex.console[0] == oIndex.PerformanceTiming[0] + 1 // new method
+						allowConsole = true
+						// if console or PT haven't moved (no tampering) then you are definitely closed
+						if (oIndex.PerformanceTiming[0] < threshold || oIndex.console[0] < threshold) {
+							isConsoleOpen = false; skipAlert = true
+						} else {
+							isConsoleOpen = oIndex.console[0] == oIndex.PerformanceTiming[0] + 1 // new method
+						}
 					}
 				}
 
@@ -1040,8 +1052,8 @@ function get_window_props(METRIC) {
 					}
 				}
 				// notate console: mark as likely if additional tampering
-				if (allowConsole && isDesktop && isOS !== undefined) {
-					let strConsole = ' [devtools ' + (isAlert ? ' likely ': '') + (isConsoleOpen ? 'open' : 'closed') +']'
+				if (allowConsole && isDesktop) {
+					let strConsole = ' [devtools ' + (isAlert && !skipAlert ? ' likely ': '') + (isConsoleOpen ? 'open' : 'closed') +']'
 					addDisplay(18, 'consolestatus', strConsole)
 				}
 			}
@@ -1108,6 +1120,8 @@ function get_window_props(METRIC) {
 }
 
 const outputTiming = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('timing')) {return resolve()}
+
 	if (!gRun) {return resolve()}
 	/* other perf prefs are in window properties
 		dom.enable_performance_observer: PerformanceObserver, PerformanceObserverEntryList
@@ -1125,6 +1139,8 @@ const outputTiming = () => new Promise(resolve => {
 })
 
 const outputMisc = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('misc')) {return resolve()}
+
 	if (runSL) {
 		addProxyLie('Math.sin')
 		addProxyLie('Math.log')
