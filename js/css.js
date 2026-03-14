@@ -632,6 +632,8 @@ function get_site_styles(METRIC) {
 }
 
 const outputCSS = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('css')) {return resolve()}
+
 	Promise.all([
 		get_colors(),
 		get_media_css('media'),
