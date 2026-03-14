@@ -626,7 +626,7 @@ const get_canvas = () => new Promise(resolve => {
 						// on it's (per execution) *toDataURL when FPP is on. This is FPP kicking in somewhere due to
 						// timing. It's not sufficient to check the chunk is persistent (but we'll do that)
 						// I think all we can do is exclude if proxylies
-						if (oFP[name].chunk == true && !isProxy) {isChunk = '*'; console.log(name, 'chunk set')}
+						if (oFP[name].chunk == true && !isProxy) {isChunk = '*'}
 					}
 
 					if (oRes[name][1] == value) {
@@ -691,6 +691,8 @@ const get_canvas = () => new Promise(resolve => {
 })
 
 const outputCanvas = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('canvas')) {return resolve()}
+
 	Promise.all([
 		get_canvas()
 	]).then(function(){
