@@ -271,7 +271,6 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 		if ('granted' == res[0] || 'denied' == res[0]) {isAuto = true} // no prompt
 		try {
 			let test = 'storage_quota' == METRIC ? navigator.storage : navigator.webkitTemporaryStorage
-
 			if (undefined == test) {
 				exit('undefined')
 			} else {
@@ -473,6 +472,8 @@ const test_worker_shared_new = (log = false) => new Promise(resolve => {
 })
 
 const outputStorage = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('storage')) {return resolve()}
+
 	let rndStr = rnd_string()
 	Promise.all([
 		get_idb('indexedDB'),
