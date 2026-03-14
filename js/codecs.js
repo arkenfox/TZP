@@ -530,6 +530,8 @@ function get_preload_media(METRIC) {
 
 const outputMedia = () => new Promise(resolve => {
 	if (gLoad) {set_mediaList()}
+	if (gRun && sectionIgnore.includes('codecs')) {return resolve()}
+
 	if (gRun) {
 		addDetail('audio_codecs', mediaList['audio'], 'lists')
 		addDetail('video_codecs', mediaList['video'], 'lists')
