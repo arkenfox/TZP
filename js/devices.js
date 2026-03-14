@@ -323,6 +323,26 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 	}
 })
 
+function get_media_constraints(METRIC) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getSupportedConstraints
+	// I doubt this adds any entropy, it's equivalency of engine/version changes
+	// but collect it anyway as yet one more piece of the browser object model
+	let hash, data ='', btn=''
+	try {
+		let m = navigator.mediaDevices
+		if (undefined !== m) {
+			data = []
+			const s = m.getSupportedConstraints()
+			for (const c of Object.keys(s)) {data.push(c)}
+			if (!data.length) {throw zErrInvalid +'none'}
+			hash = mini(data); btn = addButton(7, METRIC)
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(7, METRIC, hash, btn,'', data)
+}
+
 const get_media_devices = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 
@@ -606,8 +626,6 @@ function get_touc_h(METRIC) {
 						throw zErrInvalid +'expected none: got '+ got
 					}
 				}
-
-
 			} catch(e) {
 				log_error(7, METRIC +'_'+ m, e)
 				value = zErr
@@ -628,7 +646,6 @@ function get_touc_h(METRIC) {
 			value.sort() // we already capture order in window properties
 			if (0 == value.length) {value = 'none'}
 			if (isGecko) {
-
 				let got = 'none' == value ? value : value.join(', ')
 				if (!isDesktop) {
 					// android
@@ -691,6 +708,7 @@ function get_touc_h(METRIC) {
 
 	let hash = mini(data), btn = addButton(7, METRIC)
 	let hash0 ='727b0fac', hash1 ='0eb47178', hash5 ='f492a7f4', hash10 ='5091c020', hashA5 = 'c51b1822'
+
 	/*
 		// desktop: note: if maxTouchPoints == 0 windows = 'none'
 		{
@@ -723,7 +741,7 @@ function get_touc_h(METRIC) {
 		'windows': [hash10],
 	}
 	if (isVer < 150) {rfpHashes.linux = '553ce3d9'} // maxTouchPoints = 0
-	notation = rfpHashes[isOS].includes(hash) ? rfp_green : rfp_red
+	notation = (undefined !== isOS && rfpHashes[isOS].includes(hash) ? rfp_green : rfp_red)
 
 	// non-BB: fails RFP but may match FPP
 	if (isFPPFallback && undefined !== isOS && notation == rfp_red) {
@@ -777,9 +795,12 @@ function get_viewport_segments(METRIC) {
 }
 
 const outputDevices = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('devices')) {return resolve()}
+
 	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 	Promise.all([
 		get_media_devices('mediaDevices'),
+		get_media_constraints('mediaDevices_constraints'),
 		get_touc_h('touch'),
 		get_device_integer('pixelDepth','Screen.'),
 		get_device_integer('colorDepth','Screen.'),
