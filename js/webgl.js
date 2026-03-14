@@ -3,6 +3,11 @@
 /* modifed from https://gist.github.com/abrahamjuliot/7baf3be8c451d23f7a8693d7e28a35e2 */
 
 function get_webgl() {
+	/* ToDo:
+		view-source:https://privacy-test-pages.glitch.me/privacy-protections/fingerprinting/helpers/tests.js
+		MOAR stuff to be recorded here
+	*/
+
 	const WebGLConstants = [
 		'ALIASED_LINE_WIDTH_RANGE',
 		'ALIASED_POINT_SIZE_RANGE',
@@ -335,12 +340,14 @@ function get_webgl() {
 		//let isClickToPlay = !!document.querySelector('.__ns__pop2top [data-policy-type="webgl"]')
 
 		//*
-		console.log('WebGL: ', mini(webGLData), webGLData)
-		if (webGLErrors.length) {console.log('webGL Errors',webGLErrors)}
-		console.log('WebGL2: ', mini(webGL2Data), webGL2Data)
-		if (webGL2Errors.length) {console.log('webGL2 Errors',webGL2Errors)}
-		console.log('Experimental: ', mini(experimentalWebGLData), experimentalWebGLData)
-		if (experimentalWebGLErrors.length) {console.log('Experimental Errors',experimentalWebGLErrors)}
+		if (!isFile) {
+			console.debug('WebGL: ', mini(webGLData), webGLData)
+			if (webGLErrors.length) {console.log('webGL Errors',webGLErrors)}
+			console.debug('WebGL2: ', mini(webGL2Data), webGL2Data)
+			if (webGL2Errors.length) {console.log('webGL2 Errors',webGL2Errors)}
+			console.debug('Experimental: ', mini(experimentalWebGLData), experimentalWebGLData)
+			if (experimentalWebGLErrors.length) {console.log('Experimental Errors',experimentalWebGLErrors)}
+		}
 		//*/
 
 		// do something with the erorrs...
@@ -353,8 +360,9 @@ function get_webgl() {
 }
 
 const outputWebGL = () => new Promise(resolve => {
-	// ToDo: readPixels, webGPU
+	if (gRun && sectionIgnore.includes('webgl')) {return resolve()}
 
+	// ToDo: readPixels, webGPU
 	Promise.all([
 		get_webgl(),
 	]).then(function(){
