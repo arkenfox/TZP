@@ -12,7 +12,9 @@ const sectionMap = {
 }
 let sectionOrder = [], // numerical order for objects
 	sectionNames = [], // lookup names by number
-	sectionNos = {} // lookup numbers by name
+	sectionNos = {}, // lookup numbers by name
+	sectionIgnore = [], // show/hide on dom't run if gRun
+	sectionState = 'ac6c4be7' // default empty array: sectionIgnore hash so we know to trigger show/hide
 
 // ToDo: expand: some info can go into lies but we could create new items e.g methods/tampered-data
 	// some 'methods/entropy' are in the FP: e.g. canvas/domrect or errors e.g. font sizes
@@ -20,7 +22,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 134
+	expectedMetrics = 135
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
