@@ -97,6 +97,8 @@ const getDynamicIframeWindow = ({
 })
 
 function get_agent_iframes(log = false) {
+	if (gRun && sectionIgnore.includes('agent')) {return}
+
 	// runs post FP
 	let t0 = nowFn()
 
