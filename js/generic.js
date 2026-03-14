@@ -883,17 +883,8 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
-			// 150: fast-path: requires WebRTC
-			if('function' == typeof window.RTCPeerConnectionIceErrorEvent) return 150 // 1561441
-			try {
-				Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})
-			} catch(e) {
-				if ('RangeError' == e.name) {
-					// 150: 2018544: false postives FF134-147
-					if ('Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)) return 150 // 2018544
-					return 149 // 2009792
-				}
-			}
+			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
+			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
@@ -2107,7 +2098,7 @@ function log_section(name, time, scope = isScope) {
 		// FP
 		try {
 			let metricCount = Object.keys(gData[zFP][scope +"_flat"]).length
-			let color = metricCount == expectedMetrics ? 0 : 'red' // use red to override color in basic mode
+			let color = (metricCount == expectedMetrics || sectionIgnore.length) ? 0 : 'red' // use red to override color in basic mode
 			
 			let btnPart1 = addButton(color, zFP, metricCount)
 			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> </span>'
@@ -2343,6 +2334,23 @@ function outputSection(id, isResize = false) {
 	let delay = 100
 	// reset
 	if ('load' == id || 'all' == id) {
+		// show hide sections
+		let sState = mini(sectionIgnore)
+		if (sState !== sectionState) {
+			console.log('hiding these sections', sectionIgnore)
+			sState = sectionState
+			for (const n of Object.keys(sectionNos)) {
+				if (undefined !== sectionNos[n]) {
+					let tbltarget = dom['tb'+ sectionNos[n]]
+					if (sectionIgnore.includes(n)) {
+						tbltarget.classList.add('hidden')
+					} else {
+						tbltarget.classList.remove('hidden')
+					}
+				}
+			}
+		}
+
 		// gData
 		if (runSG) {
 			log_error('a', 'd', '4', isScope, true)
@@ -2456,7 +2464,8 @@ function outputSection(id, isResize = false) {
 				'elements', // cold on load: mathml
 				'audio',
 				'webgl',
-				'devices','fonts','region', // next to last: allow time for isDevices, font fallback, iframes
+				'devices','fonts', // near last: allow time for isDevices, font fallback
+				'region', // next to last: allow time for iframes and any reporting API items to manifest on first run
 				17 // last: uses data collected during gRun
 			]
 			const forEachSection = async (iterable, action) => {
@@ -2554,16 +2563,17 @@ function run_immediate() {
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		} else {
 			// search https://searchfox.org/firefox-main/source/dom/locales/en-US/chrome/dom/dom.properties for 'is deprecated'
-			// trigger some gecko deprecated items
-			// if the API is disabled, they are still reported when it is toggled enabled
-			try {window.InstallTrigger} catch(e) {} // FF100 1754441 deprecate InstallTrigger
-				// X is deprecated and will be removed in the future.
-			try {screen.mozOrientation} catch(e) {} // FF147 2003169 deprecate mozOrientation
-				// X attribute is deprecated and will be removed in the future.
-			try {window.fullScreen} catch(e) {} // FF65 1504946
-				// X is deprecated. Use Y instead.
+			// trigger some gecko deprecated items. They are recorded regardless of API. The API pref simply allows access to read them
+			let aItems = [
+				'InstallTrigger', // X is deprecated and will be removed in the future. | FF100 1754441
+				'fullScreen', // X is deprecated. Use Y instead. | FF65 1504946
+				'onmozfullscreenchange', 'onmozfullscreenerror' // X is deprecated
+			]
+			aItems.forEach(function(n) {try {window[n]} catch(e) {}})
 			try {document.releaseCapture()} catch(e) {} // FF90 973604 mark set/releaseCapture() as deprecated
 				// X is deprecated. Use Y instead. For more help
+			try {screen.mozOrientation} catch(e) {} // FF147 2003169 deprecate mozOrientation
+				// X attribute is deprecated and will be removed in the future.
 		}
 		// set isProtoProxy on known engines
 			// we already returned if isEngine == undefined just above
