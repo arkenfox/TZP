@@ -417,17 +417,8 @@ const get_isVer = () => new Promise(resolve => {
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
-			// 150: fast-path: requires WebRTC
-			if('function' == typeof window.RTCPeerConnectionIceErrorEvent) return 150 // 1561441
-			try {
-				Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})
-			} catch(e) {
-				if ('RangeError' == e.name) {
-					// 150: false postives FF134-147
-					if ('Anno Domini 1970-01-01' == new Intl.DateTimeFormat('en-u-ca-iso8601', {era: 'long'}).format(0)) return 150 // 2018544
-					return 149 // 2009792
-				}
-			}
+			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
+			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled (default true)
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851

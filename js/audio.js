@@ -188,6 +188,8 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 })
 
 const outputAudio = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('audio')) {return resolve()}
+
 	Promise.all([
 		get_audio_context('audioContext'),
 		get_audio_offline('offlineAudioContext'),

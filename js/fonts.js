@@ -2425,6 +2425,8 @@ const outputFonts = () => new Promise(resolve => {
 		addDisplay(12, 'glyphs_visual', strDisplay)
 	}
 
+	if (gRun && sectionIgnore.includes('fonts')) {return resolve()}
+
 	set_fntList()
 	Promise.all([
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
