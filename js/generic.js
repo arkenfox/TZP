@@ -552,7 +552,7 @@ const get_isFontDelay = () => new Promise(resolve => {
 
 	isFontDelay = true // BB default delay in case of errors/fuckery
 	Promise.all([
-		get_fonts_faces('', ['Arial','Courier','Times New Roman']), // all are allowed + expected in windows/mac
+		get_fonts_faces('','', ['Arial','Courier','Times New Roman']), // all are allowed + expected in windows/mac
 	]).then(function(res){
 		// either 'error', 'none' or an array of detected fonts
 		//console.log(res[0])

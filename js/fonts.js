@@ -1158,7 +1158,7 @@ function get_fonts_base(METRICB, selected) {
 	}
 }
 
-const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
+const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 	// testing non regular fonts + font face leaks (i.e not just light/black etc)
 		// it is problematic to test weighted fonts because you don't know
 		// if it's synthesized, a variable font, or an actual font(name)
@@ -1221,9 +1221,18 @@ const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
 			} else {
 				loadFonts(fntList).then(function(results){
 					if (results.length) {
-						data = results, value = mini(results)
+						data = []
+						// some engines record quotes: strip them out
+						results.forEach(function(item){
+							item = item.replaceAll('"',''); data.push(item)
+						})
+						value = mini(results)
 						btn = addButton(12, METRIC, results.length)
-						if (isMain && fntList.length) {notation = get_font_notation(METRIC, data)}
+						if (isMain && fntList.length) {
+							notation = get_font_notation(METRIC, data)
+							// enumerate fonts across all font tests
+							sDetail.document[METRICD] = sDetail.document[METRICD].concat(data)
+						}
 					} else {
 						// ToDo: once we allow fontFace in BB this will always be badnotation
 						notation = isBB ? goodnotation : badnotation
@@ -1239,7 +1248,7 @@ const get_fonts_faces = (METRIC, aFonts) => new Promise(resolve => {
 	})
 })
 
-function get_fonts_offscreen(METRIC) {
+function get_fonts_offscreen(METRIC, METRICD) {
 	// test RFP/FPP do not leak
 		// note: document fonts does not affect this test
 	let t0 = nowFn()
@@ -1290,6 +1299,8 @@ function get_fonts_offscreen(METRIC) {
 			value = mini(data)
 			btn = addButton(12, METRIC, data.length)
 			if (fntData.offscreen.base.length) {notation = get_font_notation(METRIC, data)}
+			// enumerate fonts across all font tests
+			sDetail.document[METRICD] = sDetail.document[METRICD].concat(data)
 		} else {
 			// ToDo: once we allow fontFace in BB this will always be badnotation
 			notation = isBB ? goodnotation : badnotation
@@ -1632,7 +1643,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 	}
 })
 
-function get_fonts(METRIC) {
+function get_fonts(METRIC, METRICD) {
 	/*
 	- only notate font_names == not a metric but is picked up health
 	- sizes we record all errors + lies per method. This is all we need for method
@@ -1812,7 +1823,6 @@ function get_fonts(METRIC) {
 					let btn = addButton(12, METRICN, oData[k].datacount)
 					sDetail.document[METRICN] = oData[k].datafonts
 					addDisplay(12, METRICN, mini(oData[k].datafonts), btn, notation)
-
 					// data
 					btn = addButton(12, METRIC, oData[k].datacount)
 					if (!isFontSizesMore) {
@@ -1820,6 +1830,8 @@ function get_fonts(METRIC) {
 						btn += addButton(12, METRIC +'_grouped', oData[k].sizecount)
 					}
 					addBoth(12, METRIC, k, btn,'', oData[k].data)
+					// enumerate fonts across all font tests
+					sDetail.document[METRICD] = sDetail.document[METRICD].concat(oData[k].datafonts)
 				}
 			}
 		}
@@ -2424,14 +2436,16 @@ const outputFonts = () => new Promise(resolve => {
 		}
 		addDisplay(12, 'glyphs_visual', strDisplay)
 	}
-
 	if (gRun && sectionIgnore.includes('fonts')) {return resolve()}
+
+	let METRICD = 'font_detection'
+	sDetail.document[METRICD] = [] // reset/clear
 
 	set_fntList()
 	Promise.all([
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
 		get_script_defaults('script_defaults'),
-		get_fonts('font_sizes'), // uses fntDocEnabled
+		get_fonts('font_sizes', METRICD), // uses fntDocEnabled
 		get_system_fonts('fonts_moz'),
 		get_system_fonts('fonts_system'),
 		get_widget_fonts('fonts_widget'),
@@ -2443,12 +2457,19 @@ const outputFonts = () => new Promise(resolve => {
 		let isLies = isDomRect == -1
 		Promise.all([
 			get_fonts_max('font_sizes_max', isLies),
-			get_fonts_faces('font_faces'),
+			get_fonts_faces('font_faces',METRICD),
 			get_glyphs('glyphs', isLies),
 			get_textmetrics('textmetrics'),
-			get_fonts_offscreen('font_offscreen'),
+			get_fonts_offscreen('font_offscreen', METRICD),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
+			// enumerated fonts over all font tests
+			let array = sDetail.document[METRICD]
+			if (array.length) {
+				array = dedupeArray(array); array.sort()
+				sDetail.document[METRICD] = array
+				addDisplay(12, METRICD, addButton(12, METRICD, array.length +' fonts'))
+			}
 			return resolve()
 		})
 	})
