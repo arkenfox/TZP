@@ -2067,6 +2067,9 @@ function get_l10n_xslt_messages(METRIC) {
 }
 
 function get_l10n_xslt_sort(METRIC) {
+	// 1978383: xsl:sort uses only base sensitivity / primary strength
+	// so we can't use plural rules to get a determinsitic result
+
 	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
 	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
@@ -2223,6 +2226,8 @@ const get_dates = () => new Promise(resolve => {
 })
 
 const outputRegion = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('region')) {return resolve()}
+
 	oIntlPerf = {} // reset
 
 	set_isLanguageSmart() // required for BB health in get_language_locale()
@@ -2300,6 +2305,8 @@ const outputRegion = () => new Promise(resolve => {
 })
 
 const outputHeaders = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('headers')) {return resolve()}
+
 	Promise.all([
 		get_nav_dnt('doNotTrack'),
 		get_nav_gpc('globalPrivacyControl'),
