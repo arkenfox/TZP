@@ -178,6 +178,7 @@ var compareExamples = [
 
 var aLegend = [],
 	aLocales = [],
+	aLocaleGroups,
 	counter = 0,
 	oSortvsSearch = {},
 	oRaw = {}
@@ -554,7 +555,7 @@ function collator() {
 				output.push(strItem +"<br>")
 
 				// locales hash
-				let aLocaleGroups = []
+				aLocaleGroups = []
 				for (const k of Object.keys(oTempData)) {
 					aLocaleGroups.push(oTempData[k])
 				}
@@ -566,15 +567,17 @@ function collator() {
 				if (isFF && thisHash == exampleHash) {
 					// notate new if 140+
 					if (isVer > 139) {
-						if (localesHash == "bbe811d0") { // FF140+
+						if (localesHash == "874da3f0") { // 1937541: FF150+ 83
+						} else if (localesHash == "bbe811d0") { // FF140+ 84
 						} else {localesHash += ' '+ zNEW}
 					}
 				}
-				strItem = s12 +"locales: "+ sc + localesHash +"<br>"
+				let localesBtn = " <span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+				strItem = s12 +"locales: "+ sc + localesHash + localesBtn +"<br>"
 				output.push(strItem)
 
 				// details
-				strItem = s4.trim() +"DETAILS"+ sc +"<br>"
+				strItem = s4.trim() +"DETAILS"+ sc + s99 +' [search, sort, combined]' + sc +'<br>'
 				output.push(strItem)
 				output.push(lineItems.join("<br>"))
 			} else {
@@ -585,6 +588,13 @@ function collator() {
 	} else {
 		// crash and burn
 		el.innerHTML = "please provide two different values"
+	}
+}
+
+function log_console(name) {
+	if (name == 'locales') {
+		let hash = mini(aLocaleGroups)
+		console.log(name +': ' + hash +'\n'+ aLocaleGroups.join('\n'))
 	}
 }
 
