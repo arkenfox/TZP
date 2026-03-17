@@ -1326,9 +1326,6 @@ function get_timezone(METRIC) {
 			oData[method] = {}
 			years.forEach(function(year) {oData[method][year] = []})
 		})
-		// ToDo: maybe hardcode UTC values since they should be constant
-			// except I want to catch all/any unexpected values so might pay
-			// to leave each method calculaing with each method
 
 		try {
 			years.forEach(function(year) {
@@ -1348,20 +1345,20 @@ function get_timezone(METRIC) {
 								k = 1
 							} else {
 								if ('date.parse' == method) {
-									utc = Date.parse(test); time = Date.parse(control);
-									offset = utc - time; oRaw[rawkey][method] = [utc, time]
+									time = Date.parse(test); utc = Date.parse(control);
+									offset = time - utc; oRaw[rawkey][method] = [utc, time]
 								} else if ('date.valueOf' == method) {
-									utc = test.valueOf(); time = control.valueOf()
-									offset = utc - time; oRaw[rawkey][method] = [utc, time]
+									time = test.valueOf(); utc = control.valueOf()
+									offset = time - utc; oRaw[rawkey][method] = [utc, time]
 								} else if ('Symbol.toPrimitive' == method) {
-									utc = test[Symbol.toPrimitive]('number'); time = control[Symbol.toPrimitive]('number')
-									offset = utc - time; oRaw[rawkey][method] = [utc, time]
+									time = test[Symbol.toPrimitive]('number'); utc = control[Symbol.toPrimitive]('number')
+									offset = time - utc; oRaw[rawkey][method] = [utc, time]
 								} else if ('getTime' == method) {
-									utc = test.getTime(); time = control.getTime()
-									offset = utc - time; oRaw[rawkey][method] = [utc, time]
+									time = test.getTime(); utc = control.getTime()
+									offset = time - utc; oRaw[rawkey][method] = [utc, time]
 								} else if ('date' == method) {
 									offset = test - control
-									oRaw[rawkey][method] = [test * 1, test, control * 1, control]
+									oRaw[rawkey][method] = [control * 1, test * 1]
 								} else if ('offsetNanoseconds' == method) {
 									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
 									// e.g. 1879-01-01T13:00Z
@@ -1374,28 +1371,39 @@ function get_timezone(METRIC) {
 									oRaw[rawkey][method] = [utc, time]
 								} else if ('components' == method) {
 									oDiffs = {
-										'1': test.getUTCFullYear() - control.getUTCFullYear(),
-										'2': test.getUTCMonth() - control.getUTCMonth(),
-										'3': test.getUTCDate() - control.getUTCDate(),
-										'4': test.getUTCHours() - control.getUTCHours(),
-										'5': test.getUTCMinutes() - control.getUTCMinutes(),
-										'6': test.getUTCSeconds() - control.getUTCSeconds(),
-										'7': test.getUTCMilliseconds() - control.getUTCMilliseconds(),
+										'1': [test.getUTCFullYear(), control.getUTCFullYear()],
+										'2': [test.getUTCMonth(), control.getUTCMonth()],
+										'3': [test.getUTCDate(), control.getUTCDate()],
+										'4': [test.getUTCHours(), control.getUTCHours()],
+										'5': [test.getUTCMinutes(), control.getUTCMinutes()],
+										'6': [test.getUTCSeconds(), control.getUTCSeconds()],
+										'7': [test.getUTCMilliseconds(), control.getUTCMilliseconds()],
 									}
-									offset = 0
-									for (const k of Object.keys(oDiffs)) {offset += (oMultiplier[k] * oDiffs[k])}
+									offset = 0, utc = [], time = []
+									for (const k of Object.keys(oDiffs)) {
+										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+										utc.push(oDiffs[k][1]) // control
+										time.push(oDiffs[k][0]) // test
+									}
+									oRaw[rawkey][method] = [utc.join(' '), time.join(' ')]
 								} else if ('components_utc' == method) {
 									oDiffs = {
-										'1': test.getFullYear() - control.getFullYear(),
-										'2': test.getMonth() - control.getMonth(),
-										'3': test.getDate() - control.getDate(),
-										'4': test.getHours() - control.getHours(),
-										'5': test.getMinutes() - control.getMinutes(),
-										'6': test.getSeconds() - control.getSeconds(),
-										'7': test.getMilliseconds() - control.getMilliseconds(),
+										'1': [test.getFullYear(), control.getFullYear()],
+										'2': [test.getMonth(), control.getMonth()],
+										'3': [test.getDate(), control.getDate()],
+										'4': [test.getHours(), control.getHours()],
+										'5': [test.getMinutes(), control.getMinutes()],
+										'6': [test.getSeconds(), control.getSeconds()],
+										'7': [test.getMilliseconds(), control.getMilliseconds()],
 									}
-									offset = 0
-									for (const k of Object.keys(oDiffs)) {offset += (oMultiplier[k] * oDiffs[k])}
+									offset = 0, utc = [], time = []
+									for (const k of Object.keys(oDiffs)) {
+										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+										// this is reversed: we subtract time from utc
+										utc.push(oDiffs[k][0]) // test
+										time.push(oDiffs[k][1]) // control
+									}
+									oRaw[rawkey][method] = [utc.join(' '), time.join(' ')]
 								}
 							}
 							if (isFirst) {
