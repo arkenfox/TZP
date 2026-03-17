@@ -190,7 +190,8 @@ let languagesSupported = {},
 	isLocaleValid,
 	isLocaleValue,
 	isLocaleAlt, // allow variants in checks e.g. en-CA checks en-US values
-	isTimeZoneValid,
+	isTimeZoneOffsetValid, // in timezone_offset we can detect a non-determisitic timeZone
+	isTimeZoneValid, // further testing, but overriden if isTimeZoneOffsetValid == false
 	isTimeZoneValue,
 	oIntlTests = {},
 	oIntlKeys = {},
