@@ -1361,7 +1361,7 @@ function get_timezone(METRIC) {
 									offset = utc - time; oRaw[rawkey][method] = [utc, time]
 								} else if ('date' == method) {
 									offset = test - control
-									oRaw[rawkey][method] = [control, test]
+									oRaw[rawkey][method] = [test * 1, test, control * 1, control]
 								} else if ('offsetNanoseconds' == method) {
 									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
 									// e.g. 1879-01-01T13:00Z
