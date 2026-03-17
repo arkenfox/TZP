@@ -1365,7 +1365,8 @@ function get_timezone(METRIC) {
 									let tzid = Temporal.Now.timeZoneId(),
 										instant = Temporal.Instant.from(year +'-'+ days[day].str +'T13:00Z')
 									utc = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
-									// UTC is always zero, riiight? so we could hard-code this
+									// UTC is always zero so we could hard-code this
+										// BUT it's nice to catch any fuckery caqused by extensions
 									time = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
 									offset = (time - utc) / 1e6
 									oRaw[rawkey][method] = [utc, time]
@@ -1398,10 +1399,11 @@ function get_timezone(METRIC) {
 									}
 									offset = 0, utc = [], time = []
 									for (const k of Object.keys(oDiffs)) {
-										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
 										// this is reversed: we subtract time from utc
-										utc.push(oDiffs[k][0]) // test
-										time.push(oDiffs[k][1]) // control
+										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+										// but lets still record utc as using the control date etc
+										utc.push(oDiffs[k][1]) // control
+										time.push(oDiffs[k][0]) // test
 									}
 									oRaw[rawkey][method] = [utc.join(' '), time.join(' ')]
 								}
@@ -1422,7 +1424,22 @@ function get_timezone(METRIC) {
 			oData = log_error(4, METRIC, e)
 		}
 		for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
-		//return oData
+		// summarize oRaw
+		let newobj = {}
+		for (const d of Object.keys(oRaw)) {
+			newobj[d] = {}
+			for (const k of Object.keys(oRaw[d])) {
+				let itemdata = oRaw[d][k], itemhash = mini(itemdata) +' '
+				if (undefined == newobj[d][itemhash]) {
+					newobj[d][itemhash] = {'data': itemdata, 'group': [k]}
+				} else {newobj[d][itemhash].group.push(k)}
+			}
+		}
+		for (const d of Object.keys(newobj)) {
+			oRaw[d] = {}
+			for (const k of Object.keys(newobj[d])) {oRaw[d][newobj[d][k].group.join(' ')] = newobj[d][k].data}
+		}
+		//return
 		return [oData, oRaw]
 	}
 
