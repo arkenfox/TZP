@@ -1298,7 +1298,9 @@ function get_timezone(METRIC) {
 			let tz, isErr = false
 			try {
 				if ('timeZone' == k) {
+					// this is what is used for isTimeZoneOffsetValid
 					tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+					//tz = 'Asia/Tokyo' // test mixed
 				} else if ('timeZoneId' == k) {
 					tz = Temporal.Now.timeZoneId()
 				} else {
@@ -1319,11 +1321,15 @@ function get_timezone(METRIC) {
 	}
 
 	function get_offsets() {
-		let oData = {}, oErrors = {}
+		let oData = {}, oErrors = {}, oRaw = {}
 		aMethods.forEach(function(method) {
 			oData[method] = {}
 			years.forEach(function(year) {oData[method][year] = []})
 		})
+		// ToDo: maybe hardcode UTC values since they should be constant
+			// except I want to catch all/any unexpected values so might pay
+			// to leave each method calculaing with each method
+
 		try {
 			years.forEach(function(year) {
 				Object.keys(days).forEach(function(day) {
@@ -1331,33 +1337,40 @@ function get_timezone(METRIC) {
 					let datetime = day +', '+ year +' 13:00:00'
 					let control = new Date(datetime +' UTC')
 					let test = new Date(datetime)
+					let rawkey = year +' '+ day
+					oRaw[rawkey] = {}
 					if (runSE) {foo++} else if (runST) {test = NaN}
 					aMethods.forEach(function(method) {
-						let offset, k = 60000, oDiffs
+						let offset, k = 60000, oDiffs, utc, time
 						try {
 							if ('getTimezoneOffset' == method) {
 								offset = test.getTimezoneOffset()
 								k = 1
 							} else {
 								if ('date.parse' == method) {
-									offset = Date.parse(test) - Date.parse(control)
+									utc = Date.parse(test); time = Date.parse(control);
+									offset = utc - time; oRaw[rawkey][method] = [utc, time]
 								} else if ('date.valueOf' == method) {
-									offset = test.valueOf() - control.valueOf()
+									utc = test.valueOf(); time = control.valueOf()
+									offset = utc - time; oRaw[rawkey][method] = [utc, time]
 								} else if ('Symbol.toPrimitive' == method) {
-									offset = test[Symbol.toPrimitive]('number') - control[Symbol.toPrimitive]('number')
+									utc = test[Symbol.toPrimitive]('number'); time = control[Symbol.toPrimitive]('number')
+									offset = utc - time; oRaw[rawkey][method] = [utc, time]
 								} else if ('getTime' == method) {
-									offset = test.getTime() - control.getTime()
+									utc = test.getTime(); time = control.getTime()
+									offset = utc - time; oRaw[rawkey][method] = [utc, time]
 								} else if ('date' == method) {
 									offset = test - control
 								} else if ('offsetNanoseconds' == method) {
 									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
 									// e.g. 1879-01-01T13:00Z
 									let tzid = Temporal.Now.timeZoneId(),
-										instant = Temporal.Instant.from(year +'-'+ days[day].str +'T13:00Z'),
-										source = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
+										instant = Temporal.Instant.from(year +'-'+ days[day].str +'T13:00Z')
+									utc = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
 									// UTC is always zero, riiight? so we could hard-code this
-									let target = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
-									offset = (target - source) / 1e6
+									time = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
+									offset = (time - utc) / 1e6
+									oRaw[rawkey][method] = [utc, time]
 								} else if ('components' == method) {
 									oDiffs = {
 										'1': test.getUTCFullYear() - control.getUTCFullYear(),
@@ -1400,7 +1413,8 @@ function get_timezone(METRIC) {
 			oData = log_error(4, METRIC, e)
 		}
 		for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
-		return oData
+		//return oData
+		return [oData, oRaw]
 	}
 
 	Promise.all([
@@ -1420,8 +1434,12 @@ function get_timezone(METRIC) {
 		tzData = dedupeArray(tzData)
 		if (1 == tzData.length) {tz = tzData[0]; isTimeZoneValue = tz}
 
+		// OFFSETS raw data
+		addDisplay(4, METRIC+'_data', addButton(4, METRIC +'_data', 'data'))
+		sDetail.document[METRIC +'_data'] = res[1][1]
+
 		// OFFSETS
-		let oOffsets = res[1], notation = tz_red, go = true, aHash = {}, countErr = 0, allHash
+		let oOffsets = res[1][0], notation = tz_red, go = true, aHash = {}, countErr = 0, allHash
 		// stop: overall error
 		if ('string' == typeof oOffsets) {addBoth(4, METRIC, oOffsets,'', notation, zErr); go = false}
 		// display errors + collect hashes
@@ -1438,9 +1456,7 @@ function get_timezone(METRIC) {
 			}
 			// stop: all errors
 			if (countErr == aMethods.length) {addBoth(4, METRIC, zErr,'', notation); go = false}
-		}
-		// display hashes + btns
-		if (go) {
+			// display hashes + btns
 			//let isHashMixed = (Object.keys(aHash).length > 1 || countErr > 0) ? true : false // includes errors
 			let isHashMixed = Object.keys(aHash).length > 1 // excludes errors
 			for (const k of Object.keys(aHash)) {
@@ -1500,6 +1516,13 @@ function get_timezone(METRIC) {
 
 		// TZ: after isTimeZoneValid set above
 			// which can only be true if we had a single tz (ignoring errors) after deduping
+		if (!isTimeZoneOffsetValid) {
+			// if timezone_ofset_timezone was a lie then this is as well
+			// note: that timezone_ofset_timezone uses Intl.DateTimeFormat().resolvedOptions().timeZone
+			// and can only set isTimeZoneOffsetValid = false if there is no error. Which means we
+			// don't error here, and thus the results (mixed or not) are untrustworthy
+			isTimeZoneValid = false
+		}
 		if (isTimeZoneValid) {
 			notation = '8d787cb5' == mini(tzObj) ? rfp_green : rfp_red
 			addBoth(4, METRICtz, tz,'', notation)
@@ -1510,7 +1533,7 @@ function get_timezone(METRIC) {
 				if (0 == tzData.length) {tz = zErr // all errors
 				} else if (tzData.length > 1) {tz = 'mixed'; isLies = true} // mixed so untrustworthy
 			} else {
-				isLies = true // single tz but failed the test, so untrustworthy
+				isLies = true // single tz but failed the test or failed the tz offset test, so untrustworthy
 			}
 			addBoth(4, METRICtz, tz,'', notation,'', isLies)
 		}
@@ -1525,67 +1548,207 @@ function get_timezone(METRIC) {
 }
 
 function get_timezone_offset(METRIC) {
+	// this is good test to catch + record various temporal/date/toString lies even
+		// if they are ultimately duplicitous. This requires the spoofed offset to differ
+		// from lastModified and real-time real-world world offsets only number 65-70
+		// IIUIC. So not definitive, but multiple exposure of tampering is good. also,
+		// fuck extensions trying to resist or solutions that create mismatches :)
 	let t0 = nowFn()
+	isTimeZoneOffsetValid = true // reset
 	// setup
 	const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
 		+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
 		+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
 	const doc = (new DOMParser).parseFromString(xslText, 'text/xml')
-	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tzControl, zOffset, tsOffset
-	let methods = ['control','date','exslt','iframe','plain','string','timestring','unsafe','zoned']
+	let oData = {}, oDisplay = {}, oLies = {}
+	let tzControl
 	let notation = tz_red
-	// non-gecko: skip exslt
-	if (!isGecko) {
-		methods = methods.filter(x => !['exslt'].includes(x))
-		addDisplay(4, METRIC +'_exslt', zNA)
-	}
+
+	let methods = ['timeZone','iframe','parseFromString','parseHTMLUnsafe','plainDateTime',
+		'toLocaleDateString','toTimeString','zonedDateTime',
+	]
+	if (isGecko) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)} // non-gecko: skip exslt
+	let aLastMods = ['exslt','iframe','parseFromString','parseHTMLUnsafe'] // is lastModified source
+	let aOffsets = ['exslt','toTimeString','zonedDateTime'] // has the offszet calculated in the string
 
 	function checkValidDate(method, value) {
-		try {if (new Date(value) +'' == 'Invalid Date') {oErr[method] = 'Invalid Date: ' + value; return false}; return true
-		} catch(e) {oErr[method] = e+''; return false}
+		try {if (new Date(value) +'' == 'Invalid Date') {oData.errors[method] = 'Invalid Date: ' + value; return false}; return true
+		} catch(e) {oData.errors[method] = e+''; return false}
 	}
 
-	function display_detail() {
+	function get_minutes(src) {
+		let offset = oData.offset[src]
+		if (undefined !== offset) {
+				let minutes = ((offset.slice(1,3) * 1)*60) + (offset.slice(4,6)*1)
+				let sign = (offset[0] == '+' ? (minutes == 0 ? '': '-') : '')
+				minutes = minutes * ('-' == sign ? -1 : 1)
+				return [minutes, (offset == '+00:00' ? '' : ' ['+ offset +']')]
+		} else {
+			return ''
+		}
+	}
+
+	function get_values() {
+		oData = {'errors' : {}, 'format': {}, 'keys': {}, 'offset': {}, 'raw': {}} // reset
+		let testdate = new Date()
+		// get values
+		let id = 'iframelastmod'
+//runSL = true
+		let tzUsed = runSL ? 'Pacific/Kiritimati' : undefined
 		methods.forEach(function(k){
+			let option = {
+				day: '2-digit', month: '2-digit', year: 'numeric',
+				hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
+			}
+			let value
+			try {
+				if ('timeZone' == k) {
+					// just use the resolvedOptions: if they're lying it will create a mix
+					tzControl = runSL ? tzUsed : Intl.DateTimeFormat().resolvedOptions().timeZone
+					option['timeZone'] = tzControl // if nothing valid we pass undefined
+					//option['timeZone'] = 'Pacific/Kiritimati' // test for flipping isTimezoneValid
+					value = testdate.toLocaleDateString('en', option).replace(',','')
+				} else if ('exslt' == k) {
+//foo++
+					let xsltProcessor = new XSLTProcessor
+					xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
+					let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
+					value = fragment.childNodes[0].nodeValue
+				} else if ('iframe' == k) {
+//foo++
+					let el = document.createElement('iframe')
+					el.setAttribute('id', id)
+					document.body.appendChild(el)
+					let target = el.contentDocument
+					value = target.lastModified // contentWindow.document
+				} else if ('parseFromString' == k) {
+//foo++
+					value = (new DOMParser).parseFromString('','text/html').lastModified
+				} else if ('parseHTMLUnsafe' == k) {
+//foo++
+					value = Document.parseHTMLUnsafe('').lastModified
+				} else if ('plainDateTime' == k) {
+					value = Temporal.Now.plainDateTimeISO(tzUsed).toString()
+				} else if ('toLocaleDateString' == k) {
+					option['timeZone'] = tzUsed
+					value = testdate.toLocaleDateString('en', option).replace(',','') // control but no timeZone option
+				} else if ('toTimeString' == k) {
+					// we don't want to use any other to*String functions, we'll add a date part later
+					value = testdate.toTimeString()
+					if (runSL) {
+						// toTimeString is always local timezone, so instead we'll manipulate the string
+						let hrs = (((testdate.getHours() + 5) % 24) +'').padStart(2,'0')
+						let spoofedvalue = hrs + value.slice(2,13) + hrs + value.slice(15, value.length)
+						value = spoofedvalue
+					}
+				} else if ('zonedDateTime' == k) {
+					value = Temporal.Now.zonedDateTimeISO(tzUsed).toString()
+				}
+				// test
+				if (runST) {
+					let aValues = [null, undefined, '99-99-99','', {}, 4]
+					value = aValues[Math.floor(Math.random() * aValues.length)]
+				}
+				// typecheck
+				let typeCheck = typeFn(value)
+				if ('string' !== typeCheck) {throw zErrType + typeCheck} else {oData.raw[k] = value}
+			} catch(e) {
+				// the error differs if the console is open vs closed
+				if ('parseHTMLUnsafe' == k) {
+					if (e.name == 'NS_ERROR_UNEXPECTED') {e = 'Error: Permission denied to access property \"lastModified\"'}
+				}
+				oData.errors[k] = e+''
+			}
+		})
+		removeElementFn(id)
+
+		// toTimeString needs a date part added to it
+		// we'll use lastMod items otherwsie we will let it error as invalid
+		if (undefined !== oData.raw.toTimeString) {
+			let dateKey, dateString
+			for (let i=0; i < aLastMods.length; i++) {
+				let key = aLastMods[i]; if (undefined !== oData.raw[key]) {dateKey = key; break}
+			}
+			if (undefined !== dateKey) {
+				oData.keys['dateKey'] = dateKey
+				dateString = oData.raw[dateKey]
+				if ('exslt' !== dateKey) {
+					dateString = dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
+				}
+				dateString = dateString.slice(0,10)
+			}
+			oData.raw.toTimeString = dateString +' '+ oData.raw.toTimeString
+		}
+//runSL = false
+
+		// MOAR stuff
+		//try {oData.raw['isostring'] = new Date().toISOString()} catch(e) {oData.errors['isostring'] = e+''}
+		//console.log(oData.raw)
+
+		// check validity and format
+		for (const k of Object.keys(oData.raw)) {
+			let formatted, src = oData.raw[k]
+			if ('exslt' == k) {
+				oData.offset[k] = src.slice(-6)
+				formatted = src.slice(0,-10).replace('T',' ')
+			} else if ('zonedDateTime' == k || 'plainDateTime' == k || 'toTimeString' == k) {
+				// we only want the first 19 chars
+				formatted = src.slice(0,19).replace('T',' ')
+				// remember offsets
+				if ('zonedDateTime' == k) {
+					let end = src.indexOf('[')
+					oData.offset[k] = src.slice(end - 6, end)
+				} else if ('toTimeString' == k) {
+					// toTimeString: always uses the format of HH:mm:ss GMT±xxxx (TZ)
+					oData.offset[k] = src.slice(23,26) +':' + src.slice(26,28)
+				}
+			} else {
+				formatted = src.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
+			}
+			if (checkValidDate(k, formatted)) {oData.format[k] = formatted}
+		}
+	}
+
+	function display_values() {
+		// all valid dates are in format, everything else is in errors
+		let truthkey
+		if (Object.keys(oData.hasLastMod).length) {truthkey = oData.hasLastMod[0]; oData.keys['truthkey'] = truthkey}
+		for (const k of Object.keys(oData.format)) {
 			let n = METRIC +'_'+ k
-			let value, data ='', extra ='', isLies = false
-			if (undefined !== oData.format[k]) {
-				// style + record lies
-				// technically control isn't a lie, even if it can be tampered with
-				// and any tampering with the date object will already show up as lies vs exslt
-				if ('control' !== k && oLies[k] !== undefined) {
+			let value, extra ='', isLies = false
+			// style + record lies
+			if (undefined !== truthkey) {
+				if (oData.format[k] !== oData.format[truthkey]) {
 					isLies = true
 					log_known(4, n, oData.format[k])
+					if ('timeZone' == k) {isTimeZoneOffsetValid = false}
 				}
-				if ('exslt' == k) {extra = ' ['+ xOffset +']'
-				} else if ('zoned' == k) {extra = ' ['+ zOffset +']'
-				} else if ('timestring' == k) {extra = ' ['+ tsOffset +']'
-				} else if ('control' == k) {extra = ' ['+ tzControl +']'}
-				value = oData.format[k] + extra
-			} else {
-				let finalkey = isGecko ? 'exslt' : 'timestring'
-				// if gecko-exslt and non-gecko-timestring then we log that the metric error and final result
-				value = log_error(4, METRIC + (finalkey == k ? '': '_'+ k), oErr[k])
-				if (finalkey == k) {addBoth(4, METRIC, value,'', notation, zErr)}
 			}
+			if ('timeZone' == k) {extra = ' ['+ tzControl +']'}
+			if (undefined !== oData.offset[k]) {extra = ' ['+ oData.offset[k] +']'}
+			value = oData.format[k] + extra
 			addDisplay(4, n, value,'','', isLies)
-		})
+		}
+		for (const k of Object.keys(oData.errors)) {
+			addDisplay(4, METRIC +'_'+ k, log_error(4, METRIC +'_'+ k, oData.errors[k]))
+		}
 	}
 
 	function checkMatch(runNo) {
-		oLies = {}
 		// are they all the same
-		let aTmp = [], xMod, xParts, xTime
+		let aTmp = []
 		for (const k of Object.keys(oData.format)) {aTmp.push(oData.format[k])}
 		aTmp = dedupeArray(aTmp)
-		if (aTmp.length == 1) {return true}
-		// get exslt parts
-		if (isGecko) {
-			xMod = oData.format.exslt
-			xParts = xMod.split(' ')
-			xTime = xParts[1].split(':')
+		if (!isGecko || undefined == oData.format.exslt) {
+			return aTmp.length == 1
 		}
+		if (aTmp.length == 1) {return true}
+
 		// gecko: diff xMod vs the rest: we treat exslt as truthy
+		// get exslt parts1
+		let xMod = oData.format.exslt,
+			xParts = xMod.split(' '),
+			xTime = xParts[1].split(':')
 		// non-gecko: should only be one
 		let isSame = true, setFormats = new Set()
 		for (const k of Object.keys(oData.format)) {
@@ -1603,187 +1766,72 @@ function get_timezone_offset(METRIC) {
 					// allow 10 seconds: jank, also leap seconds
 					// abs !important to cover being ahead or behind
 					let secondsDiff = Math.abs((tmpDiff.h * 3600) + (tmpDiff.min * 60) + tmpDiff.s)
-					if (secondsDiff > 10) {isSame = false; oLies[k] = true}
+					if (secondsDiff > 10) {isSame = false}
 				} else {
-					isSame = false; oLies[k] = true
+					isSame = false
 				}
 			}
 		}
-		if (!isGecko) {isSame = 1 == setFormats.size}
 		return isSame
 	}
 
-	function get_mods() {
-		// reset
-		oData = {'format': {}, 'raw': {}}, oErr = {}, xOffset = undefined, xMinutes = undefined
-		let option = {day: '2-digit', month: '2-digit', year: 'numeric', hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric'}
-		// grab
-		let id = 'iframelastmod'
-		try {
-			let el = document.createElement('iframe')
-			el.setAttribute('id', id)
-			document.body.appendChild(el)
-			let target = el.contentDocument
-			oData.raw['iframe'] = target.lastModified // contentWindow.document
-		} catch(e) {
-			oErr['iframe'] = e+''
-		}
-		removeElementFn(id)
-		if (isGecko) {
-			try {
-				let xsltProcessor = new XSLTProcessor
-				xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
-				let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
-				oData.raw['string'] = doc.lastModified // quickly grab lastMod since it updates each time we call it
-				oData.raw['exslt'] = fragment.childNodes[0].nodeValue
-			} catch(e) {
-				oErr['exslt'] = e+''
-				try {
-					oData.raw['string'] = (new DOMParser).parseFromString('','text/html').lastModified
-				} catch(e) {oErr['string'] = e+''}
-			}
+	// run, try to get isMatch
+	get_values()
+	let isMatch = checkMatch(1)
+	if (!isMatch) {
+		// ~0.3 ms to grab our mods: 1 in 86,400 seconds tick over a day
+		// so we'd have to be really unlucky to hit this: try again
+		get_values()
+		isMatch = checkMatch(2)
+	}
+
+	let oCheck = {
+		hasLastMod: aLastMods,
+		hasOffset: aOffsets,
+	}
+	for (const j of Object.keys(oCheck)) {
+		oData[j] = []
+		let lookup = 'hasLastMod' == j ? 'format' : 'offset'
+		let array = oCheck[j]
+		array.forEach(function(item){if (undefined !== oData[lookup][item]) {oData[j].push(item)}})
+	}
+	display_values() // do after we try populate oCheck
+
+	let finalkey, finalvalue = 'unknown', finaldisplay = 'unknown'
+	// if we have one at least one lastModified iframe/parseFromString/parseHTMLUnsafe
+	// and we have an offset that matches, then we know the real value
+	if (Object.keys(oData.hasLastMod).length && Object.keys(oData.hasOffset).length) {
+		// last mods can't be tampered with
+		if (oData.hasOffset.includes('exslt')) {
+			finalkey = 'exslt' // if we have exslt offset we also have the format
 		} else {
-			try {
-				oData.raw['string'] = (new DOMParser).parseFromString('','text/html').lastModified
-			} catch(e) {oErr['string'] = e+''}
-		}
-		try {oData.raw['unsafe'] = Document.parseHTMLUnsafe('').lastModified
-		} catch(e) {
-			// the error differs if the console is open vs closed
-			if (e.name == 'NS_ERROR_UNEXPECTED') {e = 'Error: Permission denied to access property \"lastModified\"'}
-			oErr['unsafe'] = e+''
-		}
-		try {
-			let test = (new Date()).toLocaleDateString('en', option)
-			oData.raw['date'] = test.replace(',','')
-		} catch(e) {
-			oErr['date'] = e+''
-		}
-		try {
-			// just use the resolvedOptions: if they're lying it will create a mix
-			tzControl = Intl.DateTimeFormat().resolvedOptions().timeZone
-			option['timeZone'] = tzControl // if nothing valid we pass undefined
-			let control = (new Date()).toLocaleDateString('en', option)
-			oData.raw['control'] = control.replace(',','')
-		} catch(e) {oErr['control'] = e+''}
-		try {
-			oData.raw['zoned'] = Temporal.Now.zonedDateTimeISO().toString()
-		} catch(e) {
-			oErr['zoned'] = e+''
-		}
-		try {
-			oData.raw['plain'] = Temporal.Now.plainDateTimeISO().toString()
-		} catch(e) {
-			oErr['plain'] = e+''
-		}
-		try {
-			oData.raw['isostring'] = new Date().toISOString()
-		} catch(e) {
-			oErr['isostring'] = e+''
-		}
-		try {
-			let testDate = new Date()
-			let test = testDate.toLocaleDateString('en', {day: '2-digit', month: '2-digit', year: 'numeric'})
-			test = test.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
-			oData.raw['timestring'] = test +' '+ testDate.toTimeString()
-		} catch(e) {
-			oErr['timestring'] = e+''
-		}
-		//console.log(oData.raw)
-
-		// test
-		if (runST) {
-			oData.raw['date'] = {}
-			oData.raw['iframe'] = null
-			oData.raw['string'] = undefined
-			oData.raw['plain'] = ''
-			oData.raw['unsafe'] = '99-99-99' // invalid
-			oData.raw['zoned'] = 4
-		} else if (runSL) {
-			oData.raw['date'] = '06/29/2025 09:04:17' // mixed
-		}
-
-		// type check/format
-		methods.forEach(function(k){
-			if (oErr[k] == undefined) {
-				let typeCheck = typeFn(oData.raw[k])
-				if ('string' !== typeCheck) {
-					oErr[k] = zErrType + typeCheck
-				} else {
-					let formatted
-					if ('exslt' == k) {
-						// set xOffset
-						xOffset = (oData.raw[k]).slice(-6)
-						// get xMinutes in getTimezoneoffset format
-							// *1 works as it ignores leading 0's and returns a number
-							// flip the sign but drop if positive or 0 to match calculated/getTimezoneOffset
-						xMinutes = ((xOffset.slice(1,3) * 1)*60) + (xOffset.slice(4,6)*1)
-						let xSign = (xOffset[0] == '+' ? (xMinutes == 0 ? '': '-') : '')
-						xMinutes = xSign + xMinutes
-						formatted = ((oData.raw[k]).slice(0,-10)).replace('T',' ')
-					} else if ('zoned' == k || 'plain' == k || 'timestring' == k) {
-						// we only want the first 19 chars
-						formatted = ((oData.raw[k]).slice(0,19)).replace('T',' ')
-						// remember offsets
-						if ('zoned' == k) {
-							let end = (oData.raw[k]).indexOf('[')
-							zOffset = (oData.raw[k]).slice(end - 6, end)
-						} else if ('timestring' == k) {
-							// formats the time part in English. It always uses the format of HH:mm:ss GMT±xxxx (TZ)
-							tsOffset = (oData.raw[k]).slice(23,26) +':' + (oData.raw[k]).slice(26,28)
-							if (!isGecko) {
-								xMinutes = ((tsOffset.slice(1,3) * 1)*60) + (tsOffset.slice(4,6)*1)
-								let xSign = (tsOffset[0] == '+' ? (xMinutes == 0 ? '': '-') : '')
-								xMinutes = xSign + xMinutes
-							}
-						}
-					} else {
-						formatted = (oData.raw[k]).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
-					}
-					if (checkValidDate(k, formatted)) {oData.format[k] = formatted}
-				}
+			// we already matched and returned lies, but we can do it again :)
+			let modkey = oData.keys.truthkey
+			let expected = oData.format[modkey]
+			//console.log('expected'. expected)
+			let array = oData.hasOffset
+			for (let i = 0; i < array.length; i++) {
+				let offsetkey = array[i], got = oData.format[offsetkey]
+				//console.log(offsetkey, 'got'. expected)
+				if (expected == got) {finalkey = offsetkey; break}
 			}
-		})
-	}
-
-	// run
-	get_mods()
-	//console.log(oData)
-	// gecko: relies on exslt else returns an error
-	if (isGecko) {
-		if (undefined !== oData.format.exslt) {
-			let xValue = xMinutes + (xOffset == '+00:00' ? '' : ' ['+ xOffset +']')
-			let isMatch = checkMatch(1)
-			if (!isMatch) {
-				// ~0.3 ms to grab our mods: 1 in 86,400 seconds tick over a day
-				// so we'd have to be really unlucky to hit this: try again
-				get_mods()
-				isMatch = checkMatch(2)
-			}
-			// ignore temporal not defined errors for notation
-			let errLen = Object.keys(oErr).length
-			if ('ReferenceError: Temporal is not defined' == oErr['zoned']) {errLen = errLen - 1}
-			if ('ReferenceError: Temporal is not defined' == oErr['plain']) {errLen = errLen - 1}
-			// no lies + no errors: includes control even though we ignore it for display/recording
-			if (0 == Object.keys(oLies).length && 0 == errLen) {notation = tz_green}
-			addBoth(4, METRIC, xValue,'', notation)
 		}
 	}
-	// non gecko: relies on timestring + isMatch
-		// we can look at Temporal when it lands
-	if (!isGecko) {
-		if (undefined !== oData.format.timestring) {
-			let tsValue = xMinutes + (tsOffset == '+00:00' ? '' : ' ['+ tsOffset +']')
-			let isMatch = checkMatch(1)
-			if (!isMatch) {
-				get_mods()
-				isMatch = checkMatch(2)
-			}
-			addBoth(4, METRIC, (isMatch ? tsValue : 'mixed'))
+	if (undefined !== finalkey) {
+		oData.keys['finalkey'] = finalkey
+		let finaldata = get_minutes(finalkey)
+		finalvalue = finaldata[0]
+		finaldisplay = finaldata.join('')
+		// no lies + no errors
+		if (0 == Object.keys(oLies).length && 0 == Object.keys(oData.errors).length) {notation = tz_green}
+		if (oData.keys.truthkey !== finalkey) {
+			// ignore default exslt (default and both the same) otherwise show what we used
+			notation += s99 +' [' + oData.keys.truthkey +' + '+ finalkey +']'+ sc
 		}
 	}
-
-	display_detail()
+	//console.log('DATA', oData)	
+	addDisplay(4, METRIC, finaldisplay,'', notation)
+	addData(4, METRIC, finalvalue)
 	log_perf(4, METRIC, t0)
 	return
 }
@@ -2250,7 +2298,8 @@ const outputRegion = () => new Promise(resolve => {
 		Promise.all([
 			get_language_system('languages_system'), // uses isLanguagesNav
 			get_locale_intl(),
-			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
+			get_timezone_offset('timezone_offset'), // sets isTimeZoneOffsetValid
+			get_timezone('timezone_offsets'), // uses isTimeZoneOffsetValid + sets isTimeZoneValid/Value
 			get_l10n_validation_messages('l10n_validation_messages'),
 			get_l10n_xml_messages('l10n_xml_messages'),
 			get_l10n_parsererror_direction('l10n_parsererror_direction'),
@@ -2260,7 +2309,6 @@ const outputRegion = () => new Promise(resolve => {
 			//get_l10n_css('l10n_css'),
 		]).then(function(){
 			Promise.all([
-				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates_intl(), // uses isTimeZoneValid/Value + isLocaleValid/Value
 				get_dates(), // to migrate to get_dates_intl
 				get_l10n_reporting_messages('l10n_reporting_messages'),
