@@ -1321,12 +1321,12 @@ function get_timezone(METRIC) {
 	}
 
 	function get_offsets() {
-		let oData = {}, oErrors = {}, oRaw = {}
+		let oData = {}, oErrors = {}
+		let oMath = {'1.utc_1879_date.parse': [], '2.utc': {}, '3.timezone': {}}
 		aMethods.forEach(function(method) {
 			oData[method] = {}
 			years.forEach(function(year) {oData[method][year] = []})
 		})
-
 		try {
 			years.forEach(function(year) {
 				Object.keys(days).forEach(function(day) {
@@ -1334,8 +1334,8 @@ function get_timezone(METRIC) {
 					let datetime = day +', '+ year +' 13:00:00'
 					let control = new Date(datetime +' UTC')
 					let test = new Date(datetime)
-					let rawkey = year +' '+ day
-					oRaw[rawkey] = {}
+					let key = year +'-'+ days[day].str
+					oMath['2.utc'][key] = {};  oMath['3.timezone'][key] = {}; 
 					if (runSE) {foo++} else if (runST) {test = NaN}
 					aMethods.forEach(function(method) {
 						let offset, k = 60000, oDiffs, utc, time
@@ -1345,31 +1345,25 @@ function get_timezone(METRIC) {
 								k = 1
 							} else {
 								if ('date.parse' == method) {
-									time = Date.parse(test); utc = Date.parse(control);
-									offset = time - utc; oRaw[rawkey][method] = [utc, time]
+									time = Date.parse(test); utc = Date.parse(control)
 								} else if ('date.valueOf' == method) {
 									time = test.valueOf(); utc = control.valueOf()
-									offset = time - utc; oRaw[rawkey][method] = [utc, time]
 								} else if ('Symbol.toPrimitive' == method) {
-									time = test[Symbol.toPrimitive]('number'); utc = control[Symbol.toPrimitive]('number')
-									offset = time - utc; oRaw[rawkey][method] = [utc, time]
+									time = test[Symbol.toPrimitive]('number'); utc = control[Symbol.toPrimitive]('number'); offset = time - utc
 								} else if ('getTime' == method) {
 									time = test.getTime(); utc = control.getTime()
-									offset = time - utc; oRaw[rawkey][method] = [utc, time]
 								} else if ('date' == method) {
-									offset = test - control
-									oRaw[rawkey][method] = [control * 1, test * 1]
+									utc = control * 1; time = test * 1
 								} else if ('offsetNanoseconds' == method) {
 									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
 									// e.g. 1879-01-01T13:00Z
 									let tzid = Temporal.Now.timeZoneId(),
 										instant = Temporal.Instant.from(year +'-'+ days[day].str +'T13:00Z')
-									utc = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
+									time = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
 									// UTC is always zero so we could hard-code this
 										// BUT it's nice to catch any fuckery caqused by extensions
-									time = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
-									offset = (time - utc) / 1e6
-									oRaw[rawkey][method] = [utc, time]
+									utc = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
+									offset = (utc - time) / 1e6
 								} else if ('components' == method) {
 									oDiffs = {
 										'1': [test.getUTCFullYear(), control.getUTCFullYear()],
@@ -1386,7 +1380,7 @@ function get_timezone(METRIC) {
 										utc.push(oDiffs[k][1]) // control
 										time.push(oDiffs[k][0]) // test
 									}
-									oRaw[rawkey][method] = [utc.join(' '), time.join(' ')]
+									utc = utc.join(' '); time = time.join(' ')
 								} else if ('components_utc' == method) {
 									oDiffs = {
 										'1': [test.getFullYear(), control.getFullYear()],
@@ -1401,13 +1395,22 @@ function get_timezone(METRIC) {
 									for (const k of Object.keys(oDiffs)) {
 										// this is reversed: we subtract time from utc
 										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
-										// but lets still record utc as using the control date etc
-										utc.push(oDiffs[k][1]) // control
-										time.push(oDiffs[k][0]) // test
+										utc.push(oDiffs[k][0]) // reversed so we use test
+										time.push(oDiffs[k][1]) // control
 									}
-									oRaw[rawkey][method] = [utc.join(' '), time.join(' ')]
+									utc = utc.join(' '); time = time.join(' ')
 								}
 							}
+							if (undefined !== utc) {
+								oMath['3.timezone'][key][method] = time
+								// only old-timey years have partial minutes
+								if (1879 == year &&'date.parse' == method) {
+									oMath['1.utc_1879_'+ method].push(utc)
+								} else {
+									oMath['2.utc'][key][method] = utc
+								}
+							}
+							if (undefined == offset) {offset = time - utc}
 							if (isFirst) {
 								let typeCheck = typeFn(offset)
 								//console.log(method, typeCheck, offset)
@@ -1424,23 +1427,34 @@ function get_timezone(METRIC) {
 			oData = log_error(4, METRIC, e)
 		}
 		for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
-		// summarize oRaw
-		let newobj = {}
-		for (const d of Object.keys(oRaw)) {
-			newobj[d] = {}
-			for (const k of Object.keys(oRaw[d])) {
-				let itemdata = oRaw[d][k], itemhash = mini(itemdata) +' '
-				if (undefined == newobj[d][itemhash]) {
-					newobj[d][itemhash] = {'data': itemdata, 'group': [k]}
-				} else {newobj[d][itemhash].group.push(k)}
+		// summarize oMath etc
+		let oNumbers = {'hashes': {}, 'info': {}}
+		for (const type of Object.keys(oMath)) {
+			let tmpobj = {}
+			if ('1.utc_1879_date.parse' == type) {
+				tmpobj = oMath[type]
+			} else {
+				let newobj = {}
+				for (const d of Object.keys(oMath[type])) {
+					newobj[d] = {}
+					for (const k of Object.keys(oMath[type][d])) {
+						let itemdata = oMath[type][d][k], itemhash = mini(itemdata) +' '
+						if (undefined == newobj[d][itemhash]) {
+							newobj[d][itemhash] = {'data': itemdata, 'group': [k]}
+						} else {newobj[d][itemhash].group.push(k)}
+					}
+				}
+
+				for (const d of Object.keys(newobj)) {
+					tmpobj[d] = {}
+					for (const k of Object.keys(newobj[d])) {tmpobj[d][newobj[d][k].group.join(' ')] = newobj[d][k].data}
+				}
 			}
-		}
-		for (const d of Object.keys(newobj)) {
-			oRaw[d] = {}
-			for (const k of Object.keys(newobj[d])) {oRaw[d][newobj[d][k].group.join(' ')] = newobj[d][k].data}
+			oNumbers['hashes'][type] = mini(tmpobj) // utc: 1d6b6215
+			oNumbers['info'][type] = tmpobj
 		}
 		//return
-		return [oData, oRaw]
+		return [oData, oNumbers]
 	}
 
 	Promise.all([
@@ -1461,7 +1475,33 @@ function get_timezone(METRIC) {
 		if (1 == tzData.length) {tz = tzData[0]; isTimeZoneValue = tz}
 
 		// OFFSETS raw data
-		addDisplay(4, METRIC+'_data', addButton(4, METRIC +'_data', 'data'))
+		let btnColor = 4
+		// we'll do numbers checking in the actual function where we can check each
+		// method individually and handle those with errors etc but for now I want
+		// to test and collect info and output some visuals for that
+		if (isGecko) {
+			btnColor = 'bad'
+			let mathdata = res[1][1]
+			let isUTC = mathdata.hashes['2.utc'] == 'c5902103'
+			if (isUTC) {
+				let isDP = mathdata.hashes['1.utc_1879_date.parse'] == '7f6ca60a'
+				if (isDP) {
+					btnColor = 'good'
+				} else {
+					// utc correct, but partial minute: check absolute diff within 60000
+					// we know the expected values
+					let aExpected = [-2870420400000,-2854782000000]
+					let aGot = mathdata.info['1.utc_1879_date.parse']
+					let isGood = true // assume good
+					for (let i = 0; i < aExpected.length; i++) {
+						let diff = Math.abs(aExpected[i] - aGot[i])
+						if (diff > 60000) {isGood = false}
+					}
+					if (isGood) {btnColor = 'good'}
+				}
+			}
+		}
+		addDisplay(4, METRIC+'_data', addButton(btnColor, METRIC +'_data', 'data'))
 		sDetail.document[METRIC +'_data'] = res[1][1]
 
 		// OFFSETS
