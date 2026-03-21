@@ -147,15 +147,15 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 					let hashC = mini(byteArrayToHex(hashes[1]))
 					let hashG = mini(byteArrayToHex(hashes[0]))
 					// lies
-					let isSame = hashG == hashC, display, btn = addButton(11, METRIC)
+					let isSame = hashG == hashC, display, btn = addButton(11, METRIC +'_data')
 					if (!isSame) {
 						isLies = true
-						addDetail(METRIC, {'copyFromChannel': copyTest, 'getChannelData': getTest})
+						addDetail(METRIC +'_data', {'copyFromChannel': copyTest, 'getChannelData': getTest})
 						display = 'mixed'
 					} else {
 						// no need to list twice
 						isLies = check_audioLies()
-						addDetail(METRIC, copyTest)
+						addDetail(METRIC +'_data', copyTest)
 						display = hashC
 						btn += ' '+ sum
 					}
