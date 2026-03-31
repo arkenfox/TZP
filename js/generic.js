@@ -867,7 +867,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 150) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 151) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -883,6 +883,11 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			try {
+				Temporal.PlainMonthDay.from({calendar:'chinese', year: 1898, monthCode:'M01L', day: 29}, {overflow: 'reject'})
+			} catch(e) {
+				if ('RangeError: calendar field "day" is too large: 29' == e+'') return 151 // 2024291
+			}
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
 			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
@@ -1322,6 +1327,7 @@ function metricsAction(type) {
 		dom.modaloverlay.style.display = 'none'
 		dom.overlay.style.display = 'none'
 		dom.metricsDisplay.innerHTML = '' // clear so we always start at the top
+		dom.overlayInfo.innerHTML = ''
 	} else if ('console' == type) {
 		if (metricsData !== undefined) {console.log(metricsTitle, metricsData)}
 	} else if ('download' == type) {
@@ -1339,7 +1345,6 @@ function metricsAction(type) {
 	} else {
 		// user changed settings
 		dom.metricsDisplay.innerHTML = ''
-		dom.overlayInfo.innerHTML = ''
 		// force delay so reflow = always start at the top
 		setTimeout(function() {
 			metricsShow(overlayName, overlayScope)
@@ -1418,8 +1423,8 @@ function metricsShow(name, scope) {
 
 	let isColor = !(target == 'window_functions')
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor)): ''
-	// dev: no n3eed to display overlayInfo everywhere, limit
-	if ('agent' == name) {dom.overlayInfo.innerHTML = overlayInfo}
+	// dev: no need to display overlayInfo everywhere, limit
+	if ('feature' == name) {dom.overlayInfo.innerHTML = overlayInfo}
 
 	//add btn, show/hide options, display
 	let hash = mini(data)
@@ -1555,23 +1560,28 @@ function output_health(scope) {
 	let target = gData.health[scope +'_collect']
 	try {
 		for (const metric of Object.keys(target).sort()) {
-			let sect = target[metric][0]
-			let isPass = target[metric][1]
-			if (isPass) {countPass++}
-			let symbol = isPass ? tick : cross
-			let sub = isPass ? '_pass' : '_fail'
-			// lookup
-			let data = lookup_health(sect, metric, scope, isPass)
-			let summary = data[0], detail = data[1]
-			if ('' !== summary) {summary = ' '+ summary}
-			// populate detail
-			if ('' == detail) {detail = symbol}
-			gData[h][scope][metric] = detail
-			gData[h][scope + sub][metric] = detail
-			// populate summary + metriclist
-			gData[h][scope +'_metrics'].push(metric)
-			gData[h][scope +'_summary'][metric] = symbol + summary
-			gData[h][scope +'_summary'+ sub][metric] = symbol + summary
+			try {
+				let sect = target[metric][0]
+				let isPass = target[metric][1]
+				if (isPass) {countPass++}
+				let symbol = isPass ? tick : cross
+				let sub = isPass ? '_pass' : '_fail'
+				// lookup
+				let data = lookup_health(sect, metric, scope, isPass)
+				let summary = data[0], detail = data[1]
+				if ('' !== summary) {summary = ' '+ summary}
+
+				// populate detail
+				if ('' == detail) {detail = symbol}
+				gData[h][scope][metric] = detail
+				gData[h][scope + sub][metric] = detail
+				// populate summary + metriclist
+				gData[h][scope +'_metrics'].push(metric)
+				gData[h][scope +'_summary'][metric] = symbol + summary
+				gData[h][scope +'_summary'+ sub][metric] = symbol + summary
+			} catch(e) {
+				console.log(metric, e)
+			}
 		}
 		if (countTotal > 0) {
 			let isAll = countPass == countTotal
