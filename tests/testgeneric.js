@@ -413,10 +413,15 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 150
+		isVerMax = 151
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {
+				Temporal.PlainMonthDay.from({calendar:'chinese', year: 1898, monthCode:'M01L', day: 29}, {overflow: 'reject'})
+			} catch(e) {
+				if ('RangeError: calendar field "day" is too large: 29' == e+'') return 151 // 2024291
+			}
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
 			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled (default true)

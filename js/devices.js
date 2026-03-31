@@ -117,7 +117,13 @@ function get_device_memory(METRIC) {
 			// https://www.w3.org/TR/device-memory/#sec-device-memory-js-api
 				// "While implementations may choose different values, the recommended upper bound
 				// is 8GiB and the recommended lower bound is 0.25GiB (or 256MiB)"
-			let aValid = [0.25, 0.5, 1, 2, 4, 8]
+			// blink 147+: (approx march 2026) https://chromestatus.com/feature/6330376953921536
+			/* Update to a new set of possible values for the Device Memory API:
+				- Android: 1, 2, 4, 8
+				- Others: 2, 4, 8, 16, 32
+				Replacing the old values of 0.25, 0.5, 1, 2, 4, 8 which have grown outdated.
+			*/
+			let aValid = [0.25, 0.5, 1, 2, 4, 8, 16, 32]
 			if (!aValid.includes(value)) {
 				throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ value
 			}
