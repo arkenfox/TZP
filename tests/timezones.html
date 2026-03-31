@@ -36,13 +36,20 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span class="btn4 btnfirst" onClick="run(`false`)">[ combine years ]</span>
-				<span class="btn4 btn" onClick="run(`true`)">[ summarize years ]</span>
-				<span class="btn4 btn" onClick="reset()">[ clear input ]</span>
-				<span id="elementSupported"><input type="checkbox" id="useSupported"> supported only</span>
+				<span class="btn4 btnfirst" onClick="run('run')">[ run ]</span><span class="btn4 btn" onClick="run('summary')">[ summary ]</span>
+				<select name="measure" id="measure">
+					<option value="math">date.parse</option>
+					<option value="tzn">timeZoneName</option>
+					<option value="both">both</option>
+				</select>
+				<span id="elementSupported"><input type="checkbox" id="useAll"> all</span> |
+				<span class="btn4 btn" onClick="run('tzn')">[ tzn ]</span>
 			<br><br>
-				<span><input type="text" style="width: 99%;" placeholder="comma delimited year(s)" id="inputYears"></span>
-			<br><br>
+				<label style="display: flex;">
+					<input type="text" style="flex: 1;" placeholder="comma delimited year(s)" name="inputYears" id="inputYears">
+					<span class="btn4 btn" onClick="reset()"> [clear]</span>	
+			</label>
+			<br>
 				<span><hr></span>
 			<br>
 				<span class="spaces" id="info" style="line-height: 1.5em;"></span>
@@ -65,9 +72,17 @@ var aLegend = [],
 			// use the 15th - this makes get* and getUTC* PoCs possible
 	aYears = [],
 	aYearsTZP = [],
-	loopYear = "",
-	loopData = [],
-	tzResolved = ""
+	useSupported, 
+	isLog = false
+
+let	oData = {},
+	oDataShort = {},
+	oBucketed = {},
+	oUndefined = {},
+	aBuckets = [],
+	aShortNames = [],
+	loopData = []
+
 
 function build_dates(year) {
 	// reset
@@ -90,43 +105,52 @@ function build_dates(year) {
 	}
 }
 
+function log(item) {
+	try {
+		item = item.toUpperCase()
+		if ('GROUPS' == item) {
+			console.log(item, aBuckets.length, mini(aBuckets), '\n', aBuckets)
+		} else if ('RESULTS' == item) {
+			console.log(item, mini(oBucketed) +'\n', oBucketed)
+		} else if ('FINGERPRINT' == item) {
+			console.log(item, mini(oUndefined) +'\n', oUndefined)
+		} else if ('TIMEZONENAMES' == item) {
+			console.log(item +' DATA', '\n', oDataShort)
+			console.log(item +' LIST', aShortNames.length, '\n', aShortNames)
+		}
+	} catch(e) {
+		console.log(e)
+	}
+}
+
 function reset() {
 	dom.inputYears.value = ""
 }
 
-function legend(array, invalid) {
+function legend() {
 	// pick our list
-	let useSupported = dom.useSupported.checked
 	let proceed = false, list = []
 	if (useSupported) {
 		if (aLegend.length == 0) {proceed = true}
-		list = oLists["supported"]
+		list = oLists.supported
 	} else {
 		if (aLegendFull.length == 0) {proceed = true}
-		list = oLists["full"]
+		list = oLists.full
 	}
 
-	let prev = ""
+	let prev = ''
 	// do once
 	if (proceed) {
 		list.sort()
 		for (let i = 0 ; i < list.length; i++) {
-			let parts = list[i].split("/")
+			let parts = list[i].split('/')
 			let area = parts[0]
-			let location = parts.slice(1).join("/")
+			let location = parts.slice(1).join('/')
 			if (area == prev) {
-				if (useSupported) {
-					aLegend.push(" " + location)
-				} else {
-					aLegendFull.push(" " + location)
-				}
+				if (useSupported) {aLegend.push(' '+ location)} else {aLegendFull.push(' '+ location)}
 			} else {
-				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
-				if (useSupported) {
-					aLegend.push("<br>"+ newArea +"<br><br> "+ location)
-				} else {
-					aLegendFull.push("<br>"+ newArea +"<br><br> "+ location)
-				}
+				let str = '<br>'+ s4+ (area == 'AA' ? 'MISC' : area.toUpperCase()) + sc +'<br><br> '+ location
+				if (useSupported) {aLegend.push(str)} else {aLegendFull.push(str)}
 			}
 			prev = area
 		}
@@ -135,380 +159,337 @@ function legend(array, invalid) {
 	let aDisplay = useSupported ? aLegend : aLegendFull
 	let header = s4.trim() +"TIMEZONES ["+ list.length + (useSupported ? " supported" : "") +"] "+ sc +"<br><br>"
 		+"<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
 
-	if (array == undefined) {
-		dom.legend.innerHTML = header + aDisplay.join("<br>")
-	} else {
-		let legendNEW = []
-		array.sort()
-		let matchparts = array[0].split("/"),
-			match = matchparts.slice(1).join("/"),
-			counter = 0
-		for (let i = 0 ; i < list.length; i++) {
-			let parts = list[i].split("/")
-			let area = parts[0]
-			let location = parts.slice(1).join("/")
-			if (invalid.includes(list[i])) {
-				location = sb + location + sc
-			} else if (location == match) {
-				location = sg + location + sc
-				counter++ // count matches to keep in sync with array
-				try {
-					matchparts = array[counter].split("/")
-					match = matchparts.slice(1).join("/")
-				} catch(e) {}
-			}
-			if (area == prev) {
-				legendNEW.push(" " + location)
-			} else {
-				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
-				legendNEW.push("<br>"+ newArea +"<br><br> "+ location)
-			}
-			prev = area
-		}
-		dom.legend.innerHTML = header + legendNEW.join("<br>")
-	}
 }
 
-function run_test(isLoopy) {
+function run_test(type) {
 
 	let t0 = performance.now()
+	let method = dom.measure.value
+	let methodStr = 'math' == method ? 'date.parse' : ('tzn' == method ? 'timeZoneName' : 'date.parse + timeZoneName')
+	let yrStr = aYears.length > 10 ? aYears.slice(0,3).join(', ') +' ... and ' + (aYears.length - 3) +' more' : aYears.join(', ')
+	let isTZP = 'math' == method && (aYears.join(',') == aYearsTZP.join(','))
+	let padSize = 15
+	function title(input, color) {
+		if (color == undefined) {return input.padStart(padSize) +': '} else {return color + input.padStart(padSize) +': '+ sc}
+	}
 
 	function test() {
+		// reset
+		oData = {}
+		oDataShort = {}
+		oBucketed = {}
+		aBuckets = []
+		aShortNames = []
+
 		// vars
+		let tmpoption = {
+			day: '2-digit', month: '2-digit', year: 'numeric',
+			hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
+			timeZoneName: 'short',
+		}
 		let k = 60000,
-			results = [], // one line per timezone: everything
-			buckets = [], // locales per unique values
-			unique = [], // one line per values hash
-			bucketsizes = [],
-			data = [],
 			tzresults = {},
-			tzpdata = {},
-			tolocaledata = {},
-			tzyear = [],
-			matchHash = "",
-			matchList = "",
-			tzpHash = "",
-			invalid = []
+			uniqueTZs = 0,
+			undefinedError,
+			aDisplay = [],
+			aInvalid = [],
+			aBucketSizes = []
 
-		if (isLoopy == "false") {
-			// get TZP hash
-			for (let i = 0 ; i < aYears.length; i++) {
-				tzyear = []
-				for (let j = 0 ; j < aDays.length; j++) {
-					let datetime = aDays[j] +", "+ aYears[i] +" 13:00:00"
-					let control = new Date(datetime +" UTC")
-					let test = new Date(datetime)
-					let diff = ((Date.parse(test) - Date.parse(control))/k)
-					tzyear.push(diff)
+		if ('run' == type) {
+			// get undefined hash
+			/* notes:
+				because we are formatting (toLocaleString or DTF etc) to get the timezonename we need
+				to ensure both use the same format (en) otherwise the string can mix e.g. 1/7 vs 7/1
+				in TZP we don't format and if we do it will only be for a timeZoneName PoC
+			*/
+			oUndefined = {}
+			tmpoption.timeZone = undefined
+			try {
+				for (let i = 0 ; i < aYears.length; i++) {
+					let year = aYears[i], control, test
+					oUndefined[year] = []
+					for (let j = 0 ; j < aDays.length; j++) {
+						let datetime = aDays[j] +', '+ aYears[i] +' 13:00:00'
+						let control = new Date(datetime)
+						let test = control.toLocaleString('en', {timeZone: 'UTC'})
+						let formatter = new Intl.DateTimeFormat('en', tmpoption)
+						control = formatter.format(control).replace(',','')
+						let diff = ((Date.parse(test) - Date.parse(control))/k)
+						if ('math' == method || 'both' == method) {oUndefined[year].push(diff)}
+						if ('tzn' == method || 'both' == method) {oUndefined[year].push(tznshort)}
+					}
 				}
-				tzpdata[aYears[i]] = tzyear
+			} catch(e) {
+				undefinedError = e+''
 			}
-			if (aYears.join(',') == aYearsTZP.join(',')) {
-				tzpHash = mini(tzpdata)
-				console.log("TZP HASH/DATA", tzpHash+"\n", tzpdata)
-			} else {
-				tzpHash = zNA
-			}
-
-			// get matching hash
-			for (let i = 0 ; i < aYears.length; i++) {
-				tzyear = []
-				for (let j = 0 ; j < aDays.length; j++) {
-					let datetime = aDays[j] +", "+ aYears[i] +" 13:00:00"
-					let control = new Date(datetime)
-					// note: we need to make sure control+test are the same format (en)
-						// otherwise the string can mix e.g. 1/7 vs 7/1
-					// we use UTC to get offsets to match tzpHash and to match what you would get in that actual timezone
-					let test = control.toLocaleString("en", {timeZone: "UTC"}) 
-					control = control.toLocaleString("en")
-					let diff = ((Date.parse(test) - Date.parse(control))/k)
-					tzyear.push(diff)
-				}
-				tolocaledata[aYears[i]] = tzyear
-			}
-			matchHash = mini(tolocaledata)
-			console.debug("toLocale HASH/DATA", matchHash+"\n", tolocaledata)
 		}
 
 		// select list and loop each timezone
-		let useSupported = dom.useSupported.checked
 		let array = useSupported ? oLists["supported"] : oLists["full"]
-		for (let i = 0 ; i < array.length; i++) {
-			let isInvalid = false
-			let tz = array[i]
 
+		// get data
+		let tmpData = {}
+		for (let i = 0 ; i < array.length; i++) {
+			let tz = array[i]
 			let tzclean = tz
 			// strip bogus area
 			if (tz.substring(0,3) == "AA/") { tzclean = tz.substring(3)}
-			// loop each date
-			isInvalid = false
-			tzresults = {}
-			let strResults = []
-			for (let i = 0 ; i < aYears.length; i++) {
-				tzyear = []
-				for (let j = 0 ; j < aDays.length; j++) {
-					try {
+			let tzvalid = 'UTC' == tzclean ? 'GMT' : tzclean
+			tmpoption.timeZone = tzvalid
+
+			tzresults = {} // loop each date
+			try {
+				for (let i = 0 ; i < aYears.length; i++) {
+					let year = aYears[i]
+					tzresults[year] = []
+					for (let j = 0 ; j < aDays.length; j++) {
 						let datetime = aDays[j] +", "+ aYears[i] +" 13:00:00"
 						let control = new Date(datetime)
 						let test = control.toLocaleString("en", {timeZone: "UTC"})
-						control = control.toLocaleString("en", {timeZone: tzclean})
+						let formatter = new Intl.DateTimeFormat('en', tmpoption)
+						control = formatter.format(control).replace(',','')
+						let tznshort = control.split(' ')[2]
+						control = control.slice(0,19)
 						let diff = ((Date.parse(test) - Date.parse(control))/k)
-						tzyear.push(diff)
-						strResults.push(diff)
-					} catch(e) {
-						isInvalid = true
-					}
-				}
-				tzresults[aYears[i]] = tzyear
-			}
-			// one result for every timezone
-			if (isInvalid) {
-				invalid.push(tzclean)
-			} else {
-				results.push(mini(tzresults) +":"+ tzclean +":"+ tz +":" + strResults.join(", "))
-			}
-		}
-
-		// sort + loop results, get locales per hash
-		results.sort()
-		let nextHash = "", timezones = "", tmpTZ = [], tmpLegend = []
-		for (let i = 0 ; i < results.length; i++) {
-			// get current item
-			let currentHash = results[i].split(":")[0]
-			let currentTZ = results[i].split(":")[1]
-			let currentLegend = results[i].split(":")[2]
-			let currentValues = results[i].split(":")[3]
-			tmpTZ.push(currentTZ)
-			tmpLegend.push(currentLegend)
-			// grab next item
-			if (i < results.length - 1) {
-				nextHash = results[(i+1)].split(":")[0]
-			} else {
-				nextHash = "end"
-			}
-			if (nextHash !== currentHash) {
-				let padCount = tmpTZ.length.toString()
-				padCount = padCount.padStart(3)
-				unique.push(
-					padCount
-					+":"+ currentHash
-					+":"+ tmpTZ.join(", ")
-					+":"+ tmpLegend.join(", ")
-					+":"+ currentValues
-				)
-				buckets.push(tmpTZ.join())
-				bucketsizes.push(tmpTZ.length)
-				tmpTZ = [] // reset
-				tmpLegend = []
-			}
-		}
-		// hash of locales in buckets
-		buckets.sort()
-		let buckethash = mini(buckets.join("~")) // always include a unique bucket delimiter
-		//console.debug(buckets.join("\n"))
-
-		// buckets
-		bucketsizes.sort((b,a) => b-a)
-		function checkOnes(count) { return count == 1}
-		let bucketOnes = bucketsizes.filter(checkOnes)
-		let uniqueTZs = bucketOnes.length
-
-		// Loopy
-		if (isLoopy == "true") {
-			loopData.push(
-				s12 + loopYear + sc +" "
-				+ buckethash + s4 +" ["+ bucketsizes.length +"] "+ sc
-				+ sg +"["+ uniqueTZs +"]"+ sc
-			)
-		}
-
-		// non Loopy
-		if (isLoopy == "false") {
-			// sum of bucketsizes
-			let sumTZ = bucketsizes.reduce(function(a, b){return a + b}, 0)
-			invalid = invalid.filter(function(item, position) {return invalid.indexOf(item) === position})
-
-			// unique results
-			unique.sort()
-			let counter = 1,
-				singles = [],
-				singlesLegend = [],
-				groupData = ""
-
-			for(let i = (unique.length - 1); i > -1; i = i-1) {
-				// four parts
-				let line = unique[i]
-				let groupCount = line.split(":")[0].trim(),
-					valuesHash = line.split(":")[1],
-					groupTZ = line.split(":")[2],
-					groupLegend = line.split(":")[3],
-					groupNumber = counter.toString()
-				groupData = line.split(":")[4]
-
-				// color up valuesHash, track matches
-				if (valuesHash == tzpHash) {
-					valuesHash = s16 + valuesHash +" [you match this]"+ sc
-					matchList = groupTZ
-				} else {
-					valuesHash = s14 + valuesHash + sc
-				}
-
-				// color up the group data, add year
-				groupNumber = groupNumber.padStart(3)
-				let parts = groupData.split(", "),
-					prettyStr = "",
-					prettyData = [],
-					partCounter = 0
-				for (let i = 0; i < aYears.length; i++) {
-					prettyStr = s4 + aYears[(i)] + sc +":"
-					for (let j = 0; j < aDays.length; j++) {
-						prettyStr += " "+ parts[partCounter] +","
-						partCounter++
-						//last item per year
-						if ( ((j+1)/aDays.length) == 1 ) {
-							prettyStr = prettyStr.slice(0, -1)
-							prettyData.push(prettyStr)
+						if ('math' == method || 'both' == method) {tzresults[year].push(diff)}
+						if ('tzn' == method || 'both' == method) {tzresults[year].push(tznshort)}
+						if ('run' == type || 'tzn' == type) {
+							if (undefined == oDataShort[tznshort]) {
+								oDataShort[tznshort] = [tzclean]
+							} else {
+								oDataShort[tznshort].push(tzclean)
+							}
 						}
+						/* what timezones in have part hours
+						if (2026 == aYears[i]) {
+							let partial = diff % 60
+							if (partial !== 0) {console.log(aYears[i], tz, diff)}
+						}
+						//*/
+					}
+					tmpData[tzclean] = {
+						'hash': mini(tzresults),
+						'data': tzresults
 					}
 				}
-				groupData = prettyData.join("<br>")
-
-				// build output
-				if (groupCount > 1) {
-					let groupHash = mini(groupTZ)
-					data.push(
-						s12 + groupNumber +": "+ groupHash + sc +" "
-						+ s4 +"["+ groupCount +"]"+ sc +"<br>"
-						+"<ul><li>"+ groupTZ +"</li>"
-						+"<li>"+ valuesHash +"</li>"
-						+"<li>"+ groupData +"</li></ul>"
-					)
-				} else {
-					// combine unique TZs into one
-					singles.push(groupTZ +"<ul><li>"+ valuesHash +"</li><li>"+ groupData +"</li></ul>")
-					singlesLegend.push(groupLegend)
-				}
-				counter ++
+			} catch(e) {
+				aInvalid.push(tzclean)
 			}
-			if (singles.length) {
-				singles.sort()
-				data.push(
-					s12 + (unique.length - singles.length + 1) +"-"+ unique.length + sc
-					+": are all unique "+ s4 +"["+ singles.length +"]"+ sc +"<br><br>"+ singles.join("")
+		}
+
+		// dedupe short timezonenames collection
+		if ('tzn' == type || 'run' == type) {
+			// map names into an order
+			let tznShort = {
+				// hardcoded
+				AKST: '-09:00', AKDT: '-08:00',
+				AST: '-04:00', ADT: '-03:00',
+				CST: '-06:00', CDT: '-05:00',
+				EST: '-05:00', EDT: '-04:00',
+				GMT: '+00:00', GMT0: '+00:00',
+				HAST: '-10:00', HADT: '-09:00',
+				HST: '-10:00', HDT: '-09:00',
+				MST: '-07:00', MDT: '-06:00',
+				PST: '-08:00', PDT: '-07:00',
+				UTC: '00:00', GMT: '00:00',
+				'GMT+0': '00:00', 'GMT-0': '00:00',
+			}
+			let oOrder = {'n': {}, 'p': {}} // negative/positive
+			let oMinutes = {}
+			for (const k of Object.keys(oDataShort)) {
+				// dedupe and sort
+				let parts
+				let tzones = oDataShort[k]
+				tzones = tzones.filter(function(item, position) {return tzones.indexOf(item) === position})
+				tzones.sort()
+				oDataShort[k] = tzones
+				// calculate numerical order
+				let value, target
+				if (undefined !== tznShort[k]) {
+					value = tznShort[k] +':00'
+					target = value.includes('-') ? 'n' : 'p'
+					if ('n' == target) {value = value.slice(1)}
+				} else {
+					// should be just left with GMTs
+					value = k
+					target = value.includes('-') ? 'n' : 'p'
+					value = value.replace('GMT','')
+					value = value.replace('-','')
+					value = value.replace('+','')
+					parts = value.split(':')
+					value = parts[0].padStart(2,'0') +':'
+					if (undefined == parts[1]) { value +='00'} else { value += parts[1]} // minutes are always 2 digits
+					if (undefined == parts[2]) { value +=':00'} else { value += ':'+ parts[1]} // seconds are always 2 digits
+				}
+				if (undefined !== value) {
+					let minutes
+					if ('00:00:00' == value) {minutes = 0
+					} else {
+						parts = value.split(':')
+						minutes = (parts[0] * 60) + (parts[1] * 1) + (parts[2]/60)
+						if ('p' == target) {minutes = minutes * -1}
+					}
+					oMinutes[k] = minutes
+					value = value.replaceAll(':','') * 1
+					if (undefined == oOrder[target][value]) {
+						oOrder[target][value] = {}
+					}
+					if (undefined == oOrder[target][value][k]) {
+						oOrder[target][value][k] = oDataShort[k].sort()
+					}
+				}
+			}
+			//console.log(oOrder)
+			//console.log(oMinutes)
+			// populate aShortNames			
+			for (const a of Object.keys(oOrder).sort()) {
+				if ('n' == a) {
+					// descending numbers
+					for (const b of Object.keys(oOrder[a]).sort((a,b) => b-a)) {
+						for (const k of Object.keys(oOrder[a][b]).sort()) {aShortNames.push(k)}
+					}
+				} else {
+					// ascending numbers
+					for (const b of Object.keys(oOrder[a]).sort((b,a) => b-a)) {
+						for (const k of Object.keys(oOrder[a][b]).sort()) {aShortNames.push(k)}
+					}
+				}
+			}
+			if ('tzn' == type) {
+				aDisplay.push(s12 +'YEARS: '+ sc + yrStr +'<br>')
+				aDisplay.push(s12 +'TIMEZONENAMES: '+ sc + s4 +' ['+ aShortNames.length +']' + sc +'<br><br>'+ aShortNames.join(', ') +'<br>')
+				aDisplay.push(s12 +'DATA: '+ sc +'<br>')
+				aShortNames.forEach(function(k) {
+					aDisplay.push(s14 + k + sc +': '+ s4 +'['+ oDataShort[k].length +'] '+ sc + s7 + oMinutes[k] + sc)
+					aDisplay.push('<li>' + oDataShort[k].join(', ') +'</li>')
+				})
+				dom.info.innerHTML = aDisplay.join('<br>') +'<br>'
+				dom.perf.innerHTML = Math.round(performance.now() - t0) +' ms'
+				return
+			}
+		}
+
+		// structure/tidy our data
+		for (const k of Object.keys(tmpData).sort()) {
+			let tmphash = tmpData[k].hash
+			if (undefined == oData[tmphash]) {
+				oData[tmphash] = {'data': tmpData[k]['data'],'timezones': [k]}
+			} else {
+				oData[tmphash]['timezones'].push(k)
+			}
+		}
+		for (const k of Object.keys(oData)) {
+			let count = oData[k].timezones.length
+			oData[k]['count'] = count
+			aBuckets.push(oData[k]['timezones'].join(', '))
+			aBucketSizes.push(count)
+			if (undefined == oBucketed[count]) {oBucketed[count] = {}} // group by count
+			oBucketed[count][k] = {'data': oData[k]['data'], 'timezones': oData[k]['timezones']}
+		}
+		if (undefined !== oBucketed['1']) {uniqueTZs = Object.keys(oBucketed['1']).length}
+		aBuckets.sort()
+		aInvalid = aInvalid.filter(function(item, position) {return aInvalid.indexOf(item) === position})
+		aInvalid.sort()
+		let buckethash = mini(aBuckets)
+		aBucketSizes.sort((b,a) => b-a)
+		let sumTZ = aBucketSizes.reduce(function(a, b){return a + b}, 0)
+		if (isLog && 'run' == type) {
+			console.log('tmpData\n',tmpData)
+			console.log('oData HASH/DATA', Object.keys(oData).length, mini(oData) +'\n', oData)
+			console.log('BUCKETSIZES', '[sum of sizes:', sumTZ, ']\n', aBucketSizes)
+		}
+
+		if ('summary' == type) {
+			loopData.push(s12 + loopYear + sc +' '+ buckethash + s4 +' ['+ aBucketSizes.length +'] '+ sc + sg +'['+ uniqueTZs +']'+ sc)
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +' ms'
+			return
+		}
+
+		// display data
+		aDisplay = ['<hr>']
+		let counter = 0
+		for (const c of Object.keys(oBucketed).sort((a,b) => b-a)) { // count
+			let isOnes = '1' == c
+			if (isOnes) {
+				let total = Object.keys(oData).length, next = counter + 1, remainder = total - counter
+				aDisplay.push('<hr>timezones in '+ s12 + 'hashes '+ next + '-' + total + sc
+					+' are all unqiue'+ s4 +' ['+ remainder +']'+ sc +'<br>'
 				)
 			}
-			// build info
-			let info = []
-			function title(input, color) {
-				if (color == undefined) {
-					return input.padStart(15) +": "
+
+			for (const h of Object.keys(oBucketed[c])) { // hash
+				counter++
+				let str = ''
+				if (isOnes) {
+					str = s12 + h + sc + ' ' + oBucketed[c][h].timezones + '<ul>'
 				} else {
-					return color + input.padStart(15) +": "+ sc
+					str = s12 + (counter+'').padStart(3,' ') +': '+ h + sc + s4 +' ['+ c +']' + sc
+					str += '<ul><li>' + oBucketed[c][h].timezones.join(', ') +'</li>'
 				}
+				let oTmp = oBucketed[c][h].data, dTmp = []
+				for (const y of Object.keys(oTmp)) {dTmp.push(s4 + y +sc +': ' + oTmp[y].join(', '))}
+				str += '<li>'+ dTmp.join('<br>') +'</li></ul>'
+				aDisplay.push(str)
 			}
-			function splitgroup(strToSplit) {
-				let parts = strToSplit.split(", ")
-				parts = parts.join("<br>" + ("").padStart(17))
-				return parts
-			}
-
-			info.push(
-				// color it up
-				title("unique")	+ sg + (bucketsizes.length - uniqueTZs).toString().padStart(3) + sc + " groups (>1) "
-					+ s4 + (array.length - invalid.length - uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
-					+ title("") + sg + (uniqueTZs).toString().padStart(3) + sc +" groups (=1) "
-					+ s4 + (uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
-					+ title("total") + sg + (bucketsizes.length).toString().padStart(3) + sc +" groups .... "
-					+ s4 + (array.length - invalid.length).toString().padStart(3) + sc + " timezones"
-			)
-			info.push( title("[groups] hash") + s12 + buckethash + sc)
-			info.push( title("[tzp] hash") + s16 + tzpHash + sc)
-
-			let tzpMatchNotation = ""
-			if (aYears.join() == aYearsTZP.join()) {
-				tzpMatchNotation = (matchHash == tzpHash ? sg : sb) +" [matches]" + sc
-			}
-			info.push( title("[toLocale] hash") + matchHash + tzpMatchNotation)
-			info.push( title("resolvedOptions") + tzResolved)
-
-			// any matches
-			if (matchList.length) {
-				// we can't say it's spoofed if we don't have it in the list
-				let isListed = array.includes(tzResolved)
-				let commas = matchList.match(/,/g)
-				if (commas == null) {
-					// single timezone
-					info.push( title("your group") + matchList)
-					if (matchList == tzResolved) {
-						info.push( title("veracity") +"resolvedOptions is 100% true")
-					} else {
-						info.push( title("veracity")
-							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
-					}
-				} else {
-					// multiple timezones
-					info.push( title("your group") + splitgroup(matchList))
-					if (matchList.search(tzResolved) == -1) {
-						info.push( title("veracity")
-							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
-					} else {
-						info.push( title("veracity") +"resolvedOptions seems legit")
-					}
-				}
-			} else {
-				// no match
-				info.push( title("your group") +"none")
-			}
-			// invalid timezones
-			if (sumTZ !== array.length) {
-				info.push( title("alert", sb)
-					+"total timezones " + sb +"(" + sumTZ +")"+ sc
-					+" !== legend count " + sb + "(" + array.length +")"+ sc)
-			}
-			if (invalid.length) {
-				let invHash = mini(invalid.join()), invNote = ""
-				if (isFF) {
-					if (invHash == "4e478d4b") {invNote = "[FF76-93 | ESR68]"
-					} else if (invHash == "f6849d01") {invNote = "[FF65-75 | ESR68]"
-					} else if (invHash == "9c934d1e") { invNote = "[FF53-64]"
-					} else if (invHash == "c1476da0") { invNote = "[FF52]"
-					}
-				}
-				info.push( title(invalid.length +" invalid", sb) + invHash +" "+ s14 + invNote + sc)
-				if (invalid.length == 1) {
-					info.push(("").padStart(17) + invalid[0])
-				} else {
-					info.push(title("") + splitgroup(invalid.join(", ")))
-				}
-			}
-			bucketsizes.sort((a,b) => b-a)
-			let uniqueBS = bucketsizes.filter(function(item, position) {return bucketsizes.indexOf(item) === position})
-			let notoneBS = bucketsizes.filter(x => x != 1)
-			info.push("<br><hr>")
-			info.push(s4 +"unique groups sizes"+ sc +"<br>"+ uniqueBS.join(", ") +"<br>")
-			info.push(s4 +"groups > 1 summary"+ sc +"<br>"+ notoneBS.join(", "))
-			info.push("<br><hr>") // final line
-			// output data + info
-			dom.info.innerHTML = info.join("<br>")
-			dom.data.innerHTML = data.join("<br>")
-
-			// color up unique in legend
-			if (singles.length) {
-				legend(singlesLegend, invalid)
-			}
-			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		}
+		dom.data.innerHTML = aDisplay.join('<br>')
+
+		// display info
+		aDisplay = []
+		function splitgroup(strToSplit) {
+			let parts = strToSplit.split(", "); parts = parts.join('<br>' + ('').padStart(padSize + 2)); return parts
+		}
+		aDisplay.push( title('YEARS', s14) + yrStr)
+		aDisplay.push( title('METHOD', s14) + methodStr)
+		aDisplay.push( title('TIMEZONES', s14) + (useSupported ? 'supported only' : 'all') +'<br>')
+		aDisplay.push(
+			// color it up
+			title('unique')	+ sg + (aBucketSizes.length - uniqueTZs).toString().padStart(3) + sc +' groups (>1) '
+				+ s4 + (array.length - aInvalid.length - uniqueTZs).toString().padStart(3) + sc + ' timezones<br>'
+				+ title('') + sg + (uniqueTZs).toString().padStart(3) + sc +' groups (=1) '
+				+ s4 + (uniqueTZs).toString().padStart(3) + sc + ' timezones<br>'
+				+ title('total') + sg + (aBucketSizes.length).toString().padStart(3) + sc +' groups .... '
+				+ s4 + (array.length - aInvalid.length).toString().padStart(3) + sc + ' timezones'
+		)
+		aDisplay.push( title('[groups] hash') + '<span class="s12 btnc" onClick="log(' + "'groups'"+ ')">' + buckethash + '</span>')
+		aDisplay.push( title('[results] hash') + '<span class="s12 btnc" onClick="log(' + "'results'"+ ')">' + mini(oBucketed) + '</span>')
+		aDisplay.push( title('timezonenames') + '<span class="s12 btnc" onClick="log(' + "'timezonenames'"+ ')">' + 'details' + '</span>')
+		let fpstring = title((isTZP ? '[tzp]' : '[your]') + ' hash')
+		if (undefined == undefinedError) {
+			aDisplay.push( fpstring	+ '<span class="s16 btnc" onClick="log('+ "'fingerprint'"+ ')">' + mini(oUndefined) + '</span>')
+		} else {
+			aDisplay.push( fpstring	+ undefinedError)
+		}
+		// invalid timezones
+		if (sumTZ !== array.length) {
+			aDisplay.push( title('alert', sb) +'total timezones '+ sb +'(' + sumTZ +')'+ sc +' !== legend count '+ sb + '(' + array.length +')'+ sc)
+		}
+		if (aInvalid.length) {
+			aDisplay.push( title(aInvalid.length +' invalid', sb) + aInvalid[0])
+			if (aInvalid.length > 1) {aDisplay.push(title('') + splitgroup((aInvalid.slice(1)).join(', ')))}
+		}
+		// group info
+		aBucketSizes.sort((a,b) => b-a)
+		let aBucketSizesUnique = aBucketSizes.filter(function(item, position) {return aBucketSizes.indexOf(item) === position})
+		let notoneBS = aBucketSizes.filter(x => x != 1)
+		aDisplay.push(s4 +'<br>unique groups sizes'+ sc +'<br>'+ aBucketSizesUnique.join(', ') +'<br>')
+		aDisplay.push(s4 +'groups > 1 summary'+ sc +'<br>'+ notoneBS.join(', '))
+
+		dom.info.innerHTML = aDisplay.join('<br>') +'<br>'
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+		return
 	}
 
-	if (isLoopy == "true") {
+	let loopYear = ''
+	if ('summary' == type) {
 		// reset loopData
 		loopData = []
-		loopData.push(
-			s12 +"year"+ sc +" hash-of-timezone-groups"
-			+ s4 +" [groups] "+ sc
-			+ sg +"[unique timezones]"+ sc +"<br>"
-		)
+		loopData.push( title('METHOD', s14) + methodStr)
+		loopData.push( title('TIMEZONES', s14) + (useSupported ? 'supported only' : 'all') +'<br>')
+		loopData.push(s12 +'year'+ sc +' hash-of-timezone-groups' + s4 +' [groups] '+ sc + sg +'[unique timezones]'+ sc +'<br>')
+
 		// loop
 		let loopYears = aYears
 		for (let i = 0; i < loopYears.length; i++) {
@@ -517,28 +498,31 @@ function run_test(isLoopy) {
 			test()
 		}
 		// output loopData
-		dom.info.innerHTML = loopData.join("<br>")
-		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+		dom.info.innerHTML = loopData.join('<br>')
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +' ms'
+		return
 	} else {
 		test()
 	}
 
 }
 
-function run(isLoopy) {
+function run(type) {
+	useSupported = !dom.useAll.checked
+
 	let go = false
 	// reset legend
 	legend()
-	dom.info = ""
-	dom.data = ""
-	dom.perf = ""
+	dom.info = ''
+	dom.data = ''
+	dom.perf = ''
 	aYears = []
 
 	let yearStr = dom.inputYears.value
 	yearStr = yearStr.trim()
 	if (yearStr.length) {
 		// parse for valid years
-		let tmpArr = yearStr.split(",")
+		let tmpArr = yearStr.split(',')
 		for (let i = 0 ; i < tmpArr.length; i++) {
 			let trimmed = tmpArr[i].trim()
 			if (trimmed.length) {
@@ -556,7 +540,7 @@ function run(isLoopy) {
 		if (aYears.length) {
 			go = true
 		} else {
-			dom.info = "please provide at least one year"
+			dom.info = 'please provide at least one year'
 		}
 	} else {
 		// run examples
@@ -565,39 +549,36 @@ function run(isLoopy) {
 			// tested: negative years
 		// use a year in the future to catch some changes from tzdata
 		aYears = aYearsTZP
-/*
-old: using 2018
-unique:  49 groups (>1) 173 timezones
-      : 296 groups (=1) 296 timezones
- total: 345 groups .... 469 timezones
+		/*
+		old: using 2018
+		unique:  49 groups (>1) 173 timezones
+					: 296 groups (=1) 296 timezones
+		 total: 345 groups .... 469 timezones
+			new: using 2025
+		unique:  48 groups (>1) 171 timezones <- less shared
+					: 298 groups (=1) 298 timezones <- more unique
+		 total: 346 groups .... 469 timezones <- more hashes
+		 kaching! matches
+		*/
 
-new: using 2025
-unique:  48 groups (>1) 171 timezones <- less shared
-      : 298 groups (=1) 298 timezones <- more unique
- total: 346 groups .... 469 timezones <- more hashes
- kaching! matches
-
-*/
 		// test flips
 		//aDays = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
 		//for (let i = 1879; i < 2030; i++) {aYears.push(i)}    // 1879+
 		//for (let i = 1800; i < 1900; i++) {aYears.push(i)}    // add a century
 		//for (let i = -1050; i < -350; i=i+7) {aYears.push(i)} // add negative years
 		//for (let i = 2000; i < 2100; i++) {aYears.push(i)}    // add the future
-
 		dom.inputYears.value = aYears.join(',')
 		go = true
 	}
 
 	if (go) {
-		dom.info = "calculating..."
+		dom.info = 'calculating...'
 		// rebuild aDates
 		build_dates()
-		tzResolved = Intl.DateTimeFormat().resolvedOptions().timeZone
 		// pause for repaint
 		function test() {
 			clearInterval(checking)
-			run_test(isLoopy)
+			run_test(type)
 		}
 		let checking = setInterval(test, 10)
 	}
@@ -607,7 +588,10 @@ function start() {
 	get_globals()
 	get_isVer()
 	// chrome has more groups with full vs supported
-	dom.useSupported.checked = true
+		// but this creates a false sense of uniqueness as aliases pair up
+		// e.g. supported = 280 | all = 229
+		//dom.useAll.checked = isFF ? false : true
+	dom.useAll.checked = false
 
 	aYearsTZP = [1879,1952,1976,2025]
 	if (isVer < 112) {aYearsTZP = [1879,1921,1952,1976,2025]}
@@ -623,29 +607,26 @@ function start() {
 	// add AA
 	let baselist = []
 	gTimezones.forEach(function(item){
-		if (!item.includes("/")) {item = "AA/"+ item}
+		if (!item.includes('/')) {item = 'AA/'+ item}
 		baselist.push(item)
 	})
 	baselist.sort()
-	oLists["full"] = baselist
+	oLists['full'] = baselist
 	try {
-		let supported = Intl.supportedValuesOf("timeZone")
+		let supported = Intl.supportedValuesOf('timeZone')
 		let newlist = []
 		supported.forEach(function(item){
-			if (!item.includes("/")) { item = "AA/"+ item	}
+			if (!item.includes('/')) { item = 'AA/'+ item}
 			newlist.push(item)
 		})
 		newlist.sort()
-		oLists["supported"] = newlist
+		oLists['supported'] = newlist
 	} catch(e) {
-		dom.useSupported.checked = false 
-		dom.elementSupported.style.display = "none"
+		dom.useAll.checked = true
+		dom.elementSupported.style.display = 'none'
 	}
 	legend()
-	
-
 }
-
 start()
 
 </script>
