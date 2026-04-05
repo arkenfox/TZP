@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 108, maxVer = 151, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 109, maxVer = 151, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -294,13 +294,20 @@ function testperf() {
 }
 
 		// 151: 2024291
-		let t151 = performance.now(), ver151
+		let t151a = performance.now(), ver151a
 		try {
 			Temporal.PlainMonthDay.from({calendar:'chinese', year: 1898, monthCode:'M01L', day: 29}, {overflow: 'reject'})
 		} catch(e) {
-			if ('RangeError: calendar field "day" is too large: 29' == e+'') ver151 = true // 2024291
+			if ('RangeError: calendar field "day" is too large: 29' == e+'') ver151a = true
 		}
-		rec(151, 151, "2024291", ver151, performance.now()-t151, 'TMPR') // 0.06 ms if no error | 0.35 ms is 151+
+		rec(151.1, 151, "2024291", ver151a, performance.now()-t151a, 'TMPR') // 0.06 ms if no error | 0.35 ms is 151+
+
+		// 151: 2022827
+		let t151 = performance.now(), ver151
+		try {
+			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) {ver151 = true}
+		} catch(e) {}
+		rec(151, 151, "2022827", ver151, performance.now()-t151) // 0.005 ms
 
 		// 150: 1801658
 		let t150 = performance.now(), ver150

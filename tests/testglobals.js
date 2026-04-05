@@ -188,6 +188,7 @@ var gLocales = [
 'bal,baluchi',
 'bcg,haryanvi',
 'bi,bislama',
+'bqi,luri bakhtiari', // 2020533
 'cak,kaqchikel',
 'ch,chamorro',
 'cho,choctaw',
