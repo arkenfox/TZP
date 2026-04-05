@@ -123,10 +123,7 @@ function run_main(method = "all") {
 	let dateA = new Date("January 5, 2023 1:00:00"),
 		dateB = new Date(-1,12,5,1)
 	let datesAll = [dateA, dateB]
-
 	let dateEra = new Date(-1, -11, -30)
-
-
 
 	let testsAll = {}
 	let testsAllMini = {
@@ -143,9 +140,9 @@ function run_main(method = "all") {
 	// which calendars don't do much
 	// note: F147+ 1955545 Use "islamic-tbla" when either "islamic" or "islamic-rgsa" was requested
 	let aCalendars = [
-		'default',
 		'buddhist', // yes
 		'chinese', // yes
+		'default',
 		'gregory', // yes
 		'hebrew', // yes
 		'indian', // yes
@@ -169,7 +166,6 @@ function run_main(method = "all") {
 	if (aCalendars.length) {
 		aCalendars.forEach(function(cal) {testsAll[cal] = testsAllMini})
 	}
-
 	let testsMin = {
 		'buddhist': {'long': [dateB]},
 		'chinese': {'long': [dateB]},
@@ -178,7 +174,7 @@ function run_main(method = "all") {
 		'hebrew': {'long': [dateB]},
 		'indian': {'long': [dateB]},
 		'islamic-tbla': {'long': [dateB]},
-		'japanese': {'long': [dateA]}, // only one to use dateA
+		'japanese': {'long': datesAll}, // only one to use dateA
 		'roc': {'long': [dateB]},
 	}
 	let tests = method == "all" ? testsAll : testsMin
@@ -280,14 +276,16 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "fbaf7fc4") { // FF149+
-				} else if (resultsHash == "1bfab5f2") { // FF147+
-				} else if (resultsHash == "694d0663") { // FF140-146
+				if (resultsHash == "b0fca3de") { // FF151+
+				} else if (resultsHash == "f8b5ff65") { // FF149-150
+				} else if (resultsHash == "d840090d") { // FF147-148
+				} else if (resultsHash == "92938d04") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "833f653b") { // FF140+: 174
-				} else if (localesHash == "ed510b98") { // FF140-146: 171
+				if (localesHash == "b056de0c") { // FF151+: 225
+				} else if (localesHash == "bd60b370") { // FF147-150: 174
+				} else if (localesHash == "51160b4d") { // FF140-146: 171
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -350,6 +348,8 @@ Promise.all([
 	// add additional locales to core locales for this test
 	let aListExtra = [
 		'ar-bh,arabic (bahrain)',
+		'az-cyrl,azerbaijani (cyrillic)',
+		'bn-in,bengali (india)',
 		'bs-cyrl,bosnian (cyrillic)',
 		'ckb-ir,central kurdish (iran)',
 		'en-001,english',
@@ -376,35 +376,37 @@ Promise.all([
 		'hi-latn,hindi (latin)',
 		'kk-cn,kazakh (china)',
 		'kok-latn,konkani (latin)',
+		'ks-deva,kashmiri (devanagari)',
+		'kxv-telu,kuvi (telugu)',
 		'lrc-iq,northern luri (iraq)',
 		'nl-be,dutch (belgium)',
+		'pa-arab,punjabi (arabic)',
 		'ps-pk,pashto (pakistan)',
 		'pt-ao,portuguese (angola)',
+		'sd-deva,sindhi (devanagari)',
 		'se-fi,northern sami (finland)',
+		'shi-latn,tachelhit (latin)',
 		'sr-latn,serbian (latin)',
 		'sv-fi,swedish (finland)',
 		'ur-in,urdu (india)',
+		'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
 		'yue-cn,cantonese (china)',
 		'zh-hans-hk,chinese (simplified hong kong)',
 
-		// blink: we should add blink extras after we max gecko
+		// blink
 		//*
 		'ar-sa,arabic (saudi arabia)',
-		'az-cyrl,azerbaijani (cyrillic)',
-		'pa-arab,punjabi (arabic)',
-		'sd-deva,sindhi (devanagari)',
 		'uz-af,uzbek (afghanistan)',
 		'uz-arab,uzbek (arabic)',
-		'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
 		//*/
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
 	if (isSupported) {
-		setBtn("all")
+		setBtn('all')
 		setTimeout(function() {
-			run("all")
+			run('all')
 		}, 100)
 	}
 })
