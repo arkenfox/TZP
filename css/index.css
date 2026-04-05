@@ -219,6 +219,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 .btnred, .sred {color: var(--testred); background-color: var(--bgbad);}
 .btn-left {float: left; position: relative; left: -15px; top: 0px;}
 .btn-right {float: right; position: relative; top: 0px; text-align: right;}
+.btn-right-inset {float: right; position: relative; top: 0px; right: 25%; width: 50%; direction: rtl; }
 
 /* tooltips */
 .icon {font-size: 10px; font-weight: bold; color: var(--test0); cursor: default;}
@@ -320,7 +321,7 @@ tr td.border-bottom {
 	border-bottom: 1px solid var(--test99);
 	border-bottom-style: dashed;
 }
-tr td.border-top {
+tr td.border-top, div.border-top {
 	border-top: 1px solid var(--test99);
 	border-top-style: dashed;
 }
