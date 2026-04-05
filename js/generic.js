@@ -883,11 +883,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
-			try {
-				Temporal.PlainMonthDay.from({calendar:'chinese', year: 1898, monthCode:'M01L', day: 29}, {overflow: 'reject'})
-			} catch(e) {
-				if ('RangeError: calendar field "day" is too large: 29' == e+'') return 151 // 2024291
-			}
+			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
 			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
