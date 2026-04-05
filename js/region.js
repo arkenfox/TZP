@@ -434,7 +434,7 @@ function set_oIntlTests() {
 			hebrew: [dates.RY],
 			indian: [dates.RY],
 			'islamic-tbla': [dates.RY],
-			japanese: [new Date("January 5, 2023 1:00:00")],
+			japanese: [dates.RY, new Date("January 5, 2023 1:00:00")],
 			roc: [dates.RY],
 		},
 		'datetimeformat.timezonename': {
