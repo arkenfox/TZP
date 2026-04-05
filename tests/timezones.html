@@ -216,10 +216,13 @@ function run_test(type) {
 						let test = control.toLocaleString('en', {timeZone: 'UTC'})
 						let formatter = new Intl.DateTimeFormat('en', tmpoption)
 						control = formatter.format(control).replace(',','')
+						let tznshort = control.split(' ')[2]
 						let diff = ((Date.parse(test) - Date.parse(control))/k)
 						if ('math' == method || 'both' == method) {oUndefined[year].push(diff)}
 						if ('tzn' == method || 'both' == method) {oUndefined[year].push(tznshort)}
 					}
+					// dedupe year data
+					oUndefined[year] = oUndefined[year].filter(function(item, position) {return oUndefined[year].indexOf(item) === position})
 				}
 			} catch(e) {
 				undefinedError = e+''
@@ -269,6 +272,8 @@ function run_test(type) {
 						}
 						//*/
 					}
+					// dedupe year results
+					tzresults[year] = tzresults[year].filter(function(item, position) {return tzresults[year].indexOf(item) === position})
 					tmpData[tzclean] = {
 						'hash': mini(tzresults),
 						'data': tzresults
