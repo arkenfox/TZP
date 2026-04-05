@@ -223,10 +223,13 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
+let oData = {}
 function run_main(method, aTest, isLoop = false) {
 	let t0 = performance.now()
+	oData = {}
 	sDetail['currencies'] = []
-	let oData = {}, oTempData = {} 
+
+	let oTempData = {} 
 	let spacer = '<br><br>'
 	let tests = {}
 	let intTests = 0
@@ -426,8 +429,8 @@ function run_main(method, aTest, isLoop = false) {
 			// notate new if 140+
 			if (isVer > 139) {
 				// results
-				if (resultsHash = "011ef182") { // FF147+
-				} else if (resultsHash == "6da6cad4") { // FF140-146
+				if (resultsHash == "c2325de7") { // FF147+
+				} else if (resultsHash == "3ada2b0a") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
