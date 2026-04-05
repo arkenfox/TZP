@@ -217,6 +217,7 @@ function run_test(type) {
 						let formatter = new Intl.DateTimeFormat('en', tmpoption)
 						control = formatter.format(control).replace(',','')
 						let tznshort = control.split(' ')[2]
+						control = control.slice(0,19) // remove tzn
 						let diff = ((Date.parse(test) - Date.parse(control))/k)
 						if ('math' == method || 'both' == method) {oUndefined[year].push(diff)}
 						if ('tzn' == method || 'both' == method) {oUndefined[year].push(tznshort)}
