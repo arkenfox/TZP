@@ -47,7 +47,7 @@
 			<br><br>
 				<label style="display: flex;">
 					<input type="text" style="flex: 1;" placeholder="comma delimited year(s)" name="inputYears" id="inputYears">
-					<span class="btn4 btn" onClick="reset()"> [clear]</span>	
+					<span class="btn4 btn" onClick="reset()"> [clear]</span>
 			</label>
 			<br>
 				<span><hr></span>
@@ -121,6 +121,32 @@ function log(item) {
 	} catch(e) {
 		console.log(e)
 	}
+}
+
+function get_lengths() {
+	// display string lengths for tzp
+	let max = 0
+	let oLengths = {}
+	for (const k of Object.keys(oData)) {
+		let display = []
+		for (const y of Object.keys(oData[k].data)) {
+			display.push(oData[k].data[y].join(', '))
+		}
+		let str = display.join(' | ')
+		let len = str.length
+		if (len > max) {
+			max = len
+			//console.log(max, str)
+		}
+		if (undefined == oLengths[len]) {
+			oLengths[len] = 1
+		} else {
+			oLengths[len] = oLengths[len] + 1
+		}
+
+	}
+	console.log(max)
+	console.log(oLengths)
 }
 
 function reset() {
@@ -327,7 +353,7 @@ function run_test(type) {
 					parts = value.split(':')
 					value = parts[0].padStart(2,'0') +':'
 					if (undefined == parts[1]) { value +='00'} else { value += parts[1]} // minutes are always 2 digits
-					if (undefined == parts[2]) { value +=':00'} else { value += ':'+ parts[1]} // seconds are always 2 digits
+					if (undefined == parts[2]) { value +=':00'} else { value += ':'+ parts[2]} // seconds are always 2 digits
 				}
 				if (undefined !== value) {
 					let minutes
