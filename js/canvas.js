@@ -79,8 +79,11 @@ const get_canvas = () => new Promise(resolve => {
 		if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
 		if (altB > 0) {strFP += 'b'; aNote.push('b'+ Math.floor((altB / pixelcount) * 100))}
 		if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
+		// FP data
 		isCanvasGetChannels = (isGetStealth ? 'stealth | ' : '') + strFP
-		isCanvasGet = ' ['+ (isGetStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
+		// display data: keep android short
+		if (isDesktop) {isCanvasGet = ' ['+ (isGetStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
+		} else if (isGetStealth) {isCanvasGet = ' [stealth]'}
 
 		// pixels: allow 2 collision
 		if (altP < (pixelcount - 2)) {return false}
