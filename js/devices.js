@@ -537,8 +537,8 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		}
 	}
 	function exit() {
-		// sort object
-		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k]}
+		// sort object: sort arrays so permission delays don't create disorder
+		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k].sort()}
 		let hash = mini(data)
 		let notation = '88b7fbf8' == hash ? default_green : default_red
 		// record
