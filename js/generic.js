@@ -1365,6 +1365,18 @@ function metricsEvent(evt) {
 
 function metricsShow(name, scope) {
 	overlayName = name
+
+	let isKit = false
+	if (isGecko) {
+		// atm this is pretty much limited to health, pixels_match and timezone_offsets_data
+		try {
+			let btn = dom[scope+name]
+			if (undefined == btn) {btn = dom[name]}
+			isKit = 'btngood' == btn.children[0].classList[0]
+		} catch(e) {}
+	}
+	if (isKit) {dom.overlaykit.classList.remove('hidden')} else {dom.overlaykit.classList.add('hidden')}
+
 	let isVisible = dom.modaloverlay.style.display == 'block'
 	let aShowFormat = ['fingerprint','health'] // lies need to be made into an object with metrics as key
 	let isSection = sectionNames.includes(name)
@@ -1904,8 +1916,8 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 	if (isSmart && !isLies && 8 == str.length && !str.includes(' ')) { // limit to hopefully just hashes
 		if (str.includes('6') && str.includes('7')) {
 			if (str.indexOf('6') < str.indexOf('7')) {
-				str = str.replace('7','<span class="s67">7</span>')
-				str = str.replace('6','<span class="s67">6</span>')
+				str = str.replace('7','<span class="s67 s' + section +'">7</span>')
+				str = str.replace('6','<span class="s67 s' + section +'">6</span>')
 			}
 		}
 	}
