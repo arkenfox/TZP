@@ -785,6 +785,11 @@ function set_fntList() {
 				fntData.family.full = array
 				fntData.family.full.push(fntFake)
 			} else if (isBB) {
+				// TB44461: Segoe MDL2 Assets
+				if (140 == isVer) {
+					fntMaster.allowlist.windows = fntMaster.allowlist.windows.filter(x => !['Segoe MDL2 Assets'].includes(x))
+					fntMaster.blocklist.windows.push('Segoe MDL2 Assets')
+				}
 				// desktop BB
 				let aBundled = []
 				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
@@ -2308,8 +2313,6 @@ function get_textmetrics(METRIC) {
 			let hash = mini(data), btn = addButton(12, METRIC +'_'+ k)
 			addBoth(12, METRIC +'_'+ k, hash, btn,'', data, isLies)
 		})
-	
-
 	} catch(e) {
 		for (const k of Object.keys(oMetrics)) {
 			addBoth(12, METRIC +'_'+ k, log_error(12, METRIC +'_'+ k, e))
