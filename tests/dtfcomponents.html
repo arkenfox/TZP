@@ -105,33 +105,55 @@ function legend() {
 function run_main(method = "all") {
 	let t0 = performance.now()
 	let spacer = "<br><br>"
-	/*
-	Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
 
- 	new Date("January 14, 2023 1:00:00") vs Date.UTC(2023, 0, 14, 1)
-	- a string e.g. "January 14, 2023 1:00:00" is not affected by your timezone
-	- Date.UTC is a number e.g. Date.UTC(2023, 0, 14, 1) and is affected by your timezone
+	// all dates (days/months/am-pm) must be timezone resistent:  we are checking locale only
+		// timezonename (and locale) is tested in the a different PoC - see TZP set_oIntlDateTests section
+	// thus we use UTC time so everyone uses the exact same dates, and then we pass
+		// UTC as the timezone so nothing shifts, preserving our specific datetimes
+	// note: only some sub-tests actually expose the day and/or hr
 
-	so for this test we want universal hashes so we will use a string, so e.g.
-	AM/PM will be in order, and we get the correct two weekdays
-	*/
+	let dates = {
+		// fractionalSecondDigits: we only ever reveal the seconds
+		FSD: new Date('2023-06-10T01:12:34.567Z'),
+		// month (x4) + year (xJan): we only ever reveal the month or year
+		Jan: new Date('2023-01-15T00:00:00.000Z'),
+		Feb: new Date('2023-02-15T00:00:00.000Z'),
+		Mar: new Date('2023-03-15T00:00:00.000Z'),
+		Apr: new Date('2023-04-15T00:00:00.000Z'),
+		May: new Date('2023-05-15T00:00:00.000Z'),
+		Jun: new Date('2023-06-15T00:00:00.000Z'),
+		Jul: new Date('2023-07-15T00:00:00.000Z'),
+		Aug: new Date('2023-08-15T00:00:00.000Z'),
+		Sep: new Date('2023-09-15T00:00:00.000Z'),
+		Oct: new Date('2023-10-15T00:00:00.000Z'),
+		Nov: new Date('2023-11-15T00:00:00.000Z'),
+		Dec: new Date('2023-12-15T00:00:00.000Z'),
+		// days (x2) + hrs (xFri) expose doh! days + hrs
+		Day: new Date("2003-01-01T01:00:00.000Z"), // single digit day
+		Sat: new Date('2023-01-14T01:00:00.000Z'),
+		Sun: new Date('2023-01-15T01:00:00.000Z'),
+		Mon: new Date('2023-01-16T01:00:00.000Z'),
+		Tue: new Date('2023-01-17T01:00:00.000Z'),
+		Wed: new Date('2023-01-18T01:00:00.000Z'), // doubles as hour 1 + minute 0
+		Thu: new Date('2023-01-19T01:00:00.000Z'),
+		Fri: new Date('2023-01-20T13:00:00.000Z'), // doubles as hour 13
+		// era: expose day
+		Era1: new Date('-000002-01-15T01:00:00.000Z'), // BC
+		Era2: new Date('2001-01-01T01:00:00.000Z'), // AD
+	}
 
-	let dateA = new Date("January 18, 2023 1:00:00"),
-		dateB = new Date("January 20, 2023 13:00:00"),
-		dateFSD = new Date("2022-03-11T01:12:34.5678"), // no Z: we want metric to be timezone resistent
-		dateEra = new Date(-1, -11, -30)
 
 	// https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	let testsAll = {
 		"day": {
-			dates: [new Date("January 1, 2023 1:00:00")],
+			dates: [dates.Day],
 			options: {
 				"2-digit": {day: "2-digit"},
 				"numeric": {day: "numeric"},
 			},
 		},
 		"era": {
-			dates: [dateEra, new Date("January 01, 0001 1:00:00")],
+			dates: [dates.Era1, dates.Era2],
 			options: {
 				"long": {era: "long"},
 				"narrow": {era: "narrow"},
@@ -140,7 +162,7 @@ function run_main(method = "all") {
 		},
 		// this adds nothing on it's own: what adds entropy is the delimiters and decimal separator
 		"fractionalSecondDigits": {
-			dates: [dateFSD],
+			dates: [dates.FSD],
 			options: {
 				"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1},
 				"2": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2},
@@ -148,30 +170,28 @@ function run_main(method = "all") {
 			},
 		},
 		"hour": {
-			dates: [dateA, dateB],
+			dates: [dates.Wed, dates.Fri],
 			options: {
 				"2-digit": {hour: "2-digit"},
 				"numeric": {hour: "numeric"},
 			},
 		},
 		"hourCycle": {
-			dates: [dateA],
+			dates: [dates.Wed],
 			options: {
 				"h112": {hour: "2-digit", hourCycle: "h11"},
 				// these add nothing except perf cost!
-				/*
-				"h11-n": {hour: "numeric", hourCycle: "h11"},
-				"h12-2": {hour: "2-digit", hourCycle: "h12"},
-				"h12-n": {hour: "numeric", hourCycle: "h12"},
-				"h23-2": {hour: "2-digit", hourCycle: "h23"},
-				"h23-n": {hour: "numeric", hourCycle: "h23"},
-				"h24-2": {hour: "2-digit", hourCycle: "h24"},
-				"h24-n": {hour: "numeric", hourCycle: "h24"},
-				//*/
-			},
+				//"h11-n": {hour: "numeric", hourCycle: "h11"},
+				//"h12-2": {hour: "2-digit", hourCycle: "h12"},
+				//"h12-n": {hour: "numeric", hourCycle: "h12"},
+				//"h23-2": {hour: "2-digit", hourCycle: "h23"},
+				//"h23-n": {hour: "numeric", hourCycle: "h23"},
+				//"h24-2": {hour: "2-digit", hourCycle: "h24"},
+				//"h24-n": {hour: "numeric", hourCycle: "h24"},
+				},
 		},
 		"minute": {
-			dates: [dateA],
+			dates: [dates.Wed], // single digit 0 vs 00
 			options: {
 				"2-digit": {minute: "2-digit"},
 				"numeric": {minute: "numeric"},
@@ -179,18 +199,8 @@ function run_main(method = "all") {
 		},
 		"month": {
 			dates: [
-				new Date("2023-01-15"),
-				new Date("2023-02-15"),
-				new Date("2023-03-15"),
-				new Date("2023-04-15"),
-				new Date("2023-05-15"),
-				new Date("2023-06-15"),
-				new Date("2023-07-15"),
-				new Date("2023-08-15"),
-				new Date("2023-09-15"),
-				new Date("2023-10-15"),
-				new Date("2023-11-15"),
-				new Date("2023-12-15"),
+				dates.Jan, dates.Feb, dates.Mar, dates.Apr, dates.May, dates.Jun,
+				dates.Jul, dates.Aug, dates.Sep, dates.Oct, dates.Nov, dates.Dec,
 			],
 			options: {
 				"2-digit": {month: "2-digit"},
@@ -201,23 +211,14 @@ function run_main(method = "all") {
 			},
 		},
 		"second": {
-			//dates: [dateA],
-			dates: [dateFSD],
+			dates: [dates.FSD],
 			options: {
 				"2-digit": {second: "2-digit"},
 				"numeric": {second: "numeric"},
 			},
 		},
 		"weekday": {
-			dates: [
-				new Date("January 16, 2023 13:00:00"),
-				new Date("January 17, 2023 13:00:00"),
-				dateA,
-				new Date("January 19, 2023 13:00:00"),
-				dateB,
-				new Date("January 21, 2023 13:00:00"),
-				new Date("January 22, 2023 13:00:00"),
-			],
+			dates: [dates.Mon, dates.Tue, dates.Wed, dates.Thu, dates.Fri, dates.Sat, dates.Sun],
 			options: {
 				"long": {weekday: "long"},
 				"narrow": {weekday: "narrow"},
@@ -225,7 +226,7 @@ function run_main(method = "all") {
 			},
 		},
 		"year": {
-			dates: [dateA],
+			dates: [dates.Jan],
 			options: {
 				"2-digit": {year: "2-digit"},
 				"numeric": {year: "numeric"},
@@ -233,123 +234,33 @@ function run_main(method = "all") {
 		},
 	}
 	let testsMin = {
-//* MIN
 		"era": [
 			// to match TZP we will add controlling the year-month-day part (in TZP this is needed to get toLocaleString to match)
-			[dateEra, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
+			[dates.Era1, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
 		],
-//*/
-/* MAX
-		"era": [
-			[dateEra, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
-			[dateEra, {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
-			[dateEra, {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
-			//[new Date("January 01, 0001 1:00:00"), {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
-			//[new Date("January 01, 0001 1:00:00"), {"narrow": {era: "narrow", year: "numeric", month: "numeric", day: "numeric"}}],
-			//[new Date("January 01, 0001 1:00:00"), {"short": {era: "short", year: "numeric", month: "numeric", day: "numeric"}}],
-		],
-//*/
-//* MIN
 		"fractionalSecondDigits": [
-			[dateFSD, {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}]
+			[dates.FSD, {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}]
 		],
-//*/
-/* MAX
-		"fractionalSecondDigits": [
-			[dateFSD, {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}],
-			[dateFSD, {"2": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2}}],
-			[dateFSD, {"3": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 3}}],
-		],
-//*/
 		"hour": [
-			[dateA, {"numeric": {hour: "numeric"}}],
+			[dates.Wed, {"numeric": {hour: "numeric"}}],
 		],
 		"hourCycle": [
-			[dateA, {"h112": {hour: "2-digit", hourCycle: "h11"}}], // adds like 2 items
+			[dates.Wed, {"h112": {hour: "2-digit", hourCycle: "h11"}}], // adds like 2 items
 		],
-//* MIN
 		"month": [
-			[new Date("2023-01-15"), {"short": {month: "short"}}],
-			[new Date("2023-06-15"), {"short": {month: "short"}}],
-			[new Date("2023-09-15"), {"short": {month: "short"}}],
-			[new Date("2023-11-15"), {"short": {month: "short"}}],
-			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
+			[dates.Nov, {"narrow": {month: "narrow"}}],
+			[dates.Jan, {"short": {month: "short"}}],
+			[dates.Jun, {"short": {month: "short"}}], // needed for FF146 and lower
+			[dates.Sep, {"short": {month: "short"}}],
+			[dates.Nov, {"short": {month: "short"}}],
 		],
-//*/
-/* MAX
-		"month": [
-			[new Date("2023-01-15"), {"long": {month: "long"}}],
-			[new Date("2023-02-15"), {"long": {month: "long"}}],
-			[new Date("2023-03-15"), {"long": {month: "long"}}],
-			[new Date("2023-04-15"), {"long": {month: "long"}}],
-			[new Date("2023-05-15"), {"long": {month: "long"}}],
-			[new Date("2023-06-15"), {"long": {month: "long"}}],
-			[new Date("2023-07-15"), {"long": {month: "long"}}],
-			[new Date("2023-08-15"), {"long": {month: "long"}}],
-			[new Date("2023-09-15"), {"long": {month: "long"}}],
-			[new Date("2023-10-15"), {"long": {month: "long"}}],
-			[new Date("2023-11-15"), {"long": {month: "long"}}],
-			[new Date("2023-12-15"), {"long": {month: "long"}}],
-			[new Date("2023-01-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-02-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-03-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-04-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-05-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-06-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-07-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-08-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-09-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-10-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-12-15"), {"narrow": {month: "narrow"}}],
-			[new Date("2023-01-15"), {"short": {month: "short"}}],
-			[new Date("2023-02-15"), {"short": {month: "short"}}],
-			[new Date("2023-03-15"), {"short": {month: "short"}}],
-			[new Date("2023-04-15"), {"short": {month: "short"}}],
-			[new Date("2023-05-15"), {"short": {month: "short"}}],
-			[new Date("2023-06-15"), {"short": {month: "short"}}],
-			[new Date("2023-07-15"), {"short": {month: "short"}}],
-			[new Date("2023-08-15"), {"short": {month: "short"}}],
-			[new Date("2023-09-15"), {"short": {month: "short"}}],
-			[new Date("2023-10-15"), {"short": {month: "short"}}],
-			[new Date("2023-11-15"), {"short": {month: "short"}}],
-			[new Date("2023-12-15"), {"short": {month: "short"}}],
-		],
-//*/
-/* MAX
-		"second": [
-			[dateFSD, {"2-digit": {second: "2-digit"}}],
-			[dateFSD, {"numeric": {second: "numeric"}}],
-		],
-//*/
-//* MIN
 		"weekday": [
-			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[dateB, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[dates.Wed, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
+			[dates.Fri, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
 		],
-//*/
-/* MAX
-		"weekday": [
-			[new Date("January 16, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[new Date("January 17, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[new Date("January 19, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[dateB, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[new Date("January 21, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[new Date("January 22, 2023 13:00:00"), {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-		],
-//*/
-//* MIN
 		"year": [ // needed for blink
-			[dateA, {"2-digit": {year: "2-digit"}}],
+			[dates.Jan, {"2-digit": {year: "2-digit"}}],
 		],
-//*/
-/* MAX
-		"year": [
-			[dateA, {"2-digit": {year: "2-digit"}}],
-			[dateA, {"numeric": {year: "numeric"}}],
-		],
-//*/
 	}
 	let tests = method == "all" ? testsAll : testsMin
 	//console.log(tests)
@@ -366,33 +277,35 @@ function run_main(method = "all") {
 				if (method == "all") {
 					Object.keys(tests[test].options).forEach(function(opt) {
 						oTempData[test][opt] = []
-						let formatter = new Intl.DateTimeFormat(code, tests[test].options[opt])
+						let options = tests[test].options[opt]
+						options['timeZone'] = "UTC"
+						let formatter = new Intl.DateTimeFormat(code, options)
 						let dates = tests[test].dates
 						dates.forEach(function(date){
 							oTempData[test][opt].push(formatter.format(date))
 						})
 					})
 				} else {
-					try {oConst.WeS = new Intl.DateTimeFormat(code, {weekday: "short"})} catch(e) {}
-					try {oConst.WeN = new Intl.DateTimeFormat(code, {weekday: "narrow"})} catch(e) {}
-					try {oConst.WeL = new Intl.DateTimeFormat(code, {weekday: "long"})} catch(e) {}
-					try {oConst.MoS = new Intl.DateTimeFormat(code, {month: "short"})} catch(e) {}
-					try {oConst.MoN = new Intl.DateTimeFormat(code, {month: "narrow"})} catch(e) {}
-					try {oConst.HoN = new Intl.DateTimeFormat(code, {hour: "numeric"})} catch(e) {}
-					try {oConst.HoH = new Intl.DateTimeFormat(code, {hour: "2-digit", hourCycle: "h11"})} catch(e) {}
-					try {oConst.ErL = new Intl.DateTimeFormat(code, {era: "long"})} catch(e) {}
-					try {oConst.Fr1 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1})} catch(e) {}
-					try {oConst.Fr2 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2})} catch(e) {}
-					try {oConst.Fr3 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 3})} catch(e) {}
-					try {oConst.Ye2 = new Intl.DateTimeFormat(code, {year: "2-digit"})} catch(e) {}
+					try {oConst.WeS = new Intl.DateTimeFormat(code, {weekday: "short", timeZone: "UTC"})} catch(e) {}
+					try {oConst.WeN = new Intl.DateTimeFormat(code, {weekday: "narrow", timeZone: "UTC"})} catch(e) {}
+					try {oConst.WeL = new Intl.DateTimeFormat(code, {weekday: "long", timeZone: "UTC"})} catch(e) {}
+					try {oConst.MoS = new Intl.DateTimeFormat(code, {month: "short", timeZone: "UTC"})} catch(e) {}
+					try {oConst.MoN = new Intl.DateTimeFormat(code, {month: "narrow", timeZone: "UTC"})} catch(e) {}
+					try {oConst.HoN = new Intl.DateTimeFormat(code, {hour: "numeric", timeZone: "UTC"})} catch(e) {}
+					try {oConst.HoH = new Intl.DateTimeFormat(code, {hour: "2-digit", hourCycle: "h11", timeZone: "UTC"})} catch(e) {}
+					try {oConst.ErL = new Intl.DateTimeFormat(code, {era: "long", timeZone: "UTC"})} catch(e) {}
+					try {oConst.Fr1 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', timeZone: "UTC", fractionalSecondDigits: 1})} catch(e) {}
+					try {oConst.Fr2 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', timeZone: "UTC", fractionalSecondDigits: 2})} catch(e) {}
+					try {oConst.Fr3 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', timeZone: "UTC", fractionalSecondDigits: 3})} catch(e) {}
+					try {oConst.Ye2 = new Intl.DateTimeFormat(code, {year: "2-digit", timeZone: "UTC"})} catch(e) {}
 
 					/* only maybe used if trying to test other values outside of current min
-					try {oConst.ErN = new Intl.DateTimeFormat(code, {era: "narrow"})} catch(e) {}
-					try {oConst.ErS = new Intl.DateTimeFormat(code, {era: "short"})} catch(e) {}
-					try {oConst.MoL = new Intl.DateTimeFormat(code, {month: "long"})} catch(e) {}
-					try {oConst.Se2 = new Intl.DateTimeFormat(code, {second: "2-digit"})} catch(e) {}
-					try {oConst.SeN = new Intl.DateTimeFormat(code, {second: "numeric"})} catch(e) {}
-					try {oConst.YeN = new Intl.DateTimeFormat(code, {year: "numeric"})} catch(e) {}
+					try {oConst.ErN = new Intl.DateTimeFormat(code, {era: "narrow", timeZone: "UTC"})} catch(e) {}
+					try {oConst.ErS = new Intl.DateTimeFormat(code, {era: "short", timeZone: "UTC"})} catch(e) {}
+					try {oConst.MoL = new Intl.DateTimeFormat(code, {month: "long", timeZone: "UTC"})} catch(e) {}
+					try {oConst.Se2 = new Intl.DateTimeFormat(code, {second: "2-digit", timeZone: "UTC"})} catch(e) {}
+					try {oConst.SeN = new Intl.DateTimeFormat(code, {second: "numeric", timeZone: "UTC"})} catch(e) {}
+					try {oConst.YeN = new Intl.DateTimeFormat(code, {year: "numeric", timeZone: "UTC"})} catch(e) {}
 					//*/
 
 					let array = tests[test]
@@ -478,9 +391,9 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "f5c1cc37") { // FF151+
-				} else if (resultsHash == "a2fd3fb0") { // FF147-150
-				} else if (resultsHash == "eb5b62fa") { // FF140-146+
+				if (resultsHash == "77e258bf") { // FF151+
+				} else if (resultsHash == "6e33774c") { // FF147-150
+				} else if (resultsHash == "e0558272") { // FF140-146+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
@@ -644,6 +557,7 @@ Promise.all([
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en,english']
 	legend()
 	if (isSupported) {
 		setBtn("all")
