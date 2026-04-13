@@ -23,7 +23,8 @@ let fntData = {},
 	fntBase = {},
 	fntBaseInvalid = {},
 	fntBaseMin = [],
-	fntPlatformFont // undefined
+	fntPlatformFont, // undefined
+	fntHealth = []
 
 let fntMaster = {
 	// android core noto
@@ -1177,6 +1178,7 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 	function exit(value, btn, notation, data) {
 		if (isMain) {
 			addBoth(12, METRIC, value, btn, notation, data)
+			fntHealth.push(notation)
 			log_perf(12, METRIC, t0)
 		}
 		return resolve(data)
@@ -1316,6 +1318,7 @@ function get_fonts_offscreen(METRIC, METRICD) {
 		// tmp until we enable offscreen canvas in BB
 		if (isBB && 'ReferenceError: OffscreenCanvas is not defined' == value) {notation = ''}
 	}
+	fntHealth.push(notation)
 	addBoth(12, METRIC, value, btn, notation, data)
 	log_perf(12, METRIC, t0)
 	return
@@ -1682,6 +1685,7 @@ function get_fonts(METRIC, METRICD) {
 		// display only: so always add a lookup
 		sDetail.document.lookup[METRICN] = value
 		addDisplay(12, METRICN, value,'', badnotation)
+		fntHealth.push(badnotation)
 	}
 
 	get_fonts_size().then(res => {
@@ -1828,6 +1832,7 @@ function get_fonts(METRIC, METRICD) {
 					let btn = addButton(12, METRICN, oData[k].datacount)
 					sDetail.document[METRICN] = oData[k].datafonts
 					addDisplay(12, METRICN, mini(oData[k].datafonts), btn, notation)
+					fntHealth.push(notation)
 					// data
 					btn = addButton(12, METRIC, oData[k].datacount)
 					if (!isFontSizesMore) {
@@ -2443,6 +2448,7 @@ const outputFonts = () => new Promise(resolve => {
 
 	let METRICD = 'font_detection'
 	sDetail.document[METRICD] = [] // reset/clear
+	fntHealth = []
 
 	set_fntList()
 	Promise.all([
@@ -2469,9 +2475,22 @@ const outputFonts = () => new Promise(resolve => {
 			// enumerated fonts over all font tests
 			let array = sDetail.document[METRICD]
 			if (array.length) {
+				//
+				let color = 12
+				if (isGecko && isSmart && 3 == fntHealth.length) {
+					color = 'bad'
+					// if font_names, font_faces and font_offscreen are the same and green
+					// i.e rfp_green x 3 or fpp_green x 3, bb_green x 3
+					//dedupe
+					fntHealth = dedupeArray(fntHealth)
+					if (1 == fntHealth.length) {
+						let value = fntHealth[0]
+						if (value == bb_green || value == rfp_green || value == fpp_green) {color = 'good'}
+					}
+				}
 				array = dedupeArray(array); array.sort()
 				sDetail.document[METRICD] = array
-				addDisplay(12, METRICD, addButton(12, METRICD, array.length +' fonts'))
+				addDisplay(12, METRICD, addButton(color, METRICD, array.length +' fonts'))
 			}
 			return resolve()
 		})
