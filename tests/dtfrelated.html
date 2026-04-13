@@ -107,23 +107,18 @@ function legend() {
 function run_main(method = "all") {
 	let t0 = performance.now()
 	let spacer = "<br><br>"
-	/*
-	Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
 
- 	new Date("January 14, 2023 1:00:00") vs Date.UTC(2023, 0, 14, 1)
-	- a string e.g. "January 14, 2023 1:00:00" is not affected by your timezone
-	- Date.UTC is a number e.g. Date.UTC(2023, 0, 14, 1) and is affected by your timezone
-
-	so for this test we want universal hashes so we will use a string, so e.g.
-	AM/PM will be in order, and we get the correct two weekdays
-	*/
-
-//e8454121 + d49cb2ac 
+	// all dates (days/months/am-pm) must be timezone resistent:  we are checking locale only
+		// timezonename (and locale) is tested in the a different PoC - see TZP set_oIntlDateTests section
+	// thus we use UTC time so everyone uses the exact same dates, and then we pass
+		// UTC as the timezone so nothing shifts, preserving our specific datetimes
 
 	let dateA = new Date("January 5, 2023 1:00:00"),
 		dateB = new Date(-1,12,5,1)
-	let datesAll = [dateB, dateA]
-	let dateEra = new Date(-1, -11, -30)
+
+	let RY1 = new Date('-000002-01-15T01:00:00.000Z'),
+		RY2 = new Date('2023-01-15T00:00:00.000Z')
+	let datesAll = [RY1, RY2]
 
 	let testsAll = {}
 	let testsAllMini = {
@@ -142,6 +137,7 @@ function run_main(method = "all") {
 	let aCalendars = [
 		'buddhist', // yes
 		'chinese', // yes
+		'coptic',
 		'default',
 		'gregory', // yes
 		'hebrew', // yes
@@ -149,8 +145,7 @@ function run_main(method = "all") {
 		'islamic-tbla',
 		'japanese',
 		'roc', // blink
-		// these seem redundant but incloude them for the full test
-		'coptic',
+		// these seem redundant but include them for the full test
 		'dangi',
 		'ethioaa',
 		'ethiopic',
@@ -167,15 +162,16 @@ function run_main(method = "all") {
 		aCalendars.forEach(function(cal) {testsAll[cal] = testsAllMini})
 	}
 	let testsMin = {
-		'buddhist': {'long': [dateB]},
-		'chinese': {'long': [dateB]},
-		'default': {'long': [dateB]},
-		'gregory': {'long': [dateB]},
-		'hebrew': {'long': [dateB]},
-		'indian': {'long': [dateB]},
-		'islamic-tbla': {'long': [dateB]},
-		'japanese': {'long': datesAll}, // only one to use dateA
-		'roc': {'long': [dateB]},
+		'buddhist': {'long': [RY1]},
+		'chinese': {'long': [RY1]},
+		'coptic': {'long': [RY2]},
+		'default': {'long': [RY1]},
+		'gregory': {'long': [RY1]},
+		'hebrew': {'long': [RY1]},
+		'indian': {'long': [RY1]},
+		'islamic-tbla': {'long': [RY1]},
+		'japanese': {'long': datesAll}, // only one to use both
+		'roc': {'long': [RY1]},
 	}
 	let tests = method == "all" ? testsAll : testsMin
 
@@ -190,13 +186,13 @@ function run_main(method = "all") {
 				Object.keys(tests[cal]).forEach(function(style) {
 					oTempData[cal][style] = []
 					let calname = 'default' == cal ? undefined : cal
-					let formatter = Intl.DateTimeFormat(code, {calendar: cal, relatedYear: style})
+					let formatter = Intl.DateTimeFormat(code, {calendar: cal, relatedYear: style, timeZone: 'UTC'})
 					tests[cal][style].forEach(function(d) {
 						oTempData[cal][style].push(formatter.format(d))
 						if (checkLocaleStrings) {
 							//* test toLocaleString
 							let intlvalue = formatter.format(d)
-							let strlocale = (d).toLocaleString(code, {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'})
+							let strlocale = (d).toLocaleString(code, {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC'})
 							let isMatch = intlvalue == strlocale
 							oCompare[isMatch].push([intlvalue, strlocale])
 						}
@@ -276,10 +272,9 @@ function run_main(method = "all") {
 			if (isVer > 139) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "b0fca3de") { // FF151+
-				} else if (resultsHash == "f8b5ff65") { // FF149-150
-				} else if (resultsHash == "d840090d") { // FF147-148
-				} else if (resultsHash == "92938d04") { // FF140-146
+				if (resultsHash == "9e74e02c") { // FF151+
+				} else if (resultsHash == "fddaa32a") { // FF147-150
+				} else if (resultsHash == "4b451618") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales

@@ -429,6 +429,7 @@ function set_oIntlTests() {
 			// these are all long
 			buddhist: [dates.RY1],
 			chinese: [dates.RY1],
+			coptic: [dates.RY2],
 			'default': [dates.RY1],
 			gregory: [dates.RY1],
 			hebrew: [dates.RY1],
