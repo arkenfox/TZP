@@ -345,38 +345,38 @@ function set_oIntlDateTests() {
 }
 
 function set_oIntlTests() {
+	// all dates (days/months/am-pm) must be timezone resistent
+		// we do not want the noise or extra checks we are checking locale only
+		// reported timezonename (and locale) is tested set_oIntlDateTests section
+	// thus we use UTC time so everyone uses the exact same dates, and then we pass
+		// UTC as the timezone so nothing shifts, preserving our specific datetimes
+	// the only tests that expose day/hrs are
+		// datetimeformat.relatedYear + datetimeformat.components + datetimeformat.timezonename
+	let dates = {
+		// fractionalSecondDigits: we only ever reveal the seconds
+		FSD: new Date('2023-06-10T01:12:34.567Z'),
+		// month (x4) + year (xJan): we only ever reveal the month or year
+		Jan: new Date('2023-01-15T00:00:00.000Z'),
+		Jun: new Date('2023-06-15T00:00:00.000Z'),
+		Sep: new Date('2023-09-15T00:00:00.000Z'),
+		Nov: new Date('2023-11-15T00:00:00.000Z'),
+		// days (x2) + hrs (xFri) + era: expose day/hr
+		Wed: new Date('2023-01-18T01:00:00.000Z'), // doubles as hour 1
+		Fri: new Date('2023-01-20T13:00:00.000Z'), // doubles as hour 13
+		Era: new Date('-000002-01-15T01:00:00.000Z'),
+		// relatedyear exposes day
+		RY1: new Date('-000002-01-15T01:00:00.000Z'),
+		RY2: new Date('2023-01-15T00:00:00.000Z'),
+		// timezonename exposes day but we pass the timezone itself so it's relative (i.e stable)
+		tzDays: [new Date('August 1, 2019 0:00:00 UTC')]
+	}
+	let tzLG = {'longGeneric': dates.tzDays}, tzSG = {'shortGeneric': dates.tzDays}
+	//console.log(mini(dates)) // hash = 90295fa0
 
 	let unitN = {'narrow': [1]}, unitL = {'long': [1]}, unitB = {'long': [1], 'narrow': [1]}
-	let tzDays = [new Date('August 1, 2019 0:00:00 UTC')],
-		tzLG = {'longGeneric': tzDays},
-		tzSG = {'shortGeneric': tzDays}
 	let curAN = {"accounting": [-1000], "name": [-1]},
 		curN = {"name": [-1]},
 		curS = {"symbol": [1000]}
-
-	// all dates (days/months/am-pm) must be timezone resistent
-	// we do not want the noise or extra checks we are checking locale only
-	// reported timezonename (and locale) is tested set_oIntlDateTests section
-
-	// checking timezone resistance
-	/* all identical hashes
-		Pacific/Kiritimati +14
-		KABUL at +4:30
-		Buenos_Aires at -3:00
-		America/Adak at -10:00
-		Etc/GMT+12 at -12:00
-	*/
-	let dates = {
-		FSD: new Date('2023-06-11T01:12:34.5678'), // no Z
-		Era: new Date(-1, -11, -30),
-		Jan: new Date('2023-01-15'),
-		Jun: new Date('2023-06-15'),
-		Sep: new Date('2023-09-15'),
-		Nov: new Date('2023-11-15'),
-		Wed: new Date('January 18, 2023 1:00:00'), // doubles as hour 1
-		Fri: new Date('January 20, 2023 13:00:00'), // doubles as hour 13
-		RY: new Date(-1,12,5,1),
-	}
 
 	oIntlTests = {
 		collation: {
@@ -427,15 +427,15 @@ function set_oIntlTests() {
 		},
 		'datetimeformat.relatedyear': {
 			// these are all long
-			buddhist: [dates.RY],
-			chinese: [dates.RY],
-			'default': [dates.RY],
-			gregory: [dates.RY],
-			hebrew: [dates.RY],
-			indian: [dates.RY],
-			'islamic-tbla': [dates.RY],
-			japanese: [dates.RY, new Date("January 5, 2023 1:00:00")],
-			roc: [dates.RY],
+			buddhist: [dates.RY1],
+			chinese: [dates.RY1],
+			'default': [dates.RY1],
+			gregory: [dates.RY1],
+			hebrew: [dates.RY1],
+			indian: [dates.RY1],
+			'islamic-tbla': [dates.RY1],
+			japanese: [dates.RY1, dates.RY2],
+			roc: [dates.RY1],
 		},
 		'datetimeformat.timezonename': {
 			'Africa/Douala': tzLG,
@@ -842,6 +842,9 @@ function get_locale_intl() {
 					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
 						let option = tests[key][s][0]
+						// our dates are specifically UTC to get certains days/hrs
+						// to preserve that we pass UTC as the timeZone
+						option['timeZone'] = 'UTC'
 						let data = [], datacheck = []
 						if (isIntl) {
 							formatter = new Intl.DateTimeFormat(locTest, option); countC++
@@ -877,16 +880,18 @@ function get_locale_intl() {
 					obj[key] = data; objcheck[key] = datacheck
 				}
 			} else if ('datetimeformat.relatedyear' == m) {
+				// our dates are specifically UTC as we expose the day and
+				// to preserve that we pass UTC as the timeZone
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
 					let cal = 'default' == key ? undefined : key
 					let data = [], datacheck = []
 					if (isIntl) {
-						formatter = Intl.DateTimeFormat(locTest, {calendar: cal, relatedYear: 'long'}); countC++
-						if (isCheck) {checker = Intl.DateTimeFormat(locCheck, {calendar: cal, relatedYear: 'long'}); countC++}
+						formatter = Intl.DateTimeFormat(locTest, {calendar: cal, relatedYear: 'long', timeZone: 'UTC'}); countC++
+						if (isCheck) {checker = Intl.DateTimeFormat(locCheck, {calendar: cal, relatedYear: 'long', timeZone: 'UTC'}); countC++}
 					}
 					tests[key].forEach(function(d) {
-						let stroptions = {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric'}
+						let stroptions = {calendar: cal, day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC'}
 						value = (isIntl ? formatter.format(d) : (d).toLocaleString(strTest, stroptions)); data.push(value)
 						if (isCheck) {value = (isIntl ? checker.format(d) : (d).toLocaleString(strCheck, stroptions)); datacheck.push(value)}
 					})
