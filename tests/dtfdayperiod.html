@@ -71,11 +71,11 @@ var list = gLocales,
 	localesHashAll = "" // to compare custom to
 
 const oDays = {
-	"08": new Date("2019-01-30T08:00:00"),
-	"12": new Date("2019-01-30T12:00:00"),
-	"15": new Date("2019-01-30T15:00:00"),
-	"18": new Date("2019-01-30T18:00:00"),
-	"22": new Date("2019-01-30T22:00:00")
+	"08": new Date("2019-01-30T08:00:00Z"),
+	"12": new Date("2019-01-30T12:00:00Z"),
+	"15": new Date("2019-01-30T15:00:00Z"),
+	"18": new Date("2019-01-30T18:00:00Z"),
+	"22": new Date("2019-01-30T22:00:00Z")
 }
 
 function log_console(name) {
@@ -151,10 +151,9 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
-
 function get_dayperiod(date, code, option) {
 	// always use h12
-	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
+	return new Intl.DateTimeFormat(code, {hourCycle: "h12", timeZone: 'UTC', dayPeriod: option}).format(date)
 }
 
 function run_main(method) {
@@ -188,9 +187,9 @@ function run_main(method) {
 		aLocales.forEach(function(code) {
 
 			// set our three options once per code
-			let dteS = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "short"}),
-				dteN = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "narrow"}),
-				dteL = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "long"})
+			let dteS = new Intl.DateTimeFormat(code, {hourCycle: "h12", timeZone: 'UTC', dayPeriod: "short"}),
+				dteN = new Intl.DateTimeFormat(code, {hourCycle: "h12", timeZone: 'UTC', dayPeriod: "narrow"}),
+				dteL = new Intl.DateTimeFormat(code, {hourCycle: "h12", timeZone: 'UTC', dayPeriod: "long"})
 
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
@@ -338,8 +337,8 @@ function run_custom() {
 }
 
 function run_test() {
-	let A = get_dayperiod(new Date("2019-01-30T08:00:00"), "en", "long")
-	let B = get_dayperiod(new Date("2019-01-30T12:00:00"), "en", "long")
+	let A = get_dayperiod(new Date("2019-01-30T08:00:00Z"), "en", "long")
+	let B = get_dayperiod(new Date("2019-01-30T12:00:00Z"), "en", "long")
 	if (A == B) {
 		isSupported = false
 		dom.results.innerHTML = s4 + "dayPeriod:" + sc + " not supported"
