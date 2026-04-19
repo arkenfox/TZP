@@ -518,43 +518,63 @@
 			timezone</td><td class="c mono" id="timezone"></td></tr>
 		<tr class="togTT"><td>timeZone</td><td class="c mono" id="timezone_timeZone"></td></tr>
 		<tr class="togTT"><td>timeZoneId</td><td class="c mono" id="timezone_timeZoneId"></td></tr>
-		<tr class="togTT"><td>zonedDateTime</td><td class="c mono" id="timezone_zonedDateTime"></td></tr>
+		<tr class="togTT"><td>zonedDateTimeISO</td><td class="c mono" id="timezone_zonedDateTimeISO"></td></tr>
 		<!--tz offset-->
 		<tr><td><span id="labelTL" class="btn btn0" onClick="togglerows('TL','btn')">[+]</span>
 			[offset] timezone</td>
 			<td class="mono"><span class="c" id="timezone_offset"></span>
 			<div class="btn-right s99">timezone</div>
 		</td></tr>
-		<tr class="togTL"><td>iframe</td><td class="c mono" id="timezone_offset_iframe"></td></tr>
-		<tr class="togTL"><td>parseFromString</td><td class="c mono" id="timezone_offset_parseFromString"></td></tr>
-		<tr class="togTL"><td>parseHTMLUnsafe</td><td class="c mono" id="timezone_offset_parseHTMLUnsafe"></td></tr>
-		<tr class="togTL"><td>plainDateISO</td><td class="c mono" id="timezone_offset_plainDateISO"></td></tr>
-		<tr class="togTL"><td>plainDateTimeISO</td><td class="c mono" id="timezone_offset_plainDateTimeISO"></td></tr>
-		<tr class="togTL"><td>plainTimeISO</td><td class="c mono" id="timezone_offset_plainTimeISO"></td></tr>
-		<tr class="togTL"><td>timeZone</td><td class="c mono" id="timezone_offset_timeZone"></td></tr>
-		<tr class="togTL"><td>[expected] timeZone</td><td class="c mono" id="timezone_offset_timeZone_expected"></td></tr>
+		<!--date-->
+		<tr class="togTL"><td>plainDateISO</td><td class="mono">
+			<span class="c" id="timezone_offset_plainDateISO"></span>
+			<div class="btn-right-inset s99 border-top">date</div>
+		</td></tr>
 		<tr class="togTL"><td>toDateString</td><td class="c mono" id="timezone_offset_toDateString"></td></tr>
+		<!--time-->
+		<tr class="togTL"><td>plainTimeISO</td><td class="mono">
+			<span class="c spaces" id="plainTimeISOspaces"></span>
+			<span class="c" id="timezone_offset_plainTimeISO"></span>
+			<div class="btn-right-inset s99 border-top">time</div>
+		</td></tr>
+		<tr class="togTL"><td>toTimeString</td><td class="mono">
+			<span class="c spaces" id="toTimeStringspaces"></span>
+			<span class="c" id="timezone_offset_toTimeString"><span>
+		</td></tr>
+		<!--datetime-->
+		<tr class="togTL"><td>plainDateTimeISO</td><td class="mono">
+			<span class="c" id="timezone_offset_plainDateTimeISO"></span>
+			<div class="btn-right-inset s99 border-top">datetime</div>
+		</td></tr>
+		<tr class="togTL"><td>timeZone</td><td class="c mono" id="timezone_offset_timeZone"></td></tr>
 		<tr class="togTL"><td>toLocaleDateString</td><td class="c mono" id="timezone_offset_toLocaleDateString"></td></tr>
 		<tr class="togTL"><td>toLocaleString</td><td class="c mono" id="timezone_offset_toLocaleString"></td></tr>
 		<tr class="togTL"><td>toLocaleTimeString</td><td class="c mono" id="timezone_offset_toLocaleTimeString"></td></tr>
 		<tr class="togTL"><td>toString</td><td class="c mono" id="timezone_offset_toString"></td></tr>
-		<tr class="togTL"><td>toTimeString</td><td class="c mono" id="timezone_offset_toTimeString"></td></tr>
 		<tr class="togTL"><td>zonedDateTimeISO</td><td class="c mono" id="timezone_offset_zonedDateTimeISO"></td></tr>
+		<!--lastmod-->
+		<tr class="togTL"><td>iframe</td><td class="mono">
+			<span class="c" id="timezone_offset_iframe"></span>
+			<div class="btn-right-inset s99 border-top">lastModified</div>
+			</td></tr>
+		<tr class="togTL"><td>parseFromString</td><td class="c mono" id="timezone_offset_parseFromString"></td></tr>
+		<tr class="togTL"><td>parseHTMLUnsafe</td><td class="c mono" id="timezone_offset_parseHTMLUnsafe"></td></tr>
 		<tr class="togTL"><td>EXSLT</td><td class="c mono" id="timezone_offset_exslt"></td></tr>
 		<!--tz offsets-->
 		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[+]</span>[offsets] timezone</td>
 			<td class="mono"><div class="btn-right c" id="timezone_offsets_data"></div>
 			<span class="c" id="timezone_offsets"></span></td></tr>
-		<tr class="togTO"><td>[get] components</td><td class="c mono" id="components"></td></tr>
-		<tr class="togTO"><td>[getUTC] components</td><td class="c mono" id="components_utc"></td></tr>
-		<tr class="togTO"><td>date</td><td class="c mono" id="date"></td></tr>
+		<tr class="togTO"><td>[get] components</td><td class="c mono" id="timezone_offsets_components"></td></tr>
+		<tr class="togTO"><td>[getUTC] components</td><td class="c mono" id="timezone_offsets_components_utc"></td></tr>
+		<tr class="togTO"><td>date</td><td class="c mono" id="timezone_offsets_date"></td></tr>
 		<tr class="togTO"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a>
-			&nbsp; date.parse</td><td class="c mono" id="date.parse"></td></tr>
-		<tr class="togTO"><td>date.valueOf</td><td class="c mono" id="date.valueOf"></td></tr>
-		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
-		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
-		<tr class="togTO"><td>offsetNanoseconds</td><td class="c mono" id="offsetNanoseconds"></td></tr>
-		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="Symbol.toPrimitive"></td></tr>
+			&nbsp; date.parse</td><td class="c mono" id="timezone_offsets_date.parse"></td></tr>
+		<tr class="togTO"><td>date.valueOf</td><td class="c mono" id="timezone_offsets_date.valueOf"></td></tr>
+		<tr class="togTO"><td>getTime</td><td class="c mono" id="timezone_offsets_getTime"></td></tr>
+		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="timezone_offsets_getTimezoneOffset"></td></tr>
+		<tr class="togTO"><td>offsetNanoseconds</td><td class="c mono" id="timezone_offsets_offsetNanoseconds"></td></tr>
+		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="timezone_offsets_Symbol.toPrimitive"></td></tr>
+		<tr class="togTO"><td>timeZoneName</td><td class="c mono" id="timezone_offsets_timeZoneName"></td></tr>
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
