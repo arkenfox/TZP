@@ -270,7 +270,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 	background-attachment: fixed;
 	height: 40px;
 	transform: scale(-1, 1);
-	filter: grayscale(1) sepia(90%) hue-rotate(90deg);
+	filter: sepia(1) hue-rotate(65deg) brightness(0.9) saturate(1.3);
 	z-index: 900;
 	/* works except it moves with scroll
 	position: fixed;
