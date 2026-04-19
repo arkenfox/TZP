@@ -174,7 +174,8 @@ let isArch = true,
 	isVer = 0,
 	isVerExtra = '',
 	isViewportUnits = {},
-	isXML = {}
+	isXML = {},
+	isXSLT // dom.xslt.enabled
 
 let isBB = false,
 	isBBESR = false,
@@ -190,8 +191,7 @@ let languagesSupported = {},
 	isLocaleValid,
 	isLocaleValue,
 	isLocaleAlt, // allow variants in checks e.g. en-CA checks en-US values
-	isTimeZoneOffsetValid, // in timezone_offset we can detect a non-determisitic timeZone
-	isTimeZoneValid, // further testing, but overriden if isTimeZoneOffsetValid == false
+	isTimeZoneValid,
 	isTimeZoneValue,
 	oIntlTests = {},
 	oIntlKeys = {},
