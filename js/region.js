@@ -78,6 +78,10 @@ function get_nav_connection(METRIC) {
 }
 
 function get_nav_dnt(METRIC) {
+	// ignored
+		// navigator.msDoNotTrack = IE9 + 10
+		// window.doNotTrack = IE11 and Edge 16- and old Safari
+
 	// gecko: this is an expected property
 	// nonGecko
 		// blink: string vs null: i.e a string of "null" will be an error
@@ -288,26 +292,17 @@ function set_isLanguageSmart() {
 }
 
 function set_oIntlDateTests() {
+	// all dates (days/months/am-pm) must be timezone resistent: we are checking locale + timezonename only
+		// that way everyone uses the same exact dates/days/times (e.g. am, friday, single digit day, etc)
+		// timezone entropy is in the actual timezonename (we're confirming that here)
 
-	// all dates (days/months/am-pm) must be timezone resistent
-	// we do not want the noise or extra checks we are checking locale AND timezonename
-	// timezone entropy is in the actual timezonename (we're confirming that here)
 
-	// however, PoCs need to cover all possible combos of locales x timezonenames because those
+	// tests/PoCs need to cover all possible combos of locales x timezonenames because those
 	// are the TWO variables that I cannot control (oIntlTests only have ONE variable: locale)
 	// and not all locales handle timezonenames to the same degree: e.g.
-		// America/Los_Angles has 343 possible outcomes, Europe/Vatican has 344
-		// this is because pt-ao has a different result for the vatican than pt-ch
-		// which is not the case for los angeles
-
-	// checking
-	/* all identical dates+times identical: e.g. jan + fri
-		+14 Pacific/Kiritimati
-		+ 9 Asia/Pyongyang
-		+ 4 Asia/Baku
-		- 3 America/Sao_Paulo
-		-12 Etc/GMT+12
-	*/
+		// America/Los_Angles has 343 possible outcomes, Europe/Vatican has 344: this is because
+		// pt-ao + pt-ch vary for the vatican but not for los angeles
+	// tl;dr: locale + timezonename PoCs cover a range
 
 	let dates = {
 		// cover key month names, key weekday names, (and am/pm maybe it helps with h23/h11 etc)
@@ -345,13 +340,12 @@ function set_oIntlDateTests() {
 }
 
 function set_oIntlTests() {
-	// all dates (days/months/am-pm) must be timezone resistent
-		// we do not want the noise or extra checks we are checking locale only
-		// reported timezonename (and locale) is tested set_oIntlDateTests section
+	// all dates (days/months/am-pm) must be timezone resistent: we are checking locale only
+		// reported timezonename (and locale) is tested see oIntlDateTests section
 	// thus we use UTC time so everyone uses the exact same dates, and then we pass
 		// UTC as the timezone so nothing shifts, preserving our specific datetimes
-	// the only tests that expose day/hrs are
-		// datetimeformat.relatedYear + datetimeformat.components + datetimeformat.timezonename
+	// the tests that expose day/time are datetimeformat's relatedYear + components + timezonename | and dayperiods
+
 	let dates = {
 		// fractionalSecondDigits: we only ever reveal the seconds
 		FSD: new Date('2023-06-10T01:12:34.567Z'),
@@ -368,7 +362,13 @@ function set_oIntlTests() {
 		RY1: new Date('-000002-01-15T01:00:00.000Z'),
 		RY2: new Date('2023-01-15T00:00:00.000Z'),
 		// timezonename exposes day but we pass the timezone itself so it's relative (i.e stable)
-		tzDays: [new Date('August 1, 2019 0:00:00 UTC')]
+		tzDays: [new Date('August 1, 2019 0:00:00 UTC')],
+		// dayperiod: exposes hr
+		DP8: new Date('2019-01-30T08:00:00Z'),
+		DP12: new Date('2019-01-30T12:00:00Z'),
+		DP15: new Date('2019-01-30T15:00:00Z'),
+		DP18: new Date('2019-01-30T18:00:00Z'),
+		DP22: new Date('2019-01-30T22:00:00Z'),
 	}
 	let tzLG = {'longGeneric': dates.tzDays}, tzSG = {'shortGeneric': dates.tzDays}
 	//console.log(mini(dates)) // hash = 90295fa0
@@ -418,7 +418,9 @@ function set_oIntlTests() {
 			},
 		},
 		'datetimeformat.dayperiod': {
-			'long': [8,22], 'narrow': [8,15], 'short': [12,15,18]
+			'long': [dates.DP8, dates.DP22],
+			'narrow': [dates.DP8, dates.DP15],
+			'short': [dates.DP12, dates.DP15, dates.DP18]
 		},
 		'datetimeformat.listformat': {
 			'narrow': ['conjunction','disjunction','unit'],
@@ -843,7 +845,7 @@ function get_locale_intl() {
 					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
 						let option = tests[key][s][0]
-						// our dates are specifically UTC to get certains days/hrs
+						// our dates are specifically UTC to get specific days/hrs
 						// to preserve that we pass UTC as the timeZone
 						option['timeZone'] = 'UTC'
 						let data = [], datacheck = []
@@ -859,14 +861,16 @@ function get_locale_intl() {
 					})
 				}
 			} else if ('datetimeformat.dayperiod' == m) {
+				// our dates are specifically UTC to get specific times
+				// to preserve that we pass UTC as the timeZone
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
 					let data = [], datacheck = []
-					formatter = new Intl.DateTimeFormat(locTest, {hourCycle: 'h12', dayPeriod: key}); countC++
-					if (isCheck) {checker = new Intl.DateTimeFormat(locCheck, {hourCycle: 'h12', dayPeriod: key}); countC++}
+					formatter = new Intl.DateTimeFormat(locTest, {hourCycle: 'h12', timeZone: 'UTC', dayPeriod: key}); countC++
+					if (isCheck) {checker = new Intl.DateTimeFormat(locCheck, {hourCycle: 'h12', timeZone: 'UTC', dayPeriod: key}); countC++}
 					tests[key].forEach(function(item) {
-						data.push(formatter.format(dayperiods[item]))
-						if (isCheck) {datacheck.push(checker.format(dayperiods[item]))}
+						data.push(formatter.format(item))
+						if (isCheck) {datacheck.push(checker.format(item))}
 					})
 					obj[key] = data; objcheck[key] = datacheck
 				}
@@ -1166,13 +1170,6 @@ function get_locale_intl() {
 		}
 	}
 
-	const dayperiods = { // set per run
-		8: new Date('2019-01-30T08:00:00'),
-		12: new Date('2019-01-30T12:00:00'),
-		15: new Date('2019-01-30T15:00:00'),
-		18: new Date('2019-01-30T18:00:00'),
-		22: new Date('2019-01-30T22:00:00'),
-	}
 	const oMetrics = {
 		intl : [
 			'collation',
@@ -1265,12 +1262,621 @@ function get_locale_intl() {
 }
 
 function get_timezone(METRIC) {
-	let t0 = nowFn()
-	const METRICtz = 'timezone'
-
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
+	if (gRun) {try {delete sDetail.document.lookup[METRIC]} catch(e) {}}
+
+	let tzo = get_timezone_offset(METRIC +'_offset')
+	let offsets = get_timezone_offsets(METRIC +'_offsets', tzo.nowValue, tzo.utcValue)
+
+	// timezone: we can use tzo.tampered items to return if isLies
+	let aMethods = ['timeZone','timeZoneId','zonedDateTimeISO']
+	let aTemporal = ['plainDateISO','plainDateTimeISO','plainTimeISO','zonedDateTimeISO']
+	let errCount = 0, lieCount = 0, tzData = {'data': [], 'valid': []}, notation = rfp_red, isLies = false
+	aMethods.forEach(function(k) {
+		let tz
+		isLies = false
+		try {
+			if ('timeZone' == k) {
+				tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+				if (tzo.tampered.includes('timeZone')) {isLies = true}
+				//tz = 'Asia/Tokyo' // test mixed but no lies detected
+			} else {
+				if (tzo.tampered.filter(x => aTemporal.includes(x)).length) {isLies = true}
+				if ('timeZoneId' == k) {
+					tz = Temporal.Now.timeZoneId()
+				} else {
+					tz = Temporal.Now.zonedDateTimeISO().toString()
+					tz = tz.slice(tz.indexOf('[') + 1, tz.length - 1)
+				}
+			}
+			if (runST) {tz = undefined} else if (runSI) {tz = 'tzp'}
+			let typeCheck = typeFn(tz)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			let tztest = (new Date('January 1, 2018 13:00:00 UTC')).toLocaleString('en', {timeZone: tz})
+			tzData.data.push(tz)
+			if (isLies) {lieCount++; log_known(4, METRIC +'_'+ k, tz)} else {tzData.valid.push(tz)}
+			addDisplay(4, METRIC +'_'+ k, tz, '','', isLies)
+		} catch(e) {
+			errCount++
+			addDisplay(4, METRIC +'_'+ k, log_error(4, METRIC +'_'+ k, e))
+		}
+	})
+	// all errors
+	if (errCount == aMethods.length) {addBoth(4, METRIC, zErr +'s', '', notation, zErr); return}
+
+	// notation: 3 x truthful Atlantic/Reykjavik, and whilst we already have health checks
+	// on offsets(s) but we need to confirm the actual results
+	if ('80724dcd' == mini(tzData) && 0 === tzo.nowValue && '031b56a9' == offsets.hash) {notation = rfp_green}
+
+	// summary
+		// if we have a single valid value, use that
+		// if valid is mixed then data is also mixed
+		// if valid is empty then we have to use data anyway
+		// data will always have at least one value (we returned earlier if all errors)
+	let value = '', aValid = dedupeArray(tzData.valid), aData = dedupeArray(tzData.data)
+	let isMixed = aData.length > 1, isValid = 1 == aValid.length 
+	isLies = !isValid
+	if (1 == aValid.length) {value = aValid[0]} else {if (isMixed) {value = 'mixed'} else {value = aData[0]}}
+	// isTimeZoneValue
+	if ('mixed' !== value)	{isTimeZoneValue = value}
+	// health lookup
+	if (notation == rfp_red && 'Atlantic/Reykjavik' == value) {
+		// then we must have had lies and/or errors
+		let aHealth = []
+		if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
+		if (lieCount > 0) {aHealth.push(lieCount + ' mismatch' + (lieCount == 1 ? '' : 'es'))}
+		if (gRun) {sDetail.document.lookup[METRIC] = aHealth.join(' | ')}
+	}
+	// display
+	addBoth(4, METRIC, value, '', notation, '', isLies)	
+
+	// set isTimeZoneValid
+		// offset: no tampering ignore errors | offsets : no tampering or errors (I might need to revisit this logic later)
+		// ^ this means anything date/temporal or to*string hasn't been tampered with
+		// timezone: can't be any lies and can't be mixed
+	let isTZValidSoFar = 0 == tzo.tampered.length && true === offsets.health
+	if (isTZValidSoFar) {
+		if (0 == lieCount && 1 == aValid.length) {isTimeZoneValid = true}
+	}
+	return
+}
+
+function get_timezone_offset(METRIC) {
+	// this is good test to catch + record various temporal/date/toString lies even
+		// if they are ultimately duplicitous. This requires the spoofed offset to differ
+		// from lastModified and real-time real-world world offsets only number 65-70
+		// IIUIC. So not definitive, but multiple exposure of tampering is good. also,
+		// fuck extensions trying to resist or solutions that create mismatches :)
+	let t0 = nowFn()
+	if (gRun) {try {delete sDetail.document.lookup[METRIC]} catch(e) {}}
+
+	// setup
+	const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
+			+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
+			+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
+	const	doc = (new DOMParser).parseFromString(xslText, 'text/xml')
+	let oData = {}, notation = tz_red
+	let methods = [
+		'timeZone', // intl.DTF
+		'iframe','parseFromString','parseHTMLUnsafe', // last modified, also exslt
+		'plainDateISO','plainDateTimeISO','zonedDateTimeISO','plainTimeISO', // temporal
+		// to*string
+		'toDateString','toLocaleString','toLocaleDateString',
+		'toLocaleTimeString','toString','toTimeString',
+		//'date',
+	]
+	// non-gecko: skip exslt
+		// 1990759: ToDo: add isXSLT + isVer when the pref flips: dom.xslt.enabled
+	if (isGecko) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)}
+	methods.sort()
+	let aLastMods = ['exslt','iframe','parseFromString','parseHTMLUnsafe'] // is lastModified source
+	let testdate
+	let tznShort = {
+		AKST: '-09:00', AKDT: '-08:00',
+		AST: '-04:00', ADT: '-03:00',
+		CST: '-06:00', CDT: '-05:00',
+		EST: '-05:00', EDT: '-04:00',
+		HAST: '-10:00', HADT: '-09:00',
+		HST: '-10:00', HDT: '-09:00',
+		MST: '-07:00', MDT: '-06:00',
+		PST: '-08:00', PDT: '-07:00',
+		UTC: '+00:00', GMT: '+00:00', GMT0: '+00:00',
+	}
+
+	function create_offset() {
+		// if we don't have a minutekey but we do have a non-exslt lastmod, we can
+		// check timezones and compare/calulate to determine a minutekey/offset
+		let key = oData.hasLastMod[0]
+		if (undefined == key) {return}
+		let aTZs = [
+			// these are timezones, not short timezonenames
+			'GMT','GMT+1','GMT+2','GMT+3','GMT+4','GMT+5','GMT+6','GMT+7','GMT+8','GMT+9','GMT+10','GMT+11','GMT+12',
+			'GMT-1','GMT-2','GMT-3','GMT-4','GMT-5','GMT-6','GMT-7','GMT-8','GMT-9','GMT-10','GMT-11','GMT-12','GMT-13','GMT-14',
+		]
+		let option = {
+			day: '2-digit', month: '2-digit', year: 'numeric',
+			hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
+			timeZoneName: 'short'
+		}
+		// note: testdate was already set in get_values so it's identical here
+		// note: aTZs covers the hardcoded values in tznShort
+			// note: this only covers full hours if an exact match: we will use 10's of minutes accuracy
+			// to reduce chances of a digit having ticked over
+			// lastMods iframe/parse* raw format's datetime components matches formatter
+		let exactmatch = oData.raw[key].slice(0,15),
+			hourmatch = oData.raw[key].slice(0,13)
+		let isPartial = false, offset, value
+		for (let i = 0; i < aTZs.length; i++) {
+			try {
+				option.timeZone = 'Etc/'+ aTZs[i]
+				let formatter = new Intl.DateTimeFormat('en', option)
+				value = formatter.format(testdate).replace(',','')
+				offset = value.split(' ')[2]
+				if (value.slice(0,13) == hourmatch) {
+					if (value.slice(0,15) == exactmatch) {
+						//console.log(value.slice(0,15), 'exact match', offset)
+						// exact match
+						oData.minutekey = key
+						oData.offset[key] = offset
+						break
+					} else {
+						//console.log(value.slice(0,15), 'hour match', offset)
+						// hour match
+						// this works because we use the extremes of +12/-14 which means we cover all
+						// possible day + hour combos (partials would be inside those extremes), so one
+						// of them must match: we just need to add or subtract from it
+						isPartial = true
+						break
+					}
+				}
+			} catch(e) {
+				console.log(e+'')
+			}
+		}
+		if (isPartial) {
+			// calculate minute diff in 15's, ignore seconds
+			if ('UTC' == offset) {offset = 'GMT+0'}
+			let sign = offset.slice(3,4)
+			let offsetHrs = offset.slice(4,offset.length) * 1
+			let expectedMins = oData.raw[key].slice(14,16) * 1
+			let partialMins = value.slice(14,16) * 1
+			let diff = Math.round((expectedMins - partialMins) / 15) * 15
+			let newoffset
+			/*
+			console.log(oData.raw[key], key)
+			console.log(value)
+			console.log(sign, offsetHrs, expectedMins, partialMins, diff)
+			//*/
+			if ('+' == sign) {
+				if (diff < 0) {
+					newoffset = 'GMT' + sign + ((offsetHrs - 1)+'').padStart(2, '0') +':' + (60 + diff)
+				} else {
+					newoffset = 'GMT' + sign + (offsetHrs+'').padStart(2, '0') +':' + diff
+				}
+			} else {
+				// negative sign we only have ±30 diffs. The code below _should_ handle ±15/±45
+				if (diff < 0) {
+					newoffset = 'GMT' + sign + (offsetHrs+'').padStart(2, '0') +':' + Math.abs(diff)
+				} else {
+					newoffset = 'GMT' + sign + ((offsetHrs - 1)+'').padStart(2, '0') +':' + (60 - diff)
+				}
+			}
+			if (undefined !== newoffset) {
+				oData.minutekey = key
+				oData.offset[key] = newoffset
+			}
+		}
+		return
+	}
+
+	function format_offset(str) {
+		if (!str.includes('GMT')) {return str}
+		// format en short timezonename into ±xx:xx format
+		str = str.slice(3)
+		let sign = str.slice(0,1), time = str.slice(1)
+		/* toString example GMT1300 */
+		/* other examples ['GMT+9:30','GMT+12','GMT-1','GMT+0']	*/
+		if (!time.includes(':') && 4 == time.length) {
+			time = time.slice(0,2)+':'+time.slice(2)
+		}
+		let parts = time.split(':')
+		let hrs = parts[0].padStart(2,'0')
+		let mins = (undefined == parts[1] ? '00' : parts[1])
+		return sign + hrs +':'+ mins
+	}
+
+	function get_minutes(str) {
+		if (undefined !== str) {
+			if (undefined !== tznShort[str]) {
+				str = tznShort[str]
+			} else if (str.includes('GMT')) {
+				str = format_offset(str)
+			}
+			let minutes = ((str.slice(1,3) * 1)*60) + (str.slice(4,6)*1)
+			let sign = (str[0] == '+' ? (minutes == 0 ? '': '-') : '')
+			minutes = minutes * ('-' == sign ? -1 : 1)
+			return [minutes, (str == '+00:00' ? '' : '['+ str +']')]
+		} else {
+			return ''
+		}
+	}
+
+	function get_month(src) {
+		let oMonths = {
+			Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', 
+			Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12', 
+		}
+		let month = oMonths[src]
+		return (undefined == month ? 'xx' : month)
+	}
+
+	function get_values(runNo) {
+		// short timeZoneName exposes a GMT string in ~75% of timezones
+			// which allows us more truthy offsets to fall back to
+		oData = {'_runNo': runNo, 'errors' : {}, 'format': {}, 'offset': {}, 'tampered': [], 'raw': {}} // reset
+		let option = {
+			day: '2-digit', month: '2-digit', year: 'numeric',
+			hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
+			timeZoneName: 'short', timeZone: undefined,
+		}
+		let formatter = new Intl.DateTimeFormat('en', option) // changing option does not affect our formatter
+
+		let id = 'iframelastmod'
+		testdate = new Date()
+		// get values
+		methods.forEach(function(k){
+			let value
+			try {
+		// DTF
+				if ('timeZone' == k) {
+					value = formatter.format(testdate).replace(',','')
+					//value = '04/19/2026 09:42:33 GMT'
+		// last modified
+				} else if ('exslt' == k) {
+					let xsltProcessor = new XSLTProcessor
+					xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
+					let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
+					value = fragment.childNodes[0].nodeValue
+				} else if ('iframe' == k) {
+					let el = document.createElement('iframe')
+					el.setAttribute('id', id)
+					document.body.appendChild(el)
+					let target = el.contentDocument
+					value = target.lastModified // contentWindow.document
+				} else if ('parseFromString' == k) {
+					value = (new DOMParser).parseFromString('','text/html').lastModified
+				} else if ('parseHTMLUnsafe' == k) {
+					value = Document.parseHTMLUnsafe('').lastModified
+		// temporal
+				} else if ('plainDateISO' == k) {
+					value = Temporal.Now.plainDateISO().toString()
+				} else if ('plainDateTimeISO' == k) {
+					value = Temporal.Now.plainDateTimeISO().toString()
+				} else if ('plainTimeISO' == k) {
+					value = Temporal.Now.plainTimeISO().toString()
+					value = value.slice(0,8)
+				} else if ('zonedDateTimeISO' == k) {
+					value = Temporal.Now.zonedDateTimeISO().toString()
+		// to*string standalone
+				} else if ('toLocaleDateString' == k) {
+					option.timeZone = undefined
+					value = testdate.toLocaleDateString('en', option).replace(',','')
+				} else if ('toLocaleString' == k) {
+					option.timeZone = undefined
+					value = testdate.toLocaleString('en', option).replace(',','')
+				} else if ('toLocaleTimeString' == k) {
+					value = testdate.toLocaleTimeString('en', option).replace(',','')
+				} else if ('toTimeString' == k) {
+					let parts = testdate.toTimeString().split(' ')
+					value = parts[0] +' '+ parts[1]
+		// no formatting
+				} else if ('toDateString' == k) {
+					// https://searchfox.org/firefox-main/source/js/src/tests/test262/built-ins/Date/prototype/toDateString/format.js
+					// dateRegExp = /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [0-9]{2} [0-9]{4}$/
+					// gecko format: e.g. "Fri Mar 20 2026" | blink seems to be the same, tested a few locales+timezone mixes
+					let parts = testdate.toDateString().split(' ')
+					value = get_month(parts[1]) +'/'+ parts[2] +'/'+ parts[3]
+				} else if ('toString' == k) {
+					// note: contents of the string from toString() are implementation-dependent
+						// using formatter (DTF) defeats the purpose of the test
+					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toString
+					// "it joins the string representation specified in toDateString() and toTimeString()"
+					let parts = testdate.toString().replace(',','').split(' ')
+					value = get_month(parts[1]) +'/'+ parts[2] +'/'+ parts[3] +' '+ parts[4]
+					if (undefined !== parts[5]) {value += ' '+ parts[5]}
+				}
+				//if ('iframe' !== k) {foo++} // simulate only getting offset from a non-exslt lastMod
+				// typecheck
+				let typeCheck = typeFn(value)
+				if ('string' !== typeCheck) {
+					throw zErrType + typeCheck
+				} else {
+					/* test
+					if (!aLastMods.includes(k)) {
+						let index = value.indexOf(':')
+						if (-1 !== index) {
+							// shift minutes
+							let mins = value.slice(index +1, index +3) * 1
+							mins = mins + (mins < 30 ? 1 : -1) // we only need move 1 minute: always 2 digits
+							value = value.slice(0, index +1) + mins + value.slice(index +3, value.length)
+							// shift seconds
+							let secs = value.slice(index +4, index +6) * 1
+							let secShift = 11
+							secs = secs + (secs < 30 ? secShift : secShift * -1) // always 2 digits
+							secs = (secs+'').padStart(2,'0') // just in case
+							value = value.slice(0, index +4) + secs + value.slice(index +6, value.length)
+						}
+					}
+					//*/
+					oData.raw[k] = value
+				}
+			} catch(e) {
+				// the error differs if the console is open vs closed
+				if ('parseHTMLUnsafe' == k) {
+					if (e.name == 'NS_ERROR_UNEXPECTED') {e = 'Error: Permission denied to access property \"lastModified\"'}
+				}
+				oData.errors[k] = e+''
+			}
+		})
+		removeElementFn(id)
+		// partials (date or time only) need the missing corresponding part
+		// we use lastModified items so if partials are legit they can match
+		try {
+			let partialkey, dateString, timeString
+			for (let i=0; i < aLastMods.length; i++) {
+				let key = aLastMods[i]; if (undefined !== oData.raw[key]) {partialkey = key; break}
+			}
+			if (undefined !== partialkey) {
+				oData['partialkey'] = partialkey
+				dateString = oData.raw[partialkey]
+				if ('exslt' !== partialkey) {
+					dateString = dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
+				}
+				timeString = dateString.slice(11,19)
+				dateString = dateString.slice(0,10)
+				let aPartial = ['toTimeString','plainTimeISO','toDateString','plainDateISO']
+				aPartial.forEach(function(item) {
+					// if undefined we must have had an error already
+					if (undefined !== oData.raw[item]) {
+						if (item.includes('Time')) {
+							oData.raw[item] = dateString +' '+ oData.raw[item]
+						} else {
+							oData.raw[item] = oData.raw[item] +' '+ timeString
+						}
+					}
+				})
+			}
+		} catch(e) {
+			console.log(e)
+		}
+		// check validity and format
+		for (const k of Object.keys(oData.raw)) {
+			let formatted, src = oData.raw[k]
+			if ('exslt' == k) {
+				oData.offset[k] = src.slice(-6)
+				formatted = src.slice(0,-10).replace('T',' ')
+			} else if ('zonedDateTimeISO' == k || 'plainDateTimeISO' == k) {
+				// we only want the first 19 chars
+				formatted = src.slice(0,19).replace('T',' ')
+				// remember offsets
+				if ('zonedDateTimeISO' == k) {
+					let end = src.indexOf('[')
+					oData.offset[k] = src.slice(end - 6, end)
+				}// else if ('toTimeString' == k) {
+					// toTimeString: always uses the format of HH:mm:ss GMT±xxxx (TZ)
+					//oData.offset[k] = src.slice(23,26) +':' + src.slice(26,28)
+				//}
+			} else {
+				formatted = src.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
+				// leverage short timezonename
+				let shortname = formatted.split(' ')[2]
+				formatted = formatted.slice(0,19)
+				if (undefined !== shortname) {
+					if (shortname.includes('GMT') || undefined !== tznShort[shortname]) {oData.offset[k] = shortname}
+				}
+			}
+			if (checkValidDate(k, formatted)) {oData.format[k] = formatted}
+		}
+	}
+
+	function checkValidDate(method, value) {
+		try {
+			if (new Date(value) +'' == 'Invalid Date') {
+				oData.errors[method] = 'Invalid Date: ' + value
+				return false
+			}
+			return true
+		} catch(e) {
+			oData.errors[method] = e+''
+			return false
+		}
+	}
+
+	function checkMatch(runNo) {
+		// set minutekey
+			// if we have one at least one lastModified exslt/iframe/parseFromString/parseHTMLUnsafe
+			// and we have an offset that matches, then we know the real value
+		let minutekey, checkkey
+		let oCheck = {hasLastMod: [], hasOffset: []}
+		aLastMods.forEach(function(item){if (undefined !== oData.format[item]) {oCheck.hasLastMod.push(item)}})
+		for (const k of Object.keys(oData.offset)) {oCheck.hasOffset.push(k)}
+		for (const j of Object.keys(oCheck)) {
+			oData[j] = []
+			let lookup = 'hasLastMod' == j ? 'format' : 'offset'
+			let array = oCheck[j]
+			array.forEach(function(item){if (undefined !== oData[lookup][item]) {oData[j].push(item)}})
+		}
+
+		if (Object.keys(oData.hasLastMod).length && Object.keys(oData.hasOffset).length) {
+			// last mods can't be tampered with
+			if (oData.hasOffset.includes('exslt')) {
+				minutekey = 'exslt' // if we have exslt offset we also have the format
+			} else {
+				let aOff = oData.hasOffset, aLast = oData.hasLastMod
+				// loop valid items which have an offset
+				for (let i = 0; i < aOff.length; i++) {
+					if (undefined !== minutekey) {break}
+					let offsetkey = aOff[i], got = oData.format[offsetkey]
+					// loop valid lastModified items which should all be truthy
+					for (let j = 0; j < aLast.length; j++) {
+						let lastkey = aLast[j], expected = oData.format[lastkey]
+						if (expected == got) {minutekey = offsetkey; break}
+					}
+				}
+			}
+		}
+
+		// are they all the same
+		let aTmp = []
+		for (const k of Object.keys(oData.format)) {aTmp.push(oData.format[k])}
+		aTmp = dedupeArray(aTmp)
+		if (undefined !== minutekey) {
+			oData['minutekey'] = minutekey
+			checkkey = minutekey
+		}
+		if (aTmp.length == 1) {return true}
+		if (undefined == checkkey) {
+			// just because we don't have a minutekey, doesn't mean we can't compare to a lastmodifed
+			checkkey = oCheck.hasLastMod[0]
+		}
+		if (undefined == checkkey) {return aTmp.length == 1}
+		oData['checkkey'] = checkkey
+
+		// here is where we catch the tampering
+			// some diffs + we have a checkkey which we consider truthy
+			// compare the rest to checkkey (which we treat as truthy)
+			// get checkkey parts
+		let mValue = oData.format[checkkey],
+			mParts = mValue.split(' '),
+			mDate = mParts[0],
+			mTime = mParts[1].split(':')
+		for (const k of Object.keys(oData.format)) {
+			let isDiff = false // reset each check, assume false
+			if (k !== checkkey) { // exempt checkkey
+				try {
+					let kValue = oData.format[k],
+						kParts = kValue.split(' '),
+						kDate = kParts[0],
+						kTime = kParts[1].split(':')
+					// compare k to m(inutekey)
+					if (kValue == mValue) {
+						// perfect match
+					} else if (kDate !== mDate) {
+						// different date
+						isDiff = true // this covers toDateString and plainDateISO
+						//if (isFile && 2 == runNo) {console.log('date changed', k, kDate)}
+					} else {
+						// time diff only
+						let tmpDiff = {
+							h: (kTime[0] * 1) - (mTime[0] * 1),
+							min: (kTime[1] * 1) - (mTime[1] * 1),
+							s: (kTime[2] * 1) - (mTime[2] * 1),
+						}
+						// allow 10 seconds: jank, also leap seconds
+						// abs !important to cover being ahead or behind
+						let secondsDiff = Math.abs((tmpDiff.h * 3600) + (tmpDiff.min * 60) + tmpDiff.s)
+						if (secondsDiff > 10) {
+							isDiff = true
+							//if (isFile && 2 == runNo) {console.log('secondsDiff', secondsDiff, k)}
+						}
+					}
+					if (isDiff) {oData.tampered.push(k)} //METRIC +'_'+ k)}
+				} catch(e) {
+					console.log(e+'')
+				}
+			}
+		}
+		return 0 == oData.tampered.length
+	}
+
+	function display_values() {
+		// all valid dates are in format, everything else is in errors
+		for (const k of Object.keys(oData.format)) {
+			let n = METRIC +'_'+ k, isLies = false, extra = ''
+			let value = oData.format[k]
+			// style + record lies
+			if (oData.tampered.includes(k)) {
+				isLies = true
+				let tmpvalue = value
+				// tidy up partial
+				if ('toTimeString' == k || 'plainTimeISO' == k) {tmpvalue = tmpvalue.slice(-8)
+				} else if ('toDateString' == k || 'plainDateISO' == k) {tmpvalue = tmpvalue.slice(0,10)
+				}
+				log_known(4, n, tmpvalue)
+			}
+			// tidy up partial
+			if ('toTimeString' == k || 'plainTimeISO' == k) {
+				value = value.slice(-8)
+				dom[k +'spaces'] = ' '.repeat(10)
+			} else if ('toDateString' == k || 'plainDateISO' == k) {value = value.slice(0,10)}
+			// add extra display info
+			let offsetStr = oData.offset[k]
+			if (undefined !== offsetStr & 'string' == typeof offsetStr) {extra = ' '+ offsetStr}
+			value += extra
+			addDisplay(4, n, value,'','', isLies)
+		}
+		for (const k of Object.keys(oData.errors)) {
+			addDisplay(4, METRIC +'_'+ k, log_error(4, METRIC +'_'+ k, oData.errors[k]))
+		}
+	}
+
+	// run, try to get isMatch
+	get_values(1)
+	let isMatch = checkMatch(1)
+	if (!isMatch) {
+		// ~0.5 ms to grab our mods: 1 in 86,400 seconds tick over a day
+		// so we'd have to be really unlucky to hit this: try again
+		get_values(2)
+		isMatch = checkMatch(2)
+	}
+	oData['isMatch'] = isMatch
+	display_values()
+	if (undefined == oData.minutekey) {create_offset()} // after display so we don't add offsets to a lastmod
+
+	let finalvalue, finaldisplay, utcValue
+	let errCount = Object.keys(oData.errors).length
+	let tamperCount = oData.tampered.length
+	if (undefined !== oData.minutekey) {
+		let finaldata = get_minutes(oData.offset[oData.minutekey])
+		finalvalue = finaldata[0]
+		finaldisplay = finaldata.join(' ')
+		utcValue = oData.format[oData.minutekey]
+
+		if (0 == tamperCount && 0 == errCount) {
+			// no lies + no errors
+			notation = tz_green
+		} else if (gRun) {
+			// health lookup
+			let aHealth = []
+			if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
+			if (tamperCount > 0) {aHealth.push(tamperCount + ' mismatch' + (tamperCount == 1 ? '' : 'es'))}
+			if (gRun) {sDetail.document.lookup[METRIC] = aHealth.join(' | ')}
+		}
+		addDisplay(4, METRIC, finaldisplay,'', notation)
+		addData(4, METRIC, finalvalue)
+	} else {
+		// all errors
+		if (methods.length == errCount) {
+			addBoth(4, METRIC, zErr +'s','', notation, zErr)
+		} else {
+			// 4 scenarios with isMatch/isTamper
+				// if no checkkey then we never compared and isMatch is default false
+			let isTamper = tamperCount > 0
+			finalvalue = (isMatch || undefined == oData.checkkey) ? 'unknown' : 'mixed'
+			addBoth(4, METRIC, finalvalue,'', notation,'', isTamper)
+		}
+	}
+	//if (isFile) {console.log('timezone offset\n', oData)}
+	log_perf(4, METRIC, t0)
+	return {'nowValue': finalvalue, 'utcValue': utcValue, 'tampered': oData.tampered}
+}
+
+function get_timezone_offsets(METRIC, nowValue, utcValue) {
+	let t0 = nowFn(), notation = tz_red
+	if (gRun) {try {delete sDetail.document.lookup[METRIC]} catch(e) {}}
+
 	let years = [1879, 1952, 1976, 2025]
 	let days = {
 		// to make sure we don't change years or months when a day or two ticks over
@@ -1278,12 +1884,10 @@ function get_timezone(METRIC) {
 		'January 15': {numbers: [1,15], str :'01-15'},
 		'July 15': {numbers: [7,15], str: '07-15'}
 	}
-	// 1879-01-01T13:00Z
-
 	let aMethods = [
 		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_components_and_time_zones
 		'components','components_utc','date','date.parse','date.valueOf','getTime',
-		'getTimezoneOffset','offsetNanoseconds','Symbol.toPrimitive',
+		'getTimezoneOffset','offsetNanoseconds','timeZoneName','Symbol.toPrimitive',
 	]
 	let oMultiplier = {
 		// year + month: our test dates are middle of the month: legit components will never differ
@@ -1297,59 +1901,92 @@ function get_timezone(METRIC) {
 		'6': 1000, // second
 		'7': 1, // ms
 	}
-
-	function get_tz() {
-		let methods = ['timeZone','timeZoneId','zonedDateTime']
-		let tzData = {}
-		methods.forEach(function(k) {
-			let tz, isErr = false
-			try {
-				if ('timeZone' == k) {
-					// this is what is used for isTimeZoneOffsetValid
-					tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-					//tz = 'Asia/Tokyo' // test mixed
-				} else if ('timeZoneId' == k) {
-					tz = Temporal.Now.timeZoneId()
-				} else {
-					tz = Temporal.Now.zonedDateTimeISO().toString()
-					tz = tz.slice(tz.indexOf('[') + 1, tz.length - 1)
-				}
-				if (runST) {tz = undefined} else if (runSI) {tz = 'tzp'}
-				let typeCheck = typeFn(tz)
-				if ('string' !== typeCheck) {throw zErrType + typeCheck}
-				let tztest = (new Date('January 1, 2018 13:00:00 UTC')).toLocaleString('en', {timeZone: tz})
-			} catch(e) {
-				tz = e+''
-				isErr = true
-			}
-			tzData[k] = {'isErr': isErr, 'name': tz}
-		})
-		return tzData
+	let tznShort = {
+		// hardcoded
+		AKST: 540, AKDT: 480,
+		AST: 240, ADT: 180,
+		CST: 360, CDT: 300,
+		EST: 300, EDT: 240,
+		HAST: 600, HADT: 540,
+		HST: 600, HDT: 540,
+		MST: 420, MDT: 360,
+		PST: 480, PDT: 420,
+		UTC: 0, GMT: 0, 'GMT+0': 0,
+	}
+	let oList = {}
+	years.forEach(function(year) {oList[year] = days})	
+	// if we know the real current offset (nowValue) we can add a silent non-collected
+	// now datetime and compare it's value to nowValue to determine if tampered
+	if ('number' == typeFn(nowValue)) {oList['now'] = {'now': ''}}
+	let oData = {'calc': {}, 'display': {}, 'errors': {}, 'hashes': {'all': {}, 'valid': {}},
+		'lies': {}, 'math': {'1.utc': {}, '2.timezone': {}}, 'now': {}, 'numbers': {}, 'utc': {}
+	}
+	aMethods.forEach(function(method) {
+		oData.calc[method] = {}
+		years.forEach(function(year) {oData.calc[method][year] = []})
+	})
+	let tznOption = {
+		day: '2-digit', month: '2-digit', year: 'numeric',
+		hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
+		timeZoneName: 'short',
+	}
+	let oExpected = {
+		'1879-01-15': {'components': '1879 0 15', 'other': -2870420400000},
+		'1879-07-15': {'components': '1879 6 15', 'other': -2854782000000},
+		'1952-01-15': {'components': '1952 0 15', 'other': -566823600000},
+		'1952-07-15': {'components': '1952 6 15', 'other': -551098800000},
+		'1976-01-15': {'components': '1976 0 15', 'other': 190558800000},
+		'1976-07-15': {'components': '1976 6 15', 'other': 206283600000},
+		'2025-01-15': {'components': '2025 0 15', 'other': 1736946000000},
+		'2025-07-15': {'components': '2025 6 15', 'other': 1752584400000},
 	}
 
-	function get_offsets() {
-		let oData = {}, oErrors = {}
-		let oMath = {'1.utc_1879_date.parse': [], '2.utc': {}, '3.timezone': {}}
-		aMethods.forEach(function(method) {
-			oData[method] = {}
-			years.forEach(function(year) {oData[method][year] = []})
-		})
-		try {
-			years.forEach(function(year) {
-				Object.keys(days).forEach(function(day) {
-					let isFirst = (year == years[0] && day == 'January 15')
+	try {
+		let formatter = new Intl.DateTimeFormat('en', tznOption)
+		for (const year of Object.keys(oList)) {
+			let isNow = 'now' == year
+			Object.keys(oList[year]).forEach(function(day) {
+				let isFirst = (year == years[0] && day == 'January 15')
+				let test, control, key
+				if (!isNow) {
 					let datetime = day +', '+ year +' 13:00:00'
-					let control = new Date(datetime +' UTC')
-					let test = new Date(datetime)
-					let key = year +'-'+ days[day].str
-					oMath['2.utc'][key] = {};  oMath['3.timezone'][key] = {}; 
-					if (runSE) {foo++} else if (runST) {test = NaN}
-					aMethods.forEach(function(method) {
+					control = new Date(datetime +' UTC')
+					test = new Date(datetime)
+					key = year +'-'+ days[day].str
+					oData.math['1.utc'][key] = {};  oData.math['2.timezone'][key] = {}; 
+				} else {
+					// if we have a nowValue, we had a minutekey and a formatted string
+					test = new Date(utcValue)
+					control = new Date(utcValue +' UTC')
+				}
+				if (runSE) {foo++} else if (runST) {test = NaN}
+				aMethods.forEach(function(method) {
+					if (undefined == oData.errors[method]) {
 						let offset, k = 60000, oDiffs, utc, time
 						try {
 							if ('getTimezoneOffset' == method) {
 								offset = test.getTimezoneOffset()
 								k = 1
+							} else if ('timeZoneName' == method) {
+								// it doesn't really matter what method we use since they're all exposed elsewhere
+								let tznDate = formatter.format(test).replace(',','')
+								time = tznDate.split(' ')[2]
+								k = 1
+								if (undefined !== tznShort[time]) {
+									offset = tznShort[time]
+								} else {
+									if ('GMT' !== time.slice(0,3)) {throw zErrInvalid + time}
+									// hrs, minutes, seconds
+									let sign = time.includes('-') ? 1 : -1
+									let value = time.replace('GMT','')
+									value = value.replace('-','')
+									value = value.replace('+','')
+									let parts = value.split(':')
+									offset = parts[0] * 60
+									if (undefined !== parts[1]) { offset += parts[1] * 1} // minutes
+									if (undefined !== parts[2]) { offset += (parts[2] * 1)/60} // seconds
+									offset = offset * sign
+								}
 							} else {
 								if ('date.parse' == method) {
 									time = Date.parse(test); utc = Date.parse(control)
@@ -1366,13 +2003,15 @@ function get_timezone(METRIC) {
 								} else if ('offsetNanoseconds' == method) {
 									// instant: YYYY-MM-DD T HH:mm:ss.sssssssss Z/±HH:mm [time_zone_id]
 									// e.g. 1879-01-01T13:00Z
-									let tzid = Temporal.Now.timeZoneId(),
-										instant = Temporal.Instant.from(year +'-'+ days[day].str +'T13:00Z')
+									let tzid = Temporal.Now.timeZoneId()
+									let instantStr = isNow ? utcValue +'Z' : year +'-'+ days[day].str +'T13:00Z'
+									let instant = Temporal.Instant.from(instantStr)
 									time = instant.toZonedDateTimeISO(tzid).offsetNanoseconds
 									// UTC is always zero so we could hard-code this
-										// BUT it's nice to catch any fuckery caqused by extensions
+									// BUT it's nice to catch any fuckery caqused by extensions
 									utc = instant.toZonedDateTimeISO('UTC').offsetNanoseconds
 									offset = (utc - time) / 1e6
+									//if (!isNow) (offset = offset * 2) // mixed but no lies
 								} else if ('components' == method) {
 									oDiffs = {
 										'1': [test.getUTCFullYear(), control.getUTCFullYear()],
@@ -1410,569 +2049,176 @@ function get_timezone(METRIC) {
 									utc = utc.join(' '); time = time.join(' ')
 								}
 							}
-							if (undefined !== utc) {
-								oMath['3.timezone'][key][method] = time
-								// only old-timey years have partial minutes
-								if (1879 == year &&'date.parse' == method) {
-									oMath['1.utc_1879_'+ method].push(utc)
-								} else {
-									oMath['2.utc'][key][method] = utc
-								}
-							}
+							let isTZN = 'timeZoneName' == method
 							if (undefined == offset) {offset = time - utc}
-							if (isFirst) {
-								let typeCheck = typeFn(offset)
-								//console.log(method, typeCheck, offset)
-								if ('number' !== typeCheck) {throw zErrType + typeCheck}
+							if (isNow) {
+								oData.now[method] = offset/k
+							} else {
+								if (undefined !== utc) {
+									let expected, isUTCMatch = true, isPartial = false
+									oData.math['1.utc'][key][method] = utc
+									oData.math['2.timezone'][key][method] = time
+									// check for utc tampering
+									if ('1879' == year &&'date.parse' == method) {
+										expected = oExpected[key].other
+										// only old-timey years have partial minutes and only partial minutes are offset from expected
+										if (Number.isInteger(offset/k)) {
+											isUTCMatch = utc == expected
+										} else {
+											// can't match expected (0 diff) and diff within 60000
+											isPartial = true
+											let diff = Math.abs(expected - utc)
+											isUTCMatch = diff < 60000 && diff !== 0
+										}
+									} else {
+										if ('offsetNanoseconds' == method) {expected = 0
+										} else if (method.includes('components')) {expected = oExpected[key].components +' 13 0 0 0'
+										} else {expected = oExpected[key].other}
+										if (undefined !== expected) {isUTCMatch = utc == expected}
+									}
+									// log tampering
+									if (!isUTCMatch) {
+										oData.lies[method] = ['utc']
+										if (undefined == oData.utc[method]) {oData.utc[method] = {}}
+										oData.utc[method][key] = ['expected'+ (isPartial ? ' ±60000' : ''), expected, 'got', utc]
+									}
+								}
+								if (isTZN) {
+									oData.math['2.timezone'][key][method] = time
+								}
+								if (isFirst) {
+									let typeCheck = typeFn(offset)
+									//console.log(method, typeCheck, offset)
+									if ('number' !== typeCheck) {throw zErrType + typeCheck}
+								}
+								oData.calc[method][year].push(offset/k)
 							}
-							oData[method][year].push(offset/k)
 						} catch(e) {
-							oErrors[method] = log_error(4, METRIC +'_'+ method, e)
+							oData.errors[method] = log_error(4, METRIC +'_'+ method, e)
+							delete oData.calc[method]
+							delete oData.lies[method]
+							delete oData.utc[method]
 						}
-					})
+					}
 				})
 			})
-		} catch(e) {
-			oData = log_error(4, METRIC, e)
 		}
-		for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
-		// summarize oMath etc
-		let oNumbers = {'hashes': {}, 'info': {}}
-		for (const type of Object.keys(oMath)) {
-			let tmpobj = {}
-			if ('1.utc_1879_date.parse' == type) {
-				tmpobj = oMath[type]
-			} else {
-				let newobj = {}
-				for (const d of Object.keys(oMath[type])) {
-					newobj[d] = {}
-					for (const k of Object.keys(oMath[type][d])) {
-						let itemdata = oMath[type][d][k], itemhash = mini(itemdata) +' '
-						if (undefined == newobj[d][itemhash]) {
-							newobj[d][itemhash] = {'data': itemdata, 'group': [k]}
-						} else {newobj[d][itemhash].group.push(k)}
-					}
-				}
-
-				for (const d of Object.keys(newobj)) {
-					tmpobj[d] = {}
-					for (const k of Object.keys(newobj[d])) {tmpobj[d][newobj[d][k].group.join(' ')] = newobj[d][k].data}
-				}
-			}
-			oNumbers['hashes'][type] = mini(tmpobj) // utc: 1d6b6215
-			oNumbers['info'][type] = tmpobj
-		}
-		//return
-		return [oData, oNumbers]
+	} catch(e) {
+		addBoth(4, METRIC, log_error(4, METRIC, e),'', notation, zErr)
+		return {'health': false, 'hash': zErr}
+	}
+	// display errors
+	for (const k of Object.keys(oData.errors)) {addDisplay(4, METRIC +'_'+ k, oData.errors[k])}
+	// exit if all errors
+	if (Object.keys(oData.errors).length == aMethods.length) {
+		addBoth(4, METRIC, zErr +'s', '', notation, zErr)
+		return {'health': false, 'hash': zErr}
 	}
 
-	Promise.all([
-		get_tz(),
-		get_offsets(),
-	]).then(function(res){
-		// TZ: we returned an object
-		let tz, tzObj = res[0], tzData = []
-		// display each item and track non-errors
-		for (const k of Object.keys(tzObj)) {
-			let display = tzObj[k].name
-			if (false == tzObj[k].isErr) {tzData.push(display) // track non errors
-			} else {display = log_error(4, METRICtz +'_'+ k, display)} // log errors
-			addDisplay(4, METRICtz +'_'+ k, display) // display
+	for (const k of Object.keys(oData.calc)) {
+		let tmpDisplay = []
+		for (const y of Object.keys(oData.calc[k])) {
+			oData.calc[k][y] = dedupeArray(oData.calc[k][y])
+			tmpDisplay.push(oData.calc[k][y].join(', '))
 		}
-		// dedupe, if only 1 non-error, then we have a tz value
-		tzData = dedupeArray(tzData)
-		if (1 == tzData.length) {tz = tzData[0]; isTimeZoneValue = tz}
-
-		// OFFSETS raw data
-		let btnColor = 4
-		// we'll do numbers checking in the actual function where we can check each
-		// method individually and handle those with errors etc but for now I want
-		// to test and collect info and output some visuals for that
-		if (isGecko) {
-			btnColor = 'bad'
-			let mathdata = res[1][1]
-			let isUTC = mathdata.hashes['2.utc'] == 'c5902103'
-			if (isUTC) {
-				let isDP = mathdata.hashes['1.utc_1879_date.parse'] == '7f6ca60a'
-				if (isDP) {
-					btnColor = 'good'
-				} else {
-					// utc correct, but partial minute: check absolute diff within 60000
-					// we know the expected values
-					let aExpected = [-2870420400000,-2854782000000]
-					let aGot = mathdata.info['1.utc_1879_date.parse']
-					let isGood = true // assume good
-					for (let i = 0; i < aExpected.length; i++) {
-						let diff = Math.abs(aExpected[i] - aGot[i])
-						if (diff > 60000) {isGood = false}
-					}
-					if (isGood) {btnColor = 'good'}
-				}
+		// out of 339 unique results: 1 = 57 chars, 1 = 52 chars .. the rest are all 50 and under
+		// will likely cause line overflow on android but it's cleaner to manage and visually see
+		let str = ''
+		if (isDesktop && undefined !== oData.now[k]) {str = s99 +' ('+ oData.now[k] +')'+ sc}
+		oData.display[k] = tmpDisplay.join(' | ') + str
+		if (undefined !== oData.now[k]) {
+			if (oData.now[k] !== nowValue) {
+				if (undefined == oData.lies[k]) {oData.lies[k] = []}
+				oData.lies[k].push('now')
+				log_known(4, METRIC +'_'+ k, tmpDisplay.join(' | '))
 			}
 		}
-		addDisplay(4, METRIC+'_data', addButton(btnColor, METRIC +'_data', 'data'))
-		sDetail.document[METRIC +'_data'] = res[1][1]
-
-		// OFFSETS
-		let oOffsets = res[1][0], notation = tz_red, go = true, aHash = {}, countErr = 0, allHash
-		// stop: overall error
-		if ('string' == typeof oOffsets) {addBoth(4, METRIC, oOffsets,'', notation, zErr); go = false}
-		// display errors + collect hashes
-		if (go) {
-			for (const k of Object.keys(oOffsets)) {
-				if ('string' == typeof oOffsets[k]) {
-					addDisplay(4, k, oOffsets[k])
-					countErr++
-				} else {
-					let hash = mini(oOffsets[k])
-					if (aHash[hash] == undefined) {aHash[hash] = []}
-					aHash[hash].push(k)
-				}
-			}
-			// stop: all errors
-			if (countErr == aMethods.length) {addBoth(4, METRIC, zErr,'', notation); go = false}
-			// display hashes + btns
-			//let isHashMixed = (Object.keys(aHash).length > 1 || countErr > 0) ? true : false // includes errors
-			let isHashMixed = Object.keys(aHash).length > 1 // excludes errors
-			for (const k of Object.keys(aHash)) {
-				allHash = k
-				let items = aHash[k]
-				for (let i=0; i < items.length; i++) {
-					let metric = items[i], btn =''
-					if (isHashMixed && i == 0) {
-						// btns for 1st of each hash
-						sDetail[isScope][METRIC +'_'+ metric] = oOffsets[metric]
-						btn = addButton(4, METRIC +'_'+ metric)
-					}
-					addDisplay(4, metric, k, btn)
-				}
-			}
-			// stop: not all same + valid
-			if (isHashMixed) {addBoth(4, METRIC, 'mixed','', notation,'', true); go = false}
+		addDisplay(4, METRIC +'_'+ k, oData.display[k], '','', undefined !== oData.lies[k])
+		let hash = mini(oData.calc[k])
+		if (undefined == oData.hashes.all[hash]) {oData.hashes.all[hash] = [k]} else {oData.hashes.all[hash].push(k)}
+		if (undefined == oData.lies[k]) {
+			if (undefined == oData.hashes.valid[hash]) {oData.hashes.valid[hash] = [k]} else {oData.hashes.valid[hash].push(k)}
 		}
-
-		// all valid + same
-		let isLies = false
-		if (go) {
-			if (isTimeZoneValue !== undefined) {
-				try {
-					let oTest = {}
-					// just use date.parse
-					years.forEach(function(year) {
-						oTest[year] = []
-						Object.keys(days).forEach(function(day) {
-							let datetime = day +', '+ year +' 13:00:00'
-							let control = new Date(datetime)
-							let test = control.toLocaleString('en', {timeZone: 'UTC'})
-							control = control.toLocaleString('en', {timeZone: isTimeZoneValue})
-							let diff = ((Date.parse(test) - Date.parse(control))/60000)
-							oTest[year].push(diff)
-						})
-					})
-					let testHash = mini(oTest)
-					notation = testHash === allHash && 0 == countErr ? tz_green : tz_red // no errors allowed (smart min is 140)
-					if (testHash !== allHash) {
-						isLies = true
-					} else if (isSmart) {
-						// legit single timezonename
-						// legit looking offset values
-						// all non-error offsets methods match
-						// a control matches using the timezonename
-						isTimeZoneValid = 0 == countErr // no errors allowed otherwise assume fuckery
-						//isTimeZoneValid = true
-					}
-				} catch(e) {
-					console.log(e)
-				}
-			}
-			// display
-			addBoth(4, METRIC, allHash, addButton(4, METRIC), notation, oOffsets['getTime'], isLies)
-		}
-
-		// TZ: after isTimeZoneValid set above
-			// which can only be true if we had a single tz (ignoring errors) after deduping
-		if (!isTimeZoneOffsetValid) {
-			// if timezone_ofset_timezone was a lie then this is as well
-			// note: that timezone_ofset_timezone uses Intl.DateTimeFormat().resolvedOptions().timeZone
-			// and can only set isTimeZoneOffsetValid = false if there is no error. Which means we
-			// don't error here, and thus the results (mixed or not) are untrustworthy
-			isTimeZoneValid = false
-		}
-		if (isTimeZoneValid) {
-			notation = '8d787cb5' == mini(tzObj) ? rfp_green : rfp_red
-			addBoth(4, METRICtz, tz,'', notation)
-		}	else {
-			notation = rfp_red
-			isLies = false // reset
-			if (undefined == tz) {
-				if (0 == tzData.length) {tz = zErr // all errors
-				} else if (tzData.length > 1) {tz = 'mixed'; isLies = true} // mixed so untrustworthy
-			} else {
-				isLies = true // single tz but failed the test or failed the tz offset test, so untrustworthy
-			}
-			addBoth(4, METRICtz, tz,'', notation,'', isLies)
-		}
-		// health lookup
-		if (rfp_red == notation) {
-			sDetail.document[METRICtz] = {}
-			for (const k of Object.keys(tzObj)) {sDetail.document[METRICtz][k] = tzObj[k].name}
-		}
-		log_perf(4, METRIC, t0)
-		return
-	})
-}
-
-function get_timezone_offset(METRIC) {
-	// this is good test to catch + record various temporal/date/toString lies even
-		// if they are ultimately duplicitous. This requires the spoofed offset to differ
-		// from lastModified and real-time real-world world offsets only number 65-70
-		// IIUIC. So not definitive, but multiple exposure of tampering is good. also,
-		// fuck extensions trying to resist or solutions that create mismatches :)
-	let t0 = nowFn()
-	isTimeZoneOffsetValid = true // reset
-	// setup
-	const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
-		+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
-		+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
-	const doc = (new DOMParser).parseFromString(xslText, 'text/xml')
-	let oData = {}, oDisplay = {}, oLies = {}
-	let tzControl
-	let notation = tz_red
-
-	let methods = [
-		// intl/DRF
-		'timeZone','timeZone_expected',
-		// last modified
-		'iframe','parseFromString','parseHTMLUnsafe',
-		// temporal
-		'plainDateISO','plainDateTimeISO','zonedDateTimeISO','plainTimeISO',
-		// to*string
-		'toDateString','toLocaleString','toLocaleDateString',
-		'toLocaleTimeString','toTimeString',
-		'toString',
-		//'date',
-	]
-	if (isGecko) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)} // non-gecko: skip exslt
-
-	let aLastMods = ['exslt','iframe','parseFromString','parseHTMLUnsafe'] // is lastModified source
-	let aOffsets = ['exslt','toTimeString','zonedDateTimeISO'] // has the offszet calculated in the string
-
-	function checkValidDate(method, value) {
-		try {if (new Date(value) +'' == 'Invalid Date') {oData.errors[method] = 'Invalid Date: ' + value; return false}; return true
-		} catch(e) {oData.errors[method] = e+''; return false}
 	}
 
-	function get_minutes(src) {
-		let offset = oData.offset[src]
-		if (undefined !== offset) {
-				let minutes = ((offset.slice(1,3) * 1)*60) + (offset.slice(4,6)*1)
-				let sign = (offset[0] == '+' ? (minutes == 0 ? '': '-') : '')
-				minutes = minutes * ('-' == sign ? -1 : 1)
-				return [minutes, (offset == '+00:00' ? '' : ' ['+ offset +']')]
+	// summarize oData.math etc
+	// add mismatches
+	if (Object.keys(oData.utc).length) {
+		oData.numbers['0.utc_tampered'] = {}
+		for (const k of Object.keys(oData.utc).sort()) {
+			oData.numbers['0.utc_tampered'][k] = oData.utc[k]
+		}
+	}
+	for (const type of Object.keys(oData.math)) {
+		// don't include any data from items that eventually errored
+		let tmpobj = {}, newobj = {}
+		for (const d of Object.keys(oData.math[type])) {
+			newobj[d] = {}
+			for (const k of Object.keys(oData.math[type][d])) {
+				if (undefined == oData.errors[k]) {
+					let itemdata = oData.math[type][d][k], itemhash = mini(itemdata) +' '
+					if (undefined == newobj[d][itemhash]) {
+						newobj[d][itemhash] = {'data': itemdata, 'group': [k]}
+					} else {newobj[d][itemhash].group.push(k)}
+				}
+			}
+		}
+		for (const d of Object.keys(newobj)) {
+			tmpobj[d] = {}
+			for (const k of Object.keys(newobj[d])) {tmpobj[d][newobj[d][k].group.join(' ')] = newobj[d][k].data}
+		}
+		oData.numbers[type] = tmpobj
+	}
+
+	// OFFSETS math data
+		// we only need to check for any utc methods: note: math data and lies + utc are only recorded for methods that didn't error
+	let btnColor = 4
+	if (isGecko) {btnColor = Object.keys(oData.utc).length ? 'bad' : 'good'}
+	addDisplay(4, METRIC +'_data', addButton(btnColor, METRIC +'_data', 'data'))
+	sDetail.document[METRIC +'_data'] = oData.numbers
+
+	// health lookup
+	let errCount = Object.keys(oData.errors).length
+	let tamperCount = Object.keys(oData.lies).length
+	if (gRun && errCount + tamperCount > 0) {
+		let aHealth = []
+		if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
+		if (tamperCount > 0) {aHealth.push(tamperCount + ' mismatch' + (tamperCount == 1 ? '' : 'es'))}
+		if (gRun) {sDetail.document.lookup[METRIC] = aHealth.join(' | ')}
+	}
+
+	// summarize
+	let hash, data ='', btn ='', isLies = false
+	let isMixed = Object.keys(oData.hashes.all).length > 1
+	let isValid = Object.keys(oData.hashes.valid).length == 1
+	if (isValid) {
+		// we may have lies, but we also have a single valid (non-lie) hash
+		for (const h of Object.keys(oData.hashes.valid)) { // there's only one hash
+			let m = oData.hashes.valid[h][0] // get first method listed
+			hash = h; data = oData.calc[m]
+			btn = addButton(4, METRIC)
+			// notation: no errors, no lies, i.e our single valid hash holds all methods
+			if (oData.hashes.valid[h].length == aMethods.length) {notation = tz_green}
+		}
+	} else {
+		// it may be feasible no lies detected but we have mixed results == clearly someone is lying
+		isLies = tamperCount > 0 || isMixed
+		if (isMixed) {
+			hash = 'mixed'
 		} else {
-			return ''
-		}
-	}
-	function get_month(src) {
-		let oMonths = {
-			Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', 
-			Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12', 
-		}
-		let month = oMonths[src]
-		return (undefined == month ? 'xx' : month)
-	}
-
-	function get_values() {
-		oData = {'errors' : {}, 'format': {}, 'keys': {}, 'offset': {}, 'raw': {}} // reset
-		let option = {
-			day: '2-digit', month: '2-digit', year: 'numeric',
-			hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
-			timeZone: undefined,
-		}
-		let formatter = new Intl.DateTimeFormat('en', option) // changing option does not affect our formatter
-
-		let id = 'iframelastmod'
-		let testdate = new Date()
-		// get values
-		methods.forEach(function(k){
-			let value
-			try {
-		// DTF
-				if ('timeZone_expected' == k) {
-					tzControl = Intl.DateTimeFormat().resolvedOptions().timeZone
-					option.timeZone = tzControl // if nothing valid we pass undefined
-					let formatterTZ = new Intl.DateTimeFormat('en', option)
-					value = formatterTZ.format(testdate).replace(',','')
-				} else if ('timeZone' == k) {
-					value = formatter.format(testdate).replace(',','')
-
-		// last modified
-				} else if ('exslt' == k) {
-					let xsltProcessor = new XSLTProcessor
-					xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
-					let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
-					value = fragment.childNodes[0].nodeValue
-				} else if ('iframe' == k) {
-					let el = document.createElement('iframe')
-					el.setAttribute('id', id)
-					document.body.appendChild(el)
-					let target = el.contentDocument
-					value = target.lastModified // contentWindow.document
-				} else if ('parseFromString' == k) {
-					value = (new DOMParser).parseFromString('','text/html').lastModified
-				} else if ('parseHTMLUnsafe' == k) {
-					value = Document.parseHTMLUnsafe('').lastModified
-
-		// temporal
-				} else if ('plainDateISO' == k) {
-					value = Temporal.Now.plainDateISO().toString()
-				} else if ('plainDateTimeISO' == k) {
-					value = Temporal.Now.plainDateTimeISO().toString()
-				} else if ('plainTimeISO' == k) {
-					value = Temporal.Now.plainTimeISO().toString()
-					value = value.slice(0,8)
-				} else if ('zonedDateTimeISO' == k) {
-					value = Temporal.Now.zonedDateTimeISO().toString()
-
-		// to*string standalone
-				} else if ('toLocaleDateString' == k) {
-					option.timeZone = undefined
-					value = testdate.toLocaleDateString('en', option).replace(',','')
-				} else if ('toLocaleString' == k) {
-					option.timeZone = undefined
-					value = testdate.toLocaleString('en', option).replace(',','')
-				} else if ('toLocaleTimeString' == k) {
-					value = testdate.toLocaleTimeString('en', option).replace(',','')
-				} else if ('toTimeString' == k) {
-					value = testdate.toTimeString()
-
-		// no formatting
-				} else if ('toDateString' == k) {
-					// https://searchfox.org/firefox-main/source/js/src/tests/test262/built-ins/Date/prototype/toDateString/format.js
-					// dateRegExp = /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [0-9]{2} [0-9]{4}$/
-					// gecko format: e.g. "Fri Mar 20 2026" | blink seems to be the same, tested a few locales+timezone mixes
-					value = testdate.toDateString()
-					let parts = value.split(' ')
-					value = get_month(parts[1]) +'/'+ parts[2] +'/'+ parts[3]
-
-		// useless unless we can do it without formatter first
-				} else if ('toString' == k) {
-					// note: contents of the string from toString() are implementation-dependent
-						// using formatter (DTF) defeats the purpose of the test
-						// value = formatter.format(testdate).toString().replace(',','')
-					// instead a date -> toString seems to follow toDateString's regexp
-					// check with andre bargul: this seems to folow
-					value = testdate.toString().replace(',','')
-					let parts = value.split(' ')
-					value = get_month(parts[1]) +'/'+ parts[2] +'/'+ parts[3] +' '+ parts[4]
-				}
-				// test
-				if (runST) {
-					let aValues = [null, undefined, '99-99-99','', {}, 4]
-					value = aValues[Math.floor(Math.random() * aValues.length)]
-				}
-				// typecheck
-				let typeCheck = typeFn(value)
-				if ('string' !== typeCheck) {throw zErrType + typeCheck} else {oData.raw[k] = value}
-			} catch(e) {
-				// the error differs if the console is open vs closed
-				if ('parseHTMLUnsafe' == k) {
-					if (e.name == 'NS_ERROR_UNEXPECTED') {e = 'Error: Permission denied to access property \"lastModified\"'}
-				}
-				oData.errors[k] = e+''
-			}
-		})
-		removeElementFn(id)
-
-		// partials (date or time only) need the missing corresponding part
-		// we use lastModified items so if legit they can match
-		if (undefined !== oData.raw.toTimeString) {
-			let dateKey, dateString, timeString
-			for (let i=0; i < aLastMods.length; i++) {
-				let key = aLastMods[i]; if (undefined !== oData.raw[key]) {dateKey = key; break}
-			}
-			if (undefined !== dateKey) {
-				oData.keys['dateKey'] = dateKey
-				dateString = oData.raw[dateKey]
-				if ('exslt' !== dateKey) {
-					dateString = dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
-				}
-				timeString = dateString.slice(11,19)
-				dateString = dateString.slice(0,10)
-			}
-			oData.raw.toTimeString = dateString +' '+ oData.raw.toTimeString
-			oData.raw.plainTimeISO = dateString +' '+ oData.raw.plainTimeISO
-			oData.raw.toDateString = oData.raw.toDateString +' '+ timeString
-			oData.raw.plainDateISO = oData.raw.plainDateISO +' '+ timeString
-		}
-
-		// check validity and format
-		for (const k of Object.keys(oData.raw)) {
-			let formatted, src = oData.raw[k]
-			if ('exslt' == k) {
-				oData.offset[k] = src.slice(-6)
-				formatted = src.slice(0,-10).replace('T',' ')
-			} else if ('zonedDateTimeISO' == k || 'plainDateTimeISO' == k || 'toTimeString' == k) {
-				// we only want the first 19 chars
-				formatted = src.slice(0,19).replace('T',' ')
-				// remember offsets
-				if ('zonedDateTimeISO' == k) {
-					let end = src.indexOf('[')
-					oData.offset[k] = src.slice(end - 6, end)
-				} else if ('toTimeString' == k) {
-					// toTimeString: always uses the format of HH:mm:ss GMT±xxxx (TZ)
-					oData.offset[k] = src.slice(23,26) +':' + src.slice(26,28)
-				}
-			} else {
-				formatted = src.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
-			}
-			if (checkValidDate(k, formatted)) {oData.format[k] = formatted}
-		}
-	}
-
-	function display_values() {
-		//console.log(oData)
-		// all valid dates are in format, everything else is in errors
-		let truthkey
-		if (Object.keys(oData.hasLastMod).length) {truthkey = oData.hasLastMod[0]; oData.keys['truthkey'] = truthkey}
-		for (const k of Object.keys(oData.format)) {
-			let n = METRIC +'_'+ k, isLies = false, extra = ''
-			// style + record lies
-			if (undefined !== truthkey) {
-				if (oData.format[k] !== oData.format[truthkey]) {
-					isLies = true
-					log_known(4, n, oData.format[k])
-					if ('timeZone' == k.slice(0,8)) {
-						isTimeZoneOffsetValid = false // DTF tampering: undefined or resolvedoption for timezone
-					}
-				}
-			}
-			let value = oData.format[k]
-			// tidy up partial matches
-			if ('toTimeString' == k || 'plainTimeISO' == k) {
-				value = s99 +'xxxx-xx-xx '+ sc + value.slice(-8)
-			} else if ('toDateString' == k || 'plainDateISO' == k) {
-				value = value.slice(0,10) + s99 +' xx:xx:xx'+ sc
-			}
-			// add extra display info
-			if ('timeZone_expected' == k) {
-				extra =' ['+ tzControl +']'
-			} else { 
-				let offsetStr = oData.offset[k]
-				if (undefined !== offsetStr & 'string' == typeof offsetStr) {extra = ' ['+ offsetStr +']'}
-			}
-			value += extra
-			addDisplay(4, n, value,'','', isLies)
-		}
-		for (const k of Object.keys(oData.errors)) {
-			addDisplay(4, METRIC +'_'+ k, log_error(4, METRIC +'_'+ k, oData.errors[k]))
-		}
-	}
-
-	function checkMatch(runNo) {
-		// are they all the same
-		let aTmp = []
-		for (const k of Object.keys(oData.format)) {aTmp.push(oData.format[k])}
-		aTmp = dedupeArray(aTmp)
-		if (!isGecko || undefined == oData.format.exslt) {
-			return aTmp.length == 1
-		}
-		if (aTmp.length == 1) {return true}
-
-		// gecko: diff xMod vs the rest: we treat exslt as truthy
-		// get exslt parts1
-		let xMod = oData.format.exslt,
-			xParts = xMod.split(' '),
-			xTime = xParts[1].split(':')
-		// non-gecko: should only be one
-		let isSame = true, setFormats = new Set()
-		for (const k of Object.keys(oData.format)) {
-			setFormats.add(oData.format[k])
-			if (isGecko && 'exslt' !== k) {
-				try {
-					let mod = oData.format[k]
-					let mParts = mod.split(' '), mTime = mParts[1].split(':')
-					if (mParts[0] == xParts[0]) {
-						// same day: only worry about time
-						let tmpDiff = {
-							h: (mTime[0] * 1) - (xTime[0] * 1),
-							min: (mTime[1] * 1) - (xTime[1] * 1),
-							s: (mTime[2] * 1) - (xTime[2] * 1),
-						}
-						// allow 10 seconds: jank, also leap seconds
-						// abs !important to cover being ahead or behind
-						let secondsDiff = Math.abs((tmpDiff.h * 3600) + (tmpDiff.min * 60) + tmpDiff.s)
-						if (secondsDiff > 10) {isSame = false}
-					} else {
-						isSame = false
-					}
-				} catch(e) {
-					console.log(e+'')
-				}
-			}
-		}
-		return isSame
-	}
-
-	// run, try to get isMatch
-	get_values()
-	let isMatch = checkMatch(1)
-	if (!isMatch) {
-		// ~0.3 ms to grab our mods: 1 in 86,400 seconds tick over a day
-		// so we'd have to be really unlucky to hit this: try again
-		get_values()
-		isMatch = checkMatch(2)
-	}
-
-	let oCheck = {
-		hasLastMod: aLastMods,
-		hasOffset: aOffsets,
-	}
-	for (const j of Object.keys(oCheck)) {
-		oData[j] = []
-		let lookup = 'hasLastMod' == j ? 'format' : 'offset'
-		let array = oCheck[j]
-		array.forEach(function(item){if (undefined !== oData[lookup][item]) {oData[j].push(item)}})
-	}
-	display_values() // do after we try populate oCheck
-
-	let finalkey, finalvalue = 'unknown', finaldisplay = 'unknown'
-	// if we have one at least one lastModified iframe/parseFromString/parseHTMLUnsafe
-	// and we have an offset that matches, then we know the real value
-	if (Object.keys(oData.hasLastMod).length && Object.keys(oData.hasOffset).length) {
-		// last mods can't be tampered with
-		if (oData.hasOffset.includes('exslt')) {
-			finalkey = 'exslt' // if we have exslt offset we also have the format
-		} else {
-			// we already matched and returned lies, but we can do it again :)
-			let modkey = oData.keys.truthkey
-			let expected = oData.format[modkey]
-			//console.log('expected'. expected)
-			let array = oData.hasOffset
-			for (let i = 0; i < array.length; i++) {
-				let offsetkey = array[i], got = oData.format[offsetkey]
-				//console.log(offsetkey, 'got'. expected)
-				if (expected == got) {finalkey = offsetkey; break}
+			for (const h of Object.keys(oData.hashes.all)) { // there's only one hash
+				let m = oData.hashes.all[h][0] // get first method listed
+				hash = h; data = oData.calc[m]
+				btn = addButton(4, METRIC)
 			}
 		}
 	}
-	if (undefined !== finalkey) {
-		oData.keys['finalkey'] = finalkey
-		let finaldata = get_minutes(finalkey)
-		finalvalue = finaldata[0]
-		finaldisplay = finaldata.join('')
-		// no lies + no errors
-		if (0 == Object.keys(oLies).length && 0 == Object.keys(oData.errors).length) {notation = tz_green}
-		if (oData.keys.truthkey !== finalkey) {
-			// ignore default exslt (default and both the same) otherwise show what we used
-			notation += s99 +' [' + oData.keys.truthkey +' + '+ finalkey +']'+ sc
-		}
-	}
-	//console.log('DATA', oData)	
-	addDisplay(4, METRIC, finaldisplay,'', notation)
-	addData(4, METRIC, finalvalue)
+	addBoth(4, METRIC, hash, btn, notation, data, isLies)
+
+	//if (isFile) {console.log('timezone offsets\n', oData)}
 	log_perf(4, METRIC, t0)
-	return
+	// return health as true if no errors and no lies and only one valid hash for all methods
+	return {'health': notation == tz_green, 'hash': hash}
 }
 
 /* l10n */
@@ -2238,10 +2484,22 @@ function get_l10n_xslt_messages(METRIC) {
 	// note file schema errors due to CORS
 		// we only need the one test for max entropy (tested Base Browser)
 		// but we need an object to create a btn, and this also allows future expansion
+
+	// FF151: dom.xslt.enabled
+		// we're only loading the iframe once (on page load). The pref dictates if the xslt was
+		// parsed and an error displayed or not - and that's not going to change if the pref is
+		// toggled a rerun done
+
 	let hash, data ='', btn='', notation = isLanguageSmart ? locale_red : ''
 	try {
-		data = {'xslt-parse-failure': dom.tzpXSLT.contentDocument.children[0].textContent} 
-		hash = mini(data); btn = addButton(4, METRIC)
+		let msg = dom.tzpXSLT.contentDocument.children[0].textContent
+		if ('a' == msg) {
+			// ToDo: cleanup notation when this becomes the standard
+			hash = zD // XSLT disabled on page load
+		} else {
+			data = {'xslt-parse-failure': msg} 
+			hash = mini(data); btn = addButton(4, METRIC)
+		}
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -2254,12 +2512,15 @@ function get_l10n_xslt_messages(METRIC) {
 }
 
 function get_l10n_xslt_sort(METRIC) {
-	// 1978383: xsl:sort uses only base sensitivity / primary strength
-	// so we can't use plural rules to get a determinsitic result
-
 	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
+	// 1978383: xsl:sort uses only base sensitivity / primary strength
+	// so we can't use plural rules to get a determinsitic result
 	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
+	if (!isXSLT) {
+		addBoth(4, METRIC, zD,'', notation); return
+	}
+
 	try {
 		if (runSE) {foo++}
 		// get characters
@@ -2437,8 +2698,7 @@ const outputRegion = () => new Promise(resolve => {
 		Promise.all([
 			get_language_system('languages_system'), // uses isLanguagesNav
 			get_locale_intl(),
-			get_timezone_offset('timezone_offset'), // sets isTimeZoneOffsetValid
-			get_timezone('timezone_offsets'), // uses isTimeZoneOffsetValid + sets isTimeZoneValid/Value
+			get_timezone('timezone'), // sets isTimeZoneValid/Value
 			get_l10n_validation_messages('l10n_validation_messages'),
 			get_l10n_xml_messages('l10n_xml_messages'),
 			get_l10n_parsererror_direction('l10n_parsererror_direction'),
