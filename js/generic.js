@@ -1065,6 +1065,24 @@ const get_isXML = () => new Promise(resolve => {
 	return resolve()
 })
 
+function get_isXSLT() {
+	// FF151: dom.xslt.enabled
+		// no need to record the error, returning n/a catches the entropy/change
+		// the boolean can be used to determine health
+
+	// note: this does not reflect the preference on reruns but rather the error
+		// e.g. once enabled, the error is not thrown even if the pref is flipped to false
+	isXSLT = isGecko ? true : false
+	if (isGecko) {
+		try {
+			let x = new XSLTProcessor()
+		} catch(e) {
+			if ('ReferenceError: XSLTProcessor is not defined' == e+'') {isXSLT = false}
+		}
+	}
+	return
+}
+
 /*** PREREQ ***/
 
 function get_isDomRect() {
@@ -1367,8 +1385,9 @@ function metricsShow(name, scope) {
 	overlayName = name
 
 	let isKit = false
-	if (isGecko) {
-		// atm this is pretty much limited to health, pixels_match and timezone_offsets_data
+	if (isGecko & isSmart) {
+		// atm this is pretty much limited to health, pixels_match, timezone_offsets_data
+		// and fonts_detected
 		try {
 			let btn = dom[scope+name]
 			if (undefined == btn) {btn = dom[name]}
@@ -1951,7 +1970,7 @@ function addTiming(metric) {
 	try {
 		if (0 == remainder) {
 			key = 'exslt'
-			if (!isGecko) {throw zSKIP}
+			if (!isXSLT) {throw zSKIP}
 			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
 				+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
 				+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
@@ -2505,6 +2524,8 @@ function outputSection(id, isResize = false) {
 		}
 	}
 
+	// set isXSLT which we need before we start any timing measurements
+	get_isXSLT()
 	// reset smarts
 	smartFn('final')
 	let enforcedDelay = 0
@@ -2517,7 +2538,7 @@ function outputSection(id, isResize = false) {
 		// e.g. will help with resources such as XML/images and
 		enforcedDelay = isFontDelay ? 3000 : (isFile ? 0 : 1200)
 	}
-	//if (gLoad) {enforcedDelay = 1000}
+	//if (gLoad) {enforcedDelay = 1200}
 	if (enforcedDelay > 0) {
 		delay = 0
 		let msg = isFontDelay ? 'async font fallback' : ''
