@@ -55,7 +55,7 @@ const get_battery = (METRIC) => new Promise(resolve => {
 
 				// record object for clicking
 				let btn = addButton(7, METRIC +'_reported')
-				sDetail.document[METRIC +'_reported'] = data
+				sDetail[isScope][METRIC +'_reported'] = data
 				addDisplay(7, METRIC, fpvalue +' '+ btn + (true == fpvalue ? '' : ' [false or 100% charged]'))
 				return resolve()
 			}).catch(e => {
@@ -440,7 +440,7 @@ function get_memory(METRIC) {
 
 	// super unstable in this form: just display for now
 	function exit(hash, data ='', btn ='') {
-		sDetail.document[METRIC] = data
+		sDetail[isScope][METRIC] = data
 		addDisplay(7, METRIC, hash, btn)
 		//addBoth(7, METRIC, hash, btn,'', data)
 		return
