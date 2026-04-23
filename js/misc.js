@@ -663,6 +663,9 @@ function get_navigator_keys(METRIC) {
 
 function get_pdf(METRIC) {
 	// FF99+ none/hardcoded: all three are expected nav keys
+	// https://html.spec.whatwg.org/multipage/system-state.html#dom-plugin
+		// the order is alphabetical with 'PDF Viewer' inserted in the 0th popsition
+
 	let data = {}
 	function get_obj(item) {
 		let res = 'none'
@@ -876,7 +879,7 @@ function get_window_functions(METRIC) {
 		let intKeys = Object.keys(oPost).length
 		if (intKeys > 0) {
 			let postName = '_post_constructor'
-			sDetail.document[METRIC + postName] = oPost
+			sDetail[isScope][METRIC + postName] = oPost
 			tamperBtn = addButton(18, METRIC + postName, intKeys +'/'+ intPost)
 		}
 		// notation: safer vs standard doesn't seem to affect this
@@ -941,6 +944,13 @@ function get_window_props(METRIC) {
 		let el = document.createElement('iframe')
 		el.setAttribute('id', id)
 		el.setAttribute('style', 'display: none')
+		/* ToDo: investigate
+		if ('blink' == isEngine) {
+			// content scripts never run in frames like this
+			// javascript:undefined, javascript:null as long as it's not a string
+			el.setAttribute('src', 'javascript:false')
+		}
+		//*/
 		if (!runSE) {document.body.appendChild(el)}
 		// get props
 		iframe = dom[id]
@@ -950,7 +960,7 @@ function get_window_props(METRIC) {
 		dataLen = data.length
 		// original: useful for analysis
 		dataOriginal = Object.getOwnPropertyNames(contentWindow)
-		sDetail.document[METRIC +'_original'] = dataOriginal
+		sDetail[isScope][METRIC +'_original'] = dataOriginal
 		// sorted: we use this in function_props
 		isProps = Object.getOwnPropertyNames(contentWindow)
 		isProps.sort()
@@ -1074,8 +1084,8 @@ function get_window_props(METRIC) {
 			btn += addButton(18, METRIC +'_sorted', 'sorted')
 				+ (isDesktop ? addButton(18, METRIC +'_original', 'original') : '')
 				+ addButton(18, METRIC +'_index', 'index')
-			sDetail.document[METRIC +'_sorted'] = isProps
-			sDetail.document[METRIC +'_index'] = oIndex
+			sDetail[isScope][METRIC +'_sorted'] = isProps
+			sDetail[isScope][METRIC +'_index'] = oIndex
 			/* recored original order for analysis
 			btn += 
 			
