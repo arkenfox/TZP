@@ -1031,6 +1031,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 
 function get_scr_pixels_match(METRIC, oData) {
 	if (!isSmart) {return}
+
 	// media pixels vs window devicePixelRatio
 	let isPixelMatch = true, oPixels = {}, oSummary = {'false': [], 'true': []}, controlPx, testPx
 	// remove items we don't compare
@@ -1509,7 +1510,7 @@ const get_agent_data = (METRIC, os = isOS, isMain = true) => new Promise(resolve
 
 	function exit(hash, data ='', btn ='') {
 		if (isMain) {
-			sDetail.document['agent_reported'][METRIC] = ('object' == typeof data ? data : hash)
+			sDetail[isScope]['agent_reported'][METRIC] = ('object' == typeof data ? data : hash)
 			addBoth(2, METRIC, hash, btn,'', data)
 		}
 		return resolve(data)
@@ -1783,11 +1784,11 @@ const outputAgent = () => new Promise(resolve => {
 		get_agent_data('useragentdata'),
 	]).then(function(){
 		// make agent_reported same structure as section
-		let newobj = {}, data = sDetail.document.agent_reported
+		let newobj = {}, data = sDetail[isScope].agent_reported
 		for (const k of Object.keys(data).sort()) {
 			if ('object' == typeof data[k]) {newobj[k] = {'hash': mini(data[k]), 'metrics': data[k]}} else {newobj[k] = data[k]}
 		}
-		sDetail.document.agent_reported = newobj
+		sDetail[isScope].agent_reported = newobj
 		return resolve()
 	})
 })

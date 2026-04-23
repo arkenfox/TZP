@@ -193,11 +193,14 @@ let languagesSupported = {},
 	isLocaleAlt, // allow variants in checks e.g. en-CA checks en-US values
 	isTimeZoneValid,
 	isTimeZoneValue,
-	oIntlTests = {},
-	oIntlKeys = {},
-	oIntlDateTests = {},
-	oIntlDateKeys = {},
-	oIntlPerf = {}
+	// intl.locale
+	oIntlLocale = {},
+	oIntlLocaleDates = {},
+	oIntlLocaleKeys = {},
+	oIntlLocalePerf = {},
+	// intl.dates
+	oIntlDate = {},
+	oIntlDateKeys = {}
 
 // other
 let aDomRect = [true, true, true, true],

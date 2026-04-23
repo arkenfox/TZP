@@ -552,7 +552,7 @@ function get_site_colors(METRIC) {
 	let expected = ['e2399c6e','c2a28ecb'] // prefers light/dark
 	if (expected.includes(hash)) {
 		notation = default_green
-		sDetail.document[METRIC] = data
+		sDetail[isScope][METRIC] = data
 		addDisplay(14, METRIC, 'original', btn, notation)
 		addData(14, METRIC, 'original')
 	} else {
@@ -622,7 +622,7 @@ function get_site_styles(METRIC) {
 	let expected = undefined !== isStylesheet ? '23bf083d' : '650f2257' // w w/out our extended window/screem range
 	if (hash == expected) {
 		notation = default_green
-		sDetail.document[METRIC] = data
+		sDetail[isScope][METRIC] = data
 		addDisplay(14, METRIC, 'original', btn, notation)
 		addData(14, METRIC, 'original')
 	} else {

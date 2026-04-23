@@ -284,7 +284,7 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 					if (isProxyLie('StorageManager.estimate')) {isLies = true}
 					// 1781277 RFP can only be exactly 10GB or 50GB
 					if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
-					sDetail.document.lookup[METRIC] = display
+					sDetail[isScope].lookup[METRIC] = display
 					exit(display, value)
 				}).catch(function(e){
 					exit(log_error(6, METRIC, e), zErr)
