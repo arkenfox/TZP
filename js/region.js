@@ -155,10 +155,10 @@ function get_nav_gpc(METRIC) {
 /* REGION */
 
 function add_microperf_intl(m, countC, tsub0, isIntl) {
-	if (undefined == oIntlPerf[m]) {oIntlPerf[m] = {}}
-	if (isIntl) {oIntlPerf[m]['constructors'] = countC}
+	if (undefined == oIntlLocalePerf[m]) {oIntlLocalePerf[m] = {}}
+	if (isIntl) {oIntlLocalePerf[m]['constructors'] = countC}
 	let subname = (isIntl ? 'intl' : 'string')
-	oIntlPerf[m][subname] = nowFn() - tsub0
+	oIntlLocalePerf[m][subname] = nowFn() - tsub0
 }
 
 function set_isLanguageSmart() {
@@ -291,14 +291,14 @@ function set_isLanguageSmart() {
 	return
 }
 
-function set_oIntlDateTests() {
+function set_oIntlDate() {
 	// all dates (days/months/am-pm) must be timezone resistent: we are checking locale + timezonename only
 		// that way everyone uses the same exact dates/days/times (e.g. am, friday, single digit day, etc)
 		// timezone entropy is in the actual timezonename (we're confirming that here)
 
 
 	// tests/PoCs need to cover all possible combos of locales x timezonenames because those
-	// are the TWO variables that I cannot control (oIntlTests only have ONE variable: locale)
+	// are the TWO variables that I cannot control (oIntlLocale only have ONE variable: locale)
 	// and not all locales handle timezonenames to the same degree: e.g.
 		// America/Los_Angles has 343 possible outcomes, Europe/Vatican has 344: this is because
 		// pt-ao + pt-ch vary for the vatican but not for los angeles
@@ -314,7 +314,7 @@ function set_oIntlDateTests() {
 		Nov: new Date("November 6, 2024 01:12:34"), // nov, wed
 	}
 
-	oIntlDateTests = {
+	oIntlDate = {
 		date_timestyle : {
 			"default": {
 				'full_medium': [dates.May, dates.Sep, dates.Nov],
@@ -333,20 +333,20 @@ function set_oIntlDateTests() {
 	}
 
 	// build keys
-	for (const k of Object.keys(oIntlDateTests)) {
+	for (const k of Object.keys(oIntlDate)) {
 		oIntlDateKeys[k] = []
-		for (const j of Object.keys(oIntlDateTests[k]).sort()) {oIntlDateKeys[k].push(j)}
+		for (const j of Object.keys(oIntlDate[k]).sort()) {oIntlDateKeys[k].push(j)}
 	}
 }
 
-function set_oIntlTests() {
+function set_oIntlLocale() {
 	// all dates (days/months/am-pm) must be timezone resistent: we are checking locale only
-		// reported timezonename (and locale) is tested see oIntlDateTests section
+		// reported timezonename (and locale) is tested see oIntlDate section
 	// thus we use UTC time so everyone uses the exact same dates, and then we pass
 		// UTC as the timezone so nothing shifts, preserving our specific datetimes
 	// the tests that expose day/time are datetimeformat's relatedYear + components + timezonename | and dayperiods
 
-	let dates = {
+	oIntlLocaleDates = {
 		// fractionalSecondDigits: we only ever reveal the seconds
 		FSD: new Date('2023-06-10T01:12:34.567Z'),
 		// month (x4) + year (xJan): we only ever reveal the month or year
@@ -361,8 +361,8 @@ function set_oIntlTests() {
 		// relatedyear exposes day
 		RY1: new Date('-000002-01-15T01:00:00.000Z'),
 		RY2: new Date('2023-01-15T00:00:00.000Z'),
-		// timezonename exposes day but we pass the timezone itself so it's relative (i.e stable)
-		tzDays: [new Date('August 1, 2019 0:00:00 UTC')],
+		// timezonename exposes day but we pass the timezone itself so it's relative (i.e stable per timezone)
+		TZN1: new Date('2019-08-15T00:00:00.000Z'),
 		// dayperiod: exposes hr
 		DP8: new Date('2019-01-30T08:00:00Z'),
 		DP12: new Date('2019-01-30T12:00:00Z'),
@@ -370,15 +370,17 @@ function set_oIntlTests() {
 		DP18: new Date('2019-01-30T18:00:00Z'),
 		DP22: new Date('2019-01-30T22:00:00Z'),
 	}
-	let tzLG = {'longGeneric': dates.tzDays}, tzSG = {'shortGeneric': dates.tzDays}
-	//console.log(mini(dates)) // hash = 90295fa0
+	let tzLG = {'longGeneric': [oIntlLocaleDates.TZN1]}, tzSG = {'shortGeneric': [oIntlLocaleDates.TZN1]}
+	//console.log(mini(dates))
+
+	let dates = oIntlLocaleDates
 
 	let unitN = {'narrow': [1]}, unitL = {'long': [1]}, unitB = {'long': [1], 'narrow': [1]}
 	let curAN = {"accounting": [-1000], "name": [-1]},
 		curN = {"name": [-1]},
 		curS = {"symbol": [1000]}
 
-	oIntlTests = {
+	oIntlLocale = {
 		collation: {
 			search: ['\u0107','\u0109','\u1ED9','\u00F6'],
 			sort: [
@@ -520,14 +522,14 @@ function set_oIntlTests() {
 			pluralrules: ['pluralCategories'],
 		},
 	}
-	try {oIntlTests['numberformat.compact']['long'].push(BigInt('987354000000000000'))} catch {}
+	try {oIntlLocale['numberformat.compact']['long'].push(BigInt('987354000000000000'))} catch {}
 	let nBig = 987654
 	try {nBig = BigInt('987354000000000000')} catch {}
-	oIntlTests['numberformat.notation']['scientific']['decimal'].push(nBig)
+	oIntlLocale['numberformat.notation']['scientific']['decimal'].push(nBig)
 	// build keys
-	for (const k of Object.keys(oIntlTests)) {
-		oIntlKeys[k] = []
-		for (const j of Object.keys(oIntlTests[k]).sort()) {oIntlKeys[k].push(j)}
+	for (const k of Object.keys(oIntlLocale)) {
+		oIntlLocaleKeys[k] = []
+		for (const j of Object.keys(oIntlLocale[k]).sort()) {oIntlLocaleKeys[k].push(j)}
 	}
 }
 
@@ -652,7 +654,7 @@ function get_language_locale() {
 		'numberformat','pluralrules','relativetimeformat','segmenter',
 	]
 	metrics.forEach(function(m) {res.push(get_locmetric(m))})
-	sDetail.document[METRIC] = oRes
+	sDetail[isScope][METRIC] = oRes
 	let btn = addButton(4, METRIC)
 
 	// LOCALE
@@ -742,7 +744,7 @@ function get_dates_intl() {
 	function get_metric(m, isIntl) {
 		let tsub0 = nowFn(), countC = 0
 		try {
-			let obj = {}, objcheck = {}, tests = oIntlDateTests[m], testkeys = oIntlDateKeys[m], value
+			let obj = {}, objcheck = {}, tests = oIntlDate[m], testkeys = oIntlDateKeys[m], value
 			let formatter, checker
 			if ('date_timestyle' == m) {
 				for (let i=0; i < testkeys.length; i++) {
@@ -828,7 +830,7 @@ function get_locale_intl() {
 	function get_metric(m, isIntl) {
 		let tsub0 = nowFn(), countC = 0
 		try {
-			let obj = {}, objcheck = {}, tests = oIntlTests[m], testkeys = oIntlKeys[m], value
+			let obj = {}, objcheck = {}, tests = oIntlLocale[m], testkeys = oIntlLocaleKeys[m], value
 			let formatter, checker
 
 			if ('collation' == m) {
@@ -917,7 +919,6 @@ function get_locale_intl() {
 								if (isCheck) {checker = Intl.DateTimeFormat(locCheck, option); countC++}
 							}
 							tests[key][tzn].forEach(function(dte){
-
 								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(strTest, option)); data.push(value)
 								if(isCheck) {value = (isIntl ? checker.format(dte) : (dte).toLocaleString(strCheck, option)); datacheck.push(value)}
 							})
@@ -1265,7 +1266,6 @@ function get_timezone(METRIC) {
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
-	if (gRun) {try {delete sDetail.document.lookup[METRIC]} catch(e) {}}
 
 	let tzo = get_timezone_offset(METRIC +'_offset')
 	let offsets = get_timezone_offsets(METRIC +'_offsets', tzo.nowValue, tzo.utcValue)
@@ -1327,7 +1327,7 @@ function get_timezone(METRIC) {
 		let aHealth = []
 		if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
 		if (lieCount > 0) {aHealth.push(lieCount + ' mismatch' + (lieCount == 1 ? '' : 'es'))}
-		if (gRun) {sDetail.document.lookup[METRIC] = aHealth.join(' | ')}
+		if (gRun) {sDetail[isScope].lookup[METRIC] = aHealth.join(' | ')}
 	}
 	// display
 	addBoth(4, METRIC, value, '', notation, '', isLies)	
@@ -1350,8 +1350,6 @@ function get_timezone_offset(METRIC) {
 		// IIUIC. So not definitive, but multiple exposure of tampering is good. also,
 		// fuck extensions trying to resist or solutions that create mismatches :)
 	let t0 = nowFn()
-	if (gRun) {try {delete sDetail.document.lookup[METRIC]} catch(e) {}}
-
 	// setup
 	const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
 			+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
@@ -1532,7 +1530,6 @@ function get_timezone_offset(METRIC) {
 		// DTF
 				if ('timeZone' == k) {
 					value = formatter.format(testdate).replace(',','')
-					//value = '04/19/2026 09:42:33 GMT'
 		// last modified
 				} else if ('exslt' == k) {
 					let xsltProcessor = new XSLTProcessor
@@ -1664,10 +1661,7 @@ function get_timezone_offset(METRIC) {
 				if ('zonedDateTimeISO' == k) {
 					let end = src.indexOf('[')
 					oData.offset[k] = src.slice(end - 6, end)
-				}// else if ('toTimeString' == k) {
-					// toTimeString: always uses the format of HH:mm:ss GMT±xxxx (TZ)
-					//oData.offset[k] = src.slice(23,26) +':' + src.slice(26,28)
-				//}
+				}
 			} else {
 				formatted = src.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
 				// leverage short timezonename
@@ -1852,7 +1846,7 @@ function get_timezone_offset(METRIC) {
 			let aHealth = []
 			if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
 			if (tamperCount > 0) {aHealth.push(tamperCount + ' mismatch' + (tamperCount == 1 ? '' : 'es'))}
-			if (gRun) {sDetail.document.lookup[METRIC] = aHealth.join(' | ')}
+			if (gRun) {sDetail[isScope].lookup[METRIC] = aHealth.join(' | ')}
 		}
 		addDisplay(4, METRIC, finaldisplay,'', notation)
 		addData(4, METRIC, finalvalue)
@@ -1875,7 +1869,6 @@ function get_timezone_offset(METRIC) {
 
 function get_timezone_offsets(METRIC, nowValue, utcValue) {
 	let t0 = nowFn(), notation = tz_red
-	if (gRun) {try {delete sDetail.document.lookup[METRIC]} catch(e) {}}
 
 	let years = [1879, 1952, 1976, 2025]
 	let days = {
@@ -2175,7 +2168,7 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 	let btnColor = 4
 	if (isGecko) {btnColor = Object.keys(oData.utc).length ? 'bad' : 'good'}
 	addDisplay(4, METRIC +'_data', addButton(btnColor, METRIC +'_data', 'data'))
-	sDetail.document[METRIC +'_data'] = oData.numbers
+	sDetail[isScope][METRIC +'_data'] = oData.numbers
 
 	// health lookup
 	let errCount = Object.keys(oData.errors).length
@@ -2184,7 +2177,7 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 		let aHealth = []
 		if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
 		if (tamperCount > 0) {aHealth.push(tamperCount + ' mismatch' + (tamperCount == 1 ? '' : 'es'))}
-		if (gRun) {sDetail.document.lookup[METRIC] = aHealth.join(' | ')}
+		if (gRun) {sDetail[isScope].lookup[METRIC] = aHealth.join(' | ')}
 	}
 
 	// summarize
@@ -2524,7 +2517,7 @@ function get_l10n_xslt_sort(METRIC) {
 	try {
 		if (runSE) {foo++}
 		// get characters
-		let aSource = oIntlTests.collation.sort, aChars = [], aData = []
+		let aSource = oIntlLocale.collation.sort, aChars = [], aData = []
 		aSource.forEach(function(item){aChars.push(item)})
 		aChars.sort() // always sort to match char array same as collation poc
 		// build xslt
@@ -2676,7 +2669,7 @@ const get_dates = () => new Promise(resolve => {
 const outputRegion = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('region')) {return resolve()}
 
-	oIntlPerf = {} // reset
+	oIntlLocalePerf = {} // reset
 
 	set_isLanguageSmart() // required for BB health in get_language_locale()
 	Promise.all([
@@ -2718,11 +2711,11 @@ const outputRegion = () => new Promise(resolve => {
 
 				let iTime = 0, sTime = 0 // running totals
 				let countInteger = 0 
-				for (const k of Object.keys(oIntlPerf).sort()) {
-					newobj[k] = oIntlPerf[k]
+				for (const k of Object.keys(oIntlLocalePerf).sort()) {
+					newobj[k] = oIntlLocalePerf[k]
 					let kTime = 0 // running sub total
-					for (const j of Object.keys(oIntlPerf[k]).sort()) {
-						let value = oIntlPerf[k][j]
+					for (const j of Object.keys(oIntlLocalePerf[k]).sort()) {
+						let value = oIntlLocalePerf[k][j]
 						if ('constructors' == j) {
 							count += value
 						} else {
@@ -2733,7 +2726,7 @@ const outputRegion = () => new Promise(resolve => {
 						}
 					}
 					// add a subtotal if more than expected constructors|intl
-					if (Object.keys(oIntlPerf[k]).length > 2) {newobj[k]['total'] = kTime}
+					if (Object.keys(oIntlLocalePerf[k]).length > 2) {newobj[k]['total'] = kTime}
 				}
 				// we currently have 26 times
 					// gecko noRFP + RFP = 26 | noRFP but reduceTimer + chrome = 0 to 5
@@ -2764,7 +2757,7 @@ const outputHeaders = () => new Promise(resolve => {
 	})
 })
 
-set_oIntlDateTests()
-set_oIntlTests()
+set_oIntlDate()
+set_oIntlLocale()
 countJS(4)
 
