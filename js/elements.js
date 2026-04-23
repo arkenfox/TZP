@@ -31,11 +31,11 @@ function get_domrect(METRIC) {
 	// for each method per key in oDomRect we return either
 	// error, trustworthy, or some FPing on the diffs
 	// note: errors are already recorded
-	sDetail.document[METRIC +'_data'] = {}
+	sDetail[isScope][METRIC +'_data'] = {}
 	let tmpdata = {}
 	let countPass = 0
 	for (const k of Object.keys(oDomRect).sort()) {
-		sDetail.document[METRIC +'_data'][k] = oDomRect[k]
+		sDetail[isScope][METRIC +'_data'][k] = oDomRect[k]
 		let value =''
 		if (zErr == k) {value = zErr
 		} else if ('642e7ef0' == k) {value = 'trustworthy'; countPass = oDomRect[k]['methods'].length
