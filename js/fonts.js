@@ -1238,7 +1238,7 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 						if (isMain && fntList.length) {
 							notation = get_font_notation(METRIC, data)
 							// enumerate fonts across all font tests
-							sDetail.document[METRICD] = sDetail.document[METRICD].concat(data)
+							sDetail[isScope][METRICD] = sDetail[isScope][METRICD].concat(data)
 						}
 					} else {
 						// ToDo: once we allow fontFace in BB this will always be badnotation
@@ -1307,7 +1307,7 @@ function get_fonts_offscreen(METRIC, METRICD) {
 			btn = addButton(12, METRIC, data.length)
 			if (fntData.offscreen.base.length) {notation = get_font_notation(METRIC, data)}
 			// enumerate fonts across all font tests
-			sDetail.document[METRICD] = sDetail.document[METRICD].concat(data)
+			sDetail[isScope][METRICD] = sDetail[isScope][METRICD].concat(data)
 		} else {
 			// ToDo: once we allow fontFace in BB this will always be badnotation
 			notation = isBB ? goodnotation : badnotation
@@ -1683,7 +1683,7 @@ function get_fonts(METRIC, METRICD) {
 	function add_font_names(value) {
 		// fontnames: always notate for health
 		// display only: so always add a lookup
-		sDetail.document.lookup[METRICN] = value
+		sDetail[isScope].lookup[METRICN] = value
 		addDisplay(12, METRICN, value,'', badnotation)
 		fntHealth.push(badnotation)
 	}
@@ -1830,7 +1830,7 @@ function get_fonts(METRIC, METRICD) {
 					if (fntData.family.base.length) {notation = get_font_notation(METRIC, oData[k].datafonts)}
 					// names
 					let btn = addButton(12, METRICN, oData[k].datacount)
-					sDetail.document[METRICN] = oData[k].datafonts
+					sDetail[isScope][METRICN] = oData[k].datafonts
 					addDisplay(12, METRICN, mini(oData[k].datafonts), btn, notation)
 					fntHealth.push(notation)
 					// data
@@ -1841,7 +1841,7 @@ function get_fonts(METRIC, METRICD) {
 					}
 					addBoth(12, METRIC, k, btn,'', oData[k].data)
 					// enumerate fonts across all font tests
-					sDetail.document[METRICD] = sDetail.document[METRICD].concat(oData[k].datafonts)
+					sDetail[isScope][METRICD] = sDetail[isScope][METRICD].concat(oData[k].datafonts)
 				}
 			}
 		}
@@ -2447,7 +2447,7 @@ const outputFonts = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('fonts')) {return resolve()}
 
 	let METRICD = 'font_detection'
-	sDetail.document[METRICD] = [] // reset/clear
+	sDetail[isScope][METRICD] = [] // reset/clear
 	fntHealth = []
 
 	set_fntList()
@@ -2473,7 +2473,7 @@ const outputFonts = () => new Promise(resolve => {
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			// enumerated fonts over all font tests
-			let array = sDetail.document[METRICD]
+			let array = sDetail[isScope][METRICD]
 			if (array.length) {
 				//
 				let color = 12
@@ -2489,7 +2489,7 @@ const outputFonts = () => new Promise(resolve => {
 					}
 				}
 				array = dedupeArray(array); array.sort()
-				sDetail.document[METRICD] = array
+				sDetail[isScope][METRICD] = array
 				addDisplay(12, METRICD, addButton(color, METRICD, array.length +' fonts'))
 			}
 			return resolve()
