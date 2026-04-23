@@ -107,10 +107,10 @@ function log_console(name) {
 	}
 }
 
-function legend(method) {
+function legend() {
 	// build once
 	let optExpanded = dom.optExpanded.checked
-	method = optExpanded ? "expanded" : "list"
+	let method = optExpanded ? "expanded" : "list"
 	let list = oLists[method]
 
 	let proceed = false
@@ -164,8 +164,31 @@ function legend(method) {
 	dom.legend.innerHTML = header + aDisplay.join("<br>")
 }
 
-function run_main(method) {
+function run_yr(startyear, addyears = 10) {
+	// add a year to our test to see if increases max unique results
+		// no change by adding all months for: 1800-2026
+
+	dom.optExpanded.checked = true
+	setBtn('all')
+	dom.results.innerHTML = ''
+	dom.perf.innerHTML = ''
+	legend() // set legend to expanded
+	let aYears = []
+	for (let i = 0; i < addyears; i++) {
+		aYears.push(startyear + i)
+	}
+	console.log(aYears)
+	let isSummary = aYears.length > 1
+	setTimeout(function() {
+		aYears.forEach(function(yr){
+			run_main('all_confirmed', yr, isSummary)
+		})
+	}, 50)
+}
+
+function run_main(method, yr, isSummary = false) {
 	if (undefined == method) {return}
+	if (undefined == yr) {isSummary = false}
 
 	let spacer = "<br><br>"
 	if (method == "all") {
@@ -182,21 +205,31 @@ function run_main(method) {
 
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
-
 	let optExpanded = dom.optExpanded.checked
 
-	// full
-	let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
-	let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
 	// Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
+	let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"] // full list
+	let tzDays = [
+		new Date('2019-08-15T00:00:00.000Z'), // 2019 August is a sweet spot: nightly 152 = 340 max (154a6a7c)
+	]
+	if ('all' == method && undefined !== yr) {
+		tzDays.push(
+			new Date(yr +'-01-15T00:00:00.000Z'),
+			new Date(yr +'-02-15T00:00:00.000Z'),
+			new Date(yr +'-03-15T00:00:00.000Z'),
+			new Date(yr +'-04-15T00:00:00.000Z'),
+			new Date(yr +'-05-15T00:00:00.000Z'),
+			new Date(yr +'-06-15T00:00:00.000Z'),
+			new Date(yr +'-07-15T00:00:00.000Z'),
+			new Date(yr +'-08-15T00:00:00.000Z'),
+			new Date(yr +'-09-15T00:00:00.000Z'),
+			new Date(yr +'-10-15T00:00:00.000Z'),
+			new Date(yr +'-11-15T00:00:00.000Z'),
+			new Date(yr +'-12-15T00:00:00.000Z'),
+		)
+	}
+	tzNames = ["short","shortGeneric","longGeneric"] // reduce test size
 
-	// tested july 2025: long, longOffset, shortOffset add nothing
-		// short only adds one unique hash
-	tzNames = ["short","shortGeneric","longGeneric"]
-
-	//tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
-	// use a date not a number (Date.UTC) so we're compat with toLocaleString etc
-	tzDays = [new Date("August 1, 2019 0:00:00 UTC")]
 	let tzSG = {"shortGeneric": tzDays},
 		tzLG = {"longGeneric": tzDays},
 		tzS = {"short": tzDays},
@@ -407,30 +440,32 @@ function run_main(method) {
 		for (const h of Object.keys(oData)) { // for each hash
 			localeGroups.push(oData[h]["locales"])
 			let localeCount = oData[h]["locales"].split(",").length
-			let str = ""
-			for (const not of Object.keys(oData[h])) { // for each notation
-				if (not !== "locales") {
-					let linecount = Object.keys(oData[h][not]).length
-					if (linecount == 1) {
-						str += "<li>"+ s12 + not +": "+ sc
-					} else {
-						str += "<li>"+ s12 + not + sc +"</li>"
+			if (!isSummary) {
+				let str = ""
+				for (const not of Object.keys(oData[h])) { // for each notation
+					if (not !== "locales") {
+						let linecount = Object.keys(oData[h][not]).length
+						if (linecount == 1) {
+							str += "<li>"+ s12 + not +": "+ sc
+						} else {
+							str += "<li>"+ s12 + not + sc +"</li>"
+						}
+						Object.keys(oData[h][not]).forEach(function(s){ // for each style
+							str += s16 + s +": "+ sc + oData[h][not][s] +"</br>"
+						})
+						if (linecount == 1) {str += "</li>"}
 					}
-					Object.keys(oData[h][not]).forEach(function(s){ // for each style
-						str += s16 + s +": "+ sc + oData[h][not][s] +"</br>"
-					})
-					if (linecount == 1) {str += "</li>"}
 				}
+				// wrap into details for long lists
+				if (Object.keys(tests).length > 15) {str = "<details><summary>details</summary>"+ str +"</details>"}
+				displaylist.push(
+					s12 + h + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ str
+					+ "<li>"+ s12 +"L: "+ sc + oData[h]["locales"] +"</li></ul>"
+				)
 			}
-			// wrap into details for long lists
-			if (Object.keys(tests).length > 15) {str = "<details><summary>details</summary>"+ str +"</details>"}
-			displaylist.push(
-				s12 + h + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul class='main'>"+ str
-				+ "<li>"+ s12 +"L: "+ sc + oData[h]["locales"] +"</li></ul>"
-			)
 		}
-
+		
 		// hashes + btns
 		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
 		let resultsHash = mini(oData)
@@ -463,14 +498,16 @@ function run_main(method) {
 			// notate new if expanded and 140+
 			if (isVer > 139 && optExpanded) {
 				// expanded results
-				if (resultsHash == "e1bb4d5a") { // FF149+ 2009907
-				} else if (resultsHash == "6e37f247") { // FF147+
-				} else if (resultsHash == "a5a4b5a1") { // FF140-146
+				if (resultsHash == '0db200af') { // FF151+
+				} else if (resultsHash == 'b8d2903c') { // FF149-150: 2009907
+				} else if (resultsHash == '2ca8e181') { // FF147-148
+				} else if (resultsHash == '31a3ce60') { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// expanded locales
-				if (localesHash == "ab48ed50") { // FF47+: 339
-				} else if (localesHash == "dc340cf5") { // FF40-146: 336
+				if (localesHash == '154a6a7c') { // FF151+: 340
+				} else if (localesHash == 'ab48ed50') { // FF147-150: 339
+				} else if (localesHash == 'dc340cf5') { // FF140-146: 336
 				} else {localesHash += ' '+ zNEW
 				}
 			}
@@ -487,15 +524,19 @@ function run_main(method) {
 			}
 		}
 		// display
-		let display = s4 + method.toUpperCase() +": "
-			+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"]" + sc
-			//+" &nbsp KEY: <span class='s16'>L</span> longGeneric <span class='s16'>S</span> shortGeneric"
-			+ spacer
-			+ s12 +"timezones: "+ sc + tzBtn + spacer
-			+ s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
-			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
-		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
-
+		if (!isSummary) {
+			let display = s4 + method.toUpperCase() +": "
+				+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"]" + sc
+				//+" &nbsp KEY: <span class='s16'>L</span> longGeneric <span class='s16'>S</span> shortGeneric"
+				+ spacer
+				+ s12 +"timezones: "+ sc + tzBtn + spacer
+				+ s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+				+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+			dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		} else {
+			console.log(yr, localesHash, localeGroups.length, tzDays.length)
+			dom.results.innerHTML = dom.results.innerHTML +'<br>' + s4 + yr + sc +': '+ localesHash +' ['+ localeGroups.length +' | '+ tzDays.length + ']'
+		}
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 	} catch(e) {
@@ -507,7 +548,7 @@ function run(method) {
 	if (isSupported && isSupportedValues) {
 		let optExpanded = dom.optExpanded.checked
 		// set legend
-		legend(method)
+		legend()
 		//reset
 		setBtn(method)
 		dom.perf = ""
@@ -565,8 +606,8 @@ Promise.all([
 	//list = ["en-au,english (australia)","en-bm,english (bermuda)"]
 	//list = ["en,english"]
 	//list = ['de','en-NZ']
-
 	list.sort()
+
 	oLists["list"] = list
 	// expanded: add additional locales to core locales for this test
 	let listExtra = [
@@ -682,12 +723,12 @@ Promise.all([
 	// testing
 	//expanded =['nso,northern sotho','tn,tswana','lmo,lombard','kl,greenlandic',]
 	expanded.sort()
-	oLists["expanded"] = expanded
+	oLists['expanded'] = expanded
 
 	legend()
 	if (isSupportedValues) {
 		// FF93+: supportedValuesOf
-		aTimezonesSupported = Intl.supportedValuesOf("timeZone")
+		aTimezonesSupported = Intl.supportedValuesOf('timeZone')
 		aTimezonesSupported.sort()
 		aTimezonesSupported.forEach(function(tz) {
 			if (!tzIgnore.includes(tz)) {
@@ -699,10 +740,10 @@ Promise.all([
 	}
 
 	if (isSupported && isSupportedValues) {
-		setBtn("min")
-		dom.results = "calculating ..."
+		setBtn('min')
+		dom.results = 'calculating ...'
 		setTimeout(function() {
-			run_main("min")
+			run_main('min')
 		}, 50)
 	}
 })
