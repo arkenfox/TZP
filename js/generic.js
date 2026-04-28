@@ -867,7 +867,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 151) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 152) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -883,6 +883,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
 			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
 			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
