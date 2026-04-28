@@ -292,46 +292,18 @@ function set_isLanguageSmart() {
 }
 
 function set_oIntlDate() {
-	// all dates (days/months/am-pm) must be timezone resistent: we are checking locale + timezonename only
-		// that way everyone uses the same exact dates/days/times (e.g. am, friday, single digit day, etc)
-		// timezone entropy is in the actual timezonename (we're confirming that here)
-
-
-	// tests/PoCs need to cover all possible combos of locales x timezonenames because those
-	// are the TWO variables that I cannot control (oIntlLocale only have ONE variable: locale)
-	// and not all locales handle timezonenames to the same degree: e.g.
-		// America/Los_Angles has 343 possible outcomes, Europe/Vatican has 344: this is because
-		// pt-ao + pt-ch vary for the vatican but not for los angeles
-	// tl;dr: locale + timezonename PoCs cover a range
-
-	let dates = {
-		// cover key month names, key weekday names, (and am/pm maybe it helps with h23/h11 etc)
-		// this covers date locale diffs: the tests themseleves also cover timezonename
-		Jan: new Date("January 5, 2024 13:12:34"),  // jan, fri
-		May: new Date("May 9, 2024 01:12:34"),      // may, thu
-		Jul: new Date("July 5, 2024 01:12:34"),     // jul, fri
-		Sep: new Date("September 6, 2024 01:12:34"),// sep, fri
-		Nov: new Date("November 6, 2024 01:12:34"), // nov, wed
-	}
-
+	let d = oIntlDates
 	oIntlDate = {
 		date_timestyle : {
 			"default": {
-				'full_medium': [dates.May, dates.Sep, dates.Nov],
-				'long_short': [dates.Jul],
-				'medium_long': [dates.Jan, dates.Jul],
-				'short_full': [dates.Jan, dates.Sep]
+				'full_medium': [d.JanA, d.JanB, d.JulA, d.JulB, d.SepA, d.SepB],
+				'medium_long': [d.JanA, d.JanB, d.JulA, d.JulB, d.NovA, d.NovB],
+				'short_full': [d.SepA, d.SepB],
 			},
-			'ethiopic': {
-				'full_medium': [dates.Jan]
-			},
-			'japanese': {
-				'full_medium': [dates.Jan],
-				'medium_long': [dates.Sep]
-			}
+			'ethiopic': {'full': [d.JanA], 'medium': [d.JanA]},
+			'japanese': {'medium': [d.SepA, d.NovA]}, // NovA required for blink (147)
 		},
 	}
-
 	// build keys
 	for (const k of Object.keys(oIntlDate)) {
 		oIntlDateKeys[k] = []
@@ -339,14 +311,45 @@ function set_oIntlDate() {
 	}
 }
 
-function set_oIntlLocale() {
-	// all dates (days/months/am-pm) must be timezone resistent: we are checking locale only
-		// reported timezonename (and locale) is tested see oIntlDate section
-	// thus we use UTC time so everyone uses the exact same dates, and then we pass
-		// UTC as the timezone so nothing shifts, preserving our specific datetimes
-	// the tests that expose day/time are datetimeformat's relatedYear + components + timezonename | and dayperiods
+function set_oIntlDates() {
+	/*
 
-	oIntlLocaleDates = {
+	intl.dates
+	all dates (days/months/am-pm) must account for timezones
+		- that way everyone covers the specific targets (e.g. am, friday, single digit day, etc)
+		- timezone entropy is in the actual timezonename (we're confirming that here)
+	we use UTC so we can check the original date hasn't been altered
+		- which means we will nd up testing more dates to cover specific days
+		- at this point AM/PM doesn't seem to be a factor
+		- this makes the PoC's max entropy easier to verify
+	timezones can be 14 hrs less or 12 hrs more but (IIUIC) our selected dates aren't hiting those instances
+		where it exceeds ±12 (or I lucked out) and we end up only needing two identical times on subsequent days
+	tests/PoCs need to cover all possible combos of locales x timezonenames because those
+		are the TWO variables that I cannot control (oIntlLocale only have ONE variable: locale)
+		and not all locales handle timezonenames to the same degree: e.g.
+		- America/Los_Angles has 343 possible outcomes, Europe/Vatican has 344: this is because
+		- pt-ao + pt-ch vary for the vatican but not for los angeles
+	  - tl;dr: locale + timezonename PoCs cover a range
+
+	intl.locale
+	all dates (days/months/am-pm) must be timezone resistent: we are checking locale only
+		- reported timezonename (and locale) is tested see oIntlDate section
+		- thus we use UTC time so everyone uses the exact same dates, and then we pass
+		UTC as the timezone so nothing shifts, preserving our specific datetimes
+	the tests that expose day/time are datetimeformat's relatedYear + components + timezonename | and dayperiods
+	*/
+
+	oIntlDates = {
+		//intl.dates
+		JanA: new Date('2024-01-04T04:12:34.000Z'),
+		JanB: new Date('2024-01-05T04:12:34.000Z'),
+		JulA: new Date('2024-07-04T14:12:34.000Z'),
+		JulB: new Date('2024-07-05T14:12:34.000Z'),
+		SepA: new Date('2024-09-03T04:12:34.000Z'),
+		SepB: new Date('2024-09-04T04:12:34.000Z'),
+		NovA: new Date('2024-11-03T14:12:34.000Z'),
+		NovB: new Date('2024-11-04T14:12:34.000Z'),
+		//intl.locale
 		// fractionalSecondDigits: we only ever reveal the seconds
 		FSD: new Date('2023-06-10T01:12:34.567Z'),
 		// month (x4) + year (xJan): we only ever reveal the month or year
@@ -370,11 +373,11 @@ function set_oIntlLocale() {
 		DP18: new Date('2019-01-30T18:00:00Z'),
 		DP22: new Date('2019-01-30T22:00:00Z'),
 	}
-	let tzLG = {'longGeneric': [oIntlLocaleDates.TZN1]}, tzSG = {'shortGeneric': [oIntlLocaleDates.TZN1]}
-	//console.log(mini(dates))
+}
 
-	let dates = oIntlLocaleDates
-
+function set_oIntlLocale() {
+	let d = oIntlDates
+	let tzLG = {'longGeneric': [d.TZN1]}, tzSG = {'shortGeneric': [d.TZN1]}
 	let unitN = {'narrow': [1]}, unitL = {'long': [1]}, unitB = {'long': [1], 'narrow': [1]}
 	let curAN = {"accounting": [-1000], "name": [-1]},
 		curN = {"name": [-1]},
@@ -395,34 +398,34 @@ function set_oIntlLocale() {
 		'datetimeformat.components': {
 			era: {
 				// we need to control the date part so toLocaleString matches
-				'long': [{era: 'long', year: 'numeric', month: 'numeric', day: 'numeric'}, [dates.Era]]
+				'long': [{era: 'long', year: 'numeric', month: 'numeric', day: 'numeric'}, [d.Era]]
 			},
 			fractionalSecondDigits: {
-				'1': [{minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1}, [dates.FSD]]
+				'1': [{minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1}, [d.FSD]]
 			},
 			hour: {
-				'numeric': [{hour: 'numeric'}, [dates.Wed]],
+				'numeric': [{hour: 'numeric'}, [d.Wed]],
 			},
 			hourCycle: {
-				'h11-2-digit': [{hour: '2-digit', hourCycle: 'h11'}, [dates.Wed]]
+				'h11-2-digit': [{hour: '2-digit', hourCycle: 'h11'}, [d.Wed]]
 			},
 			month: {
-				'narrow': [{month: 'narrow'}, [dates.Nov] ],
-				'short': [{month: 'short'}, [dates.Jan, dates.Jun, dates.Sep, dates.Nov]],
+				'narrow': [{month: 'narrow'}, [d.Nov] ],
+				'short': [{month: 'short'}, [d.Jan, d.Jun, d.Sep, d.Nov]],
 			},
 			weekday: {
-				'long': [{weekday: 'long'}, [dates.Wed, dates.Fri]],
-				'narrow': [{weekday: 'narrow'}, [dates.Wed, dates.Fri]],
-				'short': [{weekday: 'short'}, [dates.Fri]],
+				'long': [{weekday: 'long'}, [d.Wed, d.Fri]],
+				'narrow': [{weekday: 'narrow'}, [d.Wed, d.Fri]],
+				'short': [{weekday: 'short'}, [d.Fri]],
 			},
 			year: {
-				'2-digit': [{year: "2-digit"}, [dates.Jan]]
+				'2-digit': [{year: "2-digit"}, [d.Jan]]
 			},
 		},
 		'datetimeformat.dayperiod': {
-			'long': [dates.DP8, dates.DP22],
-			'narrow': [dates.DP8, dates.DP15],
-			'short': [dates.DP12, dates.DP15, dates.DP18]
+			'long': [d.DP8, d.DP22],
+			'narrow': [d.DP8, d.DP15],
+			'short': [d.DP12, d.DP15, d.DP18]
 		},
 		'datetimeformat.listformat': {
 			'narrow': ['conjunction','disjunction','unit'],
@@ -431,16 +434,16 @@ function set_oIntlLocale() {
 		},
 		'datetimeformat.relatedyear': {
 			// these are all long
-			buddhist: [dates.RY1],
-			chinese: [dates.RY1],
-			coptic: [dates.RY2],
-			'default': [dates.RY1],
-			gregory: [dates.RY1],
-			hebrew: [dates.RY1],
-			indian: [dates.RY1],
-			'islamic-tbla': [dates.RY1],
-			japanese: [dates.RY1, dates.RY2],
-			roc: [dates.RY1],
+			buddhist: [d.RY1],
+			chinese: [d.RY1],
+			coptic: [d.RY2],
+			'default': [d.RY1],
+			gregory: [d.RY1],
+			hebrew: [d.RY1],
+			indian: [d.RY1],
+			'islamic-tbla': [d.RY1],
+			japanese: [d.RY1, d.RY2],
+			roc: [d.RY1],
 		},
 		'datetimeformat.timezonename': {
 			'Africa/Douala': tzLG,
@@ -753,8 +756,10 @@ function get_dates_intl() {
 					Object.keys(tests[key]).forEach(function(s) {
 						let data = [], datacheck = []
 						let styles = s.split('_'), cal = 'default' == key ? undefined : key
+						if (1 == styles.length) {styles.push(styles[0])} // ensure we have two styles
 						// test
-						let options = {calendar: cal, dateStyle: styles[0], timeStyle: styles[1], timeZone: tzTest}
+						let options = {dateStyle: styles[0], timeStyle: styles[1], timeZone: tzTest}
+						if ('default' !== key) {options['calendar'] = key}
 						formatter = Intl.DateTimeFormat(locTest, options); countC++
 						// check
 						if (isCheck) {
@@ -2757,6 +2762,7 @@ const outputHeaders = () => new Promise(resolve => {
 	})
 })
 
+set_oIntlDates()
 set_oIntlDate()
 set_oIntlLocale()
 countJS(4)

@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 109, maxVer = 151, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 110, maxVer = 152, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,13 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 152: 2034371
+		let t152 = performance.now(), ver152
+		try {
+			if (SVGTextPathElement.prototype.hasOwnProperty('side')) {ver152 = true}
+		} catch(e) {}
+		rec(152, 152, "2034371", ver152, performance.now()-t152) // 0.06 ms
 
 		// 151: 2024291
 		let t151a = performance.now(), ver151a

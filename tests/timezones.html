@@ -315,20 +315,17 @@ function run_test(type) {
 		if ('tzn' == type || 'run' == type) {
 			// map names into an order
 			let tznShort = {
-				// hardcoded
-				AKST: '-09:00', AKDT: '-08:00',
-				AST: '-04:00', ADT: '-03:00',
-				CST: '-06:00', CDT: '-05:00',
-				EST: '-05:00', EDT: '-04:00',
-				GMT: '+00:00', GMT0: '+00:00',
-				HAST: '-10:00', HADT: '-09:00',
-				HST: '-10:00', HDT: '-09:00',
-				MST: '-07:00', MDT: '-06:00',
-				PST: '-08:00', PDT: '-07:00',
-				UTC: '00:00', GMT: '00:00',
-				'GMT+0': '00:00', 'GMT-0': '00:00',
+				AKST: 540, AKDT: 480,
+				AST: 240, ADT: 180,
+				CST: 360, CDT: 300,
+				EST: 300, EDT: 240,
+				HAST: 600, HADT: 540,
+				HST: 600, HDT: 540,
+				MST: 420, MDT: 360,
+				PST: 480, PDT: 420,
+				UTC: 0, GMT: 0, 'GMT+0': 0,
 			}
-			let oOrder = {'n': {}, 'p': {}} // negative/positive
+			let oOrder = {}
 			let oMinutes = {}
 			for (const k of Object.keys(oDataShort)) {
 				// dedupe and sort
@@ -338,56 +335,33 @@ function run_test(type) {
 				tzones.sort()
 				oDataShort[k] = tzones
 				// calculate numerical order
-				let value, target
+				let minutes = 'TBA'
 				if (undefined !== tznShort[k]) {
-					value = tznShort[k] +':00'
-					target = value.includes('-') ? 'n' : 'p'
-					if ('n' == target) {value = value.slice(1)}
+					minutes = tznShort[k]
 				} else {
 					// should be just left with GMTs
-					value = k
-					target = value.includes('-') ? 'n' : 'p'
+					let value = k
+					let sign = value.includes('-') ? 1 : -1
 					value = value.replace('GMT','')
 					value = value.replace('-','')
 					value = value.replace('+','')
-					parts = value.split(':')
-					value = parts[0].padStart(2,'0') +':'
-					if (undefined == parts[1]) { value +='00'} else { value += parts[1]} // minutes are always 2 digits
-					if (undefined == parts[2]) { value +=':00'} else { value += ':'+ parts[2]} // seconds are always 2 digits
+					let parts = value.split(':')
+					minutes = parts[0] * 60
+					if (undefined !== parts[1]) { minutes += parts[1] * 1} // minutes
+					if (undefined !== parts[2]) { minutes += (parts[2] * 1)/60} // seconds
+					minutes = minutes * sign
 				}
-				if (undefined !== value) {
-					let minutes
-					if ('00:00:00' == value) {minutes = 0
-					} else {
-						parts = value.split(':')
-						minutes = (parts[0] * 60) + (parts[1] * 1) + (parts[2]/60)
-						if ('p' == target) {minutes = minutes * -1}
-					}
+
 					oMinutes[k] = minutes
-					value = value.replaceAll(':','') * 1
-					if (undefined == oOrder[target][value]) {
-						oOrder[target][value] = {}
-					}
-					if (undefined == oOrder[target][value][k]) {
-						oOrder[target][value][k] = oDataShort[k].sort()
-					}
-				}
+					if (undefined == oOrder[minutes]) {oOrder[minutes] = {}}
+					if (undefined == oOrder[minutes][k]) {oOrder[minutes][k] = oDataShort[k].sort()}
 			}
+
 			//console.log(oOrder)
 			//console.log(oMinutes)
 			// populate aShortNames			
-			for (const a of Object.keys(oOrder).sort()) {
-				if ('n' == a) {
-					// descending numbers
-					for (const b of Object.keys(oOrder[a]).sort((a,b) => b-a)) {
-						for (const k of Object.keys(oOrder[a][b]).sort()) {aShortNames.push(k)}
-					}
-				} else {
-					// ascending numbers
-					for (const b of Object.keys(oOrder[a]).sort((b,a) => b-a)) {
-						for (const k of Object.keys(oOrder[a][b]).sort()) {aShortNames.push(k)}
-					}
-				}
+			for (const m of Object.keys(oOrder).sort((a,b) => b-a)) {
+				for (const k of Object.keys(oOrder[m]).sort()) {aShortNames.push(k)}
 			}
 			if ('tzn' == type) {
 				aDisplay.push(s12 +'YEARS: '+ sc + yrStr +'<br>')

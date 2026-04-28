@@ -10,6 +10,7 @@
 	<style>
 		table {width: 97%; min-width: 680px; max-width: 780px;}
 		ul.main {margin-left: -20px;}
+		div.nav-down {width: 450px;}
 	</style>
 </head>
 
@@ -29,6 +30,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title">datetimeformat: timezonename
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-down"><span class="c perf" id="timezone"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
@@ -546,16 +548,19 @@ function run_main(method, yr, isSummary = false) {
 
 function run(method) {
 	if (isSupported && isSupportedValues) {
+		try {
+			dom.timezone.innerHTML = Intl.DateTimeFormat().resolvedOptions().timeZone
+		} catch(e) {dom.timezone.innerHTML = ''}
 		let optExpanded = dom.optExpanded.checked
 		// set legend
 		legend()
 		//reset
 		setBtn(method)
-		dom.perf = ""
-		let status = "calculating ..."
-		if (method == "all_confirmed") {
+		dom.perf = ''
+		let status = 'calculating ...'
+		if (method == 'all_confirmed') {
 			status += strMaxWarning
-		} else if (method == "min" && optExpanded) {
+		} else if (method == 'min' && optExpanded) {
 			status += strMinWarning
 		}
 		dom.results.innerHTML = status
@@ -740,6 +745,7 @@ Promise.all([
 	}
 
 	if (isSupported && isSupportedValues) {
+		try {dom.timezone.innerHTML = Intl.DateTimeFormat().resolvedOptions().timeZone} catch(e) {}
 		setBtn('min')
 		dom.results = 'calculating ...'
 		setTimeout(function() {
