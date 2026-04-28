@@ -59,8 +59,9 @@ var list = gLocales,
 	aLegend = [],
 	aLocales = [],
 	isSupported = false,
-	localesHashAll = "", // to compare min to
+	localesHashAll = '', // to compare min to
 	oData = {},
+	oDates = {},
 	tzData = {},
 	tzDataAll = {},
 	isMax,
@@ -68,14 +69,14 @@ var list = gLocales,
 	aTZ = [],
 	oCheck = {},
 	isAuto = false,
-	spacer = "<br><br>"
+	spacer = '<br><br>'
 
 function log_console(name) {
 	let hash = mini(sDetail[name])
-	if (name == "locales") {
-		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	if (name == 'locales') {
+		console.log(name +': ' + hash +'\n'+ sDetail['locales'].join('\n'))
 	} else {
-		console.log(name +": " + hash +"\n", sDetail[name])
+		console.log(name +': ' + hash +'\n', sDetail[name])
 	}
 }
 
@@ -99,13 +100,13 @@ function legend() {
 			// is there anything in supported not in gTimezones
 			let aMissing = aTZ.filter(x => !gTimezones.includes(x))
 			if (aMissing.length) {
-				console.log("suported timezones missing in gTimezones\n", aMissing)
-				dom.alert.innerHTML = "<br>"+ s1 +"[alert] supported timezones missing in gTimezones"+ sc
+				console.log('suported timezones missing in gTimezones\n', aMissing)
+				dom.alert.innerHTML = '<br>'+ s1 +'[alert] supported timezones missing in gTimezones'+ sc
 			}
 			aTZ = aTZ.concat(testTZ)
 			aTZ = aTZ.filter(function(item, position) {return aTZ.indexOf(item) === position})
 			aTZ.sort()
-
+//aTZ =['America/Bogota','America/Detroit','America/Havana']
 			// chrome keeps crashing the tab with run_all : break into bits and test manually
 			//aTZ = aTZ.slice(400, 600) // 146 - 150
 
@@ -113,11 +114,11 @@ function legend() {
 			let optTZ = {}
 			aTZ.forEach(function(n) {
 				let group, name
-				if (n.includes("/")) {
-					group = n.split("/")[0]
-					name = n.slice(group.length +1) //+1 remove the "/"
+				if (n.includes('/')) {
+					group = n.split('/')[0]
+					name = n.slice(group.length +1) //+1 remove the '/'
 				} else {
-					group = "AAA" // tmp group name, we want it first alphabetically
+					group = 'AAA' // tmp group name, we want it first alphabetically
 					name = n
 				}
 				if (optTZ[group] == undefined) {optTZ[group] = []}
@@ -126,21 +127,23 @@ function legend() {
 			//console.log(optTZ)
 			let aOptions = []
 			// always add undefined as our first
-			aOptions.push("<optgroup label = '"+ "misc" +"'>")
+			if (isFF) {aOptions.push("<optgroup label = '"+ "misc" +"'>")}
 			aOptions.push("<option value = '"+ "undefined" +"'> "+ "undefined" +"</option>")
 			for (const k of Object.keys(optTZ).sort()) {
-				let prefix = k+"/"
-				if (k == "AAA") {
-					prefix = ""
+				let prefix = k+'/'
+				if (k == 'AAA') {
+					prefix = ''
 				} else {
-					aOptions.push("<hr>")
-					aOptions.push("<optgroup label = '"+ k.toUpperCase() +"'>")
+					aOptions.push('<hr>')
+					if (isFF) { // blink doesn't fully populate with optgroup
+						aOptions.push("<optgroup label = '"+ k.toUpperCase() +"'>")
+					}
 				}
 				optTZ[k].forEach(function(tz) {
 					aOptions.push("<option value = '"+ prefix + tz +"'> "+ prefix + tz +"</option>")
 				})
 			}
-			dom.timezones.innerHTML = aOptions.join("")
+			dom.timezones.innerHTML = aOptions.join('')
 		} catch(e) {
 			console.log(e)
 		}
@@ -148,64 +151,244 @@ function legend() {
 		list.sort()
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
-			let code = str.split(",")[0].trim()
-			let name = (undefined !== str.split(",")[1]) ? str.split(",")[1].trim() : ''
+			let code = str.split(',')[0].trim()
+			let name = (undefined !== str.split(',')[1]) ? str.split(',')[1].trim() : ''
 			let go = true
 			if (isSupported) {
 				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
 			}
 			if (go) {
 				aLocales.push(code)
-				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
-				if (name.includes("(")) {
-					let name0 = name.split("(")[0].trim()
+				let isSplit = (name.includes('(') && (name.length + code.length) > 32)
+				if (name.includes('(')) {
+					let name0 = name.split('(')[0].trim()
 					let name1 = name.substring(
-						name.indexOf("(") + 1, 
-						name.lastIndexOf(")")
+						name.indexOf('(') + 1, 
+						name.lastIndexOf(')')
 					)
-					name1 = s99 +"("+ name1 + ")"+ sc
+					name1 = s99 +'('+ name1 + ')'+ sc
 					if (isSplit) {
-						name = name0 +"<br>"+ " ".repeat(4) + name1
+						name = name0 +'<br>'+ ' '.repeat(4) + name1
 					} else {
-						name = name0 +" "+ name1
+						name = name0 +' '+ name1
 					}
 				}
-				aLegend.push(code.padStart(7) +": "+ name)
+				aLegend.push(code.padStart(7) +': '+ name)
 			}
 		}
 	}
 	// output
-	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aLegend.join("<br>")
+	let header = s4 +'LEGEND ['+ aLegend.length +']'+ sc +'<br><br>'
+	dom.legend.innerHTML = header + aLegend.join('<br>')
 }
 
-const run_main = (method = "all", tz) => new Promise(resolve => {
+function set_dates() {
+	// if we use UTC then we can check the original date hasn't been altered
+		// but we will have to end up testing more dates to cover specific days
+
+	// timezones can be 14 hrs less or 12 hrs more but (IIUIC) our selected dates aren't hiting those instances
+		// where it exceeds ±12 (or I lucked out) and we end up only needing two identical times on subsequent days
+	// lets do 7 days per month and two times per day
+	// this gives us a maximum result to start from
+
+	oDates = {
+		JanA: new Date('2024-01-02T04:12:34.000Z'),
+		JanB: new Date('2024-01-02T14:12:34.000Z'),
+		JanC: new Date('2024-01-03T04:12:34.000Z'),
+		JanD: new Date('2024-01-03T14:12:34.000Z'),
+		JanE: new Date('2024-01-04T04:12:34.000Z'),
+		JanF: new Date('2024-01-04T14:12:34.000Z'),
+		JanG: new Date('2024-01-05T04:12:34.000Z'),
+		JanH: new Date('2024-01-05T14:12:34.000Z'),
+		JanI: new Date('2024-01-06T04:12:34.000Z'),
+		JanJ: new Date('2024-01-06T14:12:34.000Z'),
+		JanK: new Date('2024-01-07T04:12:34.000Z'),
+		JanL: new Date('2024-01-07T14:12:34.000Z'),
+		JanM: new Date('2024-01-08T04:12:34.000Z'),
+		JanN: new Date('2024-01-08T14:12:34.000Z'),
+
+		MayA: new Date('2024-05-02T04:12:34.000Z'),
+		MayB: new Date('2024-05-02T14:12:34.000Z'),
+		MayC: new Date('2024-05-03T04:12:34.000Z'),
+		MayD: new Date('2024-05-03T14:12:34.000Z'),
+		MayE: new Date('2024-05-04T04:12:34.000Z'),
+		MayF: new Date('2024-05-04T14:12:34.000Z'),
+		MayG: new Date('2024-05-05T04:12:34.000Z'),
+		MayH: new Date('2024-05-05T14:12:34.000Z'),
+		MayI: new Date('2024-05-06T04:12:34.000Z'),
+		MayJ: new Date('2024-05-06T14:12:34.000Z'),
+		MayK: new Date('2024-05-07T04:12:34.000Z'),
+		MayL: new Date('2024-05-07T14:12:34.000Z'),
+		MayM: new Date('2024-05-08T04:12:34.000Z'),
+		MayN: new Date('2024-05-08T14:12:34.000Z'),
+
+		JulA: new Date('2024-07-02T04:12:34.000Z'),
+		JulB: new Date('2024-07-02T14:12:34.000Z'),
+		JulC: new Date('2024-07-03T04:12:34.000Z'),
+		JulD: new Date('2024-07-03T14:12:34.000Z'),
+		JulE: new Date('2024-07-04T04:12:34.000Z'),
+		JulF: new Date('2024-07-04T14:12:34.000Z'),
+		JulG: new Date('2024-07-05T04:12:34.000Z'),
+		JulH: new Date('2024-07-05T14:12:34.000Z'),
+		JulI: new Date('2024-07-06T04:12:34.000Z'),
+		JulJ: new Date('2024-07-06T14:12:34.000Z'),
+		JulK: new Date('2024-07-07T04:12:34.000Z'),
+		JulL: new Date('2024-07-07T14:12:34.000Z'),
+		JulM: new Date('2024-07-08T04:12:34.000Z'),
+		JulN: new Date('2024-07-08T14:12:34.000Z'),
+
+		SepA: new Date('2024-09-02T04:12:34.000Z'),
+		SepB: new Date('2024-09-02T14:12:34.000Z'),
+		SepC: new Date('2024-09-03T04:12:34.000Z'),
+		SepD: new Date('2024-09-03T14:12:34.000Z'),
+		SepE: new Date('2024-09-04T04:12:34.000Z'),
+		SepF: new Date('2024-09-04T14:12:34.000Z'),
+		SepG: new Date('2024-09-05T04:12:34.000Z'),
+		SepH: new Date('2024-09-05T14:12:34.000Z'),
+		SepI: new Date('2024-09-06T04:12:34.000Z'),
+		SepJ: new Date('2024-09-06T14:12:34.000Z'),
+		SepK: new Date('2024-09-07T04:12:34.000Z'),
+		SepL: new Date('2024-09-07T14:12:34.000Z'),
+		SepM: new Date('2024-09-08T04:12:34.000Z'),
+		SepN: new Date('2024-09-08T14:12:34.000Z'),
+
+		NovA: new Date('2024-11-02T04:12:34.000Z'),
+		NovB: new Date('2024-11-02T14:12:34.000Z'),
+		NovC: new Date('2024-11-03T04:12:34.000Z'),
+		NovD: new Date('2024-11-03T14:12:34.000Z'),
+		NovE: new Date('2024-11-04T04:12:34.000Z'),
+		NovF: new Date('2024-11-04T14:12:34.000Z'),
+		NovG: new Date('2024-11-05T04:12:34.000Z'),
+		NovH: new Date('2024-11-05T14:12:34.000Z'),
+		NovI: new Date('2024-11-06T04:12:34.000Z'),
+		NovJ: new Date('2024-11-06T14:12:34.000Z'),
+		NovK: new Date('2024-11-07T04:12:34.000Z'),
+		NovL: new Date('2024-11-07T14:12:34.000Z'),
+		NovM: new Date('2024-11-08T04:12:34.000Z'),
+		NovN: new Date('2024-11-08T14:12:34.000Z'),
+
+		FebA: new Date('2024-02-02T04:12:34.000Z'),
+		FebB: new Date('2024-02-02T14:12:34.000Z'),
+		FebC: new Date('2024-02-03T04:12:34.000Z'),
+		FebD: new Date('2024-02-03T14:12:34.000Z'),
+		FebE: new Date('2024-02-04T04:12:34.000Z'),
+		FebF: new Date('2024-02-04T14:12:34.000Z'),
+		FebG: new Date('2024-02-05T04:12:34.000Z'),
+		FebH: new Date('2024-02-05T14:12:34.000Z'),
+		FebI: new Date('2024-02-06T04:12:34.000Z'),
+		FebJ: new Date('2024-02-06T14:12:34.000Z'),
+		FebK: new Date('2024-02-07T04:12:34.000Z'),
+		FebL: new Date('2024-02-07T14:12:34.000Z'),
+		FebM: new Date('2024-02-08T04:12:34.000Z'),
+		FebN: new Date('2024-02-08T14:12:34.000Z'),
+
+		MarA: new Date('2024-03-02T04:12:34.000Z'),
+		MarB: new Date('2024-03-02T14:12:34.000Z'),
+		MarC: new Date('2024-03-03T04:12:34.000Z'),
+		MarD: new Date('2024-03-03T14:12:34.000Z'),
+		MarE: new Date('2024-03-04T04:12:34.000Z'),
+		MarF: new Date('2024-03-04T14:12:34.000Z'),
+		MarG: new Date('2024-03-05T04:12:34.000Z'),
+		MarH: new Date('2024-03-05T14:12:34.000Z'),
+		MarI: new Date('2024-03-06T04:12:34.000Z'),
+		MarJ: new Date('2024-03-06T14:12:34.000Z'),
+		MarK: new Date('2024-03-07T04:12:34.000Z'),
+		MarL: new Date('2024-03-07T14:12:34.000Z'),
+		MarM: new Date('2024-03-08T04:12:34.000Z'),
+		MarN: new Date('2024-03-08T14:12:34.000Z'),
+
+		AprA: new Date('2024-04-02T04:12:34.000Z'),
+		AprB: new Date('2024-04-02T14:12:34.000Z'),
+		AprC: new Date('2024-04-03T04:12:34.000Z'),
+		AprD: new Date('2024-04-03T14:12:34.000Z'),
+		AprE: new Date('2024-04-04T04:12:34.000Z'),
+		AprF: new Date('2024-04-04T14:12:34.000Z'),
+		AprG: new Date('2024-04-05T04:12:34.000Z'),
+		AprH: new Date('2024-04-05T14:12:34.000Z'),
+		AprI: new Date('2024-04-06T04:12:34.000Z'),
+		AprJ: new Date('2024-04-06T14:12:34.000Z'),
+		AprK: new Date('2024-04-07T04:12:34.000Z'),
+		AprL: new Date('2024-04-07T14:12:34.000Z'),
+		AprM: new Date('2024-04-08T04:12:34.000Z'),
+		AprN: new Date('2024-04-08T14:12:34.000Z'),
+
+		JunA: new Date('2024-06-02T04:12:34.000Z'),
+		JunB: new Date('2024-06-02T14:12:34.000Z'),
+		JunC: new Date('2024-06-03T04:12:34.000Z'),
+		JunD: new Date('2024-06-03T14:12:34.000Z'),
+		JunE: new Date('2024-06-04T04:12:34.000Z'),
+		JunF: new Date('2024-06-04T14:12:34.000Z'),
+		JunG: new Date('2024-06-05T04:12:34.000Z'),
+		JunH: new Date('2024-06-05T14:12:34.000Z'),
+		JunI: new Date('2024-06-06T04:12:34.000Z'),
+		JunJ: new Date('2024-06-06T14:12:34.000Z'),
+		JunK: new Date('2024-06-07T04:12:34.000Z'),
+		JunL: new Date('2024-06-07T14:12:34.000Z'),
+		JunM: new Date('2024-06-08T04:12:34.000Z'),
+		JunN: new Date('2024-06-08T14:12:34.000Z'),
+
+		AugA: new Date('2024-08-02T04:12:34.000Z'),
+		AugB: new Date('2024-08-02T14:12:34.000Z'),
+		AugC: new Date('2024-08-03T04:12:34.000Z'),
+		AugD: new Date('2024-08-03T14:12:34.000Z'),
+		AugE: new Date('2024-08-04T04:12:34.000Z'),
+		AugF: new Date('2024-08-04T14:12:34.000Z'),
+		AugG: new Date('2024-08-05T04:12:34.000Z'),
+		AugH: new Date('2024-08-05T14:12:34.000Z'),
+		AugI: new Date('2024-08-06T04:12:34.000Z'),
+		AugJ: new Date('2024-08-06T14:12:34.000Z'),
+		AugK: new Date('2024-08-07T04:12:34.000Z'),
+		AugL: new Date('2024-08-07T14:12:34.000Z'),
+		AugM: new Date('2024-08-08T04:12:34.000Z'),
+		AugN: new Date('2024-08-08T14:12:34.000Z'),
+
+		OctA: new Date('2024-10-02T04:12:34.000Z'),
+		OctB: new Date('2024-10-02T14:12:34.000Z'),
+		OctC: new Date('2024-10-03T04:12:34.000Z'),
+		OctD: new Date('2024-10-03T14:12:34.000Z'),
+		OctE: new Date('2024-10-04T04:12:34.000Z'),
+		OctF: new Date('2024-10-04T14:12:34.000Z'),
+		OctG: new Date('2024-10-05T04:12:34.000Z'),
+		OctH: new Date('2024-10-05T14:12:34.000Z'),
+		OctI: new Date('2024-10-06T04:12:34.000Z'),
+		OctJ: new Date('2024-10-06T14:12:34.000Z'),
+		OctK: new Date('2024-10-07T04:12:34.000Z'),
+		OctL: new Date('2024-10-07T14:12:34.000Z'),
+		OctM: new Date('2024-10-08T04:12:34.000Z'),
+		OctN: new Date('2024-10-08T14:12:34.000Z'),
+
+		DecA: new Date('2024-12-02T04:12:34.000Z'),
+		DecB: new Date('2024-12-02T14:12:34.000Z'),
+		DecC: new Date('2024-12-03T04:12:34.000Z'),
+		DecD: new Date('2024-12-03T14:12:34.000Z'),
+		DecE: new Date('2024-12-04T04:12:34.000Z'),
+		DecF: new Date('2024-12-04T14:12:34.000Z'),
+		DecG: new Date('2024-12-05T04:12:34.000Z'),
+		DecH: new Date('2024-12-05T14:12:34.000Z'),
+		DecI: new Date('2024-12-06T04:12:34.000Z'),
+		DecJ: new Date('2024-12-06T14:12:34.000Z'),
+		DecK: new Date('2024-12-07T04:12:34.000Z'),
+		DecL: new Date('2024-12-07T14:12:34.000Z'),
+		DecM: new Date('2024-12-08T04:12:34.000Z'),
+		DecN: new Date('2024-12-08T14:12:34.000Z'),
+	}
+}
+
+const run_main = (method = 'all', tz) => new Promise(resolve => {
 	let t0 = performance.now()
-	/*
-	Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
-
- 	new Date("January 14, 2023 1:00:00") vs Date.UTC(2023, 0, 14, 1)
-	- a string e.g. "January 14, 2023 1:00:00" is not affected by your timezone
-	- Date.UTC is a number e.g. Date.UTC(2023, 0, 14, 1) and is affected by your timezone
-
-	so for this test we want universal hashes so we will use a string, so e.g.
-	AM/PM will be in order, and we get the correct two weekdays
-	*/
 
 	// skip the auto all tests if I hardcoded them to speed up tests
-	if (isAuto && method == "all") {
-		if (Object.keys(tzDataAll).length) {
-			return resolve()
-		}
+	if (isAuto && method == 'all') {
+		if (Object.keys(tzDataAll).length) {return resolve()}
 	}
 
 	if (isAuto) {
-		let step = method == "all" ? 1 : 2
-		let tzstep = ((aTZ.indexOf(tz) + 1)+"").padStart(3) +"/" + aTZ.length
-		dom.results.innerHTML = "step "+ step +" of 2 ["+ method +"] "+ spacer + s16 + tzstep + sc + " "+ tz 
+		let step = method == 'all' ? 1 : 2
+		let tzstep = ((aTZ.indexOf(tz) + 1)+'').padStart(3) +'/' + aTZ.length
+		dom.results.innerHTML = 'step '+ step +' of 2 ['+ method +'] '+ spacer + s16 + tzstep + sc + ' '+ tz 
 	}
 
-	//console.log(isAuto, "running", tz)
+	//console.log(isAuto, 'running', tz)
 	if (!isAuto) {
 		if (tz == undefined) {
 			tz = dom.timezones.value
@@ -217,111 +400,288 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			}
 		}
 	}
-	if (tz == "undefined") {tz = undefined}
-	//tz = "America/Paramaribo" // temp
+	if (tz == 'undefined') {tz = undefined}
+	//tz = 'America/Paramaribo' // temp
 
-	let dates = {
-		// cover the seasons, key weekdays, am/pm
-		Jan: new Date("January 5, 2024 13:12:34"), // jan, fri pm
-		May: new Date("May 9, 2024 01:12:34"), // thur <-- adds something
-		Jul: new Date("July 5, 2024 01:12:34"), // july, fri am
-		Sep: new Date("September 6, 2024 01:12:34"), // sep, wed
-		Nov: new Date("November 6, 2024 01:12:34"), // nov wed am
-
-		// testing: cover all months and weekdays
-		//*
-		Feb: new Date("February 5, 2024 13:12:34"), //mon
-		Apr: new Date("April 10, 2024 13:12:34"), // apr, wed pm
-		Mar: new Date("March 5, 2024 13:12:34"), // tues
-		Jun: new Date("June 8, 2024 01:12:34"), // sat
-		Aug: new Date("August 4, 2024 01:12:34"), // sun
-		Oct: new Date("October 5, 2024 01:12:34"),
-		Dec: new Date("December 6, 2024 01:12:34"),
-		//*/
-	}
-	
-	if (tz !== undefined) {
-		try {
-			// when we pass a defined tz to timeZone options, it changes the
-			// date: so we should calculate the offset for each one and change
-			// it so it ends up being real world
-			for (const k of Object.keys(dates)) {
-				// lets just test one first
-				let original = dates[k]
-				let originalepoch = Date.parse(original)
-				// e.g. 1704413554000
-				let testDate = dates[k].toLocaleString('en', {timeZone: tz})
-				let testepoch = Date.parse(testDate)
-				let diff = (originalepoch - testepoch)
-				// so Europe/London is 46800000 behind (the diff is positive)
-				// so the new date would be to add the diff
-				let newepoch = originalepoch + diff
-				let newDate = new Date(newepoch) // will this work?
-				/*
-				console.log(tz)
-				console.log("original", originalepoch, original)
-				console.log("test", testepoch, testDate, diff)
-				console.log("new", Date.parse(newDate), newDate)
-				console.log("=======")
-				//*/
-				dates[k] = newDate
-			}
-		} catch(e) {
-			// catch invalid timezones
-			dom.results.innerHTML = s16 + e.name + ": "+ sc + e.message
-		}
-	}
-
+	let dates = oDates
 	let testsAll = {
-		// ignore short in non-gregory
-		// ignore med + long in ethiopic
-		"default": [
-			[dates.Jan, ['F','L','M','S']],
-			[dates.May, ['F','L','M','S']],
-			[dates.Jul, ['F','L','M','S']],
-			[dates.Sep, ['F','L','M','S']],
-			[dates.Nov, ['F','L','M','S']],
+		'default': [
+			[dates.JanE, ['F','L','M','S']],
+			[dates.JanG, ['F','L','M','S']],
+			[dates.MayA, ['F','L','M','S']],
+			[dates.MayM, ['F','L','M','S']],
+			[dates.JulF, ['F','L','M','S']],
+			[dates.JulH, ['F','L','M','S']],
+			[dates.SepC, ['F','L','M','S']],
+			[dates.SepE, ['F','L','M','S']],
+			[dates.NovD, ['F','L','M','S']],
+			[dates.NovF, ['F','L','M','S']],
+			// MAX: these add nothing
+			/*
+			// weekdays/times per month
+			//[dates.JanA, ['F','L','M','S']],
+			//[dates.JanB, ['F','L','M','S']],
+			//[dates.JanC, ['F','L','M','S']],
+			//[dates.JanD, ['F','L','M','S']],
+			//[dates.JanF, ['F','L','M','S']],
+			//[dates.JanH, ['F','L','M','S']],
+			//[dates.JanI, ['F','L','M','S']],
+			//[dates.JanJ, ['F','L','M','S']],
+			//[dates.JanK, ['F','L','M','S']],
+			//[dates.JanL, ['F','L','M','S']],
+			//[dates.JanM, ['F','L','M','S']],
+			//[dates.JanN, ['F','L','M','S']],
+
+			//[dates.MayB, ['F','L','M','S']],
+			//[dates.MayC, ['F','L','M','S']],
+			//[dates.MayD, ['F','L','M','S']],
+			//[dates.MayE, ['F','L','M','S']],
+			//[dates.MayF, ['F','L','M','S']],
+			//[dates.MayG, ['F','L','M','S']],
+			//[dates.MayH, ['F','L','M','S']],
+			//[dates.MayI, ['F','L','M','S']],
+			//[dates.MayJ, ['F','L','M','S']],
+			//[dates.MayK, ['F','L','M','S']],
+			//[dates.MayL, ['F','L','M','S']],
+			//[dates.MayN, ['F','L','M','S']],
+
+			//[dates.JulA, ['F','L','M','S']],
+			//[dates.JulB, ['F','L','M','S']],
+			//[dates.JulC, ['F','L','M','S']],
+			//[dates.JulD, ['F','L','M','S']],
+			//[dates.JulE, ['F','L','M','S']],
+			//[dates.JulG, ['F','L','M','S']],
+			//[dates.JulI, ['F','L','M','S']],
+			//[dates.JulJ, ['F','L','M','S']],
+			//[dates.JulK, ['F','L','M','S']],
+			//[dates.JulL, ['F','L','M','S']],
+			//[dates.JulM, ['F','L','M','S']],
+			//[dates.JulN, ['F','L','M','S']],
+
+			//[dates.SepA, ['F','L','M','S']],
+			//[dates.SepB, ['F','L','M','S']],
+			//[dates.SepD, ['F','L','M','S']],
+			//[dates.SepF, ['F','L','M','S']],
+			//[dates.SepG, ['F','L','M','S']],
+			//[dates.SepH, ['F','L','M','S']],
+			//[dates.SepI, ['F','L','M','S']],
+			//[dates.SepJ, ['F','L','M','S']],
+			//[dates.SepK, ['F','L','M','S']],
+			//[dates.SepL, ['F','L','M','S']],
+			//[dates.SepM, ['F','L','M','S']],
+			//[dates.SepN, ['F','L','M','S']],
+
+			[dates.NovA, ['F','L','M','S']],
+			[dates.NovB, ['F','L','M','S']],
+			[dates.NovC, ['F','L','M','S']],
+			[dates.NovE, ['F','L','M','S']],
+			[dates.NovG, ['F','L','M','S']],
+			[dates.NovH, ['F','L','M','S']],
+			[dates.NovI, ['F','L','M','S']],
+			[dates.NovJ, ['F','L','M','S']],
+			[dates.NovK, ['F','L','M','S']],
+			[dates.NovL, ['F','L','M','S']],
+			[dates.NovM, ['F','L','M','S']],
+			[dates.NovN, ['F','L','M','S']],
+
+			// entire months
+			[dates.FebA, ['F','L','M','S']],
+			[dates.FebB, ['F','L','M','S']],
+			[dates.FebC, ['F','L','M','S']],
+			[dates.FebD, ['F','L','M','S']],
+			[dates.FebE, ['F','L','M','S']],
+			[dates.FebF, ['F','L','M','S']],
+			[dates.FebG, ['F','L','M','S']],
+			[dates.FebH, ['F','L','M','S']],
+			[dates.FebI, ['F','L','M','S']],
+			[dates.FebJ, ['F','L','M','S']],
+			[dates.FebK, ['F','L','M','S']],
+			[dates.FebL, ['F','L','M','S']],
+			[dates.FebM, ['F','L','M','S']],
+			[dates.FebN, ['F','L','M','S']],
+
+			[dates.MarA, ['F','L','M','S']],
+			[dates.MarB, ['F','L','M','S']],
+			[dates.MarC, ['F','L','M','S']],
+			[dates.MarD, ['F','L','M','S']],
+			[dates.MarE, ['F','L','M','S']],
+			[dates.MarF, ['F','L','M','S']],
+			[dates.MarG, ['F','L','M','S']],
+			[dates.MarH, ['F','L','M','S']],
+			[dates.MarI, ['F','L','M','S']],
+			[dates.MarJ, ['F','L','M','S']],
+			[dates.MarK, ['F','L','M','S']],
+			[dates.MarL, ['F','L','M','S']],
+			[dates.MarM, ['F','L','M','S']],
+			[dates.MarN, ['F','L','M','S']],
+
+			[dates.AprA, ['F','L','M','S']],
+			[dates.AprB, ['F','L','M','S']],
+			[dates.AprC, ['F','L','M','S']],
+			[dates.AprD, ['F','L','M','S']],
+			[dates.AprE, ['F','L','M','S']],
+			[dates.AprF, ['F','L','M','S']],
+			[dates.AprG, ['F','L','M','S']],
+			[dates.AprH, ['F','L','M','S']],
+			[dates.AprI, ['F','L','M','S']],
+			[dates.AprJ, ['F','L','M','S']],
+			[dates.AprK, ['F','L','M','S']],
+			[dates.AprL, ['F','L','M','S']],
+			[dates.AprM, ['F','L','M','S']],
+			[dates.AprN, ['F','L','M','S']],
+
+			[dates.JunA, ['F','L','M','S']],
+			[dates.JunB, ['F','L','M','S']],
+			[dates.JunC, ['F','L','M','S']],
+			[dates.JunD, ['F','L','M','S']],
+			[dates.JunE, ['F','L','M','S']],
+			[dates.JunF, ['F','L','M','S']],
+			[dates.JunG, ['F','L','M','S']],
+			[dates.JunH, ['F','L','M','S']],
+			[dates.JunI, ['F','L','M','S']],
+			[dates.JunJ, ['F','L','M','S']],
+			[dates.JunK, ['F','L','M','S']],
+			[dates.JunL, ['F','L','M','S']],
+			[dates.JunM, ['F','L','M','S']],
+			[dates.JunN, ['F','L','M','S']],
+
+			[dates.AugA, ['F','L','M','S']],
+			[dates.AugB, ['F','L','M','S']],
+			[dates.AugC, ['F','L','M','S']],
+			[dates.AugD, ['F','L','M','S']],
+			[dates.AugE, ['F','L','M','S']],
+			[dates.AugF, ['F','L','M','S']],
+			[dates.AugG, ['F','L','M','S']],
+			[dates.AugH, ['F','L','M','S']],
+			[dates.AugI, ['F','L','M','S']],
+			[dates.AugJ, ['F','L','M','S']],
+			[dates.AugK, ['F','L','M','S']],
+			[dates.AugL, ['F','L','M','S']],
+			[dates.AugM, ['F','L','M','S']],
+			[dates.AugN, ['F','L','M','S']],
+
+			[dates.OctA, ['F','L','M','S']],
+			[dates.OctB, ['F','L','M','S']],
+			[dates.OctC, ['F','L','M','S']],
+			[dates.OctD, ['F','L','M','S']],
+			[dates.OctE, ['F','L','M','S']],
+			[dates.OctF, ['F','L','M','S']],
+			[dates.OctG, ['F','L','M','S']],
+			[dates.OctH, ['F','L','M','S']],
+			[dates.OctI, ['F','L','M','S']],
+			[dates.OctJ, ['F','L','M','S']],
+			[dates.OctK, ['F','L','M','S']],
+			[dates.OctL, ['F','L','M','S']],
+			[dates.OctM, ['F','L','M','S']],
+			[dates.OctN, ['F','L','M','S']],
+
+			[dates.DecA, ['F','L','M','S']],
+			[dates.DecB, ['F','L','M','S']],
+			[dates.DecC, ['F','L','M','S']],
+			[dates.DecD, ['F','L','M','S']],
+			[dates.DecE, ['F','L','M','S']],
+			[dates.DecF, ['F','L','M','S']],
+			[dates.DecG, ['F','L','M','S']],
+			[dates.DecH, ['F','L','M','S']],
+			[dates.DecI, ['F','L','M','S']],
+			[dates.DecJ, ['F','L','M','S']],
+			[dates.DecK, ['F','L','M','S']],
+			[dates.DecL, ['F','L','M','S']],
+			[dates.DecM, ['F','L','M','S']],
+			[dates.DecN, ['F','L','M','S']],
+			//*/
 		],
-		"ethiopic": [
-			[dates.Jan, ['F']],
-			[dates.May, ['F']],
-			[dates.Jul, ['F']],
-			[dates.Sep, ['F']],
-			[dates.Nov, ['F']],
+		'ethiopic': [ // 76bada35 (without the post minimums changes to default)
+			// adding on top of default
+				// ignore short + long: tested: adds nothing
+				// note we only need one month: tested with january (but we'll include all for the sake of it)
+				// note we're not testing every weekday per month; just using base gregory dates
+			[dates.JanE, ['F','M']],
+			[dates.JanG, ['F','M']],
+			[dates.MayA, ['F','M']],
+			[dates.MayM, ['F','M']],
+			[dates.JulF, ['F','M']],
+			[dates.JulH, ['F','M']],
+			[dates.SepC, ['F','M']],
+			[dates.SepE, ['F','M']],
+			[dates.NovD, ['F','M']],
+			[dates.NovF, ['F','M']],
 		],
-		"japanese": [
-			[dates.Jan, ['F','M']],
-			[dates.May, ['F','M']],
-			[dates.Jul, ['F','M']],
-			[dates.Sep, ['F','M']],
-			[dates.Nov, ['F','M']],
+		'japanese': [ // 1de2b69f
+			// adding on top of default
+				// ignore short + long: tested: adds nothing
+				// note we're not testing every weekday per month; just using base gregory dates
+			[dates.JanE, ['F','M']],
+			[dates.JanG, ['F','M']],
+			[dates.MayA, ['F','M']],
+			[dates.MayM, ['F','M']],
+			[dates.JulF, ['F','M']],
+			[dates.JulH, ['F','M']],
+			[dates.SepC, ['F','M']],
+			[dates.SepE, ['F','M']],
+			[dates.NovD, ['F','M']],
+			[dates.NovF, ['F','M']],
 		],
+		// other calendars add nothing: tested:
+			// buddhist, chinese, coptic, dangi, ethioaa, hebrew, indian, 
+			// islamic-civil, islamic-tbla, islamic-umalqura, iso8601, persian, roc
+			// note we're not testing every weekday per month; just using base gregory dates
 	}
 
 	// matches
 	let testsMin = {
-		// 10 tests over 5 dates + 3 calendars with 3 options (use as few combos of options as possible)
-			// this is pretty much it: can't inmprove and seems to always cover everything
-		"default": [
-			[dates.Jan, ["ML","SF"]],
-			[dates.May, ["FM"]],
-			[dates.Jul, ["LS","ML"]],
-			[dates.Sep, ["FM","SF"]],
-			[dates.Nov, ["FM"]],
+		// get minimum as we add each calendar
+			// then once done, see if we can reduce anything from previous calendars
+		'default': [
+			// this is pretty much it for gregory: can't improve and seems to always cover everything
+			[dates.JanE, ['FM','ML']],
+			[dates.JanG, ['FM','ML']],
+			//[dates.MayA, ['FM']], // we can drop May now we have ethiopic + japanese minimums
+			//[dates.MayM, ['FM']],
+			[dates.JulF, ['FM','ML']],
+			[dates.JulH, ['FM','ML']],
+			[dates.SepC, ['FM','SF']],
+			[dates.SepE, ['FM','SF']],
+			//[dates.NovD, ['FM','ML']], // we can drop Nov 'FM' now we have ethiopic + japanese minimums
+			//[dates.NovF, ['FM','ML']],
+			[dates.NovD, ['ML']],
+			[dates.NovF, ['ML']],
 		],
-		"ethiopic": [
-			[dates.Jan, ["FM"]],
+		'ethiopic': [
+			// note: FM or MF combos don't cut it
+			// looks like we need 1xF and 1xM across any dates(s): let's keep it simple with a single date
+			[dates.JanE, ['F','M']],
 		],
-		"japanese": [
-			[dates.Jan, ["FM"]],
-			[dates.Sep, ["ML"]],
+		'japanese': [
+			// looks like this is all we need
+			[dates.SepC, ['M']],
+			[dates.NovD, ['M']], // required for blink 147
 		],
 	}
+	//testsMin = {}
 
-	let tests = method == "all" ? testsAll : testsMin
-
+	let tests = 'all' == method ? testsAll : testsMin
 	let oConst = {}
 	oData = {}
+
+	let oOptions = {
+		'F': 'full',
+		'M': 'medium',
+		'L': 'long',
+		'S': 'short',
+		'FL': 'full_long',
+		'FM': 'full_medium',
+		'FS': 'full_short',
+		'LF': 'long_full',
+		'LS': 'long_short',
+		'LM': 'long_medium',
+		'MF': 'medium_full',
+		'ML': 'medium_long',
+		'MS': 'medium_short',
+		'SF': 'short_full',
+		'SL': 'short_long',
+		'SM': 'short_medium',
+	}
 
 	//aLocales = ['en','fr']
 	try {
@@ -330,12 +690,12 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			Object.keys(tests).sort().forEach(function(cal) {
 				let src = cal
 				// calendar in options really slows this down
-				if (method == "all") {
+				if ('all' == method) {
 					if ('default' == cal) {
-						try {oConst.DaF = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
-						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
-						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+						try {oConst.DaF = Intl.DateTimeFormat(code, {dateStyle: 'full', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: 'medium', timeStyle: 'medium', timeZone: tz})} catch(e) {}
+						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: 'long', timeStyle: 'long', timeZone: tz})} catch(e) {}
+						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: 'short', timeStyle: 'short', timeZone: tz})} catch(e) {}
 						// add calendar default name for visual info: not required for entropy
 						//cal += '-'+ oConst.DaF.resolvedOptions().calendar
 						/* 
@@ -344,30 +704,37 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 							ckb-ir, fa, fa-af, lrc, msn, ps, uz-arab = persian
 						*/
 					} else {
-						try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
-						if ('japanese' == cal) {
-							try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						}
+						try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'full', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'medium', timeStyle: 'medium', timeZone: tz})} catch(e) {}
+						try {oConst.DaL = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'long', timeStyle: 'long', timeZone: tz})} catch(e) {}
+						try {oConst.DaS = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'short', timeStyle: 'short', timeZone: tz})} catch(e) {}
 					}
 				} else {
 					if ('default' == cal) {
 						/* debugging
-						try {oConst.DaF = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
-						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
-						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+						try {oConst.DaF = Intl.DateTimeFormat(code, {dateStyle: 'full', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: 'long', timeStyle: 'long', timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: 'medium', timeStyle: 'medium', timeZone: tz})} catch(e) {}
+						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: 'short', timeStyle: 'short', timeZone: tz})} catch(e) {}
+						try {oConst.DaLS = Intl.DateTimeFormat(code, {dateStyle: 'long', timeStyle: 'short', timeZone: tz})} catch(e) {}
+						try {oConst.DaMS = Intl.DateTimeFormat(code, {dateStyle: 'medium', timeStyle: 'short', timeZone: tz})} catch(e) {}
+						try {oConst.DaFL = Intl.DateTimeFormat(code, {dateStyle: 'full', timeStyle: 'long', timeZone: tz})} catch(e) {}
+						try {oConst.DaLF = Intl.DateTimeFormat(code, {dateStyle: 'long', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						try {oConst.DaSL = Intl.DateTimeFormat(code, {dateStyle: 'short', timeStyle: 'long', timeZone: tz})} catch(e) {}
 						//*/
-						try {oConst.DaFM = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						try {oConst.DaLS = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "short", timeZone: tz})} catch(e) {}
-						try {oConst.DaML = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
-						try {oConst.DaSF = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
+						try {oConst.DaFM = Intl.DateTimeFormat(code, {dateStyle: 'full', timeStyle: 'medium', timeZone: tz})} catch(e) {}
+						try {oConst.DaML = Intl.DateTimeFormat(code, {dateStyle: 'medium', timeStyle: 'long', timeZone: tz})} catch(e) {}
+						try {oConst.DaSF = Intl.DateTimeFormat(code, {dateStyle: 'short', timeStyle: 'full', timeZone: tz})} catch(e) {}
 						// add calendar default name for visual info: not required for entropy
 						//cal += '-'+ oConst.DaFM.resolvedOptions().calendar
 					} else {
-						try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
-						try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
+						try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'full', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'medium', timeStyle: 'medium', timeZone: tz})} catch(e) {}
+
+						//try {oConst.DaMF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'medium', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						//try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'full', timeStyle: 'medium', timeZone: tz})} catch(e) {}
+						//try {oConst.DaMF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'medium', timeStyle: 'full', timeZone: tz})} catch(e) {}
+						//try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: 'medium', timeStyle: 'long', timeZone: tz})} catch(e) {}
 					}
 				}
 				oTempData[cal] = {}
@@ -377,13 +744,14 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 					let date = item[0]
 					let aStyles = item[1]
 					aStyles.forEach(function(opt) {
-						if (oTempData[cal][opt] == undefined) {oTempData[cal][opt] = []}
+						let k = oOptions[opt] // match TZP with friendly names
+						if (oTempData[cal][k] == undefined) {oTempData[cal][k] = []}
 						let constructor = 'Da'+ opt
 						let formatter = oConst[constructor]
 						try {
-							oTempData[cal][opt].push(formatter.format(date))
+							oTempData[cal][k].push(formatter.format(date))
 						} catch(e) {
-							oTempData[cal][opt].push('error')
+							oTempData[cal][k].push('error')
 						}
 					})
 				})
@@ -393,44 +761,32 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			let hash = mini(oTempData)
 			if (oData[hash] == undefined) {
 				oData[hash] = {}
-				oData[hash]["locales"] = [code]
-				oData[hash]["data"] = {}
+				oData[hash]['locales'] = [code]
+				oData[hash]['data'] = {}
 				for (const k of Object.keys(oTempData).sort()) {
-					oData[hash]["data"][k] = oTempData[k]
+					oData[hash]['data'][k] = oTempData[k]
 				}
 			} else {
-				oData[hash]["locales"].push(code)
+				oData[hash]['locales'].push(code)
 			}
 		})
 		// perf
 		if (!isAuto) {
-			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +' ms'
 			//console.log(oData)
-		}
-
-		let oOptions = {
-			"F": "full",
-			"M": "medium",
-			"L": "long",
-			"S": "short",
-			"FM": "full_medium",
-			"LS": "long_short",
-			"ML": "medium_long",
-			"SF": "short_full",
 		}
 
 		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oData)) {
-			localeGroups.push(oData[k]["locales"])
-			let localeCount = oData[k]["locales"].length
+			localeGroups.push(oData[k]['locales'])
+			let localeCount = oData[k]['locales'].length
 			if (!isAuto) {
-				let str = ""
-				for (const p of Object.keys(oData[k]["data"])) {
-					str += s14 + p +": "+ sc
-					for (const i of Object.keys(oData[k]["data"][p]).sort()) {
-						let option = (oOptions[i] !== undefined ? oOptions[i] : i.toLowerCase())
-						let linedata = "<li class='dates'>"+ oData[k]["data"][p][i].join("</li><li class='dates'>") + "</li>"
-						str += "<li>"+ s16 + option +": "+ sc + linedata +"</li>"
+				let str = ''
+				for (const p of Object.keys(oData[k]['data'])) {
+					str += s14 + p +': '+ sc
+					for (const style of Object.keys(oData[k]['data'][p]).sort()) {
+						let linedata = "<li class='dates'>"+ oData[k]["data"][p][style].join("</li><li class='dates'>") + "</li>"
+						str += "<li>"+ s16 + style.toLowerCase() +": "+ sc + linedata +"</li>"
 					}
 				}
 				displaylist.push(
@@ -442,12 +798,12 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 		}
 
 		// hashes + btns
-		let resultsBtn = "", localesBtn = ""
+		let resultsBtn = '', localesBtn = ''
 		localeGroups.sort()
 		if (!isAuto) {
-			sDetail["results"] = oData
+			sDetail['results'] = oData
 			resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
-			sDetail["locales"] = localeGroups
+			sDetail['locales'] = localeGroups
 			localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
 		}
 		let resultsHash = mini(oData)
@@ -462,11 +818,11 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 		//*/
 
 		// notations
-		let localesMatch = ""
-		if (method == "all") {
+		let localesMatch = ''
+		if ('all' == method) {
 			localesHashAll = localesHash
 			// don't notate anything: the numbers can change depending on your timezone
-		} else if (method == "min") {
+		} else if ('min' == method) {
 			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 
@@ -475,7 +831,7 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 				tzData[tz] = {}
 			}
 			let buckets = localeGroups.length
-			if (method == "all") {
+			if ('all' == method) {
 				if (isMax == undefined) {
 					isMax = buckets
 					isMin = buckets
@@ -489,17 +845,15 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 
 		if (!isAuto) {
 			// display
-			let display = s8 +"timeZone: "+ sc + tz
-				+ spacer + s4 + localeGroups.length + sc +" from "+ s4 + aLocales.length + sc
-				+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
-				+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
-			dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+			let display = s8 +'timeZone: '+ sc + tz
+				+ spacer + s4 + localeGroups.length + sc +' from '+ s4 + aLocales.length + sc
+				+ spacer + s16 +'results: '+ sc + resultsHash +' ' + resultsBtn +'<br>'
+				+ s12 +'locales: '+ sc + localesHash +' '+ localesBtn + localesMatch + spacer
+			dom.results.innerHTML = display + '<br>' + displaylist.join('<br>')
 		}
-
 		return resolve()
-
 	} catch(e) {
-		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+		dom.results.innerHTML = s4 + e.name +': '+ sc + e.message
 		return resolve()
 	}
 })
@@ -509,53 +863,55 @@ function run_summary() {
 	isAuto = false
 	let aCheck = []
 	for (const k of Object.keys(tzData).sort()) {
-		aCheck.push(k +": "+ tzData[k].all[0])
+		aCheck.push(k +': '+ tzData[k].all[0])
 		if (tzData[k].min == undefined) {
-			oCheck["missing"].push(k)
+			oCheck['missing'].push(k)
 		} else {
-			let strAll = tzData[k]["all"].join(", ")
-			let strMin = tzData[k]["min"].join(", ")
+			let strAll = tzData[k]['all'].join(', ')
+			let strMin = tzData[k]['min'].join(', ')
 			if (strAll == strMin) {
-				oCheck["match"].push(k +": " + strAll)
+				oCheck['match'].push(k +': ' + strAll)
 			} else {
-				strAll = s14 + tzData[k]["all"][0] + sc +" ["+ tzData[k]["all"][1] +"]"
-				strMin = s14 + tzData[k]["min"][0] + sc +" ["+ tzData[k]["min"][1] +"]"
-				oCheck["mismatch"].push(k +": "+ strAll +" vs " + strMin)
+				strAll = s14 + tzData[k]['all'][0] + sc +' ['+ tzData[k]['all'][1] +']'
+				strMin = s14 + tzData[k]['min'][0] + sc +' ['+ tzData[k]['min'][1] +']'
+				oCheck['mismatch'].push(k +': '+ strAll +' vs ' + strMin)
 			}
 		}
 	}
-	oCheck["max"] = isMax
-	oCheck["min"] = isMin
+	oCheck['max'] = isMax
+	oCheck['min'] = isMin
 
 	let display = []
-	let count = oCheck["match"].length
+	let count = oCheck['match'].length
 	let expected = aTZ.length
-	display.push(s14 +"MATCH: "+ sc + count +"/"+ expected)
-	count = oCheck["missing"].length
-	if (oCheck["missing"].length) {
-		display.push("<br>" + s14 +"MISSING: "+ sc + count +"<br>")
-		display.push(oCheck["missing"].join("<br>"))
+	display.push(s14 +'MATCH: '+ sc + count +'/'+ expected)
+	count = oCheck['missing'].length
+	if (oCheck['missing'].length) {
+		display.push('<br>' + s14 +'MISSING: '+ sc + count +'<br>')
+		display.push(oCheck['missing'].join('<br>'))
 	}
-	count = oCheck["mismatch"].length
-	if (oCheck["mismatch"].length) {
-		display.push("<br>" + s14 +"MISMATCH: "+ sc + count +"<br>")
-		display.push(oCheck["mismatch"].join("<br>"))
+	count = oCheck['mismatch'].length
+	if (oCheck['mismatch'].length) {
+		display.push('<br>' + s14 +'MISMATCH: '+ sc + count +'<br>')
+		display.push(oCheck['mismatch'].join('<br>'))
 	}
-	display.push("<br>" + s14 +"RANGE: "+ sc + isMin +" - "+ isMax)
-	dom.results.innerHTML = s16 + "ALL vs MIN"  + sc + spacer
-		+ display.join("<br>")
-		+ spacer +"<hr><br>"+ s16 +"ENTROPY:"+ sc +" (number of locale results per timezone)" + sc + spacer + aCheck.join("<br>") + spacer
+	display.push('<br>' + s14 +'RANGE: '+ sc + isMin +' - '+ isMax)
+	dom.results.innerHTML = s16 + 'ALL vs MIN'  + sc + spacer
+		+ display.join('<br>')
+		+ spacer +'<hr><br>'+ s16 +'ENTROPY:'+ sc +' (number of locale results per timezone)' + sc
+			+ ' '+ mini(aCheck) + spacer + aCheck.join('<br>') + spacer
 	console.log(oCheck)
+	console.log(mini(aCheck), '\n', aCheck)
 }
 
 const run_both = (tz) => new Promise(resolve => {
 	setTimeout(function(){
 		Promise.all([
-			run_main("all", tz)
+			run_main('all', tz)
 		]).then(function(){
 			setTimeout(function(){
 				Promise.all([
-					run_main("min", tz)
+					run_main('min', tz)
 				]).then(function(){
 					return resolve()
 				})
@@ -570,19 +926,19 @@ function run_all() {
 	// reset buttons
 	setBtn()
 	// clear displays
-	dom.perf = ""
-	dom.results = ""
+	dom.perf = ''
+	dom.results = ''
 	// reset data
-	oCheck = {"match": [], "max": 0, "min": 0, "mismatch": [], "missing": [] }
+	oCheck = {'match': [], 'max': 0, 'min': 0, 'mismatch': [], 'missing': [] }
 	tzData = {}
 	isMax = undefined
 	isMin = undefined
 
-	// speed up tesys by using a hardcoded "all"
+	// speed up tesys by using a hardcoded 'all'
 	if (Object.keys(tzDataAll).length) {
 		for (const k of Object.keys(tzDataAll).sort()) {
 			tzData[k] = {}
-			tzData[k]["all"] = tzDataAll[k]["all"]
+			tzData[k]['all'] = tzDataAll[k]['all']
 		}
 	}
 	// loop timezones
@@ -604,16 +960,16 @@ function run(method) {
 		return
 	}
 	if (isSupported) {
-		if (method == "next") {
-			method = "all"
+		if (method == 'next') {
+			method = 'all'
 			let target = dom.timezones
 			target.selectedIndex++
-			if (target.value == "") {target.selectedIndex++} // end of list, return to top
+			if (target.value == '') {target.selectedIndex++} // end of list, return to top
 		}
 		//reset
 		setBtn(method)
-		dom.perf = ""
-		dom.results = ""
+		dom.perf = ''
+		dom.results = ''
 		// delay so users see change and allow paint
 		setTimeout(function() {
 			run_main(method)
@@ -623,16 +979,16 @@ function run(method) {
 
 function setBtn(method) {
 	// reset btns
-	let items = document.getElementsByClassName("btn8")
+	let items = document.getElementsByClassName('btn8')
 	for (let i=0; i < items.length; i++) {
-		items[i].classList.add("btn4")
-		items[i].classList.remove("btn8")
+		items[i].classList.add('btn4')
+		items[i].classList.remove('btn8')
 	}
 	if (!isAuto) {
 		// set btn
-		let el = document.getElementById("b"+ method)
-		el.classList.add("btn8")
-		el.classList.remove("btn4")
+		let el = document.getElementById('b'+ method)
+		el.classList.add('btn8')
+		el.classList.remove('btn4')
 	}
 }
 
@@ -644,149 +1000,149 @@ Promise.all([
 
 	try {
 		// pointless if we can't use the feature being tested: FF58+
-		let formatF = new Intl.DateTimeFormat('en', {dateStyle: "full", timeStyle: "full"})
-		let formatS = new Intl.DateTimeFormat('en', {dateStyle: "short", timeStyle: "short"})
-		let testDate = new Date("January 5, 2024")
+		let formatF = new Intl.DateTimeFormat('en', {dateStyle: 'full', timeStyle: 'full'})
+		let formatS = new Intl.DateTimeFormat('en', {dateStyle: 'short', timeStyle: 'short'})
+		let testDate = new Date('January 5, 2024')
 		if (formatF.format(testDate) !== formatS.format(testDate)) {
 			isSupported = true
 		} else {
-			dom.results.innerHTML = s4 + "dateStyle | timeStyle:" + sc + " not supported"
+			dom.results.innerHTML = s4 + 'dateStyle | timeStyle:' + sc + ' not supported'
 		}
 	} catch(e) {
-		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+		dom.results.innerHTML = s4 + e.name +':' + sc +' '+ e.message
 	}
 	// add additional locales to core locales for this test
 	let aListExtra = [
-"af-na,afrikaans (namibia)",
-"ar-ae,arabic (united arabic emirates)",
-"ar-dz,arabic (algeria)",
-"ar-il,arabic (israel)",
-"ar-iq,arabic (iraq)",
-"ar-km,arabic (cosmoros)",
-"ar-ma,arabic (morocco)",
-"ar-mr,arabic (mauritania)",
-"ar-sa,arabic (saudi arabia)",
-"az-cyrl,azerbaijani (cyrillic)",
-"bn-in,bengali (india)",
-"bo-in,tibetan (india)",
-"bs-cyrl,bosnian (cyrillic)",
-"ckb-ir,central kurdish (iran)",
-"de-at,german (austria)",
-"de-ch,german (switzerland)",
-"ee-tg,éwé (togo)",
-"en-001,english",
-"en-150,english (europe)",
-"en-ae,english (united arab emirates)",
-"en-au,english (australia)",
-"en-be,english (belgium)",
-"en-bi,english (burundi)",
-"en-bw,english (botswana)",
-"en-bz,english (belize)",
-"en-ca,english (canada)",
-"en-ch,english (switzerland)",
-"en-dk,english (denmark)",
-"en-er,english (eritrea)",
-"en-fi,english (finland)",
-"en-gb,english (united kingdom)",
-"en-gu,english (guam)",
-"en-gy,english (guyana)",
-"en-hk,english (hong kong)",
-"en-ie,english (ireland)",
-"en-il,english (israel)",
-"en-in,english (india)",
-"en-ke,english (kenya)",
-"en-mh,english (marshall islands)",
-"en-mo,english (macau)",
-"en-mt,english (malta)",
-"en-my,english (malaysia)",
-"en-nz,english (new zealand)",
-"en-pk,english (pakistan)",
-"en-se,english (sweden)",
-"en-sg,english (singapore)",
-"en-za,english (south africa)",
-"en-zw,english (zimbabwe)",
-"es-ar,spanish (argentina)",
+'af-na,afrikaans (namibia)',
+'ar-ae,arabic (united arabic emirates)',
+'ar-dz,arabic (algeria)',
+'ar-il,arabic (israel)',
+'ar-iq,arabic (iraq)',
+'ar-km,arabic (cosmoros)',
+'ar-ma,arabic (morocco)',
+'ar-mr,arabic (mauritania)',
+'ar-sa,arabic (saudi arabia)',
+'az-cyrl,azerbaijani (cyrillic)',
+'bn-in,bengali (india)',
+'bo-in,tibetan (india)',
+'bs-cyrl,bosnian (cyrillic)',
+'ckb-ir,central kurdish (iran)',
+'de-at,german (austria)',
+'de-ch,german (switzerland)',
+'ee-tg,éwé (togo)',
+'en-001,english',
+'en-150,english (europe)',
+'en-ae,english (united arab emirates)',
+'en-au,english (australia)',
+'en-be,english (belgium)',
+'en-bi,english (burundi)',
+'en-bw,english (botswana)',
+'en-bz,english (belize)',
+'en-ca,english (canada)',
+'en-ch,english (switzerland)',
+'en-dk,english (denmark)',
+'en-er,english (eritrea)',
+'en-fi,english (finland)',
+'en-gb,english (united kingdom)',
+'en-gu,english (guam)',
+'en-gy,english (guyana)',
+'en-hk,english (hong kong)',
+'en-ie,english (ireland)',
+'en-il,english (israel)',
+'en-in,english (india)',
+'en-ke,english (kenya)',
+'en-mh,english (marshall islands)',
+'en-mo,english (macau)',
+'en-mt,english (malta)',
+'en-my,english (malaysia)',
+'en-nz,english (new zealand)',
+'en-pk,english (pakistan)',
+'en-se,english (sweden)',
+'en-sg,english (singapore)',
+'en-za,english (south africa)',
+'en-zw,english (zimbabwe)',
+'es-ar,spanish (argentina)',
 'es-419,spanish (latin america and the caribbean)',
-"es-bo,spanish (bolivia)",
-"es-br,spanish (brazil)",
-"es-cl,spanish (chile)",
-"es-co,spanish (colombia)",
-"es-do,spanish (dominican republic)",
-"es-ec,spanish (ecuador)",
-"es-gt,spanish (guatemala)",
-"es-hn,spanish (honduras)",
-"es-mx,spanish (mexico)",
-"es-pa,spanish (panama)",
-"es-pe,spanish (peru)",
-"es-ph,spanish (philippines)",
-"es-py,spanish (paraguay)",
-"es-us,spanish (united states)",
-"es-uy,spanish (uruguay)",
-"es-ve,spanish (venezuela)",
-"fa-af,persian (afghanistan)",
-"ff-adlm,fulah (adlam)",
-"ff-adlm-gh,fulah (adlam ghana)",
-"ff-gh,fulah (ghana)",
-"ff-mr,fulah (mauritania)",
-"fr-be,french (belgium)",
-"fr-ca,french (canada)",
-"fr-ch,french (switzerland)",
-"fr-dj,french (djibouti)",
-"fr-gf,french (french guiana)",
-"fr-ma,french (morocco)",
-"fr-ml,french (mali)",
-"ha-gh,hausa (ghana)",
-"hi-latn,hindi (latin)",
-"hr-ba,croatian (bosnia & herzegovina)",
-"it-ch,italian (switzerland)",
+'es-bo,spanish (bolivia)',
+'es-br,spanish (brazil)',
+'es-cl,spanish (chile)',
+'es-co,spanish (colombia)',
+'es-do,spanish (dominican republic)',
+'es-ec,spanish (ecuador)',
+'es-gt,spanish (guatemala)',
+'es-hn,spanish (honduras)',
+'es-mx,spanish (mexico)',
+'es-pa,spanish (panama)',
+'es-pe,spanish (peru)',
+'es-ph,spanish (philippines)',
+'es-py,spanish (paraguay)',
+'es-us,spanish (united states)',
+'es-uy,spanish (uruguay)',
+'es-ve,spanish (venezuela)',
+'fa-af,persian (afghanistan)',
+'ff-adlm,fulah (adlam)',
+'ff-adlm-gh,fulah (adlam ghana)',
+'ff-gh,fulah (ghana)',
+'ff-mr,fulah (mauritania)',
+'fr-be,french (belgium)',
+'fr-ca,french (canada)',
+'fr-ch,french (switzerland)',
+'fr-dj,french (djibouti)',
+'fr-gf,french (french guiana)',
+'fr-ma,french (morocco)',
+'fr-ml,french (mali)',
+'ha-gh,hausa (ghana)',
+'hi-latn,hindi (latin)',
+'hr-ba,croatian (bosnia & herzegovina)',
+'it-ch,italian (switzerland)',
 'kk-cn,kazakh (china)',
-"ko-kp,korean (north korea)",
+'ko-kp,korean (north korea)',
 'kok-in,konkani (india)',
 'kok-latn,konkani (latin)',
-"ks-deva,kashmiri (devanagari)",
+'ks-deva,kashmiri (devanagari)',
 'kxv-telu,kuvi (telugu)',
-"lrc-iq,northern luri (iraq)",
-"ms-bn,malay (brunei)",
-"ms-id,malay (indonesia)",
-"ne-in,nepali (india)",
-"nl-be,dutch (belgium)",
-"nl-sr,dutch (suriname)",
-"om-ke,oromo (kenya)",
-"pa-arab,punjabi (arabic)",
-"ps-pk,pashto (pakistan)",
-"pt-ao,portuguese (angola)",
-"pt-ch,portuguese (switzerland)",
-"pt-mo,portuguese (macau)",
-"qu-bo,quechua (bolivia)",
-"qu-ec,quechua (ecuador)",
-"sd-deva,sindhi (devanagari)",
-"se-fi,northern sami (finland)",
-"shi-latn,tachelhit (latin)",
-"so-ke,somali (kenya)",
-"sq-mk,albanian (macedonia)",
-"sr-ba,serbian (bosnia & herzegovina)",
-"sr-cyrl-me,serbian (cyrillic montenegro)",
-"sr-cyrl-xk,serbian (cyrillic kosovo)",
-"sr-latn,serbian (latin)",
-"sr-latn-ba,serbian (latin bosnia & herzegovina)",
-"sr-latn-me,serbian (latin montenegro)",
-"sr-latn-xk,serbian (latin kosovo)",
+'lrc-iq,northern luri (iraq)',
+'ms-bn,malay (brunei)',
+'ms-id,malay (indonesia)',
+'ne-in,nepali (india)',
+'nl-be,dutch (belgium)',
+'nl-sr,dutch (suriname)',
+'om-ke,oromo (kenya)',
+'pa-arab,punjabi (arabic)',
+'ps-pk,pashto (pakistan)',
+'pt-ao,portuguese (angola)',
+'pt-ch,portuguese (switzerland)',
+'pt-mo,portuguese (macau)',
+'qu-bo,quechua (bolivia)',
+'qu-ec,quechua (ecuador)',
+'sd-deva,sindhi (devanagari)',
+'se-fi,northern sami (finland)',
+'shi-latn,tachelhit (latin)',
+'so-ke,somali (kenya)',
+'sq-mk,albanian (macedonia)',
+'sr-ba,serbian (bosnia & herzegovina)',
+'sr-cyrl-me,serbian (cyrillic montenegro)',
+'sr-cyrl-xk,serbian (cyrillic kosovo)',
+'sr-latn,serbian (latin)',
+'sr-latn-ba,serbian (latin bosnia & herzegovina)',
+'sr-latn-me,serbian (latin montenegro)',
+'sr-latn-xk,serbian (latin kosovo)',
 'st-ls,southern sotho',
 'sv-ax,swedish (åland islands)',
 'sv-fi,swedish (finland)',
-"sw-ke,swahili (kenya)",
-"ta-lk,tamil (sri lanka)",
-"ta-my,tamil (malaysia)",
-"ti-er,tigrinya (eritrea)",
-"tr-cy,turkish (cyprus)",
-"ur-in,urdu (india)",
-"uz-arab,uzbek (arabic)",
-"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
-"vai-latn,vai (latin)",
-"yo-bj,yoruba (benin)",
-"yue-cn,cantonese (china)",
-"zh-hans-hk,chinese (simplified hong kong)",
-"zh-hans-mo,chinese (simplified macau)",
+'sw-ke,swahili (kenya)',
+'ta-lk,tamil (sri lanka)',
+'ta-my,tamil (malaysia)',
+'ti-er,tigrinya (eritrea)',
+'tr-cy,turkish (cyprus)',
+'ur-in,urdu (india)',
+'uz-arab,uzbek (arabic)',
+'uz-cyrl-uz,uzbek (cyrillic uzbekistan)',
+'vai-latn,vai (latin)',
+'yo-bj,yoruba (benin)',
+'yue-cn,cantonese (china)',
+'zh-hans-hk,chinese (simplified hong kong)',
+'zh-hans-mo,chinese (simplified macau)',
 'zh-my,chinese (malaysia)',
 		// blink
 		'ar-bh,arabic (bahrain)',
@@ -794,14 +1150,15 @@ Promise.all([
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	//list = ['ar-sa,arabic (saudi arabia)','en,english','fa,persian','th,thai',]
-	//list = ['en-US,english (united states)']
+	//list = ['en,english']
 	//list = ['pt-ao','pt-ch'] // e.g. split by europe/vatican
 
 	legend()
 	if (isSupported) {
-		setBtn("all")
+		set_dates()
+		setBtn('all')
 		setTimeout(function() {
-			run_main("all")
+			run_main('all')
 		}, 100)
 	}
 })
