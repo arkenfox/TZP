@@ -195,12 +195,13 @@ let languagesSupported = {},
 	isTimeZoneValue,
 	// intl.locale
 	oIntlLocale = {},
-	oIntlLocaleDates = {},
 	oIntlLocaleKeys = {},
 	oIntlLocalePerf = {},
-	// intl.dates
+	// intl.date
 	oIntlDate = {},
-	oIntlDateKeys = {}
+	oIntlDateKeys = {},
+	// test dates
+	oIntlDates = {}
 
 // other
 let aDomRect = [true, true, true, true],
