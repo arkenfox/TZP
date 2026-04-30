@@ -1874,7 +1874,6 @@ function get_timezone_offset(METRIC) {
 
 function get_timezone_offsets(METRIC, nowValue, utcValue) {
 	let t0 = nowFn(), notation = tz_red
-
 	let years = [1879, 1952, 1976, 2025]
 	let days = {
 		// to make sure we don't change years or months when a day or two ticks over
@@ -2020,11 +2019,30 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 										'6': [test.getUTCSeconds(), control.getUTCSeconds()],
 										'7': [test.getUTCMilliseconds(), control.getUTCMilliseconds()],
 									}
+									//if (isNow) {console.log(method, oDiffs)}
+									let isMonthChange = oDiffs[2][0] !== oDiffs[2][1]
 									offset = 0, utc = [], time = []
 									for (const k of Object.keys(oDiffs)) {
-										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
 										utc.push(oDiffs[k][1]) // control
 										time.push(oDiffs[k][0]) // test
+										if (isNow && isMonthChange) {
+											// only 'now' can roll over months - all the others are hardcoded middle of the month
+											// if the months differ, ignore years and months and adjust days
+											// this assumes extensions aren't altering datetimes by whole months/years
+												// in which case we would not detect a difference
+											if ('1' !== k && '2' !== k) {
+												if ('3' == k) {
+													let dayA = oDiffs[k][0], dayB = oDiffs[k][1]
+													if (dayA > dayB) {dayB += dayA} else {dayA += dayB}
+													offset += (oMultiplier[k] * (dayA - dayB))
+													//console.log('day', dayA, '('+oDiffs[k][0]+')', dayB, '('+oDiffs[k][1]+')', '|', dayA - dayB, '|', oMultiplier[k] * (dayA - dayB))
+												} else {
+													offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+												}
+											}
+										} else {
+											offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+										}
 									}
 									utc = utc.join(' '); time = time.join(' ')
 								} else if ('components_utc' == method) {
@@ -2037,12 +2055,27 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 										'6': [test.getSeconds(), control.getSeconds()],
 										'7': [test.getMilliseconds(), control.getMilliseconds()],
 									}
+									//if (isNow) {console.log(method, oDiffs)}
+									let isMonthChange = oDiffs[2][0] !== oDiffs[2][1]
 									offset = 0, utc = [], time = []
 									for (const k of Object.keys(oDiffs)) {
 										// this is reversed: we subtract time from utc
-										offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
 										utc.push(oDiffs[k][0]) // reversed so we use test
 										time.push(oDiffs[k][1]) // control
+										if (isNow && isMonthChange) {
+											if ('1' !== k && '2' !== k) {
+												if ('3' == k) {
+													let dayA = oDiffs[k][0], dayB = oDiffs[k][1]
+													if (dayA > dayB) {dayB += dayA} else {dayA += dayB}
+													offset += (oMultiplier[k] * (dayA - dayB))
+													//console.log('day', dayA, '('+oDiffs[k][0]+')', dayB, '('+oDiffs[k][1]+')', '|', dayA - dayB, '|', oMultiplier[k] * (dayA - dayB))
+												} else {
+													offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+												}
+											}
+										} else {
+											offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
+										}
 									}
 									utc = utc.join(' '); time = time.join(' ')
 								}
