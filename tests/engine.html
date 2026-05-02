@@ -400,6 +400,7 @@ function get_iframe_props(num1, num2, title) {
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
 	// FYI: don't use MIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
 
+	if (isVer > 150) { listU = listU.filter(x => !["Serial"].includes(x)) } // FF151+ serial
 	if (isVer > 121) { listU = listU.filter(x => !["WakeLock"].includes(x)) } // FF122+ dom.screenwakelock.enabled: 1589554
 	if (isVer > 92) { listU = listU.filter(x => !["Lock"].includes(x)) } // FF93+ "dom.weblocks.enabled": 1739233: FF96+ Lock
 
@@ -1242,6 +1243,7 @@ function get_nav_keys(num1, num2, title) {
 			"webkitGetUserMedia","webkitPersistentStorage","webkitTemporaryStorage","xr","SharedWorker","Worker"]
 		// FYI: don't use requestMIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
 
+		if (isVer > 121) { aNot = aNot.filter(x => !["serial"].includes(x)) } // FF151+ serial
 		if (isVer > 121) { aNot = aNot.filter(x => !["wakeLock"].includes(x)) } // FF122+ dom.screenwakelock.enabled 1589554
 		if (isVer > 119) { aNot = aNot.filter(x => !["userActivation"].includes(x)) } // 1791079: FF120+
 		if (isVer > 95) {aNot = aNot.filter(x => !["canShare"].includes(x)) } // 1666203: FF96+ canShare
