@@ -727,11 +727,8 @@ function run() {
 
 		// gecko + webkit (not seen in blink)
 		code = 54
-		rec(typeof onanimationcancel, "onanimationcancel", code, "object")
 		rec(typeof oncopy, "oncopy", code, "object") // FF110+
 		rec(typeof oncut, "oncut", code, "object") // FF110+
-		rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
-		rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
 		rec(typeof onpaste, "onpaste", code, "object") // FF110+
 
 		// I: IGNORE: confirmed common in blink, gecko, webkit
@@ -787,6 +784,7 @@ function run() {
 		rec(typeof navigator, "navigator", code, "object")
 		rec(typeof onabort, "onabort", code, "object")
 		rec(typeof onafterprint, "onafterprint", code, "object")
+		rec(typeof onanimationcancel, "onanimationcancel", code, "object")
 		rec(typeof onanimationend, "onanimationend", code, "object")
 		rec(typeof onanimationiteration, "onanimationiteration", code, "object")
 		rec(typeof onanimationstart, "onanimationstart", code, "object")
@@ -821,6 +819,8 @@ function run() {
 		rec(typeof onerror, "onerror", code, "object")
 		rec(typeof onfocus, "onfocus", code, "object")
 		rec(typeof onformdata, "onformdata", code, "object")
+		rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
+		rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
 		rec(typeof ongotpointercapture, "ongotpointercapture", code, "object")
 		rec(typeof onhashchange, "onhashchange", code, "object")
 		rec(typeof oninput, "oninput", code, "object")
