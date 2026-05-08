@@ -128,7 +128,7 @@ code {
 	padding: 2px 6px; /* top+bottom | left+ right */
 }
 .s67 {
-	fonmt-weight: bold;
+	/*font-weight: bold;*/
 	text-decoration: underline;
 }
 
@@ -294,6 +294,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 	position: absolute;
 	margin: 15px 25px 10px;
 	padding-bottom: 15px;
+	word-break: break-all;
 }
 #overlaybuttons {
 	float: right;

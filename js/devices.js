@@ -203,6 +203,8 @@ function get_device_posture(METRIC) {
 	// note: since this is non-gecko we won't cross check the values match for smarts
 	get_mm('device-posture')
 	get_nav('devicePosture')
+	let hash = mini(oData)
+	if ('46f3ec8b' == hash) {oData = 'undefined'; hash = ''} // just return undefined if alll are undefined
 	addData(7, METRIC, oData, mini(oData))
 	return
 }
