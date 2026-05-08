@@ -2019,7 +2019,6 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 										'6': [test.getUTCSeconds(), control.getUTCSeconds()],
 										'7': [test.getUTCMilliseconds(), control.getUTCMilliseconds()],
 									}
-									//if (isNow) {console.log(method, oDiffs)}
 									let isMonthChange = oDiffs[2][0] !== oDiffs[2][1]
 									offset = 0, utc = [], time = []
 									for (const k of Object.keys(oDiffs)) {
@@ -2028,10 +2027,10 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 										if (isNow && isMonthChange) {
 											// only 'now' can roll over months - all the others are hardcoded middle of the month
 											// if the months differ, ignore years and months and adjust days
-											// this assumes extensions aren't altering datetimes by whole months/years
+											// this assumes extensions aren't altering datetimes by only whole months/years
 												// in which case we would not detect a difference
-											if ('1' !== k && '2' !== k) {
-												if ('3' == k) {
+											if ('1' !== k && '2' !== k) { // ignore years/months
+												if ('3' == k) { // adjust days
 													let dayA = oDiffs[k][0], dayB = oDiffs[k][1]
 													if (dayA > dayB) {dayB += dayA} else {dayA += dayB}
 													offset += (oMultiplier[k] * (dayA - dayB))
@@ -2055,7 +2054,6 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 										'6': [test.getSeconds(), control.getSeconds()],
 										'7': [test.getMilliseconds(), control.getMilliseconds()],
 									}
-									//if (isNow) {console.log(method, oDiffs)}
 									let isMonthChange = oDiffs[2][0] !== oDiffs[2][1]
 									offset = 0, utc = [], time = []
 									for (const k of Object.keys(oDiffs)) {
@@ -2063,12 +2061,11 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 										utc.push(oDiffs[k][0]) // reversed so we use test
 										time.push(oDiffs[k][1]) // control
 										if (isNow && isMonthChange) {
-											if ('1' !== k && '2' !== k) {
-												if ('3' == k) {
+											if ('1' !== k && '2' !== k) { //ignore moths/years
+												if ('3' == k) { // adjust days
 													let dayA = oDiffs[k][0], dayB = oDiffs[k][1]
 													if (dayA > dayB) {dayB += dayA} else {dayA += dayB}
 													offset += (oMultiplier[k] * (dayA - dayB))
-													//console.log('day', dayA, '('+oDiffs[k][0]+')', dayB, '('+oDiffs[k][1]+')', '|', dayA - dayB, '|', oMultiplier[k] * (dayA - dayB))
 												} else {
 													offset += (oMultiplier[k] * (oDiffs[k][0] - oDiffs[k][1]))
 												}
@@ -2324,6 +2321,7 @@ function get_l10n_parsererror_direction(METRIC) {
 		if (!aGood.includes(value)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ value}
 		// notation
 			// since this is just BB (or FF en-US), we know only three locales are rtl: ar, fa, he
+			// 1759577: gecko sets ar, ckb, fa, he, ur
 		if (isLanguageSmart && isLocaleValid) {
 			let aRTL = ['ar','fa','he']
 			let expected = aRTL.includes(isLocaleValue) ? 'rtl' : 'ltr'
