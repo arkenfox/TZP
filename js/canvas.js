@@ -507,7 +507,11 @@ const get_canvas = () => new Promise(resolve => {
 	aCanvas.forEach(function(k){let el = dom['tzpCanvas'+ k]; el.width = sizeW; el.height = sizeH})
 
 	function exit() {
-		console.debug(oData)
+		// data
+		let metric = 'canvas_data'
+		sDetail[isScope][metric] = oData
+		addDisplay(9, metric, addButton(9, metric, 'data'))
+		// fp
 		for (const m of Object.keys(oFP)) {
 			addBoth(9, m, oFP[m].value, '', oFP[m].notation, oFP[m].data)
 		}
