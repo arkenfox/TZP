@@ -27,7 +27,7 @@
 	<div id="tzpLV"></div>
 	<div id="tzpSV"></div>
 	<!-- calc must be outside our tzpBody -->
-  <div id="tzpCalc" class="offscreen"><div id="tzpCalcTarget"></div><div class="tzpCalcContainer"></div></div>
+	<div id="tzpCalc" class="offscreen"><div id="tzpCalcTarget"></div><div class="tzpCalcContainer"></div></div>
 
 	<!-- keep tzpBody first: contains scrollbar but MUST come after tzpLV and tzpSV
 		in order to be able to be able to select and drag non-overlays -->
@@ -36,6 +36,12 @@
 
 	<!--offscreen-->
 	<div class="offscreen">
+		<img id="tzpSrcSet"
+			srcset="03.png 0.3x, 04.png 0.4x, 05.png 0.5x, 06.png 0.6x, 07.png 0.7x, 08.png 0.8x, 09.png 0.9x,
+		10.png 1x, 11.png 1.1x, 12.png 1.2x, 13.png 1.3x, 14.png 1.4x, 15.png 1.5x, 16.png 1.6x, 17.png 1.7x, 18.png 1.8x, 19.png 1.9x,
+		20.png 2x, 21.png 2.1x, 22.png 2.2x, 23.png 2.3x, 24.png 2.4x, 25.png 2.5x, 26.png 2.6x, 27.png 2.7x, 28.png 2.8x, 29.png 2.9x,
+		30.png 3x, 31.png 3.1x, 32.png 3.2x, 33.png 3.3x, 34.png 3.4x, 35.png 3.5x, 36.png 3.6x, 37.png 3.7x, 38.png 3.8x, 39.png 3.9x,
+		40.png 4x"></img>
 		<div id="tzpFS" width=0 height=0></div>
 		<iframe id="tzpInvalidImage" width="100" height="30"></iframe>
 		<iframe id="tzpScaledImage" width="100" height="30"></iframe>
@@ -332,7 +338,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">-moz-device-pixel-ratio<br>-webkit-device-pixel-ratio<br></span></div>
 				&nbsp; *device-pixel-ratio</td><td class="mono">
-			<span class="c" id="pixels_-moz-device-pixel-ratio"></span>
+				<span class="c" id="pixels_-moz-device-pixel-ratio"></span>
 				| <span class="c" id="pixels_-webkit-device-pixel-ratio"></span>
 			</td></tr>
 
@@ -341,8 +347,9 @@
 				<span class="c" id="pixels_devicePixelRatio"></span> | <span class="c" id="pixels_devicePixelRatio_iframe"></span>
 			</td></tr>
 		<tr><td>[border] devicePixelRatio</td><td class="mono"><span class="c" id="devicePixelRatio_border"></span></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range: 0.3 - 4.0</br>step: 0.1</span></div>
+			&nbsp; srcset</td><td class="c mono" id="pixels_devicePixelRatio_srcset"></td></tr>
 		<tr class="A2"><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
-
 		<tr><td colspan="2"></td></tr> <!--space-->
 		<tr><td colspan="2"><span class="normal"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
@@ -754,7 +761,7 @@
 		<tr><td>[solid] getImageData</td><td class="c mono" id="getImageData_solid"></td></tr>
 		<tr><td>isPointInPath</td><td class="c mono" id="isPointInPath"></td></tr>
 		<tr><td>isPointInStroke</td><td class="c mono" id="isPointInStroke"></td></tr>
-		<tr><td>toBlob</td><td class="c mono" id="toBlob"></td></tr>
+		<tr><td>toBlob</td><td class="mono"><span class="c" id="toBlob"></span><div class="btn-right c" id="canvas_data"></div></td></tr>
 		<tr><td>[solid] toBlob</td><td class="c mono" id="toBlob_solid"></td></tr>
 		<tr><td><a class="blue" href="tests/canvasrfp.html" target="blank">[PoC]</a>
 			&nbsp; toDataURL</td><td class="c mono" id="toDataURL"></td></tr>
