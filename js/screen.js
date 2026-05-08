@@ -975,6 +975,22 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		oData[item] = value
 	}
 
+	function get_srcset(item) {
+		let display, value
+		try {
+			let str = dom.tzpSrcSet.currentSrc
+			value = (str.slice(str.length - 6, -4)) * 1
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			value = value/10
+			display = value
+		} catch(e) {
+			display = log_error(1, METRIC +'_'+ item, e), value = zErr
+		}
+		addDisplay(1, METRIC +'_'+ item, display,'', (2 === value ? rfp_green : rfp_red))
+		oData[item] = value
+	}
+
 	// visualViewport scale
 	function get_vv_scale(item) {
 		let value, display
@@ -1006,6 +1022,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 				'dpcm': 75.59054999999998,
 				'dpi': 192.00000000000006,
 				'dppx': 2,
+				'srcset': 2,
 			}
 			let value = results[0][k]
 			oData[k] = value
@@ -1014,6 +1031,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
 		get_dpi_div('dpi_div')
+		get_srcset('devicePixelRatio_srcset')
 		if (isDesktop) {
 			// android: useless, not stable as it is affected by zoom
 			get_vv_scale('visualViewport_scale')
@@ -1053,6 +1071,7 @@ function get_scr_pixels_match(METRIC, oData) {
 			'-webkit-device-pixel-ratio': [dprValue, dprStr],
 			//'devicePixelRatio': it's the control
 			'devicePixelRatio_iframe': [dprValue, dprStr +''],
+			'devicePixelRatio_srcset': [dprValue, dprStr],
 			'dpcm': [dprValue * 96 / 2.54, dprStr +' * 96 / 2.54'],
 			'dpi': [dprValue * 96, dprStr +' * 96'],
 			'dpi_css': [dprValue * 96, dprStr +' * 96'],
@@ -1077,6 +1096,22 @@ function get_scr_pixels_match(METRIC, oData) {
 				oPixels[k]['match'] = testPx
 				if (false === testPx) {isPixelMatch = false}
 				oSummary[testPx].push(k)
+			} else if ('devicePixelRatio_srcset' == k) {
+				let diff = Math.abs(oData[k] - controlPx)
+				oPixels[k].diff = diff
+				let testPx = false
+				if (0 == diff) {
+					testPx = true // exact match
+				} else if (controlPx < 0.3) {testPx = 0.3 == oData[k] // lower bound
+				} else if (controlPx > 4) {testPx = 4 == oData[k] // upper bound
+				} else {
+					//(Math.ceil(controlPx * 10))/10} // round up to the next 0.1
+					// ^ not reliable e.g. at 120% control is 1.2 but srcset is 1.4: diff is 0.10000000000000009
+					// we'll use diff instead
+					if (diff > 0 && diff < 0.11) {testPx = true}
+				}
+				oPixels[k].match = testPx
+				if (false === testPx) {isPixelMatch = false}
 			} else if ('dpcm' == k || 'dpi' == k) {
 				let diff = Math.abs(oData[k] - controlPx)
 				oPixels[k].diff = diff
@@ -1676,7 +1711,7 @@ const outputFD = () => new Promise(resolve => {
 		return resolve()
 	}
 
-	// logo
+	// about:logo: FF152+ 1610528 no longewr web-accessible
 	let wType, hType, w, h, isLogo, isLogoData ='', isWordmark, isWordData =''
 	try {
 		w = dom.tzpAbout.width, h = dom.tzpAbout.height
@@ -1710,12 +1745,12 @@ const outputFD = () => new Promise(resolve => {
 			offscreen		628 x 227 <-- 1st time in a session and wtf ALWAYS THIS in PB windows
 			offscreen		615 x 223 <-- thereafter
 		beta is one line: "Firefox"
-			hidden			300 x 67	
+			hidden			300 x 67
 			offscreen		628 x 140 <-- 1st time in a session and wtf ALWAYS THIS in PB windows
 			offscreen		615 x 137 <-- thereafter
 			but offscreen should be 300 x 67
 
-		note: 1 1sec + pause before testing on gLoad solves stability but keeps the nonm-match
+		note: a 1+ sec pause before testing on gLoad solves stability but keeps the non-match
 		but I don't think this adds anything entropy wise
 		*/
 		isOffscreen = dom.tzpBrand.naturalWidth +' x '+ dom.tzpBrand.naturalHeight
