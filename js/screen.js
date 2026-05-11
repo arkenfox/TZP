@@ -975,6 +975,21 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		oData[item] = value
 	}
 
+	function get_imgset(item) {
+		let display, value
+		try {
+			let target = 'image-set' == item ? dom.tzpImgSet : dom.tzpImgSetWebkit
+			value = target.getBoundingClientRect().height / target.getBoundingClientRect().width
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			display = value
+		} catch(e) {
+			display = log_error(1, METRIC +'_'+ item, e), value = zErr
+		}
+		addDisplay(1, METRIC +'_'+ item, display,'', (value == oMatch[item] ? rfp_green : rfp_red))
+		oData[item] = value
+	}
+
 	function get_srcset(item) {
 		let display, value
 		try {
@@ -987,7 +1002,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		} catch(e) {
 			display = log_error(1, METRIC +'_'+ item, e), value = zErr
 		}
-		addDisplay(1, METRIC +'_'+ item, display,'', (2 === value ? rfp_green : rfp_red))
+		addDisplay(1, METRIC +'_'+ item, display,'', (value == oMatch[item] ? rfp_green : rfp_red))
 		oData[item] = value
 	}
 
@@ -1011,19 +1026,22 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 
 	// run
 	let varDPR, oData = {}
+	let oMatch = {
+		'-moz-device-pixel-ratio': 2,
+		'-webkit-device-pixel-ratio': 2,
+		'-webkit-image-set': 2,
+		'dpcm': 75.59054999999998,
+		'dpi': 192.00000000000006,
+		'dppx': 2,
+		'srcset': 2,
+		'image-set': 2,
+	}
+
 	Promise.all([
 		get_scr_mm('pixels')
 	]).then(function(results){
+		// expected 100% zoom values
 		for (const k of Object.keys(results[0])) {
-			// expected 100% zoom values
-			let oMatch = {
-				'-moz-device-pixel-ratio': 2,
-				'-webkit-device-pixel-ratio': 2,
-				'dpcm': 75.59054999999998,
-				'dpi': 192.00000000000006,
-				'dppx': 2,
-				'srcset': 2,
-			}
 			let value = results[0][k]
 			oData[k] = value
 			addDisplay(1, METRIC +'_'+ k, value,'', (value == oMatch[k] ? rfp_green : rfp_red))
@@ -1031,7 +1049,10 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
 		get_dpi_div('dpi_div')
-		get_srcset('devicePixelRatio_srcset')
+		get_srcset('srcset')
+		get_imgset('image-set'),
+		get_imgset('-webkit-image-set')
+
 		if (isDesktop) {
 			// android: useless, not stable as it is affected by zoom
 			get_vv_scale('visualViewport_scale')
@@ -1069,24 +1090,27 @@ function get_scr_pixels_match(METRIC, oData) {
 		let oControls = {
 			'-moz-device-pixel-ratio': [dprValue, dprStr],
 			'-webkit-device-pixel-ratio': [dprValue, dprStr],
+			'-webkit-image-set': [dprValue, dprStr],
 			//'devicePixelRatio': it's the control
 			'devicePixelRatio_iframe': [dprValue, dprStr +''],
-			'devicePixelRatio_srcset': [dprValue, dprStr],
 			'dpcm': [dprValue * 96 / 2.54, dprStr +' * 96 / 2.54'],
 			'dpi': [dprValue * 96, dprStr +' * 96'],
 			'dpi_css': [dprValue * 96, dprStr +' * 96'],
 			'dppx': [dprValue, dprStr],
+			'image-set': [dprValue, dprStr],
+			'srcset': [dprValue, dprStr],
 		}
 		let oLists = {
 			'-moz-device-pixel-ratio': ['-moz-device-pixel-ratio','max--moz-device-pixel-ratio','min--moz-device-pixel-ratio'],
 			'-webkit-device-pixel-ratio': ['-webkit-device-pixel-ratio','-webkit-max-device-pixel-ratio','-webkit-min-device-pixel-ratio'],
 			'dppx': ['max-resolution','min-resolution','resolution'],
 		}
-		
+
 		// b3e9e3c6 200% zoom dpr 1 === 100% zoom drp 1 with RFP
 		//console.log(mini(oData), oData)
 		for (const k of Object.keys(oData).sort()) {
 			oPixels[k] = {}
+			let isBound
 			if (undefined !== oControls[k]) {
 				controlPx = oControls[k][0]
 				oPixels[k].control = oControls[k]
@@ -1096,22 +1120,34 @@ function get_scr_pixels_match(METRIC, oData) {
 				oPixels[k]['match'] = testPx
 				if (false === testPx) {isPixelMatch = false}
 				oSummary[testPx].push(k)
-			} else if ('devicePixelRatio_srcset' == k) {
+			} else if ('srcset' == k) {
 				let diff = Math.abs(oData[k] - controlPx)
-				oPixels[k].diff = diff
 				let testPx = false
 				if (0 == diff) {
 					testPx = true // exact match
-				} else if (controlPx < 0.3) {testPx = 0.3 == oData[k] // lower bound
-				} else if (controlPx > 4) {testPx = 4 == oData[k] // upper bound
+				} else if (controlPx < 0.3) {testPx = 0.3 == oData[k]; isBound = 'lower' // lower bound
+				} else if (controlPx > 4) {testPx = 4 == oData[k]; isBound = 'upper' // upper bound
 				} else {
 					//(Math.ceil(controlPx * 10))/10} // round up to the next 0.1
 					// ^ not reliable e.g. at 120% control is 1.2 but srcset is 1.4: diff is 0.10000000000000009
 					// we'll use diff instead
 					if (diff > 0 && diff < 0.11) {testPx = true}
 				}
+				oPixels[k].diff = diff
 				oPixels[k].match = testPx
 				if (false === testPx) {isPixelMatch = false}
+			} else if (k.includes('image-set')) {
+				let diff = Math.abs(oData[k] - controlPx)
+				let testPx = false
+				if (0 == diff) {
+					testPx = true // exact match
+				} else if (controlPx < 0.3) {testPx = oData[k] <= 0.31; isBound = 'lower' // lower bound
+				} else if (controlPx > 4) {testPx = oData[k] >= 4; isBound = 'upper' // upper bound
+				} else {testPx = diff < 0.11}
+				oPixels[k].diff = diff
+				oPixels[k].match = testPx
+				if (false === testPx) {isPixelMatch = false}
+				//console.log(testPx, diff, oData[k], controlPx)
 			} else if ('dpcm' == k || 'dpi' == k) {
 				let diff = Math.abs(oData[k] - controlPx)
 				oPixels[k].diff = diff
@@ -1137,7 +1173,7 @@ function get_scr_pixels_match(METRIC, oData) {
 					oSummary[testPx].push(k +'_'+ item)
 				})
 			}
-			oPixels[k].value = oData[k]
+			if (undefined !== isBound) {oPixels[k].value = [oData[k], isBound +' bound']} else {oPixels[k].value = oData[k]}
 		}
 		// make the notification clickable
 		sDetail[isScope][METRIC] = oPixels
