@@ -874,7 +874,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 	return resolve()
 })
 
-const get_scr_pixels = (METRIC) => new Promise(resolve => {
+const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 
 	function get_dpr() {
 		// DPR window
@@ -1055,10 +1055,9 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 			get_vv_scale('visualViewport_scale')
 		}
 
-		// a timeout (even at 0ms) allows reflow/repaint/something so the src is set/loaded
-			// on blink this really helps srcset otherwise we often get a value of 0
-			// servo on the other hand is lightning fast ;)
-		let delay = 0
+		// a timeout helps reflow/repaint/something so the src is set/loaded | servo is lightning fast ;)
+		// but non-gecko (or at least blink) needs a hand with fake images in srcset when zooming in and out
+		let delay = (!isGecko && isResize) ? 3 : 0
 		setTimeout(function() {
 			get_imgset('image-set')
 			get_imgset('-webkit-image-set')
@@ -1844,7 +1843,7 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 	Promise.all([
 		get_scr_position_screen('position_screen'),
 		get_scr_position_window('position_window'),
-		get_scr_pixels('pixels'),
+		get_scr_pixels('pixels', isResize),
 		get_scr_orientation('orientation'),
 		get_scr_measure(),
 	]).then(function(){
