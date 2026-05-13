@@ -1004,6 +1004,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		}
 		addDisplay(1, METRIC +'_'+ item, display,'', (value == oMatch[item] ? rfp_green : rfp_red))
 		oData[item] = value
+		return
 	}
 
 	// visualViewport scale
@@ -1049,22 +1050,31 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
 		get_dpi_div('dpi_div')
-		get_srcset('srcset')
-		get_imgset('image-set'),
-		get_imgset('-webkit-image-set')
-
 		if (isDesktop) {
 			// android: useless, not stable as it is affected by zoom
 			get_vv_scale('visualViewport_scale')
 		}
-		let newobj = {}
-		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
-		addData(1, METRIC, newobj, mini(newobj))
-		// pixel matches
-		if (isSmart) {
-			get_scr_pixels_match('pixels_match', oData)
-		}
-		return resolve()
+
+		// a timeout (even at 0ms) allows reflow/repaint/something so the src is set/loaded
+			// on blink this really helps srcset otherwise we often get a value of 0
+			// servo on the other hand is lightning fast ;)
+		let delay = 0
+		setTimeout(function() {
+			get_imgset('image-set')
+			get_imgset('-webkit-image-set')
+			// note: *image-set : https://searchfox.org/firefox-main/rev/c001029846a51b9e15898d0900ef0c7cafb55b26/servo/components/style/values/computed/image.rs#101-123
+			// > For now, select the lowest resolution greater than display density, otherwise the greatest resolution available
+			get_srcset('srcset')
+			//console.log(oData.srcset, oData['image-set'], oData['-webkit-image-set'], window.devicePixelRatio)
+			let newobj = {}
+			for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
+			addData(1, METRIC, newobj, mini(newobj))
+			// pixel matches
+			if (isSmart) {
+				get_scr_pixels_match('pixels_match', oData)
+			}
+			return resolve()
+		}, delay)
 	})
 })
 
