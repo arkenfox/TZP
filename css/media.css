@@ -143,14 +143,8 @@
 @media (vertical-viewport-segments:4){#cssVS:after{content:" x 4";}}
 @media (vertical-viewport-segments:5){#cssVS:after{content:" x 5";}}
 
-/* */
-div.imageset {
-	position: fixed;
-	left: -100px;
-	height: 10px;
-}
+
 #tzpImgSet {
-	height: 10px;
 	content: image-set(
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAQAAAAANFb+AAAAD0lEQVR42mNkwAIYiRYEAAC9AASyXfztAAAAAElFTkSuQmCC) 0.3x,
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAECAQAAAAdMWZGAAAAD0lEQVR42mNkwAIYKRMEAAEmAAV01TQkAAAAAElFTkSuQmCC) 0.4x,
@@ -193,7 +187,6 @@ url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAoCAQAAABtX6MLAAAAFUlEQV
 	);
 }
 #tzpImgSetWebkit {
-	height: 10px;
 	content: -webkit-image-set(
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAQAAAAANFb+AAAAD0lEQVR42mNkwAIYiRYEAAC9AASyXfztAAAAAElFTkSuQmCC) 0.3x,
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAECAQAAAAdMWZGAAAAD0lEQVR42mNkwAIYKRMEAAEmAAV01TQkAAAAAElFTkSuQmCC) 0.4x,
