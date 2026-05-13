@@ -1549,8 +1549,6 @@ function get_timezone_offset(METRIC) {
 					value = target.lastModified // contentWindow.document
 				} else if ('parseFromString' == k) {
 					value = (new DOMParser).parseFromString('','text/html').lastModified
-						// tmp test
-						try {console.log((new DOMParser).parseFromString('','image/svg+xml').lastModified)} catch(e) {}
 				} else if ('parseHTMLUnsafe' == k) {
 					value = Document.parseHTMLUnsafe('').lastModified
 		// temporal
