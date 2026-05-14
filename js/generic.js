@@ -2569,6 +2569,12 @@ function outputSection(id, isResize = false) {
 
 	function proceed() {
 		setTimeout(function() {
+			if (gLoad & !isGecko) {
+				// preload fake images for non-gecko
+				let imgstr = ''
+				for (let x = 3; x < 41; x++){imgstr += '<img src="' + (x +'').padStart(2,0) +'.png">'}
+				dom.tzpImages.innerHTML = imgstr
+			}
 			get_isPerf()
 			if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
 			gt0 = nowFn()
@@ -2576,7 +2582,7 @@ function outputSection(id, isResize = false) {
 				get_isDomRect(),
 				outputPrototypeLies(isResize),
 			]).then(function(){
-				if (isBB && gClear && 'all' == id) {console.clear()}
+				if (isBB && gClear && 'all' == id || !isGecko) {console.clear()}
 				if (isSmart) {log_section(SECTP, gt0)}
 				// WTF NoScript! sometimes we have to catch this later
 				try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
