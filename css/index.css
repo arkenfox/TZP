@@ -443,6 +443,7 @@ body.tzpBody::after {
 	background-size: auto 100%; background-repeat: no-repeat; background-position: 10px 0px;
 }
 #tzpScroll {width: 100px; overflow-y: scroll;}
+.tzpScrollbar::-webkit-scrollbar {height: 1px;}
 #tzpRect {
 	position: fixed;
 	top: 0; left: 0;

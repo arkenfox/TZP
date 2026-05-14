@@ -510,18 +510,16 @@ function get_element_scrollbars(METRIC, isLies) {
 
 	// FF143+ layout.testing.scrollbars.always-hidden has no effect on measurements
 		// maybe it only affects the viewport?
-	let oData = {'auto': {}, 'thin': {}}
-	let aAuto = [], aThin = [], aWindow = []
+	let oData = {'auto': {}, 'thin': {}}, oDataW = {'auto': {}, 'thin': {}}
+	let aAuto = [], aThin = []
 	let list = ['auto','thin']
+	let element
 
-	// scrollWidth
-	function get_scroll() {
-		let element
+	function get_scroll(type ='') {
 		list.forEach(function(p) {
 			// element
 			let value, item = 'element'
 			try {
-				element = dom.tzpScroll
 				element.style['scrollbar-width'] = p
 				let target = element.children[0]
 				let width, method
@@ -537,14 +535,14 @@ function get_element_scrollbars(METRIC, isLies) {
 				if (undefined == isScrollbar && 'auto' == p) {isScrollbar = value}
 			} catch(e) {
 				value = zErr
-				log_error(15, METRIC +'_'+ p +'_'+ item, e)
+				log_error(15, METRIC +'_'+ p +'_'+ type + item, e)
 			}
 			let fpvalue = value
 			if (isLies && zErr !== value) {
-				value = log_known(15, METRIC +'_'+ p +'_'+ item, value)
+				value = log_known(15, METRIC +'_'+ p +'_'+ type + item, value)
 				fpvalue = zLIE
 			}
-			oData[p][item] = fpvalue
+			if ('' == type) {oData[p][item] = fpvalue} else {oDataW[p][item] = fpvalue}
 			if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
 
 			// scrollWidth
@@ -560,18 +558,37 @@ function get_element_scrollbars(METRIC, isLies) {
 				if (undefined == isScrollbar && 'auto' == p) {isScrollbar = value}
 			} catch(e) {
 				value = zErr
-				log_error(15, METRIC +'_'+ p +'_'+ item, e)
+				log_error(15, METRIC +'_'+ p +'_'+ type + item, e)
 			}
-			oData[p][item] = value
+			if ('' == type) {oData[p][item] = value} else {oDataW[p][item] = value}
 			if ('auto' == p) {aAuto.push(value)} else {aThin.push(value)}
 		})
 	}
 
-	get_scroll()
-	if (undefined == isScrollbar) {isScrollbar = 20}
-	addDisplay(15, METRIC, dedupeArray(aAuto, true) +' | '+ dedupeArray(aThin, true))
-	addData(15, METRIC, oData, mini(oData))
-	return
+	try {
+		element = dom.tzpScroll
+		element.classList.remove('tzpScrollbar')
+		get_scroll()
+		if (undefined == isScrollbar) {isScrollbar = 20}
+
+		// FF151: 1977511 layout.css.fake-webkit-scrollbar.enabled | FF152+: 2038877 default true
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar
+		element.classList.add('tzpScrollbar')
+		get_scroll('webkit_')
+		// add webkit if not identical to default
+		if (mini(oData) !== mini(oDataW)) {
+			for (const p of Object.keys(oDataW)) {
+				for (const k of Object.keys(oDataW[p])) {oData[p]['webkit_'+ k] = oDataW[p][k]}
+			}
+		}
+		// not quite how I should display mixed results but it's only a display: without fuckery it should be just fine
+		addDisplay(15, METRIC, dedupeArray(aAuto, true) +' | '+ dedupeArray(aThin, true))
+		addData(15, METRIC, oData, mini(oData))
+		return
+	} catch(e) {
+		addBoth(15, METRIC, log_error(15, METRIC, e))
+		return
+	}
 }
 
 const outputElements = () => new Promise(resolve => {
