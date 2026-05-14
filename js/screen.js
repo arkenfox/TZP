@@ -1055,8 +1055,11 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 			get_vv_scale('visualViewport_scale')
 		}
 
-		// a timeout helps reflow/repaint/something so the src is set/loaded | servo is lightning fast ;)
-		// but non-gecko (or at least blink) needs a hand with fake images in srcset when zooming in and out
+		// a timeout may help reflow/repaint/something so the src is set/loaded | servo is lightning fast ;)
+		// non-gecko (or at least blink) needs a hand with fake images in srcset when zooming in and out
+			// update: note: using real/cached images in blink causes blink to report the wrong values
+			// users who zoom tooo fast between resize events can trigger a false '0' result
+			// the good news is this is only a resize screen section and does not happen on a full fingerpint
 		let delay = (!isGecko && isResize) ? 3 : 0
 		setTimeout(function() {
 			get_imgset('image-set')
