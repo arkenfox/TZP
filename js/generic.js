@@ -2531,6 +2531,12 @@ function outputSection(id, isResize = false) {
 	smartFn('final')
 	let enforcedDelay = 0
 	if (gLoad) {
+		// preload fake images for non-gecko so it already knows the image is not found when zooming
+		if (!isGecko) {
+			let imgstr = ''
+			for (let x = 3; x < 41; x++){imgstr += '<img src="' + (x +'').padStart(2,0) +'.png">'}
+			dom.tzpImages.innerHTML = imgstr
+		}
 		// initiate timings
 		gCountTiming = 0
 		addTimings()
@@ -2569,12 +2575,6 @@ function outputSection(id, isResize = false) {
 
 	function proceed() {
 		setTimeout(function() {
-			if (gLoad & !isGecko) {
-				// preload fake images for non-gecko
-				let imgstr = ''
-				for (let x = 3; x < 41; x++){imgstr += '<img src="' + (x +'').padStart(2,0) +'.png">'}
-				dom.tzpImages.innerHTML = imgstr
-			}
 			get_isPerf()
 			if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
 			gt0 = nowFn()
