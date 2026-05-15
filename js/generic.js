@@ -1204,7 +1204,7 @@ function togglerows(id, word) {
 
 /*** METRICS DISPLAY ***/
 
-function json_highlight(json, clrValues = false) {
+function json_highlight(json, clrValues = false, target = '') {
 	let clrSymbols = false
 	if ('health' == overlayName) {
 		clrValues = false
@@ -1245,7 +1245,11 @@ function json_highlight(json, clrValues = false) {
 				}
 			}
 		} else if (/true|false/.test(match)) {
-			cls = 'boolean';
+			if ('pixels_match' == target) {
+				cls = (/true/.test(match)) ? 'boolean' : 'red'
+			} else {
+				cls = 'boolean';
+			}
 		} else if (/null/.test(match)) {
 			cls = 'null';
 		}
@@ -1450,7 +1454,7 @@ function metricsShow(name, scope) {
 	let cTarget = scope + ('misc' == target ? '_'+ target : overlayFP)
 
 	let isColor = !(target == 'window_functions')
-	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor)): ''
+	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor, target)): ''
 	// dev: no need to display overlayInfo everywhere, limit
 	if ('feature' == name) {dom.overlayInfo.innerHTML = overlayInfo}
 
