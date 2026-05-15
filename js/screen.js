@@ -1098,19 +1098,11 @@ function get_scr_pixels_match(METRIC, oData) {
 				if ('dpi_css' == k && '?' == oData[k]) {} else {throw zErrInvalid + k +' expected number: got '+ typeCheck}
 			}
 		}
-		let dprValue = oData.devicePixelRatio, dprStr = 'devicePixelRatio'
+		let dprValue = oData.devicePixelRatio
 		let oControls = {
-			'-moz-device-pixel-ratio': [dprValue, dprStr],
-			'-webkit-device-pixel-ratio': [dprValue, dprStr],
-			'-webkit-image-set': [dprValue, dprStr],
-			//'devicePixelRatio': it's the control
-			'devicePixelRatio_iframe': [dprValue, dprStr +''],
-			'dpcm': [dprValue * 96 / 2.54, dprStr +' * 96 / 2.54'],
-			'dpi': [dprValue * 96, dprStr +' * 96'],
-			'dpi_css': [dprValue * 96, dprStr +' * 96'],
-			'dppx': [dprValue, dprStr],
-			'image-set': [dprValue, dprStr],
-			'srcset': [dprValue, dprStr],
+			'dpcm': dprValue * 96 / 2.54,
+			'dpi': dprValue * 96,
+			'dpi_css': dprValue * 96,
 		}
 		let oLists = {
 			'-moz-device-pixel-ratio': ['-moz-device-pixel-ratio','max--moz-device-pixel-ratio','min--moz-device-pixel-ratio'],
@@ -1118,14 +1110,12 @@ function get_scr_pixels_match(METRIC, oData) {
 			'dppx': ['max-resolution','min-resolution','resolution'],
 		}
 
-		// b3e9e3c6 200% zoom dpr 1 === 100% zoom drp 1 with RFP
-		//console.log(mini(oData), oData)
 		for (const k of Object.keys(oData).sort()) {
 			oPixels[k] = {}
 			let isBound
-			if (undefined !== oControls[k]) {
-				controlPx = oControls[k][0]
-				oPixels[k].control = oControls[k]
+			if ('devicePixelRatio' !== k) { // dpr _is_ the control
+				controlPx = (undefined == oControls[k]) ? dprValue : oControls[k]
+				oPixels[k].control = controlPx
 			}
 			if ('devicePixelRatio_iframe' == k) {
 				testPx = oData[k] == controlPx
