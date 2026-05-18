@@ -2048,6 +2048,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	if ('' == error || null == error || undefined == error) {error = zErr} else {error += ''}
 	let aLen25 = [
 		'canPlayType','isTypeSuppo','font-format','font-tech','textmetrics',
+		'audio_getCa','video_getCa',
 	]
 	let len = isDesktop ? 50 : 25
 	if (aLen25.includes(metric.slice(0,11))) {len = 25}
