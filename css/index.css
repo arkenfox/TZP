@@ -1,5 +1,6 @@
 
 :root{
+	color-scheme: light dark;
 	/* backgrounds */
 	--bg0: #fbfaf9; /* body */
 	--bg1: #f09b9b;
@@ -456,7 +457,21 @@ body.tzpBody::after {
 	background-color: var(--bg0);
 	/*opacity: 0;*/
 }
-
+#tzpLightDark {
+	color: rgba(31, 176, 241, 0.6);
+	content: url('0.png');
+}
+@supports (color: light-dark(black, white)) {
+	#tzpLightDark {
+		/* use unique colors */
+		color: light-dark(rgba(45, 7, 83, 0.8), rgba(201, 212, 253, 0.7));
+	}
+}
+@supports (content: light-dark(url("1.png"), url("2.png"))) {
+	#tzpLightDark {
+		content: light-dark(url("1.png"), url("2.png"));
+	}
+}
 #tzpCalc {width: fit-content;}
 .tzpCalcContainer {container: calccontainer / inline-size;}
 .tzpCalcA {
