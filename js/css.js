@@ -494,9 +494,44 @@ function get_media_css(METRIC) {
 			}
 		}
 	}
+
+	function get_lightdark(metric) {
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value/light-dark
+		// color
+		let value, notation = rfp_red, item = '_color'
+		try {
+			let color = window.getComputedStyle(dom.tzpLightDark, null).getPropertyValue('color')
+			if ('rgba(45, 7, 83, 0.8)' == color) {value = 'light'; notation = rfp_green
+			} else if ('rgba(201, 212, 253, 0.7)' == color) {value = 'dark'
+			} else if ('rgba(31, 176, 241, 0.6)' == color) {value = zNA; notation = '' // not supported
+			} else {value = 'modified'}
+		} catch(e) {
+			log_error(14, METRIC +'_'+ metric + item, e)
+			value = zErr
+		}
+		collect_data(metric + item, value, notation)
+		// image
+			// #enable-experimental-web-platform-features: blink seems happy with fake images
+		notation = rfp_red; item = '_image'; value = 'undefined'
+		try {
+			let str = window.getComputedStyle(dom.tzpLightDark, null).getPropertyValue('content')
+			str = str.slice(str.length - 7, str.length - 6)
+			if ('1' == str) {value = 'light'; notation = rfp_green
+			} else if ('2' == str) {value = 'dark'
+			} else if ('0' == str) {value = zNA; notation = '' // not supported
+			} else {value = 'modified'}
+		} catch(e) {
+			log_error(14, METRIC +'_'+ metric + item, e)
+			value = zErr
+		}
+		collect_data(metric + item, value, notation)
+		return
+	}
+
 	// go!
 	get_mm_color()
 	get_mm_css()
+	get_lightdark('light-dark')
 
 	// sort into new object
 	let data = {}
