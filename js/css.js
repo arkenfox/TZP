@@ -497,20 +497,20 @@ function get_media_css(METRIC) {
 
 	function get_lightdark(metric) {
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value/light-dark
-		// color
+		// color: FF120+
 		let value, notation = rfp_red, item = '_color'
 		try {
 			let color = window.getComputedStyle(dom.tzpLightDark, null).getPropertyValue('color')
 			if ('rgba(45, 7, 83, 0.8)' == color) {value = 'light'; notation = rfp_green
 			} else if ('rgba(201, 212, 253, 0.7)' == color) {value = 'dark'
-			} else if ('rgba(31, 176, 241, 0.6)' == color) {value = zNA; notation = '' // not supported
+			} else if ('rgba(31, 176, 241, 0.6)' == color) {value = zNA
 			} else {value = 'modified'}
 		} catch(e) {
 			log_error(14, METRIC +'_'+ metric + item, e)
 			value = zErr
 		}
 		collect_data(metric + item, value, notation)
-		// image
+		// image: FF150+ 2023569 layout.css.light-dark.images.enabled
 			// #enable-experimental-web-platform-features: blink seems happy with fake images
 		notation = rfp_red; item = '_image'; value = 'undefined'
 		try {
@@ -518,7 +518,7 @@ function get_media_css(METRIC) {
 			str = str.slice(str.length - 7, str.length - 6)
 			if ('1' == str) {value = 'light'; notation = rfp_green
 			} else if ('2' == str) {value = 'dark'
-			} else if ('0' == str) {value = zNA; notation = '' // not supported
+			} else if ('0' == str) {value = zNA; if (isVer < 150) {notation = ''} // not supported
 			} else {value = 'modified'}
 		} catch(e) {
 			log_error(14, METRIC +'_'+ metric + item, e)
