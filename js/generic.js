@@ -1633,15 +1633,15 @@ function output_health(scope) {
 function output_perf(id, click = false) {
 	if (!isPerf) {return}
 
-	let array = id == "all" ? gData["perf"] : sDataTemp["perf"]
-	let target = id == "all" ? "perfG" : "perfS"
-	let btn = id == "all" ? dom.perfGBtn : dom.perfSBtn
+	let array = 'all' == id ? gData.perf : sDataTemp.perf
+	let target = 'all' == id ? 'tzpPerfG' : 'tzpPerfS'
+	let btn = dom[target +'Btn']
 
 	// toggle perf depth
-	let isMore = dom[target +"Btn"].innerHTML === "less"
+	let isMore = btn.innerHTML === 'less'
 	if (click) {
 		isMore = !isMore // user toggled it
-		dom[target +"Btn"] = isMore ? "less" : "more"
+		btn.innerHTML = isMore ? 'less' : 'more'
 	}
 
 	let aPretty = [],
