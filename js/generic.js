@@ -2507,9 +2507,10 @@ function outputSection(id, isResize = false) {
 				'elements', // cold on load: mathml
 				'audio',
 				'webgl',
-				'devices','fonts', // near last: allow time for isDevices, font fallback
-				'region', // next to last: allow time for iframes and any reporting API items to manifest on first run
-				17 // last: uses data collected during gRun
+				'fonts', // allow time for font fallback
+				'region', // allow time for iframe assets
+				'devices', // allow time for isDevices
+				17 // timing last: uses data collected during gRun
 			]
 			const forEachSection = async (iterable, action) => {
 				for (const n of iterable) {
