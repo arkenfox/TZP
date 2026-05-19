@@ -430,13 +430,15 @@ function get_isDevices() {
 	isDevices = undefined
 	let t0 = nowFn()
 	try {
-		if (undefined !== navigator.mediaDevices) {return}
+		if (undefined == navigator.mediaDevices) {return}
 		if (runSG) {foo++}
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			isDevices = devices
 			if (gLoad) {log_perf(SECTG, 'isDevices', t0,'', nowFn())}
 		}
-	)} catch(e) {}
+	)} catch(e) {
+		if (gLoad) {log_perf(SECTG, 'isDevices', t0,'', zErr)}
+	}
 }
 
 function get_isEngine(METRIC) {
