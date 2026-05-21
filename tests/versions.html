@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 110, maxVer = 152, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 111, maxVer = 153, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,13 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 153: 2006263
+		let t153 = performance.now(), ver153
+		try {
+			ver153 = AnimationTimeline.prototype.hasOwnProperty('duration')
+		} catch(e) {}
+		rec(153, 153, "2006263", ver153, performance.now()-t153) // 0.04 ms
 
 		// 152: 2034371
 		let t152 = performance.now(), ver152
