@@ -413,10 +413,11 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 152
+		isVerMax = 153
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {if (AnimationTimeline.prototype.hasOwnProperty('duration')) return 153} catch(e) {} // 2006263
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
 			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
