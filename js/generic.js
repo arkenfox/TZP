@@ -869,7 +869,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 152) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 153) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -885,6 +885,7 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 128 or higher
 			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
 			// now cascade
+			try {if (AnimationTimeline.prototype.hasOwnProperty('duration')) return 153} catch(e) {} // 2006263
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
 			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
@@ -2550,7 +2551,7 @@ function outputSection(id, isResize = false) {
 		addTimings()
 		// force an initial delay regardless | moreso if it it's BB with font.vis
 		// e.g. some extensions can be slow to inject etc
-		// e.g. will help with resources such as XML/images and
+		// e.g. will help with resources such as XML/images etc
 		enforcedDelay = isFontDelay ? 3000 : (isFile ? 0 : 1200)
 	}
 	//if (gLoad) {enforcedDelay = 1200}

@@ -98,7 +98,8 @@ get_scr_initial()
 	// https://en.wikipedia.org/wiki/Check_mark
 	// https://en.wikipedia.org/wiki/X_mark
 const tick = '✓', // ✓ u2713, 🗸 u1F5F8
-	cross = '✗', // ✗ u2717, 🗴 u!F5F4, 🞩 u1F7A9
+	cross = 'X', //'✗', // ✗ u2717, 🗴 u!F5F4, 🞩 u1F7A9
+		// note: u2717 has weird sizing on some platforms depending on what font is used: just use X
 	green_tick = sg+"<span class='health'>"+ tick +'</span>'+sc,
 	green_benign = sg+"[<span class='health'>"+ tick +'</span> benign]'+sc,
 	red_cross = sb+"<span class='health'>"+ cross +'</span>'+ sc,
