@@ -2204,18 +2204,14 @@ function get_system_fonts(METRIC) {
 
 function get_textautosize(METRIC) {
 	/*
-	Text Autosize: aka font inflation, font boosting
-	- chrome://flags > #force-off-text-autosizing
-	- element must be visible on screen to trigger the adjustment
-		- when offscreen it will revert to none
+	Text Autosize: aka font inflation, font boosting | chrome://flags > #force-off-text-autosizing
+	- element must be visible on screen to trigger the adjustment | when offscreen it will revert to none
 	measure
 	- we only need to get the div height
 	minimal triggers (AFAICT)
 	- gecko: 5 words x 1 line  | 3 words x 2 lines ...
 	- blink: 3 words x 4 lines | 4 words x 3 lines | 5 words x 2 lines
 	test
-	- we'll play it safe: html uses 3 words x 5 lines
-		- the more lines the higher the numbers for more % precision ?
 	- we'll test all platforms even though this is mobile only IIUIC
 		- partly because some engines are lacking some isOS or isOS could be wrong or it get added to desktop
 	- not sure what entropy this will gain
@@ -2223,23 +2219,37 @@ function get_textautosize(METRIC) {
 		and tzp is 500 min width, so I think the adjustment might be dterminied by the viewport width - not sure
 	*/
 	try {
-		let value = 'none', str =''
-		let target = dom.tzpTextAutosize
-		let control = measureFn(target.children[0]).height
-		let test = measureFn(target.children[1]).height
+		let value = 'none', str ='', control, test
+		[0,1].forEach(function(k){
+			let target = dom.tzpTextAutosize.children[k]
+			let method = measureFn(target, METRIC)
+			if (undefined !== method.error) {throw method.errorstring}
+			let check = method.height, typeCheck = typeFn(check)
+			if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			if (0 == k) {control = check} else {test = check}
+		})
+		//control = 0
+		//test = 0
+		// if test = 0 we return 0
+		// if control = 0 we return Infinity
+		str = s99 +' ('+ control +')'+ sc
 		if (control !== test) {
 			let diff = test - control
 			let percentage = (diff/control) * 100
 			value = 100 + percentage
-			str = '% '+ s99 +'['+ control +' -> '+ test +']'+ sc
+			if ('number' == typeFn(value, true)) {str = '%'}
+			str += s99 +' ('+ control +' -> '+ test +')'+ sc
+		} else if (0 == control) {
+			// if both zero we would return 'none' so we catch that here
+			throw zErrInvalid +'expected a size: got zero'
 		}
 		addData(12, METRIC, value)
 		addDisplay(12, METRIC, value + str)
+		return
 	} catch(e) {
 		addBoth(12, METRIC, e, '', '', zErrLog)
+		return
 	}
-
-	return
 }
 
 function get_textmetrics(METRIC) {
