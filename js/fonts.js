@@ -2232,16 +2232,16 @@ function get_textautosize(METRIC) {
 		//test = 0
 		// if test = 0 we return 0
 		// if control = 0 we return Infinity
-		str = s99 +' ('+ control +')'+ sc
 		if (control !== test) {
 			let diff = test - control
 			let percentage = (diff/control) * 100
 			value = 100 + percentage
 			if ('number' == typeFn(value, true)) {str = '%'}
 			str += s99 +' ('+ control +' -> '+ test +')'+ sc
-		} else if (0 == control) {
+		} else {
 			// if both zero we would return 'none' so we catch that here
-			throw zErrInvalid +'expected a size: got zero'
+			if (0 == control) {throw zErrInvalid +'expected a size: got zero'}
+			str = s99 +' ('+ control +')'+ sc
 		}
 		addData(12, METRIC, value)
 		addDisplay(12, METRIC, value + str)
