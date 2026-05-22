@@ -2202,6 +2202,46 @@ function get_system_fonts(METRIC) {
 	return
 }
 
+function get_textautosize(METRIC) {
+	/*
+	Text Autosize: aka font inflation, font boosting
+	- chrome://flags > #force-off-text-autosizing
+	- element must be visible on screen to trigger the adjustment
+		- when offscreen it will revert to none
+	measure
+	- we only need to get the div height
+	minimal triggers (AFAICT)
+	- gecko: 5 words x 1 line  | 3 words x 2 lines ...
+	- blink: 3 words x 4 lines | 4 words x 3 lines | 5 words x 2 lines
+	test
+	- we'll play it safe: html uses 3 words x 5 lines
+		- the more lines the higher the numbers for more % precision ?
+	- we'll test all platforms even though this is mobile only IIUIC
+		- partly because some engines are lacking some isOS or isOS could be wrong or it get added to desktop
+	- not sure what entropy this will gain
+		- the default size font (for latin chars) per language if they differ is equivalency
+		and tzp is 500 min width, so I think the adjustment might be dterminied by the viewport width - not sure
+	*/
+	try {
+		let value = 'none', str =''
+		let target = dom.tzpTextAutosize
+		let control = measureFn(target.children[0]).height
+		let test = measureFn(target.children[1]).height
+		if (control !== test) {
+			let diff = test - control
+			let percentage = (diff/control) * 100
+			value = 100 + percentage
+			str = '% '+ s99 +'['+ control +' -> '+ test +']'+ sc
+		}
+		addData(12, METRIC, value)
+		addDisplay(12, METRIC, value + str)
+	} catch(e) {
+		addBoth(12, METRIC, e, '', '', zErrLog)
+	}
+
+	return
+}
+
 function get_textmetrics(METRIC) {
 	/* https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
 	/* NOTES
@@ -2453,6 +2493,7 @@ const outputFonts = () => new Promise(resolve => {
 	set_fntList()
 	Promise.all([
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
+		get_textautosize('text_%_autosize'),
 		get_script_defaults('script_defaults'),
 		get_fonts('font_sizes', METRICD), // uses fntDocEnabled
 		get_system_fonts('fonts_moz'),

@@ -26,11 +26,15 @@
 	<div id="tzpRect"></div>
 	<div id="tzpLV"></div>
 	<div id="tzpSV"></div>
+	<div id="tzpTextAutosize">
+		<div class="noadjust">abc def ghi<br>abc def ghi<br>abc def ghi<br>abc def ghi<br>abc def ghi</div>
+		<div class="adjust">abc def ghi<br>abc def ghi<br>abc def ghi<br>abc def ghi<br>abc def ghi</div>
+	</div>
 	<!-- calc must be outside our tzpBody -->
 	<div id="tzpCalc" class="offscreen"><div id="tzpCalcTarget"></div><div class="tzpCalcContainer"></div></div>
 	<!-- keep tzpBody first: contains scrollbar but MUST come after tzpLV and tzpSV
 		in order to be able to be able to select and drag non-overlays -->
-	<div id="tzpBody">
+	<div id="tzpBody" class="noadjust">
 	<span translate="no">
 
 	<!--offscreen-->
@@ -892,6 +896,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">proportional font<br>monospace size<br>sans-serif size<br>serif size</span></div>
 			&nbsp; script defaults</td><td class="c mono" id="script_defaults"></td></tr>
+		<tr><td>text autosize</td><td class="c mono" id="text_%_autosize"></td></tr>
 		<!--tm-->
 		<tr><td>actualboundingbox | baseline</td><td class="mono">
 			<span class="c spaces" id="textmetrics_actualboundingbox"></span> | <span class="c" id="textmetrics_baseline"></span>
