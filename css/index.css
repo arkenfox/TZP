@@ -156,7 +156,7 @@ a.return {color: var(--txtlink); text-decoration: none;  font-size: 14px; line-h
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
 .lies {color: var(--test99); text-decoration: underline;}
 .revert {all: revert;}
-.noadjust {-moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none;} 	/* stop font inflation */
+.noadjust {-moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none;} /* stop font inflation */
 .adjust {-moz-text-size-adjust: auto; -webkit-text-size-adjust: auto; text-size-adjust: auto;} /* enforce for test */
 
 /* JSON */
@@ -485,7 +485,7 @@ body.tzpBody::after {
 }
 #tzpTextAutosize {
 	/* can't be selected it's behind tzpBody | hide visual by matching background-color */
-	position: fixed; right: 50px; color: var(--bg0);
+	position: fixed; color: var(--bg0); width: 100%;
 }
 
 /*** FP POCs ***/
