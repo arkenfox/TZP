@@ -485,7 +485,10 @@ body.tzpBody::after {
 }
 #tzpTextAutosize {
 	/* can't be selected it's behind tzpBody | hide visual by matching background-color */
-	position: fixed; color: var(--bg0); width: 100%;
+	position: fixed;
+	color: var(--bg0);
+	width: 450px;
+	font-size: 20px
 }
 
 /*** FP POCs ***/
