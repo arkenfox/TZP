@@ -483,9 +483,10 @@ body.tzpBody::after {
 		)
 	);
 }
-#tzpTextAutosize {
+#tzpTextAutosizeNo, #tzpTextAutosizeYes {
 	/* can't be selected it's behind tzpBody | hide visual by matching background-color */
 	position: fixed;
+	top: 0px;
 	color: var(--bg0);
 	width: 450px;
 	font-size: 20px
