@@ -1881,6 +1881,7 @@ function get_fonts_max(METRIC, isLies) {
 		el.innerHTML =''
 		addBoth(12, METRIC, value, btn,'', data, isLies)
 		log_perf(12, METRIC, t0)
+		return
 	}
 
 	try {
@@ -1915,8 +1916,6 @@ function get_fonts_max(METRIC, isLies) {
 		value = e; data = zErrLog
 		exit()
 	}
-
-	return
 }
 
 function get_formats() {
