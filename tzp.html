@@ -27,11 +27,12 @@
 	<div id="tzpLV"></div>
 	<div id="tzpSV"></div>
 	<div id="tzpTextAutosize">
-		<div class="noadjust">a long time ago<br>in a galaxy far, far away</div>
-		<div class="adjust">a long time ago<br>in a galaxy far, far away</div>
+		<div class="noadjust">Rebel spaceships, striking from a hidden base, have won their first victory against the evil Galctic Empire.</div>
+		<div class="adjust">Rebel spaceships, striking from a hidden base, have won their first victory against the evil Galctic Empire.</div>
 	</div>
 	<!-- calc must be outside our tzpBody -->
 	<div id="tzpCalc" class="offscreen"><div id="tzpCalcTarget"></div><div class="tzpCalcContainer"></div></div>
+
 	<!-- keep tzpBody first: contains scrollbar but MUST come after tzpLV and tzpSV
 		in order to be able to be able to select and drag non-overlays -->
 	<div id="tzpBody" class="noadjust">
@@ -327,7 +328,7 @@
 		<tr><td><span class="mono no_color">[F11]</span> &nbsp; fullscreen</td><td class="c mono" id="fsSize"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('newwin')">[ run ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
+			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the inner dimensions</span></div>
 			&nbsp; new window</td><td class="mono border-bottom"><span class="c" id="newwin"></span></td></tr>
 		<!-- pixels-->
 		<tr><td>[div] dpi</td><td class="mono"><span class="c" id="dpi_div"></span>
