@@ -2246,9 +2246,15 @@ function get_textautosize(METRIC) {
 	Entropy: besides binary enabled/disabled I think the algorithm is universal: e.g. 20px -> 34px
 		- besides equivalency (default font/language) I expect subpixels to manifest (equivalency of dpr)
 	*/
+
+	/* without font inflation we still get some diffs due to subpixels and the first element affecting the second
+	- e.g. desktop 100.0000332919071% (45.83332824707031 -> 45.833343505859375) <- 110% zoom, dpr/system is 1
+	- adding an extra line break fixes this
+	*/
+
 	try {
 		let value = 'none', str ='', control, test
-		[0,1].forEach(function(k){
+		[0,2].forEach(function(k){
 			let target = dom.tzpTextAutosize.children[k]
 			let method = measureFn(target, METRIC)
 			if (undefined !== method.error) {throw method.errorstring}
