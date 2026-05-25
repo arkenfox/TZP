@@ -264,75 +264,64 @@ const outputUserFS = (METRIC) => new Promise(resolve => {
 })
 
 const outputUserNewWin = (METRIC) => new Promise(resolve => {
-	let sizesi = [], // inner history
-		sizeso = [], // outer history
+	let sizes = [], // inner history
 		n = 1, // setInterval counter
-		newWinLeak =''
+		notation = rfp_red
 
-	// open
-		// was: tests/newwin.html
-		// use about:blank (same as forcing a delay with a non-existant website)
-	let newWin = window.open('about:blank','width=9000,height=9000')
-	//let newWin = window.open('tests/newwin.html','width=9000,height=9000')
-	let iw = newWin.innerWidth,
-		ih = newWin.innerHeight,
-		ow = newWin.outerWidth,
-		oh = newWin.outerHeight
-	sizesi.push(iw +' x '+ ih)
-	sizeso.push(ow +' x '+ oh)
-	// default output
-	newWinLeak = iw +' x '+ ih +' [inner] '+ ow +' x '+ oh +' [outer]'
+	try {
+		let current = window.innerWidth +' x '+ window.innerHeight
+		// open
+			// was: tests/newwin.html
+			// use about:blank (same as forcing a delay with a non-existant website)
+		let newWin = window.open('about:blank','width=9000,height=9000')
+		//let newWin = window.open('tests/newwin.html','width=9000,height=9000')
+		let w = newWin.innerWidth, h = newWin.innerHeight
+		let value = w +' x '+ h // 1st measurement
+		//value = (w + 50) +' x '+ (h + 20) // test
+		sizes.push(value)
 
-	function check_newwin() {
-		let changesi = 0,
-			changeso = 0
-		// detect changes
-		let prev = sizesi[0]
-		let strInner = s1 +'inner: '+ sc + iw +' x '+ ih
-		for (let k=0; k < sizesi.length; k++) {
-			if (sizesi[k] !== prev ) {
-				changesi++;	strInner += s1 +' &#9654 <b>['+ k +']</b> '+ sc + sizesi[k]
+		function check_newwin() {
+			let changes = 0
+			let prev = value
+			for (let k=0; k < sizes.length; k++) {
+				if (sizes[k] !== prev ) {changes++;	value += s1 +' &#9654 <b>['+ k +']</b> '+ sc + sizes[k]}
+				prev = sizes[k]
 			}
-			prev = sizesi[k]
-		}
-		prev = sizeso[0]
-		let strOuter = s1 +'outer: '+ sc + ow +' x '+ oh
-		for (let k=0; k < sizeso.length; k++) {
-			if (sizeso[k] !== prev ) {
-				changeso++;	strOuter += s1 +' &#9654 <b>['+ k +']</b> '+ sc + sizeso[k]
+			// output
+			if (0 == changes && value == current) {
+				// we compare to current window as part of the test
+				// or mitigations are we open in a new tab not a new window
+				if (return_lb(w,h)) {notation = rfp_green}
 			}
-			prev = sizeso[k]
+			addDisplay(1, METRIC, value,'', notation)
+			return resolve()
 		}
-		// one or two lines
-		if (changesi > 0 || changeso > 0) {
-			newWinLeak = strInner +'<br>'+ strOuter
+		function build_newwin() {
+			// check n times as fast as we can/dare
+			if (n == 150) {
+				clearInterval(checking)
+				check_newwin()
+			} else {
+				// grab metrics
+				try {
+					sizes.push(newWin.innerWidth +' x '+ newWin.innerHeight)
+				} catch {
+					clearInterval(checking)
+					// if not 'permission denied', eventually we always get
+					// NS_ERROR_UNEXPECTED which we can ignore. Always output
+					//console.log(e)
+					//console.log(n, sizes)
+					check_newwin()
+				}
+			}
+			n++
 		}
-		// output
-		addDisplay(1, METRIC, newWinLeak)
+		let checking = setInterval(build_newwin, 3)
+
+	} catch(e) {
+		addDisplay(1, METRIC, log_error(1, METRIC, e),'', notation)
 		return resolve()
 	}
-	function build_newwin() {
-		// check n times as fast as we can/dare
-		if (n == 150) {
-			clearInterval(checking)
-			check_newwin()
-		} else {
-			// grab metrics
-			try {
-				sizesi.push(newWin.innerWidth +' x '+ newWin.innerHeight)
-				sizeso.push(newWin.outerWidth +' x '+ newWin.outerHeight)
-			} catch {
-				clearInterval(checking)
-				// if not 'permission denied', eventually we always get
-				// NS_ERROR_UNEXPECTED which we can ignore. Always output
-				//console.log(e)
-				//console.log(n, sizesi, sizeso)
-				check_newwin()
-			}
-		}
-		n++
-	}
-	let checking = setInterval(build_newwin, 3)
 })
 
 const outputUserPointer = (METRIC, event) => new Promise(resolve => {
