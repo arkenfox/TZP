@@ -1867,11 +1867,18 @@ function get_fonts_max(METRIC, isLies) {
 	try {
 		data = {}
 		let range, method
+		if (isDomRect > 1) {range = document.createRange()}
 		isStylesAll.forEach(function(stylename) {
 			el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
 			let target = el.children[0]
-			method = measureFn(target, METRIC)
-			if (undefined !== method.error) {throw method.errorstring}
+			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+			} else if (isDomRect == 1) {method = target.getClientRects()[0]
+			} else {
+				range.selectNode(target)
+				method = 2 == isDomRect ? range.getBoundingClientRect() : range.getClientRects()[0]
+			}
+			//method = measureFn(target, METRIC)
+			//if (undefined !== method.error) {throw method.errorstring}
 			value = method.height
 			if (runST) {value += ''}
 			let typeCheck = typeFn(value)
