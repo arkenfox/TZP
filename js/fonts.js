@@ -2203,20 +2203,17 @@ function get_system_fonts(METRIC) {
 }
 
 function get_textautosize(METRIC) {
-	/*
+	// can't get this to work in blink (NFI about safari)
+	if (!isGecko || isDesktop) {addBoth(12, METRIC, zNA); return}
+
+	/* MOBILE
 	Text Autosize: aka font inflation, font boosting | chrome://flags > #force-off-text-autosizing
-	- element must be visible on screen to trigger the adjustment | when offscreen it will revert to none
-	measure
-	- we only need to get the div height
-	minimal triggers (AFAICT)
-	- gecko: 5 words x 1 line  | 3 words x 2 lines ...
-	- blink: 3 words x 4 lines | 4 words x 3 lines | 5 words x 2 lines
-	test
-	- we'll test all platforms even though this is mobile only IIUIC
-		- partly because some engines are lacking some isOS or isOS could be wrong or it get added to desktop
-	- not sure what entropy this will gain
-		- the default size font (for latin chars) per language if they differ is equivalency
-		and tzp is 500 min width, so I think the adjustment might be dterminied by the viewport width - not sure
+	- AFAICT element must be visible on screen to trigger the adjustment | when offscreen it will revert to none
+	Measure: we only need to get the div height | number of lines is irrelevant
+	Trigger: who F knows
+		- https://searchfox.org/firefox-main/search?q=font+inflation&path=&case=false&regexp=false
+	Entropy: besides binary enabled/disabled I think the algorithm is universal: e.g. 20px -> 34px
+		- besides equivalency (default font/language) I expect subpixels to manifest (equivalency of dpr)
 	*/
 	try {
 		let value = 'none', str ='', control, test
