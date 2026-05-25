@@ -1861,38 +1861,61 @@ function get_fonts(METRIC, METRICD) {
 }
 
 function get_fonts_max(METRIC, isLies) {
+	/*
+	Problem: this is somewhat unstable
+	- e.g. on android apart from cursive, the others all end up as 898.9166259765625 or 898.9166870117188 on my device
+	- not sure if this is because of android or because of subpixels
+	Tried:
+	- moved element to top position of offscreen div
+	- reset element to blank each style
+	- get measurenment within this function instead of measureFn()
+	ToDo:
+	- add a 0 sec delay betwen each to allow reflow or something?
+	- just use clientHeight
+	*/
+
 	let t0 = nowFn()
-	let value = zNA, data ='', btn=''
-	let el = dom.tzpFontMax
+	let value = zNA, data ='', btn='', el = dom.tzpFontMax
+
+	function exit() {
+		el.innerHTML =''
+		addBoth(12, METRIC, value, btn,'', data, isLies)
+		log_perf(12, METRIC, t0)
+	}
+
 	try {
 		data = {}
 		let range, method
 		if (isDomRect > 1) {range = document.createRange()}
 		isStylesAll.forEach(function(stylename) {
 			el.innerHTML = '' // reset
-			el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
-			let target = el.children[0]
-			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-			} else if (isDomRect == 1) {method = target.getClientRects()[0]
-			} else {
-				range.selectNode(target)
-				method = 2 == isDomRect ? range.getBoundingClientRect() : range.getClientRects()[0]
-			}
-			//method = measureFn(target, METRIC)
-			//if (undefined !== method.error) {throw method.errorstring}
-			value = method.height
-			if (runST) {value += ''}
-			let typeCheck = typeFn(value)
-			if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
-			data[stylename] = value
+			setTimeout(function() {
+				el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
+				let target = el.children[0]
+				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+				} else if (isDomRect == 1) {method = target.getClientRects()[0]
+				} else {
+					range.selectNode(target)
+					method = 2 == isDomRect ? range.getBoundingClientRect() : range.getClientRects()[0]
+				}
+				//method = measureFn(target, METRIC)
+				//if (undefined !== method.error) {throw method.errorstring}
+				value = method.height
+				if (runST) {value += ''}
+				let typeCheck = typeFn(value)
+				if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
+				data[stylename] = value
+				if (stylename == isStylesAll[isStylesAll.length - 1]) {
+					value = mini(data); btn = addButton(12, METRIC)
+					exit()
+				}
+			}, 0)
 		})
-		value = mini(data); btn = addButton(12, METRIC)
 	} catch(e) {
 		value = e; data = zErrLog
+		exit()
 	}
-	el.innerHTML =''
-	addBoth(12, METRIC, value, btn,'', data, isLies)
-	log_perf(12, METRIC, t0)
+
 	return
 }
 
