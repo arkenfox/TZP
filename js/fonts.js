@@ -1860,18 +1860,18 @@ function get_fonts(METRIC, METRICD) {
 	})
 }
 
-function get_fonts_max(METRIC, isLies) {
+const get_fonts_max = (METRIC, isLies) => new Promise(resolve => {
 	/*
 	Problem: this is somewhat unstable
-	- e.g. on android apart from cursive, the others all end up as 898.9166259765625 or 898.9166870117188 on my device
+	- e.g. FF151 android apart from cursive, they all end up as 898.9166259765625 _or_ 898.9166870117188 on my device
 	- not sure if this is because of android or because of subpixels
 	Tried:
 	- moved element to top position of offscreen div
 	- reset element to blank each style
 	- get measurenment within this function instead of measureFn()
+	- add a 0 sec delay between each to allow reflow or something?
 	ToDo:
-	- add a 0 sec delay betwen each to allow reflow or something?
-	- just use clientHeight
+	- just use clientHeight: at these sizes all we're only exposing known devicePixelRatio IIUIC
 	*/
 
 	let t0 = nowFn()
@@ -1881,7 +1881,7 @@ function get_fonts_max(METRIC, isLies) {
 		el.innerHTML =''
 		addBoth(12, METRIC, value, btn,'', data, isLies)
 		log_perf(12, METRIC, t0)
-		return
+		return resolve()
 	}
 
 	try {
@@ -1916,7 +1916,7 @@ function get_fonts_max(METRIC, isLies) {
 		value = e; data = zErrLog
 		exit()
 	}
-}
+})
 
 function get_formats() {
 	// FF105+: layout.css.font-tech.enabled
