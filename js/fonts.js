@@ -1865,13 +1865,14 @@ const get_fonts_max = (METRIC, isLies) => new Promise(resolve => {
 	Problem: this is somewhat unstable
 	- e.g. FF151 android apart from cursive, they all end up as 898.9166259765625 _or_ 898.9166870117188 on my device
 	- not sure if this is because of android or because of subpixels
-	Tried:
+	Tried without success:
 	- moved element to top position of offscreen div
 	- reset element to blank each style
 	- get measurenment within this function instead of measureFn()
-	- add a 0 sec delay between each to allow reflow or something?
+	- added a 0 sec delay between each to allow reflow or something?
+	- made it the last function to run so nothing else should be interfering
 	ToDo:
-	- just use clientHeight: at these sizes all we're only exposing known devicePixelRatio IIUIC
+	- maybe just use clientHeight: at these sizes all we're only exposing known devicePixelRatio IIUIC
 	*/
 
 	let t0 = nowFn()
@@ -1886,8 +1887,8 @@ const get_fonts_max = (METRIC, isLies) => new Promise(resolve => {
 
 	try {
 		data = {}
-		let range, method
-		if (isDomRect > 1) {range = document.createRange()}
+		let method
+		const range = document.createRange()
 		isStylesAll.forEach(function(stylename) {
 			el.innerHTML = '' // reset
 			setTimeout(function() {
@@ -2528,6 +2529,7 @@ const outputFonts = () => new Promise(resolve => {
 	fntHealth = []
 
 	set_fntList()
+	let isLies = isDomRect == -1
 	Promise.all([
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
 		get_textautosize('text_%_autosize'),
@@ -2541,13 +2543,12 @@ const outputFonts = () => new Promise(resolve => {
 		get_graphite('graphite'), // uses fntDocEnabled
 	]).then(function(){
 		// allow more time for font async fallback
-		let isLies = isDomRect == -1
 		Promise.all([
-			get_fonts_max('font_sizes_max', isLies),
 			get_fonts_faces('font_faces',METRICD),
 			get_glyphs('glyphs', isLies),
 			get_textmetrics('textmetrics'),
 			get_fonts_offscreen('font_offscreen', METRICD),
+			get_fonts_max('font_sizes_max', isLies),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			// enumerated fonts over all font tests
