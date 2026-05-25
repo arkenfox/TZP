@@ -1869,6 +1869,7 @@ function get_fonts_max(METRIC, isLies) {
 		let range, method
 		if (isDomRect > 1) {range = document.createRange()}
 		isStylesAll.forEach(function(stylename) {
+			el.innerHTML = '' // reset
 			el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
 			let target = el.children[0]
 			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
