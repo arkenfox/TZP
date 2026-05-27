@@ -1860,64 +1860,35 @@ function get_fonts(METRIC, METRICD) {
 	})
 }
 
-const get_fonts_max = (METRIC, isLies) => new Promise(resolve => {
-	/*
-	Problem: this is somewhat unstable
-	- e.g. FF151 android apart from cursive, they all end up as 898.9166259765625 _or_ 898.9166870117188 on my device
-	- not sure if this is because of android or because of subpixels
-	Tried without success:
-	- moved element to top position of offscreen div
-	- reset element to blank each style
-	- get measurenment within this function instead of measureFn()
-	- added a 0 sec delay between each to allow reflow or something?
-	- made it the last function to run so nothing else should be interfering
-	ToDo:
-	- maybe just use clientHeight: at these sizes all we're only exposing known devicePixelRatio IIUIC
-	*/
+function get_fonts_max(METRIC, isLies) {
+	// tzpFontMax must have a fixed height position (e.g. top 0) and not be influenced by preceeding elements otherwise
+	// it can be somewhat unstable e.g. on _my_ android FF151, except for cursive, any measurement could end up as
+	// 898.9166259765625 _or_ 898.9166870117188  - e.g. page load vs pull to refresh vs global rerun vs section rerun
 
 	let t0 = nowFn()
-	let value = zNA, data ='', btn='', el = dom.tzpFontMax
-
-	function exit() {
-		el.innerHTML =''
-		addBoth(12, METRIC, value, btn,'', data, isLies)
-		log_perf(12, METRIC, t0)
-		return resolve()
-	}
-
+	let value = zNA, data = {}, btn='', el
 	try {
-		data = {}
-		let method
-		const range = document.createRange()
-		isStylesAll.forEach(function(stylename) {
-			el.innerHTML = '' // reset
-			setTimeout(function() {
-				el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
-				let target = el.children[0]
-				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-				} else if (isDomRect == 1) {method = target.getClientRects()[0]
-				} else {
-					range.selectNode(target)
-					method = 2 == isDomRect ? range.getBoundingClientRect() : range.getClientRects()[0]
-				}
-				//method = measureFn(target, METRIC)
-				//if (undefined !== method.error) {throw method.errorstring}
-				value = method.height
-				if (runST) {value += ''}
-				let typeCheck = typeFn(value)
-				if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
-				data[stylename] = value
-				if (stylename == isStylesAll[isStylesAll.length - 1]) {
-					value = mini(data); btn = addButton(12, METRIC)
-					exit()
-				}
-			}, 0)
+		el = dom.tzpFontMax
+		isStylesAll.forEach(function(style) {
+			el.innerHTML = '<span class="'+ style +'" style="font-size: 20000px">.</span>'
+			let target = el.children[0]
+			let method = measureFn(target, METRIC)
+			if (undefined !== method.error) {throw method.errorstring}
+			value = method.height
+			if (runST) {value += ''}
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
+			data[style] = value
 		})
+		value = mini(data); btn = addButton(12, METRIC)
 	} catch(e) {
 		value = e; data = zErrLog
-		exit()
 	}
-})
+	try {el.innerHTML =''} catch(e) {}
+	addBoth(12, METRIC, value, btn,'', data, isLies)
+	log_perf(12, METRIC, t0)
+	return
+}
 
 function get_formats() {
 	// FF105+: layout.css.font-tech.enabled
@@ -2550,11 +2521,11 @@ const outputFonts = () => new Promise(resolve => {
 	]).then(function(){
 		// allow more time for font async fallback
 		Promise.all([
-			get_fonts_faces('font_faces',METRICD),
+			get_fonts_max('font_sizes_max', isLies),
 			get_glyphs('glyphs', isLies),
 			get_textmetrics('textmetrics'),
 			get_fonts_offscreen('font_offscreen', METRICD),
-			get_fonts_max('font_sizes_max', isLies),
+			get_fonts_faces('font_faces',METRICD),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			// enumerated fonts over all font tests
