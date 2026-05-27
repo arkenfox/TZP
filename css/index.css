@@ -483,6 +483,17 @@ body.tzpBody::after {
 		)
 	);
 }
+#tzpFontMax {
+	position: fixed;
+	top: 0px;
+	color: var(--bg0);
+	font-size: 20000px;
+	font-family: none !important;
+	font-style: normal !important;
+	font-variant: normal !important;
+	font-weight: normal !important;
+	line-height: normal !important;
+}
 #tzpTextAutosizeNo, #tzpTextAutosizeYes {
 	/* can't be selected it's behind tzpBody | hide visual by matching background-color */
 	position: fixed;
