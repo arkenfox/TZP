@@ -145,6 +145,9 @@
 
 
 #tzpImgSet {
+	position: fixed;
+	top: 0px;
+	left: -100px;
 	content: image-set(
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAQAAAAANFb+AAAAD0lEQVR42mNkwAIYiRYEAAC9AASyXfztAAAAAElFTkSuQmCC) 0.3x,
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAECAQAAAAdMWZGAAAAD0lEQVR42mNkwAIYKRMEAAEmAAV01TQkAAAAAElFTkSuQmCC) 0.4x,
@@ -187,6 +190,9 @@ url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAoCAQAAABtX6MLAAAAFUlEQV
 	);
 }
 #tzpImgSetWebkit {
+	position: fixed;
+	top: 0px;
+	left: -100px;
 	content: -webkit-image-set(
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAQAAAAANFb+AAAAD0lEQVR42mNkwAIYiRYEAAC9AASyXfztAAAAAElFTkSuQmCC) 0.3x,
 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAECAQAAAAdMWZGAAAAD0lEQVR42mNkwAIYKRMEAAEmAAV01TQkAAAAAElFTkSuQmCC) 0.4x,
