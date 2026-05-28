@@ -12,15 +12,15 @@ function getUniqueElements() {
 /*** GENERIC ***/
 
 function measureFn(target, metric) {
-	let range, method, type = isDomRect
+	let method, type = isDomRect
 	//type = 2 // test
 	try {
 		if (runSE) {foo++}
-		if (type > 1) {range = document.createRange(); range.selectNode(target)}
 		if (type < 1) {method = target.getBoundingClientRect() // get a result regardless
 		} else if (type == 1) {method = target.getClientRects()[0]
-		} else if (type == 2) {method = range.getBoundingClientRect()
-		} else if (type > 2) {method = range.getClientRects()[0]
+		} else {
+			let range = document.createRange(); range.selectNode(target)
+			method = 2 == type ? range.getBoundingClientRect() : range.getClientRects()[0]
 		}
 		return method
 	} catch(e) {
@@ -1138,7 +1138,7 @@ function get_isDomRect() {
 			oDomRect[hash]['methods'].push(METRIC)
 		}
 	}
-	//aDomRect = [false, false, false, false]
+	//aDomRect = [false, false, true, false]
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
 	log_perf(SECTP, 'isDomRect', t0,'', aDomRect.join(', '))
@@ -1527,19 +1527,24 @@ function lookup_health(sect, metric, scope, isPass) {
 		data = sDetail[scope][metric]
 		if ('string' == typeof data) {return([zErr, data])}
 	}
-	// lie?
-	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, zLIE])}} catch {}
+	// lies
+	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, data])}} catch {}
+
 	// nested, lookups, FP|detail data
 	try {
+		// nested
 		let nested ='', tmpdata, sDetailTemp
 		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
 		if ('useragent_' == metric.slice(0,10)) {nested = 'useragent'; metric = metric.replace('useragent_','')}
 		if ('media_' == metric.slice(0,6)) {nested = 'media'; metric = metric.replace('media_','')}
-
-		if ('' !== nested) {
+		// detail lookup
+		let datalookup
+		if (sDetail[scope].lookup[metric] !== undefined) {datalookup = sDetail[scope].lookup[metric]}
+		// data
+		if (undefined !== datalookup) {
+			data = datalookup
+		} else if ('' !== nested) {
 			data = gData[zFP][scope][sect]['metrics'][nested]['metrics'][metric]
-		} else if (sDetail[scope].lookup[metric] !== undefined) {
-			data = sDetail[scope].lookup[metric]
 		} else if ('font_names' == metric || 'pixels_match' == metric) {
 			// special case font names: not in FP / hash = full enumeration
 			data = sDetail[scope][metric]
@@ -1547,6 +1552,7 @@ function lookup_health(sect, metric, scope, isPass) {
 		} else {
 			data = gData[zFP][scope][sect]['metrics'][metric]
 		}
+
 		if (undefined !== data) {
 			let typeCheck = typeFn(data, true)
 			hash = '' == hash ? data : hash

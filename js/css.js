@@ -348,11 +348,19 @@ function get_media_css(METRIC) {
 	// https://drafts.csswg.org/mediaqueries-5/
 	let oTmpData = {}, countFail = 0, countSuccess = 0
 
-	function collect_data(metric, value, notation, data='', isLies = false) {
-		//console.log(metric, '~'+value +'~', '~'+data+'~', notation)
-		// data
+	function collect_data(metric, value, cssvalue, notation, data='', isLies = false) {
 		if (zErr == value) {isLies = false}
+		// record matchmedia
 		oTmpData[metric] = isSmart && isLies ? zLIE : (data == '' ? value : data)
+		if ('' !== cssvalue) {
+			// record css
+			oTmpData[metric +'_css'] = cssvalue
+			// tidy notation to include the css value
+			if ('' !== notation && value !== cssvalue) {
+				notation = rfp_red
+				sDetail[isScope].lookup[metric] = 'css: '+ cssvalue +' | matchmedia: '+ value
+			}
+		}
 		// failures: we catch failures only on checked items
 		if (rfp_red == notation) {countFail++} else if (rfp_green == notation) {countSuccess++}
 		// display
@@ -380,8 +388,7 @@ function get_media_css(METRIC) {
 			value = zErr
 		}
 		let notation = (zErr !== value && !isLies && 8 == value) ? rfp_green : rfp_red
-		collect_data(metric, value, notation, '', isLies)
-		collect_data(metric +'_css', '', (8 == cssvalue ? rfp_green : rfp_red), cssvalue)
+		collect_data(metric, value, cssvalue, notation, '', isLies)
 		return
 	}
 
@@ -391,8 +398,8 @@ function get_media_css(METRIC) {
 		const np = 'no-preference'
 		let oTests = {
 		// expected
-			'hover': {id: 'H', test: ['hover','none']},
-			'any-hover': {id: 'AH', test: ['hover','none']},
+			'hover': {id: 'H', test: ['hover','none'], rfp: 'hover', rfpver: 1},
+			'any-hover': {id: 'AH', test: ['hover','none'], rfp: 'hover', rfpver: 1},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
 			'pointer': {id: 'P', test: ['fine','coarse', 'none'], rfp: 'fine', rfpver: 1}, // FF64+
 			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine', rfpver: 1}, // FF64+
@@ -413,7 +420,7 @@ function get_media_css(METRIC) {
 			'inverted-colors': {id: 'IC', test: ['none','inverted'], rfp: 'none', rfpver: 999}, // FF114+
 				// 1794628: layout.css.inverted-colors.enabled
 			'prefers-reduced-data': {id: 'PRD', test: [np,'reduce']},
-		// matchmedia only: maybe collect for completeness' sake?
+		// matchmedia only: maybe collect for completeness?
 			// these are either expected values or not implemented yet
 			/*
 			'environment-blending': {id: '', test: ['opaque','additive','subtractive']},
@@ -429,10 +436,10 @@ function get_media_css(METRIC) {
 		// ToDo: notation reduced-transparency | inverted-colors rfpver when feature enabled
 
 		if (!isDesktop) {
-			oTests['hover']['rfp'] = 'none'; oTests['hover']['rfpver'] = 1
-			oTests['any-hover']['rfp'] = 'none'; oTests['any-hover']['rfpver'] = 1
-			oTests['pointer']['rfp'] = 'coarse'; oTests['pointer']['rfpver'] = 1
-			oTests['any-pointer']['rfp'] = 'coarse';
+			oTests.hover.rfp = 'none'
+			oTests['any-hover'].rfp = 'none'
+			oTests.pointer.rfp = 'coarse'
+			oTests['any-pointer'].rfp = 'coarse'
 		}
 
 		// any-input is a "union of capabilities": https://www.w3.org/TR/mediaqueries-4/#@media/any-input
@@ -443,7 +450,7 @@ function get_media_css(METRIC) {
 			let isTest = '' == oTests[metric].id
 			let id = '#css'+ oTests[metric].id
 			let value = zNA // match css if not supported
-			let notation ='', cssnotation ='', aTest = oTests[metric].test
+			let notation ='', aTest = oTests[metric].test
 			let aConditions = [] // for items that are a "union of capabilities" such as any-input
 			let isConditions = aUnion.includes(metric)
 			try {
@@ -494,10 +501,8 @@ function get_media_css(METRIC) {
 				let rfp = oTests[metric].rfp
 				if (rfp !== undefined && isVer >= oTests[metric].rfpver) {
 					notation = value == rfp && !isLies ? rfp_green : rfp_red
-					cssnotation = cssvalue == rfp ? rfp_green : rfp_red
 				}
-				collect_data(metric, value, notation,'', isLies)
-				collect_data(metric +'_css', '', cssnotation, cssvalue)
+				collect_data(metric, value, cssvalue, notation,'', isLies)
 			}
 		}
 	}
@@ -516,7 +521,7 @@ function get_media_css(METRIC) {
 			log_error(14, METRIC +'_'+ metric + item, e)
 			value = zErr
 		}
-		collect_data(metric + item, value, notation)
+		collect_data(metric + item, value,'', notation)
 		// image: FF150+ 2023569 layout.css.light-dark.images.enabled
 			// #enable-experimental-web-platform-features: blink seems happy with fake images
 		notation = rfp_red; item = '_image'; value = 'undefined'
@@ -531,7 +536,7 @@ function get_media_css(METRIC) {
 			log_error(14, METRIC +'_'+ metric + item, e)
 			value = zErr
 		}
-		collect_data(metric + item, value, notation)
+		collect_data(metric + item, value,'', notation)
 		return
 	}
 
