@@ -72,6 +72,8 @@
 #cssH:after{content:"n/a";}
 @media (hover:hover){#cssH:after{content:"hover";}}
 @media (hover:none){#cssH:after{content:"none ";}}
+/* any-hover is a union of capabilities: https://www.w3.org/TR/mediaqueries-4/#@media/any-input
+	except there are only two currently supported values, so no such thing (yet) */
 #cssAH:after{content:"n/a";}
 @media (any-hover:hover){#cssAH:after{content:"hover";}}
 @media (any-hover:none){#cssAH:after{content:"none ";}}
@@ -82,15 +84,12 @@
 @media (pointer:fine){#cssP:after{content:"fine";}}
 @media (pointer:coarse){#cssP:after{content:"coarse";}}
 @media (pointer:none){#cssP:after{content:"none ";}}
-/* any-pointer order matters: https://www.w3.org/TR/mediaqueries-4/#any-input */
-#cssAP:before{content:"n/a";}
-@media (any-pointer:coarse){#cssAP:before{content:"coarse";}}
-@media (any-pointer:fine){#cssAP:before{content:"fine";}} /* fine over coarse */
-@media (any-pointer:none){#cssAP:before{content:"none ";}}
-#cssAP:after{content:" + n/a";}
-@media (any-pointer:fine){#cssAP:after{content:" + fine";}}
-@media (any-pointer:coarse){#cssAP:after{content:" + coarse";}} /* coarse over fine */
-@media (any-pointer:none){#cssAP:after{content:" + none ";}}
+/* any-pointer is a union of capabilities: https://www.w3.org/TR/mediaqueries-4/#@media/any-input */
+#cssAP:after{content:"n/a";}
+@media (any-pointer:fine) or (any-pointer:coarse) {#cssAP:after {content: "any";}}
+@media (any-pointer:fine) and (not (any-pointer:coarse)) {#cssAP:after { content: "fine";}}
+@media (any-pointer:coarse) and (not (any-pointer:fine)) {#cssAP:after { content: "coarse";}}
+@media (any-pointer:none) { #cssAP:after { content:"none";}}
 #cssPC:after{content:"n/a";}
 @media (prefers-contrast:no-preference){#cssPC:after{content:"no-preference";}}
 @media (prefers-contrast:less){#cssPC:after{content:"less";}}
