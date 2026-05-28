@@ -394,9 +394,8 @@ function get_media_css(METRIC) {
 			'hover': {id: 'H', test: ['hover','none']},
 			'any-hover': {id: 'AH', test: ['hover','none']},
 			'prefers-reduced-motion': {id: 'PRM', test: [np,'reduce'], rfp: np, rfpver: 1}, // FF63+: 1478158
-			'pointer': {id: 'P', test: ['fine','coarse', 'none']}, // FF64+
-			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine + fine', rfpver: 1}, // FF64+
-				// ^ any-pointer: DO NOT CHANGE ORDER: this is our after value: coarse over fine: we break on first match
+			'pointer': {id: 'P', test: ['fine','coarse', 'none'], rfp: 'fine', rfpver: 1}, // FF64+
+			'any-pointer': {id: 'AP', test: ['coarse','fine','none'], rfp: 'fine', rfpver: 1}, // FF64+
 			'prefers-contrast': {id: 'PC', test: [np,'less','more','custom'], rfp: np, rfpver: 1}, // FF101+: 1656363
 			'prefers-color-scheme': {id: 'PCS', test: ['light','dark'], rfp: 'light', rfpver: 1}, // FF67+: 1494034 | and see 1643656
 			'forced-colors': {id: 'FC', test: ['none','active']}, // FF89+: 1659511
@@ -433,18 +432,30 @@ function get_media_css(METRIC) {
 			oTests['hover']['rfp'] = 'none'; oTests['hover']['rfpver'] = 1
 			oTests['any-hover']['rfp'] = 'none'; oTests['any-hover']['rfpver'] = 1
 			oTests['pointer']['rfp'] = 'coarse'; oTests['pointer']['rfpver'] = 1
-			oTests['any-pointer']['rfp'] = 'coarse + coarse';
+			oTests['any-pointer']['rfp'] = 'coarse';
 		}
+
+		// any-input is a "union of capabilities": https://www.w3.org/TR/mediaqueries-4/#@media/any-input
+			// we can ignore any-hover unless they expand beyond hover + none (you can't have none with any other value)
+		let aUnion = ['any-pointer']
 
 		for (const metric of Object.keys(oTests)) {
 			let isTest = '' == oTests[metric].id
 			let id = '#css'+ oTests[metric].id
 			let value = zNA // match css if not supported
 			let notation ='', cssnotation ='', aTest = oTests[metric].test
+			let aConditions = [] // for items that are a "union of capabilities" such as any-input
+			let isConditions = aUnion.includes(metric)
 			try {
 				if (runSE) {foo++}
 				for (let i=0; i < aTest.length; i++) {
-					if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value = aTest[i]; break}
+					if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {
+						if (isConditions) {
+							aConditions.push(aTest[i])
+						} else {
+							value = aTest[i]; break
+						}
+					}
 				}
 				if (isGecko) {
 					// can only be a valid value or zNA
@@ -453,18 +464,21 @@ function get_media_css(METRIC) {
 						if (value == aTest[1]) {value = aTest[0]} else {value = aTest[1]}
 					}
 				}
-				// same try catch so we don't concat errors
-				if ('any-pointer' == metric) {
-					// https://www.w3.org/TR/mediaqueries-4/#any-input
-					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
-					let value2 = zNA
-					aTest = ['fine','coarse','none']
-					// ^ any-pointer: DO NOT CHANGE ORDER: this is our before value: fine over coarse: we break on first match
-					for (let i=0; i < aTest.length; i++) {
-						if (window.matchMedia('('+ metric +':'+ aTest[i] +')').matches) {value2 = aTest[i]; break}
+				if (isConditions) {
+					let len = aConditions.length
+					// ignore unsupported
+					if (len > 0) {
+						value = aConditions.join(' + ')
+						if (1 == len) {
+							// highlander: there can only be one
+							value = aConditions[0]
+						} else {
+							// atm it's only any-pointer with only two max values
+								// the order is coarse, fine, none
+							// exact spec match: in case of fuckery
+							if (aTest[0] +' + ' + aTest[1] == value) {value = 'any'}
+						}
 					}
-					// value = after | value2 = before
-					value = value2 + ' + '+ value
 				}
 			} catch(e) {
 				if(!isTest) {log_error(14, METRIC +'_'+ metric, e)}
@@ -476,13 +490,6 @@ function get_media_css(METRIC) {
 			} else {
 				let cssvalue = getElementProp(14, id, metric +'_css')
 				// don't concat errors
-				if ('any-pointer' == metric && cssvalue !== zErr) {
-					// this is the 1st value - we use :before
-					let cssvalue2 = getElementProp(14, id, metric +'_css', ':before')
-					// cssvalue = after | cssvalue2 = before
-					let joiner = ' + ' == cssvalue.slice(0,3) ? '' : ' + '
-					cssvalue = cssvalue == zErr ? zErr : cssvalue2 + joiner + cssvalue
-				}
 				let isLies = (value !== zErr && cssvalue !== zErr && value !== cssvalue)
 				let rfp = oTests[metric].rfp
 				if (rfp !== undefined && isVer >= oTests[metric].rfpver) {
