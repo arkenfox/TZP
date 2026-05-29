@@ -148,10 +148,15 @@ function get_autoplay(METRIC) {
 	// cached from page load
 	let value, data ='', notation = isDesktop ? default_red : ''
 	if (undefined == isAutoPlayError) {
-		// Note: this is inconsistent/unstable on android: e.g. can return 'disallowed | disallowed' if the
-		// phone is on 'Do Not Disturb' )or depending on the session and transient user activity/actions?)
-		if (isDesktop && '5be5c665' == mini(isAutoPlay)) {notation = default_green}
 		value = isAutoPlay
+		if (isDesktop) {
+			if ('5be5c665' == mini(isAutoPlay)) {notation = default_green}
+		} else {
+			// this is inconsistent/unstable on android: e.g. can return 'disallowed | disallowed' if the
+			// phone is on 'Do Not Disturb' or depending on the session and transient user activity/actions
+			// e.g just a pull to refresh or open a second TZP tab etc
+			value = zNA + s99 +' ('+ value +')'+ sc; data = zNA
+		}
 	} else {
 		value = isAutoPlayError; data = isAutoPlay
 	}
