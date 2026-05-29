@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy.
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.
 			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
 		</td></tr>
 		<tr>
@@ -50,6 +50,9 @@
 <script>
 'use strict';
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#language_display_names
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 /*
    item levels atm: default 298  likely 531  expanded 1090
@@ -371,8 +374,7 @@ function run_main(method, aTest, isLoop = false) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "5dc44060") { // FF147+
 				} else if (resultsHash == "6da69df6") { // FF140-146
