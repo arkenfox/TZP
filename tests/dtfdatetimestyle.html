@@ -33,7 +33,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy with DateTimeFormat date-&-timeStyles.
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy with DateTimeFormat date-&-timeStyles.
 			Numbers will vary depending on the timezone. To check all timezones, type <code>run_all()</code> in the console and
 			go make a cup of tea.</span>
 			<span id="alert"></span>
@@ -54,6 +54,9 @@
 <script>
 'use strict';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
 	aLegend = [],
