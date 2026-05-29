@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy with DateTimeFormat date-time components</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy with DateTimeFormat date-time components</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -48,6 +48,9 @@
 <script>
 'use strict';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
 	aLegend = [],
@@ -387,8 +390,7 @@ function run_main(method = "all") {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
 				if (resultsHash == "d3d21dbf") { // FF151+

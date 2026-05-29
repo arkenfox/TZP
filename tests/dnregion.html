@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy.
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.
 			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
 		</td></tr>
 		<tr>
@@ -53,6 +53,9 @@
 // ISO-3166 2-letter country codes
 // https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 // https://www.iso.org/obp/ui/#iso:pub:PUB500001:en
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 /**
 	0. ensure a good range of locales in list
@@ -475,8 +478,7 @@ function run_main(method, aTest, isLoop = false) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "7b25db13") { // FF147+
 				} else if (resultsHash == "a0c62bf7") { // FF140-146

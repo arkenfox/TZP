@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy with DateTimeFormat relatedYear</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy with DateTimeFormat relatedYear</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -48,6 +48,9 @@
 <script>
 'use strict';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
 	aLegend = [],
@@ -152,15 +155,15 @@ function run_main(method = "all") {
 		'islamic',
 		'islamic-civil',
 		'islamic-rgsa',
+			// ^ FF147+ 1955545 Use "islamic-tbla" when either "islamic" or "islamic-rgsa" was requested
+			// ^ FF152+ 2005702 Treat 'islamic-rgsa' as an unknown calendar identifier
 		'islamic-umalqura',
 		'iso8601',
 		'persian',
 	]
 	aCalendars = aCalendars.filter(x => aSupportedCal.includes(x))
 	testsAll = {'default': testsAllMini}
-	if (aCalendars.length) {
-		aCalendars.forEach(function(cal) {testsAll[cal] = testsAllMini})
-	}
+	if (aCalendars.length) {aCalendars.forEach(function(cal) {testsAll[cal] = testsAllMini})}
 	let testsMin = {
 		'buddhist': {'long': [RY1]},
 		'chinese': {'long': [RY1]},
@@ -174,6 +177,7 @@ function run_main(method = "all") {
 		'roc': {'long': [RY1]},
 	}
 	let tests = method == "all" ? testsAll : testsMin
+	//console.log(tests)
 
 	oData = {}
 	oCompare = {'false': [], 'true': []}
@@ -268,8 +272,7 @@ function run_main(method = "all") {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
 				if (resultsHash == "6f15efe5") { // FF151+

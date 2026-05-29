@@ -33,7 +33,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy: from three
 			options (<code>narrow</code>, <code>short</code>, <code>long</code>) and five times
 			(<code>8:00</code>, <code>12:00</code>, <code>15:00</code>, <code>18:00</code>, <code>22:00</code>).
 			Click custom to test any configuration.</span>
@@ -63,6 +63,9 @@
 	<br>
 <script>
 'use strict';
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
 	aLegend = [],
@@ -269,8 +272,7 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "2fb81fcd") { // FF151+
 				} else if (resultsHash == "5acc9006") { // FF147-150
