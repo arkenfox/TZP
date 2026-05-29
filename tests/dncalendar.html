@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -49,6 +49,9 @@
 'use strict';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#script_code_display_names
 
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
+
 let aItems = [
 	//https://tc39.es/ecma402/#sec-calendar-types
 	//https://github.com/unicode-org/cldr/blob/main/common/bcp47/calendar.xml
@@ -57,7 +60,9 @@ let aItems = [
 	'islamic-umalqura', // 111 | + 7 -> 162
 	'ethiopic', 				// 125 | + 3 -> 165
 	'chinese', 					// 124 | + 1 -> 166
-	'islamic-rgsa', 		//  39 | + 1 -> 167 - F147+ 1955545 Use "islamic-tbla" when either "islamic" or "islamic-rgsa" was requested
+	'islamic-rgsa', 		//  39 | + 1 -> 167
+			// ^ FF147+ 1955545 Use "islamic-tbla" when either "islamic" or "islamic-rgsa" was requested
+			// ^ FF152+ 2005702 Treat 'islamic-rgsa' as an unknown calendar identifier
 	'roc', 							// 127 | + 1 -> 168
 	'buddhist', //125
 	'coptic', // 117
@@ -271,8 +276,7 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "f9edfcf5") { // FF147+
 				} else if (resultsHash == "8010db57") { // FF140-146
