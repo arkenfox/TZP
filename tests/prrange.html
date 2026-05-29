@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy. Both tests are not "equal": ALL
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy. Both tests are not "equal": ALL
 			calculates every single combination of words (using all numbers) which creates an exact number of
 			hashes in <code>selectRange</code>. Languages that share selectRanges can differ in <code>select</code>
 			(see previous test) and MIN uses minimal numbers, which means languages that share selectRange can now
@@ -56,6 +56,9 @@
 
 <script>
 'use strict';
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
 	aLegend = [],
@@ -277,8 +280,7 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all" & !isMax) {
 			localesHashAll = localesHash
-			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "fd71342c") { // FF147+
 				} else if (resultsHash == "deeeb2ad") { // FF140-146
