@@ -34,7 +34,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A firefox (128+) proof to confirm minimum tests for maximum entropy in timeZoneName.
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy in timeZoneName.
 			The default test covers base languages, but you can expand locales to expose
 			<span class="s4">regional differences</span> on all three tests.
 			The <code>TINY</code> test is a minimalist hardcoded test built for speed.
@@ -56,6 +56,9 @@
 
 <script>
 'use strict';
+
+let isVerMin = 140
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 let tzIgnore = [
 // MISC: acronyms and old-timey aliases: adds nothing
@@ -103,7 +106,7 @@ function log_console(name) {
 	} else if (name == "timezonesall") {
 		console.log("supported timezones\n", Intl.supportedValuesOf('timeZone'))
 	} else if (name == "locales") {
-		console.log(name +": " + hash +"\n", sDetail["locales"])
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
 	} else if (sDetail[name] !== undefined) {
 		console.log(name +": " + hash +"\n", sDetail[name])
 	}
@@ -275,6 +278,7 @@ function run_main(method, yr, isSummary = false) {
 				'America/Mendoza': tzSG, // for blink
 				"America/Montevideo": tzSG,
 				"America/Paramaribo": tzSG,
+				"America/St_Vincent": tzSG, // FF140-146 en-au vs en-nz
 				"America/Toronto": tzLG,
 				"America/Winnipeg": tzLG,
 				"Asia/Dili": tzSG,
@@ -497,13 +501,13 @@ function run_main(method, yr, isSummary = false) {
 			} else {
 				localesHashAll = localesHash
 			}
-			// notate new if expanded and 140+
-			if (isVer > 139 && optExpanded) {
+			if (isVer >= isVerMin && optExpanded) {
 				// expanded results
 				if (resultsHash == '0db200af') { // FF151+
 				} else if (resultsHash == 'b8d2903c') { // FF149-150: 2009907
 				} else if (resultsHash == '2ca8e181') { // FF147-148
 				} else if (resultsHash == '31a3ce60') { // FF140-146
+				} else if (resultsHash == 'd4b59312') { // ESR140.11
 				} else {resultsHash += ' '+ zNEW
 				}
 				// expanded locales
@@ -608,7 +612,7 @@ Promise.all([
 	// set lists
 	let list = gLocales
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	//list = ["en-au,english (australia)","en-bm,english (bermuda)"]
+	//list = ["en-au,english (australia)","en-nz,english (new zealand)"]
 	//list = ["en,english"]
 	//list = ['de','en-NZ']
 	list.sort()
