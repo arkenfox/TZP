@@ -214,6 +214,8 @@ function run_test(type) {
 			day: '2-digit', month: '2-digit', year: 'numeric',
 			hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric',
 			timeZoneName: 'short',
+			// timeZoneName: 'shortOffset', 'longOffset' also work but short gives us
+			// more variation and can be "decoded" to a numerical value
 		}
 		let k = 60000,
 			tzresults = {},
@@ -249,7 +251,10 @@ function run_test(type) {
 						if ('tzn' == method || 'both' == method) {oUndefined[year].push(tznshort)}
 					}
 					// dedupe year data
-					oUndefined[year] = oUndefined[year].filter(function(item, position) {return oUndefined[year].indexOf(item) === position})
+					// dedupe year results
+					let aTmp = oUndefined[year]
+					aTmp = aTmp.filter(function(item, position) {return aTmp.indexOf(item) === position})
+					if (1 == aTmp.length) {oUndefined[year] = aTmp[0]}
 				}
 			} catch(e) {
 				undefinedError = e+''
@@ -300,7 +305,9 @@ function run_test(type) {
 						//*/
 					}
 					// dedupe year results
-					tzresults[year] = tzresults[year].filter(function(item, position) {return tzresults[year].indexOf(item) === position})
+					let aTmp = tzresults[year]
+					aTmp = aTmp.filter(function(item, position) {return aTmp.indexOf(item) === position})
+					if (1 == aTmp.length) {tzresults[year] = aTmp[0]}
 					tmpData[tzclean] = {
 						'hash': mini(tzresults),
 						'data': tzresults
@@ -435,7 +442,10 @@ function run_test(type) {
 					str += '<ul><li>' + oBucketed[c][h].timezones.join(', ') +'</li>'
 				}
 				let oTmp = oBucketed[c][h].data, dTmp = []
-				for (const y of Object.keys(oTmp)) {dTmp.push(s4 + y +sc +': ' + oTmp[y].join(', '))}
+				for (const y of Object.keys(oTmp)) {
+					let linedata = ('object' == typeof oTmp[y]) ? oTmp[y].join(', ') : oTmp[y][0]
+					dTmp.push(s4 + y +sc +': ' + linedata)
+				}
 				str += '<li>'+ dTmp.join('<br>') +'</li></ul>'
 				aDisplay.push(str)
 			}
