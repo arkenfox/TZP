@@ -443,7 +443,7 @@ function run_test(type) {
 				}
 				let oTmp = oBucketed[c][h].data, dTmp = []
 				for (const y of Object.keys(oTmp)) {
-					let linedata = ('object' == typeof oTmp[y]) ? oTmp[y].join(', ') : oTmp[y][0]
+					let linedata = ('object' == typeof oTmp[y]) ? oTmp[y].join(', ') : oTmp[y]
 					dTmp.push(s4 + y +sc +': ' + linedata)
 				}
 				str += '<li>'+ dTmp.join('<br>') +'</li></ul>'
