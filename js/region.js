@@ -1330,7 +1330,7 @@ function get_timezone(METRIC) {
 
 	// notation: 3 x truthful Atlantic/Reykjavik, and whilst we already have health checks
 	// on offsets(s) but we need to confirm the actual results
-	if ('80724dcd' == mini(tzData) && 0 === tzo.nowValue && '031b56a9' == offsets.hash) {notation = rfp_green}
+	if ('80724dcd' == mini(tzData) && 0 === tzo.nowValue && '933e86af' == offsets.hash) {notation = rfp_green}
 
 	// summary
 		// if we have a single valid value, use that
@@ -2163,8 +2163,9 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 	for (const k of Object.keys(oData.calc)) {
 		let tmpDisplay = []
 		for (const y of Object.keys(oData.calc[k])) {
-			oData.calc[k][y] = dedupeArray(oData.calc[k][y])
-			tmpDisplay.push(oData.calc[k][y].join(', '))
+			let aTmp = dedupeArray(oData.calc[k][y])
+			tmpDisplay.push(aTmp.join(', '))
+			if (1 == aTmp.length) {oData.calc[k][y] = aTmp[0]}
 		}
 		// out of 339 unique results: 1 = 57 chars, 1 = 52 chars .. the rest are all 50 and under
 		// will likely cause line overflow on android but it's cleaner to manage and visually see
@@ -2259,7 +2260,6 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 		}
 	}
 	addBoth(4, METRIC, hash, btn, notation, data, isLies)
-
 	//if (isFile) {console.log('timezone offsets\n', oData)}
 	log_perf(4, METRIC, t0)
 	// return health as true if no errors and no lies and only one valid hash for all methods
