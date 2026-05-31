@@ -120,49 +120,26 @@ function get_element_keys(METRIC) {
 }
 
 function get_element_font(METRIC, isLies) {
+	// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/absolute-size
 	let t0 = nowFn()
-	// we only need a few pt values: more than enough to correlate styles
-	// but go more in-depth with mono/serif/sans
-	// keep in increasing size order
-	let sizeA = ['3.9pt','141.7pt','266.6pt',]
-	let sizeB = ['3.9pt','xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large','141.7pt','266.6pt']
-	let oList = {
-		// keep in sorted order
-		// https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family
-		'cursive': sizeA,
-		'emoji': sizeA, // windows: emoji = serif
-		'fangsong': sizeA,
-		'fantasy': sizeA, // windows: fantasy = sans
-		'math': sizeA,
-		'monospace': sizeB,
-		'sans-serif': sizeB,
-		'serif': sizeB,
-		'system-ui': sizeA,
-	}
-	//ToDo: each is only 3 extra tests: seem redundant
-		// windows: they all = serif
-	/*
-	'ui-monospace': sizeA,
-	'ui-rounded': sizeA,
-	'ui-serif': sizeA,
-	'ui-sans-serif': sizeA,
-	//*/
 
 	const id = 'element-fp'
 	let hash, btn ='', data = {}, method
+	let aStyles = ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+	let aSizes = ['medium'] // everything is relative to medium: so that's all we need in _this_ test
+
 	try {
 		const doc = document
 		const div = doc.createElement('div')
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
 		let oData = {}, tmpobj = {}
-		for (const k of Object.keys(oList)) {
-			let sizes = oList[k]
-			let tmpsizes = [], isFirst = 'cursive' == k // this is a bit iffy if we change our keys: do BETTER!!
-			sizes.forEach(function(size) {
-				let isTypeCheck = isFirst && size == sizes[0]
+		aStyles.forEach(function(style){		
+			let tmpsizes = [], isFirst = aStyles[0] == style
+			aSizes.forEach(function(size) {
+				let isTypeCheck = isFirst && size == aSizes[0]
 				// create + measure each individually as preceeding elements can affect subsequent ones
-				dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ k +"'>...</div>"
+				dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ style +"'>...</div>"
 				let target = div.firstChild
 				method = measureFn(target, METRIC)
 				// width+height = max entropy AFAICT but lets add x and y becuz we can
@@ -174,12 +151,13 @@ function get_element_font(METRIC, isLies) {
 						if ('number' !== typeCheck) {throw zErrType + typeCheck}
 					})
 				}
-				tmpsizes.push([size, method.width, method.height, method.x, method.y])
+				tmpsizes.push(method.width, method.height, method.x, method.y)
 			})
 			let sizehash = mini(tmpsizes)
-			if (oData[sizehash] == undefined) {oData[sizehash] = {data: tmpsizes, group: [k]}
-			} else {oData[sizehash].group.push(k)}
-		}
+			if (oData[sizehash] == undefined) {oData[sizehash] = {data: tmpsizes, group: [style]}
+			} else {oData[sizehash].group.push(style)}
+		})
+
 		// group by styles
 		for (const k of Object.keys(oData)){data[oData[k].group.join(' ')] = oData[k].data}
 		let count = Object.keys(data).length
