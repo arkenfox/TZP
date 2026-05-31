@@ -28,13 +28,13 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">basic font element test, using clientrect, with different variables</span>
+			<span class="no_color">Basic <code>generic-family</code> and
+				<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/absolute-size" class="blue" target="_blank">
+					<code>absolute-size</code></a> font element test</span>
 			<br><br>
-			<span class="btnfirst btn15" onClick="run()">[ run ]</span>
-			<input type="checkbox" name="expand" style="margin: 0; height: 12px" onClick='run()'>
-			<span class="no_color">expand font-styles</span>
-			&nbsp; <b>|</b> &nbsp; 
-			<span class="btn btn15" onClick="run_lang()">[ scripts ]</span>
+			<span class="btnfirst btn15" onClick="run(`everything`)">[ everything ]</span>
+			<span class="btn btn15" onClick="run(`TZP`)">[ TZP ]</span>
+			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</a></span>
 		</td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
@@ -44,44 +44,62 @@
 	</table>
 	<br>
 
-
 <script>
 'use strict';
-let isLanguage = '', isLocale = ''
-let sizeA = ['3.9pt','141.7pt','266.6pt',]
-let sizeB = ['3.9pt','xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large','141.7pt','266.6pt']
+let isLanguage = '', isLocale = '', type = 'TZP'
 
-let oList = {
-	// keep in sorted order
-	// https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family
-	'cursive': sizeA,
-	'emoji': sizeA, // windows: emoji = serif
-	'fangsong': sizeA,
-	'fantasy': sizeA, // windows: fantasy = sans
-	'math': sizeA,
-	'monospace': sizeB,
-	'sans-serif': sizeB,
-	'serif': sizeB,
-	'system-ui': sizeA,
+// styles: https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family
+// sizes: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/absolute-size
+
+let oTests = {
+	'everything': {
+		'sizes': ['3.9pt','xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large','141.7pt','266.6pt','947.7pt'],
+		'styles': [
+			'cursive','default','emoji','fangsong','fantasy','math','monospace','sans-serif',
+			'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
+		]
+	},
+	'TZP': {
+		'sizes': [
+			// PT
+				// we can exclude the pt sizes as these will be used in script/langauge tests
+			// absolute-size values
+				// not all of them will change on each zoom step, as long as at least one changes (medium does)
+				// that should be fine - zoom manifests in lots of other metrics anyway
+			// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/absolute-size
+				// AFAICT they are all relative to medium, so we can get away with a single size IIUIC
+				// note: a scripts/language test with pt values can defintiely change groupings so this
+				// assumption/test might be biased by my default settings/language/platform/fonts etc
+				// but we will do that lang/script test to expoloit anything, so just medium seems fine
+			'medium'
+		],
+		'styles': [
+			'cursive',
+			//'default', // we already know the default font, e.g. see font_sizes_base -> "-default-font -moz-bullet-font serif"
+			// 'emoji', // we not actually testing any emojis so this == default
+			'fangsong',
+			'fantasy',
+			'math',
+			'monospace',
+			'sans-serif',
+			'serif',
+			'system-ui',
+			// 'ui-monospace','ui-rounded','ui-sans-serif','ui-serif', // not supported yet AFAICT
+		]
+	}
 }
-let aExpand = [
-	'none',
-	'ui-monospace',
-	"ui-sans-serif",
-	'ui-serif',
-	"ui-rounded"
-]
 
-let bulkData = {}
+function get_element_font() {
 
-function get_element_font(lang = '') {
 	let t0 = performance.now()
-	let oUsed = {}
-	for (const k of Object.keys(oList)) {oUsed[k] = oList[k]}
-	if (dom.expand.checked) {aExpand.forEach(function(k){oUsed[k] = sizeB})}
-
 	const id = 'element-fp'
 	let hash, data = {}, method
+	let params = [s15 + type + sc]
+	let aStyles = oTests[type].styles, aSizes = oTests[type].sizes
+	params.push(aStyles.length +' generic-families')
+	let isOneSize = aSizes.length == 1
+	params.push(aSizes.length +' size' + (isOneSize ? ' <span class="string">'+ aSizes[0] +'</span>' :'s'))
+
 	try {
 		const doc = document
 		const div = doc.createElement('div')
@@ -89,27 +107,35 @@ function get_element_font(lang = '') {
 		doc.body.appendChild(div)
 
 		let oData = {}, tmpobj = {}
-		for (const k of Object.keys(oUsed).sort()) {
-			let sizes = oUsed[k]
+		aStyles.forEach(function(style){
 			let tmpsizes = []
-			sizes.forEach(function(size) {
+			aSizes.forEach(function(size) {
 				// create + measure each individually as preceeding elements can affect subsequent ones
-				dom[id].innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ k +"'>...</div>"
+				dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ style +"'>...</div>"
 				let target = dom[id].firstChild
 				// method
 				method = target.getBoundingClientRect()
 				// width+height = max entropy
-				tmpsizes.push([size, method.width, method.height, method.x, method.y])
+				if (isOneSize) {
+					tmpsizes.push(method.width, method.height, method.x, method.y)
+				} else {
+					tmpsizes.push([size, method.width, method.height, method.x, method.y])
+				}
 			})
 			let sizehash = mini(tmpsizes)
-			if (oData[sizehash] == undefined) {oData[sizehash] = {data: tmpsizes, group: [k]}
-			} else {oData[sizehash].group.push(k)}
-		}
+			if (oData[sizehash] == undefined) {oData[sizehash] = {data: tmpsizes, group: [style]}
+			} else {oData[sizehash].group.push(style)}
+		})
+
 		// group by styles
 		for (const k of Object.keys(oData)){data[oData[k].group.join(' ')] = oData[k].data}
 		let count = Object.keys(data).length
+		params.push(count +' unique results')
+
+		let strParam = ' ['+ params.join(' | ') +']'
 		hash = mini(data)
-		dom.results.innerHTML = s15 + hash + sc +'<br>'+ json_highlight(data, 105)
+		dom.results.innerHTML = hash + strParam +'<br><br>'+ json_highlight(data, 105)
+
 	} catch(e) {
 		dom.results.innerHTML = e+''
 	}
@@ -122,137 +148,19 @@ try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLoca
 try {isLanguage = navigator.language} catch(e) {isLanguage = zErr}
 try {dom.locale.innerHTML = isLanguage +' | '+ isLocale} catch(e) {console.log(e)}
 
-function run() {
-	dom.results = ""
-	dom.perf = ""
+function run(runtype) {
+	type = runtype
+	dom.results = ''
+	dom.perf = ''
 	setTimeout(function() {
-		get_element_font()
+		get_element_font(type)
 	}, 170)
 }
-dom.expand.checked = false
 get_element_font()
 
 //make it easy to check all zoom values
 if (isFile) {
-	//window.addEventListener("resize", get_element_font)
-}
-
-function run_lang() {
-	let t0 = performance.now()
-	bulkData = {}
-	let oUsed = {}
-	// unique measurement sets per style: this is all we need: = same on windows FF as sizeB
-		// windows TB almost the same: 'x-large' = +1 sans-serif | 'xxx-large' = +1 monospace
-	// the bigger the better it seems
-
-	// perf is atrocious at 100ms
-	let sizes = ['3.6pt','947.7pt']
-	// one small helps, and one large but not too large seems sufficient (at least on windows)
-		// 947.7pt is better than 862.3 - but 10k+ is a disaster and 1137.7pt is slightly worse than 947.7
-		// it's just going to vary slightly with DPR and locale/language and platform/fonts
-		// the above is good: 1 small, 1 large
-
-
-	for (const k of Object.keys(oList)) {oUsed[k] = oList[k]}
-
-	// one of each script (from default script sizes)
-	let aList = [
-		'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
-		// these make no diff on win FF, but some do on win TB, etc, so always include all 29 scripts
-		'ar','cr','el','gez','hy','my','ru','zh-HK',
-		// blank seems to be useless, they don't indicate anything such as locale/applang AFAICT
-			// TB: this always matches en: is this because it's a en-US build
-		'',
-	]
-	aList.sort()
-	/* WINDOWS FF: (sizeB)
-		fa405cbc
-		{
-			"cursive": 6,
-			"emoji": 20,
-			"fangsong": 2,
-			"fantasy": 2,
-			"monospace": 18,
-			"sans-serif": 15,
-			"serif": 21,
-			"system-ui": 4
-		}
-
-	WINDOWS TB:
-		075fbad5
-		{
-			"cursive": 2,
-			"emoji": 21,
-			"fangsong": 21,
-			"fantasy": 2,
-			"monospace": 17,
-			"sans-serif": 17,
-			"serif": 19,
-			"system-ui": 21
-		}
-
-	so: at this point I think we get enough entropy just by adding all scripts to FF serif and 
-
-	*/
-
-
-	// ToDo: group data by sizes and by script (we already have it by style)
-
-	const id = 'element-fp'
-	try {
-		const doc = document
-		const div = doc.createElement('div')
-		div.setAttribute('id', id)
-		doc.body.appendChild(div)
-
-		// populate our object keys
-		for (const style of Object.keys(oUsed).sort()) {bulkData[style] = {}}
-		//group by style then hash of the sizes
-		let method
-		aList.forEach(function(lang) {
-			for (const style of Object.keys(oUsed).sort()) {
-				let tmpsizes = []
-				sizes.forEach(function(size) {
-					// create + measure each individually as preceeding elements can affect subsequent ones
-					if ('' == lang) {
-						dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ style +"'>...</div>"
-					} else {
-						dom[id].innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
-					}
-					let target = dom[id].firstChild
-					// method
-					method = target.getBoundingClientRect()
-					// width+height = max entropy
-					tmpsizes.push([size, method.width, method.height, method.x, method.y])
-				})
-				let hash = mini(tmpsizes)
-				if (undefined == bulkData[style][hash]) {
-					bulkData[style][hash] = {'data': tmpsizes, 'group': [lang]}
-				} else {
-					bulkData[style][hash].group.push(lang)
-				}
-				if ('en' == lang) {
-					bulkData[style][hash]['en'] = true
-				} else if ('' == lang) {
-					bulkData[style][hash]['blank'] = true
-				}
-			}
-		})
-	} catch(e) {
-		dom.results.innerHTML = e+''
-	}
-	let perf = performance.now() - t0
-	// remove element
-	removeElementFn(id)
-	console.log(perf, 'ms |', mini(bulkData), '|', aList.length)
-	let oCounts = {}
-	for (const k of Object.keys(bulkData)) {oCounts[k] = Object.keys(bulkData[k]).length}
-	console.log(bulkData)
-
-	dom.results.innerHTML = s15 + mini(oCounts) + sc +'<br>'+ json_highlight(oCounts, 105)
-		+ '<br><br>'+ s15 + mini(bulkData) + sc +'<br>'+ json_highlight(bulkData, 105)
-	dom.perf.innerHTML = Math.round(perf) +" ms"
-
+	window.addEventListener('resize', get_element_font)
 }
 
 </script>
