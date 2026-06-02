@@ -229,8 +229,8 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 
 /* table nav */
 div.nav-title {position: relative;}
-div.nav-down {position: absolute; right: 20px; top: 0px; width: 100px; text-align: right;}
-div.nav-up {position: absolute; left: 20px; top: 0px; width: 100px; text-align: left;}
+div.nav-down {position: absolute; right: 20px; top: 0px; width: 150px; text-align: right;}
+div.nav-up {position: absolute; left: 20px; top: 0px; width: 150px; text-align: left;}
 
 /* tables */
 table {
