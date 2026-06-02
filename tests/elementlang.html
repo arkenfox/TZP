@@ -93,8 +93,8 @@ let oTests = {
 		],
 		'styles': [
 			//'default', // we already know the default font, e.g. see font_sizes_base -> "-default-font -moz-bullet-font serif"
-			// 'emoji', // we not actually testing any emojis so this == default
-			// 'ui-monospace','ui-rounded','ui-sans-serif','ui-serif', // not supported yet AFAICT
+			//'emoji', // we not actually testing any emojis so this == default
+			//'ui-monospace','ui-rounded','ui-sans-serif','ui-serif', // not supported yet AFAICT
 			'cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
 	},
 	'TZP': {
@@ -233,7 +233,7 @@ function get_element_lang() {
 		let key = newobj.lang[k].group.join(' ')
 		let tmpstyles = {}
 		for (const s of Object.keys(newobj.lang[k].data)) {
-			let stylehash = mini(newobj.lang[k].data[s])
+			let stylehash = mini(newobj.lang[k].data[s]) +' '
 			if (undefined == tmpstyles[stylehash]) {
 				tmpstyles[stylehash] = {'data': newobj.lang[k].data[s], 'group': [s]}
 			} else {
