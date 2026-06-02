@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements: language</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 480px; max-width: 780px;}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">elements: language
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+				<div class="nav-down"><span class="perf" id="locale"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Basic <code>generic-family</code> and
+				<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/lang" class="blue" target="_blank">
+					<code>lang</code></a> font element test</span>
+			<br><br>
+			<span class="btnfirst btn15" onClick="run(`everything`)">[ everything ]</span>
+			<span class="btn btn15" onClick="run(`base`)">[ base ]</span>
+			<span class="btn btn15" onClick="run(`TZP`)">[ TZP ]</span>
+			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</a></span>
+		</td></tr>
+		<tr>
+			<td colspan="2" style="text-align: left;">
+			<hr><br>
+			<span class="no_color c mono spaces" id="results"></span></td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+let isLanguage = '', isLocale = '', type = 'TZP', oData = {}
+let oTests = {
+	// all notes/numbers are FF windows 11 (ETP Strict)
+	'everything': {
+		'lang': [
+			// one of each script (from default script sizes)
+			'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+			'ar','cr','el','gez','hy','my','ru','zh-HK','default',
+		],
+		'sizes': [
+			'xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large',
+			//'3.9pt',141.7pt','266.6pt','947.7pt'
+			// pt sizes can add something: e.g. 3.9pt adds one to zh-CN but that was it
+				// it's going to be hit and miss with platforms, language/locale, available fonts, font fallback orders
+				// let's stick to absolute-size
+		],
+		'styles': [
+			'cursive','default','emoji','fangsong','fantasy','math','monospace','sans-serif',
+			'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
+		]
+	},
+	'base': {
+		// base minimum so I can see what additonal tests to add to TZP
+		'lang': [
+			'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+			'ar','cr','el','gez','hy','my','ru','zh-HK',
+			// 'default', this always seems to be same as en-US
+		],
+		'zh-HK': ['small','xxx-large',], // windows
+		'zh-TW': ['small','xxx-large',], // windows
+		'sizes': [
+			// windows: 139
+			//'xx-small', // 115
+			//'x-small', // 115
+			//'small', // 137 (with xxx-large this adds +2 to CN)
+			//'medium', // 134 (all lost on *CN/KO)
+			//'large', // 134
+			//'x-large', // 135
+			//'xx-large', // 136
+			'xxx-large', // 137 (1 each lost on zh*, that's it)
+			//'141.7pt', // 124
+			//'266.6pt', // 124
+			//'947.7pt', // 124
+		],
+		'styles': [
+			//'default', // we already know the default font, e.g. see font_sizes_base -> "-default-font -moz-bullet-font serif"
+			// 'emoji', // we not actually testing any emojis so this == default
+			// 'ui-monospace','ui-rounded','ui-sans-serif','ui-serif', // not supported yet AFAICT
+			'cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+	},
+	'TZP': {
+		// base + tweaks as I test various engines, platforms, etp settings, rfp, lang/locales
+		// note: we'll probably want to fine tune langs per generic-family
+		'lang': [
+			'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+			'ar','cr','el','gez','hy','my','ru','zh-HK',//'default',
+		],
+		// sizes: we should always try and match unique langs - which means we add additional size tests, which
+			// means by it's very nature that can add new combos: we should at least match combos but can exceed it
+			// it also means as we create per language rules, some browsers + configs will exceed unique langs
+		// the key point being that we should not be under unique lang or unique combos
+			// being careful not to drop any uniqueness (which is what base is for to show diffs vs everything)
+		'km': ['small','xxx-large',], // windows TB
+		'te': ['small','xxx-large',], // windows TB
+		'zh-HK': ['small','xxx-large',], // windows
+		'zh-TW': ['small','xxx-large',], // windows
+		'sizes': ['xxx-large'],
+		'styles': ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+	}
+}
+// keep items sorted
+oTests.everything.lang.sort()
+oTests.everything.styles.sort()
+oTests.base.lang.sort()
+oTests.base.styles.sort()
+oTests.TZP.lang.sort()
+oTests.TZP.styles.sort()
+
+function get_element_lang() {
+
+	let t0 = performance.now()
+	const id = 'element-fp'
+	let hash, data = {}, method
+	let aStyles = oTests[type].styles, aSizes = oTests[type].sizes, aLang = oTests[type].lang
+	// params
+	let params = [s15 + type + sc], params2= []
+	params.push(aStyles.length +' generic-families')
+	let allSizes = []
+	aSizes.forEach(function(s){allSizes.push(s)})
+	aLang.forEach(function(l){
+		if (undefined !== oTests[type][l]) {
+			let tempArray = oTests[type][l]
+			tempArray.forEach(function(s){allSizes.push(s)})
+		}
+	})
+	allSizes = allSizes.filter(function(item, position) {return allSizes.indexOf(item) === position})
+
+	let isAllOneSize = allSizes.length == 1
+	params.push(allSizes.length +' size' + (isAllOneSize ? ' <span class="string">'+ allSizes[0] +'</span>' :'s'))
+
+	params.push(aLang.length +' lang')
+
+	// collect the data
+	// then summarize in several ways
+		// group by style then size
+		// group by lang
+	oData = {'lang': {}, 'style': {}}
+	let oCounts = {'lang': {}, 'style': {}}
+	let testCount = 0
+	let mSet = new Set()
+
+	try {
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+
+		aLang.forEach(function(lang) {
+			oData['lang'][lang] = {}
+			aStyles.forEach(function(style){
+				if (undefined == oData['style'][style]) {oData['style'][style] = {}} // group by style
+				let tmpsizes = []
+				let arraySizes = undefined == oTests[type][lang] ? aSizes : oTests[type][lang]
+
+				let isOneSize = arraySizes.length == 1
+				arraySizes.forEach(function(size) {
+					testCount++
+					// create + measure each individually as preceeding elements can affect subsequent ones
+					dom[id].innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
+					let target = dom[id].firstChild
+					// method
+					method = target.getBoundingClientRect()
+					// width+height = max entropy
+					mSet.add(method.width +' '+ method.height +' '+ method.x +' '+ method.y)
+					if (isOneSize) { // we could use if isAllOneSize if we really refine sizes per lang
+						tmpsizes.push(method.width, method.height, method.x, method.y)
+					} else {
+						tmpsizes.push([size, method.width, method.height, method.x, method.y])
+					}
+				})
+				oData['lang'][lang][style] = tmpsizes
+				let hash = mini(tmpsizes) +' '
+				// group by style
+				if (undefined == oData['style'][style][hash]) {
+					oData['style'][style][hash] = {'data': tmpsizes, 'group': [lang]}
+				} else {
+					oData['style'][style][hash].group.push(lang)
+				}
+			})
+		})
+	} catch(e) {
+		dom.results.innerHTML = e+''
+		removeElementFn(id)
+		return
+	}
+	// perf
+	removeElementFn(id) // remove element
+	let perf = performance.now() - t0
+
+	params.push(testCount + ' tests')
+	// group stuff
+	let newobj = {}
+	for (const t of Object.keys(oData)) {
+		newobj[t] = {}
+		for (const k of Object.keys(oData[t])) {
+			let hash = mini(oData[t][k]) +' '
+			if (undefined == newobj[t][hash]) {
+				newobj[t][hash] = {'data': oData[t][k], 'group': [k]}
+			} else {
+				newobj[t][hash].group.push(k)
+			}
+		}
+	}
+	//console.log('newobj\n', newobj)
+	// cleanup style
+	oData.style = {}
+	for (const k of Object.keys(newobj.style)) {
+		let key = newobj.style[k].group.join(' ')
+		oData.style[key] = newobj.style[k].data
+	}
+	// cleanup lang
+	let tmpobj = {}
+	for (const k of Object.keys(newobj.lang)) {
+		let key = newobj.lang[k].group.join(' ')
+		let tmpstyles = {}
+		for (const s of Object.keys(newobj.lang[k].data)) {
+			let stylehash = mini(newobj.lang[k].data[s])
+			if (undefined == tmpstyles[stylehash]) {
+				tmpstyles[stylehash] = {'data': newobj.lang[k].data[s], 'group': [s]}
+			} else {
+				tmpstyles[stylehash].group.push(s)
+			}
+		}
+		let newstyles = {}
+		for (const s of Object.keys(tmpstyles)) {
+			let skey = tmpstyles[s].group.join(' ')
+			newstyles[skey] = tmpstyles[s].data
+		}
+		tmpobj[key] = newstyles
+	}
+	oData.lang = tmpobj
+	//console.log('tmpobj\n', tmpobj)
+	dom.perf.innerHTML = Math.round(perf) +' ms'
+
+	// counts
+	for (const k of Object.keys(oData.style)) {
+		oCounts.style[k] = Object.keys(oData.style[k]).length
+	}
+	params2.push(Object.keys(oData.lang).length +' unique lang')
+	let totalStyles = 0
+	for (const k of Object.keys(oData.lang)) {
+		let len = Object.keys(oData.lang[k]).length
+		oCounts.lang[k] = len
+		totalStyles += len
+	}
+	params2.push(totalStyles +' combos')
+	//console.log('oCounts\n', oCounts)
+	//console.log('oData\n', oData)
+
+	// unique measurements
+	let aMeasure = Array.from(mSet)
+	params2.push(aMeasure.length + ' unique measurements')
+
+	let strParam = ' ['+ params.join(' | ') +']'
+	let strParam2 = ' ['+ params2.join(' | ') +']'
+
+	hash = mini(oData.lang)
+	//if ('3f0404b2' == hash) {hash = sg + hash + sc} // windows 100% zoom, dpr = 1: FFbeta
+
+	dom.results.innerHTML = hash + strParam +'<br><br>GROUPED BY LANG '+ strParam2 +'<br>'+ json_highlight(oCounts.lang, 105)
+		+'<br><br><details><summary>'+ mini(oData.lang) +'</summary><br>'+ json_highlight(oData.lang, 105) +'</details>'
+		+'<br><hr><br>GROUPED BY GENERIC-FAMILY<br>'+ json_highlight(oCounts.style, 105)
+		+'<br><br><details><summary>'+ mini(oData.style) +'</summary><br>'+ json_highlight(oData.style, 105) +'</details>'
+}
+
+
+try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLocale = zErr}
+try {isLanguage = navigator.language} catch(e) {isLanguage = zErr}
+try {dom.locale.innerHTML = isLanguage +' | '+ isLocale} catch(e) {console.log(e)}
+
+function run(runtype) {
+	type = runtype
+	dom.results = ''
+	dom.perf = ''
+	setTimeout(function() {
+		get_element_lang(runtype)
+	}, 170)
+}
+//type = 'everything' // temp change whilst testing
+get_element_lang()
+
+</script>
+</body>
+</html>
