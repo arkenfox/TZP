@@ -121,8 +121,6 @@ function get_element_keys(METRIC) {
 
 function get_element_font(METRIC, isLies) {
 	// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/absolute-size
-	let t0 = nowFn()
-
 	const id = 'element-fp'
 	let hash, btn ='', data = {}, method
 	let aStyles = ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
@@ -167,7 +165,6 @@ function get_element_font(METRIC, isLies) {
 	}
 	removeElementFn(id)
 	addBoth(15, METRIC, hash, btn,'', data, isLies)
-	log_perf(15, METRIC, t0)
 	return
 }
 
@@ -261,6 +258,106 @@ function get_element_forms(METRIC, isLies) {
 			for (const k of Object.keys(newobj[key]).sort()) {data[key][k] = newobj[key][k]}
 		}
 		hash = mini(data), btn = addButton(15, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	removeElementFn(id)
+	addBoth(15, METRIC, hash, btn,'', data, isLies)
+	log_perf(15, METRIC, t0)
+	return
+}
+
+function get_element_lang(METRIC, isLies) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/lang
+	/* notes
+	- this test exposes subpixels, default+available fonts/fallback-fonts per script and default script sizes
+	- it does not expose language or locale changes: except in blink setting the UI language alters at least
+		system-ui, but that's equivalency of navigator (the language is added to navigator.languages)
+	- we will expose locale/lang in a different test that uses chars per script
+	*/
+	/*
+	perf: absolutely horrible
+	- FF cold: 125 134 134 136
+	- FF cold with mono/serif/sans hardcoded into the html: 61 72 62 59 63
+	- reruns: ~35ms
+	ToDo: can we reduce the tests, even per platform or browser
+	- e.g. chrome has a lot of lang redundancy on windows (and I don't see any way to change settings)
+		blink windows: group "bn bo cr en gez gu he hy ka km kn ml my or pa si ta te th x-math" seems inevitable
+	*/
+	let t0 = nowFn()
+	const id = 'element-fp'
+	let hash, btn ='', data = {}, method
+	let aLang = [
+		// one of each script (from default script sizes)
+		'ar','bn','bo','cr','el','en','gez','gu','he','hi','hy','ja','ka','km','kn','ko',
+		'ml','my','or','pa','ru','si','ta','te','th','x-math','zh-CN','zh-HK','zh-TW',
+	]
+	// sizes: ignore
+		// 'default': we already know default generic-family - see font_sizes_base
+		// 'emoji' : we not actually testing any emojis so this == default
+		// 'ui-monospace','ui-rounded','ui-sans-serif','ui-serif': not supported yet
+	let aStyles = ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+	let aSizes = ['xxx-large']
+	let oTweaks = {
+		'km': ['small','xxx-large',], // win TB
+		'te': ['small','xxx-large',], // win TB
+		'zh-HK': ['small','xxx-large',], // win
+		'zh-TW': ['small','xxx-large',], // win
+	}
+
+	try {
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		let oData = {}, newobj = {}
+		// collect
+		aLang.forEach(function(lang) {
+			let tmpobj = {}
+			aStyles.forEach(function(style){
+				let tmpsizes = []
+				let arraySizes = undefined == oTweaks[lang] ? aSizes : oTweaks[lang]
+				let isOneSize = arraySizes.length == 1
+				arraySizes.forEach(function(size) {
+					// create + measure each individually as preceeding elements can affect subsequent ones
+					dom[id].innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
+					let target = dom[id].firstChild
+					method = measureFn(target, METRIC)
+					if (isOneSize) {
+						tmpsizes.push(method.width, method.height, method.x, method.y)
+					} else {
+						tmpsizes.push([size, method.width, method.height, method.x, method.y])
+					}
+				})
+				tmpobj[style] = tmpsizes
+			})
+			// group lang hash
+			let langhash = mini(tmpobj) +' '
+			if (undefined == newobj[langhash]) {
+				// group style hash
+				let styleobj = {}
+				for (const s of Object.keys(tmpobj)) {
+					let stylehash = mini(tmpobj[s]) +' '
+					if (undefined == styleobj[stylehash]) {
+						styleobj[stylehash] = {'data': tmpobj[s], 'group': [s]}
+					} else {
+						styleobj[stylehash].group.push(s)
+					}
+				}
+				newobj[langhash] = {'data': styleobj, 'group': [lang]}
+			} else {
+				newobj[langhash].group.push(lang)
+			}
+		})
+		// group by lang then styles
+		for (const k of Object.keys(newobj)) {
+			let key = newobj[k].group.join(' '), tmpobj = {}
+			for (const s of Object.keys(newobj[k].data)) {
+				tmpobj[newobj[k].data[s].group.join(' ')] = newobj[k].data[s].data
+			}
+			data[key] = tmpobj
+		}
+		hash = mini(data); btn = addButton(15, METRIC) +' ['+ (nowFn()-t0).toFixed(0) +' ms]'
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -581,6 +678,7 @@ const outputElements = () => new Promise(resolve => {
 		get_element_mathml('element_mathml', isLies),
 		get_element_other('element_other', isLies),
 		get_element_scrollbars('element_scrollbars', isLies),
+		get_element_lang('element_lang', isLies),
 	]).then(function(){
 		return resolve()
 	})
