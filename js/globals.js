@@ -22,7 +22,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 136
+	expectedMetrics = 137
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -167,8 +167,8 @@ let isArch = true,
 		// 'emoji' = better covered in special metric/test targeting emojis/unicode
 		// 'fantasy' = not set in gecko (checked Feb 2026) see 536004#c2
 	isStylesAll = [
-		'cursive','emoji','fangsong','fantasy','math','monospace',
-		'sans-serif','serif','system-ui','ui-monospace','ui-rounded','ui-serif'
+		'cursive','emoji','fangsong','fantasy','math','monospace','sans-serif',
+		'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
 	],
 	isStylesheet,
 	isSystemFont = [],
