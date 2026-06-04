@@ -326,7 +326,7 @@ function get_element_lang(METRIC, isLies) {
 					if (isOneSize) {
 						tmpsizes.push(method.width, method.height, method.x, method.y)
 					} else {
-						tmpsizes.push([size, method.width, method.height, method.x, method.y])
+						tmpsizes.push([method.width, method.height, method.x, method.y])
 					}
 				})
 				tmpobj[style] = tmpsizes
@@ -446,47 +446,47 @@ function get_element_other(METRIC, isLies) {
 	let t0 = nowFn()
 	let hash, btn ='', data = {}
 
-	// note: some elements we insert a char "." to a) force a height
+	// note: some elements we insert character(s) (var eStr) to a) force a height
 	// or b) for unique measurements without a char to get more precision/decimal places
 	// always use the same char
+	let eStr = '.'
 	let aUseFirstChild = ['hgroup'] // sometimes we want the first child
 	let oExtraStyles = {
 		'marquee': '; width: 20px; height: 20px', // if we don't constrain it, it changes with inner window sizes
 	}
 
 	let oList = {
+		// AFAICT audio/video, canvas, iframe + img don't respect writing-mode
 		'horizontal-tb' : {
-			base: '<base href=""/>',
+			audio: '<audio controls=""></audio>',
+			canvas: '<canvas></canvas>',
 			figure: '<figure></figure>',
+			iframe: '<iframe>'+ eStr +'</iframe>',
+			img: '<img>', // unique on android
 		},
 		'vertical-lr' : {
-			a: '<a href="">.</a>',
-			audio: '<audio controls=""></audio>',
-			base: '<base href=""/>',
-			big_x2: '<big><big>.</big></big>',
-			big_x3: '<big><big><big>.</big></big></big>',
+			a: '<a href="">'+ eStr +'</a>',
+			big_x2: '<big><big>'+ eStr +'</big></big>',
+			big_x3: '<big><big><big>'+ eStr +'</big></big></big>',
 			br: '<br>',
-			canvas: '<canvas></canvas>',
-			caption: '<table><caption>.</caption></table>',
-			dd: '<dl><dd>.</dd></dl>',
+			caption: '<table><caption>'+ eStr +'</caption></table>',
+			dd: '<dl><dd>'+ eStr +'</dd></dl>',
 			dialog: '<dialog open=""></dialog>',
-			dt: '<dl><dt>.</dt></dl>',
+			dt: '<dl><dt>'+ eStr +'</dt></dl>',
 			fieldset: '<fieldset></fieldset>',
-			figcaption: '<figure><figcaption>.</figcaption></figure>',
-			geolocation: '<geolocation></geolocation>',
+			figcaption: '<figure><figcaption>'+ eStr +'</figcaption></figure>',
 			hgroup: '<hgroup><h1>.</h1><p class="revert">.</p></hgroup>', // code doesn't revert 2nd child so hardcode it
 			hr: '<hr>',
-			img: '<img></img>',
-			legend: '<fieldset><legend>.</legend></fieldset>',
+			legend: '<fieldset><legend>'+ eStr +'</legend></fieldset>',
 			li: '<ul><li></li></ul>',
 			'q_empty': '<q></q>',
-			'menu_li': '<menu>.<li></li></menu>',
-			noembed: '<embed><noembed>.</noembed>',
-			'ol_li': '<ol><li>.</li></ol>',
+			'menu_li': '<menu>'+ eStr +'<li></li></menu>',
+			'ol_li': '<ol><li>'+ eStr +'</li></ol>',
 			optgroup: '<optgroup></optgroup>',
 			output: '<form><input>=<output class="revert"></output></form>',
 			plaintext: '<plaintext>',
-			rt: '<ruby><rt>.</rt></ruby>',
+			rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
+			search: '<search></search>',
 			td: '<table><tr><td></td></tr></table>',
 			tfoot: '<table><tfoot></tfoot></table>',
 			// test error
@@ -494,10 +494,10 @@ function get_element_other(METRIC, isLies) {
 		}
 	}
 	let aVerticalAdd = [
-		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i','iframe',
-		'marquee','meter','noscript','option','pre','q','small','sub','sup','ul',
+		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
+		'marquee','meter','option','pre','q','small','sub','sup','ul',
 	]
-	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>.</'+item+'>'})
+	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>'+ eStr +'</'+item+'>'})
 
 	let width, height, x, y, method, tmpdata = {}
 	const id = 'element-fp'
