@@ -13,6 +13,35 @@
 </head>
 
 <body>
+	<div id="element-fp"></div>
+
+	<!--for async fallback-->
+	<div class="offscreen">
+		<div class="monospace">
+			<span lang='ar'>.</span><span lang='bn'>.</span><span lang='bo'>.</span><span lang='cr'>.</span><span lang='el'>.</span>
+			<span lang='en'>.</span><span lang='gez'>.</span><span lang='gu'>.</span><span lang='he'>.</span><span lang='hi'>.</span>
+			<span lang='hy'>.</span><span lang='ja'>.</span><span lang='ka'>.</span><span lang='km'>.</span><span lang='kn'>.</span>
+			<span lang='ko'>.</span><span lang='ml'>.</span><span lang='my'>.</span><span lang='or'>.</span><span lang='pa'>.</span>
+			<span lang='ru'>.</span><span lang='si'>.</span><span lang='ta'>.</span><span lang='te'>.</span><span lang='th'>.</span>
+			<span lang='x-math'>.</span><span lang='zh-CN'>.</span><span lang='zh-HK'>.</span><span lang='zh-TW'>.</span>
+		</div>
+		<div class="serif">
+			<span lang='ar'>.</span><span lang='bn'>.</span><span lang='bo'>.</span><span lang='cr'>.</span><span lang='el'>.</span>
+			<span lang='en'>.</span><span lang='gez'>.</span><span lang='gu'>.</span><span lang='he'>.</span><span lang='hi'>.</span>
+			<span lang='hy'>.</span><span lang='ja'>.</span><span lang='ka'>.</span><span lang='km'>.</span><span lang='kn'>.</span>
+			<span lang='ko'>.</span><span lang='ml'>.</span><span lang='my'>.</span><span lang='or'>.</span><span lang='pa'>.</span>
+			<span lang='ru'>.</span><span lang='si'>.</span><span lang='ta'>.</span><span lang='te'>.</span><span lang='th'>.</span>
+			<span lang='x-math'>.</span><span lang='zh-CN'>.</span><span lang='zh-HK'>.</span><span lang='zh-TW'>.</span>
+		</div>
+		<div class="sans-serif">
+			<span lang='ar'>.</span><span lang='bn'>.</span><span lang='bo'>.</span><span lang='cr'>.</span><span lang='el'>.</span>
+			<span lang='en'>.</span><span lang='gez'>.</span><span lang='gu'>.</span><span lang='he'>.</span><span lang='hi'>.</span>
+			<span lang='hy'>.</span><span lang='ja'>.</span><span lang='ka'>.</span><span lang='km'>.</span><span lang='kn'>.</span>
+			<span lang='ko'>.</span><span lang='ml'>.</span><span lang='my'>.</span><span lang='or'>.</span><span lang='pa'>.</span>
+			<span lang='ru'>.</span><span lang='si'>.</span><span lang='ta'>.</span><span lang='te'>.</span><span lang='th'>.</span>
+			<span lang='x-math'>.</span><span lang='zh-CN'>.</span><span lang='zh-HK'>.</span><span lang='zh-TW'>.</span>
+		</div>
+	</div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -47,88 +76,91 @@
 
 <script>
 'use strict';
-let isLanguage = '', isLocale = '', type = 'TZP', oData = {}
-let oTests = {
-	// all notes/numbers are FF windows 11 (ETP Strict)
-	'everything': {
-		'lang': [
-			// one of each script (from default script sizes)
-			'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
-			'ar','cr','el','gez','hy','my','ru','zh-HK','default',
-		],
-		'sizes': [
-			'xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large',
-			//'3.9pt',141.7pt','266.6pt','947.7pt'
-			// pt sizes can add something: e.g. 3.9pt adds one to zh-CN but that was it
-				// it's going to be hit and miss with platforms, language/locale, available fonts, font fallback orders
-				// let's stick to absolute-size
-		],
-		'styles': [
-			'cursive','default','emoji','fangsong','fantasy','math','monospace','sans-serif',
-			'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
-		]
-	},
-	'base': {
-		// base minimum so I can see what additonal tests to add to TZP
-		'lang': [
-			'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
-			'ar','cr','el','gez','hy','my','ru','zh-HK',
-			// 'default', this always seems to be same as en-US
-		],
-		'zh-HK': ['small','xxx-large',], // windows
-		'zh-TW': ['small','xxx-large',], // windows
-		'sizes': [
-			// windows: 139
-			//'xx-small', // 115
-			//'x-small', // 115
-			//'small', // 137 (with xxx-large this adds +2 to CN)
-			//'medium', // 134 (all lost on *CN/KO)
-			//'large', // 134
-			//'x-large', // 135
-			//'xx-large', // 136
-			'xxx-large', // 137 (1 each lost on zh*, that's it)
-			//'141.7pt', // 124
-			//'266.6pt', // 124
-			//'947.7pt', // 124
-		],
-		'styles': [
-			//'default', // we already know the default font, e.g. see font_sizes_base -> "-default-font -moz-bullet-font serif"
-			//'emoji', // we not actually testing any emojis so this == default
-			//'ui-monospace','ui-rounded','ui-sans-serif','ui-serif', // not supported yet AFAICT
-			'cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
-	},
-	'TZP': {
-		// base + tweaks as I test various engines, platforms, etp settings, rfp, lang/locales
-		// note: we'll probably want to fine tune langs per generic-family
-		'lang': [
-			'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
-			'ar','cr','el','gez','hy','my','ru','zh-HK',//'default',
-		],
-		// sizes: we should always try and match unique langs - which means we add additional size tests, which
-			// means by it's very nature that can add new combos: we should at least match combos but can exceed it
-			// it also means as we create per language rules, some browsers + configs will exceed unique langs
-		// the key point being that we should not be under unique lang or unique combos
-			// being careful not to drop any uniqueness (which is what base is for to show diffs vs everything)
-		'km': ['small','xxx-large',], // windows TB
-		'te': ['small','xxx-large',], // windows TB
-		'zh-HK': ['small','xxx-large',], // windows
-		'zh-TW': ['small','xxx-large',], // windows
-		'sizes': ['xxx-large'],
-		'styles': ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
-	}
-}
-// keep items sorted
-oTests.everything.lang.sort()
-oTests.everything.styles.sort()
-oTests.base.lang.sort()
-oTests.base.styles.sort()
-oTests.TZP.lang.sort()
-oTests.TZP.styles.sort()
+let isLanguage = '', isLocale = '', defaultType = 'TZP', oData = {}, oTests = {}
 
-function get_element_lang() {
+function build_tests() {
+	oTests = {
+		// all notes/numbers are FF windows 11 (ETP Strict)
+		'everything': {
+			'lang': [
+				// one of each script (from default script sizes)
+				'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+				'ar','cr','el','gez','hy','my','ru','zh-HK','default',
+			],
+			'sizes': [
+				'xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large',
+				//'3.9pt',141.7pt','266.6pt','947.7pt'
+				// pt sizes can add something: e.g. 3.9pt adds one to zh-CN but that was it
+					// it's going to be hit and miss with platforms, language/locale, available fonts, font fallback orders
+					// let's stick to absolute-size
+			],
+			'styles': [
+				'cursive','default','emoji','fangsong','fantasy','math','monospace','sans-serif',
+				'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
+			]
+		},
+		'base': {
+			// base minimum so I can see what additonal tests to add to TZP
+			'lang': [
+				'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+				'ar','cr','el','gez','hy','my','ru','zh-HK',
+				// 'default', this always seems to be same as en-US
+			],
+			'zh-HK': ['small','xxx-large',], // windows
+			'zh-TW': ['small','xxx-large',], // windows
+			'sizes': [
+				// windows: 139
+				//'xx-small', // 115
+				//'x-small', // 115
+				//'small', // 137 (with xxx-large this adds +2 to CN)
+				//'medium', // 134 (all lost on *CN/KO)
+				//'large', // 134
+				//'x-large', // 135
+				//'xx-large', // 136
+				'xxx-large', // 137 (1 each lost on zh*, that's it)
+				//'141.7pt', // 124
+				//'266.6pt', // 124
+				//'947.7pt', // 124
+			],
+			'styles': [
+				//'default', // we already know the default font, e.g. see font_sizes_base -> "-default-font -moz-bullet-font serif"
+				//'emoji', // we not actually testing any emojis so this == default
+				//'ui-monospace','ui-rounded','ui-sans-serif','ui-serif', // not supported yet AFAICT
+				'cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+		},
+		'TZP': {
+			// base + tweaks as I test various engines, platforms, etp settings, rfp, lang/locales
+			// note: we'll probably want to fine tune langs per generic-family
+			'lang': [
+				'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+				'ar','cr','el','gez','hy','my','ru','zh-HK',//'default',
+			],
+			// sizes: we should always try and match unique langs - which means we add additional size tests, which
+				// means by it's very nature that can add new combos: we should at least match combos but can exceed it
+				// it also means as we create per language rules, some browsers + configs will exceed unique langs
+			// the key point being that we should not be under unique lang or unique combos
+				// being careful not to drop any uniqueness (which is what base is for to show diffs vs everything)
+			'km': ['small','xxx-large',], // windows TB
+			'te': ['small','xxx-large',], // windows TB
+			'zh-HK': ['small','xxx-large',], // windows
+			'zh-TW': ['small','xxx-large',], // windows
+			'sizes': ['xxx-large'],
+			'styles': ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+		}
+	}
+
+	oTests.everything.lang.sort()
+	oTests.everything.styles.sort()
+	oTests.base.lang.sort()
+	oTests.base.styles.sort()
+	oTests.TZP.lang.sort()
+	oTests.TZP.styles.sort()
+}
+
+function get_element_lang(type) {
+	if (undefined == type) {type = defaultType}
 
 	let t0 = performance.now()
-	const id = 'element-fp'
 	let hash, data = {}, method
 	let aStyles = oTests[type].styles, aSizes = oTests[type].sizes, aLang = oTests[type].lang
 	// params
@@ -146,7 +178,6 @@ function get_element_lang() {
 
 	let isAllOneSize = allSizes.length == 1
 	params.push(allSizes.length +' size' + (isAllOneSize ? ' <span class="string">'+ allSizes[0] +'</span>' :'s'))
-
 	params.push(aLang.length +' lang')
 
 	// collect the data
@@ -158,12 +189,8 @@ function get_element_lang() {
 	let testCount = 0
 	let mSet = new Set()
 
+	const parent = dom['element-fp']
 	try {
-		const doc = document
-		const div = doc.createElement('div')
-		div.setAttribute('id', id)
-		doc.body.appendChild(div)
-
 		aLang.forEach(function(lang) {
 			oData['lang'][lang] = {}
 			aStyles.forEach(function(style){
@@ -175,8 +202,8 @@ function get_element_lang() {
 				arraySizes.forEach(function(size) {
 					testCount++
 					// create + measure each individually as preceeding elements can affect subsequent ones
-					dom[id].innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
-					let target = dom[id].firstChild
+					parent.innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
+					let target = parent.firstChild
 					// method
 					method = target.getBoundingClientRect()
 					// width+height = max entropy
@@ -184,7 +211,8 @@ function get_element_lang() {
 					if (isOneSize) { // we could use if isAllOneSize if we really refine sizes per lang
 						tmpsizes.push(method.width, method.height, method.x, method.y)
 					} else {
-						tmpsizes.push([size, method.width, method.height, method.x, method.y])
+						tmpsizes.push([method.width, method.height, method.x, method.y])
+						//tmpsizes.push([size, method.width, method.height, method.x, method.y])
 					}
 				})
 				oData['lang'][lang][style] = tmpsizes
@@ -198,13 +226,12 @@ function get_element_lang() {
 			})
 		})
 	} catch(e) {
+		parent.innerHTML = '' // clear display
 		dom.results.innerHTML = e+''
-		removeElementFn(id)
 		return
 	}
-	// perf
-	removeElementFn(id) // remove element
-	let perf = performance.now() - t0
+	parent.innerHTML = '' // clear display
+	dom.perf.innerHTML = Math.round(performance.now() - t0) +' ms' // perf
 
 	params.push(testCount + ' tests')
 	// group stuff
@@ -249,7 +276,6 @@ function get_element_lang() {
 	}
 	oData.lang = tmpobj
 	//console.log('tmpobj\n', tmpobj)
-	dom.perf.innerHTML = Math.round(perf) +' ms'
 
 	// counts
 	for (const k of Object.keys(oData.style)) {
@@ -282,21 +308,21 @@ function get_element_lang() {
 		+'<br><br><details><summary>'+ mini(oData.style) +'</summary><br>'+ json_highlight(oData.style, 105) +'</details>'
 }
 
-
 try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLocale = zErr}
 try {isLanguage = navigator.language} catch(e) {isLanguage = zErr}
 try {dom.locale.innerHTML = isLanguage +' | '+ isLocale} catch(e) {console.log(e)}
 
-function run(runtype) {
-	type = runtype
+function run(type) {
 	dom.results = ''
 	dom.perf = ''
 	setTimeout(function() {
-		get_element_lang(runtype)
+		get_element_lang(type)
 	}, 170)
 }
-//type = 'everything' // temp change whilst testing
+//defaultType = 'everything' // temp change whilst testing
+build_tests()
 get_element_lang()
+
 
 </script>
 </body>
