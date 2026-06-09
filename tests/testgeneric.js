@@ -688,6 +688,9 @@ function copyclip(element) {
 			let regex = /<br\s*[\/]?>/gi
 			content = content.replace(regex, "\r\n")
 			content = content.replace(/<\/?span[^>]*>/g,"")
+			content = content.replace(/<\/?details[^>]*>/g,"")
+			content = content.replace(/<\/?summary[^>]*>/g,"")
+			content = content.replace(/<\/?hr[^>]*>/g,"\r\n")
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
 				// clipboard successfully set
