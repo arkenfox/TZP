@@ -36,6 +36,7 @@
 			background-color: bisque;
 			color: black;
 		}
+		.btn-right {float: right; position: relative; right: 0px; top: 0px; text-align: right;}
 
 		/*** custom styles so we can check they are removed ***/
 		/* you can run check_revert() to test */
@@ -68,14 +69,14 @@
 		#element-fp sup {margin: 2px; padding: 2px;}
 
 		abbr, acronym, address, applet, article, aside, audio,
-		big, blockquote, caption, center, cite,
+		base, basefont, big, blockquote, caption, center, cite,
 		data, dd, del, dfn, dialog, dir, dl, dt {
 			margin: 2px; padding: 2px;
 		}
 
 		em, figcaption, fieldset, figure, footer, form,
-		header, hgroup, ins, isindex, keygen, kbd, label, legend, li,
-		main, mark, marquee, menu, nav, nobr {
+		header, hgroup, input, ins, isindex, keygen, kbd, label, legend, li,
+		link, main, mark, marquee, menu, nav, nobr, noframes {
 			margin: 2px; padding: 2px;
 		}
 
@@ -85,7 +86,7 @@
 			margin: 2px; padding: 2px;
 		}
 
-		canvas, iframe, img, meter, object, picture, video {
+		canvas, embed, iframe, img, meter, noembed, object, picture, video {
 			width: 75px;
 		}
 
@@ -117,10 +118,12 @@
 			<span class="btn15 btnfirst" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn15 btnfirst" onClick="run(`TZP`)">[ TZP ]</span>
 			<span class="btn15 btnfirst" onClick="list_elements()">[ elements ]</span>
-			<span class="btn15 btnfirst">
-				<a class="blue" target="_blank" href="elementother_nocss.html" onClick="run('everything')">[ NO CSS TEST ]</a>
-			</span>
 			<span class="btn15 btnfirst" onClick="copyclip('elements')">[ COPY ]</a></span>
+			<span class="btn btn0">
+				<a class="blue" target="_blank" href="elementother_nocss.html" onClick="run('everything')">no css</a>
+				| <a class="blue" target="_blank" href="elementother_sanity.html">sanity</a>
+			</span>
+
 			<div id="methodused" class="btn-right mono"></div>
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
@@ -138,7 +141,9 @@
 // ^ AFAICT audio/video, canvas, iframe + img don't respect writing-mode
 // ^^ but we can still measure (or try to measure) all these elements in at least horizontal or no writing-style modes
 
-let oData = {}, oList = {}, oListBase = {}, oTZP = {}, oChecks = {}, oCheckSummary = {}
+let defaultType = 'TZP'
+
+let oData = {}, oList = {}, oListBase = {}, oTZP = {}, oChecks = {}, oCheckSummary = {}, allTests = []
 let testTarget
 let isMethod = 0, strMethod
 let oMethods = {
@@ -148,26 +153,53 @@ let oMethods = {
 	3: 'range.getClientRects()[0]',
 }
 
-let aUseFirstChild = ['hgroup'] // we want to measure the first element, not the last
-let oExtraStyles = {
-	'marquee': '; width: 20px; height: 20px', // if we don't constrain it, it changes with inner window sizes
+let oSpecial = {
+	// resets to parent.firstChild | then if an integer, selects that child item
+	'hgroup': '', // revert to parent first child
+	'output_in_form': 1,
 }
 
 let eStr = '.'
 function build_lists() {
+	allTests = []
+	oListBase = {}
+	oTZP = {}
+
 	// note: some elements we insert a char "." to a) force a height
 	// or b) for unique measurements without a char to get more precision/decimal places
 	// always use the same char
 	let oTmp = {
+		// display:inline required
+			// otherwise errors in various domrect methods or mismatches or both
+		base: '<base style="display:inline;" href=""/>',
+		basefont: '<basefont style="display:inline;" color="#FF0000"/>',
+		caption: '<table><caption style="display:inline;">'+ eStr +'</caption></table>',
+		link: '<link style="display:inline;" href="" rel="stylesheet">',
+		noframes: '<noframes style="display:inline;">'+ eStr +'</noframes>',
+		rp: '<ruby><rp style="display:inline;">'+ eStr +'</rp></ruby>',
+		slot: '<slot style="display:inline;">'+ eStr +'</slot>',
+		title: '<title style="display:inline;">' + eStr +'</title>',
+
+		// other style
+			// these were all unique beforehand, we're not creating artificial uniqueness
+		figure: '<figure style="display:inline;"></figure>', // inline for horizontal decimals
+		hr: '<hr style="display:inline;">', // inline to add more unique individual measurements
+		marquee: '<marquee style="width: 20px; height: 20px;">'+ eStr +'</marquee>',
+			// marquee constrain size else it changes with inner window sizes
+		plaintext: '<plaintext style="display:inline;">', // inline for vertical decimals
+		ruby: '<ruby style="display:inline;">'+ eStr +'</ruby>',
+			// ruby inline otherwise TZP doesn't match PoC in gecko (it does in blink)
+			// NFI: have checked element, styles, everything
+
+		// the rest
 		a: '<a href="">'+ eStr +'</a>',
 		audio: '<audio controls=""></audio>',
 		big_x2: '<big><big>'+ eStr +'</big></big>',
 		big_x3: '<big><big><big>'+ eStr +'</big></big></big>',
-		// always revert tables because we have that in our inline style in the plain test
-		caption: '<table><caption>'+ eStr +'</caption></table>',
 		dd: '<dl><dd>'+ eStr +'</dd></dl>',
 		dialog: '<dialog open=""></dialog>',
 		dt: '<dl><dt>'+ eStr +'</dt></dl>',
+		embed: '<embed src="">',
 		figcaption: '<figure><figcaption>'+ eStr +'</figcaption></figure>',
 		hgroup: '<hgroup><h1>'+ eStr +'</h1><p class="revert">'+ eStr +'</p></hgroup>', // revert 2nd child (p)
 		isindex: '<isindex prompt="search"></isindex>',
@@ -175,17 +207,22 @@ function build_lists() {
 		label: '<div id="elementlabel"><label for="elementlabel">'+ eStr +'</label></div<',
 		legend: '<fieldset><legend>'+ eStr +'</legend></fieldset>',
 		li: '<ul><li></li></ul>',
-		output: '<form><input>=<output class="revert"></output></form>',
-			// '<form><input id="a" value="."> = <output id="x" name="x" for="a"></output></form>',
-			// we don't actually need to calculate any values
+		noembed: '<embed src=""><noembed>'+ eStr +'</noembed>',
+		//output_in_form: '<form><input><output class="revert"></output></form>', // revert 2nd child
+			// output
+			// - we don't actually need to calculate any values | if we wanted to we could add eStr
+			// - on it's own is redundant ('<output>'+ eStr +'<output>')
+			// - when wrapped in form/input it becomes unique, butr what's interesting is that I get two
+			//   different values in two FF151's (my test profile, my main profile) and I have no idea why
+			//   When this happens it is because form has a different width (and thus cascades effects)
+			// If we cabn replicate this in forms, then we can drop output here and instead add it as
+			// a redundant item as such: '<output>'+ eStr +'<output>'
+
 		rb: '<ruby><rb>'+ eStr +'</rb></ruby>',
 		rbc: '<ruby><rbc>'+ eStr +'</rbc></ruby>',
-		rp: '<ruby><rp style="display:inline;">'+ eStr +'</rp></ruby>',
 		rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
 		rtc: '<ruby><rtc>'+ eStr +'</rtc></ruby>',
-		slot: '<slot style="display:inline;">'+ eStr +'</slot>',
 		summary: '<details><summary>'+ eStr +'</summary></details>',
-		'q_empty': '<q></q>',
 		// tables
 		tbody: '<table><tbody></tbody></table>', 
 		td: '<table><tr><td></td></tr></table>',
@@ -194,9 +231,9 @@ function build_lists() {
 		thead: '<table><thead></thead></table>',
 		tr: '<table><tr></tr></table>',
 		// other
-		'ol_li': '<ol><li>'+ eStr +'</li></ol>',
-		'menu_li': '<menu>'+ eStr +'<li></li></menu>',
-		'ul_li': '<ul><li>'+ eStr +'</li></ul>',
+		ol_li: '<ol><li>'+ eStr +'</li></ol>',
+		menu_li: '<menu>'+ eStr +'<li></li></menu>',
+		ul_li: '<ul><li>'+ eStr +'</li></ul>',
 		// test error
 		//'error': '<frame></frame>'
 	}
@@ -208,21 +245,19 @@ function build_lists() {
 			'data','del','dir','div','dfn','dl','em','footer',
 			'h1','h2','h3','h4','h5','h6','header',
 			'i','ins','iframe','kbd',
-			'main','mark','marquee','menu','meter',
-			'nobr','ol','option','p','pre','q',
-			'ruby',
+			'main','mark','menu',
+			'nobr','ol','option','output','p','pre','q',
 			's','samp','section','small','span','strike','strong','sub','sup',
-			'time','title','tt',
+			'time','tt',
 			'u','ul','var','xmp',
 		],
 		nochar: [
-			'canvas','fieldset','figure',
-			'nav','optgroup','picture',
+			'canvas','fieldset','meter','nav','optgroup','picture',
 			'portal', // https://wicg.github.io/portals/#the-portal-element
 			'search','table','video',
 		],
 		standalone: [
-			'br','hr','img','object','plaintext',
+			'br','img','object',
 		]
 	}
 	for (const type of Object.keys(oExtra)) {
@@ -241,6 +276,7 @@ function build_lists() {
 	// sort into final object
 	for (const k of Object.keys(oTmp).sort()) {
 		oListBase[k] = oTmp[k]
+		allTests.push(k)
 	}
 
 	// build TZP
@@ -250,14 +286,21 @@ function build_lists() {
 		// add a new element: the point of difference was in "base, basefont, picture"
 		// (grouped in everything) - we already use base, so instead add basefont or picture 
 	oTmp = {
-		'horizontal-tb': ['audio','canvas','figure','iframe','img',],
+		'horizontal-tb': [
+			// AFAICT audio/video, canvas, iframe + img don't respect writing-mode
+			'audio','canvas','iframe','img',
+			// unqiueness comes horizontal
+			'ol_li','ul_li',
+			// the rest
+			'article','big','big_x2','big_x3','blockquote','br','caption','code','dt','fieldset',
+			'figure','h1','h2','h3','h4','h5','h6','hgroup','hr','legend','marquee','menu_li','meter',
+			'q','rtc','search','small','sub','td','tfoot','ul',
+			// keep together
+			'a','b','i', // unique on android
+		],
 		'vertical-lr': [
-			'a','b','big','big_x2','big_x3','blockquote','br',
-			'caption','code','dd','dialog','dl','dt','fieldset','figcaption',
-			'h1','h2','h3','h4','h5','h6','hgroup','hr','i',
-			'legend','li','marquee','menu_li','meter',
-			'ol_li','optgroup','option','output','plaintext','pre','q','q_empty',
-			'rt','search','small','sub','sup','tfoot','td','ul',
+			'dd','dialog','dl','figcaption','li','object','optgroup',
+			'option','plaintext','pre','rb','rt','summary','sup',
 		]
 	}
 	// populate
@@ -266,6 +309,7 @@ function build_lists() {
 		let array = oTmp[t].sort()
 		array.forEach(function(item) {oTZP[t][item] = oListBase[item]})
 	}
+	console.log('allTests\n', allTests)
 	/* testing
 	oListBase = {
 		tbody: '<table><tbody></tbody></table>', 
@@ -278,26 +322,8 @@ function build_lists() {
 	//*/
 }
 
-function create_element(str, vertical = false, isLoop = false) {
-	if (isMethod < 0 && isMethod > 3) {isMethod = 0}
-	strMethod = oMethods[isMethod]
-
-	let style = vertical ? 'vertical-lr' : 'horizontal-tb'
-	oList = {}
-	oList[style] = {'test': str}
-	let oRes = get_elements('everything', true) // returned tmpdata, target
-	let itemdata = oRes[0]['test'][style.slice(0,-3)]
-	if (!isLoop) {
-		testTarget = oRes[1]
-		console.log('testTarget', style, 'method', strMethod, '\n', testTarget)
-		console.log('isRevert', isRevert, mini(itemdata), itemdata)
-	} else {
-		return [mini(itemdata), itemdata]
-	}
-}
-
 function get_elements(type, isTest = false) {
-	if (undefined == type) {type = 'TZP'}
+	if (undefined == type) {type = defaultType}
 	let t0 = performance.now()
 	oData = {}
 	let params = [s15 + type + sc]
@@ -305,7 +331,7 @@ function get_elements(type, isTest = false) {
 		oList = 'TZP' == type ? oTZP : {'horizontal-tb': oListBase, 'vertical-lr': oListBase}
 	}
 
-	let tmpdata = {}, newobj = {}
+	let tmpdata = {}, newobj = {}, setIndividual = new Set()
 	let target, testCount = 0, shadowData = {}
 	const parent = dom['element-fp']
 	try {
@@ -342,11 +368,14 @@ function get_elements(type, isTest = false) {
 						if (undefined == newtarget) {break}
 						target = newtarget
 					}
-					// choose target
-					if (aUseFirstChild.includes(k)) {target = parent.firstChild}
-					// set style
-					let extraStyle = undefined == oExtraStyles[k] ? '' : oExtraStyles[k]
-					target.setAttribute("style","display:inline; writing-mode: "+ s + extraStyle +";")
+					// amend target
+					if (undefined !== oSpecial[k]) {
+						let intTarget = oSpecial[k]; target = parent.firstChild
+						if (Number.isInteger(intTarget)) {target = target.children[intTarget]}
+					}
+
+					// add writing-mode: ignore horizontal
+					if ('vertical-lr' == s) {target.style.setProperty('writing-mode', s)}
 					let method
 					if (isMethod == 0) {method = target.getBoundingClientRect()
 					} else if (isMethod == 1) {method = target.getClientRects()[0]
@@ -355,6 +384,8 @@ function get_elements(type, isTest = false) {
 						method = 2 == isMethod ? range.getBoundingClientRect() : range.getClientRects()[0]
 					}
 					itemdata = [method.width, method.height, method.x, method.y]
+					itemdata.forEach(function(num) {setIndividual.add(num)}) // unique individuaL measurements
+
 				} catch(e) {
 					itemdata = zErr
 					console.log(k, e+'')
@@ -387,7 +418,6 @@ function get_elements(type, isTest = false) {
 		params.push(testCount +' measurements')
 
 		//console.log(tmpdata)
-		let aHash
 		if ('TZP' == type) {
 			// group by results
 			for (const s of Object.keys(tmpdata)) {
@@ -401,8 +431,6 @@ function get_elements(type, isTest = false) {
 				oData[s] = {}
 				for (const k of Object.keys(newobj[s]).sort()) {oData[s][k] = newobj[s][k]}
 			}
-			aHash = Array.from(setHash)
-			params.push(aHash.length +' unique measurements')
 			// shadowData
 			//console.log(shadowData)
 			let setShadow = new Set()
@@ -411,7 +439,7 @@ function get_elements(type, isTest = false) {
 				setShadow.add(elementhash)
 			}
 			let aShadow = Array.from(setShadow)
-			params.push(aShadow.length +' unique elements')
+			params.push('unique: '+ setHash.size +' measurements '+ setIndividual.size +' individual '+ setShadow.size +' elements')
 		} else {
 			// group by element hash
 			for (const k of Object.keys(tmpdata)) {
@@ -429,8 +457,7 @@ function get_elements(type, isTest = false) {
 					'data': newobj[k]['data']
 				}
 			}
-			aHash = Array.from(setHash)
-			params.push(aHash.length +' unique elements')
+			params.push('unique: '+ setHash.size +' elements '+ setIndividual.size +' individual')
 		}
 
 		//console.log(tmpdata)
@@ -478,6 +505,26 @@ let strElement = ''
 let aRemainder = []
 let aIgnored = []
 
+function create_element(str, vertical = false, isLoop = false) {
+	// ToDo: this doesn't use oSpecial
+
+	if (isMethod < 0 && isMethod > 3) {isMethod = 0}
+	strMethod = oMethods[isMethod]
+
+	let style = vertical ? 'vertical-lr' : 'horizontal-tb'
+	oList = {}
+	oList[style] = {'test': str}
+	let oRes = get_elements('everything', true) // returned tmpdata, target
+	let itemdata = oRes[0]['test'][style.slice(0,-3)]
+	if (!isLoop) {
+		testTarget = oRes[1]
+		console.log('testTarget', style, 'method', strMethod, '\n', testTarget)
+		console.log('isRevert', isRevert, mini(itemdata), itemdata)
+	} else {
+		return [mini(itemdata), itemdata]
+	}
+}
+
 function run_once() {
 	aIgnored = [
 		// ignore
@@ -492,6 +539,7 @@ function run_once() {
 		'map',
 		'menuitem', // deprecated
 		'nextid', // died 1997 with HTML v3.2
+		'noscript', // blink+ gecko errors in methods 1,3
 		'param', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/param
 		'script',
 		'source',
@@ -499,12 +547,6 @@ function run_once() {
 		'template', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/template
 		'track', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/track
 		'wbr', // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/wbr
-
-		// errors in various domrect methods (due to DOMRectList { length: 0 })
-			// and generally useless (e.g. it's going to be 0's w/out transform/skew)
-			// some could be interesting on different engines/platforms when no an error, but that's equyivalency
-		'base','basefont','link','noframes','noscript', // blink+ gecko errors in methods 1,3
-		'noembed', // blink errors in methods 1,3
 	]
 	aIgnored.sort()
 

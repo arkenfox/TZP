@@ -443,6 +443,24 @@ function get_element_mathml(METRIC, isLies) {
 }
 
 function get_element_other(METRIC, isLies) {
+	/* NOTE
+	TZP uses isDomRect, the default being 0 (element.getBoundingClientRect). When
+	falling back to other domrect methods, some differences can occur (per engine)
+	- e.g. gecko: audio + sometimes marquee measure differently with 2
+	- e.g. blink: q measures differently if 1 or 3
+	- e.g. servo: as of June 2026: everything mismatches
+	Ideally this wouldn't happen, but ultimately it is equivalency of isDomRect
+	Currently only gecko usews isDomRect for fallback
+
+	Additionally, some elements (per engine) require display:inline otherwise errors and/or
+	measurement	differences can occur
+
+	They could all likely be inline (marquee can be weird) but being selective allows us
+	to generate more unique individual measuremments and unique elements, without artificially
+	creating more uniqueness - and/or to generate measuremeants with lots of decimal places
+	- e.g. figure, hr, marquee... were already uniquely sized elements
+	*/
+
 	let t0 = nowFn()
 	let hash, btn ='', data = {}
 
@@ -450,54 +468,66 @@ function get_element_other(METRIC, isLies) {
 	// or b) for unique measurements without a char to get more precision/decimal places
 	// always use the same char
 	let eStr = '.'
-	let aUseFirstChild = ['hgroup'] // sometimes we want the first child
-	let oExtraStyles = {
-		'marquee': '; width: 20px; height: 20px', // if we don't constrain it, it changes with inner window sizes
+	let oSpecial = {
+		// resets to parent.firstChild | then if an integer, selects that child item
+		'hgroup': '', // revert to parent first child
 	}
 
 	let oList = {
 		// AFAICT audio/video, canvas, iframe + img don't respect writing-mode
-		'horizontal-tb' : {
-			audio: '<audio controls=""></audio>',
-			canvas: '<canvas></canvas>',
-			figure: '<figure></figure>',
-			iframe: '<iframe>'+ eStr +'</iframe>',
-			img: '<img>', // unique on android
-		},
-		'vertical-lr' : {
+		// use horizontal by default: less work (adding attributes)
+		'horizontal' : {
 			a: '<a href="">'+ eStr +'</a>',
+			audio: '<audio controls=""></audio>',
 			big_x2: '<big><big>'+ eStr +'</big></big>',
 			big_x3: '<big><big><big>'+ eStr +'</big></big></big>',
 			br: '<br>',
-			caption: '<table><caption>'+ eStr +'</caption></table>',
-			dd: '<dl><dd>'+ eStr +'</dd></dl>',
-			dialog: '<dialog open=""></dialog>',
+			canvas: '<canvas></canvas>',
+			caption: '<table><caption style="display:inline;">'+ eStr +'</caption></table>',
 			dt: '<dl><dt>'+ eStr +'</dt></dl>',
 			fieldset: '<fieldset></fieldset>',
-			figcaption: '<figure><figcaption>'+ eStr +'</figcaption></figure>',
+			figure: '<figure style="display:inline;"></figure>',
 			hgroup: '<hgroup><h1>.</h1><p class="revert">.</p></hgroup>', // code doesn't revert 2nd child so hardcode it
-			hr: '<hr>',
+			hr: '<hr style="display:inline;">',
+			iframe: '<iframe>'+ eStr +'</iframe>',
+			img: '<img>', // unique on android
 			legend: '<fieldset><legend>'+ eStr +'</legend></fieldset>',
-			li: '<ul><li></li></ul>',
-			'q_empty': '<q></q>',
-			'menu_li': '<menu>'+ eStr +'<li></li></menu>',
-			'ol_li': '<ol><li>'+ eStr +'</li></ol>',
-			optgroup: '<optgroup></optgroup>',
-			output: '<form><input>=<output class="revert"></output></form>',
-			plaintext: '<plaintext>',
-			rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
+			marquee: '<marquee style="width:20px; height:20px;">'+ eStr +'</marquee>',
+				// marquee requires a size constrain else it changes with inner window sizes
+			menu_li: '<menu>'+ eStr +'<li></li></menu>',
+			meter: '<meter></meter>',
+			rtc: '<ruby><rtc>'+ eStr +'</rtc></ruby>',
 			search: '<search></search>',
 			td: '<table><tr><td></td></tr></table>',
 			tfoot: '<table><tfoot></tfoot></table>',
-			// test error
-			//'error': '<frame></frame>'
+			ol_li: '<ol><li>'+ eStr +'</li></ol>',
+			ul_li: '<ul><li>'+ eStr +'</li></ul>',
+		},
+		// these verticals should/could add more more unique individual measurements [1]: depends on scaling
+		// [1] more could expose greater rendering/subpixel entropy
+		'vertical' : {
+			dd: '<dl><dd>'+ eStr +'</dd></dl>',
+			dialog: '<dialog open=""></dialog>',
+			figcaption: '<figure><figcaption>'+ eStr +'</figcaption></figure>',
+			li: '<ul><li></li></ul>',
+			object: '<object>',
+			optgroup: '<optgroup></optgroup>',
+			plaintext: '<plaintext style="display:inline;">',
+			rb: '<ruby><rb>'+ eStr +'</rb></ruby>',
+			rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
+			summary: '<details><summary>'+ eStr +'</summary></details>',
+			//'error': '<frame></frame>' // test error
 		}
 	}
-	let aVerticalAdd = [
-		'b','big','blockquote','code','dl','h1','h2','h3','h4','h5','h6','i',
-		'marquee','meter','option','pre','q','small','sub','sup','ul',
-	]
-	aVerticalAdd.forEach(function(item){oList['vertical-lr'][item] = '<'+item+'>'+ eStr +'</'+item+'>'})
+
+	let aHorizontalAdd = ['article','b','big','blockquote','code','h1','h2','h3','h4','h5','h6','i','q','small','sub','ul']
+	aHorizontalAdd.forEach(function(item){oList['horizontal'][item] = '<'+item+'>'+ eStr +'</'+item+'>'})
+	let aVerticalAdd = ['dl','option','pre','sup']
+	aVerticalAdd.forEach(function(item){oList['vertical'][item] = '<'+item+'>'+ eStr +'</'+item+'>'})
+	//console.log(oList)
+
+	let setIndividual = new Set() // individual measurements from x,y,width,height
+	let setMeasure = new Set() // sets of x,y,width + height
 
 	let width, height, x, y, method, tmpdata = {}
 	const id = 'element-fp'
@@ -508,8 +538,8 @@ function get_element_other(METRIC, isLies) {
 		doc.body.appendChild(div)
 		let parent = dom[id], isFirst = true
 		for (const s of Object.keys(oList).sort()) {
-			let style = s.slice(0,-3), itemdata
-			tmpdata[style] = {}
+			let itemdata
+			tmpdata[s] = {}
 			for (const k of Object.keys(oList[s]).sort()) {
 				// set parent, determine target to measure and as we walk
 				// the children, ensure no other css affects any element
@@ -523,11 +553,13 @@ function get_element_other(METRIC, isLies) {
 						if (undefined == newtarget) {break}
 						target = newtarget
 					}
-					// choose target
-					if (aUseFirstChild.includes(k)) {target = parent.firstChild}
-					// set writing-mode and style
-					let extraStyle = undefined == oExtraStyles[k] ? '' : oExtraStyles[k]
-					target.setAttribute('style','display:inline; writing-mode: '+ s + extraStyle +';')
+					// amend target
+					if (undefined !== oSpecial[k]) {
+						let intTarget = oSpecial[k]; target = parent.firstChild
+						if (Number.isInteger(intTarget)) {target = target.children[intTarget]}
+					}
+					// add writing-mode: ignore horizontal
+					if ('vertical' == s) {target.style.setProperty('writing-mode', 'vertical-lr')}
 					method = measureFn(target, METRIC)
 					// typecheck
 					itemdata = [method.width, method.height, method.x, method.y]
@@ -545,8 +577,14 @@ function get_element_other(METRIC, isLies) {
 					log_error(15, METRIC +'_'+k, e)
 				}
 				let itemhash = mini(itemdata)
-				if (undefined == tmpdata[style][itemhash]) {tmpdata[style][itemhash] = {'data': itemdata, 'group': [k]}
-				} else {tmpdata[style][itemhash]['group'].push(k)}
+				if (undefined == tmpdata[s][itemhash]) {
+					tmpdata[s][itemhash] = {'data': itemdata, 'group': [k]}
+					// uniqueness
+					if (itemdata !== zErr) {
+						itemdata.forEach(function(num) {setIndividual.add(num)})
+						setMeasure.add(itemhash)
+					}
+				} else {tmpdata[s][itemhash]['group'].push(k)}
 			}
 		}
 		// group by results
@@ -558,11 +596,17 @@ function get_element_other(METRIC, isLies) {
 				newobj[s][keydata.join(' ')] = tmpdata[s][k]['data']
 			}
 		}
+		let uniqueTests = 0, totalTests = 0
 		for (const s of Object.keys(newobj)) {
 			data[s] = {}
 			for (const k of Object.keys(newobj[s]).sort()) {data[s][k] = newobj[s][k]}
+			totalTests += Object.keys(oList[s]).length
+			uniqueTests += Object.keys(data[s]).length
 		}
-		hash = mini(data); btn = addButton(15, METRIC)
+		let btnStr = setIndividual.size +'/'+ (setMeasure.size * 4)
+		let percentage = (setIndividual.size/(setMeasure.size * 4)) * 100
+		let extraStr = ' ['+ percentage.toFixed(1) +'% | '+ setMeasure.size +'/'+ uniqueTests +'/'+ totalTests +']'
+		hash = mini(data); btn = addButton(15, METRIC, btnStr) + extraStr
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -646,7 +690,7 @@ function get_element_scrollbars(METRIC, isLies) {
 		get_scroll()
 		if (undefined == isScrollbar) {isScrollbar = 20}
 
-		// FF151: 1977511 layout.css.fake-webkit-scrollbar.enabled | FF152+: 2038877 default true
+		// FF151: 1977511 layout.css.fake-webkit-scrollbar.enabled | FF153+: 2038877 default true
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar
 		element.classList.add('tzpScrollbar')
 		get_scroll('webkit_')

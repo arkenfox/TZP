@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements: other [sanity]</title>
+  <!--<link rel="stylesheet" type="text/css" href="testindex.css"> <!-- -->
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<style>
+		.mono {font-family: monospace, "Courier New"; font-size: 12px;}
+		.spaces {white-space: pre-wrap;}
+		#tb15 {
+			width: 97%;
+			min-width: 780px;
+			max-width: 780px;
+		}
+		.btn-right {float: right; position: relative; top: 0px; text-align: right;}
+		code {
+			background: rgba(142, 142, 145, 0.25);
+			padding: 2px 6px;
+		}
+		button, select {margin-right: 10px;}
+		#fixed {
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: bisque;
+		}
+		.method {text-decoration: underline;; padding-bottom: 5px;}
+		.good {color: #0ab90a; background-color: #bae6aa40;;}
+		.bad {color: #be0f0f; background-color: #fb80802e;}
+		.faint {color: #808080}
+	</style>
+</head>
+
+<body>
+<div id="fixed"></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="25%"><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">elements: other [sanity]</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<p>The <a href="elementother.html">elements: other</a> PoC uses <code>element.getBoundingClientRect()</code>
+			by default - but TZP can fall back to other DOMRect methods - where differences can occur, per browser engine.
+			Additionally, some elements require <code>display:inline</code> otherwise errors and/or measurement differences
+			can occur. And some elements will always error. This is a sanity test to see what is happening.</p>
+			<button onClick="cycle('back')"> &nbsp; PREV &nbsp; </button>
+			<select id="tests" name="tests" onChange="run()"></select> 
+			<button onClick="cycle('forward')"> &nbsp; NEXT &nbsp; </button>
+			<button onClick="run(true)"> &nbsp; TEST ALL &nbsp; </button>
+			<p class="faint mono spaces">navigation keys shortcuts: ↑ ↓ → ← keys <u><i>anywhere</i></u> on the page</p>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="mono">
+				<div id="info"></div><br>
+				<div class="method">element.getBoundingClientRect()</div>
+				<div id='res0'></div><br>
+				<div class="method">element.getClientRects()[0]</div>
+				<div id='res1'></div><br>
+				<div class="method">range.getBoundingClientRect()</div>
+				<div id='res2'></div><br>
+				<div class="method">range.getClientRects()[0]</div>
+				<div id='res3'></div>
+				<br><hr>
+				<div id='all' class="spaces"></div>
+			</div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let eStr = 'i am groot', oTests = {}, aTests = []
+let allTests = [], isTestAll = false, maxTestLen = 0
+let selector = document.getElementById('tests'),
+	all = document.getElementById('all'),
+	info = document.getElementById('info')
+
+let oSpecial = {
+	// resets to parent.firstChild | then if an integer, selects that child item
+	'hgroup': '', // revert to parent first child
+	'output_in_form': 1, // we want the parent.firstChild's second element
+}
+
+function build_lists() {
+	let oTmp = {
+		a: '<a href="">'+ eStr +'</a>',
+		audio: '<audio controls=""></audio>',
+		audio_inline: '<audio controls="" style="display:inline;"></audio>',
+		base: '<base href=""/>',
+		base_inline: '<base style="display:inline;" href=""/>',
+		basefont: '<basefont color="#FF0000"/>',
+		basefont_inline: '<basefont style="display:inline;" color="#FF0000"/>',
+		big_x2: '<big><big>'+ eStr +'</big></big>',
+		big_x3: '<big><big><big>'+ eStr +'</big></big></big>',
+		caption: '<table><caption>'+ eStr +'</caption></table>',
+		caption_inline: '<table><caption style="display:inline;">'+ eStr +'</caption></table>',
+		dd: '<dl><dd>'+ eStr +'</dd></dl>',
+		dialog: '<dialog open=""></dialog>',
+		dt: '<dl><dt>'+ eStr +'</dt></dl>',
+		embed: '<embed src="">',
+		figcaption: '<figure><figcaption>'+ eStr +'</figcaption></figure>',
+		isindex: '<isindex prompt="search"></isindex>',
+		keygen: '<form method="POST"><keygen></keygen></form>',
+		label: '<div id="elementlabel"><label for="elementlabel">'+ eStr +'</label></div>',
+		legend: '<fieldset><legend>'+ eStr +'</legend></fieldset>',
+		hgroup: '<hgroup><h1>'+ eStr +'</h1><p>'+ eStr +'</p></hgroup>',
+		li: '<ul><li></li></ul>',
+		link: '<link href="" rel="stylesheet">',
+		link_inline: '<link style="display:inline;" href="" rel="stylesheet">',
+		marquee: '<marquee style="width:20px; height:20px;">'+ eStr +'</marquee>',
+			// ^ marquee requires a size constrain else it changes with inner window sizes
+		meter: '<meter min="0" max="2" value="1"></meter>', // i just want to see the progress color
+		menu_li: '<menu>'+ eStr +'<li></li></menu>',
+		noembed: '<embed src=""><noembed>'+ eStr +'</noembed>',
+		noframes: '<noframes>'+ eStr +'</noframes>',
+		noframes_inline: '<noframes style="display:inline;">'+ eStr +'</noframes>',
+		noscript_inline: '<noscript style="display:inline;">'+ eStr +'</noscript>',
+		ol_li: '<ol><li>'+ eStr +'</li></ol>',
+		output: '<output>'+ eStr +'</output>',
+		output_in_form: '<form><input><output>'+ eStr +'</output></form>',
+		q_inline: '<q style="display:inline;">'+ eStr +'</q>',
+		rb: '<ruby><rb>'+ eStr +'</rb></ruby>',
+		rbc: '<ruby><rbc>'+ eStr +'</rbc></ruby>',
+		rp: '<ruby><rp>'+ eStr +'</rp></ruby>',
+		rp_inline: '<ruby><rp style="display:inline;">'+ eStr +'</rp></ruby>',
+		rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
+		rtc: '<ruby><rtc>'+ eStr +'</rtc></ruby>',
+		slot: '<slot>'+ eStr +'</slot>',
+		slot_inline: '<slot style="display:inline;">'+ eStr +'</slot>',
+		summary: '<details><summary>'+ eStr +'</summary></details>',
+		title: '<title>' + eStr +'</title>',
+		title_inline: '<title style="display:inline;">' + eStr +'</title>',
+		ul_li: '<ul><li>'+ eStr +'</li></ul>',
+		// tables
+		tbody: '<table><tbody></tbody></table>', 
+		td: '<table><tr><td></td></tr></table>',
+		tfoot: '<table><tfoot></tfoot></table>',
+		th: '<table><thead><tr><th></th></tr></thead></table>',
+		thead: '<table><thead></thead></table>',
+		tr: '<table><tr></tr></table>',
+	}
+	// programatically add more
+	let oExtra = {
+		'char': [
+			'abbr','acronym','address','applet','article','aside',
+			'b','big','blockquote','center','cite','code',
+			'data','del','dir','div','dfn','dl','em','footer',
+			'h1','h2','h3','h4','h5','h6','header',
+			'i','ins','iframe','kbd',
+			'main','mark','menu',
+			'nobr','noscript','ol','option','p','pre','q',
+			'ruby',
+			's','samp','section','small','span','strike','strong','sub','sup',
+			'time','tt',
+			'u','ul','var','xmp',
+		],
+		nochar: [
+			'canvas','fieldset','figure','nav','optgroup','picture',
+			'portal', // https://wicg.github.io/portals/#the-portal-element
+			'search','table','video',
+		],
+		standalone: [
+			'br','hr','img','object','plaintext',
+		]
+	}
+	for (const type of Object.keys(oExtra)) {
+		for (const k of Object.keys(oExtra[type])) {
+			let array = oExtra[type]
+			array.forEach(function(item) {
+				if ('standalone' == type) {
+					oTmp[item] = '<'+ item +'>'
+				} else {
+					let str = 'char' == type ? eStr : ''
+					oTmp[item] = '<'+ item +'>'+ str +'</'+ item +'>'
+				}
+			})
+		}
+	}
+	// sort into final object, build select list, detrmine max test name length
+	for (const k of Object.keys(oTmp).sort()) {
+		let len = k.length
+		if (len > maxTestLen) {maxTestLen = len}
+		oTests[k] = oTmp[k]
+		aTests.push('<option value = "'+ k +'"> '+ k +'</option>')
+		allTests.push(k)
+	}
+	console.log('allTests\n', allTests)
+	// populate select
+	selector.innerHTML = aTests.join('')
+	// add listener
+	document.addEventListener('keydown', shortcutKey)
+}
+build_lists()
+
+function mini(str) {
+	const json = `${JSON.stringify(str)}`
+	let len = json.length, hash = 0x811c9dc5
+	for (let i=0; i < len; i++) {
+		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
+	}
+	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
+}
+
+function cycle(dir) {
+	if (isTestAll) {return}
+	if ('back' == dir) {
+		let index = selector.selectedIndex
+		let lastIndex = aTests.length - 1
+		let newIndex = index == 0 ? lastIndex : index - 1
+		selector.selectedIndex = newIndex
+	} else {
+		selector.selectedIndex++
+		if (selector.value == '') {selector.selectedIndex++} // end of list, return to top
+	}
+	run()
+}
+
+function shortcutKey(evt) {
+	evt = evt || window.event
+	if ('ArrowLeft' == evt.key || 'ArrowUp' == evt.key) {
+		cycle('back')
+	} else if ('ArrowRight' == evt.key || 'ArrowDown' == evt.key) {
+		cycle('forward')
+	}
+}
+
+function call(test) {
+	selector.value = test
+	run()
+}
+
+function run(isAll = false) {
+	let testsUsed, oAll = {}, aBad = []
+	let oDisplay = {'bad': [], 'good': []}
+	if (isAll) {
+		testsUsed = allTests
+		isTestAll = true // block shortcut keys
+	} else {
+		testsUsed = [selector.value]
+	}
+	let parent = document.getElementById('fixed')
+
+	testsUsed.forEach(function(test){
+		oAll[test] = {}
+		parent.innerHTML = oTests[test]
+		let target = parent.firstChild
+		// get final target to measure
+		for (let i = 0; i < 10; i++) {
+			let newtarget = target.children[0]
+			if (undefined == newtarget) {break}
+			target = newtarget
+		}
+		// amend target
+		if (undefined !== oSpecial[test]) {
+			let intTarget = oSpecial[test]; target = parent.firstChild
+			if (Number.isInteger(intTarget)) {target = target.children[intTarget]}
+		}
+		//console.log(target)
+
+		let range = document.createRange(); range.selectNode(target)
+		let method, setHashes = new Set()
+		let intErr = 0
+		for (let i=0; i < 4; i++) {
+			oAll[test][i] = {}
+			try {
+				if (0 == i) {method = target.getBoundingClientRect()
+				} else if (1 == i) {method = target.getClientRects()[0]
+				} else if (2 == i) {method = range.getBoundingClientRect()
+				} else {method = range.getClientRects()[0]}
+
+				let keys = ['x','y','width','height','top','right','bottom','left'], items = []
+				keys.forEach(function(k){
+					items.push(k + ': ' + method[k])
+					oAll[test][i][k] = method[k]
+				})
+				setHashes.add(mini(items))
+				if (!isAll) {document.getElementById('res'+i).innerHTML = items.join(', ')}
+			} catch(e) {
+				oAll[test][i] = e+''
+				intErr++
+				if (!isAll) {document.getElementById('res'+i).innerHTML = e+''}
+			}
+		}
+		let matchStr = '', errorStr =''
+		// if you have 3 or 4 errors, then there's nothing to match
+		if (intErr < 3) {
+			let aHashes = Array.from(setHashes)
+			matchStr = '<span class="' + (aHashes.length == 1 ? 'good">match' : 'bad">mismatch') +'</span>'
+		}
+		if (intErr > 0) {
+			errorStr = ' <span class="bad">'+ intErr +' error'+ (intErr > 1 ? 's' : '') +'</spaN>'
+		}
+		if (isAll) {
+			let strCombined = matchStr + errorStr
+			let isGoodBad = 'good'
+			if (strCombined.includes('bad">')) {
+				strCombined += ' <button onClick="call(`'+ test +'`)"> run </button>'
+				isGoodBad = 'bad'
+				aBad.push(test)
+			} else {
+				// _inlined comes after the non inlined test alphabetically
+				// if the non-inlined test was bad, also add the inlined next to it
+				if (test.includes('_inline')) {
+					if (aBad.includes(test.slice(0,-7))) {isGoodBad = 'bad'}
+				}
+			}
+			oDisplay[isGoodBad].push(test.padStart(maxTestLen) +': ' + strCombined)
+
+		} else {
+			let code = oTests[test]
+			code = code.replaceAll('<','&lt;')
+			code = code.replaceAll('>','&gt;')
+			code = code.replaceAll('"/','"')
+
+			let targetcode = target.outerHTML
+			targetcode = targetcode.replaceAll('<','&lt;')
+			targetcode = targetcode.replaceAll('>','&gt;')
+
+			info.innerHTML = '<b>'+ test.toUpperCase() +'</b>: <code>'+ code +'</code>'
+				+ (targetcode == code ? '' : ' | target: <code>'+ targetcode +'</code>')
+				+ ' | ' + matchStr + errorStr
+		}
+	})
+
+	if (isAll) {
+		// just assume we will always have one bad (e.g. noscript)
+		let divider = '-'.padStart(maxTestLen + 1, '-')
+		divider = '<br>'+ divider +' '+ divider +'<br>'
+		all.innerHTML = '<u>problematic</u><br>'+ oDisplay.bad.join('<br>')
+			+ divider + '<u>awesome</u><br>'+ oDisplay.good.join('<br>')
+		console.log(mini(oAll), '\n', oAll)
+	}
+	isTestAll = false // allow shortcut keys again
+}
+
+setTimeout(() => {
+	// in gecko, if we don't allow a tiny (10ms) timeout, marquee can pass
+	// when it would/might normally fail - let's go 100ms to be sure
+	// which at least mimics a delay thgat we get in the PoCs/nocss and TZpo itself
+	run(true)
+	run()
+	//call('output') // temp
+}, 100)
+
+</script>
+</body>
+</html>
+
+
