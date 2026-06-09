@@ -394,7 +394,7 @@ function get_timing(METRIC) {
 	})
 
 	// display
-	let btn = ''
+	let btn = '', databtn = '', btnColor = 17
 	// data
 	if ('timing_precision' == METRIC) {
 		// we didn't countFail reducetimer or skipped Temporal so RFP will have zero fails
@@ -443,18 +443,22 @@ function get_timing(METRIC) {
 		notation = isProtected ? rfp_green : rfp_red
 		str = (aLoop.length - countFail) +'/' + aLoop.length
 		// add
-		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
+		btn = addButton(17, METRIC, str)
 		addBoth(17, METRIC, mini(oData), btn, notation, oData)
 		// cleanup
 		//performance.clearMeasures()
-
 	} else {
 		notation = (aLoop.length - countFail) == aLoop.length ? rfp_green : rfp_red
 		str = (aLoop.length - countFail) +'/' + aLoop.length
-		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
+		btn = addButton(17, METRIC, str)
 		sDetail[isScope][METRIC] = oData
 		addDisplay(17, METRIC, mini(oData), btn, notation)
 	}
+	// data
+	if (isGecko) {btnColor = notation == rfp_red ? 'bad' : 'good'}
+	databtn = addButton(btnColor, METRIC +'_data', 'data')
+	addDisplay(17, METRIC +'_data', databtn)
+
 	return
 }
 
