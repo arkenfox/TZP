@@ -404,13 +404,11 @@ const outputUserTimingAudio = (METRIC) => new Promise(resolve => {
 	// contexttime: geckoview
 		// TypeError: undefined (with and with and w/out RFP)) on first run sometimes (and sometimes subsequent runs)
 		// seen in FF139 stable, 141 beta, 142 nightly
-
 	let aList = ['contexttime','performancetime'], oTime = {}, audioCtx, source, rAF 
 	aList.forEach(function(k){
 		gData.timing[k] = []
 		oTime[k] = []
 	})
-
 	// collect
 	function collectTimestamps() {
 		const ts = audioCtx.getOutputTimestamp();
@@ -419,7 +417,6 @@ const outputUserTimingAudio = (METRIC) => new Promise(resolve => {
 		rAF = requestAnimationFrame(collectTimestamps); // Reregister itself
 		if (oTime.contexttime.length > 20) {stop()}
 	}
-
 	// record
 	try {
 		audioCtx = new AudioContext()
@@ -430,7 +427,6 @@ const outputUserTimingAudio = (METRIC) => new Promise(resolve => {
 		addDisplay(17, METRIC, log_error(17, METRIC, e),'', rfp_red)
 		return resolve()
 	}
-
 	// finish
 	function stop() {
 		source.stop(0)
@@ -491,6 +487,7 @@ function outputUser(x, event) {
 	} else {
 		try {dom[x] = ''} catch {} // clear
 		// clear additional
+		try {dom[x +'_data'] = ''} catch {} // clear
 		try {
 			let items = document.getElementsByClassName('u'+x)
 			for (let i=0; i < items.length; i++) {items[i].innerHTML = '&nbsp'}
