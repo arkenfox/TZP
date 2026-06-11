@@ -1138,7 +1138,11 @@ function get_isDomRect() {
 			oDomRect[hash]['methods'].push(METRIC)
 		}
 	}
-	//aDomRect = [false, false, true, false]
+	//aDomRect = [false, false, false, false] // -1
+	//aDomRect = [true, false, false, false] // 0
+	//aDomRect = [false, true, false, false] // 1
+	//aDomRect = [false, false, true, false] // 2
+	//aDomRect = [false, false, false, true] // 3
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
 	log_perf(SECTP, 'isDomRect', t0,'', aDomRect.join(', '))
@@ -2360,14 +2364,21 @@ function outputSection(id, isResize = false) {
 		return
 	}
 	// set the onion skin pattern background if TB and dark
-	if (gLoad && isTB && 'android' !== isOS) {
+	// if MB swap kit for cookie
+	if (gLoad) {
 		try {
-			let target = document.body
-			let bgcolor = window.getComputedStyle(target).getPropertyValue('background-color')
-			if ('rgb(22, 27, 34)' == bgcolor) {
-				target.classList.add('tzpBody')
-			} else {
-				target.classList.remove('tzpBody')
+			if (isTB && 'android' !== isOS) {
+				let target = document.body
+				let bgcolor = window.getComputedStyle(target).getPropertyValue('background-color')
+				if ('rgb(22, 27, 34)' == bgcolor) {
+					target.classList.add('tzpBody')
+				} else {
+					target.classList.remove('tzpBody')
+				}
+			} else if (isMB) {
+				dom.overlaykit.style.backgroundImage ='url("images/mullvad.svg")'
+				dom.overlaykit.style.height ='60px'
+				dom.overlaykit.style.top ='88%'
 			}
 		} catch(e) {}
 	}
