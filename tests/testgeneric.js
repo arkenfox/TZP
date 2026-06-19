@@ -413,11 +413,16 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 153
+		isVerMax = 154
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
-			try {if (AnimationTimeline.prototype.hasOwnProperty('duration')) return 153} catch(e) {} // 2006263
+			try {let test154 = new Date('4294967303').toISOString()} catch(e) { // 2027609
+				if ('RangeError: invalid date' == e+'') {
+					if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) {return 154} // FF122 or lower are false positives; hence extra check
+				}
+			}
+			try {if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) return 153} catch(e) {} // 2039500
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
 			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
@@ -604,7 +609,7 @@ const get_isVer = () => new Promise(resolve => {
 
 function buildnav() {
 	// add prev/next nav links in all the intl tests so it's easy to loop thru them
-	let aTests = [ // filenames: in order as per listed, not necerssarily alphabetical
+	let aTests = [ // filenames: in order as per listed, not necessarily alphabetical
 		'collation',
 		'dtfcomponents','dtfdatetimestyle','dtfdayperiod','dtflistformat','dtfrelated','dtftimezonename',
 		'dncalendar','dncurrency','dndatetime','dnlanguage','dnregion','dnscript',
@@ -662,7 +667,6 @@ function buildnav() {
 			dom.navnext.innerHTML = '<a class="return" href="'+ next +'.html">'+ nName +' ▶</a>'
 		}
 	} catch(e) {}
-
 }
 
 function copyclip(element) {
@@ -688,9 +692,12 @@ function copyclip(element) {
 			let regex = /<br\s*[\/]?>/gi
 			content = content.replace(regex, "\r\n")
 			content = content.replace(/<\/?span[^>]*>/g,"")
+			content = content.replace(/<\/?div[^>]*>/g,"")
 			content = content.replace(/<\/?details[^>]*>/g,"")
 			content = content.replace(/<\/?summary[^>]*>/g,"")
 			content = content.replace(/<\/?hr[^>]*>/g,"\r\n")
+			content = content.replace(/<\/?u[^>]*>/g,"")
+			content = content.replace(/<\/?b[^>]*>/g,"")
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
 				// clipboard successfully set
