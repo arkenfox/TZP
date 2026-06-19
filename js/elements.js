@@ -717,7 +717,7 @@ const outputElements = () => new Promise(resolve => {
 	Promise.all([
 		get_domrect('domrect'),
 		get_element_font('element_font', isLies),
-		get_element_keys('htmlelement_keys'),
+		get_element_keys('element_keys'),
 		get_element_forms('element_forms', isLies),
 		get_element_mathml('element_mathml', isLies),
 		get_element_other('element_other', isLies),

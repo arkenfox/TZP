@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 111, maxVer = 153, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 112, maxVer = 154, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -293,12 +293,25 @@ function testperf() {
 	console.log(tEnd - tStart, 'ms', testversion)
 }
 
-		// 153: 2006263
+		// 154: 2027609
+		let t154 = performance.now(), ver154
+		try {
+			let test154 = new Date('4294967303').toISOString()
+		} catch(e) {
+			if ('RangeError: invalid date' == e+'') {
+				// FF122 or lower are false positives
+				// so we'll add another check for e.g. FF151+
+				if (CSSContainerRule.prototype.hasOwnProperty('conditions')) {ver154 = true}
+			}
+		}
+		rec(154, 154, "2027609", ver154, performance.now()-t154) // 0.02 ms
+
+		// 153: 2039500
 		let t153 = performance.now(), ver153
 		try {
-			ver153 = AnimationTimeline.prototype.hasOwnProperty('duration')
+			if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) {ver153 = true}
 		} catch(e) {}
-		rec(153, 153, "2006263", ver153, performance.now()-t153) // 0.04 ms
+		rec(153, 153, "2039500", ver153, performance.now()-t153) // 0.005 ms
 
 		// 152: 2034371
 		let t152 = performance.now(), ver152

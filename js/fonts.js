@@ -520,7 +520,7 @@ let fntMaster = {
 		],
 		linux: [
 			// self
-			'Noto Sans','Noto Serif',
+			'Noto Sans','Noto Sans Mono','Noto Serif',
 			// +always
 			'Arial','Courier','Courier New',
 			// +common notos
@@ -528,9 +528,9 @@ let fntMaster = {
 			// +selective kBase ubuntu or fedora
 				// notos
 			'Noto Color Emoji','Noto Mono','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
-				// western/symbols
-			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX','STIX Two Text','Symbola', // fedora
-			'Dingbats','FreeMono','Jamrul','Kinnari','Ubuntu', // ubuntu
+				// western/symbols: fedora/ubuntu
+			'Cantarell','DejaVu Sans','DejaVu Sans Mono','DejaVu Serif','Droid Sans','STIX','STIX Two Text','Symbola',
+			'Dingbats','FreeMono','FreeSans','FreeSerif','Jamrul','Kinnari','Ubuntu','Ubuntu Mono','Ubuntu Sans','Ubuntu Sans Mono',
 				// other
 			'OpenSymbol', // openoffice
 			'Amiri', // libreoffice

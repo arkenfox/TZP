@@ -768,8 +768,9 @@ function get_last_prototype_keys(num1, title) {
 		Object.keys(HTMLAnchorElement.prototype)
 		let props1 = Object.getOwnPropertyNames(HTMLAnchorElement.prototype) // includes the constructor
 		let res1 = props1.slice(-3).join(", ")
+		let expected = isVer > 152 ? "hreflang, type, constructor" : "search, hash, constructor"
 		// search, hash, constructor
-		fnRecord(num1, title1, res1, res1 == "search, hash, constructor", "skip", t0)
+		fnRecord(num1, title1, res1, res1 == expected, "skip", t0)
 	} catch(e) {
 		fnRecord(num1, title1, e.name, zErr, e.message)
 	}

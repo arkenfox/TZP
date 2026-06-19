@@ -111,19 +111,12 @@ function set_mediaList() {
 		v+'x-matroska; codecs="hev1.1.6.L93.B0"',
 		v+'x-matroska; codecs="vp8"',
 		v+'x-matroska; codecs="vp9"',
-	]
-	if (isVer < 130) {
 		// theora support: FF126 1860492 prep + FF130 1890370 remove
-		vList.push(
-			v+'ogg',
-			v+'ogg; codecs="flac"',
-			v+'ogg; codecs="opus"',
-			v+'ogg; codecs="theora"',
-			v+'ogg; codecs="theora, flac"',
-			v+'ogg; codecs="theora, speex"',
-			v+'ogg; codecs="theora, vorbis"',
-		)
-	}
+		/*
+		v+1'ogg', v+'ogg; codecs="flac"', v+'ogg; codecs="opus"', v+'ogg; codecs="theora"',
+		v+'ogg; codecs="theora, flac"', v+'ogg; codecs="theora, speex"', v+'ogg; codecs="theora, vorbis"',
+		*/
+	]
 	// add and record fakes
 		// we use default 5 for length to ensure we don't randomly duplicate a real codec/mime name
 	mediaList['fake'] = {
@@ -152,9 +145,9 @@ function get_autoplay(METRIC) {
 		if (isDesktop) {
 			if ('5be5c665' == mini(isAutoPlay)) {notation = default_green}
 		} else {
-			// this is inconsistent/unstable on android: e.g. can return 'disallowed | disallowed' if the
-			// phone is on 'Do Not Disturb' or depending on the session and transient user activity/actions
-			// e.g just a pull to refresh or open a second TZP tab etc
+			// this is inconsistent/unstable on android but seems fine on desktop
+			// https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/User_activation#sticky_activation
+			// may also be influenced by DoNotDisturb
 			value = zNA + s99 +' ('+ value +')'+ sc; data = zNA
 		}
 	} else {
@@ -521,8 +514,7 @@ function get_preload_media(METRIC) {
 		if (runST) {value = 99} else if (runSI) {value = 'banana'}
 		if ('string' !== typeFn(value, true)) {throw zErrType + typeFn(value)}
 		if ('' == value) {value = typeFn(value)}
-		let aValid = ['auto','metadata','none']
-		if (isVer < 140) {aValid.push('empty string')} // 929890
+		let aValid = ['auto','metadata','none'] // 'empty string' dropped FF140 929890
 		if (!aValid.includes(value)) {aValid.sort(); throw zErrInvalid +'expected ' + aValid.join(', ') + ': got '+ value}
 		if ('auto' == value) {notation = rfp_green}
 	} catch(e) {

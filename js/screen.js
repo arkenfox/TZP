@@ -1538,12 +1538,10 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 					if (!isVerCheck) {isLies = true}
 				} else if ('appVersion' == k) {
 					// User-Agent Switcher
-					if ('windows' == os) {isLies = reported !== '5.0 (Windows)'
-					}
+					if ('windows' == os) {isLies = reported !== '5.0 (Windows)'}
 				} else if ('platform' == k) {
 					// User-Agent Switcher
-					if ('windows' == os) {isLies = reported !== 'Win32'
-					}
+					if ('windows' == os) {isLies = reported !== 'Win32'}
 				} else if ('oscpu' == k) {
 					// User-Agent Switcher
 					if ('windows' == os) {isLies = !reported.includes('Windows NT 10.0')
@@ -1798,18 +1796,11 @@ const outputFD = () => new Promise(resolve => {
 		isWordmark = e; isWordData = zErrShort
 	}
 
-	// set isMB: legacy: older 128's still need detection
-	if (gLoad && !isBB && isDesktop) {
-		if (128 == isVer && isWordmark + isLogo == '400 x 32300 x 236') {
-			isMB = true
-			isBB = true
-		}
-	}
 	// browser
 	let notation = isBB ? bb_red : ''
 	addBoth(3, 'browser', (isMB ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
-	addBoth(3, 'logo', isLogo,'', (isBB && '24 x 24' == isLogo ? bb_green : notation), isLogoData)
-	addBoth(3, 'wordmark', isWordmark,'', (isBB && '0 x 0' == isWordmark ? bb_green : notation), isWordData)
+	addBoth(3, 'browser_logo', isLogo,'', (isBB && '24 x 24' == isLogo ? bb_green : notation), isLogoData)
+	addBoth(3, 'browser_wordmark', isWordmark,'', (isBB && '0 x 0' == isWordmark ? bb_green : notation), isWordData)
 
 	// eval
 	METRIC = 'eval.toString'
@@ -1822,7 +1813,7 @@ const outputFD = () => new Promise(resolve => {
 	}
 	// os, version
 	addBoth(3, 'os', (isOS == undefined ? (isOSErr !== undefined ? isOSErr : zErr) : isOS))
-	addBoth(3, 'version', (isVerExtra !== '' ? isVer + isVerExtra : isVer))
+	addBoth(3, 'browser_version', (isVerExtra !== '' ? isVer + isVerExtra : isVer))
 	// set metricsPrefix
 	if (isGecko && isSmart) {
 		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'

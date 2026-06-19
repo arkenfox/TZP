@@ -180,6 +180,7 @@ let isArch = true,
 
 let isBB = false,
 	isBBESR = false,
+	isBBVer = [140], // we'll add 153 once TB has a build based on FF153 stable
 	isMB = false,
 	isTB = false,
 	isFPPFallback = false // helps track FPP health, block BB giving passes to FPP protections
@@ -242,7 +243,7 @@ let gt0, gt1,
 	isSmartAllowed = false, // data-only mode - do not give off false health signals if not maintained
 	isStop = false
 
-const isBlockMin = 128,
+const isBlockMin = 140,
 	isSmartMin = 140
 
 /** DEV **/

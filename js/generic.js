@@ -541,7 +541,7 @@ const get_isFileSystem = (METRIC, isWarmup = false) => new Promise(resolve => {
 })
 
 const get_isFontDelay = () => new Promise(resolve => {
-	if (!isBB || !isGecko || isVer < 139 || 'android' == isOS) {return resolve()}
+	if (!isBB || !isGecko || 'android' == isOS) {return resolve()}
 
 	//if ('windows' !== isOS && 'mac' !== isOS) {return resolve()}
 		// ^ linux shouldn't have any delay since it's dets the font dir as system font dir?
@@ -617,6 +617,22 @@ function get_isPointerRawUpdate(event) {
 
 const get_isOS = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
+
+	function exit(value) {
+		isOS = value
+		isDesktop = 'android' !== isOS
+		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
+			+ (isDesktop ? '' : 'fav') + "icon64.png')" // set icon
+		log_perf(SECTG, METRIC, t0, '', isOS +'')
+		if (undefined == isOS) {
+			// for now only alert isGecko
+			if (isGecko) {
+				isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
+				log_alert(SECTG, METRIC, "undefined", isScope, true)
+			}
+		}
+		return resolve()
+	}
 
 	// 1. widget font: mac/linux
 	function trywidget() {
@@ -712,22 +728,6 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 	// 3. now what? 
 	function trysomethingelse() {
 		exit()
-	}
-	// 4. exit
-	function exit(value) {
-		isOS = value
-		isDesktop = 'android' !== isOS
-		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
-			+ (isDesktop ? '' : 'fav') + "icon64.png')" // set icon
-		log_perf(SECTG, METRIC, t0, '', isOS +'')
-		if (undefined == isOS) {
-			// for now only alert isGecko
-			if (isGecko) {
-				isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
-				log_alert(SECTG, METRIC, "undefined", isScope, true)
-			}
-		}
-		return resolve()
 	}
 
 	if (isGecko) {
@@ -869,7 +869,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 153) {isVerExtra = '+'} else if (isVer == 127) {isVerExtra = ' or lower'}
+	if (isVer == 154) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -882,10 +882,15 @@ function get_isVer(METRIC) {
 	function cascade() {
 		let test
 		try {
-			// old-timey check: avoid false postives: must be 128 or higher
-			try {let test128 = (new Blob()).bytes()} catch {return 127} // 1896509
+			// old-timey check(s): avoid false postives: must be 140 or higher
+			let isCascade	= false
+			try {if (undefined !== performance.getEntriesByType("paint")[0].presentationTime) isCascade = true} catch(e) {} // 1963464
+			try {if ('' !== dom.tzpAudio.preload) isCascade = true} catch(e) {} // 929890
+			if (!isCascade) return 139
+
 			// now cascade
-			try {if (AnimationTimeline.prototype.hasOwnProperty('duration')) return 153} catch(e) {} // 2006263
+			try {test = new Date('4294967303').toISOString()} catch(e) {if ('RangeError: invalid date' == e+'') {return 154}} // 2027609
+			try {if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) return 153} catch(e) {} // 2039500
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
 			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
@@ -908,48 +913,7 @@ function get_isVer(METRIC) {
 			try {if (undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear) return 141} catch(e) {} // 1950162
 			// 141: fast-path: dom.intersection_observer.scroll_margin.enabled (default true)
 			try {if (window["IntersectionObserver"].prototype.hasOwnProperty('scrollMargin')) return 141} catch(e) {} // 1860030
-			// 140: fast-path: pref: dom.event.pointer.rawupdate.enabled : default true 140+
-			try {if ("object" === typeof onpointerrawupdate) return 140 } catch(e) {} // 1550462
-			// 140: if < 141 there is only one paint entry "PerformancePaintTiming"
-			try {if (undefined !== performance.getEntriesByType("paint")[0].presentationTime) return 140} catch(e) {} // 1963464
-			try {if ('' !== dom.tzpAudio.preload) return 140} catch(e) {} // 929890
-			// 139
-			if (HTMLDialogElement.prototype.hasOwnProperty('requestClose')) return 139 // 1960556
-			// 138: fast-path: requires webrtc e.g. media.peerconnection.enabled | --disable-webrtc
-			try {if (RTCCertificate.prototype.hasOwnProperty('getFingerprints')) return 138} catch(e) {} // 1525241
-			// 138: fast-path: dom.origin_agent_cluster.enabled
-			if ('boolean' == typeof originAgentCluster) return 138 // 1665474
-			// 138: must be FF134 or higher
-			try {
-				if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) { // FF135+
-					test = Intl.NumberFormat('yo-bj', {style: 'unit', unit: 'year', unitDisplay: 'narrow'}).format(1)
-					if ('606d1046' == mini(test)) return 138 // 1954425
-				}
-			} catch(e) {}
-			// 137 fast-path: javascript.options.experimental.math_sumprecise
-			if ('function' == typeof Math.sumPrecise) return 137 // 1943120
-			// 136 fast-path: FF132+ pref enabled javascript.options.experimental.regexp_modifiers
-			try {if ((new RegExp("(?i:[A-Z]{4})")).test('abcd')) return 136} catch {} // 1939533
-			if (HTMLScriptElement.prototype.hasOwnProperty('textContent')) return 135 // 1905706
-			// 134: may be affected by --with-system-icu
-				// ToDo: replace, fallbacks?
-			if ('lij' == Intl.PluralRules.supportedLocalesOf('lij').join()) return 134 // 1927706
-			try {
-				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
-				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
-			} catch {}
-			try {
-				const re = new RegExp('(?:)', 'gv');
-				test = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
-				for (let i=0; i < 3; i++) {if (true == test.next().done) return 132} // 1899413
-			} catch {}
-			try {
-				test = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
-				if ('2033' == test.slice(0,4)) return 131 // 1900196
-			} catch {}
-			try {new RegExp('[\\00]','u')} catch(e) {if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130} // 1907236
-			if (CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
-			return 128
+			return 140
 		} catch(e) {
 			console.error(e)
 			return 0
@@ -1456,11 +1420,13 @@ function metricsShow(name, scope) {
 		}
 	}
 	metricsData = data
-	let aCached = ['fingerprint','fingerprint_flat','misc']
-	let isCache = aCached.includes(target)
-	let cTarget = scope + ('misc' == target ? '_'+ target : overlayFP)
+	let aCached = ['fingerprint','fingerprint_flat']
+	let aSectionCached = ['misc','elements']
+	let isCache = aCached.includes(target) || aSectionCached.includes(target)
+	let cTarget = scope + (aSectionCached.includes(target) ? '_'+ target : overlayFP)
 
-	let isColor = !(target == 'window_functions')
+	let aNoColor = ['element_keys','window_functions']
+	let isColor = !aNoColor.includes(target)
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor, target)): ''
 	// dev: no need to display overlayInfo everywhere, limit
 	if ('feature' == name) {dom.overlayInfo.innerHTML = overlayInfo}
@@ -1877,10 +1843,13 @@ function output_section(section, scope) {
 		sDataTemp['cache'][scope] = json_highlight(gData[zFP][scope])
 		sDataTemp['cache'][flat] = json_highlight(gData[zFP][flat])
 	}
-	if (gRun || 18 == section) {
-		// cache misc
+	if (gRun || 'misc' == sectionMap[section]) { // cache misc
 		sDataTemp['cache'][scope +'_misc'] = json_highlight(gData[zFP][scope]['misc'])
 	}
+	if (gRun || 'elements' == sectionMap[section]) { // cache elements
+		sDataTemp['cache'][scope +'_elements'] = json_highlight(gData[zFP][scope]['elements'])
+	}
+
 }
 
 /*** RECORD ***/
@@ -2315,8 +2284,9 @@ function countJS(item) {
 					dom.metricsConsole.classList.add('hidden')
 				}
 				// set isBBESR: some health checks we only want to do if it's worthwhile
-				// android and alpha are moving to RR and it's not ffeasible to keep up with per release changes
-				if (isBB && 'android' !== isOS && isVer == 140) {isBBESR = true}
+				// android and alpha are moving to RR and it's not feasible to keep up with per release changes
+				// and alpha is based on beta with pref flips yet to ride the train
+				if (isBB && 'android' !== isOS && isBBVer.includes(isVer)) {isBBESR = true}
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
 				]).then(function(){
@@ -2522,9 +2492,9 @@ function outputSection(id, isResize = false) {
 				3, // first: sets isMB (legacy method)
 				2, 1, 5, 14, 13, // fast
 				'canvas',
+				'elements',
 				'storage', // little slow: cache + permissions
 				'misc', // cold on load: iframe props
-				'elements', // cold on load: mathml
 				'audio',
 				'webgl',
 				'fonts', // allow time for font fallback
