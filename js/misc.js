@@ -369,7 +369,7 @@ function get_timing(METRIC) {
 			if ('reducetimer' !== k) {
 				if ('instant' == k) {
 					// gecko 139+ we expect temporal to work
-					if (!isGecko || isGecko && isVer < 139) {
+					if (!isGecko) {
 						if ('ReferenceError: Temporal is not defined' == e || 'ReferenceError: Can\'t find variable: Temporal' == e) {e = zSKIP}
 					}
 				}
@@ -619,10 +619,7 @@ function get_navigator_keys(METRIC) {
 			post = aProto.slice(position +1)
 			// aNav: pre javaEnabled
 			position = aNav.indexOf('javaEnabled')
-			if (position > 0) {
-				pre = aNav.slice(0, position)
-				if (isVer < 129) {pre = pre.filter(x => !['vibrate'].includes(x))} // ignore vibrate in 128 or lower
-			}
+			if (position > 0) {pre = aNav.slice(0, position)}
 			// missing
 			let missingNav = expected.filter(x => !aNav.includes(x))
 			let missingProto = expected.filter(x => !aProto.includes(x))
