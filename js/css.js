@@ -24,7 +24,6 @@ function rgba2hex(orig, hexOnly = false) {
 }
 
 function get_colors() {
-	let t0 = nowFn()
 	/* https://www.w3.org/TR/css-color-4/ */
 	let oList = {	// sorted
 		css4: [
@@ -61,10 +60,7 @@ function get_colors() {
 		// wrecking our RFP deterministic hash: to solve this we will add them if we expect them
 		let aAdd = []
 		if (isVer < 141) {aAdd.push('-moz-buttonhoverface','-moz-buttonhovertext')} // removed FF141: 1968925
-		if (isVer < 140) {aAdd.push('-moz-eventreerow')} // removed FF140: can't find bugzilla
-		if (aAdd.length) {
-			oList.moz = oList.moz.concat(aAdd).sort()
-		}
+		if (aAdd.length) {oList.moz = oList.moz.concat(aAdd).sort()}
 	}
 	//console.log(oList)
 
@@ -99,7 +95,6 @@ function get_colors() {
 		}
 		addBoth(14, METRIC, hash, btn, notation, data)
 	}
-	log_perf(14, 'colors', t0)
 	return
 }
 
