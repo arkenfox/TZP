@@ -170,6 +170,11 @@ function set_isLanguageSmart() {
 	isLanguageSmart = isBB
 
 	const en = 'en-US, en'
+	// ToDo: I think mozilla changed everything in FF146+
+	// see https://bugzilla.mozilla.org/show_bug.cgi?id=2044482#c1
+	// TB should match but I can't easily test in FF
+
+
 	languagesSupported = {
 		// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
 		'ar': [en],
@@ -2375,7 +2380,10 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 				for (let i=0; i < res.length; i++) {
 					let msg = res[i].body.message
 					msg = msg.replace('https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture','').trim()
-					aSet.add(msg)
+					// FF154+ if dom.xslt.enabled == true, we get an XSLT deprecation warning
+						// added in FF147 1993933 but it doesn't show up in Reporting API until 154
+						// Regardless, given this is going to be rolled out gradually let's exclude it: we have plenty already
+					if (!msg.includes('XSLT')) {aSet.add(msg)}
 					if (max == aSet.size) {break} // reruns accrue messages so break
 				}
 				data = Array.from(aSet).sort()
@@ -2387,7 +2395,7 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 				hash = 'none'
 			}
 			// notate
-			if (isLanguageSmart) {
+			if (isLanguageSmart && isVer > 148) {
 				if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
 					let check = localesSupported[isLocaleAlt].r
 					// if blank then it hasn't been translated yet
@@ -2408,6 +2416,8 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 	if (!isGecko) {
 		exit(zNA)
 	} else if (undefined == isReporting && undefined == window.ReportingObserver) {
+		// don't need isLanguageSmart to notate undefined
+		notation = isVer > 148 ? default_red : default_green
 		exit('undefined')
 	} else {
 		// but we do notate when it is on to match locale
