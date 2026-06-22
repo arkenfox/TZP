@@ -1392,9 +1392,13 @@ function get_timezone_offset(METRIC) {
 		'toLocaleTimeString','toString','toTimeString',
 		//'date',
 	]
-	// non-gecko: skip exslt
-		// 1990759: ToDo: add isXSLT + isVer when the pref flips: dom.xslt.enabled
-	if (isGecko) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)}
+	// non-gecko: skip exslt: see 1990759 dom.xslt.enabled
+		// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
+		// pending: BB ESR153: 45072 (maybe security levels)
+	let addEXSLT = isGecko ? true : false
+	if (isVer > 153 && !isXSLT) {addEXSLT = false}
+
+	if (addEXSLT) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)}
 	methods.sort()
 	let aLastMods = ['exslt','iframe','parseFromString','parseHTMLUnsafe'] // is lastModified source
 	let testdate
@@ -2381,7 +2385,7 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 					let msg = res[i].body.message
 					msg = msg.replace('https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture','').trim()
 					// FF154+ if dom.xslt.enabled == true, we get an XSLT deprecation warning
-						// added in FF147 1993933 but it doesn't show up in Reporting API until 154
+						// added in FF147 1993933 but it doesn't show up in Reporting API until 154 (probably 2046720)
 						// Regardless, given this is going to be rolled out gradually let's exclude it: we have plenty already
 					if (!msg.includes('XSLT')) {aSet.add(msg)}
 					if (max == aSet.size) {break} // reruns accrue messages so break
@@ -2534,7 +2538,7 @@ function get_l10n_xml_prettyprint(METRIC, isLies) {
 }
 
 function get_l10n_xslt_messages(METRIC) {
-	if (!isGecko) {addBoth(4, METRIC, zNA); return}
+	if (isGecko) {addBoth(4, METRIC, zNA); return}
 
 	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom/xslt.ftl
 	// note file schema errors due to CORS
@@ -2550,7 +2554,9 @@ function get_l10n_xslt_messages(METRIC) {
 	try {
 		let msg = dom.tzpXSLT.contentDocument.children[0].textContent
 		if ('a' == msg) {
-			// ToDo: cleanup notation when this becomes the standard
+			// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
+				// pending: BB ESR153: 45072 (maybe security levels)
+			if (isVer > 153) {notation = ''}
 			hash = zD // XSLT disabled on page load
 		} else {
 			data = {'xslt-parse-failure': msg} 
@@ -2574,6 +2580,9 @@ function get_l10n_xslt_sort(METRIC) {
 	// so we can't use plural rules to get a determinsitic result
 	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
 	if (!isXSLT) {
+		// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
+			// pending: BB ESR153: 45072 (maybe security levels)
+		if (isVer > 153) {notation = ''}
 		addBoth(4, METRIC, zD,'', notation); return
 	}
 
