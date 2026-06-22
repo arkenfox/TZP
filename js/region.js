@@ -2538,7 +2538,7 @@ function get_l10n_xml_prettyprint(METRIC, isLies) {
 }
 
 function get_l10n_xslt_messages(METRIC) {
-	if (isGecko) {addBoth(4, METRIC, zNA); return}
+	if (!isGecko) {addBoth(4, METRIC, zNA); return}
 
 	// https://searchfox.org/firefox-main/source/dom/locales/en-US/dom/xslt.ftl
 	// note file schema errors due to CORS
