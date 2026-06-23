@@ -282,6 +282,10 @@ function get_codecs(type) {
 	function get_isType() {
 		let hash, data = {'MediaRecorder': [],'MediaSource': []}, btn='', isLies = false, hasFakeR = false, hasFakeS = false
 		try {
+			if ('undefined' == typeof MediaRecorder && 'undefined' == typeof MediaSource) {
+				addBoth(13, metricT, 'undefined')
+				return
+			}
 			let canRecord = true, canSource = true
 			list.forEach(function(item) {
 				let tmp = item.replace(type +'\/','') // strip 'video/','audio/'

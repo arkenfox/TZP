@@ -586,10 +586,11 @@ function get_touc_h(METRIC) {
 		let value
 		try {
 			value = navigator[m]
-			if (runST) {value = undefined} else if (runSI) {value = -5} else if (runSL) {addProxyLie('Navigator.'+ m)}
+			if (runST) {value = null} else if (runSI) {value = -5} else if (runSL) {addProxyLie('Navigator.'+ m)}
 			let typeCheck = typeFn(value)
-			if ('number' !== typeCheck) {throw zErrType + typeCheck}
-			if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value}
+			if ('undefined' == typeCheck) {value = typeCheck
+			} else if ('number' !== typeCheck) {throw zErrType + typeCheck
+			} else if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value}
 			if (isProxyLie('Navigator.'+ m)) {
 				log_known(7, METRIC +'_'+ m, value)
 				value = zLIE
@@ -612,26 +613,30 @@ function get_touc_h(METRIC) {
 				if (runSE) {foo++}
 				let target = window[m]
 				let typeCheck = typeFn(target)
-				if (runST) {typeCheck = undefined}
-				if ('function' !== typeCheck) {throw zErrType + typeCheck}
-				let props = Object.getOwnPropertyNames(target.prototype)
-				value = props.filter(x => x.includes('ouch'))
-				value.sort() // we already capture order in window function properties
-				if (0 == value.length) {value = 'none'}
-				if (isGecko) {
-					// gecko: ontouch* only exists in android: desktop blocks these to avoid being identified as mobile
-					let got = 'none' == value ? value : value.join(', ')
-					if (!isDesktop) {
-						// android
-						let expected = ['ontouchcancel','ontouchend','ontouchmove','ontouchstart']
-						if ('Document' == m) {expected.push('createTouch','createTouchList'); expected.sort()}
-						let minihash = mini(value), miniexpected = mini(expected)
-						if (minihash !== miniexpected) {
-							throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
+				if (runST) {typeCheck = ''}
+				if ('undefined' == typeCheck) {
+					value = typeCheck
+				} else {
+					if ('function' !== typeCheck) {throw zErrType + typeCheck}
+					let props = Object.getOwnPropertyNames(target.prototype)
+					value = props.filter(x => x.includes('ouch'))
+					value.sort() // we already capture order in window function properties
+					if (0 == value.length) {value = 'none'}
+					if (isGecko) {
+						// gecko: ontouch* only exists in android: desktop blocks these to avoid being identified as mobile
+						let got = 'none' == value ? value : value.join(', ')
+						if (!isDesktop) {
+							// android
+							let expected = ['ontouchcancel','ontouchend','ontouchmove','ontouchstart']
+							if ('Document' == m) {expected.push('createTouch','createTouchList'); expected.sort()}
+							let minihash = mini(value), miniexpected = mini(expected)
+							if (minihash !== miniexpected) {
+								throw zErrInvalid +'expected '+ expected.join(', ') +': got '+ got
+							}
+						} else if ('none' !== value) {
+							// desktop
+							throw zErrInvalid +'expected none: got '+ got
 						}
-					} else if ('none' !== value) {
-						// desktop
-						throw zErrInvalid +'expected none: got '+ got
 					}
 				}
 			} catch(e) {
