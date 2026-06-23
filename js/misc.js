@@ -793,9 +793,13 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 		}
 	}
 	try {
-		populateVoiceList()
-		if (speechSynthesis.onvoiceschanged !== undefined) {
-			speechSynthesis.onvoiceschanged = populateVoiceList;
+		if ('undefined' == typeof window.speechSynthesis) {
+			exit('undefined')
+		} else {
+			populateVoiceList()
+			if (speechSynthesis.onvoiceschanged !== undefined) {
+				speechSynthesis.onvoiceschanged = populateVoiceList;
+			}
 		}
 	} catch(e) {
 		exit(e, zErrLog)
@@ -829,7 +833,8 @@ function get_webdriver(METRIC) {
 		value = navigator[METRIC]
 		if (runST) {value = null}
 		let typeCheck = typeFn(value)
-		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+		if ('undefined' == typeCheck) {value = typeCheck
+		} else if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
 	} catch(e) {
 		value = e; data = zErrLog
 	}
