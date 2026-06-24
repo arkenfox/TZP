@@ -1392,11 +1392,18 @@ function get_timezone_offset(METRIC) {
 		'toLocaleTimeString','toString','toTimeString',
 		//'date',
 	]
-	// non-gecko: skip exslt: see 1990759 dom.xslt.enabled
-		// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
-		// pending: BB ESR153: 45072 (maybe security levels)
+
+	// 1990759 dom.xslt.enabled
+	// the way the code works is if we add exslt and it errors then we get a failed health
+		// 2028408: FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
+		// 45072: BB ESR153 we expect xslt to be disabled
+			// BB: don't care about alphas, just use > 140: next isSmart change we can remove the version check
 	let addEXSLT = isGecko ? true : false
-	if (isVer > 153 && !isXSLT) {addEXSLT = false}
+	// so don't add exslt _only_ if we're not expecting it _and_ it's disabled
+	if (!isXSLT) {
+		let xsltVer = isBB ? 140 : 153
+		if (isVer > xsltVer) {addEXSLT = false}
+	}
 
 	if (addEXSLT) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)}
 	methods.sort()
@@ -1872,6 +1879,11 @@ function get_timezone_offset(METRIC) {
 		if (0 == tamperCount && 0 == errCount) {
 			// no lies + no errors
 			notation = tz_green
+			// 45072: BB ESR153 we expect xslt to be disabled
+				// if xslt is enabled then exslt is added, and it will pass health, i.e match
+				// so here is where we catch that
+				// BB: don't care about alphas, just use > 140: next isSmart change we can remove the version check
+			if (isBB && isVer > 140 && isXSLT) {notation = tz_red}
 		} else if (gRun) {
 			// health lookup
 			let aHealth = []
@@ -2408,6 +2420,8 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 				}
 			}
 		}
+		// 45080: BB expected to be undefined
+		if (isBB) {notation = 'undefined' == hash ? bb_green : bb_red}
 		addBoth(4, METRIC, hash, btn, notation, data)
 		if (!hasReporting) {log_perf(4, METRIC, t0)}
 		return resolve()
@@ -2555,7 +2569,6 @@ function get_l10n_xslt_messages(METRIC) {
 		let msg = dom.tzpXSLT.contentDocument.children[0].textContent
 		if ('a' == msg) {
 			// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
-				// pending: BB ESR153: 45072 (maybe security levels)
 			if (isVer > 153) {notation = ''}
 			hash = zD // XSLT disabled on page load
 		} else {
@@ -2570,6 +2583,11 @@ function get_l10n_xslt_messages(METRIC) {
 			if (localesSupported[isLocaleAlt].xs.includes(hash)) {notation = locale_green}
 		}
 	}
+	// 45072: BB ESR153 we expect xslt to be disabled
+		// BB: don't care about alphas, just use > 140: next isSmart change we can remove the version check
+	if (isBB && isVer > 140) {
+		notation = zD == hash ? bb_green : bb_red
+	}
 	addBoth(4, METRIC, hash, btn, notation, data)
 }
 
@@ -2581,8 +2599,9 @@ function get_l10n_xslt_sort(METRIC) {
 	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
 	if (!isXSLT) {
 		// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
-			// pending: BB ESR153: 45072 (maybe security levels)
-		if (isVer > 153) {notation = ''}
+		// 45072: BB ESR153 we expect xslt to be disabled
+		if (isBB && isVer > 140) {notation = bb_green // don't care about alphas, just use > 140: next isSmart change we can remove the version check
+		} else if (isVer > 153) {notation = ''}
 		addBoth(4, METRIC, zD,'', notation); return
 	}
 
@@ -2620,6 +2639,8 @@ function get_l10n_xslt_sort(METRIC) {
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
+	// 45072: BB ESR153 we expect xslt to be disabled
+	if (isBB && isVer > 140) {notation = bb_red} // don't care about alphas, just use > 140: next isSmart change we can remove the version check
 	addBoth(4, METRIC, hash, btn, notation, data)
 	return
 }
