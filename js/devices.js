@@ -488,18 +488,19 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
 	let tmpData = {}, data = {}, count = 0
 	let aList = [
-		// gecko
-		'camera','geolocation','microphone','midi','midi_sysex','notifications',
-		'persistent-storage','push','screen-wake-lock',
-		// non-gecko
-		'accelerometer','ambient-light-sensor','background-fetch','background-sync','clipboard-read',
-		'clipboard-write','compute-pressure','gyroscope','local-fonts','magnetometer','payment-handler',
-		'storage-access','top-level-storage-access','window-management',
-		// not listed on mdn: but confirmed in blink as a non error
-		'display-capture','nfc',
-		// other
-		//'accessibility-events', // 
-		'bluetooth','device-info','gamepad','speaker','speaker-selection',
+		// ToDo: see 1536382#c5 where do deviceorientation/devicemotion fit in here
+		'accelerometer','accessibility-events','ambient-light-sensor',
+		'background-fetch','background-sync','bluetooth',
+		'camera','captured-surface-control','clipboard-read','clipboard-write','compute-pressure',
+		'device-info','display-capture',
+		'gamepad','geolocation','gyroscope',
+		'local-fonts','local-network','local-network-access','loopback-network',
+		'magnetometer','microphone','midi','midi_sysex',
+		'nfc','notifications',
+		'payment-handler','persistent-storage','push',
+		'screen-wake-lock','speaker','speaker-selection','storage-access',
+		'top-level-storage-access',
+		'window-management',
 	]
 	aList.sort()
 	for (let i=0; i < aList.length; i++) {
@@ -542,7 +543,10 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		// sort object: sort arrays so permission delays don't create disorder
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k].sort()}
 		let hash = mini(data)
-		let notation = '88b7fbf8' == hash ? default_green : default_red
+		// FF152+ added local-network/loopback-network
+			// ToDo: check android
+		let goodhash = isVer > 151 ? '915b710d' : '4dfee60f'
+		let notation = goodhash == hash ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
 		return resolve()
