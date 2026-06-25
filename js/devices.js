@@ -486,7 +486,7 @@ function get_memory(METRIC) {
 const get_permissions = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API#permission-aware_apis
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
-	let tmpData = {}, data = {}, count = 0
+	let tmpData = {}, data = {}, count = 0, state
 	let aList = [
 		// ToDo: see 1536382#c5 where do deviceorientation/devicemotion fit in here
 		'accelerometer','accessibility-events','ambient-light-sensor',
@@ -501,13 +501,15 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		'screen-wake-lock','speaker','speaker-selection','storage-access',
 		'top-level-storage-access',
 		'window-management',
+		'i-do-not-exist', // test
 	]
 	aList.sort()
+	// https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus
+	// spec: https://w3c.github.io/permissions/#permissions
+	let aValid = ['denied','granted','prompt']
+
 	for (let i=0; i < aList.length; i++) {
 		let k = aList[i], key = k
-		// https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus
-		// spec: https://w3c.github.io/permissions/#permissions
-		let aValid = ['denied','granted','prompt']
 		function accrue(k, value) {
 			count++
 			if (undefined ==tmpData[value]) {tmpData[value] = [k]} else {tmpData[value].push(k)}
@@ -518,7 +520,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 			let isSysex = k.includes('sysex')
 			if (isSysex) {key = 'midi'}
 			navigator.permissions.query({name: key, sysex: isSysex}).then(function(r) {
-				let state = r.state
+				state = r.state
 				if (runST) {state = undefined} else if (runSI) {state = 'allowed'}
 				// checks
 				let typeCheck = typeFn(state)
@@ -526,27 +528,45 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 				if (!aValid.includes(state)) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ state}
 				accrue(k, state)
 			}).catch(err => {
+				state = isGecko ? zErr : err.name.toLowerCase()
 				// only log non-standard gecko
 				if (isGecko) {
-					let expected = 'TypeError: \''+ k +'\' (value of \'name\' member of '
+					// TypeError: 'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
+					// this is what we expect from unsupported values: e.g. local-network in FF140
+					let testErr = 'TypeError: \''+ k +'\' (value of \'name\' member of '
 						+ 'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
-					if (err+'' !== expected) {log_error(7, METRIC +'_'+ k, err)}
+					let isLogErr = err+'' !== testErr
+					if (isLogErr) {
+						// 2050333
+						// TypeError: Permissions.query: 'local-network' (value of...
+						// but this is what we get for local-network and loopback-network once it was added - diff is 'Permissions.query: '
+						if ('local-network' == k || 'loopback-network' == k) {
+							testErr = 'TypeError: Permissions.query: \''+ k +'\' (value of \'name\' member of '
+								+ 'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
+							isLogErr = err+'' !== testErr
+						}
+					}
+// TypeError:                    'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
+// TypeError: Permissions.query: 'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
+					if (isLogErr) {log_error(7, METRIC +'_'+ k, err)}
 				}
-				accrue(k, zErr)
+				accrue(k, state)
 			})
 		} catch(e) {
-			if (isGecko) {log_error(7, METRIC +'_'+ k, e)}
-			accrue(k, zErr)
+			state = e.name.toLowerCase()
+			if (isGecko) {state = zErr; log_error(7, METRIC +'_'+ k, e)}
+			accrue(k, state)
 		}
 	}
 	function exit() {
 		// sort object: sort arrays so permission delays don't create disorder
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k].sort()}
 		let hash = mini(data)
-		// FF152+ added local-network/loopback-network
-			// ToDo: check android
-		let goodhash = isVer > 151 ? '915b710d' : '4dfee60f'
-		let notation = goodhash == hash ? default_green : default_red
+		// FF150+ added local-network/loopback-network to ETP Strict and I guess it can be flipped on in other ways
+
+		let aGood = ['2afe1864']
+		if (isVer > 149) {aGood.push('6e5aa362')}
+		let notation = aGood.includes(hash) ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
 		return resolve()
