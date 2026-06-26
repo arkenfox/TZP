@@ -90,32 +90,114 @@ function get_domrect(METRIC) {
 }
 
 function get_element_keys(METRIC) {
-	const id = 'element-key'
-	let hash, btn ='', data = [], notation = isBBESR ? bb_red : '', isLies = false
+	let t0 = nowFn()
+	let list = [
+		'a','audio','blockquote','button','canvas','data','datalist','del','details','dialog','dir','div',
+		'font','form','geolocation','iframe','install','label','math','marquee','meter','ol','output',
+		'param','pre','progress','script','slot','style','svg','template','textarea','time','title',
+	]
+	let list_standalone = ['base','br','embed','hr','img','input','link','meta','object','source']
+	let aList = [
+		'<fieldset><legend></legend></fieldset>',
+		'<map><area></map>',
+		'<select><optgroup><option></option></optgroup></select>',
+		'<table><col><tr><td></td></tr><tbody></tbody></table>',
+		'<ul><li></li></ul>',
+		'<video><track></video>',
+	]
+	list.forEach(function(item) {aList.push('<'+ item+'></'+ item+'>')})
+	list_standalone.forEach(function(item) {aList.push('<'+ item+'>')})
+	let aAdditional = ['<frameset><frame></frameset>'] // you can't do these when you have a body
+	let aSkip = ['colgroup'] // can't seem to block colgroup when I add a col
+	let aSkipAdditional = ['body','head','html'] // no point getting these twice
+
+	let hash, btn ='', data='', notation = isBBESR ? bb_red : ''
+	let oRaw = {}
 	try {
 		if (runSE) {foo++}
-		const element = document.createElement('a')
-		element.setAttribute('id', id)
-		document.body.appendChild(element)
-		let htmlElement = dom[id]
-		for (const key in htmlElement) {data.push(key)}
-		hash = mini(data); btn = addButton(15, METRIC, data.length)
-		// cydec: changes order, removes some keys
-			// ToDo: use post constructor when we enumerate all elements
-		const aExpected = ['scrollWidth','scrollHeight','clientWidth','clientHeight']
-		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
+		// LIST
+		let parser = new DOMParser
+		let doc = parser.parseFromString(aList.join(''), "text/html")
+		let obj = doc.all // servo: obj is undefined
+		for (const k of Object.keys(obj)) {
+			let name = obj[k].localName
+			if (!aSkip.includes(name)) {
+				let keys = []
+				for (const key in obj[k]) {keys.push(key)}
+				oRaw[name] = {'hash': mini(keys), 'data': keys}
+			}
+		}
+		// ADDITIONAL
+		doc = parser.parseFromString(aAdditional.join(''), "text/html")
+		obj = doc.all
+		for (const k of Object.keys(obj)) {
+			let name = obj[k].localName
+			if (!aSkipAdditional.includes(name)) {
+				let keys = []
+				for (const key in obj[k]) {keys.push(key)}
+				oRaw[name] = {'hash': mini(keys), 'data': keys}
+			}
+		}
+
+		// group by hash + split array
+		let oTemp = {}, oCommon = {}, oTamper = {}, oPre = {}
+		let splitValue = isGecko ? 'click' : 'title' // set a baseline
+		try {splitValue = oRaw.head.data[0]} catch(e) {} // lookup it up
+
+		for (const k of Object.keys(oRaw)) {
+			let key = oRaw[k].hash
+			if (undefined == oTemp[key]) {
+				// split
+				let keys = oRaw[k].data, aPre = [], aCommon = []
+				let splitUsed = splitValue
+				if ('math' == k || 'svg' == k) {
+					if (keys.includes('classList')) {splitUsed = 'classList' } // works on blink + gecko
+				}
+				let splitIndex = keys.indexOf(splitUsed)
+				aPre = keys.slice(0, splitIndex) // unique stuff
+				aCommon = keys.slice(splitIndex, keys.length) // common stuff
+				let commonhash = mini(aCommon)
+				// common tampering
+				if (oCommon[commonhash] == undefined) {
+					oCommon[commonhash] = aCommon
+					let commonTamper = []
+					aCommon.forEach(function(r) {if (r.includes(' ')) {commonTamper.push(r)}})
+					if (commonTamper.length) {oTamper[commonhash] = commonTamper}
+				}
+				// add the commonhash to pre data
+				// note: because aPre contains the commonhash, no aPre data can be alike across different commons
+					// i.e two elements with the same aPre of X: one has a commonhash of C1, the other C2
+					// the final aPres will always be unique: [x,C1] and [x, C2]
+				aPre.push(commonhash)
+				oTemp[key] = {'data': aPre, 'group': [k]}
+			} else {
+				oTemp[key].group.push(k)
+			}
+		}
+		// group elements into keys
+		for (const k of Object.keys(oTemp)) {
+			let key = oTemp[k].group.sort()
+			oPre[key.join(' ')] = oTemp[k].data
+		}
+		// build fingerprint
+		let counter = 0
+		data = {'common': {}, 'elements': {}}
+		for (const k of Object.keys(oCommon).sort()) {data.common[counter +'. '+ k] = oCommon[k]; counter++}
+		for (const k of Object.keys(oPre).sort()) {data.elements[k] = oPre[k]}
+		hash = mini(data); btn = addButton(15, METRIC)
+
 		// health: BB only if ESR
 		if (isBBESR) {
-			// 40f682b2: 352 standard
-			// 5e5ae1c9: 365 safer (including webgl click-to-play)
-			// the 13 items diff are all NS tampering
-			if ('40f682b2' == hash || '5e5ae1c9' == hash) {notation = bb_green}
+			// we'll want hashes for standard + safer (including webgl clicked-to-play - has no effect AFAICT)
+			// need to test per platform: below is windows TB/MB140 standard then safer
+			if ('98024325' == hash || '2d776e74' == hash) {notation = bb_green}
 		}
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	removeElementFn(id)
-	addBoth(15, METRIC, hash, btn, notation, data, isLies)
+
+	addBoth(15, METRIC, hash, btn, notation, data)
+	log_perf(15, METRIC, t0)
 	return
 }
 
