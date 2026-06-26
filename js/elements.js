@@ -180,9 +180,13 @@ function get_element_keys(METRIC) {
 			oPre[key.join(' ')] = oTemp[k].data
 		}
 		// build fingerprint
-		let counter = 0
+		let counter = 0, isDouble = Object.keys(oCommon).length > 9
 		data = {'common': {}, 'elements': {}}
-		for (const k of Object.keys(oCommon).sort()) {data.common[counter +'. '+ k] = oCommon[k]; counter++}
+		for (const k of Object.keys(oCommon).sort()) {
+			counter++ // start at 1
+			let prefix = isDouble ? (counter+'').padStart(2,'0') : counter
+			data.common[prefix +'. '+ k] = oCommon[k]
+		}
 		for (const k of Object.keys(oPre).sort()) {data.elements[k] = oPre[k]}
 		hash = mini(data); btn = addButton(15, METRIC)
 
