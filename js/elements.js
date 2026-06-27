@@ -111,7 +111,7 @@ function get_element_keys(METRIC) {
 	let aSkip = ['colgroup'] // can't seem to block colgroup when I add a col
 	let aSkipAdditional = ['body','head','html'] // no point getting these twice
 
-	let hash, btn ='', data='', notation = isBBESR ? bb_red : ''
+	let hash, btn ='', tamperBtn = '', data='', notation = isBBESR ? bb_red : ''
 	let oRaw = {}
 	try {
 		if (runSE) {foo++}
@@ -140,11 +140,10 @@ function get_element_keys(METRIC) {
 		}
 
 		// group by hash + split array
-		let oTemp = {}, oCommon = {}, oTamper = {}, oPre = {}
+		let oTemp = {}, oCommon = {}, oTamper = {'common': {}, 'elements': {}}, oPre = {}, oCount = {}
 		let splitValue = isGecko ? 'click' : 'title' // set a baseline
 		try {splitValue = oRaw.head.data[0]} catch(e) {} // lookup it up
-
-		for (const k of Object.keys(oRaw)) {
+		for (const k of Object.keys(oRaw).sort()) {
 			let key = oRaw[k].hash
 			if (undefined == oTemp[key]) {
 				// split
@@ -154,16 +153,28 @@ function get_element_keys(METRIC) {
 					if (keys.includes('classList')) {splitUsed = 'classList' } // works on blink + gecko
 				}
 				let splitIndex = keys.indexOf(splitUsed)
-				aPre = keys.slice(0, splitIndex) // unique stuff
-				aCommon = keys.slice(splitIndex, keys.length) // common stuff
+				let aTamper = [], tamperhash
+				// element
+				aPre = keys.slice(0, splitIndex)
+				// common
+				aCommon = keys.slice(splitIndex, keys.length)
 				let commonhash = mini(aCommon)
 				// common tampering
 				if (oCommon[commonhash] == undefined) {
+					aTamper = []
+					oCount[commonhash] = 0
 					oCommon[commonhash] = aCommon
-					let commonTamper = []
-					aCommon.forEach(function(r) {if (r.includes(' ')) {commonTamper.push(r)}})
-					if (commonTamper.length) {oTamper[commonhash] = commonTamper}
+					aCommon.forEach(function(item) {if (item.includes(' ')) {aTamper.push(item)}})
+					if (aTamper.length) {
+						tamperhash = mini(aTamper)
+						if (undefined == oTamper.common[tamperhash]) {
+							oTamper.common[tamperhash] = {'data': aTamper, 'group': [commonhash]}
+						} else {
+							oTamper.common[tamperhash].group.push(commonhash)
+						}
+					}
 				}
+				oCount[commonhash] = oCount[commonhash] + 1
 				// add the commonhash to pre data
 				// note: because aPre contains the commonhash, no aPre data can be alike across different commons
 					// i.e two elements with the same aPre of X: one has a commonhash of C1, the other C2
@@ -179,6 +190,31 @@ function get_element_keys(METRIC) {
 			let key = oTemp[k].group.sort()
 			oPre[key.join(' ')] = oTemp[k].data
 		}
+		// get most common as control
+		let ctrlcount = 0, ctrlkey
+		for (const k of Object.keys(oCount)) {
+			if (oCount[k] > ctrlcount) {ctrlkey = k; ctrlcount = oCount[k]}
+		}
+		ctrlcount = oCommon[ctrlkey].length
+		let ctrldata = oCommon[ctrlkey]
+		// simplify common
+		for (const k of Object.keys(oCommon)) {
+			if (ctrlkey !== k) {
+				// if the test array is only a few LESS than the control
+				let diff = ctrlcount - oCommon[k].length
+				if (diff > 0 && diff < 10) {
+					// what is missing in the test array
+					let aNotInCtrl = ctrldata.filter(x => !oCommon[k].includes(x))
+					// remove those from ctrl and if hashes match then ...
+					let aCtrlMinusMissing = ctrldata.filter(x => !aNotInCtrl.includes(x))
+					if (mini(aCtrlMinusMissing) == k) {
+						// identical except for those missing: simplify
+						oCommon[k] = [ctrlkey]
+						aNotInCtrl.forEach(function(item){oCommon[k].push('-'+ item)})
+					}
+				}
+			}
+		}
 		// build fingerprint
 		let counter = 0, isDouble = Object.keys(oCommon).length > 9
 		data = {'common': {}, 'elements': {}}
@@ -189,18 +225,51 @@ function get_element_keys(METRIC) {
 		}
 		for (const k of Object.keys(oPre).sort()) {data.elements[k] = oPre[k]}
 		hash = mini(data); btn = addButton(15, METRIC)
-
 		// health: BB only if ESR
 		if (isBBESR) {
 			// we'll want hashes for standard + safer (including webgl clicked-to-play - has no effect AFAICT)
 			// need to test per platform: below is windows TB/MB140 standard then safer
 			if ('98024325' == hash || '2d776e74' == hash) {notation = bb_green}
 		}
+
+		// tampering: this is for display info only, the data is already in the FP
+		// add element tampering
+		for (const k of Object.keys(oPre).sort()) {
+			//if ('geolocation head install' == k || 'hr' == k || 'area' == k) {oPre[k].push('i am groot')} // test
+			let aTamper = []
+			oPre[k].forEach(function(item) {if (item.includes(' ')) {aTamper.push(item)}})
+			if (aTamper.length) {
+				let tamperhash = mini(aTamper)
+				let key = k.split(' ')
+				if (undefined == oTamper.elements[tamperhash]) {
+					oTamper.elements[tamperhash] = {'data': aTamper, 'group': key}
+				} else {
+					let tmpArray = oTamper.elements[tamperhash].group.concat(key)
+					oTamper.elements[tamperhash].group = tmpArray
+				}
+			}
+		}
+		// simplify/cleanup oTamper
+		if (Object.keys(oTamper.common).length || Object.keys(oTamper.elements).length) {
+			//console.log(oTamper)
+			let obj = {}
+			for (const k of Object.keys(oTamper).sort()) {
+				for (const t of Object.keys(oTamper[k])) {
+					if (undefined == obj[k]) {obj[k] = {}}
+					let key = oTamper[k][t].group.sort()
+					key = key.join(' ')
+					obj[k][key] = oTamper[k][t].data
+				}
+			}
+			//console.log(obj)
+			sDetail[isScope][METRIC +'_tampered'] = obj
+			tamperBtn = addButton(15, METRIC +'_tampered','tampered')
+		}
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
 
-	addBoth(15, METRIC, hash, btn, notation, data)
+	addBoth(15, METRIC, hash, btn + tamperBtn, notation, data)
 	log_perf(15, METRIC, t0)
 	return
 }
