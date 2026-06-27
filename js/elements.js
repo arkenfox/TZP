@@ -229,7 +229,8 @@ function get_element_keys(METRIC) {
 		if (isBBESR) {
 			// we'll want hashes for standard + safer (including webgl clicked-to-play - has no effect AFAICT)
 			// need to test per platform: below is windows TB/MB140 standard then safer
-			if ('98024325' == hash || '2d776e74' == hash) {notation = bb_green}
+			// always uodate from HTTPS cuz NoScript can handle file:// schema differently
+			if ('904cea9c' == hash || '58dbc797' == hash) {notation = bb_green}
 		}
 
 		// tampering: this is for display info only, the data is already in the FP
