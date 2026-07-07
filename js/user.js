@@ -213,7 +213,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 						// {"oscillator": "f263f055", "oscillator_compressor": "1f38e089"}
 						notation = sgtick+'ARM64/aarch64]'+sc
 					}
-				} else if ('e9f98e24' == hash) {
+				} else if ('75398d16' == hash) {
 					// {"oscillator": "e9f98e24", "oscillator_compressor": "bafe56d6"}
 					notation = sgtick+'x86/i686/ARMv7]'+sc
 				}
