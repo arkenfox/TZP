@@ -93,9 +93,19 @@ function get_element_keys(METRIC) {
 	let t0 = nowFn()
 	let list = [
 		'a','audio','blockquote','button','canvas','data','datalist','del','details','dialog','dir','div',
-		'font','form','geolocation','iframe','install','label','math','marquee','meter','ol','output',
-		'param','pre','progress','script','slot','style','svg','template','textarea','time','title',
+		'fencedframe','font','form','geolocation','iframe','install','label','math','marquee','meter','ol','output',
+		'param','pre','progress','script','slot','style','svg','template','textarea','time','title','usermedia'
 	]
+	let oIsSupported = {
+		fencedframe: 'HTMLFencedFrameElement' in window,
+		geolocation: 'HTMLGeolocationElement' in window,
+		install: 'HTMLInstallElement' in window,
+		usermedia: 'HTMLUserMediaElement' in window,
+	}
+	let skiplist = []
+	for (const k of Object.keys(oIsSupported)) {if (false === oIsSupported[k]) {skiplist.push(k)}}
+	list = list.filter(x => !skiplist.includes(x))
+
 	let list_standalone = ['base','br','embed','hr','img','input','link','meta','object','source']
 	let aList = [
 		'<fieldset><legend></legend></fieldset>',
@@ -216,12 +226,11 @@ function get_element_keys(METRIC) {
 			}
 		}
 		// build fingerprint
-		let counter = 0, isDouble = Object.keys(oCommon).length > 9
+		let counter = 0
 		data = {'common': {}, 'elements': {}}
 		for (const k of Object.keys(oCommon).sort()) {
 			counter++ // start at 1
-			let prefix = isDouble ? (counter+'').padStart(2,'0') : counter
-			data.common[prefix +'. '+ k] = oCommon[k]
+			data.common[(counter+'').padStart(2,'0') +'. '+ k] = oCommon[k]
 		}
 		for (const k of Object.keys(oPre).sort()) {data.elements[k] = oPre[k]}
 		hash = mini(data); btn = addButton(15, METRIC)
@@ -229,14 +238,13 @@ function get_element_keys(METRIC) {
 		if (isBBESR) {
 			// we'll want hashes for standard + safer (including webgl clicked-to-play - has no effect AFAICT)
 			// need to test per platform: below is windows TB/MB140 standard then safer
-			// always uodate from HTTPS cuz NoScript can handle file:// schema differently
-			if ('904cea9c' == hash || '58dbc797' == hash) {notation = bb_green}
+			// always update from HTTPS cuz NoScript can handle file:// schema differently
+			if ('904cea9c' == hash || '634fbcfa' == hash) {notation = bb_green}
 		}
 
 		// tampering: this is for display info only, the data is already in the FP
 		// add element tampering
 		for (const k of Object.keys(oPre).sort()) {
-			//if ('geolocation head install' == k || 'hr' == k || 'area' == k) {oPre[k].push('i am groot')} // test
 			let aTamper = []
 			oPre[k].forEach(function(item) {if (item.includes(' ')) {aTamper.push(item)}})
 			if (aTamper.length) {
@@ -314,8 +322,7 @@ function get_element_font(METRIC, isLies) {
 
 		// group by styles
 		for (const k of Object.keys(oData)){data[oData[k].group.join(' ')] = oData[k].data}
-		let count = Object.keys(data).length
-		hash = mini(data); btn = addButton(15, METRIC, count +' group'+ (count > 1 ? 's' : ''))
+		hash = mini(data); btn = addButton(15, METRIC)
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -523,7 +530,9 @@ function get_element_lang(METRIC, isLies) {
 	return
 }
 
-function get_element_mathml(METRIC, isLies) {
+function get_element_math(METRIC, isLies) {
+	// https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element
+
 	let t0 = nowFn()
 	const id = 'element-fp'
 	const sizetype = 'px', sizes = [33,99,111], sizectl = sizes[0]
@@ -602,7 +611,7 @@ function get_element_other(METRIC, isLies) {
 	/* NOTE
 	TZP uses isDomRect, the default being 0 (element.getBoundingClientRect). When
 	falling back to other domrect methods, some differences can occur (per engine)
-	- e.g. gecko: audio + sometimes marquee measure differently with 2
+	- e.g. gecko: audio measures differently with 2
 	- e.g. blink: q measures differently if 1 or 3
 	- e.g. servo: as of June 2026: everything mismatches
 	Ideally this wouldn't happen, but ultimately it is equivalency of isDomRect
@@ -638,6 +647,7 @@ function get_element_other(METRIC, isLies) {
 			big_x2: '<big><big>'+ eStr +'</big></big>',
 			big_x3: '<big><big><big>'+ eStr +'</big></big></big>',
 			br: '<br>',
+			button: '<button></button>', // this is not the same as input type='button'
 			canvas: '<canvas></canvas>',
 			caption: '<table><caption style="display:inline;">'+ eStr +'</caption></table>',
 			dt: '<dl><dt>'+ eStr +'</dt></dl>',
@@ -652,7 +662,6 @@ function get_element_other(METRIC, isLies) {
 				// marquee requires a size constrain else it changes with inner window sizes
 			menu_li: '<menu>'+ eStr +'<li></li></menu>',
 			meter: '<meter></meter>',
-			rtc: '<ruby><rtc>'+ eStr +'</rtc></ruby>',
 			search: '<search></search>',
 			td: '<table><tr><td></td></tr></table>',
 			tfoot: '<table><tfoot></tfoot></table>',
@@ -662,6 +671,7 @@ function get_element_other(METRIC, isLies) {
 		// these verticals should/could add more more unique individual measurements [1]: depends on scaling
 		// [1] more could expose greater rendering/subpixel entropy
 		'vertical' : {
+			article: '<article>'+ eStr +'</article>', // vertical for android blink
 			dd: '<dl><dd>'+ eStr +'</dd></dl>',
 			dialog: '<dialog open=""></dialog>',
 			figcaption: '<figure><figcaption>'+ eStr +'</figcaption></figure>',
@@ -671,12 +681,13 @@ function get_element_other(METRIC, isLies) {
 			plaintext: '<plaintext style="display:inline;">',
 			rb: '<ruby><rb>'+ eStr +'</rb></ruby>',
 			rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
+			rtc: '<ruby><rtc>'+ eStr +'</rtc></ruby>', // vertical for android blink
 			summary: '<details><summary>'+ eStr +'</summary></details>',
 			//'error': '<frame></frame>' // test error
 		}
 	}
 
-	let aHorizontalAdd = ['article','b','big','blockquote','code','h1','h2','h3','h4','h5','h6','i','q','small','sub','ul']
+	let aHorizontalAdd = ['b','big','blockquote','code','h1','h2','h3','h4','h5','h6','i','q','small','sub','ul']
 	aHorizontalAdd.forEach(function(item){oList['horizontal'][item] = '<'+item+'>'+ eStr +'</'+item+'>'})
 	let aVerticalAdd = ['dl','option','pre','sup']
 	aVerticalAdd.forEach(function(item){oList['vertical'][item] = '<'+item+'>'+ eStr +'</'+item+'>'})
@@ -875,7 +886,7 @@ const outputElements = () => new Promise(resolve => {
 		get_element_font('element_font', isLies),
 		get_element_keys('element_keys'),
 		get_element_forms('element_forms', isLies),
-		get_element_mathml('element_mathml', isLies),
+		get_element_math('element_math', isLies),
 		get_element_other('element_other', isLies),
 		get_element_scrollbars('element_scrollbars', isLies),
 		get_element_lang('element_lang', isLies),
