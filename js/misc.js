@@ -895,14 +895,14 @@ function get_window_functions(METRIC) {
 			let oHashes = {
 				// key: [standard, safer]
 				MB : {
-					'linux': ['c99980b4','12add862'],
+					'linux': ['c99980b4','83498308'],
 					'mac': ['f862f015','df5f9ac3'],
-					'windows': ['c99980b4','12add862']
+					'windows': ['c99980b4','83498308']
 				},
 				TB : {
-					'linux': ['0c9aaf28','cdde2f4c'],
+					'linux': ['0c9aaf28','a568527c'],
 					'mac': ['efef2c31','d2e0c655'],
-					'windows': ['0c9aaf28', 'cdde2f4c']
+					'windows': ['0c9aaf28', 'a568527c']
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
