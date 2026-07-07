@@ -896,12 +896,12 @@ function get_window_functions(METRIC) {
 				// key: [standard, safer]
 				MB : {
 					'linux': ['c99980b4','83498308'],
-					'mac': ['f862f015','df5f9ac3'],
+					'mac': ['f862f015','14238469'],
 					'windows': ['c99980b4','83498308']
 				},
 				TB : {
 					'linux': ['0c9aaf28','a568527c'],
-					'mac': ['efef2c31','d2e0c655'],
+					'mac': ['efef2c31','b6cfe185'],
 					'windows': ['0c9aaf28', 'a568527c']
 				},
 			}
