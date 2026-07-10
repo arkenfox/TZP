@@ -23,14 +23,14 @@ function get_nav_connection(METRIC) {
 				type: 'string',
 				// also in blink
 				downlink: 'number',
-				downlinkMax: 'null',
+				downlinkMax: 'null', // Infinity or a number
 				effectiveType: 'string',
 				onchange: 'null',
 				rtt: 'number',
 				saveData: 'boolean',
 				when: 'function',
 			}
-			let oGood = {
+			let oValid = {
 				effectiveType: ['slow-2g','2g','3g','4g'],
 				type: ['bluetooth','cellular','ethernet','none','wifi','wimax','other','unknown']
 			}
@@ -45,14 +45,16 @@ function get_nav_connection(METRIC) {
 						let isInvalid = true
 						// https://groups.google.com/a/chromium.org/g/blink-dev/c/tU_Hqqytx8g/m/HTJebzVHBAAJ
 						// "WiFi on Android reports Infinity for downlinkMax as Chrome recently dropped the required permission to get Wifi linkSpeed
-						if ('blink' == isEngine && 'downlinkMax' == k && 'Infinity' == typeCheck) {isInvalid = false}
+						if ('blink' == isEngine && 'downlinkMax' == k)
+							if ('Infinity' == typeCheck || 'number' == typeCheck) {isInvalid = false}
+						}
 						if (isInvalid) {throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck}
 					}
 					// valid string
 					if ('type' == k || 'effectiveType' == k) {
 						if (runSI) {x = '1g'}
-						let aGood = oGood[k]
-						if (!aGood.includes(x)) {throw zErrInvalid + ': got ' + x}
+						let aValid = oValid[k]
+						if (!aValid.includes(x)) {throw zErrInvalid + ': got ' + x}
 						if ('slow-2g' == x) {x = '2g'} // treat slow-2g as 2g
 					}
 					// cleanup
@@ -2355,8 +2357,8 @@ function get_l10n_parsererror_direction(METRIC) {
 		if (runST) {value = ''} else if (runSI) {value = 'upsidedown'}
 		let typeCheck = typeFn(value)
 		if ('string' !== typeCheck) {throw zErrType + typeCheck}
-		let aGood = ['ltr','rtl']
-		if (!aGood.includes(value)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ value}
+		let aValid = ['ltr','rtl']
+		if (!aValid.includes(value)) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ value}
 		// notation
 			// since this is just BB (or FF en-US), we know only three locales are rtl: ar, fa, he
 			// 1759577: gecko sets ar, ckb, fa, he, ur
