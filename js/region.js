@@ -45,7 +45,7 @@ function get_nav_connection(METRIC) {
 						let isInvalid = true
 						// https://groups.google.com/a/chromium.org/g/blink-dev/c/tU_Hqqytx8g/m/HTJebzVHBAAJ
 						// "WiFi on Android reports Infinity for downlinkMax as Chrome recently dropped the required permission to get Wifi linkSpeed
-						if ('blink' == isEngine && 'downlinkMax' == k)
+						if ('blink' == isEngine && 'downlinkMax' == k) {
 							if ('Infinity' == typeCheck || 'number' == typeCheck) {isInvalid = false}
 						}
 						if (isInvalid) {throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck}
