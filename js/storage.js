@@ -169,43 +169,57 @@ const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/CookieStore
 	function exit() {
 		// don't use cookie in element names == adblockers might block display
-		addDisplay(6, 'cstest', value)
+		addDisplay(6, 'cstest', ('' == data ? value : data))
 		addData(6, METRIC, value)
 		return resolve()
 	}
 
-	let value, obj = window[METRIC]
+	let value, data = ''
 	try {
-		value = 'object' == typeFn(obj, true) ? zE : zD
-	} catch(e) {
-		log_error(6, METRIC, e); value = zErr
-	}
-	if (isFile) {
-		value += ' | '+ zSKIP + ' | '+ zSKIP
-		exit()
-	} else {
-		// use a different suffix than cookies
-		let aTests = ['_session_store','_persistent_store']
-		aTests.forEach(function(k){
-			try {
-				let options = {name: rndStr + k, value: rndStr}
-				if ('_persistent_store' == k) {
-					options['expires'] = Date.now() + 172800000 // 2 days
-				}
-				cookieStore.set(options)
-				Promise.all([
-					lookup_cookiestore(rndStr, k),
-				]).then(function(res){
-					value += ' | ' + (res[0] == rndStr ? zS : zF)
-					if ('_persistent_store' == k) {exit()}
+		let obj = window[METRIC]
+		if (runSE) {foo++} else if (runST) {obj = ''}
+		let typeCheck = typeFn(obj, true)
+		if ('undefined' == typeCheck) {
+			// unsupported
+			value = typeCheck;	exit()
+		} else if ('object' !== typeCheck) {
+			// typecheck
+			throw zErrType + typeCheck
+		} else {
+			// supported
+			value = zE
+			if (isFile) {
+				// file://
+				value += ' | '+ zSKIP + ' | '+ zSKIP
+				exit()
+			} else {
+				// test: use a different suffix than cookies
+				let aTests = ['_session_store','_persistent_store']
+				aTests.forEach(function(k){
+					try {
+						let options = {name: rndStr + k, value: rndStr}
+						if ('_persistent_store' == k) {
+							options['expires'] = Date.now() + 172800000 // 2 days
+						}
+						cookieStore.set(options)
+						Promise.all([
+							lookup_cookiestore(rndStr, k),
+						]).then(function(res){
+							value += ' | ' + (res[0] == rndStr ? zS : zF)
+							if ('_persistent_store' == k) {exit()}
+						})
+					} catch(e) {
+						// slice "_store": consistent style to match cookies
+						// redundant to use "cookieStore_session_store"
+						log_error(6, METRIC + k.slice(0,-6), e); value += ' | '+ zErr
+						if ('_persistent_store' == k) {exit()}
+					}
 				})
-			} catch(e) {
-				// slice "_store": consistent style to match cookies
-				// redundant to use "cookieStore_session_store"
-				log_error(6, METRIC + k.slice(0,-6), e); value += ' | '+ zErr
-				if ('_persistent_store' == k) {exit()}
 			}
-		})
+		}
+	} catch(e) {
+		data = log_error(6, METRIC, e); value = zErr
+		exit()
 	}
 })
 
