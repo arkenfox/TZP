@@ -2,7 +2,7 @@
 
 /* modifed from https://gist.github.com/abrahamjuliot/7baf3be8c451d23f7a8693d7e28a35e2 */
 
-function get_webgl() {
+function get_webgl(METRIC) {
 	/* ToDo:
 		view-source:https://privacy-test-pages.glitch.me/privacy-protections/fingerprinting/helpers/tests.js
 		MOAR stuff to be recorded here
@@ -27,10 +27,10 @@ function get_webgl() {
 		'MAX_VERTEX_UNIFORM_VECTORS',
 		'MAX_VIEWPORT_DIMS',
 		'RED_BITS',
-		'RENDERER',
+		//'RENDERER',
 		'SHADING_LANGUAGE_VERSION',
 		'STENCIL_BITS',
-		'VENDOR',
+		//'VENDOR',
 		'VERSION'
 	]
 	const WebGL2Constants = [
@@ -62,7 +62,7 @@ function get_webgl() {
 		'UNIFORM_BUFFER_OFFSET_ALIGNMENT'
 	]
 	const Categories = {
-		data: [
+		parameters: [
 			//uniformBuffers
 			'MAX_UNIFORM_BUFFER_BINDINGS',
 			'MAX_UNIFORM_BLOCK_SIZE',
@@ -115,7 +115,7 @@ function get_webgl() {
 			// was info
 			'ANTIALIAS',
 		],
-		info: [
+		gpu: [
 			//'CONTEXT',
 			//'DIRECT_3D',
 			'MAJOR_PERFORMANCE_CAVEAT',
@@ -139,7 +139,6 @@ function get_webgl() {
 			)
 			return context.getParameter(extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT)
 		} catch (error) {
-			console.error(error)
 			return undefined
 		}
 	}
@@ -194,23 +193,33 @@ function get_webgl() {
 	}
 
 	// https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_debug_renderer_info
-	const getUnmasked = (contextType, context, constant) => {
+		// also get vendor/renderer here to match errors
+	const getVR = (contextType, context, constant) => {
 		try {
-			const extension = context.getExtension('WEBGL_debug_renderer_info')
-			const unmasked = context.getParameter(extension[constant])
-			return unmasked
+			//if ('webgl' == contextType) {foo++} // test a single error
+			//if ('webgl2' == contextType) {foo++} // test two errors
+			//if ('webgl2' == contextType) {return 'Mozilla random'} // test mixed
+
+			if (constant.includes('UNMASKED')) {
+				const extension = context.getExtension('WEBGL_debug_renderer_info')
+				const unmasked = context.getParameter(extension[constant])
+				return unmasked
+			} else {
+				const masked = context.getParameter(context[constant])
+				return masked
+			}
 		} catch (e) {
-			log_error(10, contextType +'_'+ constant, e)
+			let m = constant.toLowerCase()
+			m = m.replace('_webgl','')
+			log_error(10, 'webgl_gpu_'+ m +'_'+ contextType, e)
 			return zErr
 		}
 	}
-
 
 	/* get WebGLRenderingContext or WebGL2RenderingContext */
 	// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
 	// https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext
 	function getWebGL(contextType) {
-		const errors = []
 		let data = {}
 		const isWebGL = /^(experimental-)?webgl$/ 
 		const isWebGL2 = /^(experimental-)?webgl2$/
@@ -219,8 +228,7 @@ function get_webgl() {
 
 		// detect support
 		if (!supportsWebGL && !supportsWebGL2) {
-			errors.push('not supported')
-			return [data, errors]
+			return 'not supported'
 		}
 
 		// get canvas context
@@ -233,23 +241,25 @@ function get_webgl() {
 			if (!context) {
 				hasMajorPerformanceCaveat = true
 				context = canvas.getContext(contextType)
-				if (!context) {
-					throw new Error(`context of type ${typeof context}`)
+				if (null === context) {
+					return 'null'
+				} else if (!context) {
+					throw zErrType + typeFn(context)
 				}
 			}
 		} catch (e) {
-			errors.push(['context', e+'']) // 'context blocked'
-			return [data, errors]
+			log_error(10, 'webgl_context_'+ contextType, e)
+			return zErr
 		}
 
 		// get supported extensions
 		// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getSupportedExtensions
 		// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Using_Extensions
-		let webGLExtensions
+		let extensions
 		try {
-			webGLExtensions = context.getSupportedExtensions()
+			extensions = context.getSupportedExtensions()
 		} catch (e) {
-			errors.push(['extensions', e+'']) // 'extensions blocked'
+			log_error(10, 'webgl_extensions_'+ contextType, e)
 		}
 
 		// get parameters
@@ -268,8 +278,10 @@ function get_webgl() {
 				VERTEX_SHADER_BEST_FLOAT_PRECISION: Object.values(VERTEX_SHADER.HIGH_FLOAT),
 				FRAGMENT_SHADER,
 				FRAGMENT_SHADER_BEST_FLOAT_PRECISION: Object.values(FRAGMENT_SHADER.HIGH_FLOAT),
-				UNMASKED_VENDOR_WEBGL: getUnmasked(contextType, context, 'UNMASKED_VENDOR_WEBGL'),
-				UNMASKED_RENDERER_WEBGL: getUnmasked(contextType, context, 'UNMASKED_RENDERER_WEBGL')
+				UNMASKED_VENDOR_WEBGL: getVR(contextType, context, 'UNMASKED_VENDOR_WEBGL'),
+				UNMASKED_RENDERER_WEBGL: getVR(contextType, context, 'UNMASKED_RENDERER_WEBGL'),
+				RENDERER: getVR(contextType, context, 'RENDERER'),
+				VENDOR: getVR(contextType, context, 'VENDOR')
 			}
         
 			const glConstants =  [...WebGLConstants, ...(supportsWebGL2 ? WebGL2Constants : [])]
@@ -296,8 +308,7 @@ function get_webgl() {
 			//parameters.DIRECT_3D = /Direct3D|D3D(\d+)/.test(parameters.UNMASKED_RENDERER_WEBGL)
 
 		} catch (e) {
-			log_error(10, contextType, e)
-			errors.push(['parameters', e+'']) // 'parameters blocked'
+			log_error(10, 'webgl_parameters_'+ contextType, e)
 		}
 
 		// Structure parameter data
@@ -318,40 +329,260 @@ function get_webgl() {
 		}
 
 		data = {
-			...components, webGLExtensions
+			...components, extensions
 		}
-		return [data, errors]
+		return data
 	}
 
-	Promise.all([
-		getWebGL('webgl'),
-		getWebGL('webgl2'),
-		getWebGL('experimental-webgl'),
-	]).then((response) => {
-		//console.log(response)
-		const [webGL, webGL2, experimentalWebGL] = response
-		const [webGLData, webGLErrors] = webGL
-		const [webGL2Data, webGL2Errors] = webGL2
-		const [experimentalWebGLData, experimentalWebGLErrors] = experimentalWebGL
+	function run(runNo) {
+		Promise.all([
+			getWebGL('experimental-webgl'),
+			getWebGL('webgl'),
+			getWebGL('webgl2'),
+		]).then((result) => {
+			const [experimental, webgl, webgl2] = result
+			oRaw[runNo] = {
+				'experimental-webgl': experimental,
+				'webgl': webgl,
+				'webgl2': webgl2,
+			}
+			return
+		})
+	}
 
+	let oRaw = {}
+	Promise.all([
+		run(0),
+		run(1),
+	]).then(function(){
 		// NS click to play: not entropy: only guaranteed on FIRST session page load assuming the
 			// exception hasn't been permanently saved. We already have entropy on safer vs standard
 			// and NS, so a Safer with allowed webgl implies clickedToPlay
 		//let isClickToPlay = !!document.querySelector('.__ns__pop2top [data-policy-type="webgl"]')
 
-		//*
-		if (!isFile) {
-			console.debug('WebGL: ', mini(webGLData), webGLData)
-			if (webGLErrors.length) {console.log('webGL Errors',webGLErrors)}
-			console.debug('WebGL2: ', mini(webGL2Data), webGL2Data)
-			if (webGL2Errors.length) {console.log('webGL2 Errors',webGL2Errors)}
-			console.debug('Experimental: ', mini(experimentalWebGLData), experimentalWebGLData)
-			if (experimentalWebGLErrors.length) {console.log('Experimental Errors',experimentalWebGLErrors)}
+		// RAWDATA
+			// simplfy run data and add for user lookup
+			// we can add readpixel data later
+		function add_raw(metric) {
+			try {
+				let newdata = {}
+				let hash0 = mini(oRaw[0]), hash1 = mini(oRaw[1])
+				if (hash0 == hash1) {
+					newdata = oRaw[0]
+				} else {
+					for (const c of Object.keys(oRaw[0]).sort()) { // context
+						if ('string' == typeof oRaw[0][c]) {
+							if (oRaw[0][c] == oRaw[1][c]) {
+								newdata[c] = oRaw[0][c]
+							} else {
+								newdata[c] = {'run0': oRaw[0][c], 'run1': oRaw[1][c]}
+							}
+						} else {
+							newdata[c] = {}
+							for (const k of Object.keys(oRaw[0][c]).sort()) { // key (data, info, etc)
+								hash0 = mini(oRaw[0][c][k])
+								hash1 = mini(oRaw[1][c][k])
+								if (hash0 == hash1) {
+									newdata[c][k] = oRaw[0][c][k]
+								} else {
+									newdata[c][k] = {'run0': oRaw[0][c][k], 'run1': oRaw[1][c][k]}
+								}
+							}
+						}
+					}
+				}
+				sDetail[isScope][metric] = newdata
+				addDisplay(10, metric, addButton(10, metric, 'data'))
+			} catch(e) {
+				console.log(e)
+			}
 		}
-		//*/
 
-		// do something with the erorrs...
-		return
+		// CONTEXT
+		function add_context(metric) {
+			let value = [], data = {}, notation = isBB ? bb_red : default_red
+			try {
+				// just use run 0
+				for (const c of Object.keys(oRaw[0]).sort()) {
+					let x = oRaw[0][c]
+					x = 'string' == typeof x ? x : zE
+					data[c] = x
+					value.push(x)
+					if (zE == x) {hasWebGL = true}
+				}
+				value = value.join(' | ')
+				// notation
+				if (isBB) {
+					if ('null | null | null' == value || 'enabled | enabled | null' == value) {notation = bb_green}
+				} else if ('enabled | enabled | enabled' == value) {
+					notation = default_green
+				}
+				// display string, record obj
+				addData(10, metric, data, mini(data)) 
+				addDisplay(10, metric, value, '', notation)
+			} catch(e) {
+				value = e; data = zErrLog
+				addBoth(10, metric, value,'', notation, data)
+			}
+		}
+
+		// GPU
+		function add_gpu(metric) {
+			let hash, data='', btn='', notation = rfp_red
+			try {
+				let oTmp = {}
+				let aInfo = ['renderer','vendor','unmasked_renderer','unmasked_vendor']
+				// get data
+				for (const r of Object.keys(oRaw)) { // r = run number
+					let tmpdata = oRaw[r]
+					for (const c of Object.keys(tmpdata)) { // c = context
+						let data = tmpdata[c].gpu
+						if (undefined !== data) {
+							aInfo.forEach(function(m){ // m = metric
+								let key = m.toUpperCase()
+								if (m.includes('unmasked')) {key += '_WEBGL'}
+								if (undefined !== data[key]) {
+									if (undefined == oTmp[r]) {oTmp[r] = {}}
+									if (undefined == oTmp[r][m]) {oTmp[r][m] = {}}
+									let value = data[key]
+									let typeCheck = typeFn(value)
+									if ('string' !== typeCheck) {
+										log_error(10, 'webgl_gpu_'+ m +'_'+ c, zErrType + typeCheck); value = zErr
+									}
+									oTmp[r][m][c] = value
+								}
+							})
+						}
+					}
+				}
+				//console.log(oTmp)
+				// simplify runs
+					// compare each value across runs: if it differs then it's per-execution
+					// collect per execution values
+				let oInfo = {}
+				let oRandom = {}
+				if (Object.keys(oTmp).length) {
+					// we'll assume runs 0 + 1 are identical re support/errors/obj keys
+					let ctrldata = oTmp[0], testdata = oTmp[1]
+					if (mini(ctrldata) == mini(testdata)) {
+						oInfo = ctrldata
+					} else {
+						for (const m of Object.keys(ctrldata)) {
+							for (const c of Object.keys(ctrldata[m])) {
+								if (undefined == oInfo[m]) {oInfo[m] = {}}
+								let control = ctrldata[m][c]
+								let test = testdata[m][c]
+								let isMatch = control == test
+								if (!isMatch) {
+									if (undefined == oRandom[m]) {oRandom[m] = []}
+									oRandom[m].push(test, control)
+								}
+								let value = isMatch ? control : 'per execution'
+								oInfo[m][c] = value
+							}
+						}
+					}
+				}
+				//console.log(oInfo, oRandom)
+				// simplify contexts
+					// compare across each metric: if more than 1 value then it's mixed
+				let oFinal = {}
+				for (const m of Object.keys(oInfo)) {
+					let tmpSet = new Set(), errCount = 0
+					for (const c of Object.keys(oInfo[m])) {
+						tmpSet.add(oInfo[m][c])
+						if (zErr == oInfo[m][c]) {errCount++}
+					}
+					let tmparray = Array.from(tmpSet)
+					if (tmparray.length) {
+						if (1 == tmparray.length) {
+							// all identical (including zErr)
+							oFinal[m] = tmparray[0]
+						} else {
+							tmparray = tmparray.filter(x => !x.includes(zErr))
+							// all identical (minus zErr) else mixed
+							let value = 1 == tmparray.length ? tmparray[0] : zLIE //'mixed'
+							if (zLIE == value) {log_known(10, metric +'_'+ m, tmparray.join(', '))}
+							// we also want to include an error count so a health fail will show that
+							if (errCount > 0) {
+								value += ' | '+ errCount +' error'+ (errCount > 1 ? 's': '')
+							}
+							oFinal[m] = value
+						}
+					}
+				}
+				// any context missing is n/a
+					// we record context errors/null/etc elsewhere
+				aInfo.forEach(function(m){if (undefined == oFinal[m]) {oFinal[m] = zNA}})
+				// sort final into a new obj
+				data = {}
+				for (const c of Object.keys(oFinal).sort()) {data[c] = oFinal[c]}
+				hash = mini(data); btn = addButton(10, metric)
+				// notation
+					// we don't need to worry about missing contexts (already health checked in contexts metric and
+					// the health differs per FF vs BB) and we built in error counts: so we just need to check the hash
+				if ('57a5a98f' == hash) {
+					notation = rfp_green // 4 x Mozilla
+				} else if (isVer > 153) {
+					// FF154+ 2050515
+					if ('acf1912a' == hash) {
+						// 3 x Mozilla and unmasked_vendor is per execution
+						// check our unmasked_vendor randomness matches FPP's pattern
+						//console.log(oRandom)
+						let isMatch = true, aRandom = oRandom['unmasked_vendor']
+						aRandom.forEach(function(item){
+							// pattern is "Mozilla " + 11 alphanumeric + '='
+							if (20 !== item.length) {isMatch = false
+							} else if ('=' != item.slice(19)) {isMatch = false
+							} else if ('Mozilla ' != item.slice(0,8)) {isMatch = false}
+						})
+						if (isMatch) {notation = fpp_green}
+
+					}
+				}
+			} catch(e) {
+				hash = e; data = zErrLog
+			}
+			addBoth(10, metric, hash, btn, notation, data)
+		}
+
+		function add_ext(metric) {
+			let hash, data='', btn='', notation ='' //rfp_red
+			try {
+				hash = 'TBA'
+
+
+			} catch(e) {
+				hash = e; data = zErrLog
+			}
+			addBoth(10, metric, hash, btn, notation, data)
+		}
+
+		function add_params(metric) {
+			let hash, data='', btn='', notation ='' //rfp_red
+			try {
+				hash = 'TBA'
+
+			} catch(e) {
+				hash = e; data = zErrLog
+			}
+			addBoth(10, metric, hash, btn, notation, data)
+		}
+
+		let hasWebGL = false
+		add_context(METRIC +'_context') // sets hasWebGL
+		if (hasWebGL) {
+			add_raw(METRIC +'_data')
+			add_gpu(METRIC +'_gpu')
+			add_ext(METRIC +'_extensions')
+			add_params(METRIC +'_parameters')
+
+		} else {
+			// no need to notate, it's covered by _context metric
+			let aMetrics = ['_extensions','_gpu','_parameters']
+			aMetrics.forEach(function(m){addBoth(10, METRIC + m, zNA)})
+		}
+		return hasWebGL
 	}).catch(error => {
 		console.error(error)
 		return
@@ -364,7 +595,7 @@ const outputWebGL = () => new Promise(resolve => {
 
 	// ToDo: readPixels, webGPU
 	Promise.all([
-		get_webgl(),
+		get_webgl('webgl'),
 	]).then(function(){
 		return resolve()
 	})
