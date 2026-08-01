@@ -147,28 +147,30 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 					let hashC = mini(byteArrayToHex(hashes[1]))
 					let hashG = mini(byteArrayToHex(hashes[0]))
 					// lies
-					let isSame = hashG == hashC, display, btn = addButton(11, METRIC +'_data')
+					let isSame = hashG == hashC, display, data =''
+					// raw data
+					let metric = METRIC +'_data' 
+					addDisplay(11, metric, addButton(11, metric, 'data'))
+					sDetail[isScope][metric] = isSame ? copyTest : {'copyFromChannel': copyTest, 'getChannelData': getTest}
+					// mismatch
 					if (!isSame) {
 						isLies = true
-						addDetail(METRIC +'_data', {'copyFromChannel': copyTest, 'getChannelData': getTest})
 						display = 'mixed'
 					} else {
-						// no need to list twice
 						isLies = check_audioLies()
-						addDetail(METRIC +'_data', copyTest)
-						display = hashC
-						btn += ' '+ sum
+						display = hashC + ' | '+ sum; data = hashC
 					}
 					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
 						// isArch: true = large arrays else it's an error string
 					if (true === isArch) {
+						// ToDo: FF152+ 2036977 supposedly now only one hash for 64bit
+							// ^ update: awaiting 2040494
 						if ('a7c1fbb6' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
 						} else if ('a34c73cd' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
 					} else {
 						if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
 					}
-					addData(11, METRIC, display,'', isLies)
-					addDisplay(11, METRIC, display, btn, notation, isLies)
+					addBoth(11, METRIC, display, '', notation, data, isLies)
 					log_perf(11, METRIC, t0)
 					return resolve()
 				})
