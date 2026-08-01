@@ -2443,6 +2443,8 @@ function outputSection(id, isResize = false) {
 		gCount = 0
 		get_isDevices() // non gLoad warmup
 	} else {
+		// convert section name to number if required
+		if ('string' == typeof id) {if (undefined !== sectionNos[id]) {id = sectionNos[id] * 1}}
 		// clear section data
 		let name = sectionMap[id]
 		try {sData[zFP][isScope][name] = {}} catch {}
