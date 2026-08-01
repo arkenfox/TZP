@@ -264,8 +264,13 @@ const outputUserFS = (METRIC) => new Promise(resolve => {
 			Promise.all([
 				element.requestFullscreen()
 			]).then(function(){
-				get_scr_fs_measure(true)
-				return resolve()
+				Promise.all([
+					get_scr_fs_measure(true)
+				]).then(function(){
+					outputUserOrientationLock()
+					exitUserFS()
+					return resolve()
+				})
 			})
 		}
 	} catch(e) {
@@ -293,13 +298,13 @@ const outputUserOrientationLock = () => new Promise(resolve => {
 		try {await screen.orientation.unlock()} catch (e) {}
 	}
 	function display(value) {
-		dom[METRIC].innerHTML = value + (isSmart ? notation : '')
+		dom[METRIC].innerHTML = value + (isSmart && isVer > 143 ? notation : '')
 		return resolve()
 	}
 
 	let notation = rfp_red
-	// we expect this to only be available on android and _some_ windows
-		// RFP: 2059465
+	// we expect this to only be available on android and _some_ Windows
+		// 1983483: shipped FF144 | RFP: 2059465 to disable on Windows
 	try {
 		// get current orientation
 		let state = screen.orientation.type

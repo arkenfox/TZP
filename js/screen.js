@@ -21,7 +21,7 @@ function return_nw(w,h) {
 	return (bw && bh) ? nw_green : nw_red
 }
 
-function get_scr_fs_measure(isElementFS) {
+const get_scr_fs_measure = (isElementFS) => new Promise(resolve => {
 	// F11: triggered by resize events if in fs
 	// fullscreenElement: called on android by outputUserFS
 		// i.e isElementFS is only true if android
@@ -71,8 +71,9 @@ function get_scr_fs_measure(isElementFS) {
 		// notate
 		if (return_lb(lastW, lastH)) {notation = rfp_green}
 		dom[output].innerHTML = size + (isSmart ? notation : '') + strSteps
-		if (isElementFS) {document.exitFullscreen()} // only android can be isElementFS
+		//if (isElementFS) {document.exitFullscreen()} // only android can be isElementFS
 		gFS = false // reset
+		return resolve()
 	}
 
 	let current = size, oDiffs = [], nochange = 0
@@ -98,7 +99,7 @@ function get_scr_fs_measure(isElementFS) {
 		n++
 	}
 	let checking = setInterval(build_sizes, delay)
-}
+})
 
 const get_scr_fullscreen = (METRIC, isElementFS) => new Promise(resolve => {
 	let oRes = {}
