@@ -2,7 +2,7 @@
 
 /* modifed from https://gist.github.com/abrahamjuliot/7baf3be8c451d23f7a8693d7e28a35e2 */
 
-function get_webgl(METRIC) {
+const get_webgl = (METRIC) => new Promise(resolve => {
 	/* ToDo:
 		view-source:https://privacy-test-pages.glitch.me/privacy-protections/fingerprinting/helpers/tests.js
 		MOAR stuff to be recorded here
@@ -234,7 +234,7 @@ function get_webgl(METRIC) {
 		// get canvas context
 		let canvas
 		let context
-		let hasMajorPerformanceCaveat
+		let hasMajorPerformanceCaveat = false
 		try {
 			canvas = document.createElement('canvas')
 			context = canvas.getContext(contextType, { failIfMajorPerformanceCaveat: true })
@@ -350,7 +350,7 @@ function get_webgl(METRIC) {
 		})
 	}
 
-	let oRaw = {}
+	let oRaw = {}, hasWebGL = false
 	Promise.all([
 		run(0),
 		run(1),
@@ -431,7 +431,7 @@ function get_webgl(METRIC) {
 			let hash, data='', btn='', notation = rfp_red
 			try {
 				let oTmp = {}
-				let aInfo = ['renderer','vendor','unmasked_renderer','unmasked_vendor']
+				let aInfo = ['major_performance_caveat','renderer','vendor','unmasked_renderer','unmasked_vendor']
 				// get data
 				for (const r of Object.keys(oRaw)) { // r = run number
 					let tmpdata = oRaw[r]
@@ -446,10 +446,11 @@ function get_webgl(METRIC) {
 									if (undefined == oTmp[r][m]) {oTmp[r][m] = {}}
 									let value = data[key]
 									let typeCheck = typeFn(value)
-									if ('string' !== typeCheck) {
+									let typeExpected = 'major_performance_caveat' == m ? 'boolean' : 'string'
+									if (typeExpected !== typeCheck) {
 										log_error(10, 'webgl_gpu_'+ m +'_'+ c, zErrType + typeCheck); value = zErr
 									}
-									oTmp[r][m][c] = value
+									if (false !== value) {oTmp[r][m][c] = value} // only add caveat if true
 								}
 							})
 						}
@@ -511,8 +512,8 @@ function get_webgl(METRIC) {
 						}
 					}
 				}
-				// any context missing is n/a
-					// we record context errors/null/etc elsewhere
+				// any context missing is n/a: we record context errors/null/etc elsewhere
+				aInfo = aInfo.filter(x => !['major_performance_caveat'].includes(x))
 				aInfo.forEach(function(m){if (undefined == oFinal[m]) {oFinal[m] = zNA}})
 				// sort final into a new obj
 				data = {}
@@ -520,24 +521,32 @@ function get_webgl(METRIC) {
 				hash = mini(data); btn = addButton(10, metric)
 				// notation
 					// we don't need to worry about missing contexts (already health checked in contexts metric and
-					// the health differs per FF vs BB) and we built in error counts: so we just need to check the hash
+					// the health differs in FF vs BB) and we built in error counts: so we just need to check the hash
 				if ('57a5a98f' == hash) {
 					notation = rfp_green // 4 x Mozilla
 				} else if (isVer > 153) {
-					// FF154+ 2050515
-					if ('acf1912a' == hash) {
-						// 3 x Mozilla and unmasked_vendor is per execution
-						// check our unmasked_vendor randomness matches FPP's pattern
-						//console.log(oRandom)
-						let isMatch = true, aRandom = oRandom['unmasked_vendor']
-						aRandom.forEach(function(item){
-							// pattern is "Mozilla " + 11 alphanumeric + '='
-							if (20 !== item.length) {isMatch = false
-							} else if ('=' != item.slice(19)) {isMatch = false
-							} else if ('Mozilla ' != item.slice(0,8)) {isMatch = false}
-						})
-						if (isMatch) {notation = fpp_green}
-
+					// FF154+ 2050515 FPP enabled nightly
+					// vendor, renderer are always constants | unmasked_renderer is sanitized into families
+						// ToDo: 2055176 check final family strings
+					let aSanitized = ['Mozilla'] //'NVDIA GPU','Intel Graphics','AMD Graphics','Apple GPU','Google SwiftShader']
+					if ('Mozilla' == data.renderer
+						&& 'Mozilla' == data.vendor
+						&& aSanitized.includes(data.unmasked_renderer)
+					) {
+						// unmasked_vendor was initialy randomized | 2056780 backed that out at least temporarily
+						/* OBSOLETE for now until FPP settles down
+						if ('per execution' == data.unmasked_vendor) {
+							// unmasked_vendor randomness should match FPP pattern
+							let isMatch = true, aRandom = oRandom['unmasked_vendor']
+							aRandom.forEach(function(item){
+								// pattern is "Mozilla " + 11 alphanumeric/symbols + '='
+								if (20 !== item.length) {isMatch = false
+								} else if ('=' != item.slice(19)) {isMatch = false
+								} else if ('Mozilla ' != item.slice(0,8)) {isMatch = false}
+							})
+							if (isMatch) {notation = fpp_green}
+						}
+						//*/
 					}
 				}
 			} catch(e) {
@@ -569,25 +578,37 @@ function get_webgl(METRIC) {
 			addBoth(10, metric, hash, btn, notation, data)
 		}
 
-		let hasWebGL = false
 		add_context(METRIC +'_context') // sets hasWebGL
 		if (hasWebGL) {
 			add_raw(METRIC +'_data')
 			add_gpu(METRIC +'_gpu')
 			add_ext(METRIC +'_extensions')
 			add_params(METRIC +'_parameters')
-
 		} else {
 			// no need to notate, it's covered by _context metric
 			let aMetrics = ['_extensions','_gpu','_parameters']
 			aMetrics.forEach(function(m){addBoth(10, METRIC + m, zNA)})
 		}
-		return hasWebGL
+		return resolve(hasWebGL)
 	}).catch(error => {
 		console.error(error)
-		return
+		return resolve(false) // assume !hasWebGL and catch an error?
 	})
+})
 
+function get_readpixels(METRIC, hasWebGL) {
+	let hash, data='', btn='', notation ='' //rfp_red
+	if (!hasWebGL) {
+		hash = zNA
+	} else {
+		try {
+			hash = 'TBA'
+
+		} catch(e) {
+			hash = e; data = zErrLog
+		}
+	}
+	addBoth(10, METRIC, hash, btn, notation, data)
 }
 
 const outputWebGL = () => new Promise(resolve => {
@@ -596,8 +617,13 @@ const outputWebGL = () => new Promise(resolve => {
 	// ToDo: readPixels, webGPU
 	Promise.all([
 		get_webgl('webgl'),
-	]).then(function(){
-		return resolve()
+	]).then(function(res){
+		let hasWebGL = res[0]
+		Promise.all([
+			get_readpixels('webgl_readpixels', hasWebGL),
+		]).then(function(res){
+			return resolve()
+		})
 	})
 })
 

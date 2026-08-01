@@ -1231,7 +1231,7 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 						data = []
 						// some engines record quotes: strip them out
 						results.forEach(function(item){
-							item = item.replaceAll('"',''); data.push(item)
+							item = item.replace(/"/g, ''); data.push(item)
 						})
 						value = mini(results)
 						btn = addButton(12, METRIC, results.length)
@@ -2416,37 +2416,54 @@ function get_widget_fonts(METRIC) {
 		for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]; count += tmpdata[k].length}
 		hash = mini(data)
 		btn = addButton(12, METRIC, Object.keys(data).length +'/'+ count)
-		// RFP FF128+
-		if ('windows' == isOS && '24717aa8' == hash) {notation = rfp_green
-		/*monospace 13.3333px: [date, datetime-local, time],
-			monospace 13px: [textarea],
-			sans-serif 13.3333px: [19 items],
-			sans-serif 13px: [image]*/
-		} else if ('mac' == isOS && '12e7f88a' == hash) {notation = rfp_green
-		/*-apple-system 13.3333px: [19 items],
-			monospace 13.3333px: [date, datetime-local, time],
-			monospace 13px: [textarea],
-			sans-serif 13px: [image] */
-		} else if ('linux' == isOS) {
-			if (isBB) {
-			// BB14: due to font config aliases
-			/*Arimo 13.3333px: [19 items],
+		if (isVer > 153) {
+			// RFP FF154+
+				// 2042294 caused changes to non-integers, but they are consistent: namely 13.3333 -> 13.3281
+				// IDK any more if RFP upstream or BB patches ever controlled the sizes or rely on defaults but
+				// this is a universal change, so if it is/was proetected it still is IIUIC
+			if ('windows' == isOS && 'bde8bcf8' == hash) {notation = rfp_green
+			} else if ('mac' == isOS && '7cb7418a' == hash) {notation = rfp_green
+			} else if ('linux' == isOS) {
+				if (isBB) {
+					if ('cb542176' == hash) {notation = rfp_green}
+				} else {
+					if ('a1f13f79' == hash) {notation = rfp_green}
+				}
+			} else if ('android' == isOS && 'e59c5b19' == hash) {notation = rfp_green
+			}
+		} else {
+			// RFP FF128-153
+			if ('windows' == isOS && '24717aa8' == hash) {notation = rfp_green
+			/*monospace 13.3333px: [date, datetime-local, time],
+				monospace 13px: [textarea],
+				sans-serif 13.3333px: [19 items],
+				sans-serif 13px: [image]*/
+			} else if ('mac' == isOS && '12e7f88a' == hash) {notation = rfp_green
+			/*-apple-system 13.3333px: [19 items],
+				monospace 13.3333px: [date, datetime-local, time],
+				monospace 13px: [textarea],
+				sans-serif 13px: [image] */
+			} else if ('linux' == isOS) {
+				if (isBB) {
+				// BB14: due to font config aliases
+				/*Arimo 13.3333px: [19 items],
+					monospace 12px: [textarea],
+					monospace 13.3333px: [date, datetime-local, time],
+					sans-serif 13px: [image]*/
+					if ('edeba276' == hash) {notation = rfp_green}
+				} else {
+				/*monospace 12px: [textarea],
+					monospace 13.3333px: [date, datetime-local, time],
+					sans-serif 13.3333px: [19 items],
+					sans-serif 13px: [image]*/
+					if ('99054729' == hash) {notation = rfp_green}
+				}
+			} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green
+			/*Roboto 13.3333px: [19 items],
 				monospace 12px: [textarea],
 				monospace 13.3333px: [date, datetime-local, time],
 				sans-serif 13px: [image]*/
-				if ('edeba276' == hash) {notation = rfp_green}
-			} else {
-			/*monospace 12px: [textarea],
-				monospace 13.3333px: [date, datetime-local, time],
-				sans-serif 13.3333px: [19 items],
-				sans-serif 13px: [image]*/
-				if ('99054729' == hash) {notation = rfp_green}
 			}
-		} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green
-		/*Roboto 13.3333px: [19 items],
-			monospace 12px: [textarea],
-			monospace 13.3333px: [date, datetime-local, time],
-			sans-serif 13px: [image]*/
 		}
 	} catch(e) {
 		hash = e; data = zErrLog

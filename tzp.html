@@ -347,6 +347,7 @@
 				<span class="c" id="fullscreenElement"></span>
 				<div id="btnFS" class="btn-right btn1" onClick="exitUserFS()">[ exit ]</div>
 			</td></tr>
+		<tr><td>orientation.lock</td><td class="gc mono" id="orientation_lock"></td></tr>
 		<tr><td><span class="mono no_color">[F11]</span> &nbsp; fullscreen</td><td class="c mono" id="fsSize"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('newwin')">[ run ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
@@ -864,7 +865,10 @@
 		<tr><td>audioContext <sup>1</sup></td><td class="c mono" id="audioContext"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">copyFromChannel<br>getChannelData<br>sum of buffer</span></div>
-			&nbsp; offlineAudioContext <sup>2</sup></td><td class="c mono" id="offlineAudioContext"></td></tr>
+			&nbsp; offlineAudioContext <sup>2</sup></td>
+			<td class="mono"><span class="c" id="offlineAudioContext"></span>
+				<div class="btn-right c" id="offlineAudioContext_data"></div>
+			</td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('audio_test')">[ run ]</span>
 			hash</td><td class="gc mono" id="audio_test"></td></tr>
@@ -1088,7 +1092,7 @@
 			&nbsp; lang</td><td class="c mono" id="element_lang"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp; mathml</td><td class="c mono" id="element_math"></td></tr>
+			&nbsp; math</td><td class="c mono" id="element_math"></td></tr>
 		<tr><td><a class="blue" href="tests/elementother.html" target="blank">[PoC]</a>
 			&nbsp; other</td><td class="c mono" id="element_other"></td></tr>
 		<tr><td>[auto | thin] scrollbars</td><td class="c mono" id="element_scrollbars"></td></tr>
@@ -1183,6 +1187,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp; wasm</td><td class="c mono" id="wasm"></td></tr>
+		<tr><td>[autofill ui] webauthn</td><td class="c mono" id="webauthn_autofill_ui"></td></tr>
 		<tr><td>webdriver</td><td class="c mono" id="webdriver"></td></tr>
 		<tr><td>window functions</td><td class="c mono" id="window_functions"></td></tr>
 		<tr><td>window properties</td><td class="mono">

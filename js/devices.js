@@ -606,15 +606,21 @@ function get_touc_h(METRIC) {
 
 	function get_maxTouchPoints(m) {
 		// https://www.w3.org/TR/pointerevents/#extensions-to-the-navigator-interface
-		// FF64+: RFP 1363508
 		let value
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=1979581#c7
+			// we'd still catch the reported value in the error fp
+		let aValid = [0,1,2,5,10,20,40,50,256]
 		try {
 			value = navigator[m]
 			if (runST) {value = null} else if (runSI) {value = -5} else if (runSL) {addProxyLie('Navigator.'+ m)}
 			let typeCheck = typeFn(value)
 			if ('undefined' == typeCheck) {value = typeCheck
 			} else if ('number' !== typeCheck) {throw zErrType + typeCheck
-			} else if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value}
+			} else if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value
+			} else if (!aValid.includes(value)) {
+				// lets not enforce this for now: there's no limitation on values
+				//throw zErrInvalid + 'expected '+ aValid.join(', ') +': got '+ value
+			}
 			if (isProxyLie('Navigator.'+ m)) {
 				log_known(7, METRIC +'_'+ m, value)
 				value = zLIE

@@ -103,30 +103,29 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 
 const get_caches = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
-	// PB mode: DOMException: The operation is insecure.
-		// FF122: 1864684: dom.cache.privatebrowsing.enabled
-		// also see 1742344 / 1714354
-
-	// type check first
-		// e.g. insecure parent on http://www.raymondhill.net/ublock/pageloadspeed.html
-	let typeCheck = typeFn(window.self.caches, true)
+	// PB mode: SecurityError: The operation is insecure.
+		// FF122: 1864684: dom.cache.privatebrowsing.enabled | also see 1742344, 1714354
+	let data = ''
 	try {
-		if ('object' !== typeCheck) {
-			throw zErrType + typeCheck
+		// type check first
+			// e.g. insecure parent on http://www.raymondhill.net/ublock/pageloadspeed.html
+		let test = window.self.caches
+		let typeCheck = typeFn(test, true)
+		if ('object' !== typeCheck) { throw zErrType + typeCheck
 		} else {
 			Promise.all([
 				window.self.caches.keys()
 			]).then(function(){
 				exit(zE)
 			}).catch(function(e){
-				exit(log_error(6, METRIC, e))
+				data = zErr;  exit(log_error(6, METRIC, e))
 			})
 		}
 	} catch(err) {
-		exit(log_error(6, METRIC, err))
+		data = zErr;  exit(log_error(6, METRIC, err))
 	}
 	function exit(str) {
-		addBoth(6, METRIC, str,'','', (str = zE ? str : zErr))
+		addBoth(6, METRIC, str,'','', data)
 		log_perf(6, METRIC, t0)
 		return resolve()
 	}

@@ -1,6 +1,7 @@
 'use strict';
 
 /* USER */
+/* https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/User_activation */
 
 function exitUserFS() {
 	try {document.exitFullscreen()} catch {}
@@ -246,20 +247,70 @@ const outputUserFS = (METRIC) => new Promise(resolve => {
 				// let the resize event trigger running the section
 				// let get_scr_measure check for document.fullscreen and fill in the display
 				// use svh because otherwise the height is the full document height
-			document.documentElement.requestFullscreen()
-			return resolve()
+
+			// note entering fsElement from fs (F11) there is no resize event except with letterboxing
+				// we could check display-mode before requesting and if true call get_scr_fs_measure
+				// like we do in android (because there is no resize event), but this would be
+				// dupicitous on events that do fire resize (zoom). In the case of F11->fsElement we
+				// also end up with an incorrect height e.g. 2560 x 8
+			Promise.all([
+				document.documentElement.requestFullscreen()	
+			]).then(function(){
+				outputUserOrientationLock()
+				return resolve()
+			})
 		} else {
 			let element = dom.tzpFS
 			Promise.all([
 				element.requestFullscreen()
 			]).then(function(){
-				get_scr_fs_measure()
+				get_scr_fs_measure(true)
 				return resolve()
 			})
 		}
 	} catch(e) {
 		addDisplay(1, METRIC, log_error(1, METRIC, e))
 		return resolve()
+	}
+})
+
+const outputUserOrientationLock = () => new Promise(resolve => {
+	// we only need to call this if entering isElementFS: use gc class (global clear)
+	// i.e no need to run it on resize
+	const METRIC = 'orientation_lock'
+	async function lock(orientation) {
+		try {
+			await screen.orientation.lock(orientation)
+			if (!isDesktop) {notation = rfp_green}
+			unlock()
+			display(zS)
+		} catch (e) {
+			if (isDesktop && 'NotSupportedError: Operation is not supported' == e+'') {notation = rfp_green}
+			display(log_error(11, METRIC, e))
+		}
+	}
+	async function unlock() {
+		try {await screen.orientation.unlock()} catch (e) {}
+	}
+	function display(value) {
+		dom[METRIC].innerHTML = value + (isSmart ? notation : '')
+		return resolve()
+	}
+
+	let notation = rfp_red
+	// we expect this to only be available on android and _some_ windows
+		// RFP: 2059465
+	try {
+		// get current orientation
+		let state = screen.orientation.type
+		let typeCheck = typeFn(state)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		let aValid = ['landscape','landscape-primary','portrait','portrait-primary']
+		if (!aValid.includes(state)) {throw zErrInvalid + state}
+		// lock to current orientation
+		lock(state)
+	} catch(e) {
+		display(log_error(11, METRIC, e))
 	}
 })
 

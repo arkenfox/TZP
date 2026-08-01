@@ -855,7 +855,6 @@ const get_isSystemFont = () => new Promise(resolve => {
 		// we use isSystemFont in fntSizes where -moz group doesn't match non -moz even though all of
 		// aFonts have the same computedStyes: ensure we have one of each
 			if (0 == isSystemFont.filter(x => aMoz.includes(x).length)) {isSystemFont.push(aMoz[0])}
-
 		}
 		isSystemFont.sort()
 		exit(isSystemFont.join(', '))
@@ -880,6 +879,7 @@ function get_isVer(METRIC) {
 	return
 
 	function cascade() {
+		// JFC: starting FF155, release cadence is now 2 weeks
 		let test
 		try {
 			// old-timey check(s): avoid false postives: must be 140 or higher
@@ -1321,9 +1321,9 @@ function metricsAction(type) {
 	} else if ('console' == type) {
 		if (metricsData !== undefined) {console.log(metricsTitle, metricsData)}
 	} else if ('download' == type) {
-	if (metricsData == undefined) {return}
+		if (metricsData == undefined) {return}
 		try {
-			let name = metricsPrefix + (metricsTitle.replaceAll(': ', '_')).toLowerCase()
+			let name = metricsPrefix + (metricsTitle.replace(/: /g, '_')).toLowerCase()
 			var file = new Blob([JSON.stringify(metricsData, null, 2)], {type: 'application/json'})
 			var a = document.createElement('a')
 			a.href = URL.createObjectURL(file)

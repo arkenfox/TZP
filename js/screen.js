@@ -21,14 +21,15 @@ function return_nw(w,h) {
 	return (bw && bh) ? nw_green : nw_red
 }
 
-function get_scr_fs_measure() {
-	// F11: triggered by resize events if in FS
+function get_scr_fs_measure(isElementFS) {
+	// F11: triggered by resize events if in fs
 	// fullscreenElement: called on android by outputUserFS
+		// i.e isElementFS is only true if android
+
 	if (gFS) {return} // don't run if already running
 	gFS = true // set running state
 	let delay = 25, max = 40, n = 1 // 40 x 25 = 1sec
 	let w, h, firstW, firstH, lastW, lastH
-	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 	let target = document.fullscreenElement //, range, data
 	let output = isElementFS ? 'fullscreenElement' : 'fsSize'
 	dom[output].innerHTML ='' // clear
@@ -99,7 +100,7 @@ function get_scr_fs_measure() {
 	let checking = setInterval(build_sizes, delay)
 }
 
-const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
+const get_scr_fullscreen = (METRIC, isElementFS) => new Promise(resolve => {
 	let oRes = {}
 	let cssvalue = getElementProp(1, '#cssDM', METRIC +'_display-mode_css')
 	let isErrCss = cssvalue == zErr
@@ -127,9 +128,8 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 		oRes[item] = isLies ? zLIE : data
 		oRes[item2] = cssvalue
 		// get FS measurments if in FS
-		let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 		if (!isElementFS && 'fullscreen' == data && isDesktop) {
-			get_scr_fs_measure()
+			get_scr_fs_measure(isElementFS)
 		} else {
 			gFS = false // cancel run state
 		}
@@ -185,11 +185,11 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 	return resolve(oRes)
 })
 
-const get_scr_measure = () => new Promise(resolve => {
+const get_scr_measure = (isElementFS) => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm('measure'),
 		get_scr_viewport('sizes_viewport'),
-		get_scr_fullscreen('fullscreen'),
+		get_scr_fullscreen('fullscreen', isElementFS),
 	]).then(function(res){
 		// get FS status
 		let isDisplayFS = 'fullscreen' == res[2]['display-mode']
@@ -372,7 +372,6 @@ const get_scr_measure = () => new Promise(resolve => {
 		// desktop: if in fullscreenElement mode, use the svh element to measure
 			// we don't have a resize event in android
 		if (isDesktop) {
-			let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 			if (isElementFS) {
 				addDisplay(1, 'fullscreenElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
 			}
@@ -1824,12 +1823,13 @@ const outputFD = () => new Promise(resolve => {
 const outputScreen = (isResize = false) => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('screen')) {return resolve()}
 
+	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
 	Promise.all([
 		get_scr_position_screen('position_screen'),
 		get_scr_position_window('position_window'),
 		get_scr_pixels('pixels', isResize),
 		get_scr_orientation('orientation'),
-		get_scr_measure(),
+		get_scr_measure(isElementFS),
 	]).then(function(){
 		// add listeners once
 		if (gLoad && isDesktop) {

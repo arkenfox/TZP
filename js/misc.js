@@ -1,6 +1,12 @@
 'use strict';
 
 /* TIMING */
+/*
+	Web Animations 2
+	https://drafts.csswg.org/web-animations-2/#the-overall-progress-of-an-animation
+	this is behind currentTime which we already check
+*/
+
 
 function check_timing(type) {
 	let aAllow = ['currenttime', 'date', 'mark', 'now', 'timestamp']
@@ -826,6 +832,33 @@ function get_svg(METRIC) {
 	return
 }
 
+const get_webauthn_autofill = async (METRIC) => {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#autofill_ui
+		// webauthn API: security.webauth.webauthn
+
+	// https://github.com/brave/brave-browser/issues/56378
+		// blink: disabled in Guest mode for isolation
+	// note we don't need to distinguish between API vs API functionality as that is all captured
+		// in window properties and functions metrics
+	function exit(value, data ='') {
+		addBoth(18, METRIC, value,'','', data)
+		return		
+	}
+	try {
+		if (runSE) {foo++}
+		if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
+			const isCMA = await PublicKeyCredential.isConditionalMediationAvailable()
+			let typeCheck = typeFn(isCMA)
+			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+			exit(isCMA)
+		} else {
+			exit('undefined')
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+}
+
 function get_webdriver(METRIC) {
 	// expected FF60+
 	let value, data =''
@@ -1188,6 +1221,7 @@ const outputMisc = () => new Promise(resolve => {
 		get_webdriver('webdriver'),
 		get_pdf('pdf'),
 		get_speech_engines('speech_engines'),
+		get_webauthn_autofill('webauthn_autofill_ui'),
 	]).then(function(){
 		Promise.all([
 			get_window_functions('window_functions')
