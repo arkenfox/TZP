@@ -239,6 +239,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 })
 
 const outputUserFS = (METRIC) => new Promise(resolve => {
+	// note: this function is only called if not already in fsElement
 	gFS = false
 	try {
 		if (isDesktop) {
@@ -247,14 +248,8 @@ const outputUserFS = (METRIC) => new Promise(resolve => {
 				// let the resize event trigger running the section
 				// let get_scr_measure check for document.fullscreen and fill in the display
 				// use svh because otherwise the height is the full document height
-
-			// note entering fsElement from fs (F11) there is no resize event except with letterboxing
-				// we could check display-mode before requesting and if true call get_scr_fs_measure
-				// like we do in android (because there is no resize event), but this would be
-				// dupicitous on events that do fire resize (zoom). In the case of F11->fsElement we
-				// also end up with an incorrect height e.g. 2560 x 8
 			Promise.all([
-				document.documentElement.requestFullscreen()	
+				document.documentElement.requestFullscreen()
 			]).then(function(){
 				outputUserOrientationLock()
 				return resolve()
@@ -514,9 +509,16 @@ function outputUser(x, event) {
 	if (isBlock || !gClick) {return}
 	// if already in fullscreenElement, nothing to do
 		// we already did it when entering and resize picks up changes
+	let wasF11 = false
 	if ('fullscreenElement' == x) {
 		if (document.fullscreen || document.webkitIsFullscreen) {
 			return
+		}
+		if (isDesktop) {
+			// desktop resize doesn't always happen e.g. no letterboxing and changing from F11
+			// we can check display-mode before requesting and if true call measuring
+			// like we do in android (because there is _by default_ no resize event)
+			wasF11 = window.matchMedia('(display-mode:fullscreen').matches
 		}
 	}
 
@@ -553,10 +555,15 @@ function outputUser(x, event) {
 		setTimeout(function() {
 			Promise.all([
 				promiseTest(x)
-			]).then(function(){
+			]).then(function(res){
 				gClick = true
 				let target = sDataTemp.display.manual
-				for (const k of Object.keys(target)) {dom[k].innerHTML = target[k]}		
+				for (const k of Object.keys(target)) {dom[k].innerHTML = target[k]}
+				// trigger a manual measure if desktop + wasF11 and testing  fullscreenElement
+				if (true === wasF11) {
+					//get_scr_fs_measure(true) // a timing issue? I always get a width of 8
+					outputSection('screen') // this works
+				}
 			})
 		}, delay)
 	}
