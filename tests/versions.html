@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 112, maxVer = 154, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 113, maxVer = 155, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,14 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 155: 2058578 (not affected by svg.disabled)
+		let t155 = performance.now(), ver155
+		try {
+			//"origin", "protocol", "username", "password", "host", "hostname", "port", "pathname", "search", "hash",
+			if (SVGAElement.prototype.hasOwnProperty('origin')) {ver155 = true}
+		} catch(e) {}
+		rec(155, 155, "2058578", ver155, performance.now()-t155) // 0.006 ms
 
 		// 154: 2027609
 		let t154 = performance.now(), ver154
