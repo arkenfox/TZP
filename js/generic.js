@@ -868,7 +868,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 154) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
+	if (isVer == 155) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -889,6 +889,7 @@ function get_isVer(METRIC) {
 			if (!isCascade) return 139
 
 			// now cascade
+			try {if (SVGAElement.prototype.hasOwnProperty('origin')) return 155} catch(e) {} // 2058578
 			try {test = new Date('4294967303').toISOString()} catch(e) {if ('RangeError: invalid date' == e+'') {return 154}} // 2027609
 			try {if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) return 153} catch(e) {} // 2039500
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
