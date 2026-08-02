@@ -1737,7 +1737,7 @@ const outputFD = () => new Promise(resolve => {
 	if (!isGecko) {
 		let aList = ['logo','wordmark','version']
 		if (undefined == isOS) {aList.push('os')}
-		aList.forEach(function(item) {addBoth(3, item, zNA)})
+		aList.forEach(function(item) {addBoth(3, 'browser_'+ item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
