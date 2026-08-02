@@ -413,10 +413,11 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 154
+		isVerMax = 155
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {if (SVGAElement.prototype.hasOwnProperty('origin')) return 155} catch(e) {} // 2058578
 			try {let test154 = new Date('4294967303').toISOString()} catch(e) { // 2027609
 				if ('RangeError: invalid date' == e+'') {
 					if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) {return 154} // FF122 or lower are false positives; hence extra check
