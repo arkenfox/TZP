@@ -58,6 +58,21 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 	//bytes = Math.floor(((32/5) * GiB)) +1 // = 6-7 range
 	//bytes = 5368709119 // 5GiB minus 1 byte = 4-5 range
 
+	// https://chromestatus.com/feature/4977371751645184
+		// says chrome 138 will return 10 GiB _PLUS_ usage in all windows
+		// chrome 150 (at least): 10 GiB normal and 6 GiB private, but it does include usage
+		// usage seems to be seems to be per session (i.e I didn't clear site data)
+		// this means each rerun in the session accumulates in size
+	if ('blink' == isEngine) {
+		let remainder = bytes % GiB
+		// 41955 (+1416) 43371 (+1416) 44787 (+1416) 46203
+		// so ~40k initial overhead + ~1.5k per run
+		if (remainder < 1000000) {
+			// that's 1 megabyte and ~700 reruns
+			bytes = bytes - remainder
+		}
+	}
+
 	let value = (bytes/GiB) // in GiBs
 	let isExact = Number.isInteger(value)
 	if (!isExact) {
