@@ -388,6 +388,7 @@ let fntMaster = {
 			'Bahnschrift','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			// 11
 			'SimSun-ExtG', // win11 24H2 see 1947960 | 1954265 FF139 adeed to base
+			'Sans Serif Collection', // win11 only: added FF155 see 2058840
 			// fntPlatformFont
 			'MS Shell Dlg \\32',
 			// common FontSubstitutes that point to kBase fonts
@@ -421,13 +422,15 @@ let fntMaster = {
 			// 10
 			'Candara Light','Corbel Light','Malgun Gothic Semilight',
 			'Yu Gothic Medium','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
+			// 11
+			'Sans Serif Collection',
 			/* ignore: not detected by font face
 				'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight',
 			//*/
 		],
 		windowsoffscreen: [
 			// vs MS Shell Dlg \32
-			'Calibri','Cambria','Georgia','MV Boli','Marlett','NSimSun','Sylfaen',
+			'Calibri','Cambria','Georgia','MV Boli','Marlett','NSimSun','Sans Serif Collection','Sylfaen',
 		]
 	},
 	// kLangPackFonts
@@ -647,7 +650,6 @@ let fntMaster = {
 			// 1957317: Noto Sans CJK HK/JP/KR/SC/TC and Noto Serif CJK HK/JP/KR/SC/TC
 				// ^ not added: windows only installs region-specific e.g. Noto Sans TC, not language-specific e.g. Noto Sans CJK TC
 			// other
-			'Sans Serif Collection', // win11 only: 1858357
 			'MingLiU_MSCS','細明體_MSCS','MingLiU_MSCS-ExtB','細明體_MSCS-ExtB', // win11 only? 2016678
 			'Cascadia Code','Cascadia Mono', // MS downloads 11
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT', // MS products
@@ -663,7 +665,7 @@ let fntMaster = {
 			'Verdana Pro Black','Verdana Pro Light',
 			// the above are all supplemental, so to properly test font face is not leaking
 			// we need to add some non-weighted fonts: not much to work with :-(
-			'Ink Free','Sans Serif Collection',
+			'Ink Free',
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
 		],
@@ -671,8 +673,6 @@ let fntMaster = {
 			'Arial Nova','Georgia Pro','Gill Sans Nova','Ink Free','Neue Haas Grotesk Text Pro','Rockwell Nova',
 			'Segoe Fluent Icons','Segoe UI Variable Display','Segoe UI Variable Small','Segoe UI Variable Text',
 			'Simplified Arabic Fixed','Verdana Pro',
-			// win11
-			'Sans Serif Collection',
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
 			// MS downloads
@@ -705,6 +705,20 @@ let fntMaster = {
 
 function set_fntList() {
 	let build = (gLoad || isFontSizesMore !== isFontSizesPrevious)
+	if (gLoad) {
+		// do once: font vis changes
+		if ('windows' == isOS) {
+			if (isVer < 155) {
+				// 2058840: move Sans Serif Collection from base tro system
+				let aList = ['windows','windowsfaces','windowsoffscreen']
+				aList.forEach(function(key) {
+					fntMaster.system[key].push('Sans Serif Collection')
+					let newarray = fntMaster.base[key].filter(x => !['Sans Serif Collection'].includes(x))
+					fntMaster.base[key] = newarray
+				})
+			}
+		}
+	}
 
 	if (build) {
 		isFontSizesPrevious = isFontSizesMore
