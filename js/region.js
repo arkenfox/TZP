@@ -20,10 +20,10 @@ function get_nav_connection(METRIC) {
 				dispatchEvent: 'function',
 				ontypechange: 'null',
 				removeEventListener: 'function',
-				type: 'string',
+				type: 'string', // android + chromeOS only
 				// also in blink
 				downlink: 'number',
-				downlinkMax: 'null', // Infinity or a number
+				downlinkMax: 'null', // android + chromeOS only | Infinity or a number
 				effectiveType: 'string',
 				onchange: 'null',
 				rtt: 'number',
@@ -613,7 +613,7 @@ function get_language_locale() {
 	isLocaleAlt = undefined
 	isLanguagesNav = []
 
-	// LANGUAGES
+	// LANGUAGES: sets isLanguagesNav
 	function get_langmetric(m) {
 		try {
 			let value = navigator[m]
@@ -631,22 +631,6 @@ function get_language_locale() {
 			return [e]
 		}
 	}
-	let oData = {}, metrics = ['language','languages'], notation =''
-	metrics.forEach(function(m) {oData[m] = get_langmetric(m)})
-	Object.keys(oData).forEach(function(METRIC){
-		if (isLanguageSmart && isBB) { // only notate BB
-			notation = bb_red
-			if (languagesSupported[oData.language] !== undefined) {
-				if ('language' == METRIC) {notation = bb_green
-				} else {if (oData[METRIC] == oData.language +', '+ languagesSupported[oData.language][0]) {notation = bb_green}
-				}
-			}
-		}
-		let value = oData[METRIC], data =''
-		if ('array' == typeFn(value)) {value = value[0]; data = zErrLog}
-		addBoth(4, METRIC, value,'', notation, data, isProxyLie('Navigator.'+ METRIC))
-	})
-
 	// LOCALES
 	function get_locmetric(m) {
 		let METRIC = 'locale_'+ m, r
@@ -665,106 +649,143 @@ function get_language_locale() {
 			let typeCheck = typeFn(r)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 			if (!Intl.DateTimeFormat.supportedLocalesOf([r]).length) {throw zErrInvalid + 'locale '+ r +' not supported'}
-			oRes[m] = r
+			oLoc[m] = r
 			return r
 		} catch(e) {
-			oRes[m] = e+''
+			oLoc[m] = e+''
 			log_error(4, METRIC, e)
-			oErr[m] = e+''
+			oLocErr[m] = e+''
 			return zErr
 		}
 	}
-	// LOCALES
-	let METRIC = 'locale', value ='', res = [], oRes = {}, oErr = {}
-	metrics = [
-		'collator','datetimeformat','displaynames','durationformat','listformat',
-		'numberformat','pluralrules','relativetimeformat','segmenter',
-	]
-	metrics.forEach(function(m) {res.push(get_locmetric(m))})
-	sDetail[isScope][METRIC] = oRes
-	let btn = addButton(4, METRIC)
-
-	// LOCALE
-	// remove errors + dupes
-	res = res.filter(x => ![zErr].includes(x))
-	res = dedupeArray(res)
-	let isLies = false
-	if (res.length == 1) {
-		value = res[0]
-		isLocaleValue = value
-		// reduce en health false positives
-		// but only for isBB since as it only ships with en-US
-			// use isLocaleAlt in validation checks: allow e.g. en-CA to use en-US for lookup
-			// ^ we already have a health check for wrong locale
-		isLocaleAlt = (isBB && 'en-' == isLocaleValue.slice(0,3) ? 'en-US' : isLocaleValue)
-		if (isSmart) {isLocaleValid = true} // only set if smart
-	} else if (res.length == 0) {
-		value = zErr
-	} else {
-		value = 'mixed'; isLies = true
+	// SYSTEM LANGUAGES
+	function get_systemmetric(m) {
+		/* systemLanguages: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/systemLanguage
+		populate svg with nav entries to detect if anything added. To detect removals would mean
+		populating with all supported BCPs (lots) = not worth it: perf and it is unlikely _only_ removal
+		happens, i.e we already detect added. Also prior to FF127 = false positives with prefixs e.g. if
+		you were 'en-US, en', all en-* would be be true. Not worth the footgun or hasssle
+		*/
+		let value, data ='', returnvalue
+		try {
+			isLanguagesNav.sort() // so results are sorted
+			// populate
+			let aText = ['<switch id="switch">']
+			isLanguagesNav.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
+			aText.push('<text systemLanguage="groot">groot</text>')
+			aText.push('<text>unknown</text></switch>')
+			let el = dom.tzpSwitch
+			el.innerHTML = aText.join('')
+			// walk nodes
+			let aDetected = []
+			const walker = document.createTreeWalker(dom['switch'], NodeFilter.SHOW_TEXT, null);
+			while(walker.nextNode() && walker.currentNode) {
+				let target = walker.currentNode
+				//* important: we check range.getClientRects DOMRectList length so only real nav items are detected
+					// we use range due to selectNode (I think)
+					// we can't use range.getBoundingClientRect's DOMRect object (can't get obj keys length)
+					// THIS IS THE WAY: range.getClientRects()
+				// e.g. if isLanguagesNav has a fake 'fr' (e.g. extension) it won't be detected as it
+					// isn't a "rendered" node with a range (cuz it's fake) - IIUIC
+				let range = new Range()
+				range.selectNode(target)
+				if (range.getClientRects().length) {aDetected.push(target.textContent)}
+			}
+			// remove unknown
+			aDetected = aDetected.filter(x => !['unknown'].includes(x))
+			if (0 == aDetected.length) {returnvalue = []; throw zErrType + 'empty array'}
+			value = aDetected.join(', ')
+			returnvalue = aDetected
+		} catch(e) {
+			value = e; data = zErrLog
+			if (undefined == returnvalue) {returnvalue = zErr}
+		}
+		// tidy nav string to compare to
+		isLanguagesNav = isLanguagesNav.join(', ')
+		addBoth(4, m, value,'', (value == isLanguagesNav ? lang_green : lang_red), data)
+		return returnvalue // we return an array, an empty array or zErr
 	}
-	if (isLanguageSmart && isBB) { // only notate BB
-		notation = bb_red
-		let errHash = mini(oErr)
-		if (Object.keys(oErr).length == 0) {
-			// BB15: no errors
-			// only green if BB supported
-			let key = oData.language
-			if (languagesSupported[key] !== undefined) {
-				let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
-				if (value === expected) {notation = bb_green}
+
+	// flow: get lang values, use those to check system languages, then use system
+		// languages to notate language, and then output locale
+	let oLang = {}, oLoc = {}, oLocErr = {}, aMetrics = ['language','languages']
+	aMetrics.forEach(function(m) {oLang[m] = get_langmetric(m)})
+	Promise.all([
+		get_systemmetric('languages_system'),
+	]).then(function(result){
+		// if system languages is an array then we check
+		let aSys = result[0]
+		let isSysCheck = 'string' !== typeof aSys
+
+		let notation ='', isLies
+		Object.keys(oLang).forEach(function(METRIC){
+			if (isLanguageSmart && isBB) { // only notate BB
+				notation = bb_red
+				if (languagesSupported[oLang.language] !== undefined) {
+					if ('language' == METRIC) {notation = bb_green
+					} else {if (oLang[METRIC] == oLang.language +', '+ languagesSupported[oLang.language][0]) {notation = bb_green}
+					}
+				}
+			}
+			let value = oLang[METRIC], data =''
+			if ('array' == typeFn(value)) {value = value[0]; data = zErrLog} // why did I add this? was it some extension?
+			isLies = isProxyLie('Navigator.'+ METRIC)
+			if (isSysCheck && !isLies) {
+				if ('language' == METRIC) {
+					if (!aSys.includes(value.toLowerCase())) {isLies = true} // language is missing
+				} else {
+					if (isLanguagesNav !== aSys.join(', ')) {isLies = true} // no match
+				}
+			}
+			addBoth(4, METRIC, value,'', notation, data, isLies)
+		})
+
+		// LOCALES
+		let METRIC = 'locale', value ='', res = []
+		aMetrics = [
+			'collator','datetimeformat','displaynames','durationformat','listformat',
+			'numberformat','pluralrules','relativetimeformat','segmenter',
+		]
+		aMetrics.forEach(function(m) {res.push(get_locmetric(m))})
+		sDetail[isScope][METRIC] = oLoc
+		let btn = addButton(4, METRIC)
+
+		// LOCALE
+		// remove errors + dupes
+		res = res.filter(x => ![zErr].includes(x))
+		res = dedupeArray(res)
+		isLies = false
+		if (res.length == 1) {
+			value = res[0]
+			isLocaleValue = value
+			// reduce en health false positives
+			// but only for isBB since as it only ships with en-US
+				// use isLocaleAlt in validation checks: allow e.g. en-CA to use en-US for lookup
+				// ^ we already have a health check for wrong locale
+			isLocaleAlt = (isBB && 'en-' == isLocaleValue.slice(0,3) ? 'en-US' : isLocaleValue)
+			if (isSmart) {isLocaleValid = true} // only set if smart
+		} else if (res.length == 0) {
+			value = zErr
+		} else {
+			value = 'mixed'; isLies = true
+		}
+		if (isLanguageSmart && isBB) { // only notate BB
+			notation = bb_red
+			let errHash = mini(oLocErr)
+			if (Object.keys(oLocErr).length == 0) {
+				// BB15: no errors
+				// only green if BB supported
+				let key = oLang.language
+				if (languagesSupported[key] !== undefined) {
+					let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
+					if (value === expected) {notation = bb_green}
+				}
 			}
 		}
-	}
-	addDisplay(4, METRIC, value, btn, notation, isLies)
-	addData(4, METRIC, value, '', isLies)
-	return
-}
-
-function get_language_system(METRIC) {
-	/* systemLanguages: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/systemLanguage
-	populate svg with nav entries to detect if anything added. To detect removals would mean
-	populating with all supported BCPs (lots) = not worth it: perf and it is unlikely _only_ removal
-	happens, i.e we already detect added. Also prior to FF127 = false positives with prefixs e.g. if
-	you were 'en-US, en', all en-* would be be true. Not worth the footgun or hasssle
-	*/
-	let t0 = nowFn()
-	let value, data =''
-	try {
-		isLanguagesNav.sort() // so results are sorted
-		// populate
-		let aText = ['<switch id="switch">']
-		isLanguagesNav.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
-		aText.push('<text systemLanguage="groot">groot</text>')
-		aText.push('<text>unknown</text></switch>')
-		let el = dom.tzpSwitch
-		el.innerHTML = aText.join('')
-		// walk nodes
-		let aDetected = []
-		const walker = document.createTreeWalker(dom['switch'], NodeFilter.SHOW_TEXT, null);
-		while(walker.nextNode() && walker.currentNode) {
-			let target = walker.currentNode
-			//* important: we check range.getClientRects DOMRectList length so only real nav items are detected
-				// we use range due to selectNode (I think)
-				// we can't use range.getBoundingClientRect's DOMRect object (can't get obj keys length)
-				// THIS IS THE WAY: range.getClientRects()
-			// e.g. if isLanguagesNav has a fake 'fr' (e.g. extension) it won't be detected as it
-				// isn't a "rendered" node with a range (cuz it's fake) - IIUIC
-			let range = new Range()
-			range.selectNode(target)
-			if (range.getClientRects().length) {aDetected.push(target.textContent)}
-		}
-		// remove unknown
-		aDetected = aDetected.filter(x => !['unknown'].includes(x))
-		if (0 == aDetected.length) {throw zErrType + 'empty array'}
-		value = aDetected.join(', ')
-	} catch(e) {
-		value = e; data = zErrLog
-	}
-	// tidy nav string to compare to
-	isLanguagesNav = isLanguagesNav.join(', ')
-	addBoth(4, METRIC, value,'', (value == isLanguagesNav ? lang_green : lang_red), data)
-	log_perf(4, METRIC, t0)
+		addDisplay(4, METRIC, value, btn, notation, isLies)
+		addData(4, METRIC, value, '', isLies)
+		return
+	})
 }
 
 function get_dates_intl() {
@@ -2784,7 +2805,6 @@ const outputRegion = () => new Promise(resolve => {
 		
 		let isLies = isDomRect == -1
 		Promise.all([
-			get_language_system('languages_system'), // uses isLanguagesNav
 			get_locale_intl(),
 			get_timezone('timezone'), // sets isTimeZoneValid/Value
 			get_l10n_validation_messages('l10n_validation_messages'),
