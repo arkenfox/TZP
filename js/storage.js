@@ -7,14 +7,6 @@
 	- safari: removed in 2019
 */
 
-/*
-	ToDo: leverage expires to get real date/time (substract our constant - e.g 2 days)
-	cookieStore.getAll().then(cookies=>console.log(cookies))
-	some engines return more information
-	e.g. chrome includes
-		expires: 1765940558000
-*/
-
 function lookup_cookie(name) {
 	try {
 		name += '='
@@ -50,7 +42,7 @@ const lookup_permission = (item) => new Promise(resolve => {
 	}
 })
 
-function lookup_storage_bucket(type, bytes, granted = false) {
+function lookup_storage_bucket(type, bytes, usage, granted = false) {
 	const GiB = 1073741824
 	// test
 	//bytes = Math.floor(((32/5) * GiB))    // = 6.4 exact
@@ -67,8 +59,7 @@ function lookup_storage_bucket(type, bytes, granted = false) {
 		let remainder = bytes % GiB
 		// 41955 (+1416) 43371 (+1416) 44787 (+1416) 46203
 		// so ~40k initial overhead + ~1.5k per run
-		if (remainder < 1000000) {
-			// that's 1 megabyte and ~700 reruns
+		if (remainder == usage) {
 			bytes = bytes - remainder
 		}
 	}
@@ -304,11 +295,13 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 			} else {
 				navigator.storage.estimate().then(estimate => {
 					let bytes = estimate.quota
+					let usage = estimate.usage
 					if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
 					let typeCheck = typeFn(bytes)
 					if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
-					let value = lookup_storage_bucket('quota', bytes, isAuto)
-					let display = value +' ['+ bytes +' bytes]'
+					let value = lookup_storage_bucket('quota', bytes, usage, isAuto)
+					let usageStr = ('blink' == isEngine && usage > 0) ? ' | '+ usage : ''
+					let display = value +' ['+ bytes + usageStr +']'
 					if (isProxyLie('StorageManager.estimate')) {isLies = true}
 					// 1781277 RFP can only be exactly 10GB or 50GB
 					if (10737418240 == bytes || 53687091200 == bytes) {notation = rfp_green}
@@ -459,10 +452,11 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 				shared.port.close()
 				exit(value)
 			}, false)
-			shared.onerror = function (err) {exit(zErr)}
+			shared.onerror = function(err) {exit(zErr)}
 			shared.port.start()
 			shared.port.postMessage(rndStr2)
-		} catch {
+		} catch(e) {
+			console.log('trycatch', e)
 			exit(zErr)
 		}
 	}
