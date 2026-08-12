@@ -1785,7 +1785,7 @@ function output_section(section, scope) {
 					str = sDataTemp["display"][scope][number][d]
 					dom[d].innerHTML = str
 				} catch(e) {
-					console.error(d, str, e.name, e.emssage)
+					console.error(d, str, e.name, e.message)
 				}
 			}
 		} catch(e) {
@@ -2630,6 +2630,30 @@ function run_immediate() {
 		// storage warm ups
 		get_isFileSystem('isFileSystem', true)
 		try {window.caches.keys()} catch {}
+		// get some usage into storage estimate
+		if ('blink' == isEngine) {
+			try {
+				let t1 = nowFn()
+				let rndStr = rnd_string()
+				let openIDB = indexedDB.open(rndStr +'_warmup_idb')
+				// create
+				openIDB.onupgradeneeded = function(event){
+					let dbObject = event.target.result
+					let dbStore = dbObject.createObjectStore(rndStr, {keyPath:'id'})
+				}
+				openIDB.onsuccess = function(event) {
+					let dbObject = event.target.result
+					// start
+					let dbTx = dbObject.transaction(rndStr, 'readwrite')
+					let dbStore = dbTx.objectStore(rndStr)
+					// add
+					dbStore.put({id: rndStr, value: rndStr})
+					// close
+					dbTx.oncomplete = function() {dbObject.close()}
+					log_perf(SECTG, 'storage.usage', t1)
+				}
+			} catch(e) {}
+		}
 		// other warm ups
 		get_isDevices()
 		try {let w = speechSynthesis.getVoices()} catch {}
