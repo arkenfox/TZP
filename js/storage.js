@@ -55,13 +55,10 @@ function lookup_storage_bucket(type, bytes, usage, granted = false) {
 		// chrome 150 (at least): 10 GiB normal and 6 GiB private, but it does include usage
 		// usage seems to be seems to be per session (i.e I didn't clear site data)
 		// this means each rerun in the session accumulates in size
-	if ('blink' == isEngine) {
-		let remainder = bytes % GiB
-		// 41955 (+1416) 43371 (+1416) 44787 (+1416) 46203
-		// so ~40k initial overhead + ~1.5k per run
-		if (remainder == usage) {
-			bytes = bytes - remainder
-		}
+	let remainder = bytes % GiB, isPlusUsage = ''
+	if (remainder == usage) {
+		bytes = bytes - remainder
+		isPlusUsage = ' + usage'
 	}
 
 	let value = (bytes/GiB) // in GiBs
@@ -103,8 +100,7 @@ function lookup_storage_bucket(type, bytes, usage, granted = false) {
 	}
 	// webkit private window returns 1048576000 bytes = 1000MB
 	if ('webkit' == isEngine && 1048576000 == bytes) {value = '1000 MB'} else {value += ' GiB'}
-	// blink incognito returns 1819735497 bytes = some reduced calculation?
-	return value
+	return value + isPlusUsage
 }
 
 const get_caches = (METRIC) => new Promise(resolve => {
