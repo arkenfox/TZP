@@ -155,12 +155,13 @@ let isArch = true,
 	isFontDelay = false, // BB win/mac require a delay for async font fallback if font.vis used
 	isGecko = false,
 	isOS,
+	isOSCSS,
 	isOSErr,
 	isProps, // window properties
 	isProtoProxy = false,
 	isRecursion,
 	isReporting, // ReportingAPI
-	isScrollbar,
+	isScrollbar, // used to adjust overlay json format length
 	isStyles = ['cursive','math','monospace','sans-serif','serif','system-ui'],
 		// FF145+ nightly 1788937 math | 2014703 FF149+
 		// 'emoji','ui-monospace','ui-rounded','ui-serif' = currently at least gecko + blink redundant (windows)
@@ -189,7 +190,6 @@ let isBB = false,
 let languagesSupported = {},
 	localesSupported = {},
 	isLanguageSmart = false,
-	isLanguagesNav = [], // lowercase sorted to compare to systemLanguages
 	isLocaleValid,
 	isLocaleValue,
 	isLocaleAlt, // allow variants in checks e.g. en-CA checks en-US values
