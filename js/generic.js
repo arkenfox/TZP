@@ -627,7 +627,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		if (undefined == isOS) {
 			// for now only alert isGecko
 			if (isGecko) {
-				isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
+				isOSErr = log_error(3, 'platform_os', zErrType +'undefined', isScope, true) // persist sect3
 				log_alert(SECTG, METRIC, "undefined", isScope, true)
 			}
 		}
