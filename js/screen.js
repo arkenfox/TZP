@@ -1734,9 +1734,39 @@ const outputFD = () => new Promise(resolve => {
 	}
 	addBoth(3, 'browser_architecture', str,'','', data)
 
+	// platform
+	METRIC = 'platform'
+	let aOS = [], oOS = {}, m = 'os', display = ''
+	// isOS
+	if (!isGecko && undefined == isOS) {
+		value = zNA; display = zNA
+	} else {
+		if (undefined == isOS) {
+			value = zErr; display = isOSErr !== undefined ? isOSErr : zErr
+		} else {
+			value = isOS; display = isOS
+		}
+	}
+	addDisplay(3, METRIC, display)
+	oOS[m] = value
+	// css: if browser.display.use_document_fonts is 0 we get all four | docfont metric is recorded elsewhere
+		// os_css is really just a reflection of detected fonts
+	m = 'os_css'
+	try {
+		let target = dom.tzpOS.children
+		for (const k of Object.keys(target)) {
+			let w = target[k].getBoundingClientRect().width
+			if (w > 0) {aOS.push(target[k].innerText)}
+		}
+		if (0 == aOS.length) {aOS = 'none'} else {aOS = aOS.join(', ')}
+	} catch (e) {
+		log_error(3, METRIC +'_'+ m, e); aOS = zErr
+	}
+	oOS[m] = aOS
+	addData(3, METRIC, oOS, mini(oOS))
+
 	if (!isGecko) {
 		let aList = ['logo','wordmark','version']
-		if (undefined == isOS) {aList.push('os')}
 		aList.forEach(function(item) {addBoth(3, 'browser_'+ item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
@@ -1811,8 +1841,8 @@ const outputFD = () => new Promise(resolve => {
 	} catch(e) {
 		log_error(3, METRIC, e)
 	}
-	// os, version
-	addBoth(3, 'os', (isOS == undefined ? (isOSErr !== undefined ? isOSErr : zErr) : isOS))
+
+	// version
 	addBoth(3, 'browser_version', (isVerExtra !== '' ? isVer + isVerExtra : isVer))
 	// set metricsPrefix
 	if (isGecko && isSmart) {
