@@ -1772,8 +1772,6 @@ const outputFD = () => new Promise(resolve => {
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
 		addBoth(3, 'browser', isBrave ? 'Brave' : isEngine+'')
-		// os
-		if (undefined !== isOS) {addBoth(3, 'os', isOS)}
 		return resolve()
 	}
 
