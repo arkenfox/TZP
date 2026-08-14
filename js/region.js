@@ -611,9 +611,9 @@ function get_language_locale() {
 	isLocaleValid = false
 	isLocaleValue = undefined
 	isLocaleAlt = undefined
-	isLanguagesNav = []
+	let isLanguagesNav = [] // lowercase sorted to compare to systemLanguages
 
-	// LANGUAGES: sets isLanguagesNav
+	// LANGUAGES
 	function get_langmetric(m) {
 		try {
 			let value = navigator[m]
@@ -668,7 +668,7 @@ function get_language_locale() {
 		*/
 		let value, data ='', returnvalue
 		try {
-			isLanguagesNav.sort() // so results are sorted
+			isLanguagesNav.sort()
 			// populate
 			let aText = ['<switch id="switch">']
 			isLanguagesNav.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
@@ -685,7 +685,7 @@ function get_language_locale() {
 					// we use range due to selectNode (I think)
 					// we can't use range.getBoundingClientRect's DOMRect object (can't get obj keys length)
 					// THIS IS THE WAY: range.getClientRects()
-				// e.g. if isLanguagesNav has a fake 'fr' (e.g. extension) it won't be detected as it
+				// e.g. if navigator has a fake 'fr' (e.g. extension) it won't be detected as it
 					// isn't a "rendered" node with a range (cuz it's fake) - IIUIC
 				let range = new Range()
 				range.selectNode(target)
@@ -2790,7 +2790,7 @@ const outputRegion = () => new Promise(resolve => {
 	set_isLanguageSmart() // required for BB health in get_language_locale()
 	Promise.all([
 		get_geo('geolocation'),
-		get_language_locale(), // sets isLocaleValid/Value, isLanguagesNav
+		get_language_locale(), // sets isLocaleValid/Value
 	]).then(function(){
 		// add smarts if locale matches: i.e we can notate messages for FF
 		// isLanguageSmart controls health for l10n (and language/locale but we also check isBB in those)
