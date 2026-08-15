@@ -1766,8 +1766,8 @@ const outputFD = () => new Promise(resolve => {
 	addData(3, METRIC, oOS, mini(oOS))
 
 	if (!isGecko) {
-		let aList = ['logo','wordmark','version']
-		aList.forEach(function(item) {addBoth(3, 'browser_'+ item, zNA)})
+		let aList = ['browser_branding','browser_version']
+		aList.forEach(function(item) {addBoth(3, item, zNA)})
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
@@ -1775,28 +1775,32 @@ const outputFD = () => new Promise(resolve => {
 		return resolve()
 	}
 
+	// BRANDING
+	METRIC = 'browser_branding'
+	let oBranding = {}, wType, hType, w, h, isLogo, isWordmark
 	// about:logo: FF152+ 1610528 no longewr web-accessible
-	let wType, hType, w, h, isLogo, isLogoData ='', isWordmark, isWordData =''
+	m = 'logo'
 	try {
 		w = dom.tzpAbout.width, h = dom.tzpAbout.height
-		if (runST) {w += '', h = null}
+		if (runSE) {foo++} else if (runST) {w += '', h = null}
 		wType = typeFn(w), hType = typeFn(h)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' x '+ hType}
 		isLogo = w +' x '+ h
 	} catch(e) {
-		isLogo = e; isLogoData = zErrShort
+		isLogo = zErr; log_error(3, METRIC +'_'+ m, e)
 	}
-
+	oBranding[m] = isLogo
 	// about-wordmark.svg
 		// we were using width/height but in beta/dev 148 (may have started earlier) offscreen would
 		// produce different and unstable results (see below) so instead we will use naturalW/H
-	// ToDo: if I can work ouot how to make w/h stable and different this may help expose other methods
+	// ToDo: if I can work out how to make w/h stable and different this may help expose other methods
 		// to differentiate channels and PB mode
+	m = 'wordmark'
 	try {
 		let isHidden, isOffscreen
 		// hidden
 		w = dom.tzpBrandHidden.naturalWidth, h = dom.tzpBrandHidden.naturalHeight
-		if (runST) {w = true, h += ''}
+		if (runSE) {foo++} else if (runST) {w = true, h += ''}
 		wType = typeFn(w), hType = typeFn(h)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' x '+ hType}
 		isHidden = w +' x '+ h
@@ -1821,14 +1825,16 @@ const outputFD = () => new Promise(resolve => {
 		if (isHidden !== isOffscreen) {isHidden += ', ' + isOffscreen}
 		isWordmark = isHidden
 	} catch(e) {
-		isWordmark = e; isWordData = zErrShort
+		isWordmark = zErr; log_error(3, METRIC +'_'+ m, e)
 	}
+	oBranding[m] = isWordmark
+	let hash = mini(oBranding)
+	let notation = isBB ? ('c30ba703' == hash ? bb_green : bb_red) : '' // BB: logo 24x24 wordmark 0x0
+	addDisplay(3, METRIC, 'logo: '+ isLogo +' wordmark: '+ isWordmark,'', notation)
+	addData(3, METRIC, oBranding, hash)
 
-	// browser
-	let notation = isBB ? bb_red : ''
+	// BROWSER
 	addBoth(3, 'browser', (isMB ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
-	addBoth(3, 'browser_logo', isLogo,'', (isBB && '24 x 24' == isLogo ? bb_green : notation), isLogoData)
-	addBoth(3, 'browser_wordmark', isWordmark,'', (isBB && '0 x 0' == isWordmark ? bb_green : notation), isWordData)
 
 	// eval
 	METRIC = 'eval.toString'
