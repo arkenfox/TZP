@@ -437,16 +437,18 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 })
 
 function get_memory(METRIC) {
-	// https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory
-	// blink only and deprecated
+	// ToDo: investigate https://developer.mozilla.org/en-US/docs/Web/API/Performance/measureUserAgentSpecificMemory
 
-	// super unstable in this form: just display for now
-	function exit(hash, data ='', btn ='') {
-		sDetail[isScope][METRIC] = data
-		addDisplay(7, METRIC, hash, btn)
-		//addBoth(7, METRIC, hash, btn,'', data)
+	// https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory
+	// blink only and deprecated: jsHeapSizeLimit might be stable, perhaps bucketize it
+	function exit(value, data='') {
+		// display only for now
+		addDisplay(7, METRIC, (data == '' ? value : data))
+		//addBoth(7, METRIC, value,'','', data)
 		return
 	}
+
+	let value ='undefined', data =''
 	try {
 		let k = performance.memory
 		if (runSI) {k = [1]}
@@ -459,27 +461,18 @@ function get_memory(METRIC) {
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
 			// blink
-			let expected = '[object MemoryInfo]', data = {}
+			let expected = '[object MemoryInfo]'
 			if (k+'' !== expected) {
 				throw zErrInvalid + 'expected '+ expected +': got '+ (typeCheck.includes('object') ? k : typeCheck)
 			}
-			let aKeys = ['jsHeapSizeLimit','totalJSHeapSize','usedJSHeapSize']
-			aKeys.forEach(function(m){
-				let value, check
-				try {
-					value = k[m]
-					if (runSI) {value = null}
-					let check = typeFn(value)
-					if ('number' !== check) {throw zErrType + check}
-				} catch(e) {
-					value = zErr; log_error(7, METRIC +'_'+ m, e)
-				}
-				data[m] = value
-			})
-			exit(mini(data), data, addButton(7, METRIC))
+			value = k.jsHeapSizeLimit
+			if (runST) {value = null}
+			typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrType + typeCheck}
+			exit(value)
 		}
 	} catch(e) {
-		exit(e, zErrLog)
+		exit(zErr, log_error(7, METRIC, e))
 	}
 }
 
