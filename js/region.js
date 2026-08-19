@@ -2419,10 +2419,9 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 				for (let i=0; i < res.length; i++) {
 					let msg = res[i].body.message
 					msg = msg.replace('https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture','').trim()
-					// FF154+ if dom.xslt.enabled == true, we get an XSLT deprecation warning
-						// added in FF147 1993933 but it doesn't show up in Reporting API until 154 (probably 2046720)
-						// Regardless, given this is going to be rolled out gradually let's exclude it: we have plenty already
-					if (!msg.includes('XSLT')) {aSet.add(msg)}
+					// exclude items that may or may not appear due to prefs
+						// FF154+ 2046720 XSLT and Components shim
+					if (!msg.includes('XSLT') && !msg.includes('Components')) {aSet.add(msg)}
 					if (max == aSet.size) {break} // reruns accrue messages so break
 				}
 				data = Array.from(aSet).sort()
