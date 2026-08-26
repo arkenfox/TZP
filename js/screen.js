@@ -1421,30 +1421,22 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			appVersion: '5.0 (Windows)', oscpu: 'Windows NT 10.0; Win64; x64', platform: 'Win32', ua_os: 'Windows NT 10.0; Win64; x64'
 		}
 	}
+	// add userAgent
 	if (os !== undefined) {
 		for (const k of Object.keys(oRFP)) {
-			// important: only add next version to array if we are open ended ('+')
-			let uaVer = isVer, isDroid = 'android' == k, nxtVer = uaVer + 1
-			// userAgent
-			let uaRFP = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:', uaNext = uaRFP // base
-			uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
-			oRFP[k].userAgent = [uaRFP]
-			// next userAgent
-			if ('+' == isVerExtra) {
-				uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
-				oRFP[k].userAgent.push(uaNext)
-			}
-			// desktop mode: 1727775
-			if (isDroid) {
-				uaRFP = 'Mozilla/5.0 (' + oRFP.linux.ua_os +'; rv:', uaNext = uaRFP // base
-				uaRFP += uaVer +'.0) Gecko/20100101 Firefox/'+ uaVer +'.0'
+			oRFP[k].userAgent = []
+			let uaBase = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:'
+			let isDroid = 'android' == k
+			// allow future versions if open ended: FF release cadence is now every 2 weeks
+			let max = '+' == isVerExtra ? 3 : 1
+			for (let x = 0; x < max; x++){
+				let uaVer = isVer + x
+				let uaRFP = uaBase + uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
 				oRFP[k].userAgent.push(uaRFP)
-				if ('+' == isVerExtra) {
-					uaNext += nxtVer +'.0) Gecko/20100101 Firefox/'+ nxtVer +'.0'
-					oRFP[k].userAgent.push(uaNext)
-				}
 			}
 		}
+		// desktop mode: 1727775
+		oRFP.android.userAgent = oRFP.android.userAgent.concat(oRFP.linux.userAgent)
 	}
 	//console.log(oRFP)
 
