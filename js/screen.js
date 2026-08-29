@@ -1522,7 +1522,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 				if ('userAgent' == k) {
 					// check version: all platforms contain '; rv:' + version + '.0)'
 					aFlags = [isVer]
-					if ('+' == isVerExtra) {aFlags.push(isVer + 1)}
+					if ('+' == isVerExtra) {aFlags.push(isVer + 1, isVer + 2)}
 					let isVerCheck = false
 					aFlags.forEach(function(item) {
 						if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
