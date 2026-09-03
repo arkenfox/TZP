@@ -5,9 +5,9 @@
 	<meta name="viewport" content="width=500">
 	<title>elements: forms</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
-	<link rel="stylesheet" href="chrome://global/locale/intl.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
+	<script src="testelements.js"></script>
 	<style>
 		table {width: 97%; min-width: 780px; max-width: 780px}
 		/* tweak overlay for this PoC */
@@ -23,9 +23,7 @@
 			-webkit-appearance: none;
 			appearance: none;
 		}
-		.revert {
-			all: revert;
-		}
+		.btn-right {float: right; position: relative; right: 0px; top: 0px; text-align: right;}
 		/** custom input styles **/
 		/*details, input, option {font-size: 45px;}*/
 
@@ -44,6 +42,7 @@
 				<p class="native">
 					<input style="display:inline;" type="button"> &nbsp;
 					<input style="display:inline;" type="checkbox"> &nbsp;
+					<input style="display:inline;" type="checkbox" switch> &nbsp;
 					<input style="display:inline;" type="radio"> &nbsp;
 					<input style="display:inline;" type="color"> &nbsp;
 					<input style="display:inline;" type="reset"> &nbsp;
@@ -59,19 +58,26 @@
 				<p class="native"><input style="display:inline; color: var(--test0);" type="image"></p>
 				<p class="native"><input style="display:inline;" type="number"> &nbsp; <input type="submit" style="display:inline;"></p>
 				<p class="native">
-					<select style="display:inline;" multiple=""><option></option></select> &nbsp;
-					<select style="display:inline;" multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option></select> &nbsp;
-					<select style="display:inline;" multiple=""><option>Mōá?-&#xffff;</option></select>
+					<select style="display:inline;" multiple=""></select> &nbsp;
+					<select style="display:inline;" multiple=""><optgroup label="example"></optgroup></select> &nbsp;
+					<select style="display:inline;" multiple=""><option>example</option></select>
 				</p>
 				<p class="native"><details style="display:inline;"></details></p>
 				<p class="native"><input style="display:inline;" type="range" min="0" max="2" value="1"></p>
+				<p class="native"><geolocation></geolocation> &nbsp; <install></install></p>
+				<p class="native"><usermedia></usermedia></p>
 			</div>
 		</div>
 	</div>
 
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
 
 	<!-- app lang -->
@@ -84,17 +90,25 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
-			<span class="btn15 btn" onClick="run(true)">[ TZP ]</span>
-			<span class="no_color">
-				<input id="optVertical" checked type="checkbox"> &nbsp; vertical
-				<input id="optUnstyled" type="checkbox"> &nbsp; unstyled &nbsp; |
-				<input id="optEverything" onChange="style_everything()" type="checkbox"> &nbsp; everything &nbsp; | &nbsp;
+			<span class="no_color">Counts for unique elements across the two tests are not directly comparable. In everything all
+				elements are treated equally with both <code>writing-modes</code> and <code>styling</code>, which is not the case in the TZP test.
+ 			</span><br><br>
+			<span class="btn15 btnfirst" style="cursor: pointer;" onClick="run(`everything`)">[ everything ]</span>
+			<span class="btn15 btnfirst" style="cursor: pointer;" onClick="run(`TZP`)">[ TZP ]</span>
+			<span class="btn15 btnfirst" onClick="list_elements()">[ elements ]</span>
+			<span class="btn15 btnfirst" onClick="copyclip('elements')">[ COPY ]</span>
+			<span class="btn btn0">
+				<!--<a class="blue" target="_blank" href="elementforms_nocss.html" onClick="run('everything')">no css</a>	|-->
+				<a class="blue" target="_blank" href="elementforms_sanity.html">sanity</a>
+			</span>
+			<!--<br>-->
+			<span class="btn-right no_color">
+				<span class="btn btn0" onClick="show_overlay()">[ example ]</span> &nbsp;
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties'
-					target='blank'>searchfox HtmlForm</a>
-				<span class="btn btn0" onCLick="show_overlay()">[ example ]</span>
+					target='blank'>HtmlForm</a>
 			</span>
 		</td></tr>
+
 		<tr><td colspan="2"><hr><br></td></tr>
 		<tr><td colspan="2" style="text-align: left;">
 			<div class="c mono spaces no_color" id="elements"></div>
@@ -105,14 +119,328 @@
 <script>
 'use strict';
 
-let isLocale = ""
-let isTestSets = false
-let oData = {}
-dom.optVertical.checked = true
-dom.optUnstyled.checked = false
-dom.optEverything.checked = false
+let defaultType = 'TZP'
 
-dom.demoNative.checked = true
+let oData = {}, oList = {}, oTZP = {}, aListAll = [], testTarget
+
+function build_lists() {
+	// reset
+	oTZP = {}
+	// build
+	build_element_forms()
+	// build TZP
+	for (const t of Object.keys(oElementFormsTZP).sort()) {
+		if (undefined !== oElementFormsTZP[t] && oElementFormsTZP[t].length) {
+			oTZP[t] = {}
+			let array = oElementFormsTZP[t].sort()
+			array.forEach(function(item) {
+				if (undefined !== oElementForms[item]) {
+					oTZP[t][item] = oElementForms[item]
+				}
+			})
+		}
+	}
+}
+
+function get_elements(type, isTest = false) {
+	// ui.useOverlayScrollbars: 0=on, 1=off
+	// windows 11 on -> off (en-US)
+	// select* and textarea* are affected by scrollbars
+		// in horizontal the diff in width == 17 which matches auto scrollbar width
+		// note: dpr = 1
+		// I expect this will _have_ to leak subpixels given we are measuring with clientRect
+		// but IDK if it _adds_ entropy not already gained
+
+	if (undefined == type) {type = defaultType}
+	let t0 = performance.now()
+	// reset
+	oData = {}
+	// info
+	let params = [s15 + type + sc]
+	if (0 !== isMethod) {params.push(s99 + strMethod + sc)}
+
+	if (!isTest) {
+		oList = 'TZP' == type ? oTZP : {'NH': oElementForms, 'NV': oElementForms, 'UH': oElementForms, 'UV': oElementForms}
+	}
+
+	let tmpdata = {}, newobj = {}, setIndividual = new Set()
+	let target, testCount = 0, shadowData = {}
+	const parent = dom['element-fp']
+
+	try {
+		// count unique hashes per element
+		let setHash = new Set(), setElements = new Set()
+		for (const k of Object.keys(oList).sort()) {
+			// N native U unstyled V vertical H horizontal
+			let style = k[0] == 'N' ? 'native' : 'unstyled'
+			let writing = k[1] == 'H' ? 'horizontal' : 'vertical'
+			let key = 'TZP' == type ? style +'_'+ writing : k
+			if ('TZP' == type) {tmpdata[key] = {}}
+
+			for (const j of Object.keys(oList[k]).sort()) {
+				let itemdata
+				if (undefined !== oIsSupported[j]) {
+					// handle special items: add a placeholder if supported (we will update later)
+					if (true === oIsSupported[j]) {
+						itemdata = 'TBA'
+						//testCount++
+						setElements.add(j)
+					}
+				} else {
+					// count measurments taken
+					testCount++
+					// unique elements tested
+					setElements.add(j)
+					parent.innerHTML = oList[k][j]
+					try {
+						target = parent.firstChild
+						// revert everything + get final target
+						for (let i = 0; i < 10; i++) {
+							//if (isRevert) {target.classList.add('revert')}
+							let newtarget = target.children[0]
+							if (undefined == newtarget) {break}
+							target = newtarget
+						}
+						// add writing-mode: ignore horizontal
+						if ('V' == k[1]) {target.style.setProperty('writing-mode', 'vertical-lr')}
+						// add unstyled
+						if ('U' == k[0]) {target.classList.add('unstyled')}
+						let method
+						if (isMethod == 0) {method = target.getBoundingClientRect()
+						} else if (isMethod == 1) {method = target.getClientRects()[0]
+						} else {
+							let range = document.createRange(); range.selectNode(target)
+							method = 2 == isMethod ? range.getBoundingClientRect() : range.getClientRects()[0]
+						}
+						itemdata = [method.width, method.height, method.x, method.y]
+						itemdata.forEach(function(num) {setIndividual.add(num)}) // unique individuaL measurements
+					} catch(e) {
+						itemdata = zErr
+						console.log(k, e+'')
+					}
+				}
+				if (undefined !== itemdata) {
+					if ('TZP' == type) {
+						// unique measurments
+						let itemhash = mini(itemdata)
+						setHash.add(itemhash)
+						// add shadowData
+						if (undefined == shadowData[j]) {shadowData[j] = {}}
+						shadowData[j][key] = itemdata
+						// TZP group by key then hash
+						if (undefined == tmpdata[key][itemhash]) {
+							tmpdata[key][itemhash] = {'data': itemdata, 'group': [j]}
+						} else {
+							tmpdata[key][itemhash]['group'].push(j)
+						}
+					} else {
+						// everything group by element
+						if (undefined == tmpdata[j]) {tmpdata[j] = {}}
+						tmpdata[j][key] = itemdata
+					}
+				}
+			}
+		}
+		parent.innerHTML = '' // just in case
+		if (isTest) {return [tmpdata, target]}
+
+		// counts
+		let aElements = Array.from(setElements)
+		params.push(aElements.length +' elements')
+		params.push(testCount +' measurements')
+
+		if ('TZP' == type) {
+			// group by results
+			for (const s of Object.keys(tmpdata)) {
+				newobj[s] = {}
+				for (const k of Object.keys(tmpdata[s])) {
+					let keydata = tmpdata[s][k].group.sort()
+					newobj[s][keydata.join(' ')] = tmpdata[s][k]['data']
+				}
+			}
+			for (const s of Object.keys(newobj)) {
+				oData[s] = {}
+				for (const k of Object.keys(newobj[s]).sort()) {oData[s][k] = newobj[s][k]}
+			}
+			// shadowData
+			//console.log(shadowData)
+			let setShadow = new Set()
+			for (const k of Object.keys(shadowData)) {
+				let elementhash = mini(shadowData[k])
+				setShadow.add(elementhash)
+			}
+			let aShadow = Array.from(setShadow)
+			params.push('unique: '+ setHash.size +' measurements '+ setIndividual.size +' individual '+ setShadow.size +' elements')
+		} else {
+			// group by element hash
+			for (const k of Object.keys(tmpdata)) {
+				let elementhash = mini(tmpdata[k]) +' '
+					// the space means the object (sent to json_highlight) doesn't put numeric only chars keys first
+					// thus preserving the display in order of first element per hash
+				setHash.add(elementhash)
+				if (undefined == newobj[elementhash]) {newobj[elementhash] = {'data': tmpdata[k], 'elements': [k]}
+				} else {newobj[elementhash]['elements'].push(k)}
+			}
+			//console.log(newobj)
+			for (const k of Object.keys(newobj)) { // don't sort
+				// group styles
+				let obj = {}, tmpobj = {}
+				for (const j of Object.keys(newobj[k].data)) {
+					let linehash = mini(newobj[k].data[j]) +' '
+					if (undefined == obj[linehash]) {obj[linehash] = {'data': newobj[k].data[j], 'keys': []}}
+					obj[linehash]['keys'].push(j)
+				}
+				//console.log(obj)
+				for (const k of Object.keys(obj)) {tmpobj[obj[k].keys.join('+')] = obj[k].data}
+				oData[k] = {
+					'elements': newobj[k]['elements'].join(', '),
+					'data': tmpobj
+				}
+			}
+
+			params.push('unique: '+ setHash.size +' elements '+ setIndividual.size +' individual')
+		}
+
+		/*
+		console.log('testCount', testCount)
+		console.log('tmpdata\n', tmpdata)
+		console.log('setIndividual\n', setIndividual)
+		console.log('aElements\n', aElements)
+		*/
+
+		let hash = mini(oData), notation = ''
+		let t1 = performance.now()
+		try {dom.perf.innerHTML = Math.round(t1 - t0) +' ms'} catch(e) {}
+
+		let strParam = (params.length ? ' ['+ params.join(' | ') +']' : '')
+		let display = [], tmphash = ''
+		dom.elements.innerHTML = hash + strParam +'<br><br>'+ json_highlight(oData, 120)
+		return
+
+	} catch(e) {
+		parent.innerHTML = '' // clear display
+		dom.elements = e +''
+		return
+	}
+}
+
+function run(type) {
+	if (isMethod < 0 && isMethod > 3) {isMethod = 0}
+	strMethod = elementMethods[isMethod]
+	// clear
+	dom.elements.innerHTML = ' &nbsp; '
+	// pause so users see change
+	setTimeout(function() {
+		get_elements(type)
+	}, 170)
+}
+
+let isRevert = false
+Promise.all([
+	get_globals(),
+	build_lists(),
+]).then(function(){
+	buildnav_element()
+	run_once()
+	run()
+})
+
+/*** NOT USED in NOCSS test ***/
+let strElement = ''
+let aRemainder = []
+
+function log_console(name) {
+	let hash = mini(name)
+	if (name == "aListAll") {
+		console.log(name +": " + hash +"\n"+ "'"+ aListAll.join("',\n'") +"'")
+	}
+}
+
+function run_once() {
+	isRevert = true
+	dom.demoNative.checked = true
+	let isLanguage = '', isLocale = ''
+	try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLocale = zErr}
+	try {isLanguage = navigator.language} catch(e) {isLanguage = zErr}
+	try {dom.locale.innerHTML = isLanguage +' | '+ isLocale} catch(e) {}
+
+	// enumerate elements: messy as F but who cares .. track element use and display
+	let sKey = '<span class="key">',
+		sNumber = '<span class="number">',
+		sString = '<span class="string">',
+		sNone = '<span class="no_color bold">'
+
+	let tzpSet = new Set(), aRedundant = []
+	for (const t of Object.keys(oTZP)) {
+		for (const k of Object.keys(oTZP[t])) {
+			if (k !== 'input' && oTZP[t][k].includes('<input')) {
+				tzpSet.add('input|'+k)
+			} else {
+				tzpSet.add(k)
+			}
+		}
+	}
+	let aTZP = Array.from(tzpSet).sort()
+	for (const k of Object.keys(oElementForms)) {
+		let key = k
+		if (k !== 'input' && oElementForms[k].includes('<input')) {key = 'input|'+k}
+		if (!aTZP.includes(key)) {aRedundant.push(key)}
+	}
+	let oElements = {
+		'ignored': aElementFormsIgnore,
+		'redundant': aRedundant.sort(),
+		'tzp': aTZP.sort(),
+		'remainder': aRemainder.sort(),
+	}
+	for (const k of Object.keys(oElements)) {aListAll = aListAll.concat(oElements[k])}
+	aListAll.sort()
+	let aListAllCheck = aListAll.filter(function(item, position) {return aListAll.indexOf(item) === position})
+	let sanityStr = ''
+	if (aListAll.length !== aListAllCheck.length) {
+		sanityStr = sb+' [duplicates]'+sc
+		console.log('duplicates\n', aListAll)
+	}
+
+	let countTotal = aListAll.length
+	let allBtn = " <span class='btn15 btnc' onClick='log_console(`aListAll`)'>["+ countTotal +"]</span>"
+	strElement = '<u>ELEMENTS</u>'+ allBtn + sanityStr + '<br><br>'
+
+	if (aElementFormsIgnore.length) {
+		strElement += '{<br><div class="indent">'+
+			sKey +'ignored: ' + sc +'{ ' + sNumber + aElementFormsIgnore.length + sc
+				+'<br><div class="indent">'+ sString + aElementFormsIgnore.join(', ') + sc +'</div><br>}'
+			+'</div><br>}'
+	}
+	let displayRedundant = []
+	aRedundant.forEach(function(item){
+		let tmpitem = item.replace('input|','')
+		if (undefined !== oIsSupported[tmpitem]) {item += sNone +'<sup>[a]</sup>'+ sc}
+		displayRedundant.push(item)
+	})
+	strElement += '<br>{<br><div class="indent">'+
+		sKey +'redundant: ' + sc +'{ ' + sNumber + aRedundant.length + sc
+			+'<br><div class="indent">'+ sString + displayRedundant.join(', ') + sc +'</div><br>}'
+		+'</div><br>}'
+
+	let displayTZP = []
+	aTZP.forEach(function(item){
+		let tmpitem = item.replace('input|','')
+		if (undefined !== oIsSupported[tmpitem]) {item += sNone +'<sup>[a]</sup>'+ sc}
+		displayTZP.push(item)
+	})
+	strElement += '<br>{<br><div class="indent">'+
+		sKey +'TZP: ' + sc +'{ ' + sNumber + aTZP.length + sc
+			+'<br><div class="indent">'+ sString + displayTZP.join(', ') + sc +'</div><br>}'
+		+'</div><br>}'
+	if (aRemainder.length) {
+		strElement += '<br>{<br><div class="indent">'+
+			sKey +'TBA:: work in progres: ' + sc +'{ ' + sNumber + aRemainder.length + sc
+				+'<br><div class="indent">'+ sString + aRemainder.join(', ') + sc +'</div><br>}'
+			+'</div><br>}'
+	}
+	strElement += '<br><br>[a] if supported'
+}
+
 function style_demo() {
 	// flip style in examples
 	let addstyle = dom.demoNative.checked ? "native" : "mozInputs"
@@ -125,13 +453,6 @@ function style_demo() {
 		}
 	} catch(e) {}
 }
-
-function style_everything() {
-	let isEverything = dom.optEverything.checked
-	dom.optVertical.disabled = isEverything
-	dom.optUnstyled.disabled = isEverything
-}
-style_everything()
 
 try {
 	// escape to close
@@ -154,265 +475,11 @@ try {
 	console.log(e)
 }
 
-function get_elements(isTZP = false) {
-	let t0 = performance.now()
-	// ui.useOverlayScrollbars: 0=on, 1=off
-	// windows 11 on -> off (en-US)
-		//  empty 29 -> 12 = -17
-		// spaces 49 -> 32 = -17
-		// string 78 -> 61 = -17
-		// matches scrollbar in document/viewport/element
-		// I expect this will _have_ to leak subpixels given we are measuring with clientRect
-
-	let tmpData = {}, target
-	let isEverything = dom.optEverything.checked
-	let aStyles = [], aWritingStyles = []
-
-	let params = []
-	if (isTZP) {
-		aWritingStyles = ['vertical-lr']
-		aStyles = ['native','unstyled']
-		params = ['TZP']
-	} else if (isEverything) {
-		aWritingStyles = ['horizontal-tb','vertical-lr']
-		aStyles = ['native','unstyled']
-		params = ['everything']
-	} else {
-		if (dom.optVertical.checked) {aWritingStyles = ['vertical-lr']} else {aWritingStyles = ['horizontal-tb']}
-		if (dom.optUnstyled.checked) {aStyles = ['unstyled']} else {aStyles = ['native']}
-		params.push(aWritingStyles[0].slice(0,-3))
-		params.push(aStyles[0])
-	}
-
-	let oList = {
-		button: '', checkbox: '', color: '', date: '', "datetime-local": '', file: '',
-		image: '', number: '', radio: '', range: '', reset: '', submit: '', time: '', 
-		details: '<details></details>',
-		details_open: '<details open="">.</details>',
-		progress: '<progress></progress>',
-		select: '<select><option></option></select>',
-		select_empty: '<select multiple=""><option></option></select>',
-		select_empty_option: '<select multiple=""><option></option></select>',
-		select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-		select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-		select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-		select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-		textarea: '<textarea></textarea>',
-		textarea_3x5: '<textarea cols="5" rows="3"></textarea>',
-		// always == file
-		directory: '<input webkitdirectory directory type="file">',
-		files: '<input multiple="" type="file">',
-		// gecko: should always = number
-		datetime: '', email: '', month: '', password: '',
-		search: '', tel: '', text: '', url: '', week: '',
-		// always 0
-		hidden: '',
-	}
-	let oTZP = {
-		'native': {
-			button: '',
-			checkbox: '',
-			color: '',
-			date: '',
-			'datetime-local': '',
-			details: '<details></details>',
-			'details_open': '<details open="">.</details>',
-			file: '',
-			image: '',
-			month: '',
-			number: '',
-			progress: '<progress></progress>',
-			radio: '',
-			range: '',
-			reset: '',
-			select: '<select><option></option></select>',
-			select_empty: '<select multiple=""><option></option></select>',
-			select_empty_option: '<select multiple=""><option></option></select>',
-			select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-			select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-			select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-			select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-			submit: '',
-			textarea: '<textarea></textarea>',
-			textarea_3x5: '<textarea cols="5" rows="3"></textarea>',
-			time: '',
-			week: '',
-			// month + week are same as number but not in chrome | gecko may follow suit
-		},
-		'unstyled': {
-			// differ on windows
-			// ToDo: check linux/mac/android
-			checkbox: '',
-			progress: '<progress></progress>',
-			radio: '',
-			select: '<select><option></option></select>',
-		}
-	}
-
-	try {
-		const parent = dom['element-fp']
-		let count = 0
-		let oSets = {
-			setAll: new Set(),
-			// 2
-			setWH: new Set(),
-			setWX: new Set(), // terrible
-			setWY: new Set(), // 57/59
-			setHX: new Set(), // 56/59
-			setHY: new Set(),
-			setXY: new Set(),
-			// 3
-			setWHX: new Set(), // 59/59
-			setWHY: new Set(), // 57
-		}
-
-		aStyles.forEach(function(style){
-			if (isTZP) {
-				tmpData[style] = {}
-			} else if (isEverything) {
-				tmpData[style] = {}
-			}
-			aWritingStyles.forEach(function(writingstyle){
-				if (isTZP) {
-				} else if (isEverything) {
-					tmpData[style][writingstyle] = {}
-				}
-
-				let oItems = isTZP ? oTZP[style] : oList
-
-				for (const k of Object.keys(oItems).sort()) {
-					count++
-					// important to clear the div so no other elements can affect measurements
-					parent.innerHTML = ""
-					let data = []
-					try {
-						parent.innerHTML = ('' == oList[k] ? '<input type="'+ k +'">' : oList[k])
-						target = parent.firstChild
-						target.setAttribute("style","display:inline; writing-mode: "+ writingstyle +";")
-						if (style == "unstyled") {target.classList.add('unstyled')}
-						if (k.includes('_option')) {target = target.lastElementChild}
-
-						let method = target.getBoundingClientRect()
-						data = [method.width, method.height, method.x, method.y]
-						oSets.setAll.add(data.join(' '))
-						if (isTestSets) {
-							// 2s
-							oSets.setWH.add(method.width +' '+ method.height)
-							oSets.setWX.add(method.width +' '+ method.x)
-							oSets.setWY.add(method.width +' '+ method.y)
-							oSets.setHX.add(method.height +' '+ method.x)
-							oSets.setHY.add(method.height +' '+ method.y)
-							oSets.setXY.add(method.x +' '+ method.y)
-							// 3s
-							oSets.setWHX.add(method.width +' '+ method.height +' '+ method.x)
-							oSets.setWHY.add(method.width +' '+ method.height +' '+ method.y)
-						}
-						if (isTZP) {
-							let itemhash = mini(data)
-							if (undefined == tmpData[style][itemhash]) {tmpData[style][itemhash] = {'data': data, 'group': [k]}
-							} else {tmpData[style][itemhash]['group'].push(k)}
-						} else if (isEverything) {
-							tmpData[style][writingstyle][k] = data
-						} else {
-							tmpData[k] = data
-						}
-					} catch(e) {
-						if (isTZP) {
-							tmpData[style][k] = [k +", "+ e+'']
-						} else if (isEverything) {
-							tmpData[style][writingstyle][k] = [e+'']
-						} else {
-							tmpData[k] = [e+'']
-						}
-					}
-				}
-			})
-		})
-
-		parent.innerHTML = "" // just in case
-		oData = {} // reset
-		if (isTZP) {
-			// group by results
-			let newobj = {}
-			for (const key of Object.keys(tmpData)) {
-				newobj[key] = {}
-				for (const k of Object.keys(tmpData[key])) {
-					newobj[key][tmpData[key][k].group.join(' ')] = tmpData[key][k]['data']
-				}
-			}
-			for (const key of Object.keys(newobj)) {
-				oData[key] = {}
-				for (const k of Object.keys(newobj[key]).sort()) {oData[key][k] = newobj[key][k]}
-			}
-		} else {
-			for (const k of Object.keys(tmpData).sort()) {
-				if (isEverything) {
-					oData[k] = {}
-					for (const j of Object.keys(tmpData[k]).sort()) {
-						oData[k][j] = {}
-						for (const m of Object.keys(tmpData[k][j]).sort()) {
-							oData[k][j][m] = tmpData[k][j][m]
-						}
-					}
-				} else {
-					oData[k] = tmpData[k]
-				}
-			}
-		}
-		let hash = mini(oData), notation = ""
-
-		let t1 = performance.now()
-		try {dom.perf.innerHTML = Math.round(t1 - t0) +" ms"} catch(e) {}
-
-		let strParam = (params.length ? " ["+ params.join(" ") +"]" : "")
-		let strCount = ' [' + count + ' items | ' + oSets.setAll.size + ' unique]'
-		let display = [], tmphash = ''
-		if (!isTZP && isEverything) {
-			for (const k of Object.keys(oData).sort()) {
-				tmphash = mini(oData[k])
-				display.push(s15 + k.toUpperCase() +": " + sc + tmphash +"<br>")
-				for (const j of Object.keys(oData[k]).sort()) {
-					tmphash = mini(oData[k][j])
-					display.push(s15+ (k +" "+ j).toUpperCase() +": " + sc + tmphash +"<br>")
-					display.push(json_highlight(oData[k][j], 120) +"<br>")
-				}
-			}
-			hash = s15 +"EVERYTHING: " + sc + hash
-		}
-		dom.elements.innerHTML = hash + notation + strParam + strCount + "<br>"
-			+ (!isTZP && isEverything ? "<br>" + display.join("<br>") : json_highlight(oData, 120))
-
-		if (isTestSets) {
-			console.log('---\n' + (isEverything ? 'everything' : params.join(' ')))
-			for (const k of Object.keys(oSets)) {
-				console.log(k, oSets[k].size)
-			}
-		}
-		return
-	} catch(e) {
-		dom.elements = e+""
-		return
-	}
+function list_elements() {
+	dom.perf.innerHTML = ''
+	dom.elements.innerHTML = strElement
 }
 
-function run(isTZP = false) {
-	// clear
-	dom.elements.innerHTML = " &nbsp; "
-	// pause so users see change
-	setTimeout(function() {
-		get_elements(isTZP)
-	}, 170)
-}
-
-try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLocale = zErr}
-try {dom.locale.innerHTML = isLocale} catch(e) {}
-
-Promise.all([
-	get_globals()
-]).then(function(){
-	style_everything()
-	run()
-})
 
 </script>
 </body>
