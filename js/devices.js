@@ -554,7 +554,8 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k].sort()}
 		let hash = mini(data)
 		// droid diff is local-network/loopback-network are errors
-		let aGood = isDesktop ? ['6e5aa362'] : ['2afe1864']
+			// note: TBA16.0.11a tor-browser#44155: Always enable LNA on Android as a defense-in-depth (so therefore it matches desktop)
+		let aGood = (isDesktop || isBB) ? ['6e5aa362'] : ['2afe1864']
 		let notation = aGood.includes(hash) ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
