@@ -114,6 +114,13 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			'VERTEX_SHADER_BEST_FLOAT_PRECISION',
 			// was info
 			'ANTIALIAS',
+			/* IDK
+			'STENCIL_BACK_VALUE_MASK',
+			'STENCIL_BACK_WRITEMASK',
+			'STENCIL_VALUE_MASK',
+			'STENCIL_WRITEMASK',
+			'SUBPIXEL_BITS',
+			//*/
 		],
 		gpu: [
 			//'CONTEXT',
@@ -526,7 +533,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					notation = rfp_green // 4 x Mozilla
 				} else if (isVer > 153) {
 					// FF154+ 2050515 FPP enabled nightly
-					// vendor, renderer are always constants | unmasked_renderer is sanitized into families
+					// vendor, renderer are always constants | unmasked_renderer _might_ be sanitized into families
 						// ToDo: 2055176 check final family strings
 					let aSanitized = ['Mozilla'] //'NVDIA GPU','Intel Graphics','AMD Graphics','Apple GPU','Google SwiftShader']
 					if ('Mozilla' == data.renderer
@@ -615,6 +622,7 @@ const outputWebGL = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('webgl')) {return resolve()}
 
 	// ToDo: readPixels, webGPU
+	// ToDo: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
 	Promise.all([
 		get_webgl('webgl'),
 	]).then(function(res){
