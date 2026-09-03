@@ -49,7 +49,7 @@
 'use strict';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#script_code_display_names
 
-let isVerMin = 140
+let isVerMin = 153
 dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 let aItems = [
@@ -279,13 +279,9 @@ function run_main(method) {
 			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "f9edfcf5") { // FF147+
-				} else if (resultsHash == "8010db57") { // FF140-146
-				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
 				if (localesHash == "c4ca9d63") { // FF147+: 173
-				} else if (localesHash == "8aee271e") { // FF140-146: 168
-				} else {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
