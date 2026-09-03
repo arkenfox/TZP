@@ -57,7 +57,7 @@
 <script>
 'use strict';
 
-let isVerMin = 140
+let isVerMin = 153
 dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
@@ -283,12 +283,10 @@ function run_main(method) {
 			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "fd71342c") { // FF147+
-				} else if (resultsHash == "deeeb2ad") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
 				if (localesHash == "ce9ce45f") { // FF147+: 30
-				} else if (localesHash == "d3b22832") { // FF140-146: 30
 				} else {localesHash += ' '+ zNEW
 				}
 			}
