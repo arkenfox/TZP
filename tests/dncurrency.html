@@ -51,7 +51,7 @@
 'use strict';
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#currency_code_display_names
 
-let isVerMin = 140
+let isVerMin = 153
 dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 let aAll = [ // for reference
@@ -432,12 +432,10 @@ function run_main(method, aTest, isLoop = false) {
 			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "c2325de7") { // FF147+
-				} else if (resultsHash == "3ada2b0a") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
 				if (localesHash == "295f8248") { // FF147+ 402
-				} else if (localesHash == "e5f55367") { // FF140-146 398
 				} else {localesHash += ' '+ zNEW
 				}
 			}
