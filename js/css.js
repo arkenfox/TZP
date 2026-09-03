@@ -87,8 +87,7 @@ function get_colors() {
 			for (const k of Object.keys(tmpobj).sort()) {data[k] = tmpobj[k]; count += data[k].length} // sort/count
 			hash = mini(data); btn = addButton(14, METRIC, Object.keys(data).length +'/'+ count)
 			if ('moz' == type) {
-				let expectedhash = isVer == 140 ? 'c04857b2' : '2439d123' // FF140 | FF141+
-				notation = expectedhash == hash ? rfp_green : rfp_red
+				notation = '2439d123' == hash ? rfp_green : rfp_red
 			}
 		} catch(e) {
 			hash = e; data = zErrLog
@@ -283,13 +282,13 @@ function get_computed_styles(METRIC) {
 							MozOsxFontSmoothing,-moz-osx-font-smoothing,
 							WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
 						*/
-						if ('1c5fe54d' == hash) {notation = bb_green} // BB15 1127
+						if ('' == hash) {notation = bb_green} // BB16
 					} else {
 						// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
 							// some older (mostly unsupported) win10 and android <= 6 will lack
 							// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
 							// but I consider these out-of-scope
-						if ('ed89a929' == hash) {notation = bb_green} // BB15 1122
+						if ('05874eb7' == hash) {notation = bb_green} // BB16 1152
 					}
 				}
 			} else {
@@ -525,7 +524,7 @@ function get_media_css(METRIC) {
 			str = str.slice(str.length - 7, str.length - 6)
 			if ('1' == str) {value = 'light'; notation = rfp_green
 			} else if ('2' == str) {value = 'dark'
-			} else if ('0' == str) {value = zNA; if (isVer < 150) {notation = ''} // not supported
+			} else if ('0' == str) {value = zNA // not supported
 			} else {value = 'modified'}
 		} catch(e) {
 			log_error(14, METRIC +'_'+ metric + item, e)
