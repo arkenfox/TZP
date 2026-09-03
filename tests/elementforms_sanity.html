@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements: forms [sanity]</title>
+  <!--<link rel="stylesheet" type="text/css" href="testindex.css"> <!-- -->
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+  <script src="testelements.js"></script>
+	<style>
+		.mono {font-family: monospace, "Courier New"; font-size: 12px;}
+		.spaces {white-space: pre-wrap;}
+		#tb0, #tb15 {
+			width: 97%;
+			min-width: 780px;
+			max-width: 780px;
+		}
+		#tb0 td {text-align: center;}
+		.btn-right {float: right; position: relative; top: 0px; text-align: right;}
+		code {
+			background: rgba(142, 142, 145, 0.25);
+			padding: 2px 6px;
+		}
+		button, select {margin-right: 10px;}
+		#fixed, #fixed2 {
+			position: fixed;
+			top: 0;
+			left: 0;
+			background-color: bisque;
+		}
+		.method {text-decoration: underline;; padding-bottom: 5px;}
+		.good {color: #0ab90a; background-color: #bae6aa40;;}
+		.bad {color: #be0f0f; background-color: #fb80802e;}
+		.faint {color: #808080}
+		.hidden {display: none;}
+		.offscreen {
+			position: absolute !important;
+			top: -2000% !important;
+			left: 0px !important;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="fixed"></div>
+
+	<table id="tb0">
+		<tr><td>
+			<h3>TorZillaPrint</h3>
+			<a href="../index.html#elements">return to TZP index</a><br><br>
+		</td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="25%"><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">elements: forms [sanity]</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<p>The <a href="elementforms.html">elements: forms</a> PoC uses <code>element.getBoundingClientRect()</code>
+			by default - but TZP can fall back to other DOMRect methods - where differences may occur, per browser engine.
+			This is a sanity test to see what is happening.</p>
+			<button onClick="cycle('back')"> &nbsp; PREV &nbsp; </button>
+			<select id="tests" name="tests" onChange="run()"></select> 
+			<button onClick="cycle('forward')"> &nbsp; NEXT &nbsp; </button>
+			<button onClick="run(true)"> &nbsp; TEST ALL &nbsp; </button>
+			<input type="checkbox" id="optVertical"></input> vertical
+			<p class="faint mono spaces">navigation keys shortcuts: ↑ ↓ → ← keys <u><i>anywhere</i></u> on the page</p>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="mono">
+				<div id="info"></div><br>
+				<div class="method">element.getBoundingClientRect()</div>
+				<div id='res0'></div><br>
+				<div class="method">element.getClientRects()[0]</div>
+				<div id='res1'></div><br>
+				<div class="method">range.getBoundingClientRect()</div>
+				<div id='res2'></div><br>
+				<div class="method">range.getClientRects()[0]</div>
+				<div id='res3'></div>
+				<br><hr>
+				<div id='all' class="spaces"></div>
+			</div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let oTests = {}, aTests = [], allTests = [], isTestAll = false, maxTestLen = 0
+let selector = document.getElementById('tests'),
+	all = document.getElementById('all'),
+	info = document.getElementById('info')
+eFiller = 'i am groot'
+let wmode, target, range
+
+function test() {
+	let parent = document.getElementById('fixed')	
+	parent.innerHTML = oTests.geolocation
+	let testtarget = parent.firstChild
+	setTimeout(function() {
+		console.log(testtarget.getBoundingClientRect().width)
+	}, 0)
+
+	// we just need to engineer a delay for Page-Embedded Permission Controls
+
+	/* we need to promise each result (measured with a delay), before moving
+		onto the next item and changing the element, otherwise everything ends
+		up beingv measured as the last item
+		- i.e we loop thru all the items and set the element
+		- then the first item delay measures (the final element, not the first one), etc
+
+	so...
+   - set element, delay, measure .. then set next element, delay, measure
+
+	*/
+
+
+	/*
+	let xinitial = testtarget.getBoundingClientRect().width
+	let t0 = performance.now()
+	let xfinal, n = 1
+	function measure() {
+		// check n times as fast as we can/dare
+		if (n == 5) {
+			clearInterval(checking)
+			console.log(n +' loops', xinitial, xfinal, (performance.now() - t0) +' ms')
+		} else {
+			let x = testtarget.getBoundingClientRect().width
+			if (x !== xinitial) {
+				clearInterval(checking)
+				xfinal = x
+				console.log(n +' loops', xinitial, xfinal, (performance.now() - t0) +' ms')
+			}
+		}
+		n++
+	}
+	let checking = setInterval(measure, 0) // 0.7ms, 1 loop
+	*/
+}
+
+function build_lists() {
+	// reset
+	allTests = []
+	oTests = {}
+	aTests = []
+	// build: we'll use testelements.js to ensure we don't miss anything
+	build_element_forms()
+
+	// get element forms and remove redundant stuff
+	let tmpobj = oElementForms, oTmp = {}
+	let aRemove = ['textarea_3x5']
+	aRemove.forEach(function(item){delete tmpobj[item]})
+	for (const k of Object.keys(tmpobj)) {oTmp[k] = tmpobj[k]}
+	// add some variation
+	//oTmp['geolocation_fr'] = '<geolocation lang="fr"></geolocation>'
+	//oTmp['install_de'] = '<install lang="de"></install>'
+	//oTmp['usermedia_es'] = '<usermedia lang="es"></usermedia>'
+
+	// sort intoi final object, determine max test name length
+	for (const k of Object.keys(oTmp).sort()) {
+		let len = k.length
+		if (len > maxTestLen) {maxTestLen = len}
+		oTests[k] = oTmp[k]
+		aTests.push('<option value = "'+ k +'"> '+ k +'</option>')
+		allTests.push(k)
+	}
+	allTests.sort()
+	console.log('allTests\n', allTests)
+	// populate select
+	selector.innerHTML = aTests.join('')
+	// add listener
+	document.addEventListener('keydown', shortcutKey)
+}
+
+function mini(str) {
+	const json = `${JSON.stringify(str)}`
+	let len = json.length, hash = 0x811c9dc5
+	for (let i=0; i < len; i++) {
+		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
+	}
+	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
+}
+
+function cycle(dir) {
+	if (isTestAll) {return}
+	if ('back' == dir) {
+		let index = selector.selectedIndex
+		let lastIndex = aTests.length - 1
+		let newIndex = index == 0 ? lastIndex : index - 1
+		selector.selectedIndex = newIndex
+	} else {
+		selector.selectedIndex++
+		if (selector.value == '') {selector.selectedIndex++} // end of list, return to top
+	}
+	run()
+}
+
+function shortcutKey(evt) {
+	evt = evt || window.event
+	if ('ArrowLeft' == evt.key || 'ArrowUp' == evt.key) {
+		cycle('back')
+	} else if ('ArrowRight' == evt.key || 'ArrowDown' == evt.key) {
+		cycle('forward')
+	}
+}
+
+function call(test) {
+	selector.value = test
+	run()
+}
+
+function run(isAll = false) {
+	wmode = dom.optVertical.checked ? 'vertical' : 'horizontal'
+
+	let testsUsed, oAll = {}, aBad = [], counter = 0
+	let oDisplay = {'bad': [], 'good': []}
+	if (isAll) {
+		testsUsed = allTests
+		isTestAll = true // block shortcut keys
+	} else {
+		testsUsed = [selector.value]
+	}
+	let parent = document.getElementById('fixed')
+
+	testsUsed.forEach(function(test){
+		oAll[test] = {}
+		parent.innerHTML = oTests[test]
+		target = parent.firstChild
+		// get final target
+		for (let i = 0; i < 10; i++) {
+			let newtarget = target.children[0]
+			if (undefined == newtarget) {break}
+			target = newtarget
+		}
+		if ('vertical' == wmode) {target.style.setProperty('writing-mode', 'vertical-lr')}
+
+		let method, setHashes = new Set()
+		let intErr = 0
+		counter++
+
+		range = document.createRange(); range.selectNode(target)
+		for (let i=0; i < 4; i++) {
+			oAll[test][i] = {}
+			try {
+				if (0 == i) {method = target.getBoundingClientRect()
+				} else if (1 == i) {method = target.getClientRects()[0]
+				} else if (2 == i) {method = range.getBoundingClientRect()
+				} else {method = range.getClientRects()[0]}
+				let keys = ['x','y','width','height','top','right','bottom','left'], items = []
+				keys.forEach(function(k){
+					items.push(k + ': ' + method[k])
+					oAll[test][i][k] = method[k]
+				})
+				setHashes.add(mini(items))
+				if (!isAll) {document.getElementById('res'+i).innerHTML = items.join(', ')}
+			} catch(e) {
+				oAll[test][i] = i +' : '+ e+''
+				intErr++
+				if (!isAll) {document.getElementById('res'+i).innerHTML = e+''}
+			}
+		}
+		let matchStr = '', errorStr =''
+		// if you have 3 or 4 errors, then there's nothing to match
+		if (intErr < 3) {
+			let aHashes = Array.from(setHashes)
+			matchStr = '<span class="' + (aHashes.length == 1 ? 'good">match' : 'bad">mismatch') +'</span>'
+		}
+		if (intErr > 0) {
+			errorStr = ' <span class="bad">'+ intErr +' error'+ (intErr > 1 ? 's' : '') +'</spaN>'
+		}
+		if (isAll) {
+			let strCombined = matchStr + errorStr
+			let isGoodBad = 'good'
+			if (strCombined.includes('bad">')) {
+				strCombined += ' <button onClick="call(`'+ test +'`)"> run </button>'
+				isGoodBad = 'bad'
+				aBad.push(test)
+			} else {
+				// _inlined comes after the non inlined test alphabetically
+				// if the non-inlined test was bad, also add the inlined next to it
+				if (test.includes('_inline')) {
+					if (aBad.includes(test.slice(0,-7))) {isGoodBad = 'bad'}
+				}
+			}
+			oDisplay[isGoodBad].push(test.padStart(maxTestLen) +': ' + strCombined)
+			//if (counter == allTests.length) {finish()}
+		} else {
+			let code = oTests[test]
+			code = code.replaceAll('<','&lt;')
+			code = code.replaceAll('>','&gt;')
+			code = code.replaceAll('"/','"')
+
+			let targetcode = target.outerHTML
+			targetcode = targetcode.replaceAll('<','&lt;')
+			targetcode = targetcode.replaceAll('>','&gt;')
+			targetcode = targetcode.replaceAll('ry=""','ry')
+			targetcode = targetcode.replaceAll('switch=""','switch')
+
+			info.innerHTML = '<b>'+ test.toUpperCase() +'</b>: <code>'+ code +'</code>'
+				+ (targetcode == code ? '' : ' | target: <code>'+ targetcode +'</code>')
+				+ ' | ' + matchStr + errorStr
+		}
+
+	})
+
+	//function finish() {
+		if (isAll) {
+			let divider = '-'.padStart(maxTestLen + 1, '-')
+			divider = '<br>'+ divider +' '+ divider +'<br>'
+			all.innerHTML =  wmode.toUpperCase() + '<br><br><u>problematic</u><br>'+ oDisplay.bad.join('<br>')
+				+ divider + '<u>awesome</u><br>'+ oDisplay.good.join('<br>')
+			console.log(mini(oAll), '\n', oAll)
+			isTestAll = false // allow shortcut keys again
+		}
+	//}
+}
+
+dom.optVertical.checked = false
+build_lists()
+run(true)
+run()
+
+</script>
+</body>
+</html>
+
+
