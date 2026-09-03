@@ -236,11 +236,10 @@ function get_element_keys(METRIC) {
 		hash = mini(data); btn = addButton(15, METRIC)
 		// health: BB only if ESR
 		if (isBBESR) {
-			// we'll want hashes for standard + safer (including webgl clicked-to-play - has no effect AFAICT)
-			// always update from HTTPS cuz NoScript can handle file:// schema differently
-
-			// need to test per platform: below is standard then safer
-			if ('64d3d98f' == hash || 'de5cd629' == hash) {notation = bb_green} // windows
+			// hashes must be calculated on HTTPS not file schema
+			// awaiting BB16
+			// key: standard | safer (including webgl clicked-to-play - has no effect AFAICT)
+			if ('' == hash || '' == hash) {notation = bb_green} // windows
 		}
 
 		// tampering: this is for display info only, the data is already in the FP
@@ -335,50 +334,81 @@ function get_element_font(METRIC, isLies) {
 function get_element_forms(METRIC, isLies) {
 	let t0 = nowFn()
 	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
-	let oList = {
-		// ignore: hidden
-		// redundant: (drop 2) directory, file, files
-		// redundant: (drop 9) datetime, email, month, number, password, search, tel, text, url, week
-			// BUT (bring back 2) month + week differ from number-etc in blink | gecko may follow suit so keep those
-		'native': {
-			button: '',
-			checkbox: '',
-			color: '',
-			date: '',
-			'datetime-local': '',
-			details: '<details></details>',
-			'details_open': '<details open="">.</details>',
-			file: '',
-			image: '',
-			month: '',
-			number: '',
-			progress: '<progress></progress>',
-			radio: '',
-			range: '',
-			reset: '',
-			select: '<select><option></option></select>',
-			select_empty: '<select multiple=""><option></option></select>',
-			select_empty_option: '<select multiple=""><option></option></select>',
-			select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-			select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-			select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-			select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-			submit: '',
-			textarea: '<textarea></textarea>',
-			textarea_3x5: '<textarea cols="5" rows="3"></textarea>',
-			time: '',
-			week: '',
-		},
-		'unstyled': {
-			// differ on windows
-			// ToDo: check linux/mac/android
-			checkbox: '',
-			progress: '<progress></progress>',
-			radio: '',
-			select: '<select><option></option></select>',
+
+	// build items
+	let eStr = '.'
+	let oIsSupported = {
+		geolocation: 'HTMLGeolocationElement' in window,
+		install: 'HTMLInstallElement' in window,
+		usermedia: 'HTMLUserMediaElement' in window,
+		// camera: false,
+		// microphone: false,
+	}
+	let oForms = {
+		details: '<details></details>',
+		details_open: '<details open="">'+ eStr +'</details>',
+		progress: '<progress></progress>',
+		select: '<select></select>',
+		select_multiple: '<select multiple=""></select>',
+			// select + select_multiple don't need any content(options)
+			// select multiple is affected by scrollbars
+		select_optgroup: '<select multiple=""><optgroup label ="'+ eStr +'"></optgroup></select>',
+		select_option: '<select multiple=""><option>'+ eStr +'</option></select>',
+		textarea: '<textarea></textarea>',
+		textarea_3x5: '<textarea cols="5" rows="3"></textarea>',
+
+		// if supported
+		geolocation: '<geolocation></geolocation>',
+		install: '<install></install>',
+		usermedia: '<usermedia></usermedia>',
+		// camera: '<camera></camera>',
+		// microphone: '<microphone></microphone>',
+	}
+	let aInput = [
+		'button','checkbox','color','date','datetime-local','file','image',
+		'month','number','radio','range','reset','submit','time','week',
+	]
+	aInput.forEach(function(item) {oForms[item] = '<input type="'+ item+'">' })
+	// tzp items
+	let oFormsTZP = {
+		// N native U unstyled V vertical H horizontal
+		'NH': [
+			'button','checkbox','color','date','datetime-local','details','details_open',
+			'file','image','number','progress','radio',
+			'range','reset','select','submit','textarea','time',
+			'select_multiple','textarea_3x5',
+			// for blink
+				// note: month + week are same as number but not in chrome | gecko may follow suit
+			'month','week',
+			// if supported: requires special handling
+			'geolocation','install','usermedia'
+		],
+		'NV': ['select_optgroup','select_option'], // to get diff in blink
+		// unstyled
+			// 'checkbox','radio','select': show a diff to native in gecko + blink at least
+			// 'range': gecko only
+		'UH': ['checkbox','radio','range','select'],
+	}
+	// populate list
+	let oList = {}
+	for (const t of Object.keys(oFormsTZP).sort()) {
+		if (undefined !== oFormsTZP[t] && oFormsTZP[t].length) {
+			oList[t] = {}
+			let array = oFormsTZP[t].sort()
+			array.forEach(function(item) {
+				if (undefined !== oForms[item]) {oList[t][item] = oForms[item]}
+			})
 		}
 	}
+	//console.log(oList)
+
 	let width, height, x, y, method
+
+	let totalTests = 0
+	let setIndividual = new Set() // individual measurements from x,y,width,height
+	let setMeasure = new Set() // sets of x,y,width + height
+	let setElement = new Set()
+
 	const id = 'element-fp'
 	try {
 		const doc = document
@@ -386,34 +416,64 @@ function get_element_forms(METRIC, isLies) {
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
 		let parent = dom[id], isFirst = true
-		for (const key of Object.keys(oList)) {
+
+		for (const k of Object.keys(oList)) {
+			let key = (k[0] == 'N' ? 'native' : 'unstyled') +'_'+ (k[1] == 'H' ? 'horizontal' : 'vertical')
 			tmpdata[key] = {}, newobj[key] = {}, data[key] = {}
-			for (const k of Object.keys(oList[key])) {
-				// important to clear the div so no other elements can affect measurements
-				parent.innerHTML =''
-				parent.innerHTML = ('' == oList[key][k] ? '<input type="'+ k +'">' : oList[key][k])
-				let target = parent.firstChild
-				// vertical seems to create subpixels in width before transform
-				target.setAttribute('style', 'display:inline; writing-mode: vertical-lr;') 
-				if ('unstyled' == key) {target.classList.add('unstyled')}
-				if (k.includes('_option')) {target = target.lastElementChild}
-				method = measureFn(target, METRIC)
-				// typecheck
-				let itemdata = [method.width, method.height, method.x, method.y]
-				if (isFirst) {
-					isFirst = false
-					if (undefined !== method.error) {throw method.errorstring}
-					itemdata.forEach(function(item){
-						if (runST) {item = null}
-						let typeCheck = typeFn(item)
-						if ('number' !== typeCheck) {throw zErrType + typeCheck}
-					})
+			for (const j of Object.keys(oList[k])) {
+				let itemdata
+				if (undefined !== oIsSupported[j]) {
+					// handle special items: add a placeholder if supported (we will update later)
+					if (true === oIsSupported[j]) {
+						itemdata = 'TBA'
+						setElement.add(j)
+					}
+				} else {
+					setElement.add(j)
+					// important to clear the div so no other elements can affect measurements
+					parent.innerHTML =''
+					parent.innerHTML = oList[k][j]
+					let target = parent.firstChild
+					// revert everything + get final target
+					for (let i = 0; i < 10; i++) {
+						//if (isRevert) {target.classList.add('revert')}
+						let newtarget = target.children[0]
+						if (undefined == newtarget) {break}
+						target = newtarget
+					}
+					// add writing-mode: ignore horizontal
+					if ('V' == k[1]) {target.style.setProperty('writing-mode', 'vertical-lr')}
+					// add unstyled
+					if ('U' == k[0]) {target.classList.add('unstyled')}
+					method = measureFn(target, METRIC)
+					itemdata = [method.width, method.height, method.x, method.y]
+					// first result: check for error and type check
+					if (isFirst) {
+						isFirst = false
+						if (undefined !== method.error) {throw method.errorstring}
+						itemdata.forEach(function(item){
+							if (runST) {item = null}
+							let typeCheck = typeFn(item)
+							if ('number' !== typeCheck) {throw zErrType + typeCheck}
+						})
+					}
 				}
-				let itemhash = mini(itemdata)
-				if (undefined == tmpdata[key][itemhash]) {tmpdata[key][itemhash] = {'data': itemdata, 'group': [k]}
-				} else {tmpdata[key][itemhash]['group'].push(k)}
+				if (undefined !== itemdata) {
+					let itemhash = mini(itemdata) +' '
+					//console.log(j, oList[k][j], itemdata, itemhash)
+					if (undefined == tmpdata[key][itemhash]) {tmpdata[key][itemhash] = {'data': itemdata, 'group': [j]}
+					} else {tmpdata[key][itemhash]['group'].push(j)}
+					// stats
+					totalTests++
+					if (itemdata !== 'TBA') { // check for TBA
+						itemdata.forEach(function(num) {setIndividual.add(num)})
+						setMeasure.add(itemhash)
+					}
+				}
 			}
 		}
+		//console.log(tmpdata)
+
 		// group by results
 		for (const key of Object.keys(tmpdata)) {
 			for (const k of Object.keys(tmpdata[key])) {newobj[key][tmpdata[key][k].group.join(' ')] = tmpdata[key][k]['data']}
@@ -421,7 +481,10 @@ function get_element_forms(METRIC, isLies) {
 		for (const key of Object.keys(newobj)) {
 			for (const k of Object.keys(newobj[key]).sort()) {data[key][k] = newobj[key][k]}
 		}
-		hash = mini(data), btn = addButton(15, METRIC)
+		let btnStr = (setIndividual.size +'').padStart(3,'_') +'/'+ (setMeasure.size * 4)
+		let percentage = (setIndividual.size/(setMeasure.size * 4)) * 100
+		let extraStr = ' ['+ percentage.toFixed(1) +'% | '+ setElement.size +'/'+ setMeasure.size +'/'+ totalTests +']'
+		hash = mini(data), btn = addButton(15, METRIC, btnStr) + extraStr
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
@@ -450,7 +513,7 @@ function get_element_lang(METRIC, isLies) {
 	*/
 	let t0 = nowFn()
 	const id = 'element-fp'
-	let hash, btn ='', data = {}, method
+	let hash, btn ='', data = {}, method, isFirst = true
 	let aLang = [
 		// one of each script (from default script sizes)
 		'ar','bn','bo','cr','el','en','gez','gu','he','hi','hy','ja','ka','km','kn','ko',
@@ -487,6 +550,17 @@ function get_element_lang(METRIC, isLies) {
 					dom[id].innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
 					let target = dom[id].firstChild
 					method = measureFn(target, METRIC)
+					// first result: check for error and type check
+					if (isFirst) {
+						isFirst = false
+						if (undefined !== method.error) {throw method.errorstring}
+						let itemdata = [method.width, method.height, method.x, method.y]
+						itemdata.forEach(function(item){
+							if (runST) {item = null}
+							let typeCheck = typeFn(item)
+							if ('number' !== typeCheck) {throw zErrType + typeCheck}
+						})
+					}
 					if (isOneSize) {
 						tmpsizes.push(method.width, method.height, method.x, method.y)
 					} else {
@@ -612,18 +686,19 @@ function get_element_other(METRIC, isLies) {
 	/* NOTE
 	TZP uses isDomRect, the default being 0 (element.getBoundingClientRect). When
 	falling back to other domrect methods, some differences can occur (per engine)
-	- e.g. gecko: audio measures differently with 2
-	- e.g. blink: q measures differently if 1 or 3
+	- e.g. gecko: rt (vertical only) and audio (FF153 or lower in both writing modes) measure differently with 2
+	- e.g. blink: q measures differently if 1 or 3 (horizontal) or 2 (vertical), rt has mismatches
+	- e.g. blink + gecko: marquee can't be vertical - see PoC: errors + mismatches + inner windfow sizes affects measurements
 	- e.g. servo: as of June 2026: everything mismatches
-	Ideally this wouldn't happen, but ultimately it is equivalency of isDomRect
-	Currently only gecko usews isDomRect for fallback
+	i.e nothing is guaranteed due to engine code changes. Ideally this wouldn't happen, but ultimately
+	it is equivalency of isDomRect - currently only gecko uses isDomRect for fallback
 
 	Additionally, some elements (per engine) require display:inline otherwise errors and/or
 	measurement	differences can occur
 
-	They could all likely be inline (marquee can be weird) but being selective allows us
-	to generate more unique individual measuremments and unique elements, without artificially
-	creating more uniqueness - and/or to generate measuremeants with lots of decimal places
+	They could all likely be inline but being selective allows us to generate more unique
+	individual measuremments and unique elements, without artificially creating more
+	uniqueness - and/or to generate measuremeants with lots of decimal places
 	- e.g. figure, hr, marquee... were already uniquely sized elements
 	*/
 
@@ -645,8 +720,7 @@ function get_element_other(METRIC, isLies) {
 		'horizontal' : {
 			a: '<a href="">'+ eStr +'</a>',
 			audio: '<audio controls=""></audio>',
-			big_x2: '<big><big>'+ eStr +'</big></big>',
-			big_x3: '<big><big><big>'+ eStr +'</big></big></big>',
+			big_nested: '<big><big>'+ eStr +'</big></big>',
 			br: '<br>',
 			button: '<button></button>', // this is not the same as input type='button'
 			canvas: '<canvas></canvas>',
@@ -659,8 +733,7 @@ function get_element_other(METRIC, isLies) {
 			iframe: '<iframe>'+ eStr +'</iframe>',
 			img: '<img>', // unique on android
 			legend: '<fieldset><legend>'+ eStr +'</legend></fieldset>',
-			marquee: '<marquee style="width:20px; height:20px;">'+ eStr +'</marquee>',
-				// marquee requires a size constrain else it changes with inner window sizes
+			marquee: '<marquee style="display:inline">'+ eStr +'</marquee>',
 			menu_li: '<menu>'+ eStr +'<li></li></menu>',
 			meter: '<meter></meter>',
 			search: '<search></search>',
@@ -681,7 +754,7 @@ function get_element_other(METRIC, isLies) {
 			optgroup: '<optgroup></optgroup>',
 			plaintext: '<plaintext style="display:inline;">',
 			rb: '<ruby><rb>'+ eStr +'</rb></ruby>',
-			rt: '<ruby><rt>'+ eStr +'</rt></ruby>',
+			rt: '<ruby><rt style="display:inline">'+ eStr +'</rt></ruby>',
 			rtc: '<ruby><rtc>'+ eStr +'</rtc></ruby>', // vertical for android blink
 			summary: '<details><summary>'+ eStr +'</summary></details>',
 			//'error': '<frame></frame>' // test error
@@ -712,46 +785,40 @@ function get_element_other(METRIC, isLies) {
 				// set parent, determine target to measure and as we walk
 				// the children, ensure no other css affects any element
 				parent.innerHTML = oList[s][k]
-				try {
-					let target = parent.firstChild
-					// revert everything
-					for (let i = 0; i < 10; i++) {
-						target.classList.add('revert')
-						let newtarget = target.children[0]
-						if (undefined == newtarget) {break}
-						target = newtarget
-					}
-					// amend target
-					if (undefined !== oSpecial[k]) {
-						let intTarget = oSpecial[k]; target = parent.firstChild
-						if (Number.isInteger(intTarget)) {target = target.children[intTarget]}
-					}
-					// add writing-mode: ignore horizontal
-					if ('vertical' == s) {target.style.setProperty('writing-mode', 'vertical-lr')}
-					method = measureFn(target, METRIC)
-					// typecheck
-					itemdata = [method.width, method.height, method.x, method.y]
-					if (isFirst) {
-						isFirst = false
-						if (undefined !== method.error) {throw method.errorstring}
-						itemdata.forEach(function(item){
-							if (runST) {item = null}
-							let typeCheck = typeFn(item)
-							if ('number' !== typeCheck) {throw zErrType + typeCheck}
-						})
-					}
-				} catch(e) {
-					itemdata = zErr
-					log_error(15, METRIC +'_'+k, e)
+				let target = parent.firstChild
+				// revert everything
+				for (let i = 0; i < 10; i++) {
+					target.classList.add('revert')
+					let newtarget = target.children[0]
+					if (undefined == newtarget) {break}
+					target = newtarget
+				}
+				// amend target
+				if (undefined !== oSpecial[k]) {
+					let intTarget = oSpecial[k]; target = parent.firstChild
+					if (Number.isInteger(intTarget)) {target = target.children[intTarget]}
+				}
+				// add writing-mode: ignore horizontal
+				if ('vertical' == s) {target.style.setProperty('writing-mode', 'vertical-lr')}
+				method = measureFn(target, METRIC)
+				// typecheck
+				itemdata = [method.width, method.height, method.x, method.y]
+				// first result: check for error and type check
+				if (isFirst) {
+					isFirst = false
+					if (undefined !== method.error) {throw method.errorstring}
+					itemdata.forEach(function(item){
+						if (runST) {item = null}
+						let typeCheck = typeFn(item)
+						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					})
 				}
 				let itemhash = mini(itemdata)
 				if (undefined == tmpdata[s][itemhash]) {
 					tmpdata[s][itemhash] = {'data': itemdata, 'group': [k]}
 					// uniqueness
-					if (itemdata !== zErr) {
-						itemdata.forEach(function(num) {setIndividual.add(num)})
-						setMeasure.add(itemhash)
-					}
+					itemdata.forEach(function(num) {setIndividual.add(num)})
+					setMeasure.add(itemhash)
 				} else {tmpdata[s][itemhash]['group'].push(k)}
 			}
 		}
@@ -771,7 +838,7 @@ function get_element_other(METRIC, isLies) {
 			totalTests += Object.keys(oList[s]).length
 			uniqueTests += Object.keys(data[s]).length
 		}
-		let btnStr = setIndividual.size +'/'+ (setMeasure.size * 4)
+		let btnStr = (setIndividual.size +'').padStart(3,'_') +'/'+ (setMeasure.size * 4)
 		let percentage = (setIndividual.size/(setMeasure.size * 4)) * 100
 		let extraStr = ' ['+ percentage.toFixed(1) +'% | '+ setMeasure.size +'/'+ uniqueTests +'/'+ totalTests +']'
 		hash = mini(data); btn = addButton(15, METRIC, btnStr) + extraStr
@@ -857,8 +924,8 @@ function get_element_scrollbars(METRIC, isLies) {
 		element.classList.remove('tzpScrollbar')
 		get_scroll()
 		if (undefined == isScrollbar) {isScrollbar = 20}
-
 		// FF151: 1977511 layout.css.fake-webkit-scrollbar.enabled | FF153+: 2038877 default true
+		// FF155: 2061547 limited to an allowlist
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar
 		element.classList.add('tzpScrollbar')
 		get_scroll('webkit_')
