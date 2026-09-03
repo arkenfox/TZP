@@ -206,7 +206,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 				for (const k of Object.keys(section).sort()) {obj[k.replace('audio_test_', '')] = section[k]}
 				let hash = mini(obj)
 				addDetail(METRIC, obj)
-				if (true === isArch) {
+				if (true === isArchArray) {
 					if ('e2bbb839' == hash) {
 						// {"oscillator": "5b3956a9", "oscillator_compressor": "e08487bf"}
 						notation = sgtick+'x86_64/amd_64]'+sc
@@ -293,7 +293,7 @@ const outputUserOrientationLock = () => new Promise(resolve => {
 		try {await screen.orientation.unlock()} catch (e) {}
 	}
 	function display(value) {
-		dom[METRIC].innerHTML = value + (isSmart && isVer > 143 ? notation : '')
+		dom[METRIC].innerHTML = value + (isSmart ? notation : '')
 		return resolve()
 	}
 
@@ -555,11 +555,11 @@ function outputUser(x, event) {
 		setTimeout(function() {
 			Promise.all([
 				promiseTest(x)
-			]).then(function(res){
+			]).then(function(){
 				gClick = true
 				let target = sDataTemp.display.manual
 				for (const k of Object.keys(target)) {dom[k].innerHTML = target[k]}
-				// trigger a manual measure if desktop + wasF11 and testing  fullscreenElement
+				// trigger a manual measure if desktop + wasF11 and testing fullscreenElement
 				if (true === wasF11) {
 					//get_scr_fs_measure(true) // a timing issue? I always get a width of 8
 					outputSection('screen') // this works

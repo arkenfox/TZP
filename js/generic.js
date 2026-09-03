@@ -233,23 +233,92 @@ const promiseRaceFulfilled = async ({
 
 /*** GLOBAL ONCE ***/
 
-function get_isArch(METRIC) {
-	// FYI: 32bit no longer supported for linux FF145+
+function get_isArchArray(METRIC) {
+	// note: servo doesn't do 32bit builds
+	if (!isGecko) {return}
+	// ToDo: gecko array is browser bitness | open this up to all engines | need some 32bit browsers + 32bit platforms
+
+	// on gecko at least, this value is limited by the browser bitness
+		// FF110+ pref removed: error means 32bit
+		// FYI: 32bit no longer supported for linux FF145+
 	let t0 = nowFn(), value
 	try {
 		if (runSG) {foo++}
 		let test = new ArrayBuffer(Math.pow(2,32)) // 4294967296
-		value = 64
+		isArchArray = 64
 	} catch(e) {
-		if ('blink' == isEngine && 'RangeError: Array buffer allocation failed' == e+'') {
-			// chrome limits ArrayBuffer to 2145386496: https://issues.chromium.org/issues/40055619
-			isArch = zNA; value = zNA
+		if ('RangeError: invalid array length' == e+'') {
+			isArchArray = 32
 		} else {
-			isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist sect3
-			value = zErr
+			log_error(3, 'architecture_array', e, isScope, true) // persist sect3
+			isArchArray = zErr
 		}
 	}
-	log_perf(SECTG, METRIC, t0,'', value)
+	log_perf(SECTG, METRIC, t0,'', isArchArray)
+}
+
+function get_isArchString(METRIC) {
+	//if ('blink' !== isEngine) {return}
+	// https://firefox-source-docs.mozilla.org/js/constraints.html
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/length
+		// In V8 (used by Chrome and Node), the maximum length is 2**29 - 24 (~1GiB). On 32-bit systems, the maximum length is 2**28 - 16 (~512MiB).
+		// In Firefox, the maximum length is 2**30 - 2 (~2GiB). Before Firefox 65, the maximum length was 2**28 - 1 (~512MiB).
+		// In Safari, the maximum length is 2**31 - 1 (~4GiB).
+
+	// ToDo: test 32bit chrome on a) 64bit platform b) 32bit platform
+
+	let t0 = nowFn()
+	let oSizes = {
+		0: 268435430, // 2**28 - 16 = 268435440 | baseline, just under
+		1: 268435456, // 2**28: just over
+		2: 536870912, // 2**29 - 24 = 536870888
+		3: 1073741824, // 2**30 - 2 = 1073741822
+	}
+	// find highest key == true
+		// e.g. FF should say { 0: true, 1: true, 2: true, 3: false } and we return 2GiB
+		// we didn't aqctually test the upper limit and assume a natural progression
+	let oSizeKey = {
+		0: '512MiB', // '< 512MiB' expected to be true for all
+		1: '1GiB', // '> 512MiB'
+		2: '2GiB', // '> 1GiB'
+		3: '4GiB', // '> 2GiB'
+	}
+	// expected errors: we'll learn more valid error hashes as we come across them
+	let oErrs = {
+		'blink': ['cc5986a4'], // RangeError: Invalid string length
+		'gecko': ['e06bd848'], // RangeError: repeat count must be less than infinity and not overflow maximum string size
+		'undefined': ['e06bd848'], // servo same as gecko
+	}
+	let oData = {}
+	try {
+		for (const k of Object.keys(oSizes)) {
+			let size = oSizes[k], value
+			try {
+				if (runSG) {foo++}
+				let str = 'a'.repeat(size)
+				value = true
+			} catch(e) {
+				let eHash = mini(e+''), isThrow = true
+				let lookup = isGecko ? 'gecko' : isEngine
+				if (undefined !== oErrs[lookup]) {
+					if (oErrs[lookup].includes(eHash)) {isThrow = false}
+				}
+				if (isThrow) {throw e+''}
+				value = false
+			}
+			oData[k] = value
+		}
+		// get upper value
+		let max = -1
+		for (const k of Object.keys(oData)) {if (true == oData[k]) {max = k}}
+		if (max < 0) {isArchString = 'none'} else {isArchString = oSizeKey[max]}
+		log_perf(SECTG, METRIC, t0,'', isArchString)
+	} catch(err) {
+		// if I catch or throw an error here, then it's unexpected
+		log_error(3, 'architecture_string', err, isScope, true) // persist sect3
+		isArchString = zErr
+		log_perf(SECTG, METRIC, t0,'', isArchString)
+	}
 }
 
 function get_isAutoplay(METRIC) {
@@ -699,7 +768,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 						trysomethingelse()
 					}
 				} else {
-					console.log(aDetected)
+					// console.log(aDetected)
 					// if we detected the fake font then ignore
 					//aDetected.push('--00'+ rnd_string()) // test
 					let aFake = aDetected.filter(x => !fntMaster.platform.all.includes(x)) 
@@ -730,10 +799,10 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		exit()
 	}
 
+	set_fntList_mini()
 	if (isGecko) {
 		trywidget()
 	} else {
-		set_fntList_mini()
 		tryfonts()
 
 		/*
@@ -868,7 +937,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 155) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
+	if (isVer == 157) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -889,11 +958,19 @@ function get_isVer(METRIC) {
 			if (!isCascade) return 139
 
 			// now cascade
+			try {
+				test = '<nobr><table><marquee></table><nobr>'
+				if (2 == (new DOMParser).parseFromString(test, 'text/html').body.children.length) return 157 // 2049083
+			} catch(e) {}
+			try {
+				test = (new DOMParser).parseFromString('<select><button></button></select>', "text/html")
+				if ('button' == test.body.firstChild.firstChild.type) return 156 // 2064013
+			} catch(e) {}
 			try {if (SVGAElement.prototype.hasOwnProperty('origin')) return 155} catch(e) {} // 2058578
 			try {test = new Date('4294967303').toISOString()} catch(e) {if ('RangeError: invalid date' == e+'') {return 154}} // 2027609
 			try {if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) return 153} catch(e) {} // 2039500
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
-			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
+			try {if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151} catch(e) {} // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
 			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled: default true 148+
@@ -1352,10 +1429,12 @@ function metricsEvent(evt) {
 	} else {
 		isEscape = (27 == evt.keyCode)
 	}
-	if (isEscape) {metricsAction('close')
-	} else if ((evt.ctrlKey || evt.metaKey) && 67 == evt.keyCode) {
-		copyclip('metricsDisplay')
+	if (isEscape) {metricsAction('close')}
+	/* don't control ctrl-c as it prevents copying selected text
+	if ((evt.ctrlKey || evt.metaKey) && 67 == evt.keyCode) {
+		copyclip('metricsDisplay') // ctrl+c: disable
 	}
+	*/
 }
 
 function metricsShow(name, scope) {
@@ -2228,7 +2307,7 @@ function countJS(item) {
 			try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {} // in FF134 or lower this breaks devtools: oh dear, what a shame
 		}
 
-		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
+		get_isVer('isVer') // if version PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
@@ -2284,10 +2363,6 @@ function countJS(item) {
 					// hide console button in overlay: width is a premium
 					dom.metricsConsole.classList.add('hidden')
 				}
-				// set isBBESR: some health checks we only want to do if it's worthwhile
-				// android and alpha are moving to RR and it's not feasible to keep up with per release changes
-				// and alpha is based on beta with pref flips yet to ride the train
-				if (isBB && 'android' !== isOS && isBBVer.includes(isVer)) {isBBESR = true}
 				Promise.all([
 					get_isFontDelay() // determine if we need to delay BB for font.vis and async font fallback
 				]).then(function(){
@@ -2528,6 +2603,14 @@ function outputSection(id, isResize = false) {
 	get_isXSLT()
 	// reset smarts
 	smartFn('final')
+	// set isBBESR: some health checks we only want to do if it's worthwhile
+		// android and alpha are moving to RR and it's not feasible to keep up with per release changes
+		// and alpha is based on beta with pref flips yet to ride the train
+	isBBESR = false
+	if (isSmart && isBB && 'android' !== isOS && isBBVer.includes(isVer)) {isBBESR = true}
+
+	if (!isSmart) {isBBESR = false}
+
 	let enforcedDelay = 0
 	if (gLoad) {
 		// preload fake images for non-gecko so it already knows the image is not found when zooming
@@ -2608,7 +2691,7 @@ function run_immediate() {
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		} else {
 			// search https://searchfox.org/firefox-main/source/dom/locales/en-US/chrome/dom/dom.properties for 'is deprecated'
-			// trigger some gecko deprecated items. They are recorded regardless of API. The API pref simply allows access to read them
+			// trigger gecko deprecated items. They are recorded regardless of API. The API pref simply allows access to read them
 			let aItems = [
 				'InstallTrigger', // X is deprecated and will be removed in the future. | FF100 1754441
 				'fullScreen', // X is deprecated. Use Y instead. | FF65 1504946
@@ -2668,7 +2751,8 @@ function run_immediate() {
 			warm = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
 		} catch {}
 		get_isXML()
-		get_isArch('isArch')
+		get_isArchArray('isArchArray')
+		get_isArchString('isArchString')
 		try {
 			// ensure hevc correctness e.g. see 1972902 fixed by 1974881
 				// 1st query on a new session hevc are false positives: a recheck fixes it

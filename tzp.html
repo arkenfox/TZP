@@ -478,8 +478,13 @@
 		</td></tr>
 		<tr><td>[css] branding</td><td class="mono" id="tzpWordmark"></td></tr>
 		<tr><td>[css] browser</td><td class="mono" id="tzpResource"></td></tr>
-		<tr><td>[browser | &infin;] architecture</td><td class="mono">
-			<span class="c" id="browser_architecture"></span> | <span class="c" id="infinity_architecture"></span></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">array<br>infinity<br>string</span></div>
+			&nbsp; architecture</td><td class="mono">
+			<span class="c" id="architecture_array"></span>
+			| <span class="c" id="architecture_infinity"></span>
+			| <span class="c" id="architecture_string"></span>
+		</td></tr>
 		<tr><td>branding</td><td class="c mono" id="browser_branding"></td></tr>
 		<tr><td>browser | version</td><td class="mono">
 			<span class="c" id="browser"></span> | <span class="c" id="browser_version"></span></td></tr>
@@ -746,7 +751,7 @@
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
 		<tr><td>[constraints] media devices</td><td class="c mono" id="mediaDevices_constraints"></td></tr>
-		<tr><td>memory</td><td class="c mono" id="memory"></td></tr>
+		<tr><td>[jsHeapSizeLimit] memory</td><td class="c mono" id="memory"></td></tr>
 		<tr><td>permissions</td><td class="c mono" id="permissions"></td></tr>
 		<tr><td id="tzpPointer"><span class="btn btn0">[ run ]</span>
 			&nbsp; pointer event <sup>1</sup></td><td class="c mono" id="pointer_event"></td></tr>
@@ -1087,11 +1092,13 @@
 			&nbsp; font</td><td class="c mono" id="element_font"></td></tr>
 		<tr><td><a class="blue" href="tests/elementforms.html" target="blank">[PoC]</a>
 			&nbsp; forms</td><td class="c mono" id="element_forms"></td></tr>
-		<tr><td>keys</td><td class="c mono" id="element_keys"></td></tr>
+		<tr><td><a class="blue" href="tests/elementkeys.html" target="blank">[PoC]</a>
+			&nbsp; keys</td><td class="c mono" id="element_keys"></td></tr>
 		<tr><td><a class="blue" href="tests/elementlang.html" target="blank">[PoC]</a>
 			&nbsp; lang</td><td class="c mono" id="element_lang"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
+			&nbsp; <a class="blue" href="tests/elementmath.html" target="blank">[PoC]</a>
 			&nbsp; math</td><td class="c mono" id="element_math"></td></tr>
 		<tr><td><a class="blue" href="tests/elementother.html" target="blank">[PoC]</a>
 			&nbsp; other</td><td class="c mono" id="element_other"></td></tr>
@@ -1219,7 +1226,7 @@
 			<span id="overlaybuttons">
 				<span class='btn0 btnc' onClick="metricsAction('download')" id="metricDownload">[DOWNLOAD]</span>
 				<span class='btn0 btnc' onClick="metricsAction('console')" id="metricsConsole">[CONSOLE]</span>
-				<span class='btn0 btnc' onClick="copyclip('metricsDisplay')" id="metricsBtnCopy"><abbr title="Ctrl+C">[COPY]</abbr></span>
+				<span class='btn0 btnc' onClick="copyclip('metricsDisplay')" id="metricsBtnCopy">[COPY]</span>
 				<span class='btn0 btnc' onClick="metricsAction('close')"><abbr title="Esc">[CLOSE]</abbr></span>
 				<br><br>
 				<div id="metricOptions"><br><p><u>FORMAT</u></p>

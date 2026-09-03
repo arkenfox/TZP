@@ -709,7 +709,7 @@ function set_fntList() {
 		// do once: font vis changes
 		if ('windows' == isOS) {
 			if (isVer < 155) {
-				// 2058840: move Sans Serif Collection from base tro system
+				// 2058840: move Sans Serif Collection from base to system
 				let aList = ['windows','windowsfaces','windowsoffscreen']
 				aList.forEach(function(key) {
 					fntMaster.system[key].push('Sans Serif Collection')
@@ -752,7 +752,7 @@ function set_fntList() {
 		fntPlatformFont = undefined // reset
 		if ('windows' == isOS) {
 			if (!isFontSizesMore) {
-				// blink doesn't allow MS Shell Dlg \\32
+				// blink doesn't allow MS Shell Dlg \\32, servo has issues with the backslashes
 				fntPlatformFont = isGecko ? 'MS Shell Dlg \\32' : 'Tahoma'
 			}
 			if (isBB) {fntPlatformFont = undefined} // force BB to detect all fonts for health
@@ -800,11 +800,6 @@ function set_fntList() {
 				fntData.family.full = array
 				fntData.family.full.push(fntFake)
 			} else if (isBB) {
-				// TB44461: Segoe MDL2 Assets
-				if (140 == isVer) {
-					fntMaster.allowlist.windows = fntMaster.allowlist.windows.filter(x => !['Segoe MDL2 Assets'].includes(x))
-					fntMaster.blocklist.windows.push('Segoe MDL2 Assets')
-				}
 				// desktop BB
 				let aBundled = []
 				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
@@ -1344,6 +1339,8 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 	fntBaseInvalid = {}
 	fntBaseMin = []
 	const id = 'element-fp'
+	let isMiniMethod = 'scroll' // method to check fonts for isOS | servo throws NaN errors on perspective and transform
+
 	// note: element-fp has a transform: this only affects domrect
 	try {
 		if (runSE) {foo++}
@@ -1396,7 +1393,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 
 		// set parameters
 		let fntGeneric = [], fntTest = [], fntControl = [], fntControlObj = {}, oTests = {}, aTests = []
-		const aSkipCheck = ['domrectbounding', 'domrectclient','domrectboundingrange','domrectclientrange','client','offset']
+		const aSkipCheck = ['domrectbounding','domrectclient','domrectboundingrange','domrectclientrange','client','offset']
 		let oSkip = {}, isSkip = false
 		for (let i=0; i < aSkipCheck.length; i++) {oSkip[i] = false}
 		if (isMain) {
@@ -1471,7 +1468,8 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			fntTest = ['--00'+ rnd_string()]
 			let src = isGecko ? 'gecko' : 'all'
 			fntTest = fntTest.concat(fntMaster.platform[src])
-			oTests = {'perspective': {}}
+			oTests = {}
+			oTests[isMiniMethod] = {}
 		}
 
 		let getDimensions = (span, style) => {
@@ -1610,7 +1608,7 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		// exit isOS check
 		if (!isMain) {
 			removeElementFn(id)
-			return resolve(oTests['perspective'])
+			return resolve(oTests[isMiniMethod])
 		}
 
 		// sim fake font + same sizes
@@ -2434,50 +2432,48 @@ function get_widget_fonts(METRIC) {
 			// RFP FF154+
 				// 2042294 caused changes to non-integers, but they are consistent: namely 13.3333 -> 13.3281
 				// IDK any more if RFP upstream or BB patches ever controlled the sizes or rely on defaults but
-				// this is a universal change, so if it is/was proetected it still is IIUIC
+				// this is a universal change, so if it is/was protected it still is IIUIC
 			if ('windows' == isOS && 'bde8bcf8' == hash) {notation = rfp_green
+				/*monospace 13.3281px: [date, datetime-local, time],
+					monospace 13px: [textarea],
+					sans-serif 13.3281px: [19 items],
+					sans-serif 13px: [image]*/
 			} else if ('mac' == isOS && '7cb7418a' == hash) {notation = rfp_green
+				/*-apple-system 13.3281px: [19 items],
+					monospace 13.3281px: [date, datetime-local, time],
+					monospace 13px: [textarea],
+					sans-serif 13px: [image] */
 			} else if ('linux' == isOS) {
 				if (isBB) {
+					/*Arimo 13.3281px: [19 items],
+						monospace 12px: [textarea],
+						monospace 13.3281px: [date, datetime-local, time],
+						sans-serif 13px: [image]*/
 					if ('cb542176' == hash) {notation = rfp_green}
 				} else {
+					/*monospace 12px: [textarea],
+						monospace 13.3281px: [date, datetime-local, time],
+						sans-serif 13.3281px: [19 items],
+						sans-serif 13px: [image]*/
 					if ('a1f13f79' == hash) {notation = rfp_green}
 				}
 			} else if ('android' == isOS && 'e59c5b19' == hash) {notation = rfp_green
+				/*Roboto 13.3281px: [19 items],
+					monospace 12px: [textarea],
+					monospace 13.3281px: [date, datetime-local, time],
+					sans-serif 13px: [image]*/
 			}
 		} else {
-			// RFP FF128-153
+			// RFP 153
 			if ('windows' == isOS && '24717aa8' == hash) {notation = rfp_green
-			/*monospace 13.3333px: [date, datetime-local, time],
-				monospace 13px: [textarea],
-				sans-serif 13.3333px: [19 items],
-				sans-serif 13px: [image]*/
 			} else if ('mac' == isOS && '12e7f88a' == hash) {notation = rfp_green
-			/*-apple-system 13.3333px: [19 items],
-				monospace 13.3333px: [date, datetime-local, time],
-				monospace 13px: [textarea],
-				sans-serif 13px: [image] */
 			} else if ('linux' == isOS) {
 				if (isBB) {
-				// BB14: due to font config aliases
-				/*Arimo 13.3333px: [19 items],
-					monospace 12px: [textarea],
-					monospace 13.3333px: [date, datetime-local, time],
-					sans-serif 13px: [image]*/
 					if ('edeba276' == hash) {notation = rfp_green}
 				} else {
-				/*monospace 12px: [textarea],
-					monospace 13.3333px: [date, datetime-local, time],
-					sans-serif 13.3333px: [19 items],
-					sans-serif 13px: [image]*/
 					if ('99054729' == hash) {notation = rfp_green}
 				}
-			} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green
-			/*Roboto 13.3333px: [19 items],
-				monospace 12px: [textarea],
-				monospace 13.3333px: [date, datetime-local, time],
-				sans-serif 13px: [image]*/
-			}
+			} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green}
 		}
 	} catch(e) {
 		hash = e; data = zErrLog

@@ -74,8 +74,6 @@ function get_device_integer(METRIC, proxyCheck) {
 	// dom.maxHardwareConcurrency : 1958598: FF139+ 128
 	let value, data ='', notation = rfp_red, expected = 24
 	let isHWC = 'hardwareConcurrency' == METRIC
-	// 1984333: FF143+ (backported to beta) RFP: 8 if mac else 4 | FPP 4 or 8
-	if (isHWC) {expected = 2; if (isVer > 142 || isBB) {expected = 'mac' == isOS ? 8 : 4}} // RFP
 	try {
 		value = isHWC ? navigator[METRIC] : screen[METRIC]
 		if (runST) {value += ''} else if (runSL) {addProxyLie(proxyCheck + METRIC)}
@@ -83,14 +81,14 @@ function get_device_integer(METRIC, proxyCheck) {
 	} catch(e) {
 		value = e; data = isHWC ? zErrLog : zErrShort
 	}
+	// 1984333: FF143+ (backported to beta) RFP: 8 if mac else 4 | FPP 4 or 8
+	if (isHWC) {expected = 'mac' == isOS ? 8 : 4} // RFP
 	if (value == expected) {
 		notation = rfp_green
 	} else if (isHWC && isFPPFallback) {
 		// non-BB: can fail RFP but may match FPP
 		// 1984333: FF144+ FPP 4 or 8	
-		if (isVer > 142) {
-			if (4 == value || 8 == value) {notation = fpp_green}
-		}
+		if (4 == value || 8 == value) {notation = fpp_green}
 	}
 	addBoth(7, METRIC, value,'', notation, data, isProxyLie(proxyCheck + METRIC))
 	return
@@ -440,7 +438,7 @@ function get_memory(METRIC) {
 	// ToDo: investigate https://developer.mozilla.org/en-US/docs/Web/API/Performance/measureUserAgentSpecificMemory
 
 	// https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory
-	// blink only and deprecated: jsHeapSizeLimit might be stable, perhaps bucketize it
+	// blink only and deprecated: jsHeapSizeLimit might be stable, perhaps bucketize it | bytes
 	function exit(value, data='') {
 		// display only for now
 		addDisplay(7, METRIC, (data == '' ? value : data))
@@ -539,8 +537,6 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 							isLogErr = err+'' !== testErr
 						}
 					}
-// TypeError:                    'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
-// TypeError: Permissions.query: 'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
 					if (isLogErr) {log_error(7, METRIC +'_'+ k, err)}
 				}
 				accrue(k, state)
@@ -555,10 +551,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		// sort object: sort arrays so permission delays don't create disorder
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k].sort()}
 		let hash = mini(data)
-		// FF150+ added local-network/loopback-network to ETP Strict and I guess it can be flipped on in other ways
-
-		let aGood = ['2afe1864']
-		if (isVer > 149) {aGood.push('6e5aa362')}
+		let aGood = ['6e5aa362']
 		let notation = aGood.includes(hash) ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
@@ -776,7 +769,6 @@ function get_touc_h(METRIC) {
 		'mac': [hash0],
 		'windows': [hash10],
 	}
-	if (isVer < 150) {rfpHashes.linux = '553ce3d9'} // maxTouchPoints = 0
 	notation = (undefined !== isOS && rfpHashes[isOS].includes(hash) ? rfp_green : rfp_red)
 
 	// non-BB: fails RFP but may match FPP
@@ -785,10 +777,9 @@ function get_touc_h(METRIC) {
 		let fppHashes = {
 			'android': [hashA5],
 			'mac': [hash0],
-			'linux': [hash0],
+			'linux': [hash0, hash5], // FF150+: 2020170: linux wayland can now report 5
 			'windows': [hash0, hash1, hash5],
 		}
-		if (isVer > 149) {fppHashes.linux.push(hash5)} // FF150+: 2020170: linux wayland can now report 5
 		if (fppHashes[isOS].includes(hash)) {notation = fpp_green}
 	}
 

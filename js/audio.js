@@ -161,8 +161,8 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 						display = hashC + ' | '+ sum; data = hashC
 					}
 					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
-						// isArch: true = large arrays else it's an error string
-					if (true === isArch) {
+						// isArchAray: true = large arrays else it's an error string
+					if (64 == isArchArray) {
 						// ToDo: FF152+ 2036977 supposedly now only one hash for 64bit
 							// ^ update: awaiting 2040494
 						if ('a7c1fbb6' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc

@@ -774,7 +774,6 @@ const get_canvas = () => new Promise(resolve => {
 						// I think all we can do is exclude if proxylies
 						if (oFP[name].chunk == true && !isProxy) {isChunk = '*'}
 					}
-
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
@@ -791,9 +790,7 @@ const get_canvas = () => new Promise(resolve => {
 								// FF144 or lower: exclude solids: FPP does not tamper with those
 								// exclude if all white | exclude if proxy lies
 								// note: isGetStealth is getImageData
-								let useSolid = !name.includes('_solid')
-								if (isVer > 144 && 'to' == key && isChunk !== '') {useSolid = true} // FF145+ FPP now handles to* solids
-								if (!isWhite && useSolid) {
+								if (!isWhite) {
 									if (!isProxy) {
 										if ('ge' == key && !isGetStealth || 'ge' !== key) {
 											// no proxy lies but persistent, so must be FPP

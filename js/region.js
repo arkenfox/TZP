@@ -209,8 +209,8 @@ function set_isLanguageSmart() {
 		'nl': [en],
 		'pl': [en],
 		'pt-BR': ['pt, '+ en],
-		'pt-PT': ['pt, en, en-US'],
-		'ro-RO': ['ro, en-US, en-GB, en', 'ro'],
+		'pt-PT': ['pt, '+ en],
+		'ro-RO': ['ro-GB, en', 'ro'],
 		'ru-RU': ['ru, '+ en, 'ru'],
 		'sq': ['sq-AL, '+ en],
 		'sv-SE': ['sv, '+ en],
@@ -223,76 +223,60 @@ function set_isLanguageSmart() {
 	}
 	// these are current stable BB hashes since last checked
 		// note: upstream ESR seems to pick up stable l10n changes
-	// last checked TB15.06
 
 	// NOTE: these hashes are only designed to work with BB ESR (stable) and FF en-US
 	// we can use an array if necessary so as to not get false positives in FF
 	// using an array (test is .includes) means we're not super tight on our health check i.e per isVer
 
-	let xsEN = '6cc5a8b4'
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
 			// ^ F151+ 2028170: DateTimeRangeOver/Underflow also localized
-		// c = css | m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort
-		// r = reporting (if blank we use the english hash)
-		'ar': {   m: '1f9a06e3', v: 'bdd9698a', x: '71982b47', xs: '5cee96ec', xsort: '352c4e34', r: ''},
-		'be': {   m: '076d68e6', v: '42adb3ab', x: '42583d22', xs: 'c28dba41', xsort: '74053574', r: '6de2f0b7'},
-		'bg': {   m: '2da6c02e', v: '6a1ca7c0', x: 'c4f06f98', xs: 'b964cfe0', xsort: '7d747674', r: ''},
-		'ca': {   m: 'd856d812', v: 'e0fb2f58', x: '77a62a49', xs: 'ad2e7060', xsort: xsEN,       r: ''},
-		'cs': {   m: 'c92accb0', v: '5b9af9b7', x: '81c91d49', xs: '7c010d86', xsort: 'a7ddfef4', r: '39eac55d'},
-		'da': {   m: '39169214', v: '3e4c13e1', x: 'a30818e8', xs: '8654b0f1', xsort: '88f55cfa', r: '266a324b'},
-		'de': {   m: '298d11c6', v: '38a536e6', x: 'c1ce6571', xs: '5ab0cbb9', xsort: xsEN,       r: '8c11ce07'},
-		'el': {   m: '39712e09', v: '9d013788', x: '493f7225', xs: '33a4584c', xsort: 'cae41bf4', r: '71191fa1'},
-		'en-US': {m: '05c30936', v: 'd9a20198', x: '544e1ae8', xs: 'bcb04adc', xsort: xsEN,       r: ['8c954475','4a9afc22']},
-		'es-ES': {m: '96b78cbd', v: '7973bda9', x: 'ed807f70', xs: 'd9a6e947', xsort: '32fce55a', r: '7fc42e10'},
-		'fa': {   m: '6648d919', v: 'c01dd969', x: '1ed34bca', xs: '47876cea', xsort: 'ff0f7334', r: ''},
-		'fi': {   m: '82d079c7', v: '986deae7', x: '859efc32', xs: '67b222db', xsort: '26f7a3f8', r: ''},
-		'fr': {   m: '024d0fce', v: '9892d7a2', x: '1d2050d3', xs: 'f09eacaa', xsort: xsEN,       r: '7ebbf4b3'},
-		'ga-IE': {m: '97fca229', v: '0da0fa1d', x: 'd3af2cd8', xs: '021b6b57', xsort: xsEN,       r: ''},
-		'he': {   m: 'cdde832b', v: '5e208782', x: 'c7274a3e', xs: '35d1f35c', xsort: 'a0fcc2b4', r: 'cadeed05'},
-		'hu': {   m: 'db7366e6', v: '18a5b3a1', x: 'e4f85168', xs: 'ffae360e', xsort: '2fe650b4', r: '4b0d44d0'},
-		'id': {   m: '1e275882', v: 'acd7fd73', x: 'a70cd23c', xs: '26e6e4fb', xsort: xsEN,       r: '93c32eba'},
-		'is': {   m: '204c8f73', v: '34b5568f', x: 'edb8b212', xs: '3d227a5a', xsort: '93b575f8', r: 'ce6ce0a6'},
-		'it': {   m: '716e7242', v: '4bedc709', x: 'c567f479', xs: '7d0eba5c', xsort: xsEN,       r: '514ebfe9'},
-		'ja': {   m: 'ab56d7cb', v: 'c9dbe506', x: 'a58f6165', xs: 'a0fa98ad', xsort: '22ec9486', r: '64e8a6a1'},
-		'ka': {   m: '6961b7e4', v: '4168588f', x: '765afcb4', xs: '460ae32f', xsort: '7a65b6b4', r: '778bc94a'},
-		'ko': {   m: 'c758b027', v: 'ff60441d', x: '1235e26d', xs: '1d314216', xsort: '9c39494c', r: 'c81a1027'},
-		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc', xs: 'ca28b814', xsort: 'f26c6ff4', r: 'e58fc47e'},
-		'mk': {   m: '78274f1b', v: '2dbf4494', x: 'b6020ec1', xs: '36e30ccb', xsort: 'f9e81474', r: ''},
-		'ms': {   m: '3e26c6be', v: '3752f464', x: '15e6148f', xs: '421d606a', xsort: xsEN,       r: '411351e5'},
-		'my': {   m: '939f2013', v: 'a2afa2a3', x: 'a6571ec7', xs: 'bfc734fe', xsort: 'fbfb1d8c', r: ''},
-		'nb-NO': {m: '1d496fea', v: '687250eb', x: 'e0d34e04', xs: '19e8e2a5', xsort: '88f55cfa', r: 'b32738cf'},
-		'nl': {   m: 'e1d3b281', v: '9904bcd2', x: 'caef95fc', xs: '8a47ae1a', xsort: xsEN,       r: '2a725fb7'},
-		'pl': {   m: '0bd88e98', v: 'cdd14c51', x: '2a45177d', xs: '4740c17a', xsort: '01902794', r: '2678c528'},
-		'pt-BR': {m: '39835e93', v: '2b0329e9', x: '68f80c66', xs: 'e710618b', xsort: xsEN,       r: '21ee14c6'},
-		'pt-PT': {m: '6ae9a13a', v: '68b8f504', x: '0aa2a309', xs: '025ca23b', xsort: xsEN,       r: 'e6a7d6ff'},
-		'ro': {   m: '3e321768', v: '2d29f0cb', x: 'a9da3416', xs: '61b5e498', xsort: '2a01a4d8', r: '9b675c63'},
-		'ru': {   m: '8e9b7945', v: '79cf0fac', x: '26f663da', xs: '4445d36a', xsort: '7d747674', r: '0bf2516d'},
-		'sq': {   m: '91943e67', v: 'cd22c677', x: '4e0bbdcd', xs: '569be7bb', xsort: 'f45c6af8', r: 'a75d2c6f'},
-		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f', xs: '701cd8c7', xsort: '1ca25322', r: '3ed80374'},
-		'th': {   m: 'a32d70a7', v: '9d8a4a07', x: '2a04071a', xs: '7e968207', xsort: 'a0bff3b4', r: '65ade427'},
-		'tr': {   m: '4217ef80', v: 'ba842f52', x: '55daef93', xs: 'd8e92945', xsort: 'e9fda72a', r: 'd62d2c72'},
-		'uk': {   m: '4bea2a13', v: '99c8791d', x: '4f817ea3', xs: 'e62ccf4f', xsort: 'ae65fe74', r: '2049852a'},
-		'vi': {   m: 'bba6c980', v: '6f0371d9', x: '80da1efb', xs: '959b2e31', xsort: '2a01a4d8', r: 'ef6841d7'},
-		'zh-Hans-CN': {m: '550ea53e', v: '5db2602a', x: '536abb21', xs: '1feed45e', xsort: '42d5bac6', r: '135f1290'},
-		'zh-Hant-TW': {m: '66b515a4', v: '6b67bbc3', x: '9ad3338c', xs: '8aa6bfbf', xsort: '6d106412', r: '62cefab7'},
-	}
-	// 2028170: BB validation hashes in FF150 or lower
-	let oValidation = {
-		'ar': '7262bcc6', 'be': '4edeafab', 'bg': 'ce892c88', 'ca': '6b3bb3d8', 'cs': 'de3ab0ad',
-		'da': '479797a1', 'de': 'f9e2eae6', 'el': 'fb391308', 'en-US': '41310558', 'es-ES': '97c3f5a9',
-		'fa': '8ef57409', 'fi': '3e29e6e7', 'fr': '34e28fa2', 'ga-IE': '2bf1321d', 'he': 'e47dbb82',
-		'hu': 'b72d316d', 'id': '5dda18f3', 'is': '6bbe7a8f', 'it': '3b781f09', 'ja': '48645d06',
-		'ka': '40feb44f', 'ko': 'd3b54047', 'lt': 'd5f9b95d', 'mk': '333aae58', 'ms': '9dadbc64',
-		'my': '43cc3aa3', 'nb-NO': '84ce54eb', 'nl': '326cbfd2', 'pl': '95ad4851', 'pt-BR': 'de2c3569',
-		'pt-PT': 'b21f3984', 'ro': 'd72a350b', 'ru': '2391fbec', 'sq': 'e0259277', 'sv-SE': 'd9d7828b',
-		'th': '07358a87', 'tr': '5048d312', 'uk': '0163f51d', 'vi': 'b8137d59', 'zh-Hans-CN': '0e58f82a',
-		'zh-Hant-TW': '8e4cfa0e',
-	}
-	if (isVer < 151) {
-		for (const k of Object.keys(oValidation)) {localesSupported[k].v = oValidation[k]}
-	}
+		// c = css | m = media | v = verification | x = xml | xs = xslt | xsort = xslt sort | r = reporting
 
+		// NOTE: TB154 disables XSLT + reporting, so xs, xsort and r become unused except for en-US which I use in FF
+		// last checked TB16.0a9
+		'ar': {   m: '1f9a06e3', v: 'bdd9698a', x: '71982b47'},
+		'be': {   m: '076d68e6', v: '42adb3ab', x: '42583d22'},
+		'bg': {   m: '2da6c02e', v: '6a1ca7c0', x: 'c4f06f98'},
+		'ca': {   m: 'd856d812', v: 'e0fb2f58', x: '77a62a49'},
+		'cs': {   m: 'c92accb0', v: '5b9af9b7', x: '81c91d49'},
+		'da': {   m: '39169214', v: '3e4c13e1', x: 'a30818e8'},
+		'de': {   m: '298d11c6', v: '38a536e6', x: 'c1ce6571'},
+		'el': {   m: '39712e09', v: '9d013788', x: '493f7225'},
+		'en-US': {m: '05c30936', v: 'd9a20198', x: '544e1ae8', xs: 'bcb04adc', xsort: '6cc5a8b4', r: ['4a9afc22']},
+		'es-ES': {m: '96b78cbd', v: '7973bda9', x: 'ed807f70'},
+		'fa': {   m: '6648d919', v: 'c01dd969', x: '1ed34bca'},
+		'fi': {   m: '82d079c7', v: '986deae7', x: '859efc32'},
+		'fr': {   m: '024d0fce', v: '9892d7a2', x: '1d2050d3'},
+		'ga-IE': {m: '97fca229', v: '0da0fa1d', x: 'd3af2cd8'},
+		'he': {   m: 'cdde832b', v: '5e208782', x: 'c7274a3e'},
+		'hu': {   m: 'db7366e6', v: '18a5b3a1', x: 'e4f85168'},
+		'id': {   m: '1e275882', v: 'acd7fd73', x: 'a70cd23c'},
+		'is': {   m: '204c8f73', v: '34b5568f', x: 'edb8b212'},
+		'it': {   m: '716e7242', v: '4bedc709', x: 'c567f479'},
+		'ja': {   m: 'ab56d7cb', v: 'c9dbe506', x: 'a58f6165'},
+		'ka': {   m: '6961b7e4', v: '4168588f', x: '765afcb4'},
+		'ko': {   m: 'c758b027', v: 'ff60441d', x: '1235e26d'},
+		'lt': {   m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc'},
+		'mk': {   m: '78329157', v: '2dbf4494', x: 'b6020ec1'},
+		'ms': {   m: '3e26c6be', v: '3752f464', x: '15e6148f'},
+		'my': {   m: '939f2013', v: 'a2afa2a3', x: 'a6571ec7'},
+		'nb-NO': {m: '1d496fea', v: '687250eb', x: 'e0d34e04'},
+		'nl': {   m: 'e1d3b281', v: '9904bcd2', x: 'caef95fc'},
+		'pl': {   m: '0bd88e98', v: 'cdd14c51', x: '2a45177d'},
+		'pt-BR': {m: '39835e93', v: '2b0329e9', x: '68f80c66'},
+		'pt-PT': {m: '6ae9a13a', v: '68b8f504', x: '0aa2a309'},
+		'ro': {   m: '3e321768', v: '2d29f0cb', x: 'a9da3416'},
+		'ru': {   m: '13ad3b59', v: '79cf0fac', x: '26f663da'},
+		'sq': {   m: '91943e67', v: 'cd22c677', x: '4e0bbdcd'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f'},
+		'th': {   m: 'a32d70a7', v: '9d8a4a07', x: '2a04071a'},
+		'tr': {   m: '4217ef80', v: 'ba842f52', x: '55daef93'},
+		'uk': {   m: '4bea2a13', v: '99c8791d', x: '4f817ea3'},
+		'vi': {   m: 'bba6c980', v: '6f0371d9', x: '80da1efb'},
+		'zh-Hans-CN': {m: '550ea53e', v: '5db2602a', x: '536abb21'},
+		'zh-Hant-TW': {m: '66b515a4', v: '6b67bbc3', x: '9ad3338c'},
+	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
 		languagesSupported['ja'].push('ja-JP')
@@ -1420,12 +1404,10 @@ function get_timezone_offset(METRIC) {
 	// the way the code works is if we add exslt and it errors then we get a failed health
 		// 2028408: FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
 		// 45072: BB ESR153 we expect xslt to be disabled
-			// BB: don't care about alphas, just use > 140: next isSmart change we can remove the version check
+		// so only exclude if we're not expecting it (BB) or maybe not expecting it (FF154+) ... _and_ it's disabled
 	let addEXSLT = isGecko ? true : false
-	// so don't add exslt _only_ if we're not expecting it _and_ it's disabled
 	if (!isXSLT) {
-		let xsltVer = isBB ? 140 : 153
-		if (isVer > xsltVer) {addEXSLT = false}
+		if (isBB || isVer > 153) {addEXSLT = false}
 	}
 
 	if (addEXSLT) {methods.push('exslt')} else {addDisplay(4, METRIC +'_exslt', zNA)}
@@ -1905,8 +1887,7 @@ function get_timezone_offset(METRIC) {
 			// 45072: BB ESR153 we expect xslt to be disabled
 				// if xslt is enabled then exslt is added, and it will pass health, i.e match
 				// so here is where we catch that
-				// BB: don't care about alphas, just use > 140: next isSmart change we can remove the version check
-			if (isBB && isVer > 140 && isXSLT) {notation = tz_red}
+			if (isBB && isXSLT) {notation = tz_red}
 		} else if (gRun) {
 			// health lookup
 			let aHealth = []
@@ -2432,13 +2413,11 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 			} else {
 				hash = 'none'
 			}
-			// notate
-			if (isLanguageSmart && isVer > 148) {
+			// notate: BB154 no longer checked, r removed except en-US
+			if (!isBB && isLanguageSmart) {
 				if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
 					let check = localesSupported[isLocaleAlt].r
-					// if blank then it hasn't been translated yet
-					if ('' == check) {check = localesSupported['en-US'].r}
-					if (check.includes(hash)) {notation = locale_green}
+					if (undefined !== check && check.includes(hash)) {notation = locale_green}
 				}
 			}
 		}
@@ -2457,7 +2436,7 @@ const get_l10n_reporting_messages = (METRIC) => new Promise(resolve => {
 		exit(zNA)
 	} else if (undefined == isReporting && undefined == window.ReportingObserver) {
 		// don't need isLanguageSmart to notate undefined
-		notation = isVer > 148 ? default_red : default_green
+		notation = default_red
 		exit('undefined')
 	} else {
 		// but we do notate when it is on to match locale
@@ -2551,8 +2530,9 @@ function get_l10n_xml_prettyprint(METRIC, isLies) {
 	// by using a narrow iframe width, word segmentation line breaks determine the height,
 		// and the content varies per app locale. It's imperative that the iframe be very
 		// narrow (TZP uses 20px) as this ensure all scripts return the maximum number of lines
+
 	// Deterministic health checks can't be hardcoded due to subpixels (system + other scaling)
-			// and fonts (per platform + language), but we could simulate + compare
+		// and fonts (per platform + language), but we could simulate + compare
 	let value, data ='', notation=''
 	try {
 		if (gRun) {dom.tzpXMLunstyled.width = 20} // ensure narrow width for max lines
@@ -2600,16 +2580,15 @@ function get_l10n_xslt_messages(METRIC) {
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	if (isLanguageSmart) {
+	// notate: BB154 no longer checked, xs removed except en-US
+	if (!isBB && isLanguageSmart) {
 		if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-			if (localesSupported[isLocaleAlt].xs.includes(hash)) {notation = locale_green}
+			let check = localesSupported[isLocaleAlt].xs
+			if (undefined !== check && check.includes(hash)) {notation = locale_green}
 		}
 	}
 	// 45072: BB ESR153 we expect xslt to be disabled
-		// BB: don't care about alphas, just use > 140: next isSmart change we can remove the version check
-	if (isBB && isVer > 140) {
-		notation = zD == hash ? bb_green : bb_red
-	}
+	if (isBB) {notation = zD == hash ? bb_green : bb_red}
 	addBoth(4, METRIC, hash, btn, notation, data)
 }
 
@@ -2622,8 +2601,7 @@ function get_l10n_xslt_sort(METRIC) {
 	if (!isXSLT) {
 		// 2028408: pending FF154 nightly | a bit problematic/messy to track pref flips over releases/channels/time
 		// 45072: BB ESR153 we expect xslt to be disabled
-		if (isBB && isVer > 140) {notation = bb_green // don't care about alphas, just use > 140: next isSmart change we can remove the version check
-		} else if (isVer > 153) {notation = ''}
+		if (isBB) {notation = bb_green} else if (isVer > 153) {notation = ''}
 		addBoth(4, METRIC, zD,'', notation); return
 	}
 
@@ -2652,17 +2630,19 @@ function get_l10n_xslt_sort(METRIC) {
 		let dataStr = (aTmp.join(' , ')).trim()
 		data = {'sort': dataStr}
 		hash = mini(data); btn = addButton(4, METRIC)
-		if (isLanguageSmart) {
+		// notate: BB154 no longer checked, xsort removed except en-US
+		if (!isBB && isLanguageSmart) {
 			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
 				// compare the string hash
-				if (localesSupported[isLocaleAlt].xsort.includes(mini(dataStr))) {notation = locale_green}
+				let check = localesSupported[isLocaleAlt].xsort
+				if (undefined !== check && check.includes(mini(dataStr))) {notation = locale_green}
 			}
 		}
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
 	// 45072: BB ESR153 we expect xslt to be disabled
-	if (isBB && isVer > 140) {notation = bb_red} // don't care about alphas, just use > 140: next isSmart change we can remove the version check
+	if (isBB) {notation = bb_red}
 	addBoth(4, METRIC, hash, btn, notation, data)
 	return
 }
