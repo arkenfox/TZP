@@ -22,7 +22,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 142
+	expectedMetrics = 141
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -139,7 +139,8 @@ let bb_green = sgtick+'TB]'+sc,
 	bb_safer = sg+'[TB Safer]'+sc // don't tick/cross slider
 
 // run once
-let isArch = true,
+let isArchArray = zNA,
+	isArchString = zNA,
 	isAutoPlay,
 	isAutoPlayError,
 	isBrave = false,
@@ -181,7 +182,7 @@ let isArch = true,
 
 let isBB = false,
 	isBBESR = false,
-	isBBVer = [140], // we'll add 153 once TB has a build based on FF153 stable
+	isBBVer = [], // value only checked to determine isBBESR if isSmart: we'll add 153 once TB/MB153 hits stable
 	isMB = false,
 	isTB = false,
 	isFPPFallback = false // helps track FPP health, block BB giving passes to FPP protections
@@ -244,7 +245,7 @@ let gt0, gt1,
 	isStop = false
 
 const isBlockMin = 140,
-	isSmartMin = 140
+	isSmartMin = 153
 
 /** DEV **/
 // simulate errors
