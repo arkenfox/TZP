@@ -1,0 +1,299 @@
+	<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements: coverage</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+	<link rel="stylesheet" href="chrome://global/locale/intl.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testelements.js"></script>
+	<style>
+		table {width: 97%; min-width: 780px; max-width: 780px}
+		#sticky {
+			position: sticky;
+			top: 0;
+			background-color: #161b22;
+			margin-bottom: 5px;
+			line-height: 1.5;
+		}
+		#elements {line-height: 1.5;}
+		.underline {
+			text-decoration: underline var(--test99) dotted;
+		}
+	</style>
+</head>
+
+<body>
+
+	<table>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
+	</table>
+
+	<table id="tb15">
+		<col width="25%"><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">elements: coverage</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">current state of what's what - legend:
+				<code><span class="bad">?</span></code> missing?
+				<code><span class="s3">X</span></code> ignored <code><b>R</b></code> redundant
+				<code><span class="s7">TZP</span></code> used in tzp
+				<code><span class="no_color">[a]</span></code> if supported
+			</span>
+		</td></tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="mono spaces" id="sticky"></div>
+			<div class="mono spaces no_color" id="elements"></div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+let aKeys = []
+let aForms = [], aFormsTZP = [], aFormsRedundant = [], aFormsIgnore = []
+let aOther = [], aOtherTZP = [], aOtherRedundant = [], aOtherIgnore = []
+let aAll = []
+let aMeasured = [], aMeasuredForms = [], aMeasuredOther = [], aMeasuredTZP = []
+let aMeasuredRedundant = [], aMeasuredIgnore = [], aMeasuredMissing = []
+
+let aEverything = [] // includes itmes we totally ignored
+let oIgnored = {
+	blink: 'see <a class="blue" target="_blank" href="https://en.wikipedia.org/wiki/Blink_element">wikipedia</a>',
+	content: 'proposed and rejected in <a class="blue" target="_blank" href="https://lists.w3.org/Archives/Public/public-whatwg-archive/2012Aug/0298.html">2012</a>',
+	image: 'modern browsers parse and output this as img',
+	keygen: 'removed chrome + safari 2017, firefox 2019, see <a class="blue" target="_blank" href="https://bugs.webkit.org/show_bug.cgi?id=167018">here</a>',
+		// keygen when supported is actually a select with two options, so it's a little problematic for element keys
+		// removed in gecko: FF69 may 2019 | blink: chrome 56 jan 2017
+	shadow: 'never fully implemented',
+	spacer: 'gecko only, removed in Firefox 5',
+}
+
+function enumerate() {
+	// keys
+		// we have TZP == list_plain and redundant == ignore_plain
+	build_element_keys()
+	aKeys = oElementKeys.ignore_plain.concat(oElementKeys.list_plain)
+	aKeys.sort()
+
+	// forms
+	build_element_forms()
+	for (const k of Object.keys(oElementForms)) {
+		let prefix = ''
+		if ('input' !== k && oElementForms[k].includes('<input')) {prefix = 'input|'}
+		aForms.push(prefix + k)
+	}
+	let aFormsFilter = [
+		'details_open','input|checkbox_switch',
+		'select_multiple','select_optgroup','select_option','textarea_3x5',
+	]
+	aForms = aForms.filter(x => !aFormsFilter.includes(x))
+	for (const k of Object.keys(oElementFormsTZP)) {
+		oElementFormsTZP[k].forEach(function(item){
+			let lookup = oElementForms[item], prefix = ''
+			if (undefined !== lookup) {
+				if ('input' !== item && lookup.includes('<input')) {prefix = 'input|'}
+				aFormsTZP.push(prefix + item)
+			}
+		})
+	}
+
+	aFormsTZP = aFormsTZP.filter(function(item, position) {return aFormsTZP.indexOf(item) === position})
+	aFormsTZP = aFormsTZP.filter(x => !aFormsFilter.includes(x))
+	aFormsTZP.sort()
+	aFormsRedundant = aForms.filter(x => !aFormsTZP.includes(x))
+	aFormsIgnore = aElementFormsIgnore
+	aForms = aForms.concat(aFormsIgnore)
+	aForms = aForms.filter(function(item, position) {return aForms.indexOf(item) === position})
+	aForms.sort()
+	aAll = aKeys.concat(aForms)
+
+	// other
+		// we have ignored = oElementOtherIgnore| we have TZP = oElementOtherTZP | redundant will the diff
+	build_element_other()
+	for (const k of Object.keys(oElementOther)) {aOther.push(k)}
+	let aOtherFilter = ['big_nested','ol_li','menu_li','ul_li']
+	aOther = aOther.filter(x => !aOtherFilter.includes(x))
+	for (const k of Object.keys(oElementOtherTZP)) {aOtherTZP = aOtherTZP.concat(oElementOtherTZP[k])}
+	aOtherTZP = aOtherTZP.filter(x => !aOtherFilter.includes(x))
+	aOtherIgnore = aElementOtherIgnore
+	aOtherRedundant = aOther.filter(x => !aOtherTZP.includes(x))
+	aOther = aOther.concat(aOtherIgnore)
+	aOther.sort()
+	aAll = aAll.concat(aOther)
+
+	// tidy aAll
+	aAll = aAll.filter(function(item, position) {return aAll.indexOf(item) === position})
+	aAll.sort()
+
+	// build everything
+	aAll.forEach(function(item){aEverything.push(item)})
+	for (const k of Object.keys(oIgnored)) {aEverything.push(k)}
+	aEverything.sort()
+
+	// what is/isn't "measured"
+	aMeasuredForms = aForms.filter(x => !aFormsIgnore.includes(x)) // exclude ignored items
+	aMeasuredOther = aOther.filter(x => !aOtherIgnore.includes(x)) // exclude ignored items
+	aMeasured = aMeasuredForms.concat(aMeasuredOther)
+	aMeasured = aMeasured.filter(function(item, position) {return aMeasured.indexOf(item) === position})
+	aMeasured.sort()
+
+	aMeasuredMissing = aForms.concat(aOther)
+	aMeasuredMissing = aAll.filter(x => !aMeasuredMissing.includes(x))
+
+	aMeasuredIgnore = aAll.filter(x => !aMeasured.includes(x))
+	aMeasuredIgnore = aMeasuredIgnore.filter(x => !aMeasuredMissing.includes(x)) // exclude mssing
+
+	aMeasuredTZP = aFormsTZP.concat(aOtherTZP)
+	aMeasuredTZP = aMeasuredTZP.filter(function(item, position) {return aMeasuredTZP.indexOf(item) === position})
+	aMeasuredTZP.sort()
+
+	aMeasuredRedundant = aMeasured.filter(x => !aMeasuredTZP.includes(x))
+
+	output()
+}
+
+function output() {
+	let elementLen = 0, keyLen = 14, formsLen = 14, otherLen = 14, measureLen = 18
+	aAll.forEach(function(item){if (item.length > elementLen) {elementLen = item.length}})
+	let aDisplay = [], aSticky = [], counter = 0
+	aEverything.forEach(function(item){
+		let str = item.padStart(elementLen)
+		if (undefined == oIgnored[item]) {
+			// keys
+			let indicator = ''
+			let strSupported = aElementKeysIfSupported.includes(item) ? '[a] ' : ''
+			if (aKeys.includes(item)) {
+				indicator = oElementKeys.list_plain.includes(item) ? 'TZP' : 'R'
+			}
+			indicator = strSupported + indicator
+			let tmpstr = indicator.padStart(keyLen)
+			tmpstr = tmpstr.replace(strSupported +'TZP', strSupported + s7 +'TZP'+ sc )
+			tmpstr = tmpstr.replace('TZP', s7 +'TZP'+ sc)
+			tmpstr = tmpstr.replace('R', s99 +'R'+ sc)
+			str += tmpstr
+
+			// forms
+			indicator = ''
+			strSupported = undefined !== oIsSupported[item] ? '[a] ' : ''
+			if (aForms.includes(item)) {
+				if (aFormsTZP.includes(item)) {indicator = 'TZP'
+				} else if (aFormsRedundant.includes(item)) {indicator = 'R'; strSupported = ''
+				} else if (aFormsIgnore.includes(item)) {indicator = 'X'; strSupported = ''
+				}
+			}
+			if ('' == indicator) {strSupported = ''}
+			indicator = strSupported + indicator
+			tmpstr = indicator.padStart(formsLen)
+			tmpstr = tmpstr.replace(strSupported +'TZP', strSupported + s7 +'TZP'+ sc )
+			tmpstr = tmpstr.replace('X', s2 +'X'+ sc)
+			tmpstr = tmpstr.replace('X', s2 +'X'+ sc)
+			tmpstr = tmpstr.replace('R', s99 +'R'+ sc)
+			str += tmpstr
+
+			// other
+			indicator = ''
+			if (aOther.includes(item)) {
+				if (aOtherRedundant.includes(item)) {indicator = 'R'
+				} else if (aOtherTZP.includes(item)) {indicator = 'TZP'
+				} else if (aOtherIgnore.includes(item)) {indicator = 'X'
+				}
+			}
+			tmpstr = indicator.padStart(otherLen)
+			tmpstr = tmpstr.replace('TZP', s7 +'TZP'+ sc)
+			tmpstr = tmpstr.replace('X', s2 +'X'+ sc)
+			tmpstr = tmpstr.replace('R', s99 +'R'+ sc)
+			str += tmpstr
+
+			// measured
+			indicator = ''
+			if (aMeasured.includes(item)) {
+				if (aMeasuredRedundant.includes(item)) {indicator = 'R'
+				} else if (aMeasuredTZP.includes(item)) {indicator = 'TZP'}
+			} else if (aMeasuredMissing.includes(item)) {
+				indicator = '?'
+			} else if (aMeasuredIgnore.includes(item)) {
+				indicator = 'X'
+			}
+			tmpstr = indicator.padStart(measureLen)
+			tmpstr = tmpstr.replace('TZP', s7 +'TZP'+ sc)
+			tmpstr = tmpstr.replace('X', s2 +'X '+ item + sc)
+			tmpstr = tmpstr.replace('R', s99 +'R'+ sc)
+			tmpstr = tmpstr.replace('?', sb +'? '+ item + sc)
+			str += tmpstr
+
+
+		} else {
+			str = s99 + str +'  ignored: '+ oIgnored[item] +sc
+		}
+
+		counter++
+		if (0 == (counter % 10)) {str = '<span class="underline">'+ str + '</span>'}
+		aDisplay.push(str)
+	})
+
+	let strSticky = 'ELEMENTS'.padStart(elementLen) + 'KEYS'.padStart(keyLen)
+		+ 'FORMS'.padStart(formsLen) + 'OTHER'.padStart(otherLen) + 'MEASURED'.padStart(measureLen)
+	aSticky.push(strSticky)
+
+	let strTotals = (aAll.length +'').padStart(elementLen)
+		+ (aKeys.length +'').padStart(keyLen)
+		+ (aForms.length +'').padStart(formsLen)
+		+ (aOther.length +'').padStart(otherLen)
+		+ ('forms|other').padStart(measureLen)
+	aSticky.push('<span class="s12">'+ strTotals +'</span>')
+
+	// everything
+	let elementStr = '+ ignored '+ Object.keys(oIgnored).length
+	let elementPad = elementLen - elementStr.length
+	let strCounts = ' '.repeat(elementPad) + s99 +'+ ignored '+ Object.keys(oIgnored).length + sc
+
+	// keys: just assume we'll always have both r + tzp
+	let keyStr = oElementKeys.ignore_plain.length + ' '+ oElementKeys.list_plain.length
+	let keyPad = keyLen - keyStr.length
+	strCounts += ' '.repeat(keyPad) + oElementKeys.ignore_plain.length
+		+ s7 +' '+ oElementKeys.list_plain.length + sc
+
+	// forms
+	let formsStr = aFormsIgnore.length + ' '+ aFormsRedundant.length +' '+ aFormsTZP.length
+	let formsPad = formsLen - formsStr.length
+	strCounts += ' '.repeat(formsPad) + s3+ aFormsIgnore.length + sc
+		+ ' '+ aFormsRedundant.length + s7 +' '+ aFormsTZP.length + sc
+
+	// other: just assume we'll always have both r + tzp
+	let otherStr = aOtherIgnore.length + ' '+ aOtherRedundant.length +' '+ aOtherTZP.length
+	let otherPad = otherLen - otherStr.length
+	strCounts += ' '.repeat(otherPad) + s3+ aOtherIgnore.length + sc
+		+ ' '+ aOtherRedundant.length + s7 +' '+ aOtherTZP.length + sc
+
+	// measured
+	let measureStr = aMeasuredMissing.length + ' '+ aMeasuredIgnore.length
+		+ ' '+ aMeasuredRedundant.length +' '+ aMeasuredTZP.length
+	let measurePad = measureLen - measureStr.length
+	strCounts += ' '.repeat(measurePad) + sb + aMeasuredMissing.length + sc + ' '
+		+ s3 + aMeasuredIgnore.length + sc + ' '+ aMeasuredRedundant.length + s7 +' '+ aMeasuredTZP.length + sc
+
+	aSticky.push('<span class="no_color">'+ strCounts +'</span>')
+	dom.sticky.innerHTML = aSticky.join('<br>') +'<br><hr>'
+	dom.elements.innerHTML = aDisplay.join('<br>')
+}
+
+
+
+buildnav_element()
+enumerate()
+
+</script>
+</body>
+</html>
