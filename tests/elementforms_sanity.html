@@ -60,7 +60,9 @@
 		<tr><td colspan="2" class="intro">
 			<p>The <a href="elementforms.html">elements: forms</a> PoC uses <code>element.getBoundingClientRect()</code>
 			by default - but TZP can fall back to other DOMRect methods - where differences may occur, per browser engine.
-			This is a sanity test to see what is happening.</p>
+			This is a sanity test to see what is happening.<br>NOTE: <a href="https://github.com/WICG/PEPC" target="_blank">PEPCs</a>
+			such as <code>geolocation</code>, <code>install</code> and <code>usermedia</code> (blink only at the time of
+			writing) require a delay to get the correct measurements. We don't care about that here, we're checking DOMREct methods</p>
 			<button onClick="cycle('back')"> &nbsp; PREV &nbsp; </button>
 			<select id="tests" name="tests" onChange="run()"></select> 
 			<button onClick="cycle('forward')"> &nbsp; NEXT &nbsp; </button>
