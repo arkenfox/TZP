@@ -1423,16 +1423,20 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			appVersion: '5.0 (Windows)', oscpu: 'Windows NT 10.0; Win64; x64', platform: 'Win32', ua_os: 'Windows NT 10.0; Win64; x64'
 		}
 	}
+	// determine how far ahead to check versions in userAgent
+		// e.g. if open-ended (+) then go 3 (current + next 2)
+		// FUTURE: if ranged (-xx) then go 2 (or calculate using diff from xx)
+			// i.e with 2 week cycles, we may end up with isVer + isVerExtra = "160-161"
+			// i.e pocs for 160 and 162, but not 161
+	let maxCheck = '+' == isVerExtra ? 3 : 1
 	// add userAgent
-	let maxOpen = 3 // total current + additional next versions
 	if (os !== undefined) {
 		for (const k of Object.keys(oRFP)) {
 			oRFP[k].userAgent = []
 			let uaBase = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:'
 			let isDroid = 'android' == k
 			// allow future versions if open ended: FF release cadence is now every 2 weeks
-			let max = '+' == isVerExtra ? maxOpen : 1
-			for (let x = 0; x < max; x++){
+			for (let x = 0; x < maxCheck; x++){
 				let uaVer = isVer + x
 				let uaRFP = uaBase + uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
 				oRFP[k].userAgent.push(uaRFP)
@@ -1525,9 +1529,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 				if ('userAgent' == k) {
 					// check version: all platforms contain '; rv:' + version + '.0)'
 					aFlags = []
-					// allow future versions if open ended: match oRFP
-					let max = '+' == isVerExtra ? maxOpen : 1
-					for (let x = 0; x < max; x++){aFlags.push(isVer + x)}
+					for (let x = 0; x < maxCheck; x++){aFlags.push(isVer + x)}
 					let isVerCheck = false
 					aFlags.forEach(function(item) {
 						if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
