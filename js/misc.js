@@ -654,9 +654,9 @@ function get_navigator_keys(METRIC) {
 		// health: BB only if ESR
 		if (isBBESR) {
 			if (isMB) { // MB
-				if ('a389214b' == hash) {notation = bb_green} // MB15 41
+				if ('32b42263' == hash) {notation = bb_green} // MB16 42
 			} else { // TB
-				if ('8d3dd2a1' == hash) {notation = bb_green} // TB15
+				if ('a3b97023' == hash) {notation = bb_green} // TB16 40
 			}
 		}
 		// if tampered use notation to fail health
@@ -925,17 +925,18 @@ function get_window_functions(METRIC) {
 			// but we need to check webgl click to play
 		if (isBBESR) {
 			// hashes must be calculated on HTTPS not file schema
+			// awaiting BB16
 			let oHashes = {
 				// key: [standard, safer]
 				MB : {
-					'linux': ['c99980b4','83498308'],
-					'mac': ['f862f015','14238469'],
-					'windows': ['c99980b4','83498308']
+					'linux': ['',''],
+					'mac': ['',''],
+					'windows': ['','']
 				},
 				TB : {
-					'linux': ['0c9aaf28','a568527c'],
-					'mac': ['efef2c31','b6cfe185'],
-					'windows': ['0c9aaf28', 'a568527c']
+					'linux': ['',''],
+					'mac': ['',''],
+					'windows': ['', '']
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
@@ -1012,8 +1013,9 @@ function get_window_props(METRIC) {
 			// all the properties that can be tampered with by NS/uBO
 				// ultimately we move those present (sorted) to the end of the data so we can get a stable hash across security levels in Base Barowser
 				// FF148+ 543435 changed things up
-			let isExpanded = isVer > 147
-			let aExpanded = ['PerformanceTiming','console','Promise','PageTransitionEvent','NodeList'] // nodelist from android
+			let aIgnore = [
+				'Event','Location','PerformanceTiming','console','Promise','PageTransitionEvent','NodeList', // nodelist from android
+			]
 			let aPossible = [
 				'Audio','Blob','Crypto','CustomEvent','Element','Error','HTMLAudioElement','HTMLCanvasElement',
 				'HTMLElement','HTMLFrameElement','HTMLHtmlElement','HTMLIFrameElement','HTMLImageElement',
@@ -1021,13 +1023,10 @@ function get_window_props(METRIC) {
 				'OffscreenCanvas','Promise','Proxy','SecurityPolicyViolationEvent','SharedWorker','String','URL',
 				'WebAssembly','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI','decodeURIComponent',
 				'encodeURI','encodeURIComponent','escape','unescape','webkitURL',
+				// FF147+
+				'JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget', // 543435 uBO exposes these 5
+				'Navigator', // NoScript aded this around 148alpha
 			]
-			if (isExpanded) {
-				aPossible.push(
-					'JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget', // 543435 uBO exposes these 5
-					'Navigator', // NoScript aded this around 148alpha
-				)
-			}
 
 			if (isSmart) {
 				/* determine console state before we start messing around with the array
@@ -1040,24 +1039,13 @@ function get_window_props(METRIC) {
 				position is off-by-one diff checks, and use isAlert to add a 'likely' qualifier
 				*/
 				let threshold = dataLen - 150
-				if (!isExpanded) {
-					if (oIndex.Event[0] !== -1 && oIndex.Performance[0] !== -1) {
-						// if event hasn't moved (no tampering) then you are definitely closed
-						if (oIndex.Event[0] < threshold) {
-							isConsoleOpen = false; skipAlert = true
-						} else {
-							isConsoleOpen = oIndex.Event[0] == oIndex.Performance[0] + 1; allowConsole = true // old method
-						}
-					}
-				} else {
-					if (oIndex.console[0] !== -1 && oIndex.PerformanceTiming[0] !== -1) {
-						allowConsole = true
-						// if console or PT haven't moved (no tampering) then you are definitely closed
-						if (oIndex.PerformanceTiming[0] < threshold || oIndex.console[0] < threshold) {
-							isConsoleOpen = false; skipAlert = true
-						} else {
-							isConsoleOpen = oIndex.console[0] == oIndex.PerformanceTiming[0] + 1 // new method
-						}
+				if (oIndex.console[0] !== -1 && oIndex.PerformanceTiming[0] !== -1) {
+					allowConsole = true
+					// if console or PT haven't moved (no tampering) then you are definitely closed
+					if (oIndex.PerformanceTiming[0] < threshold || oIndex.console[0] < threshold) {
+						isConsoleOpen = false; skipAlert = true
+					} else {
+						isConsoleOpen = oIndex.console[0] == oIndex.PerformanceTiming[0] + 1 // new method
 					}
 				}
 
@@ -1067,8 +1055,6 @@ function get_window_props(METRIC) {
 				//  BB/FF/ALL open: Performance then Event...
 				if (runSL) {data.push('fake')}
 				aTampered = data.slice(oIndex.Performance[0] +1)
-				let aIgnore = ['Event','Location']
-				if (isExpanded) {aIgnore = aIgnore.concat(aExpanded)}
 				aTampered = aTampered.filter(x => !aIgnore.includes(x))
 				if (aTampered.length) {
 					addDetail(METRIC +'_tampered', aTampered.sort())
@@ -1109,9 +1095,9 @@ function get_window_props(METRIC) {
 
 			// move expected Performance, Event, Location to the end
 				// these affect the order if console open and various tabs selected
-			let aCheck = ['Location','Performance','Event']
-			if (isExpanded) {aCheck = aCheck.concat(aExpanded)}
-			let aItems = data.filter(x => aCheck.includes(x))
+				// also move ignored items (which already includes Event, Location)
+			aIgnore.push('Performance')
+			let aItems = data.filter(x => aIgnore.includes(x))
 			aItems.sort() // because an open console can change the order
 			data = data.filter(x => !aItems.includes(x))
 			data = data.concat(aItems)
@@ -1133,20 +1119,21 @@ function get_window_props(METRIC) {
 			btn += addButton(18, METRIC +'_original', 'original')
 		}
 		// health: BB only if ESR
+		// funfact: 1419501 (backported from FF144) radically altered the order of items in the unordered list
 		if (isBBESR) {
-			// hashes are: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
-			// funfact: 1419501 (backported from FF144) radically altered the order of items in the unordered list
-			// NOTE: hashes can not be computed via file schema as NS does weird shit now
+			// hashes must be calculated on HTTPS not file schema
+			// awaiting BB16
 			let oHashes = {
+				// key: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
 				MB : {
-					'linux': ['0a2537c8','3c3cf46a'], // 860, 859
-					'mac': ['cb4fa24b','8be8b02d'], // 857, 856
-					'windows': ['0a2537c8','3c3cf46a'] // 860, 859
+					'linux': ['',''],
+					'mac': ['',''],
+					'windows': ['','']
 				},
 				TB : {
-					'linux': ['f3fd6bb5','0698db17'], // 837, 836
-					'mac': ['bd279b0a','27f5532c'], // 834, 833
-					'windows': ['f3fd6bb5','0698db17'] // 837, 836
+					'linux': ['',''],
+					'mac': ['',''],
+					'windows': ['','']
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
