@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements: math</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<script src="testelements.js"></script>
+	<style>
+		table {width: 90%; min-width: 480px; max-width: 780px}
+	</style>
+</head>
+
+<body>
+	<div id="element-fp"></div>
+
+	<table>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
+	</table>
+
+	<table id="tb15">
+		<thead><tr><th>
+			<div class="nav-title">elements: math
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td class="intro">
+			<span class="btn15 btnfirst" onClick="run(`everything`)">[ everything ]</span>
+			<span class="btn15 btnfirst" onClick="run(`TZP`)">[ TZP ]</span>
+			<span class="btn15 btnfirst" onClick="list_elements()">[ elements ]</span>
+			<span class="btn15 btnfirst" onClick="copyclip('elements')">[ COPY ]</span>
+		</td></tr>
+		<tr><td><hr></td></tr>
+		<tr><td></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="c mono spaces no_color" id="elements"></div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+// https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element
+
+Promise.all([
+	get_globals(),
+]).then(function(){
+	buildnav_element()
+	dom.elements.innerHTML = 'coming soon'
+
+})
+
+</script>
+</body>
+</html>
+
