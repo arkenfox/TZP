@@ -482,7 +482,6 @@ function output() {
 			}
 		}
 	}
-
 	// DEV ALERTS
 	let strAlert = ""
 	// invalid group codes
@@ -505,7 +504,6 @@ function output() {
 	}
 	// alerts
 	if (strAlert !== "") {strAlert += "<hr><br>"}
-
 	// function hash
 		// gecko: 39: 334c4512 : function atob() {\n    [native code]\n}
 		// blink: 33: 1dd1c7f6 : function atob() { [native code] }
@@ -575,6 +573,12 @@ function run() {
 		// undetermined: status confirmed in EOL comments
 		code = 98
 		//rec(typeof keys, "keys", code) // NFI where I got this from
+		// 4 x webdriver* - from servo
+		rec(typeof webdriverElement, "webdriverElement", code, "function")
+		rec(typeof webdriverFrame, "webdriverFrame", code, "function")
+		rec(typeof webdriverShadowRoot, "webdriverShadowRoot", code, "function")
+		rec(typeof webdriverWindow, "webdriverWindow", code, "function")
+
 
 		// blink only
 		code = 10
@@ -614,6 +618,8 @@ function run() {
 		rec(typeof onscrollsnapchanging, "onscrollsnapchanging", code, "object")
 		rec(typeof viewport, "viewport", code, "object")
 		rec(typeof when, "when", code, "function")
+		rec(typeof crashReport, "crashReport", code, "object")
+		rec(typeof CrashReportContext, "CrashReportContext", code, "function")
 
 		// edgeHTML only
 		code = 11
@@ -773,8 +779,8 @@ function run() {
 		rec(typeof KeyboardEvent, "KeyboardEvent", code, "function")
 		rec(typeof KeyframeEffect, "KeyframeEffect", code, "function")
 		rec(typeof length, "length", code, "number")
-		rec(typeof localStorage, "localStorage", code, "object")
-		rec(typeof location, "location", code, "object")
+		try {rec(typeof localStorage, "localStorage", code, "object")} catch(e) {}  // this kills servo
+		rec(typeof window.location, "location", code, "object")
 		rec(typeof locationbar, "locationbar", code, "object")
 		rec(typeof matchMedia, "matchMedia", code, "function")
 		rec(typeof menubar, "menubar", code, "object")
@@ -923,7 +929,7 @@ function run() {
 		rec(typeof scrollY, "scrollY", code, "number")
 		rec(typeof scrollbars, "scrollbars", code, "object")
 		rec(typeof self, "self", code, "object")
-		rec(typeof sessionStorage, "sessionStorage", code, "object")
+		try {rec(typeof sessionStorage, "sessionStorage", code, "object")} catch(e) {}  // this kills servo
 		rec(typeof setInterval, "setInterval", code, "function")
 		rec(typeof setTimeout, "setTimeout", code, "function")
 		rec(typeof speechSynthesis, "speechSynthesis", code, "object")
@@ -935,7 +941,6 @@ function run() {
 		rec(typeof top, "top", code, "object")
 		rec(typeof visualViewport, "visualViewport", code, "object")
 		rec(typeof window, "window", code, "object")
-
 		// LEVEL 2
 		// I don't think we need bother with level 2 for a mini isEngine
 		/*
