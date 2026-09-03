@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 113, maxVer = 155, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 115, maxVer = 157, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -293,6 +293,27 @@ function testperf() {
 	console.log(tEnd - tStart, 'ms', testversion)
 }
 
+		// 157: 2049083
+			// checked FF52 = false | _should_ be no old-timey FF false positives
+		let t157 = performance.now(), ver157
+		try {
+			ver157 = 2 == (new DOMParser).parseFromString('<nobr><table><marquee></table><nobr>', 'text/html').body.children.length
+		} catch(e) {}
+		rec(157, 157, "2049083", ver157, performance.now()-t157) // 0.11 ms
+
+		// 156: 2064013
+			// note: requires custom-select otherwise throws parser.body.firstChild.firstChild is null TypeError
+			// AFAICT
+				// 1933591: FF150 pref added dom.lift_select_parser_restrictions.enabled
+				// 2031668: FF152 pref enabled nightly
+				// 2019977: FF153 pref rides the trains + 2019979 pref removed
+		let t156 = performance.now(), ver156
+		try {
+			let parser156 = (new DOMParser).parseFromString('<select><button></button></select>', "text/html")
+			if ('button' == parser156.body.firstChild.firstChild.type) {ver156 = true}
+		} catch(e) {}
+		rec(156, 156, "2064013", ver156, performance.now()-t156) // 0.14 ms
+
 		// 155: 2058578 (not affected by svg.disabled)
 		let t155 = performance.now(), ver155
 		try {
@@ -309,7 +330,9 @@ function testperf() {
 			if ('RangeError: invalid date' == e+'') {
 				// FF122 or lower are false positives
 				// so we'll add another check for e.g. FF151+
-				if (CSSContainerRule.prototype.hasOwnProperty('conditions')) {ver154 = true}
+				try {
+					if (CSSContainerRule.prototype.hasOwnProperty('conditions')) {ver154 = true}
+				} catch(err) {}
 			}
 		}
 		rec(154, 154, "2027609", ver154, performance.now()-t154) // 0.02 ms
@@ -792,6 +815,8 @@ function testperf() {
 		rec(91.1, 91, "1717072", ver91p, performance.now()-t91p, "PREF")
 
 		// 91: 1714933: legacy perf: toSource (74+): FF70- very slow
+			// note: false negative in FF150+ which dropped collator `sa`, not that it matters
+			// because in reality we would return 150 or higher and never hit this test
 		let t91 = performance.now(), ver91
 		try {ver91 = ("undefined" === typeof Object.toSource
 			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
@@ -999,6 +1024,26 @@ function testperf() {
 			}
 		}
 
+		/* FF140 or lower: Uncaught SyntaxError: unexpected token: identifier
+			// so breaks everything in older browsers that don't support 'using'
+		// 157: 2067030: 
+			// 156: a,b,c | 157: b,a,c
+		let t157 = performance.now(), ver157
+		try {
+			// backported to ESR153
+			if (SVGAElement.prototype.hasOwnProperty('origin')) {
+				let test157 = [], x
+				{
+					using a = {[Symbol.dispose]() {test157.push('a')}};
+					for (x of [1, 2]) {break;}; test157.push('b');
+				}
+				test157.push('c');
+				ver157 = 'b,a,c' == test157.join(',')
+			}
+		} catch(e) {}
+		rec(157, 157, "2067030", ver157, performance.now()-t157) // 0.02 ms
+		//*/
+
 		// 150: 1561441: fast-path: requires webRTC
 		let t150a = performance.now(), ver150a
 		try {
@@ -1019,9 +1064,12 @@ function testperf() {
 		rec(150, 150, "2018544", ver150, performance.now()-t150, 'TMPR') // ~1+ ms
 
 		// 149: 1999917 = SLOW
+			// also false positives from olde timey FF's
 		let t149 = performance.now(), ver149
 		try {
-			ver149 = '/' !== new Intl.DateTimeFormat("en-u-ca-chinese", {timeZone:"UTC"}).format(new Date("+100000-01-01T00:00:00.000Z"))
+			if (undefined == window.CSS2Properties) { // FF144+
+				ver149 = '/' !== new Intl.DateTimeFormat("en-u-ca-chinese", {timeZone:"UTC"}).format(new Date("+100000-01-01T00:00:00.000Z"))
+			}
 		} catch(e) {}
 		rec(149, 149, "1999917", ver149, performance.now()-t149, 'DATE') // 6.5ms
 

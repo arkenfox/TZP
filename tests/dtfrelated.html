@@ -49,7 +49,7 @@
 'use strict';
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
 
-let isVerMin = 140
+let isVerMin = 153
 dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
@@ -276,14 +276,10 @@ function run_main(method = "all") {
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
 				if (resultsHash == "6f15efe5") { // FF151+
-				} else if (resultsHash == "fddaa32a") { // FF147-150
-				} else if (resultsHash == "4b451618") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
 				if (localesHash == "e57bb0b6") { // FF151+: 226
-				} else if (localesHash == "bd60b370") { // FF147-150: 174
-				} else if (localesHash == "51160b4d") { // FF140-146: 171
 				} else {localesHash += ' '+ zNEW
 				}
 			}

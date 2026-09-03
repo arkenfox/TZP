@@ -57,7 +57,7 @@
 <script>
 'use strict';
 
-let isVerMin = 140
+let isVerMin = 153
 dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 let tzIgnore = [
@@ -504,16 +504,10 @@ function run_main(method, yr, isSummary = false) {
 			if (isVer >= isVerMin && optExpanded) {
 				// expanded results
 				if (resultsHash == '0db200af') { // FF151+
-				} else if (resultsHash == 'b8d2903c') { // FF149-150: 2009907
-				} else if (resultsHash == '2ca8e181') { // FF147-148
-				} else if (resultsHash == '31a3ce60') { // FF140-146
-				} else if (resultsHash == 'd4b59312') { // ESR140.11
 				} else {resultsHash += ' '+ zNEW
 				}
 				// expanded locales
 				if (localesHash == '154a6a7c') { // FF151+: 340
-				} else if (localesHash == 'ab48ed50') { // FF147-150: 339
-				} else if (localesHash == 'dc340cf5') { // FF140-146: 336
 				} else {localesHash += ' '+ zNEW
 				}
 			}

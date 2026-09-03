@@ -413,24 +413,33 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 155
+		isVerMax = 157
+		let test
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {
+				test = '<nobr><table><marquee></table><nobr>'
+				if (2 == (new DOMParser).parseFromString(test, 'text/html').body.children.length) return 157 // 2049083
+			} catch(e) {}
+			try {
+				test = (new DOMParser).parseFromString('<select><button></button></select>', "text/html")
+				if ('button' == test.body.firstChild.firstChild.type) return 156 // 2064013
+			} catch(e) {}
 			try {if (SVGAElement.prototype.hasOwnProperty('origin')) return 155} catch(e) {} // 2058578
-			try {let test154 = new Date('4294967303').toISOString()} catch(e) { // 2027609
+			try {test = new Date('4294967303').toISOString()} catch(e) { // 2027609
 				if ('RangeError: invalid date' == e+'') {
 					if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) {return 154} // FF122 or lower are false positives; hence extra check
 				}
 			}
 			try {if (HTMLAreaElement.prototype.hasOwnProperty('hreflang')) return 153} catch(e) {} // 2039500
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
-			if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151 // 2022827
+			try {if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151} catch(e) {} // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
 			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled (default true)
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
-			try {let test148 = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
+			try {test = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
 			try {if (Intl.supportedValuesOf('numberingSystem').includes('tols')) return 147} catch(e) {} // 2000225 ?
 			try {throw new DOMException('a', 'b')} catch(e) {if (0 !== e.columnNumber) return 146} // 1997216
 			if (undefined !== (new ToggleEvent('toggle', null)).source) return 145 // 1968987
@@ -440,8 +449,8 @@ const get_isVer = () => new Promise(resolve => {
 			// 142
 			try {
 				let segmenter = new Intl.Segmenter('en', {granularity:'word'})
-				let test142 = Array.from(segmenter.segment('a:b')).map(({ segment }) => segment)
-				if (3 == test142.length) return 142 // 1960300
+				test = Array.from(segmenter.segment('a:b')).map(({ segment }) => segment)
+				if (3 == test.length) return 142 // 1960300
 			} catch(e) {}
 			// 141: fast-path: requires temporal default enabled FF139+ javascript.options.experimental.temporal
 			try {if (undefined == Temporal.PlainDate.from('2029-12-31[u-ca=gregory]').weekOfYear) return 141} catch(e) {} // 1950162

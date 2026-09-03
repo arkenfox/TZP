@@ -44,10 +44,12 @@
 <script>
 'use strict';
 
+let isVerMin = 153
+
 let oData = {}
 
 function display(item) {
-	let delim = (item == "timeZone" ? "<br>" : ", ")
+	let delim = (item == 'timeZone' ? '<br>' : ', ')
 	dom.details.innerHTML = s4 + item + sc +"<br><span class='faint'>[<br><span class='indent'>" + oData[item].join(delim) + "</span><br>]</span>"
 }
 
@@ -56,34 +58,27 @@ function run() {
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/supportedValuesOf
 	try {
 		let res = []
-		let list = ["calendar","collation","currency","numberingSystem","timeZone","unit"]
+		let list = ['calendar','collation','currency','numberingSystem','timeZone','unit']
 		list.forEach(function(item) {
 			let array = Intl.supportedValuesOf(item)
 			let el = document.getElementById(item)
 			let hash = mini(array)
 			el.innerHTML = hash + " <span class='btn4 btnc' onclick='display(`" + item + "`)'>[" + array.length +"]</span>"
-			res.push(item +": "+ hash)
+			res.push(item +': '+ hash)
 			oData[item] = array
 		})
 		// overall hash
-		let hash = mini(res), code = ""
+		let hash = mini(res), code = ''
 
 		if (isFF) {
-			// notate new if 140+
-			if (isVer > 139) {
-				if (hash == "1a35c685") {code = s14 +" [FF150+]"+ sc // collation: -searchjl
-				} else if (hash == "3c1a144a") {code = s14 +" [FF147-149]"+ sc
-					/* calendar: -islamic -islamic-rgsa
-						numberingSystem: +tols
-					*/
-				} else if (hash == "db8d9901") {code = s14 +" [FF140-146]"+ sc
-					/* timezone: +America/Coyhaique */
+			if (isVer >= isVerMin) {
+				if ('1a35c685' == hash) {code = s14 +' [FF150+]'+ sc
 				} else {code = ' '+ zNEW
 				}
 			}
 		}
 		dom.hashAll.innerHTML = hash + code
-		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +' ms'
 	} catch (e) {
 		dom.details = ""
 		dom.detailslabel = e.name

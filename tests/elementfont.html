@@ -3,26 +3,32 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>elements: fonts</title>
+	<title>elements: font</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
+	<script src="testelements.js"></script>
 	<style>
 		table {width: 97%; min-width: 480px; max-width: 780px;}
 	</style>
 </head>
 
 <body>
-
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
+
 
 	<table id="tb15">
 		<col width="15%"><col width="85%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">elements: fonts
+			<div class="nav-title">elements: font
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 				<div class="nav-down"><span class="perf" id="locale"></span></div>
 			</div>
@@ -34,7 +40,7 @@
 			<br><br>
 			<span class="btnfirst btn15" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn btn15" onClick="run(`TZP`)">[ TZP ]</span>
-			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</a></span>
+			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</span>
 		</td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
@@ -46,11 +52,10 @@
 
 <script>
 'use strict';
-let isLanguage = '', isLocale = '', type = 'TZP'
-
 // styles: https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family
 // sizes: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/absolute-size
 
+let isLanguage = '', isLocale = '', type = 'TZP'
 let oTests = {
 	'everything': {
 		'sizes': ['3.9pt','xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large','141.7pt','266.6pt','947.7pt'],
@@ -156,6 +161,8 @@ function run(runtype) {
 		get_element_font(type)
 	}, 170)
 }
+
+buildnav_element()
 get_element_font()
 
 //make it easy to check all zoom values

@@ -3,10 +3,11 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>elements: language</title>
+	<title>elements: lang</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
+	<script src="testelements.js"></script>
 	<style>
 		table {width: 97%; min-width: 480px; max-width: 780px;}
 	</style>
@@ -44,14 +45,19 @@
 	</div>
 
 	<table>
-	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+		<col width="25%"><col width="50%"><col width="25%">
+		<tr><td></td><td colpsan="3"><h2>TorZillaPrint</h2></td><td></td></tr>
+		<tr>
+			<td id="navprev" style="text-align: left;"></td>
+			<td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td>
+			<td id="navnext" style="text-align: right;"></td>
+		</tr>
 	</table>
 
 	<table id="tb15">
 		<col width="15%"><col width="85%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">elements: language
+			<div class="nav-title">elements: lang
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 				<div class="nav-down"><span class="perf" id="locale"></span></div>
 			</div>
@@ -64,7 +70,7 @@
 			<span class="btnfirst btn15" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn btn15" onClick="run(`base`)">[ base ]</span>
 			<span class="btn btn15" onClick="run(`TZP`)">[ TZP ]</span>
-			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</a></span>
+			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</span>
 		</td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
@@ -145,7 +151,12 @@ function build_tests() {
 			'zh-HK': ['small','xxx-large',], // windows
 			'zh-TW': ['small','xxx-large',], // windows
 			'sizes': ['xxx-large'],
-			'styles': ['cursive','fangsong','fantasy','math','monospace','sans-serif','serif','system-ui']
+			'styles': [
+				// must have
+				'monospace','sans-serif','serif',
+				// these sometimes offer little depending on the platform or engine or brand (FF vs TB)
+				'cursive','fangsong','fantasy','math','system-ui'
+			]
 		}
 	}
 
@@ -320,6 +331,7 @@ function run(type) {
 	}, 170)
 }
 //defaultType = 'everything' // temp change whilst testing
+buildnav_element()
 build_tests()
 get_element_lang()
 
