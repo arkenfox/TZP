@@ -1184,13 +1184,11 @@ const outputMisc = () => new Promise(resolve => {
 	let isMathTrigLies = check_mathLies('trig')
 	let isMathOtherLies = check_mathLies('other')
 
-	let notation = '', value = zNA
+	let notation = default_red, value = zNA
 	if (isGecko) {
 		// 1259822: FF74+ | 1965165: javascript.options.property_error_message_fix FF140+ default enabled
 		try {null.bar} catch(e) {
-			if (isBB) {
-				notation = (e+'' == 'TypeError: can\'t access property "bar" of null' ? bb_green : bb_red)
-			}
+			if (e+'' == 'TypeError: can\'t access property "bar" of null') {notation = default_green}
 			value = e.message
 		}
 	}
