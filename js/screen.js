@@ -224,9 +224,11 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 			// android "document" is an inner size not viewport || calculate get dynamic toolbar
 			oTmp.inner.width['document'] = vpWidth.document
 			oTmp.inner.height['document'] = vpHeight.document
-			// dynamic toolbar: display only - let it NaN for I care
+			// dynamic toolbar: display only (we already have the fp data) - let it NaN for I care
 			let strToolbar = (vpWidth.lvw - vpWidth.svw) +' x '+ (vpHeight.lvh - vpHeight.svh)
-			addDisplay(1, 'dynamic_toolbar', strToolbar)
+			let notationTB = isBB ? ('0 x 0' == strToolbar ? bb_green : bb_red) : ''
+			sDetail[isScope].lookup['dynamic_toolbar'] = strToolbar
+			addDisplay(1, 'dynamic_toolbar', strToolbar, '', notationTB)
 			// large viewport units 
 			addDisplay(1, 'viewport_large', vpWidth.lvw +' x '+ vpHeight.lvh)
 			// sizes_viewport metric (small is already under sizes_inner)
@@ -1422,13 +1424,14 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 		}
 	}
 	// add userAgent
+	let maxOpen = 3 // total current + additional next versions
 	if (os !== undefined) {
 		for (const k of Object.keys(oRFP)) {
 			oRFP[k].userAgent = []
 			let uaBase = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:'
 			let isDroid = 'android' == k
 			// allow future versions if open ended: FF release cadence is now every 2 weeks
-			let max = '+' == isVerExtra ? 3 : 1
+			let max = '+' == isVerExtra ? maxOpen : 1
 			for (let x = 0; x < max; x++){
 				let uaVer = isVer + x
 				let uaRFP = uaBase + uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
@@ -1521,8 +1524,10 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			if (!isLies) {
 				if ('userAgent' == k) {
 					// check version: all platforms contain '; rv:' + version + '.0)'
-					aFlags = [isVer]
-					if ('+' == isVerExtra) {aFlags.push(isVer + 1, isVer + 2)}
+					aFlags = []
+					// allow future versions if open ended: match oRFP
+					let max = '+' == isVerExtra ? maxOpen : 1
+					for (let x = 0; x < max; x++){aFlags.push(isVer + x)}
 					let isVerCheck = false
 					aFlags.forEach(function(item) {
 						if (reported.includes('; rv:'+ item +'.0)')) {isVerCheck = true}
@@ -1704,31 +1709,35 @@ function get_agent_workers() {
 const outputFD = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('feature')) {return resolve()}
 
-	let METRIC = 'infinity_architecture', value, data =''
+	let oArch = {}
+	// isArchArray can only be 32, 64, zErr or zNA
+	let METRIC = 'architecture', m = 'array'
+	addDisplay(3, METRIC +'_'+ m, isArchArray + (Number.isInteger(isArchArray) ? 'bit' : ''))
+	oArch[m] = isArchArray
+
+	// arch infinity
+		// sometimes my windows chrome on reruns returns 127 instead of 255
+	let value; m = 'infinity'
 	try {
   	const f = new Float32Array([Infinity - Infinity])
   	value = new Uint8Array(f.buffer)[3]
   } catch(e) {
-  	value = e; data = zErrLog
+		log_error(3, METRIC +'_'+ m, e); value = zErr
   }
-	addBoth(3, METRIC, value,'','', data)
+	addDisplay(3, METRIC +'_'+ m, value)
+	oArch[m] = value
 
-	// arch: FF110+ pref removed: error means 32bit
-	let str = '64bit'; data = 64
-	if (isArch !== true) {
-		if ('RangeError: invalid array length' == isArch) {
-			str = '32bit'; data = 32
-		} else {
-			str = isArch; data = zErr
-			// blink we set zNA if expected error, so propigate that
-			if ('blink' == isEngine && zNA == isArch) {data = zNA}
-		}
-	}
-	addBoth(3, 'browser_architecture', str,'','', data)
+	// isArchString is always a string: zNA, zErr or an upper bound
+	m = 'string'
+	addDisplay(3, METRIC +'_'+ m, isArchString)
+	oArch[m] = isArchString
+
+	// add arch obj
+	addData(3, METRIC, oArch, mini(oArch))
 
 	// platform
-	METRIC = 'platform'
-	let aOS = [], oOS = {}, m = 'os', display = ''
+	METRIC = 'platform'; m = 'os'
+	let aOS = [], oOS = {}, display = ''
 	// isOS
 	if (!isGecko && undefined == isOS) {
 		value = zNA; display = zNA
