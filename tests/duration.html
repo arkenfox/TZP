@@ -32,7 +32,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy in Intl.DurationFormat</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy in Intl.DurationFormat</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -47,6 +47,9 @@
 
 <script>
 'use strict';
+
+let isVerMin = 153
+dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var list = gLocales,
 	aLegend = [],
@@ -435,17 +438,13 @@ function run_main(method, aTest, isLoop = false) {
 		if (method == "all") {
 			localesHashAll = localesHash
 			// notate new if 140+
-			if (isVer > 139) {
+			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == '92b05a5c') { // FF151+
-				} else if (resultsHash == '319ff3fd') { // FF147-150
-				} else if (resultsHash == '1294206a') { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
 				if (localesHash == '97048ba7') { // FF151+: 219
-				} else if (localesHash == '91d4e56b') { // FF147-150: 218
-				} else if (localesHash == 'c5d9dc08') { // FF140-146: 216
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
