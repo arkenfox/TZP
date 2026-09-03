@@ -228,8 +228,10 @@ const get_feature_policy = (METRIC) => new Promise(resolve => {
 		} else {
 			// blink/gecko
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
-			let expected = '[object FeaturePolicy]'
-			if (f+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ f}
+			let expected = ['[object FeaturePolicy]']
+				// I think blink changed from FP to PP because it didn't throw when I added the test so lets just always check both if blink
+			if ('blink' == isEngine) {expected.push('[object PermissionsPolicy]')}
+			if (!expected.includes(f+'')) {throw zErrInvalid + 'expected '+ expected.join(' or ') +': got '+ f}
 			// enumerate: array
 			let aList = f.features()
 			// gecko: disabling geo or blocking geo requests or both doesn't remove geolocation
