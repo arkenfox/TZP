@@ -54,6 +54,8 @@
 <script>
 'use strict';
 
+let isVerMin = 153
+
 var list = [],
 	listExpanded = [],
 	aLegend = [],
@@ -133,20 +135,17 @@ function run_main(method, isLoopy) {
 	try {
 		// hash
 		function getNotation(hash, method) {
-			if (!isFF || isExpanded) return ""
+			if (!isFF || isExpanded) return ''
 			// only hash notate if 140+
-			let notation = ""
-			if (isVer > 139) {
-				if (method == "C") {
-					if (hash == "cdcd1420") {notation = " [FF150+]" // 120 : 1937541: dropped dz, sa, wae
-					} else if (hash == "50c5b9d7") {notation = " [FF147-159]" // 123 - added 'ba' (bashkir)
-					} else if (hash == "6eb2ef9e") {notation = " [FF140-146]" // 122
-					} else { notation = " "+ zNEW
+			let notation = ''
+			if (isVer >= isVerMin) {
+				if ('C' == method) {
+					if ('cdcd1420' == hash) {notation = ' [FF150+]' // 120 : 1937541: dropped dz, sa, wae
+					} else { notation = ' '+ zNEW
 					}
 				} else {
-					if (hash == "0376e707") {notation = " [FF147+]" // 245
-					} else if (hash == "66c554ac") {notation = " [FF140-14]" // 245
-					} else { notation = " "+ zNEW
+					if ('0376e707' == hash) {notation = ' [FF147+]' // 245
+					} else { notation = ' '+ zNEW
 					}
 				}
 				if (notation !== zNEW) notation = s14 + notation + sc
