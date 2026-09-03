@@ -52,7 +52,7 @@
 <script>
 'use strict';
 
-let isVerMin = 140
+let isVerMin = 153
 dom.version.innerHTML = ' ('+ isVerMin + '+)'
 
 var oCurrencies = {},
@@ -396,13 +396,10 @@ function run_main(method) {
 			if (isVer >= isVerMin) {
 				// results
 				if (resultsHash == "975e37a5") { // FF151+
-				} else if (resultsHash == "8927863e") { // FF147-150
-				} else if (resultsHash == "105215e4") { // FF140-146
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
 				if (localesHash == "f3b23b8f") { // FF147+: 430
-				} else if (localesHash == "e4c818f6") { // FF140-146: 426
 				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
