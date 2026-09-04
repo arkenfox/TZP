@@ -206,7 +206,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 				for (const k of Object.keys(section).sort()) {obj[k.replace('audio_test_', '')] = section[k]}
 				let hash = mini(obj)
 				addDetail(METRIC, obj)
-				if (true === isArchArray) {
+				if (64 == isArchArray) {
 					if ('e2bbb839' == hash) {
 						// {"oscillator": "5b3956a9", "oscillator_compressor": "e08487bf"}
 						notation = sgtick+'x86_64/amd_64]'+sc
