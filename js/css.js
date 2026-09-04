@@ -188,17 +188,17 @@ function get_computed_styles(METRIC) {
 						...Object.keys(propertiesInPrototypeChain)
 					])
 				]
-				/* checks
-				let moz = keys.filter(key => (/moz/i).test(key)).length,
-					webkit = keys.filter(key => (/webkit/i).test(key)).length,
+				//* checks
+				let moz = keys.filter(key => (/moz/i).test(key)), //.length,
+					webkit = keys.filter(key => (/webkit/i).test(key)), //.length,
 					prototypeName = ('' + prototype).match(/\[object (.+)\]/)[1]
 				//*/
 				// output
 				return resolve({
 					keys,
-					//moz,
-					//webkit,
-					//prototypeName
+					moz,
+					webkit,
+					prototypeName
 				})
 			} catch(e) {
 				aErr[type] = true
@@ -238,6 +238,7 @@ function get_computed_styles(METRIC) {
 		//*/
 		//console.log(res)
 
+		let moz, webkit
 		for (let i=0; i < res.length; i++) {
 			let obj = res[i]
 			let type = METRIC +'_'+ names[i]
@@ -258,6 +259,11 @@ function get_computed_styles(METRIC) {
 					oDisplay[type] = hash
 					// last item s/be constructor: detects if items are added, not removed
 					if (data[data.length-1] !== 'constructor') {isLies = true}
+					// populate moz/webkit
+					if (undefined == moz) {
+						moz = res[i].moz
+						webkit = res[i].webkit
+					}
 				} catch(e) {
 					aErr[i] = true
 					oDisplay[type] = log_error(14, type, e)
@@ -291,6 +297,21 @@ function get_computed_styles(METRIC) {
 						if ('05874eb7' == hash) {notation = bb_green} // BB16 1152
 					}
 				}
+				// add btn for moz/webkit
+				try {
+					// only do those engines with moz | don't check webkit typeof/length, just assume it exists
+					if (moz.length) {
+						let m = METRIC +'_moz_webkit'
+						let oMoz = {
+							'moz': {'count': moz.length, 'keys': moz.sort()},
+							'webkit': {'count': webkit.length, 'keys': webkit.sort()}
+						}
+						sDetail[isScope][m] = oMoz
+						let mozBtn = addButton(14, m, moz.length +'|'+ webkit.length)
+						addDisplay(14, m, mozBtn)
+					}
+				} catch(e) {}
+
 			} else {
 				// mixed hashes
 				hash = 'mixed'; isLies = true // gecko is never mixed

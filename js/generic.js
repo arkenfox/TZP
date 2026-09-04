@@ -556,6 +556,26 @@ function get_isEngine(METRIC) {
 			isEngineStr = aAllowed.join(',') + isEngineStr
 		}
 		if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
+		// servo
+			// easiest way to check for servo is it's not isGecko but has a lot of moz css properties
+		if (undefined == isEngine) {
+			try {
+				// get all properties
+				let cssStyleDeclaration = ((new DOMParser).parseFromString('', 'text/html')).body.style
+				let prototype = Object.getPrototypeOf(cssStyleDeclaration)
+				let	aKeys = Object.getOwnPropertyNames(prototype)
+				// last checked Sept 2026 servo had 24 camelcase moz items
+				let aMoz = ['MozAnimation','MozAnimationDelay','MozAnimationDirection','MozAnimationDuration',
+					'MozAnimationFillMode','MozAnimationIterationCount','MozAnimationName','MozAnimationPlayState',
+					'MozAnimationTimingFunction','MozBackfaceVisibility','MozBorderImage','MozBoxSizing',
+					'MozFontFeatureSettings','MozFontLanguageOverride','MozPerspective','MozPerspectiveOrigin',
+					'MozTransform','MozTransformOrigin','MozTransformStyle','MozTransition','MozTransitionDelay',
+					'MozTransitionDuration','MozTransitionProperty','MozTransitionTimingFunction'
+				]
+				let aMozFound = aKeys.filter(x => aMoz.includes(x))
+				if (aMozFound.length/aMoz.length > 0.5) {isEngine = 'servo'}
+			} catch(e) {}
+		}
 		// set minimum
 		if (undefined !== isEngine) {
 			// approved engine detected, if not enforcing min, disable block
@@ -563,7 +583,9 @@ function get_isEngine(METRIC) {
 			// if enforcing min, check
 			if (isAllowNonGeckoMin) {
 				try {
-					if ('blink' == isEngine) {
+					if ('servo' == isEngine) {
+						isEngineBlocked = false
+					} else if ('blink' == isEngine) {
 						// 109 is the last version supported on win7
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
 						if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
@@ -633,6 +655,7 @@ const get_isFontDelay = () => new Promise(resolve => {
 })
 
 function get_isGecko(METRIC) {
+	// servo is 0/7
 	let t0 = nowFn(), value
 	try {
 		let list = [
@@ -641,11 +664,13 @@ function get_isGecko(METRIC) {
 			[HTMLCanvasElement, 'HTMLCanvasElement', 'mozPrintCallback'],
 			[HTMLElement, 'HTMLElement', 'onmozfullscreenerror'],
 			[HTMLVideoElement, 'HTMLVideoElement', 'mozDecodedFrames'],
-			[IDBIndex, 'IDBIndex', 'mozGetAllKeys'],
-			[IDBObjectStore, 'IDBObjectStore', 'mozGetAll'],
 			[Screen, 'Screen', 'mozOrientation'], // 1325110: mozOrientation slated for deprecation
-			[SVGElement, 'SVGElement', 'onmozfullscreenchange'] 
+			[SVGElement, 'SVGElement', 'onmozfullscreenchange']
 		]
+		// not defined errors on servo
+		try {list.push([IDBIndex, 'IDBIndex', 'mozGetAllKeys'])} catch(e){}
+		try {list.push([IDBObjectStore, 'IDBObjectStore', 'mozGetAll'])} catch(e){}
+		// enumerate
 		let obj, prop, aNo = []
 		list.forEach(function(array) {
 			obj = array[0]
@@ -664,6 +689,7 @@ function get_isGecko(METRIC) {
 		}
 		value = isGecko +' | '+ found +'/'+ list.length
 	} catch(e) {
+		log_alert(SECTG, METRIC, e+'', isScope, true)
 		value = zErr
 	}
 	log_perf(SECTG, METRIC, t0,'', value)
