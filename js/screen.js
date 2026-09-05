@@ -1253,8 +1253,9 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 
 		// negate brave randomizing | AFAICT it's always under 10: e.g. 3,0 2,6 6,5 5,6 4,3
 			// brave does this even when in fullscreen (F11) or fullscreenElement
+		// ignore android
 		let value = x
-		if ('number' == typeCheck) {
+		if (isDesktop && 'number' == typeCheck) {
 			// record new value, display both if different0	
 			// ToDo: perhaps bucketize it a lot more
 			let diff = Math.abs(x)
