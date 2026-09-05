@@ -1250,15 +1250,20 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 		} catch(e) {
 			log_error(1, METRIC +'_'+ k, e); x = zErr
 		}
+
 		// negate brave randomizing | AFAICT it's always under 10: e.g. 3,0 2,6 6,5 5,6 4,3
-			// we can just do this anyway for everyone
-		// ToDo: perhaps bucketize it a lot more
+			// brave does this even when in fullscreen (F11) or fullscreenElement
 		let value = x
 		if ('number' == typeCheck) {
-			// record new value, display both if different
+			// record new value, display both if different0	
+			// ToDo: perhaps bucketize it a lot more
 			let diff = Math.abs(x)
-			if (0 !== diff && diff < 10) {
-				value = '>10'; x = value + s99 +'('+ x +')'+ sc
+			// brave randomizes using 0, but we want a stable result so e.g. 3,0 == 2,6
+				// RFP we require exactly 0
+			// the less reliance on isBrave the better | just bucketize all blink
+			let minDiff = 'blink' == isEngine ? -1 : 0
+			if (diff > minDiff && diff < 10) {
+				value = '<10'; x = value + s99 +'('+ x +')'+ sc
 			}
 		}
 		oData[k] = value; display.push(x)
