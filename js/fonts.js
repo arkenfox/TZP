@@ -768,8 +768,10 @@ function set_fntList() {
 				'sans-serif',
 				'serif'
 			]
-		} else if ('android' == isOS) {
-			// Roboto is not guaranteed unless Android 9+
+		} else if (isGecko && 'android' == isOS) {
+			// with blink we want to force 3 checks | not sure if it ever did
+				// but blink doesn't detect either dancing or roboto in fontdebug
+			// note: Roboto is not guaranteed unless Android 9+
 			if (!isFontSizesMore) {fntPlatformFont = 'Dancing Script'}
 		}
 
