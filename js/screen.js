@@ -1238,17 +1238,30 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 	let aNonGecko = ['mozInnerScreenX','mozInnerScreenY']
 	let display = [], x
 	aList.forEach(function(k){
+		let typeCheck
 		try {
 			x = window[k]
 			if (runST) {x = 'undefined'}
-			let typeCheck = typeFn(x), expectedType = 'number'
-				if (!isGecko && aNonGecko.includes(k)) {expectedType = 'undefined'}
-				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
-				if (undefined == x) {x += ''}
+			typeCheck = typeFn(x)
+			let expectedType = 'number'
+			if (!isGecko && aNonGecko.includes(k)) {expectedType = 'undefined'}
+			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+			if (undefined == x) {x += ''}
 		} catch(e) {
 			log_error(1, METRIC +'_'+ k, e); x = zErr
 		}
-		oData[k] = x; display.push(x)
+		// negate brave randomizing | AFAICT it's always under 10: e.g. 3,0 2,6 6,5 5,6 4,3
+			// we can just do this anyway for everyone
+		// ToDo: perhaps bucketize it a lot more
+		let value = x
+		if ('number' == typeCheck) {
+			// record new value, display both if different
+			let diff = Math.abs(x)
+			if (0 !== diff && diff < 10) {
+				value = '>10'; x = value + s99 +'('+ x +')'+ sc
+			}
+		}
+		oData[k] = value; display.push(x)
 	})
 	let hash = mini(oData)
 	let notation = '66a7ee25' == hash ? rfp_green : rfp_red
@@ -1774,7 +1787,11 @@ const outputFD = () => new Promise(resolve => {
 		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		// browser
-		addBoth(3, 'browser', isBrave ? 'Brave' : isEngine+'')
+			// generally we're not interested in returning names of forks etc, but
+			// we can/do distinguish some (e.g. Brave) or the engine needs proper case
+		let isBrowser = isBrave ? 'Brave' : isEngine+'' // +'' ensure not undefined
+		isBrowser = 'servo' == isBrowser ? 'Servo' : isBrowser // proper case
+		addBoth(3, 'browser', isBrowser)
 		return resolve()
 	}
 
