@@ -533,9 +533,9 @@ function set_oIntlLocale() {
 			pluralrules: ['pluralCategories'],
 		},
 	}
-	try {oIntlLocale['numberformat.compact']['long'].push(BigInt('987354000000000000'))} catch {}
+	try {oIntlLocale['numberformat.compact']['long'].push(BigInt('987354000000000000'))} catch(e) {}
 	let nBig = 987654
-	try {nBig = BigInt('987354000000000000')} catch {}
+	try {nBig = BigInt('987354000000000000')} catch(e) {}
 	oIntlLocale['numberformat.notation']['scientific']['decimal'].push(nBig)
 	// build keys
 	for (const k of Object.keys(oIntlLocale)) {
@@ -656,7 +656,7 @@ function get_language_locale() {
 			// populate
 			let aText = ['<switch id="switch">']
 			isLanguagesNav.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
-			aText.push('<text systemLanguage="groot">groot</text>')
+			aText.push('<text systemLanguage="i-am-fake">i-am-fake</text>')
 			aText.push('<text>unknown</text></switch>')
 			let el = dom.tzpSwitch
 			el.innerHTML = aText.join('')
@@ -956,7 +956,7 @@ function get_locale_intl() {
 								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(strTest, option)); data.push(value)
 								if(isCheck) {value = (isIntl ? checker.format(dte) : (dte).toLocaleString(strCheck, option)); datacheck.push(value)}
 							})
-						} catch {} // ignore invalid
+						} catch(e) {} // ignore invalid
 						if (data.length) {obj[key] = data}
 						if (datacheck.length) {objcheck[key] = datacheck}
 					})
@@ -1096,7 +1096,7 @@ function get_locale_intl() {
 									datacheck.push(value)
 								}
 							})
-						} catch {} // ignore invalid
+						} catch(e) {} // ignore invalid
 					})
 					if (data.length) {obj[key] = data}
 					if (datacheck.length) {objcheck[key] = datacheck}
@@ -2677,7 +2677,7 @@ const get_dates = () => new Promise(resolve => {
 
 	let localecode = undefined
 	let DTFo
-	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch {}
+	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
 
 	function get_item(item) {
 		let itemPad = 'item '+ item
