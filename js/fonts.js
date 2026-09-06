@@ -959,7 +959,7 @@ function set_fntList() {
 						newkey += k.slice(1)
 					}
 					array = array.concat(fntData.family.summary[newkey].fonts)
-					try {array = array.concat(fntData.offscreen.summary[k].fonts)} catch {}
+					try {array = array.concat(fntData.offscreen.summary[k].fonts)} catch(e) {}
 					array = dedupeArray(array)
 
 					// remove unexpected if they're in the allow/expected lot
@@ -2393,7 +2393,7 @@ function get_textmetrics(METRIC) {
 		}
 	}
 	log_perf(12, METRIC, t0)
-	try {dom.tzpTextmetrics.height = 0} catch {} // hide the fixed canvas after use
+	try {dom.tzpTextmetrics.height = 0} catch(e) {} // hide the fixed canvas after use
 	return
 }
 
