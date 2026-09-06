@@ -557,7 +557,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 			// TBA16.0.11a tor-browser#44155: enable LNA on Android as defense-in-depth (so therefore it matches desktop)
 		let aGood = ['6e5aa362'] // isDesktop/isBB
 		// 1971290: android meta tracking | 2015496: FF149+ nightly | to be rolled out via nimbus
-		if (!isDekstop) {aGood.push('2afe1864') // droid allow both
+		if (!isDesktop && !isBB) {aGood.push('2afe1864')} // non BB droid allow both
 		let notation = aGood.includes(hash) ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
