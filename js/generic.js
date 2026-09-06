@@ -37,7 +37,7 @@ function rnd_word(len = 5) {
 	for (let i=0; i < len; i++) {str += Math.floor(Math.random() * 25 + 10).toString(36)}
 	return str
 }
-function removeElementFn(id) {try {dom[id].remove()} catch {}}
+function removeElementFn(id) {try {dom[id].remove()} catch(e) {}}
 function addProxyLie(value) {sData[SECT99].push(value)}
 function isProxyLie(value) {
 	// ensure we only _use_ tampering in gecko smart mode
@@ -85,7 +85,7 @@ function typeFn(item, isSimple = false) {
 		} else if (null === item) {type = 'null'
 		} else {
 			if (!isSimple) {
-				try {if (0 === Object.keys(item).length) {type = 'empty object'}} catch {}
+				try {if (0 === Object.keys(item).length) {type = 'empty object'}} catch(e) {}
 			}
 		}
 	}
@@ -755,7 +755,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 					tryfonts()
 				}
 			}
-		} catch {
+		} catch(e) {
 			tryfonts()
 		}
 	}
@@ -770,7 +770,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
 				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
 			fntEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
-		} catch {}
+		} catch(e) {}
 		if (!fntEnabled) {trysomethingelse(); return}
 
 		// check fonts
@@ -860,7 +860,7 @@ const get_isRecursion = () => new Promise(resolve => {
 	let t0 = nowFn()
 	let level = 0
 	function recurse() {level++; recurse()}
-	try {recurse()} catch {}
+	try {recurse()} catch(e) {}
 	level = 0
 	try {
 		recurse()
@@ -1223,7 +1223,7 @@ function get_isPerf() {
 		try {
 			let value = Math.trunc(performance.now() - performance.now())
 			if (0 !== value && -1 !== value) {return}
-		} catch {return}
+		} catch(e) {return}
 	}
 	isPerf = true
 }
@@ -1256,7 +1256,7 @@ function copyclip(element) {
 			}, function() {
 				// clipboard write failed
 			})
-		} catch {}
+		} catch(e) {}
 	}
 }
 
@@ -1274,7 +1274,7 @@ function togglerows(id, word) {
 	} else {
 		word = ('none' == style ? '&#9660; show ' : '&#9650; hide ') + ('' == word || word === undefined ? 'details' : word)
 	}
-	try {dom['label'+ id].innerHTML = word} catch {}
+	try {dom['label'+ id].innerHTML = word} catch(e) {}
 }
 
 /*** METRICS DISPLAY ***/
@@ -1598,13 +1598,13 @@ function lookup_health(sect, metric, scope, isPass) {
 	if ('window.caches' == metric) {metric = 'caches'}
 	let data ='', hash =''
 	// error?
-	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch {}
+	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
 	if ('pixels_match' == metric) {
 		data = sDetail[scope][metric]
 		if ('string' == typeof data) {return([zErr, data])}
 	}
 	// lies
-	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, data])}} catch {}
+	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, data])}} catch(e) {}
 
 	// nested, lookups, FP|detail data
 	try {
@@ -1652,7 +1652,7 @@ function lookup_health(sect, metric, scope, isPass) {
 				}
 			}
 			if ('object' === typeCheck) {
-				try {hash = gData[zFP][scope][sect]['metrics'][metric].hash} catch {}
+				try {hash = gData[zFP][scope][sect]['metrics'][metric].hash} catch(e) {}
 			}
 			return([hash, data])
 		}
@@ -2058,7 +2058,7 @@ function addTiming(metric) {
 	let remainder = gCountTiming % 8, key, value
 	if (0 == gCountTiming % 5) {
 		// get extra dates
-		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
+		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 	}
 	try {
 		if (0 == remainder) {
@@ -2099,18 +2099,18 @@ function addTiming(metric) {
 
 function addTimings() {
 	// get first and final values for each to ensure a max diff
-	try {gData.timing['now'].push(performance.now())} catch {}
-	try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch {}
-	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch {}
-	try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch {}
+	try {gData.timing['now'].push(performance.now())} catch(e) {}
+	try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+	try {gData.timing['instant'].push(Temporal.Now.instant().toString())} catch(e) {}
 	try {
 		if (0 == gCountTiming) {gTimeline = new DocumentTimeline()}
 		gData.timing['currenttime'].push(gTimeline.currentTime)
-	} catch {}
+	} catch(e) {}
 	try {
 		if (0 == gCountTiming) {performance.clearMarks('a')}
 		performance.mark('a')
-	} catch {}
+	} catch(e) {}
 	if (0 == gCountTiming) {
 		addTiming('start') // adds first exslt
 	}
@@ -2327,12 +2327,11 @@ function countJS(item) {
 			// mismatched contents in both windows and android. Only setting them via JS are we always correct
 			// jesus says: WT actual F
 		if (isGecko) {
-			try {dom.tzpInvalidImage.src = 'images/InvalidImage.png'} catch {}
-			try {dom.tzpScaledImage.src = 'images/ScaledImage.png'} catch {}
-			try {dom.tzpXMLunstyled.src = 'xml/xmlunstyled.xml'} catch {}
-			try {dom.tzpXSLT.src='xml/xslterror.xml'} catch {} // in FF134 or lower this breaks devtools: oh dear, what a shame
+			try {dom.tzpInvalidImage.src = 'images/InvalidImage.png'} catch(e) {}
+			try {dom.tzpScaledImage.src = 'images/ScaledImage.png'} catch(e) {}
+			try {dom.tzpXMLunstyled.src = 'xml/xmlunstyled.xml'} catch(e) {}
+			try {dom.tzpXSLT.src='xml/xslterror.xml'} catch(e) {} // in FF134 or lower this breaks devtools: oh dear, what a shame
 		}
-
 		get_isVer('isVer') // if version PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
@@ -2549,12 +2548,12 @@ function outputSection(id, isResize = false) {
 		if ('string' == typeof id) {if (undefined !== sectionNos[id]) {id = sectionNos[id] * 1}}
 		// clear section data
 		let name = sectionMap[id]
-		try {sData[zFP][isScope][name] = {}} catch {}
-		try {sDataTemp[zFP][isScope][id] = {}} catch {}
-		try {sDataTemp['display'][isScope][id] = {}} catch {}
+		try {sData[zFP][isScope][name] = {}} catch(e) {}
+		try {sDataTemp[zFP][isScope][id] = {}} catch(e) {}
+		try {sDataTemp['display'][isScope][id] = {}} catch(e) {}
 		btnList.forEach(function(item){
-			try {sData[item][isScope][name] = {}} catch {}
-			try {sDataTemp[item][isScope][name] = {}} catch {}
+			try {sData[item][isScope][name] = {}} catch(e) {}
+			try {sDataTemp[item][isScope][name] = {}} catch(e) {}
 		})
 		if (!isResize) {
 			let tbl = dom['tb'+ id]
@@ -2651,7 +2650,7 @@ function outputSection(id, isResize = false) {
 		// force an initial delay regardless | moreso if it it's BB with font.vis
 		// e.g. some extensions can be slow to inject etc
 		// e.g. will help with resources such as XML/images etc
-		enforcedDelay = isFontDelay ? 3000 : (isFile ? 0 : 1200)
+		enforcedDelay = isFontDelay ? 3000 : (isFile && isGecko ? 0 : 1200)
 	}
 	//if (gLoad) {enforcedDelay = 1200}
 	if (enforcedDelay > 0) {
@@ -2738,7 +2737,7 @@ function run_immediate() {
 		get_isRecursion()
 		// storage warm ups
 		get_isFileSystem('isFileSystem', true)
-		try {window.caches.keys()} catch {}
+		try {window.caches.keys()} catch(e) {}
 		// get some usage into storage estimate
 		if ('blink' == isEngine) {
 			try {
@@ -2765,17 +2764,17 @@ function run_immediate() {
 		}
 		// other warm ups
 		get_isDevices()
-		try {let w = speechSynthesis.getVoices()} catch {}
+		try {let w = speechSynthesis.getVoices()} catch(e) {}
 		try {
 			const config = {initDataTypes: ['cenc'], videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}]}
 			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {}).catch(function(e){})
-		} catch {}
+		} catch(e) {}
 		try {
 			let warm = Intl.DateTimeFormat().resolvedOptions()
 			warm = Intl.DateTimeFormat(undefined, {timeZone: 'Europe/London', timeZoneName: 'shortGeneric'}).format(new Date)
 			warm = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
 			warm = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
-		} catch {}
+		} catch(e) {}
 		get_isXML()
 		get_isArchArray('isArchArray')
 		get_isArchString('isArchString')

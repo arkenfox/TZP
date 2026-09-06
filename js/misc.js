@@ -31,7 +31,7 @@ function check_timing(type) {
 			// we're subtracting the second measurement from the first so any value !== 0/-0 would be negative
 			if (!aIgnore.includes(value)) {result = false}
 			setTiming.add(value)
-		} catch {
+		} catch(e) {
 			// we would have already captured errors
 			return true
 		}
@@ -731,7 +731,7 @@ function get_pdf(METRIC) {
 			try {
 				let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 				if (keys.indexOf('pdfViewerEnabled') > keys.indexOf('constructor')) {isLies = true}
-			} catch {}
+			} catch(e) {}
 		}
 		if ('91073152' == hash) {notation = rfp_green}
 		addBoth(18, METRIC, hash, addButton(18, METRIC), notation, data, isLies)
@@ -931,7 +931,7 @@ function get_window_functions(METRIC) {
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['','']
+					'windows': ['47c888c4','10d7fc22'] // 906 | 907 | diff = WebAssembly
 				},
 				TB : {
 					'linux': ['',''],

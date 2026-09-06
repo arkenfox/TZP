@@ -184,7 +184,7 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 	} catch(e) {
 		try {
 			if (gRun) {dom.audio_test_oscillator_compressor = zNA; dom.audio_test_oscillator = zNA; dom.audio_test = zNA}
-		} catch {}
+		} catch(e) {}
 		outputErrors(log_error(11, METRIC, e))
 	}
 })

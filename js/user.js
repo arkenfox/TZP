@@ -4,7 +4,7 @@
 /* https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/User_activation */
 
 function exitUserFS() {
-	try {document.exitFullscreen()} catch {}
+	try {document.exitFullscreen()} catch(e) {}
 }
 
 const outputUserAgentOpen = (METRIC) => new Promise(resolve => {
@@ -356,7 +356,7 @@ const outputUserNewWin = (METRIC) => new Promise(resolve => {
 				// grab metrics
 				try {
 					sizes.push(newWin.innerWidth +' x '+ newWin.innerHeight)
-				} catch {
+				} catch(e) {
 					clearInterval(checking)
 					// if not 'permission denied', eventually we always get
 					// NS_ERROR_UNEXPECTED which we can ignore. Always output
@@ -543,13 +543,13 @@ function outputUser(x, event) {
 	if ('all' == x) {
 
 	} else {
-		try {dom[x] = ''} catch {} // clear
+		try {dom[x] = ''} catch(e) {} // clear
 		// clear additional
-		try {dom[x +'_data'] = ''} catch {} // clear
+		try {dom[x +'_data'] = ''} catch(e) {} // clear
 		try {
 			let items = document.getElementsByClassName('u'+x)
 			for (let i=0; i < items.length; i++) {items[i].innerHTML = '&nbsp'}
-		} catch {}
+		} catch(e) {}
 		let noDelay = ['audio','newwin', 'timing_audio']
 		let delay = noDelay.includes(x) ? 0 : 170
 		setTimeout(function() {
