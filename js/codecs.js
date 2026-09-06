@@ -412,7 +412,6 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		on android since at least FF153 DRM in PB mode is always prompted
 	*/
 
-	let data = {}
 	let config, aErrs = [], notation = isBB ? bb_red : default_red
 	let timeout = 'blink' == isEngine ? 4000 : 400
 	const get_eme_item = (key, item) => new Promise(resolve => {
@@ -423,25 +422,26 @@ const get_eme = (METRIC) => new Promise(resolve => {
 			// https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
 			// except then we wouldn't catch the error (disabled vs nmot shipped or othger fuckery)
 		if (!isBB && !isDesktop) {if ('widevine' == item) {return resolve()}}
-		// create keys
-		if (undefined == data[key]) {data[key] = {}}
 		// catch timeouts
+		let isFound = false
 		setTimeout(function() {
-			if (undefined == data[key][item]) {
-				data[key][item] = 'timed out'
+			if (!isFound) {
+//console.log(performance.now(), item, 'timed out')
 				return resolve([key, item, 'timed out'])
 			}
 		}, timeout)
+		//*/
 		// get value
 		navigator.requestMediaKeySystemAccess(item, [config]).then((result) => {
 			let typeCheck = typeFn(result)
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = '[object MediaKeySystemAccess]'
 			if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
-			data[key][item] = true
+//console.log(performance.now(), item, 'found true')
+			isFound = true
 			return resolve([key, item, true])
 		}).catch(function(e){
-			let value = zErr
+			let value = zErr; isFound = true
 			// suppress expected _unsupported_ errors
 				// ToDo: check safari
 			let aCheck = []
@@ -460,7 +460,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				aErrs.push(e+'')
 				log_error(13, METRIC +'_'+ item, e)
 			}
-			data[key][item] = value
+//console.log(performance.now(), item, 'found', value)
 			return resolve([key, item, value])
 		})
 	})
@@ -478,6 +478,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				audioCapabilities: [{contentType: 'audio/webm; codecs="opus"'}],
 			}
 			Promise.all([
+				// in sorted order
 				get_eme_item('clearkey','org.w3.clearkey'),
 				get_eme_item('clearkey','webkit-org.w3.clearkey'),
 				get_eme_item('fairplay','com.apple.fairplay'),
@@ -488,16 +489,13 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				get_eme_item('tzptime','i.dont.exist'),
 				get_eme_item('widevine','com.widevine.alpha'),
 			]).then(function(res){
-				// predefine order | results are not guaranteed to come back in the order requested
-				data = {
-					'clearkey': {'org.w3.clearkey': '','webkit-org.w3.clearkey': ''},
-					'fairplay': {'com.apple.fairplay': ''},
-					'playready': {'com.microsoft.playready': '','com.youtube.playready': ''},
-					'primetime': {'com.adobe.access': '','com.adobe.primetime': ''},
-					'tzptime': {'i.dont.exist': ''},
-					'widevine': {'com.widevine.alpha': ''},
-				}
-				res.forEach(function(array){data[array[0]][array[1]] = array[2]})
+				//console.log(res)
+				let data = {}
+				res.forEach(function(array){
+					let key = array[0], item = array[1], value = array[2]
+					if (undefined == data[key]) {data[key] = {}}
+					data[key][item] = value
+				})
 				let hash = mini(data), btn = addButton(13, METRIC)
 				if (isBB) {
 					aErrs.sort()
