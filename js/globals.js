@@ -84,7 +84,7 @@ function get_scr_initial() {
 			try {
 				x = window[k]
 				if ('number' !== typeof x || Number.isNaN(x)) {x = zErr}
-			} catch {
+			} catch(e) {
 				x = zErr
 			}
 			if (k.includes('inner')) {k = 'inner'} else {k = 'outer'}
