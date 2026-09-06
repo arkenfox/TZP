@@ -421,13 +421,17 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	let timeout = 'blink' == isEngine ? 4000 : (isDesktop ? 1000 : 2000)
 	if (!gLoad) {timeout = 100}
 	const get_eme_item = (key, item) => new Promise(resolve => {
-		// skip
-		// widevine android is problematic | LW also added a prompt to desktop
+		// skip: widevine android PBM (temp) and LW (persistent site exceptions) added a prompt, but
+			// only prompts should cause a timeout |it also means widevine+prompt is not super stable
+			// not worth disbling widevine checks here: prompt users can eat some timeout ms
+			// ... but gecko does seem quite perf heavy regardless .. oh well, sucks to be droid
 		// note: BB is going to block prompts
+		//if (!isBB && !isDesktop) {if ('widevine' == key) {return resolve('skip'}}
+
 		// ToDo: there are other ways to determine drm I think under mediacapabilties that don't prompt
 			// https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
-			// except then we wouldn't catch the error (disabled vs nmot shipped or othger fuckery)
-		if (!isBB && !isDesktop) {if ('widevine' == item) {return resolve()}}
+			// except then we wouldn't catch the error (disabled vs not shipped or other fuckery)
+
 		// catch timeouts
 		let isFound = false
 		setTimeout(function() {
@@ -498,9 +502,11 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				//console.log(res)
 				let data = {}
 				res.forEach(function(array){
-					let key = array[0], item = array[1], value = array[2]
-					if (undefined == data[key]) {data[key] = {}}
-					data[key][item] = value
+					if ('skip' !== array ) {
+						let key = array[0], item = array[1], value = array[2]
+						if (undefined == data[key]) {data[key] = {}}
+						data[key][item] = value
+					}
 				})
 				let hash = mini(data), btn = addButton(13, METRIC)
 				if (isBB) {
