@@ -412,33 +412,9 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		on android since at least FF153 DRM in PB mode is always prompted
 	*/
 
-	function exit(value, btn='') {
-		if ('object' == typeof data) {
-			value = mini(data)
-			btn = addButton(13, METRIC)
-		}
-		let notation = isBB ? bb_red : default_red
-		if (isBB) {
-			aErrs.sort()
-			// correct hash _and_ correct errors
-			if ('cc7705b5' == value && 'e2c1d62e' == mini(aErrs)) {notation = bb_green} // desktop + android
-		} else {
-			if ('59aec911' == value) {notation = default_green}
-		}
-		addBoth(13, METRIC, value, btn, notation, data)
-		return resolve()
-	}
-
-	// predefine order | results are not guaranteed to come back in the order requested
-	let data = {
-		clearkey: {'org.w3.clearkey': '','webkit-org.w3.clearkey': ''},
-		fairplay: {'com.apple.fairplay': ''},
-		playready: {'com.microsoft.playready': '','com.youtube.playready': ''},
-		primetime: {'com.adobe.access': '','com.adobe.primetime': ''},
-		tzptime: {'i.dont.exist': ''},
-		widevine: {'com.widevine.alpha': ''},
-	}
-	let config, aErrs = [], timeout = 'blink' == isEngine ? 4000 : 400 
+	let data = {}
+	let config, aErrs = [], notation = isBB ? bb_red : default_red
+	let timeout = 'blink' == isEngine ? 4000 : 400
 	const get_eme_item = (key, item) => new Promise(resolve => {
 		// skip
 		// widevine android is problematic | LW also added a prompt to desktop
@@ -452,20 +428,20 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		// catch timeouts
 		setTimeout(function() {
 			if (undefined == data[key][item]) {
-				data[key][item] = 'timed out'; return resolve()
+				data[key][item] = 'timed out'
+				return resolve([key, item, 'timed out'])
 			}
 		}, timeout)
 		// get value
-		let value
 		navigator.requestMediaKeySystemAccess(item, [config]).then((result) => {
 			let typeCheck = typeFn(result)
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = '[object MediaKeySystemAccess]'
 			if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
 			data[key][item] = true
-			return resolve()
+			return resolve([key, item, true])
 		}).catch(function(e){
-			value = zErr
+			let value = zErr
 			// suppress expected _unsupported_ errors
 				// ToDo: check safari
 			let aCheck = []
@@ -485,7 +461,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				log_error(13, METRIC +'_'+ item, e)
 			}
 			data[key][item] = value
-			return resolve()
+			return resolve([key, item, value])
 		})
 	})
 
@@ -511,13 +487,32 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				get_eme_item('primetime','com.adobe.primetime'),
 				get_eme_item('tzptime','i.dont.exist'),
 				get_eme_item('widevine','com.widevine.alpha'),
-			]).then(function(){
-				exit()
+			]).then(function(res){
+				// predefine order | results are not guaranteed to come back in the order requested
+				data = {
+					'clearkey': {'org.w3.clearkey': '','webkit-org.w3.clearkey': ''},
+					'fairplay': {'com.apple.fairplay': ''},
+					'playready': {'com.microsoft.playready': '','com.youtube.playready': ''},
+					'primetime': {'com.adobe.access': '','com.adobe.primetime': ''},
+					'tzptime': {'i.dont.exist': ''},
+					'widevine': {'com.widevine.alpha': ''},
+				}
+				res.forEach(function(array){data[array[0]][array[1]] = array[2]})
+				let hash = mini(data), btn = addButton(13, METRIC)
+				if (isBB) {
+					aErrs.sort()
+					// correct hash _and_ correct errors
+					if ('cc7705b5' == hash && 'e2c1d62e' == mini(aErrs)) {notation = bb_green} // desktop + android
+				} else {
+					if ('59aec911' == hash) {notation = default_green}
+				}
+				addBoth(13, METRIC, hash, btn, notation, data)
 				return resolve()
 			})
 		}
 	} catch(e) {
-		data = zErrLog; exit(e)
+		addBoth(13, METRIC, e,'', notation, zErrLog)
+		return resolve()
 	}
 })
 
