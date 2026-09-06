@@ -553,9 +553,11 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 		// sort object: sort arrays so permission delays don't create disorder
 		for (const k of Object.keys(tmpData).sort()) {data[k] = tmpData[k].sort()}
 		let hash = mini(data)
-		// droid diff is local-network/loopback-network are errors
-			// note: TBA16.0.11a tor-browser#44155: Always enable LNA on Android as a defense-in-depth (so therefore it matches desktop)
-		let aGood = (isDesktop || isBB) ? ['6e5aa362'] : ['2afe1864']
+		// 2033733: FF153+ network.lna.blocking desktop LNA enabled (local-network/loopback-network)
+			// TBA16.0.11a tor-browser#44155: enable LNA on Android as defense-in-depth (so therefore it matches desktop)
+		let aGood = ['6e5aa362'] // isDesktop/isBB
+		// 1971290: android meta tracking | 2015496: FF149+ nightly | to be rolled out via nimbus
+		if (!isDekstop) {aGood.push('2afe1864') // droid allow both
 		let notation = aGood.includes(hash) ? default_green : default_red
 		// record
 		addBoth(7, METRIC, hash, addButton(7, METRIC), notation, data)
