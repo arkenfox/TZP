@@ -413,7 +413,13 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	*/
 
 	let config, aErrs = [], notation = isBB ? bb_red : default_red
-	let timeout = 'blink' == isEngine ? 4000 : 400
+	// timeout: nothing we can do to speed this up: first session call takes ages to get
+		// requestMediaKeySystemAccess out of bed and into some work boots | very cold on blink
+		// once warmed-up/cached it's 3 or 4 ms
+	// blink shouldn't timeout, we just need lots of time to ensure we get the results
+	// gecko we need to catch DRM prompts
+	let timeout = 'blink' == isEngine ? 4000 : (isDesktop ? 1000 : 2000)
+	if (!gLoad) {timeout = 100}
 	const get_eme_item = (key, item) => new Promise(resolve => {
 		// skip
 		// widevine android is problematic | LW also added a prompt to desktop
@@ -426,18 +432,18 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		let isFound = false
 		setTimeout(function() {
 			if (!isFound) {
-//console.log(performance.now(), item, 'timed out')
+				isFound = true
+				//console.log(performance.now(), item, 'timed out')
 				return resolve([key, item, 'timed out'])
 			}
 		}, timeout)
-		//*/
 		// get value
 		navigator.requestMediaKeySystemAccess(item, [config]).then((result) => {
 			let typeCheck = typeFn(result)
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = '[object MediaKeySystemAccess]'
 			if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
-//console.log(performance.now(), item, 'found true')
+			//console.log(performance.now(), item, 'found true')
 			isFound = true
 			return resolve([key, item, true])
 		}).catch(function(e){
@@ -460,7 +466,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				aErrs.push(e+'')
 				log_error(13, METRIC +'_'+ item, e)
 			}
-//console.log(performance.now(), item, 'found', value)
+			//console.log(performance.now(), item, 'found', value)
 			return resolve([key, item, value])
 		})
 	})
