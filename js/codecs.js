@@ -413,20 +413,15 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	*/
 
 	function exit(value, btn='') {
-		// results are not guaranteed to come back in the order requested: sort into a new object
 		if ('object' == typeof data) {
-			let newobj = {}
-			for (const k of Object.keys(data).sort()) {
-				newobj[k] = {}
-				for (const j of Object.keys(data[k]).sort()) {newobj[k][j] = data[k][j]}
-			}
-			data = newobj
 			value = mini(data)
 			btn = addButton(13, METRIC)
 		}
 		let notation = isBB ? bb_red : default_red
 		if (isBB) {
-			if ('cc7705b5' == value) {notation = bb_green} // desktop + android
+			aErrs.sort()
+			// correct hash _and_ correct errors
+			if ('cc7705b5' == value && 'e2c1d62e' == mini(aErrs)) {notation = bb_green} // desktop + android
 		} else {
 			if ('59aec911' == value) {notation = default_green}
 		}
@@ -434,7 +429,16 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		return resolve()
 	}
 
-	let data = {}, config, timeout = 'blink' == isEngine ? 4000 : 400 
+	// predefine order | results are not guaranteed to come back in the order requested
+	let data = {
+		clearkey: {'org.w3.clearkey': '','webkit-org.w3.clearkey': ''},
+		fairplay: {'com.apple.fairplay': ''},
+		playready: {'com.microsoft.playready': '','com.youtube.playready': ''},
+		primetime: {'com.adobe.access': '','com.adobe.primetime': ''},
+		tzptime: {'i.dont.exist': ''},
+		widevine: {'com.widevine.alpha': ''},
+	}
+	let config, aErrs = [], timeout = 'blink' == isEngine ? 4000 : 400 
 	const get_eme_item = (key, item) => new Promise(resolve => {
 		// skip
 		// widevine android is problematic | LW also added a prompt to desktop
@@ -475,7 +479,11 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				aCheck.push('NotSupportedError: Unsupported keySystem or supportedConfigurations.')
 			}
 			// errors: item names are unique, we don't need the key
-			if (aCheck.includes(e+'')) {value = false} else {log_error(13, METRIC +'_'+ item, e)}
+			if (aCheck.includes(e+'')) {value = false
+			} else {
+				aErrs.push(e+'')
+				log_error(13, METRIC +'_'+ item, e)
+			}
 			data[key][item] = value
 			return resolve()
 		})
