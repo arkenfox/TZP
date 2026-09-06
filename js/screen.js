@@ -92,7 +92,7 @@ const get_scr_fs_measure = (isElementFS) => new Promise(resolve => {
 					nochange++
 					if (nochange > 25) {check_size()} // exit
 				}
-			} catch {
+			} catch(e) {
 				check_size()
 			}
 		}
@@ -250,8 +250,8 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		// window.inner on android is dynamic and also redudnant with document + small viewport units
 		if (!isDesktop) {delete oList.inner}
 		let iTarget, target
-		try {iTarget = dom.tzpIframe.contentWindow} catch {}
-		try {target = iTarget.screen} catch {} // initial iframe target
+		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
+		try {target = iTarget.screen} catch(e) {} // initial iframe target
 		aList.forEach(function(name) {
 			if ('iframe' !== name) {target = screen; name = 'screen'} // initial target post iframe
 			for (const k of Object.keys(oList)) {
@@ -363,7 +363,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 			try {
 				controlw = window.innerWidth
 				if ('number' !== typeFn(controlw)) {controlw = zErr} else if (!Number.isInteger(controlw)) {control = zErr}
-			} catch {
+			} catch(e) {
 				controlw = zErr
 			}
 			// initial_sizes
@@ -378,7 +378,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 			if (isElementFS) {
 				addDisplay(1, 'fullscreenElement', oData.inner.width.svw +' x '+ oData.inner.height.svh)
 			}
-			try {dom.btnFS.style.display = (isElementFS ? 'block' : 'none')} catch {}
+			try {dom.btnFS.style.display = (isElementFS ? 'block' : 'none')} catch(e) {}
 		}
 
 		// RFP/match
@@ -763,7 +763,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 	// 1325110: mozOrientation slated for deprecation
 	let items = ['mozOrientation', 'orientation.angle', 'orientation.type']
 	let targets = ['screen','iframe'], iscreen
-	try {iscreen = dom.tzpIframe.contentWindow.screen} catch {}
+	try {iscreen = dom.tzpIframe.contentWindow.screen} catch(e) {}
 	targets.forEach(function(k) {
 		let strIframe = 'iframe' == k ? '_iframe' : ''
 		let target = 'screen' == k ? screen : iscreen
@@ -1196,7 +1196,7 @@ const get_scr_position_screen = (METRIC) => new Promise(resolve => {
 	// nonGecko: number vs undefined: i.e a string of "undefined" will be an error
 	let aNonGecko = ['left','top']
 	let targets = ['screen','iframe'], iscreen, display = []
-	try {iscreen = dom.tzpIframe.contentWindow.screen} catch {}
+	try {iscreen = dom.tzpIframe.contentWindow.screen} catch(e) {}
 	targets.forEach(function(k) {
 		let strIframe = 'iframe' == k ? '_iframe' : ''
 		let target = 'screen' == k ? screen : iscreen, x
@@ -1288,7 +1288,7 @@ function get_scr_viewport_units() {
 	aList.forEach(function(k) {
 		let METRIC = 'L' == k ? 'sizes_viewport' : 'sizes_inner'
 		let target
-		try {target = dom['tzp'+ k +'V']} catch {}
+		try {target = dom['tzp'+ k +'V']} catch(e) {}
 		let prefix = k.toLowerCase() + 'v'
 		for (const p of Object.keys(data)) {
 		//aItems.forEach(function(p) {
