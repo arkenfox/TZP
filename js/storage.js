@@ -17,7 +17,7 @@ function lookup_cookie(name) {
 			while (c.charAt(0) == ' ') {c = c.substring(1)}
 			if (c.indexOf(name) == 0) {return c.substring(name.length, c.length)}
 		}
-	} catch {}
+	} catch(e) {}
 	return ''
 }
 
@@ -377,7 +377,7 @@ const test_idb = (log = false) => new Promise(resolve => {
 			dbTx.oncomplete = function() {dbObject.close()}
 		}
 		openIDB.onerror = function(event) {exit(zF)}
-	} catch {
+	} catch(e) {
 		exit(zErr)
 	}
 })
@@ -401,7 +401,7 @@ const test_worker = (log = false) => new Promise(resolve => {
 			worker.onmessage = function(e) {worker.terminate; exit(zS)} // receive
 			worker.onerror = function(e) {exit(zErr)} // error
 			worker.onterminate = function() {URL.revokeObjectURL(workerURL)} // cleanup
-		} catch {
+		} catch(e) {
 			exit(zErr)
 		}
 	}
@@ -425,7 +425,7 @@ const test_worker_service = (log = false) => new Promise(resolve => {
 			.catch((error) => {
 				exit(zErr)
 			})
-		} catch {exit(zErr)}
+		} catch(e) {exit(zErr)}
 	}
 })
 
