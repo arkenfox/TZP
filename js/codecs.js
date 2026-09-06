@@ -164,9 +164,9 @@ function get_autoplay(METRIC) {
 	try {
 		let atest, mtest
 		let ares = navigator.getAutoplayPolicy('audiocontext')
-		try {atest = navigator.getAutoplayPolicy(dom.tzpAudio)} catch {atest = zErr}
+		try {atest = navigator.getAutoplayPolicy(dom.tzpAudio)} catch(e) {atest = zErr}
 		let mres = navigator.getAutoplayPolicy('mediaelement')
-		try {mtest = navigator.getAutoplayPolicy(dom.tzpVideo)} catch {mtest = zErr}
+		try {mtest = navigator.getAutoplayPolicy(dom.tzpVideo)} catch(e) {mtest = zErr}
 		let display = (ares === atest ? ares : ares +', '+ atest) +' | '+ (mres === mtest ? mres : mres +', '+ mtest)
 		addDisplay(13, METRICuser, display)
 	} catch(e) {
@@ -409,43 +409,77 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		on android it can hold up the result and we end up with eme == timeout
 			^ if rerun/no-timeout we get
 			" error is: NotSupportedError: The application embedding this user agent has blocked MediaKeySystemAccess"
-		on android DRM in PB mode is always prompted
+		on android since at least FF153 DRM in PB mode is always prompted
 	*/
 
-	let isDone = false
-	// really slow on first session loads in blink / also android needs help
-	let timeout = 'blink' == isEngine ? 4000 : 400 
-	setTimeout(function() {if (!isDone) {exit(zErrTime)}}, timeout)
-	function exit(value, data ='', btn='') {
-		if (!isDone) {
-			isDone = true
-			// results are not guaranteed to come back in the order requested: sort into a new object
-			if ('object' == typeof data) {
-				let newobj = {}
-				for (const k of Object.keys(data).sort()) {
-					newobj[k] = {}
-					for (const j of Object.keys(data[k]).sort()) {newobj[k][j] = data[k][j]}
-				}
-				data = newobj
-				value = mini(data)
-				btn = addButton(13, METRIC)
+	function exit(value, btn='') {
+		// results are not guaranteed to come back in the order requested: sort into a new object
+		if ('object' == typeof data) {
+			let newobj = {}
+			for (const k of Object.keys(data).sort()) {
+				newobj[k] = {}
+				for (const j of Object.keys(data[k]).sort()) {newobj[k][j] = data[k][j]}
 			}
-			let notation = isBB ? bb_red : ''
-			if (isBB && '1f5a84f8' == value) {notation = bb_green} // desktop + android
-			addBoth(13, METRIC, value, btn, notation, data)
-			return resolve()
+			data = newobj
+			value = mini(data)
+			btn = addButton(13, METRIC)
 		}
+		let notation = isBB ? bb_red : default_red
+		if (isBB) {
+			if ('cc7705b5' == value) {notation = bb_green} // desktop + android
+		} else {
+			if ('59aec911' == value) {notation = default_green}
+		}
+		addBoth(13, METRIC, value, btn, notation, data)
+		return resolve()
 	}
 
-	let oEME = {
-		clearkey: ['org.w3.clearkey','webkit-org.w3.clearkey'],
-		fairplay: ['com.apple.fairplay'],
-		playready: ['com.microsoft.playready','com.youtube.playready'],
-		primetime: ['com.adobe.access','com.adobe.primetime'],
-		widevine: ['com.widevine.alpha'],
-	}
-	// widevine on non-BB android is problematic
-	if (!isBB && !isDesktop) {delete oEME.widevine}
+	let data = {}, config, timeout = 'blink' == isEngine ? 4000 : 400 
+	const get_eme_item = (key, item) => new Promise(resolve => {
+		// skip
+		// widevine android is problematic | LW also added a prompt to desktop
+		// note: BB is going to block prompts
+		// ToDo: there are other ways to determine drm I think under mediacapabilties that don't prompt
+			// https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
+			// except then we wouldn't catch the error (disabled vs nmot shipped or othger fuckery)
+		if (!isBB && !isDesktop) {if ('widevine' == item) {return resolve()}}
+		// create keys
+		if (undefined == data[key]) {data[key] = {}}
+		// catch timeouts
+		setTimeout(function() {
+			if (undefined == data[key][item]) {
+				data[key][item] = 'timed out'; return resolve()
+			}
+		}, timeout)
+		// get value
+		let value
+		navigator.requestMediaKeySystemAccess(item, [config]).then((result) => {
+			let typeCheck = typeFn(result)
+			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
+			let expected = '[object MediaKeySystemAccess]'
+			if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
+			data[key][item] = true
+			return resolve()
+		}).catch(function(e){
+			value = zErr
+			// suppress expected _unsupported_ errors
+				// ToDo: check safari
+			let aCheck = []
+			if (isGecko) {
+				// default gecko is clearkey and widewine enabled | errors vary
+					// clearkey: BB NotSupportedError: CDM is not installed
+					// winevine: BB NotSupportedError: EME has been preffed off
+					// winevine: FF NotSupportedError: Widevine EME disabled
+				aCheck.push('NotSupportedError: Key system is unsupported') // default unsupported
+			} else if ('blink' == isEngine) {
+				aCheck.push('NotSupportedError: Unsupported keySystem or supportedConfigurations.')
+			}
+			// errors: item names are unique, we don't need the key
+			if (aCheck.includes(e+'')) {value = false} else {log_error(13, METRIC +'_'+ item, e)}
+			data[key][item] = value
+			return resolve()
+		})
+	})
 
 	try {
 		if (runSE) {foo++}
@@ -455,57 +489,27 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		if ('undefined' == typeCheck) {exit(typeCheck)
 		} else if ('function' !== typeCheck) {throw zErrType +'requestMediaKeySystemAccess: ' + typeCheck
 		} else {
-			let data = {}, maxCount = 0, counter = 0
-			for (const k of Object.keys(oEME)) {maxCount += oEME[k].length}
-			const config = {
+			config = {
 				initDataTypes: ['keyids', 'webm'],
 				audioCapabilities: [{contentType: 'audio/webm; codecs="opus"'}],
 			}
-			for (const key of Object.keys(oEME).sort()) {
-				data[key] = {}
-				let value
-				oEME[key].forEach(function(item){
-					navigator.requestMediaKeySystemAccess(item, [config]).then((result) => {
-					typeCheck = typeFn(result)
-					if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
-					let expected = '[object MediaKeySystemAccess]'
-					if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
-						data[key][item] = true
-						counter++
-						// await all results
-						if (maxCount == counter) {exit('', data)}
-					}).catch(function(e){
-						value = zErr
-						// suppress expected errors
-							// ToDo: check safari
-						let aCheck = []
-						if (isGecko) {
-							if (isBB) {
-								let checkvalue = 'Key system is unsupported'
-								if ('com.widevine.alpha' == item) {checkvalue = 'EME has been preffed off'
-								} else if ('org.w3.clearkey' == item) {checkvalue = 'CDM is not installed'}
-								aCheck.push('NotSupportedError: '+ checkvalue)
-							} else {
-								aCheck.push('NotSupportedError: Key system is unsupported')
-							}
-						} else if ('blink' == isEngine) {
-							aCheck.push('NotSupportedError: Unsupported keySystem or supportedConfigurations.')
-						}
-						if (aCheck.includes(e+'')) {
-							value = false
-						} else {
-							log_error(13, METRIC +'_'+ item, e) // item names are unique, we don't need the key
-						}
-						data[key][item] = value
-						counter++
-						// wait for all the results
-						if (maxCount == counter) {exit('', data)}
-					})
-				})
-			}
+			Promise.all([
+				get_eme_item('clearkey','org.w3.clearkey'),
+				get_eme_item('clearkey','webkit-org.w3.clearkey'),
+				get_eme_item('fairplay','com.apple.fairplay'),
+				get_eme_item('playready','com.microsoft.playready'),
+				get_eme_item('playready','com.youtube.playready'),
+				get_eme_item('primetime','com.adobe.access'),
+				get_eme_item('primetime','com.adobe.primetime'),
+				get_eme_item('tzptime','i.dont.exist'),
+				get_eme_item('widevine','com.widevine.alpha'),
+			]).then(function(){
+				exit()
+				return resolve()
+			})
 		}
 	} catch(e) {
-		exit(e, zErrLog)
+		data = zErrLog; exit(e)
 	}
 })
 
