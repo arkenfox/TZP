@@ -2023,7 +2023,7 @@ function addData(section, metric, data, hash ='', isLies = false, donotuse ='x')
 	sDataTemp[zFP][isScope][section][metric] = isLies ? zLIE : value
 	if (isLies) {
 		// don't add spoofed domrect data
-		let aIgnore = ['element_font','element_forms','element_mathml','element_other','glyphs']
+		let aIgnore = ['element_font','element_forms','element_lang','element_math','element_other','glyphs']
 		if (aIgnore.includes(metric)) {value = zLIE}
 		log_known(section, metric, value)
 	}
