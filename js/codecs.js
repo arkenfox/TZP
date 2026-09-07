@@ -196,7 +196,6 @@ function get_capabilities_rfc(type) {
 			if (runSI) {data = null}
 			typeCheck = typeFn(data)
 			if ('object' !== typeCheck) {throw zErrInvalid +'expected object: got '+ typeCheck}
-			//console.log(data)
 			hash = mini(data); btn = addButton(13, METRIC)
 		}
 	} catch(e) {
@@ -441,7 +440,6 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		setTimeout(function() {
 			if (!isFound) {
 				isFound = true
-				//console.log(performance.now(), item, 'timed out')
 				return resolve([key, item, 'timed out'])
 			}
 		}, timeout)
@@ -451,7 +449,6 @@ const get_eme = (METRIC) => new Promise(resolve => {
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = '[object MediaKeySystemAccess]'
 			if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
-			//console.log(performance.now(), item, 'found true')
 			isFound = true
 			return resolve([key, item, true])
 		}).catch(function(e){
@@ -474,7 +471,6 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				aErrs.push(e+'')
 				log_error(13, METRIC +'_'+ item, e)
 			}
-			//console.log(performance.now(), item, 'found', value)
 			return resolve([key, item, value])
 		})
 	})

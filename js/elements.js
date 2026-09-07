@@ -11,7 +11,7 @@
 function get_domrect(METRIC) {
 	// quick exits
 	let hash, data = {}
-	if (!isGecko) {hash = zNA} else if ('9e6f19c5' == mini(oDomRect)) {hash = 'trustworthy'}
+	if (!isGeckoLike) {hash = zNA} else if ('9e6f19c5' == mini(oDomRect)) {hash = 'trustworthy'}
 	if (undefined !== hash) {
 		addBoth(15, METRIC, hash)
 		return
@@ -81,11 +81,18 @@ function get_domrect(METRIC) {
 		}
 		oDomRect[k].methods.forEach(function(method){tmpdata[method] = value})
 	}
-	let btnData = addButton(15, METRIC +'_data', 'data')
+	// raw data | gecko we failed, servo we're observing
+	let btnDataColor = isGecko ? 'bad' : 15
+	let btnData = addButton(btnDataColor, METRIC +'_data', 'data')
+	addDisplay(17, METRIC +'_data', btnData)
+
+	// FP
 	for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]}
 	hash = mini(data)
 	let btn = addButton(15, METRIC, countPass +'/4')
-	addBoth(15, METRIC, hash, btn + btnData, default_red, data)
+	// servo we just want to see what we got
+	if ('servo' == isEngine) {btn = '', data = '', hash = zNA}
+	addBoth(15, METRIC, hash, btn, default_red, data)
 	return
 }
 
