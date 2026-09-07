@@ -155,6 +155,7 @@ let isArchArray = zNA,
 	isFileSystemError,
 	isFontDelay = false, // BB win/mac require a delay for async font fallback if font.vis used
 	isGecko = false,
+	isGeckoLike = false, // gecko/servo
 	isOS,
 	isOSCSS,
 	isOSErr,
