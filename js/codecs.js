@@ -421,14 +421,18 @@ const get_eme = (METRIC) => new Promise(resolve => {
 	let timeout = 'blink' == isEngine ? 4000 : (isDesktop ? 1000 : 2000)
 	if (!gLoad) {timeout = 100}
 	const get_eme_item = (key, item) => new Promise(resolve => {
-		// skip: widevine android PBM (temp) and LW (persistent site exceptions) added a prompt, but
-			// only prompts should cause a timeout |it also means widevine+prompt is not super stable
-			// not worth disbling widevine checks here: prompt users can eat some timeout ms
-			// ... but gecko does seem quite perf heavy regardless .. oh well, sucks to be droid
+		// skip: widevine due to permission prompts
+			// notes: android (PBM has a temp prompt) | LW added it to normal mode
+			// only these prompts should cause a timeout | it also means widevine+prompt is not super stable
 		// note: BB is going to block prompts
-		//if (!isBB && !isDesktop) {if ('widevine' == key) {return resolve('skip'}}
+		if (isGecko && !isBB && !isDesktop) {
+			if ('widevine' == key) {
+				notation = ''
+				return resolve('skip')
+			}
+		}
 
-		// ToDo: there are other ways to determine drm I think under mediacapabilties that don't prompt
+		// ToDo: there may be other ways to determine DRM e.g under mediacapabilties that don't prompt
 			// https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
 			// except then we wouldn't catch the error (disabled vs not shipped or other fuckery)
 
@@ -509,12 +513,14 @@ const get_eme = (METRIC) => new Promise(resolve => {
 					}
 				})
 				let hash = mini(data), btn = addButton(13, METRIC)
-				if (isBB) {
-					aErrs.sort()
-					// correct hash _and_ correct errors
-					if ('cc7705b5' == hash && 'e2c1d62e' == mini(aErrs)) {notation = bb_green} // desktop + android
-				} else {
-					if ('59aec911' == hash) {notation = default_green}
+				if ('' !== notation) {
+					if (isBB) {
+						aErrs.sort()
+						// correct hash _and_ correct errors
+						if ('cc7705b5' == hash && 'e2c1d62e' == mini(aErrs)) {notation = bb_green} // desktop + android
+					} else {
+						if ('59aec911' == hash) {notation = default_green}
+					}
 				}
 				addBoth(13, METRIC, hash, btn, notation, data)
 				return resolve()
