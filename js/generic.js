@@ -512,7 +512,7 @@ function get_isDevices() {
 
 function get_isEngine(METRIC) {
 	if (isGecko) {return}
-	let t0 = nowFn()
+	let t0 = nowFn(), isEngineStats = ''
 	try {
 		let oEngines = {
 			blink: [
@@ -542,11 +542,14 @@ function get_isEngine(METRIC) {
 			//*/
 		}
 		// array engine matches, so subsequent results doesn't override prev
-		let aEngine = [], aAllowed = []
+		let aEngine = [], aAllowed = [], sumTrue
 		for (const engine of Object.keys(oEngines).sort()) {
 			aAllowed.push(engine)
 			let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
-			if (sumE > (oEngines[engine].length/2)) {aEngine.push(engine)}
+			if (sumE > (oEngines[engine].length/2)) {
+				sumTrue = sumE
+				aEngine.push(engine)
+			}
 		}
 		aAllowed.sort()
 		isEngineStr = aAllowed.join(', ')
@@ -555,7 +558,10 @@ function get_isEngine(METRIC) {
 			aAllowed = aAllowed.slice(0,-1)
 			isEngineStr = aAllowed.join(',') + isEngineStr
 		}
-		if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
+		if (aEngine.length == 1) {
+			isEngine = aEngine[0] // valid one result
+			isEngineStats = sumTrue +'/'+ Object.keys(oEngines[isEngine]).length
+		}
 		// servo
 			// easiest way to check for servo is it's not isGecko but has a lot of moz css properties
 		if (undefined == isEngine) {
@@ -573,7 +579,10 @@ function get_isEngine(METRIC) {
 					'MozTransitionDuration','MozTransitionProperty','MozTransitionTimingFunction'
 				]
 				let aMozFound = aKeys.filter(x => aMoz.includes(x))
-				if (aMozFound.length/aMoz.length > 0.5) {isEngine = 'servo'}
+				if (aMozFound.length/aMoz.length > 0.5) {
+					isEngine = 'servo'
+					isEngineStats = aMozFound.length +'/'+ aMoz.length
+				}
 			} catch(e) {}
 		}
 		// set minimum
@@ -603,7 +612,7 @@ function get_isEngine(METRIC) {
 			isEngineBlocked = false
 		}
 	} catch(e) {}
-	log_perf(SECTG, METRIC, t0,'', isEngine)
+	log_perf(SECTG, METRIC, t0,'', isEngine + ('' == isEngineStats ? '' : ' | '+ isEngineStats))
 }
 
 const get_isFileSystem = (METRIC, isWarmup = false) => new Promise(resolve => {
@@ -1158,7 +1167,8 @@ function get_isXSLT() {
 /*** PREREQ ***/
 
 function get_isDomRect() {
-	if (!isGecko) {return}
+	// notes: isGeckoLike: servo seems stable (different results to gecko), but not all four methods match
+	if (!isGeckoLike) {return}
 	// like canvas: this is only testing for protection, so always run in gecko including basic mode
 	// determine valid domrect methods + grab data for analysis
 	let t0 = nowFn()
@@ -1206,6 +1216,11 @@ function get_isDomRect() {
 			oDomRect[hash]['methods'].push(METRIC)
 		}
 	}
+	// fixup servo which we're running to see what we get
+	if ('servo' == isEngine) {
+		aDomRect = [true, true, true, true]
+	}
+
 	//aDomRect = [false, false, false, false] // -1
 	//aDomRect = [true, false, false, false] // 0
 	//aDomRect = [false, true, false, false] // 1
@@ -2730,6 +2745,8 @@ function run_immediate() {
 			try {screen.mozOrientation} catch(e) {} // FF147 2003169 deprecate mozOrientation
 				// X attribute is deprecated and will be removed in the future.
 		}
+		// set geckolike
+		isGeckoLike = (isGecko || 'servo' == isEngine)
 		// set isProtoProxy on known engines
 			// we already returned if isEngine == undefined just above
 		isProtoProxy = 'undefined' == isEngine ? false : true
