@@ -371,7 +371,8 @@ tr td.border-top, div.border-top {
 
 .togA, .togP, #btnFS, /* android, perf, fullscreen element */
 .togUA, .togUAD, .togAI, .togAW, .togMM,
-.togCS, .togFS, .togFG, .togL, .togS, .togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
+.togCS, .togFS, .togFSU, .togFG, .togL, .togS,
+.togTP, .togTA, .togTL, .togTT, .togTO {display: none;}
 
 #tb1 td:first-child {color: var(--test1); font-weight: var(--testweight)}
 	#tb1 .togS td:first-child {color: var(--test99); font-weight: normal;} /* screen/window/viewport */
@@ -395,6 +396,7 @@ tr td.border-top, div.border-top {
 #tb12 td:first-child {color: var(--test12); font-weight: var(--testweight)}
 	#tb12 .togFS td:first-child {color: var(--test99); font-weight: normal;} /* font sizes */
 	#tb12 .togFG td:first-child {color: var(--test99); font-weight: normal;} /* font glyphs */
+	#tb12 .togFSU td:first-child {color: var(--test99); font-weight: normal;} /* font support */
 #tb13 td:first-child {color: var(--test13); font-weight: var(--testweight)}
 #tb14 td:first-child {color: var(--test14); font-weight: var(--testweight)}
 	#tb14 .togCS td:first-child {color: var(--test99); font-weight: normal;} /* computed styles */

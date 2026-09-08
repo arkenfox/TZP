@@ -997,26 +997,30 @@ function set_fntList_mini() {
 	} catch(e) {}
 }
 
-function get_document_fonts(METRIC) {
-	fntDocEnabled = false // reset
-	let value, data, notation = default_red, fntTest = '\"test font name\"'
-	try {
-		if (runSE) {foo++}
-		// dedicated div, hardcoded style
-		let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
-			fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
-		fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
-		// test setting it: catches e.g. chameleon
-		dom.tzpDiv.style.fontFamily = fntTest
-		let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
-		// tidy
-		value = (fntDocEnabled ? zE : zD) +' | '+ font + (font !== font2 ? ' | '+ font2 : '')
-		// notate: only default if exact match
-		if ('enabled | \"test font name\"' == value) {notation = default_green}
-	} catch(e) {
-		value = e; data = zErrLog
+function get_font_formats() {
+	// FF105+: layout.css.font-tech.enabled
+	const oList = {
+		'font-format': ['collection','embeddedopentype','opentype','svg','truetype','woff','woff2'],
+		'font-tech': ['color-CBDT','color-COLRv0','color-COLRv1','color-SVG','color-sbix',
+			'features-aat','features-graphite','features-opentype','incremental','palettes','variations']
 	}
-	addBoth(12, METRIC, value,'', notation, data)
+	for (const k of Object.keys(oList)) {
+		let list = oList[k]
+		const METRIC = k
+		let hash, btn ='', data = []
+		try {
+			if (runSE) {foo++}
+			list.forEach(function(item) {if (CSS.supports(k +'('+ item + ')')) {data.push(item)}})
+			if (data.length) {
+				hash = mini(data); btn = addButton(12, METRIC, data.length)
+			} else {
+				hash = zNA; data =''
+			}
+		} catch(e) {
+			hash = e; data = zErrLog
+		}
+		addBoth(12, METRIC, hash, btn,'', data)
+	}
 	return
 }
 
@@ -1069,6 +1073,121 @@ function get_font_notation(METRIC, data) {
 		}
 	}
 	return notation
+}
+
+function get_font_support(METRIC) {
+	let oData = {}, aHealth = []
+
+	function get_document_fonts(m = 'document') {
+		fntDocEnabled = false // reset
+		let value, display ='', notation = default_red, fntTest = '\"test font name\"'
+		try {
+			if (runSE) {foo++}
+			// dedicated div, hardcoded style
+			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
+				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
+			fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
+			// test setting it: catches e.g. chameleon
+			dom.tzpDiv.style.fontFamily = fntTest
+			let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
+			// tidy
+			value = (fntDocEnabled ? zE : zD) +' | '+ font + (font !== font2 ? ' | '+ font2 : '')
+			// notate: only default if exact match
+			if ('enabled | \"test font name\"' == value) {notation = default_green}
+		} catch(e) {
+			value = zErr; display = log_error(12, METRIC +'_'+ m, e)
+		}
+		addDisplay(12, METRIC +'_'+ m, ('' == display ? value : display),'', notation)
+		if ('' !== notation) {aHealth.push(notation.includes(tick))}
+		oData[m] = value
+		return
+	}
+
+	function get_graphite(m = 'graphite') {
+		let value, display ='', notation = isBB ? bb_red : default_red
+		let isCount = true
+		try {
+			if (!fntDocEnabled) {throw zErrInvalid + 'document fonts disabled'}
+			// ToDo: handle when font face is blocked
+			let el = dom.tzpGraphite,
+				test = el.children[0].offsetWidth,
+				control = el.children[1].offsetWidth
+			if (runST) {test = NaN; control = NaN}
+			let wType = typeFn(test), hType = typeFn(control)
+			if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
+			value = (control == test ? zF : zS)
+			if (isBB) {
+				notation = value == zS ? bb_standard : bb_safer
+				isCount = false // don't count slider notations
+			} else if (zS == value) {
+				notation = default_green
+			}
+		} catch(e) {
+			value = zErr; display = log_error(12, METRIC +'_'+ m, e)
+		}
+		addDisplay(12, METRIC +'_'+ m, ('' == display ? value : display),'', notation)
+		oData[m] = value
+		if (isCount) {aHealth.push(notation.includes(tick))}
+		return
+	}
+
+	const get_woff = (m = 'woff2') => new Promise(resolve => {
+		// css
+		let cssvalue = getElementProp(14, '#cssWoff2', METRIC +'_'+ m +'_css')
+		oData[m +'_css'] = cssvalue
+		// test
+		let typeCheck = typeFn(window.FontFace)
+		if ('undefined' == typeCheck) {
+			oData[m] = typeCheck
+			addDisplay(12, METRIC +'_'+ m, typeCheck)
+			return resolve()
+		} else {
+			try {
+				const supportsWoff2 = (function(){
+					const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
+					font.load().catch(err => {
+						// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
+						// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
+						addDisplay(12, METRIC, log_error(12, METRIC, err))
+					})
+					return font.status == 'loaded' || font.status == 'loading'
+				})()
+				let value = (supportsWoff2 ? zS : zF)
+				oData[m] = value
+				addDisplay(12, METRIC +'_'+ m, value)
+				return resolve()
+			} catch(e) {
+				oData[m] = zErr
+				addDisplay(12, METRIC +'_'+ m, log_error(12, METRIC +'_'+ m, e))
+				return resolve()
+			}
+		}
+	})
+
+	Promise.all([
+		get_document_fonts(), //sets fntDocEnabled
+	]).then(function(){
+		Promise.all([
+			get_graphite(), //uses fntDocEnabled
+			get_woff(),
+		]).then(function(){
+			// sort object
+			let newobj = {}
+			for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
+			let hash = mini(newobj), btn = addButton(12, METRIC), notation = '', total = aHealth.length
+			if (total) {
+				let good = 0
+				aHealth.forEach(function(check){if (check) {good++}})
+				let prefix = good == total ? sg : sb
+				let str =  good == total ? tick : cross
+				notation = prefix +"[<span class='healthsilent'>"+ str +' '+ good +'/'+ total + '</span>]'+ sc
+
+			}
+			// healthsilent
+			addBoth(12, METRIC, hash, btn, notation, newobj)
+			return
+		})
+	})
 }
 
 function get_fonts_base(METRICB, selected) {
@@ -1265,6 +1384,36 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 		}
 	})
 })
+
+function get_fonts_max(METRIC, isLies) {
+	// tzpFontMax must have a fixed height position (e.g. top 0) and not be influenced by preceeding elements otherwise
+	// it can be somewhat unstable e.g. on _my_ android FF151, except for cursive, any measurement could end up as
+	// 898.9166259765625 _or_ 898.9166870117188  - e.g. page load vs pull to refresh vs global rerun vs section rerun
+
+	let t0 = nowFn()
+	let value = zNA, data = {}, btn='', el
+	try {
+		el = dom.tzpFontMax
+		isStylesAll.forEach(function(style) {
+			el.innerHTML = '<span class="'+ style +'" style="font-size: 20000px">.</span>'
+			let target = el.children[0]
+			let method = measureFn(target, METRIC)
+			if (undefined !== method.error) {throw method.errorstring}
+			value = method.height
+			if (runST) {value += ''}
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
+			data[style] = value
+		})
+		value = mini(data); btn = addButton(12, METRIC)
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	try {el.innerHTML =''} catch(e) {}
+	addBoth(12, METRIC, value, btn,'', data, isLies)
+	log_perf(12, METRIC, t0)
+	return
+}
 
 function get_fonts_offscreen(METRIC, METRICD) {
 	// test RFP/FPP do not leak
@@ -1874,63 +2023,6 @@ function get_fonts(METRIC, METRICD) {
 	})
 }
 
-function get_fonts_max(METRIC, isLies) {
-	// tzpFontMax must have a fixed height position (e.g. top 0) and not be influenced by preceeding elements otherwise
-	// it can be somewhat unstable e.g. on _my_ android FF151, except for cursive, any measurement could end up as
-	// 898.9166259765625 _or_ 898.9166870117188  - e.g. page load vs pull to refresh vs global rerun vs section rerun
-
-	let t0 = nowFn()
-	let value = zNA, data = {}, btn='', el
-	try {
-		el = dom.tzpFontMax
-		isStylesAll.forEach(function(style) {
-			el.innerHTML = '<span class="'+ style +'" style="font-size: 20000px">.</span>'
-			let target = el.children[0]
-			let method = measureFn(target, METRIC)
-			if (undefined !== method.error) {throw method.errorstring}
-			value = method.height
-			if (runST) {value += ''}
-			let typeCheck = typeFn(value)
-			if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
-			data[style] = value
-		})
-		value = mini(data); btn = addButton(12, METRIC)
-	} catch(e) {
-		value = e; data = zErrLog
-	}
-	try {el.innerHTML =''} catch(e) {}
-	addBoth(12, METRIC, value, btn,'', data, isLies)
-	log_perf(12, METRIC, t0)
-	return
-}
-
-function get_formats() {
-	// FF105+: layout.css.font-tech.enabled
-	const oList = {
-		'font-format': ['collection','embeddedopentype','opentype','svg','truetype','woff','woff2'],
-		'font-tech': ['color-CBDT','color-COLRv0','color-COLRv1','color-SVG','color-sbix',
-			'features-aat','features-graphite','features-opentype','incremental','palettes','variations']
-	}
-	for (const k of Object.keys(oList)) {
-		let list = oList[k]
-		const METRIC = k
-		let hash, btn ='', data = []
-		try {
-			if (runSE) {foo++}
-			list.forEach(function(item) {if (CSS.supports(k +'('+ item + ')')) {data.push(item)}})
-			if (data.length) {
-				hash = mini(data); btn = addButton(12, METRIC, data.length)
-			} else {
-				hash = zNA; data =''
-			}
-		} catch(e) {
-			hash = e; data = zErrLog
-		}
-		addBoth(12, METRIC, hash, btn,'', data)
-	}
-	return
-}
-
 function get_glyphs(METRIC, isLies) {
 	/* NOTES
 	FF131+ nightly: 1900175 + 1403931 ride the train
@@ -2047,26 +2139,6 @@ function get_glyphs(METRIC, isLies) {
 	removeElementFn(id)
 	addBoth(12, METRIC, hash, btn,'', data, isLies)
 	log_perf(12, METRIC, t0,'', strSizes)
-	return
-}
-
-function get_graphite(METRIC) {
-	let hash, data ='', notation = isBB ? bb_red : ''
-	try {
-		if (!fntDocEnabled) {throw zErrInvalid + 'document fonts disabled'}
-		// ToDo: handle when font face is blocked
-		let el = dom.tzpGraphite,
-			test = el.children[0].offsetWidth,
-			control = el.children[1].offsetWidth
-		if (runST) {test = NaN; control = NaN}
-		let wType = typeFn(test), hType = typeFn(control)
-		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
-		hash = (control == test ? zF : zS)
-		if (isBB) {notation = hash == zS ? bb_standard : bb_safer}
-	} catch(e) {
-		hash = e; data = zErrLog
-	}
-	addBoth(12, METRIC, hash,'', notation, data)
 	return
 }
 
@@ -2484,33 +2556,6 @@ function get_widget_fonts(METRIC) {
 	return
 }
 
-const get_woff2 = (METRIC) => new Promise(resolve => {
-	// check
-	let typeCheck = typeFn(window.FontFace)
-	if ('undefined' == typeCheck) {
-		addBoth(12, METRIC, typeCheck)
-		return resolve()
-	} else {
-		try {
-			const supportsWoff2 = (function(){
-				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
-				font.load().catch(err => {
-					// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
-					// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
-					addDisplay(12, METRIC, log_error(12, METRIC, err))
-				})
-				return font.status == 'loaded' || font.status == 'loading'
-			})()
-			let value = (supportsWoff2 ? zS : zF)
-			addBoth(12, METRIC, value)
-			return resolve()
-		} catch(e) {
-			addBoth(12, METRIC, e,'','', zErrLog)
-			return resolve()
-		}
-	}
-})
-
 const outputFonts = () => new Promise(resolve => {
 	if (gLoad) {
 		let strDisplay
@@ -2537,16 +2582,14 @@ const outputFonts = () => new Promise(resolve => {
 	set_fntList()
 	let isLies = isDomRect == -1
 	Promise.all([
-		get_document_fonts('document_fonts'), // sets fntDocEnabled
+		get_font_support('font_support'), // sets and uses fntDocEnabled
 		get_textautosize('text_%_autosize'),
 		get_script_defaults('script_defaults'),
 		get_fonts('font_sizes', METRICD), // uses fntDocEnabled
 		get_system_fonts('fonts_moz'),
 		get_system_fonts('fonts_system'),
 		get_widget_fonts('fonts_widget'),
-		get_formats(),
-		get_woff2('woff2'),
-		get_graphite('graphite'), // uses fntDocEnabled
+		get_font_formats(),
 	]).then(function(){
 		// allow more time for font async fallback
 		Promise.all([
