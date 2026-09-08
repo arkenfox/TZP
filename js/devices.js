@@ -565,6 +565,31 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 	}
 })
 
+const get_recursion = (METRIC) => new Promise(resolve => {
+	// sometimes, at least on blink, I can get a different result on first run
+	// per tab or per session: e.g. i get 17 (incorrect) then 12 (stable)
+	// easily reproducible for me on file:// - 99% sure I saw this on https
+	if (gLoad) {
+		// if page load run it again and compare
+			// if different log a global alert so I know what's happening
+			// tests indicate this is working: leave the global alert for a while
+		let initialR = isRecursion[1]
+		Promise.all([
+			get_isRecursion(1) // resets isRecursion
+		]).then(function(){
+			let newR = isRecursion[1]
+			if (initialR !== newR) {
+				log_alert(SECTG, METRIC, 'initial: '+ initialR +' | new: '+ newR, isScope, true)
+			}
+			addBoth(7, METRIC, isRecursion[0],'','', isRecursion[1])
+			return resolve()
+		})
+	} else {
+		addBoth(7, METRIC, isRecursion[0],'','', isRecursion[1])
+		return resolve()
+	}
+})
+
 function get_screen_isextended(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Screen/isExtended
 	// currently blink (100+) only
@@ -830,7 +855,6 @@ function get_viewport_segments(METRIC) {
 const outputDevices = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('devices')) {return resolve()}
 
-	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 	Promise.all([
 		get_media_devices('mediaDevices'),
 		get_media_constraints('mediaDevices_constraints'),
@@ -849,7 +873,11 @@ const outputDevices = () => new Promise(resolve => {
 		get_memory('memory'),
 		get_screen_isextended('screen_isextended'),
 	]).then(function(){
-		return resolve()
+		Promise.all([
+			get_recursion('recursion'), // run separately from all other functions
+		]).then(function(){
+			return resolve()
+		})
 	})
 })
 

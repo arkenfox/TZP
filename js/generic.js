@@ -863,7 +863,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 	}
 })
 
-const get_isRecursion = () => new Promise(resolve => {
+const get_isRecursion = (runNo) => new Promise(resolve => {
 	// 2nd test is more accurate/stable
 	const METRIC = "isRecursion"
 	let t0 = nowFn()
@@ -877,7 +877,9 @@ const get_isRecursion = () => new Promise(resolve => {
 		let stacklen = e.stack.toString().length
 		// display value
 		isRecursion = [level +" [stack length: "+ stacklen +']']
-		log_perf(SECTG, METRIC, t0, "", isRecursion.join())
+		if (undefined == runNo) {
+			log_perf(SECTG, METRIC, t0, "", isRecursion.join())
+		}
 		// metric values: only collect level
 			// https://github.com/arkenfox/user.js/issues/1789: round down to 1000's
 		isRecursion.push(Math.floor(level/1000))
