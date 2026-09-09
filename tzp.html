@@ -904,12 +904,8 @@
 			<span class="c" id="fontshash"></span>
 			<div class="btn-right smaller"><span class="c" id="fntBtn"></span></div>
 		</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">layout.css.font-tech.enabled</span></div>
-			&nbsp; font-format | font-tech</td><td class="mono"><span class="c" id="font-format"></span> | <span class="c" id="font-tech"></span>
-		</td></tr>
 		<!--fonts-->
-		<tr><td>[faces] fonts</td><td class="mono border-top">
+		<tr><td>[faces] fonts</td><td class="mono">
 			<div class="btn-right c" id="font_detection"></div><span id="font_faces"><span></td></tr>
 		<tr><td>[offscreen] fonts</td><td class="mono c" id="font_offscreen"></td></tr>
 		<tr><td><span id="labelFS" class="btn btn0" onClick="togglerows('FS','btn')">[+]</span>
@@ -948,9 +944,15 @@
 		<tr class="togFSU"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
 			&nbsp; document fonts</td><td class="c mono" id="font_support_document"></td></tr>
-		<tr class="togFSU"><td>graphite <sup>3</sup></td><td class="c mono" id="font_support_graphite"></td></tr>
+		<tr class="togFSU"><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">layout.css.font-tech.enabled</span></div>
+			&nbsp; font-format | font-tech</td><td class="mono">
+			<span class="c" id="font_support_font-format"></span>
+			| <span class="c" id="font_support_font-tech"></span>
+		</td></tr>
+		<tr class="togFSU"><td>graphite <sup>3</sup></td><td class="c mono" id="font_support_graphite_test"></td></tr>
 		<tr class="togFSU"><td>[css | test] woff2 <sup>4</sup></td><td class="mono">
-			<span id="cssWoff2"></span> | <span class="c" id="font_support_woff2"></span></td></tr>
+			<span id="cssWoff2"></span> | <span class="c" id="font_support_woff2_test"></span></td></tr>
 
 		<tr><td>text autosize</td><td class="c mono" id="text_%_autosize"></td></tr>
 		<!--tm-->
