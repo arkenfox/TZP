@@ -1,18 +1,56 @@
 /* @supports: https://drafts.csswg.org/css-conditional-5/#at-supports-ext */
 
 /* font-tech */
+#cssCBDT:after{content:"n/a";}
+@supports not font-tech(color-CBDT){#cssCBDT:after{content:"false";}}
+@supports font-tech(color-CBDT){#cssCBDT:after{content:"true";}}
 #cssCOLRv0:after{content:"n/a";}
+@supports not font-tech(color-COLRv0){#cssCOLRv0:after{content:"false";}}
 @supports font-tech(color-COLRv0){#cssCOLRv0:after{content:"true";}}
 #cssCOLRv1:after{content:"n/a";}
+@supports not font-tech(color-COLRv1){#cssCOLRv1:after{content:"false";}}
 @supports font-tech(color-COLRv1){#cssCOLRv1:after{content:"true";}}
-#cssOpenType:after{content:"n/a";}
-@supports font-tech(features-opentype){#cssOpenType:after{content:"true";}}
-#cssTrueType:after{content:"n/a";}
-@supports font-format(TrueType){#cssTrueType:after{content:"true";}}
+#cssSBIX:after{content:"n/a";}
+@supports not font-tech(color-SBIX){#cssSBIX:after{content:"false";}}
+@supports font-tech(color-SBIX){#cssSBIX:after{content:"true";}}
+#cssCSVG:after{content:"n/a";}
+@supports not font-tech(color-SVG){#cssCSVG:after{content:"false";}}
+@supports font-tech(color-SVG){#cssCSVG:after{content:"true";}}
+#cssfaat:after{content:"n/a";}
+@supports not font-tech(features-aat){#cssfaat:after{content:"false";}}
+@supports font-tech(features-aat){#cssfaat:after{content:"true";}}
+#cssfgraphite:after{content:"n/a";}
+@supports not font-tech(features-graphite){#cssfgraphite:after{content:"false";}}
+@supports font-tech(features-graphite){#cssfgraphite:after{content:"true";}}
+#cssfopentype:after{content:"n/a";}
+@supports not font-tech(features-opentype){#cssfopentype:after{content:"false";}}
+@supports font-tech(features-opentype){#cssfopentype:after{content:"true";}}
+#csspalettes:after{content:"n/a";}
+@supports not font-tech(palettes){#csspalettes:after{content:"false";}}
+@supports font-tech(palettes){#csspalettes:after{content:"true";}}
+#cssvariations:after{content:"n/a";}
+@supports not font-tech(variations){#cssvariations:after{content:"false";}}
+@supports font-tech(variations){#cssvariations:after{content:"true";}}
 
 /* font-format */
-#cssWoff2:after{content:"n/a";}
-@supports font-format(woff2){#cssWoff2:after{content:"true";}}
+#csscollection:after{content:"n/a";}
+@supports not font-format(collection){#csscollection:after{content:"false";}}
+@supports font-format(collection){#csscollection:after{content:"true";}}
+#cssopentype:after{content:"n/a";}
+@supports not font-format(opentype){#cssopentype:after{content:"false";}}
+@supports font-format(opentype){#cssopentype:after{content:"true";}}
+#csssvg:after{content:"n/a";}
+@supports not font-format(svg){#csssvg:after{content:"false";}}
+@supports font-format(svg){#csssvg:after{content:"true";}}
+#csstruetype:after{content:"n/a";}
+@supports not font-format(truetype){#csstruetype:after{content:"false";}}
+@supports font-format(truetype){#csstruetype:after{content:"true";}}
+#csswoff:after{content:"n/a";}
+@supports not font-format(woff){#csswoff:after{content:"false";}}
+@supports font-format(woff){#csswoff:after{content:"true";}}
+#csswoff2:after{content:"n/a";}
+@supports not font-format(woff2){#csswoff2:after{content:"false";}}
+@supports font-format(woff2){#csswoff2:after{content:"true";}}
 
 /* @media */
 #cssOm:after{content:"undefined";}

@@ -1065,6 +1065,7 @@ function get_font_support(METRIC) {
 			let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
 			// tidy
 			value = (fntDocEnabled ? zE : zD) +' | '+ font + (font !== font2 ? ' | '+ font2 : '')
+			oData[m+'_font'] = font + (font !== font2 ? ' | '+ font2 : '')
 			// notate: only default if exact match
 			if ('enabled | \"test font name\"' == value) {notation = default_green}
 		} catch(e) {
@@ -1072,48 +1073,73 @@ function get_font_support(METRIC) {
 		}
 		addDisplay(12, METRIC +'_'+ m, ('' == display ? value : display),'', notation)
 		if ('' !== notation) {aHealth.push(notation.includes(tick))}
-		oData[m] = value
+		oData[m] = fntDocEnabled
+		return
+	}
+
+	function get_font_formats_css() {
+		//return
+		// with the API disabled, everything is returned as false
+		let list = [
+			// font-format
+				// ToDo: embeddedopentype
+			'collection','opentype','svg','truetype','woff','woff2',
+			// font-tech
+				// ToDo: 4x incrementals
+			'CBDT','COLRv0','COLRv1','SBIX','CSVG',
+			'faat','fgraphite','fopentype',
+			'palettes','variations',
+		]
+		let oNames= {
+			'CBDT': 'color-CBDT',
+			'COLRv0': 'color-COLRv0',
+			'COLRv1': 'color-COLRv1',
+			'SBIX': 'color-SBIX',
+			'CSVG': 'color-SVG',
+			'faat': 'features-aat',
+			'fgraphite': 'features-graphite',
+			'fopentype': 'features-opentype',
+		}
+		list.forEach(function(m) {
+			let cssvalue = getElementProp(14, '#css'+ m, METRIC +'_'+ m +'_css')
+			cssvalue = "true" == cssvalue ? true : ('false' == cssvalue ? false : cssvalue )
+			if (undefined !== oNames[m]) {m = oNames[m]} // clean up names
+			oData[m +'_css'] = "true" == cssvalue ? true : cssvalue
+		})
 		return
 	}
 
 	function get_font_formats() {
-		// FF105+: layout.css.font-tech.enabled
+		// FF105+: layout.css.font-tech.enabled | pref removed in FF155+
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@supports
+
+		// ToDo: is it embeddedopentype or embedded-opentype
+			// the MDN page is specifically about css @supports
 		const oList = {
 			'font-format': [
-				'collection','embedded-opentype','embeddedopentype','opentype','svg','truetype','woff','woff2'
+				'collection','embeddedopentype','opentype','svg','truetype','woff','woff2'
 			],
 			'font-tech': [
-				'color-CBDT','color-COLRv0','color-COLRv1','color-SVG','color-sbix',
+				'color-CBDT','color-COLRv0','color-COLRv1','color-SVG','color-SBIX',
 				'features-aat','features-graphite','features-opentype',
 				'incremental','incremental-patch','incremental-range','incremental-auto','palettes','variations'
 			]
 		}
+		// with the API disabled, everything is returned as false
 		for (const k of Object.keys(oList)) {
 			let list = oList[k]
-			let value, btn ='', data = [], tmpdata = {}
-			try {
-				if (runSE) {foo++}
-				list.forEach(function(item) {
+			let data = {}
+			list.forEach(function(item) {
+				try {
+					if (runSE) {foo++}
 					let supported = CSS.supports(k +'('+ item + ')')
-					// rename item if features so graphite/opentype comes first
-					if (item.includes('features')) {item = item.slice(9) + '_features'}
-					if (supported) {data.push(item)}
-					tmpdata[item] = supported
-				})
-				if (data.length) {
-					value = mini(data); btn = addButton(12, METRIC +'_'+ k, data.length)
-					sDetail[isScope][METRIC +'_'+ k] = data
-					for (const j of Object.keys(tmpdata)) {oData[j] = tmpdata[j]}
-				} else {
-					value = zNA
-					oData[k] = value
+					data[item] = supported
+				} catch(e) {
+					data[item] = zErr
+					log_error(12, METRIC +'_'+ item, e)
 				}
-			} catch(e) {
-				value = log_error(12, METRIC +'_'+ k, e)
-				oData[k] = zErr
-			}
-			addDisplay(12, METRIC +'_'+ k, value, btn)
+			})
+			for (const j of Object.keys(data)) {oData[j] = data[j]}
 		}
 		return
 	}
@@ -1146,16 +1172,10 @@ function get_font_support(METRIC) {
 		return
 	}
 
-	const get_woff = (m = 'woff2') => new Promise(resolve => {
-		// css
-		let cssvalue = getElementProp(14, '#cssWoff2', METRIC +'_'+ m +'_css')
-		oData[m +'_css'] = "true" == cssvalue ? true : cssvalue
-		// test
-		m += '_test'
+	const get_woff = (m = 'woff2_test') => new Promise(resolve => {
 		let typeCheck = typeFn(window.FontFace)
 		if ('undefined' == typeCheck) {
 			oData[m] = typeCheck
-			addDisplay(12, METRIC +'_'+ m, typeCheck)
 			return resolve()
 		} else {
 			try {
@@ -1168,13 +1188,10 @@ function get_font_support(METRIC) {
 					})
 					return font.status == 'loaded' || font.status == 'loading'
 				})()
-				let value = (supportsWoff2 ? true : false)
-				oData[m] = value
-				addDisplay(12, METRIC +'_'+ m, value)
+				oData[m] = (supportsWoff2 ? true : false)
 				return resolve()
 			} catch(e) {
 				oData[m] = zErr
-				addDisplay(12, METRIC +'_'+ m, log_error(12, METRIC +'_'+ m, e))
 				return resolve()
 			}
 		}
@@ -1187,6 +1204,7 @@ function get_font_support(METRIC) {
 			get_graphite(), //uses fntDocEnabled
 			get_woff(),
 			get_font_formats(),
+			get_font_formats_css(),
 		]).then(function(){
 			// ToDo: downloadable: add a placeholder to remind me
 			oData['downloadable'] = 'TBA'
