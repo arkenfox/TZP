@@ -1180,7 +1180,7 @@ function get_font_support(METRIC) {
 				aHealth.forEach(function(check){if (check) {good++}})
 				let prefix = good == total ? sg : sb
 				let str =  good == total ? tick : cross
-				notation = prefix +"[<span class='healthsilent'>"+ str +' '+ good +'/'+ total + '</span>]'+ sc
+				notation = prefix +"[<span class='healthsilent'>"+ str +'</span> '+ good +'/'+ total +']'+ sc
 
 			}
 			// healthsilent
