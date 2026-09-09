@@ -2151,12 +2151,15 @@ function log_alert(section, metric, alert, scope = isScope, isOnce = false) {
 function log_error(section, metric, error = zErr, scope = isScope, isOnce = false) {
 	if ('string' !== typeof section) {section = sectionMap[section]}
 	if ('' == error || null == error || undefined == error) {error = zErr} else {error += ''}
-	let aLen25 = [
-		'canPlayType','isTypeSuppo','font-format','font-tech','textmetrics',
-		'audio_getCa','video_getCa',
-	]
+	// trim display errors
+	let isShorten = false
+	let aShortenStart = ['canPlayType','isTypeSuppo','textmetrics','audio_getCa','video_getCa',]
+	let aShortenMatch = ['font_support_font-format','font_support_font-tech']
 	let len = isDesktop ? 50 : 25
-	if (aLen25.includes(metric.slice(0,11))) {len = 25}
+	if (aShortenStart.includes(metric.slice(0,11)) || aShortenMatch.includes(metric)) {
+		isShorten = true
+		len = 25
+	}
 	let key = 'errors'
 	// collect
 	if (gRun && isOnce) {
@@ -2172,7 +2175,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	}
 	// trim if required + return
 	// is aLen25 and android, just display zErr
-	if (!isDesktop && aLen25.includes(metric.slice(0,11))) {
+	if (!isDesktop && isShorten) {
 		error = zErr
 	} else if (error.length > len) {
 		error = error.slice(0,len-3) + "..."
