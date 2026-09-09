@@ -997,33 +997,6 @@ function set_fntList_mini() {
 	} catch(e) {}
 }
 
-function get_font_formats() {
-	// FF105+: layout.css.font-tech.enabled
-	const oList = {
-		'font-format': ['collection','embeddedopentype','opentype','svg','truetype','woff','woff2'],
-		'font-tech': ['color-CBDT','color-COLRv0','color-COLRv1','color-SVG','color-sbix',
-			'features-aat','features-graphite','features-opentype','incremental','palettes','variations']
-	}
-	for (const k of Object.keys(oList)) {
-		let list = oList[k]
-		const METRIC = k
-		let hash, btn ='', data = []
-		try {
-			if (runSE) {foo++}
-			list.forEach(function(item) {if (CSS.supports(k +'('+ item + ')')) {data.push(item)}})
-			if (data.length) {
-				hash = mini(data); btn = addButton(12, METRIC, data.length)
-			} else {
-				hash = zNA; data =''
-			}
-		} catch(e) {
-			hash = e; data = zErrLog
-		}
-		addBoth(12, METRIC, hash, btn,'', data)
-	}
-	return
-}
-
 function get_font_notation(METRIC, data) {
 	if (!isGecko) {return ''}
 
@@ -1103,7 +1076,49 @@ function get_font_support(METRIC) {
 		return
 	}
 
-	function get_graphite(m = 'graphite') {
+	function get_font_formats() {
+		// FF105+: layout.css.font-tech.enabled
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@supports
+		const oList = {
+			'font-format': [
+				'collection','embedded-opentype','embeddedopentype','opentype','svg','truetype','woff','woff2'
+			],
+			'font-tech': [
+				'color-CBDT','color-COLRv0','color-COLRv1','color-SVG','color-sbix',
+				'features-aat','features-graphite','features-opentype',
+				'incremental','incremental-patch','incremental-range','incremental-auto','palettes','variations'
+			]
+		}
+		for (const k of Object.keys(oList)) {
+			let list = oList[k]
+			let value, btn ='', data = [], tmpdata = {}
+			try {
+				if (runSE) {foo++}
+				list.forEach(function(item) {
+					let supported = CSS.supports(k +'('+ item + ')')
+					// rename item if features so graphite/opentype comes first
+					if (item.includes('features')) {item = item.slice(9) + '_features'}
+					if (supported) {data.push(item)}
+					tmpdata[item] = supported
+				})
+				if (data.length) {
+					value = mini(data); btn = addButton(12, METRIC +'_'+ k, data.length)
+					sDetail[isScope][METRIC +'_'+ k] = data
+					for (const j of Object.keys(tmpdata)) {oData[j] = tmpdata[j]}
+				} else {
+					value = zNA
+					oData[k] = value
+				}
+			} catch(e) {
+				value = log_error(12, METRIC +'_'+ k, e)
+				oData[k] = zErr
+			}
+			addDisplay(12, METRIC +'_'+ k, value, btn)
+		}
+		return
+	}
+
+	function get_graphite(m = 'graphite_test') {
 		let value, display ='', notation = isBB ? bb_red : default_red
 		let isCount = true
 		try {
@@ -1115,11 +1130,11 @@ function get_font_support(METRIC) {
 			if (runST) {test = NaN; control = NaN}
 			let wType = typeFn(test), hType = typeFn(control)
 			if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
-			value = (control == test ? zF : zS)
+			value = (control == test ? false : true)
 			if (isBB) {
-				notation = value == zS ? bb_standard : bb_safer
+				notation = true === value ? bb_standard : bb_safer
 				isCount = false // don't count slider notations
-			} else if (zS == value) {
+			} else if (true === value) {
 				notation = default_green
 			}
 		} catch(e) {
@@ -1134,8 +1149,9 @@ function get_font_support(METRIC) {
 	const get_woff = (m = 'woff2') => new Promise(resolve => {
 		// css
 		let cssvalue = getElementProp(14, '#cssWoff2', METRIC +'_'+ m +'_css')
-		oData[m +'_css'] = cssvalue
+		oData[m +'_css'] = "true" == cssvalue ? true : cssvalue
 		// test
+		m += '_test'
 		let typeCheck = typeFn(window.FontFace)
 		if ('undefined' == typeCheck) {
 			oData[m] = typeCheck
@@ -1152,7 +1168,7 @@ function get_font_support(METRIC) {
 					})
 					return font.status == 'loaded' || font.status == 'loading'
 				})()
-				let value = (supportsWoff2 ? zS : zF)
+				let value = (supportsWoff2 ? true : false)
 				oData[m] = value
 				addDisplay(12, METRIC +'_'+ m, value)
 				return resolve()
@@ -1170,7 +1186,10 @@ function get_font_support(METRIC) {
 		Promise.all([
 			get_graphite(), //uses fntDocEnabled
 			get_woff(),
+			get_font_formats(),
 		]).then(function(){
+			// ToDo: downloadable: add a placeholder to remind me
+			oData['downloadable'] = 'TBA'
 			// sort object
 			let newobj = {}
 			for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
@@ -2589,7 +2608,6 @@ const outputFonts = () => new Promise(resolve => {
 		get_system_fonts('fonts_moz'),
 		get_system_fonts('fonts_system'),
 		get_widget_fonts('fonts_widget'),
-		get_font_formats(),
 	]).then(function(){
 		// allow more time for font async fallback
 		Promise.all([
