@@ -262,6 +262,12 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 				for (let i=0; i < aItems.length; i++) {
 					let p = aItems[i], x, isSkip = false
 					let axis = p.includes('idth') ? 'width' : 'height'
+					// differentiate iframe tests, e.g. we'll be adding more such as media_iframe
+						// we don't do iframe inner: so outer = window, rest = screen
+					let metricname = name
+					if ('iframe' == name) {
+						metricname = ('outer' == k ? 'window' : 'screen') +'_iframe'
+					}
 					try {
 						if ('iframe' == name && 'inner' == k) {isSkip = true} // skip iframe inner
 						if (!isSkip) {
@@ -280,10 +286,10 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 							if (!Number.isInteger(x)) {throw zErrInvalid + 'expected Integer: got '+ typeCheck}
 						}
 					} catch(e) {
-						log_error(1, 'sizes_'+ k +'_'+ axis +'_'+ name, e)
+						log_error(1, 'sizes_'+ k +'_'+ axis +'_'+ metricname, e)
 						x = zErr
 					}
-					if (!isSkip) {oTmp[k][axis][name] = x}
+					if (!isSkip) {oTmp[k][axis][metricname] = x}
 				}
 			}
 		})
