@@ -147,6 +147,16 @@
 			<a id="tzpClrlink" href="fake" class="">unvisited</a>
 			<a id="tzpClrvisited-link" href="" class="">visited</a>
 		</div>
+		<div>
+			<!--font-tech-->
+			<span id="cssCBDT"></span><span id="cssCOLRv0"></span><span id="cssCOLRv1"></span>
+			<span id="cssSBIX"></span><span id="cssCSVG"></span>
+			<span id="cssfaat"></span><span id="cssfgraphite"></span><span id="cssfopentype"></span>
+			<span id="csspalettes"></span><span id="cssvariations"></span>
+			<!--font-format-->
+			<span id="csscollection"></span><span id="cssopentype"></span>
+			<span id="csssvg"></span><span id="csstruetype"></span><span id="csswoff"></span><span id="csswoff2"></span>
+		</div>
 	</div>
 
 	<table>
@@ -939,20 +949,12 @@
 			<span class="ttxt">proportional font<br>monospace size<br>sans-serif size<br>serif size</span></div>
 			&nbsp; script defaults</td><td class="c mono" id="script_defaults"></td></tr>
 		<!--support-->
-		<tr><td><span id="labelFSU" class="btn btn0" onClick="togglerows('FSU','btn')">[+]</span>support</td>
+		<tr><td><span id="labelFSU" class="btn btn0" onClick="togglerows('FSU','btn')">[+]</span>support <sup>4</sup></td>
 			<td class="c mono" id="font_support"></td></tr>
 		<tr class="togFSU"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
 			&nbsp; document fonts</td><td class="c mono" id="font_support_document"></td></tr>
-		<tr class="togFSU"><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">layout.css.font-tech.enabled</span></div>
-			&nbsp; font-format | font-tech</td><td class="mono">
-			<span class="c" id="font_support_font-format"></span>
-			| <span class="c" id="font_support_font-tech"></span>
-		</td></tr>
 		<tr class="togFSU"><td>graphite <sup>3</sup></td><td class="c mono" id="font_support_graphite_test"></td></tr>
-		<tr class="togFSU"><td>[css | test] woff2 <sup>4</sup></td><td class="mono">
-			<span id="cssWoff2"></span> | <span class="c" id="font_support_woff2_test"></span></td></tr>
 
 		<tr><td>text autosize</td><td class="c mono" id="text_%_autosize"></td></tr>
 		<!--tm-->
@@ -969,13 +971,13 @@
 		<tr><td colspan="2"><span class="normal">
 			<span class="no_color">custom font from </span>
 			<a target="_blank" class="blue"	href="https://graphite.sil.org/">SIL</a> <sup>3</sup>
+			<span class="no_color">, woff test from </span>
+			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>4</sup>
 			<span class="no_color"> and code based on work by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
-			<span class="no_color">, </span>
+			<span class="no_color"> and </span>
 			<a target="_blank" class="blue"
 				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>2</sup>
-			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>4</sup>
 		</span></td></tr>
 	</table>
 
