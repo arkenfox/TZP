@@ -2,17 +2,17 @@
 
 /* font-tech */
 #cssCOLRv0:after{content:"n/a";}
-@supports font-tech(color-COLRv0){#cssCOLRv0:after{content:"supported";}}
+@supports font-tech(color-COLRv0){#cssCOLRv0:after{content:"true";}}
 #cssCOLRv1:after{content:"n/a";}
-@supports font-tech(color-COLRv1){#cssCOLRv1:after{content:"supported";}}
+@supports font-tech(color-COLRv1){#cssCOLRv1:after{content:"true";}}
 #cssOpenType:after{content:"n/a";}
-@supports font-tech(features-opentype){#cssOpenType:after{content:"supported";}}
+@supports font-tech(features-opentype){#cssOpenType:after{content:"true";}}
 #cssTrueType:after{content:"n/a";}
-@supports font-format(TrueType){#cssTrueType:after{content:"supported";}}
+@supports font-format(TrueType){#cssTrueType:after{content:"true";}}
 
 /* font-format */
-#cssWoff2:after{content:"undefined";}
-@supports font-format(woff2){#cssWoff2:after{content:"supported";}}
+#cssWoff2:after{content:"n/a";}
+@supports font-format(woff2){#cssWoff2:after{content:"true";}}
 
 /* @media */
 #cssOm:after{content:"undefined";}
