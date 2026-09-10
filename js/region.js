@@ -140,6 +140,9 @@ function get_nav_gpc(METRIC) {
 		if (runST) {hash = null} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
 		if (undefined === hash) {
 			hash = hash+''
+			// 1983296: FF157+ remove privacy.globalprivacycontrol.functionality.enabled
+				// with pref removed we can only get a boolean
+			if (isVer > 156) {throw zErrType + 'undefined'}
 		} else {
 			let typeCheck = typeFn(hash)
 			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}

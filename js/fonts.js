@@ -1068,6 +1068,7 @@ function get_font_support(METRIC) {
 			oData[m+'_font'] = font + (font !== font2 ? ' | '+ font2 : '')
 			// notate: only default if exact match
 			if ('enabled | \"test font name\"' == value) {notation = default_green}
+			sDetail[isScope].lookup[METRIC +'_'+ m] = value
 		} catch(e) {
 			value = zErr; display = log_error(12, METRIC +'_'+ m, e)
 		}
