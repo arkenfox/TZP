@@ -2154,7 +2154,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	// trim display errors
 	let isShorten = false
 	let aShortenStart = ['canPlayType','isTypeSuppo','textmetrics','audio_getCa','video_getCa',]
-	let aShortenMatch = ['font_support_font-format','font_support_font-tech']
+	let aShortenMatch = []
 	let len = isDesktop ? 50 : 25
 	if (aShortenStart.includes(metric.slice(0,11)) || aShortenMatch.includes(metric)) {
 		isShorten = true
