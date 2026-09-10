@@ -17,6 +17,14 @@
 @supports font-tech(features-graphite){#cssfgraphite:after{content:"true";}}
 #cssfopentype:after{content:"false";}
 @supports font-tech(features-opentype){#cssfopentype:after{content:"true";}}
+#cssincremental:after{content:"false";}
+@supports font-tech(incremental){#cssincremental:after{content:"true";}}
+#cssiauto:after{content:"false";}
+@supports font-tech(incremental-auto){#cssiauto:after{content:"true";}}
+#cssipatch:after{content:"false";}
+@supports font-tech(incremental-patch){#cssipatch:after{content:"true";}}
+#cssirange:after{content:"false";}
+@supports font-tech(incremental-range){#cssirange:after{content:"true";}}
 #csspalettes:after{content:"false";}
 @supports font-tech(palettes){#csspalettes:after{content:"true";}}
 #cssvariations:after{content:"false";}
