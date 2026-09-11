@@ -1124,7 +1124,7 @@ function get_font_support(METRIC) {
 	}
 
 	function get_font_formats() {
-		// FF105+: layout.css.font-tech.enabled | pref removed in FF155+
+		// FF105-154: layout.css.font-tech.enabled | 2068247#c19: pref removed in FF155+
 			// https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@supports
 			// incremental: https://github.com/w3c/IFT/
 
@@ -1175,6 +1175,7 @@ function get_font_support(METRIC) {
 			let wType = typeFn(test), hType = typeFn(control)
 			if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
 			value = (control == test ? false : true)
+			display = value ? zE : zD
 			if (isBB) {
 				notation = true === value ? bb_standard : bb_safer
 				isCount = false // don't count slider notations
@@ -1184,7 +1185,7 @@ function get_font_support(METRIC) {
 		} catch(e) {
 			value = zErr; display = log_error(12, metricname, e)
 		}
-		addDisplay(12, metricname, ('' == display ? value : display),'', notation)
+		addDisplay(12, metricname, display,'', notation)
 		oData[key][m] = value
 		if (isCount) {aHealth.push(notation.includes(tick))}
 		return
