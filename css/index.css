@@ -321,7 +321,7 @@ table {
 	font-size: 12px;
 }
 tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
-td {padding-top: 2px; padding-bottom: 3px; padding-left: 10px; vertical-align: top;}
+td {padding-top: 2px; padding-bottom: 3px; padding-left: 10px;}
 th {color: black; font-size: 14px; padding: 3px 0;}
 
 table td:first-child { text-align: right; vertical-align: top;}
