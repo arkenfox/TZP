@@ -1018,18 +1018,24 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 	// visualViewport scale
 	function get_vv_scale(item) {
 		let value, display
-		try {
-			value = visualViewport.scale
-			if (runST) {value = undefined}
-			let typeCheck = typeFn(value)
-			display = value
-			if ('number' !== typeof value) {throw zErrType + typeCheck}
-		} catch(e) {
-			display = log_error(1, METRIC +'_'+ item, e)
-			value = zErr
-		}
-		addDisplay(1, item, display)
-		oData[item] = value
+		let targets = ['window','iframe']
+		targets.forEach(function(k) {
+			value = undefined
+			let strIframe = 'iframe' == k ? '_iframe' : ''
+			try {
+				let target = 'window' == k ? window : dom.tzpIframe.contentWindow.window
+				value = target.visualViewport.scale
+				if (runST) {value = undefined}
+				let typeCheck = typeFn(value)
+				display = value
+				if ('number' !== typeof value) {throw zErrType + typeCheck}
+			} catch(e) {
+				display = log_error(1, METRIC +'_'+ item + strIframe, e)
+				value = zErr
+			}
+			addDisplay(1, item + strIframe, display)
+			oData[item + strIframe] = value
+		})
 		return
 	}
 
