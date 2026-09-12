@@ -549,11 +549,22 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		addDisplay(1, 'screen_aspect_ratio', '[aspect ratio: '+ aspect +']','', notation)
 
 		// data
-		for (const k of Object.keys(oData)) {addData(1, 'sizes_'+ k, oData[k], mini(oData[k]))}
+			// we only want to record a single result or summary
+			// this makes it easier to control (e.g. zLIES or bucketed)
+			// it also removes the noise of mismatches, lies, errors
+		for (const k of Object.keys(oSummary)) {
+			// display
+			let str = oSummary[k].width +' x '+ oSummary[k].height
+			sDetail[isScope].lookup['sizes_'+ k] = str
+			oDisplay[k +'_summary'] = str
+			// data
+			addData(1, 'sizes_'+ k, oSummary[k], mini(oSummary[k]))
+		}
 		addData(1, 'sizes_initial', initData, initHash)
 		// display
-		for (const k of Object.keys(oSummary)) {oDisplay[k +'_summary'] = oSummary[k].width +' x '+ oSummary[k].height}
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
+		// health raw data
+		for (const k of Object.keys(oData)) {sDetail[isScope]['sizes_'+ k +'_rawdetail'] = oData[k]}
 		return resolve()
 	})
 })
