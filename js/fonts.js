@@ -1162,7 +1162,6 @@ function get_font_support(METRIC) {
 		let key = 'graphite'
 		if (undefined == oData[key]) {oData[key] = {}}
 		let metricname = METRIC +'_'+ key +'_'+ m
-
 		let value, display ='', notation = isBB ? bb_red : default_red
 		let isCount = true
 		try {
@@ -1176,6 +1175,7 @@ function get_font_support(METRIC) {
 			if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
 			value = (control == test ? false : true)
 			display = value ? zE : zD
+			sDetail[isScope].lookup[key +'_'+ m] = value
 			if (isBB) {
 				notation = true === value ? bb_standard : bb_safer
 				isCount = false // don't count slider notations
