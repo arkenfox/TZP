@@ -529,7 +529,6 @@ function get_isEngine(METRIC) {
 				'function' === typeof webkitCancelRequestAnimationFrame,
 				'object' === typeof webkitIndexedDB,
 			],
-			/* ignore edgeHTML
 			edgeHTML: [
 				'function' === typeof clearImmediate,
 				'function' === typeof msWriteProfilerMark,
@@ -538,8 +537,10 @@ function get_isEngine(METRIC) {
 				'object' === typeof onmsinertiastart,
 				'object' === typeof onreadystatechange,
 				'function' === typeof setImmediate,
+				/*
+				'MSStream' in window, 'msLaunchUri' in navigator, 'msSaveBlob' in navigator
+				*/
 			]
-			//*/
 		}
 		// array engine matches, so subsequent results doesn't override prev
 		let aEngine = [], aAllowed = [], sumTrue
@@ -592,9 +593,7 @@ function get_isEngine(METRIC) {
 			// if enforcing min, check
 			if (isAllowNonGeckoMin) {
 				try {
-					if ('servo' == isEngine) {
-						isEngineBlocked = false
-					} else if ('blink' == isEngine) {
+					if ('blink' == isEngine) {
 						// 109 is the last version supported on win7
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
 						if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
@@ -604,6 +603,9 @@ function get_isEngine(METRIC) {
 						// 15.6.1 2022-Aug = last version supported on macOS 10.15?
 						if ('function' == typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4 2024-Mar
+					} else {
+						// we have no min check to run, so allow
+						isEngineBlocked = false
 					}
 				} catch(e) {}
 			}
@@ -1616,6 +1618,7 @@ function lookup_health(sect, metric, scope, isPass) {
 	let data ='', hash =''
 	// error?
 	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
+
 	if ('pixels_match' == metric) {
 		data = sDetail[scope][metric]
 		if ('string' == typeof data) {return([zErr, data])}
@@ -1630,6 +1633,8 @@ function lookup_health(sect, metric, scope, isPass) {
 		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
 		if ('useragent_' == metric.slice(0,10)) {nested = 'useragent'; metric = metric.replace('useragent_','')}
 		if ('media_' == metric.slice(0,6)) {nested = 'media'; metric = metric.replace('media_','')}
+		if ('font_support_' == metric.slice(0,13)) {nested = 'font_support'; metric = metric.replace('font_support_','')}
+
 		// detail lookup
 		let datalookup
 		if (sDetail[scope].lookup[metric] !== undefined) {datalookup = sDetail[scope].lookup[metric]}
@@ -1650,8 +1655,12 @@ function lookup_health(sect, metric, scope, isPass) {
 			let typeCheck = typeFn(data, true)
 			hash = '' == hash ? data : hash
 			// handle sDetailTemp: copy per run so it doesn't change in gData
-			if (undefined !== sDetail[scope][metric]) {
+			if (undefined !== sDetail[scope][metric +'_rawdetail']) {
+				sDetailTemp = sDetail[scope][metric +'_rawdetail']
+			} else if (undefined !== sDetail[scope][metric]) {
 				sDetailTemp = sDetail[scope][metric]
+			}
+			if (undefined !== sDetailTemp) {
 				if (!isPass) {
 					// special case font names/faces: detail should reflect isPass: can't just check for !== undefined
 					// e.g. windows FPP will still have unexpected data (for RFP)
@@ -1705,8 +1714,8 @@ function output_health(scope) {
 				let summary = data[0], detail = data[1]
 				if ('' !== summary) {summary = ' '+ summary}
 
-				// populate detail
-				if ('' == detail) {detail = symbol}
+				// populate detail | note: '' == false (true) | 0 == false (true)
+				if ('' == detail && 'string' == typeof detail) {detail = symbol}
 				gData[h][scope][metric] = detail
 				gData[h][scope + sub][metric] = detail
 				// populate summary + metriclist
