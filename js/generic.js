@@ -819,11 +819,11 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 					//console.log(aWindows, intW, aMac, intM, aAndroid, intA)
 					if (intW > 0 && (intM + intA == 0)) {exit('windows')
 					} else if (intM > 0 && (intW + intA == 0)) {exit('mac')
-					} else if (aDetected.length == 0) {exit('linux')
 					} else {
-						//} else if (intA > 0 && (intM + intW == 0)) {exit('android')
-						//} else {exit('linux')}
-						// can't base android vs lionux on a single font
+						// blink droid seems broken (mayhbe it always was)
+						// fontdebug PoC can't even detect Roboto or Dancing Script
+						// so we always end up as linux
+						// going to need other ways to determine linux/android
 						trysomethingelse()
 					}
 				}
