@@ -52,7 +52,7 @@ function smartFn(type) {
 	isSmartDataMode = false
 	isSmart = false
 	// calculate
-	if (isGecko && isVer >= isSmartMin) {
+	if (isVer >= isSmartMin) {
 		if ('early' == type) {
 			// we do not know isBB yet
 			if (isSmartAllowed) {isSmart = true}
@@ -776,11 +776,12 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		let fntEnabled = false
 		try {
 			if (runSG) {foo++}
-			let fntTest = '\"test font name\"'
+			// FF157+ 2067259 change to criteria to determine if foint-families are quoted
+			let fntTest = ['\"test font name\"','test font name']
 			//dom.tzpDocFont.style.fontFamily = fntTest
 			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
-				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
-			fntEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
+				fontnoquotes = font.slice(0, fntTest[0].length - 2) // ext may strip quotes marks
+			fntEnabled = (fntTest.includes(font) || fntTest.includes(fontnoquotes) ? true : false)
 		} catch(e) {}
 		if (!fntEnabled) {trysomethingelse(); return}
 

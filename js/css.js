@@ -345,7 +345,7 @@ function get_link(METRIC) {
 		if (runST) {value = null} else if (runSI) {value = 'x'}
 		let typeCheck = typeFn(value)
 		if ('string' !== typeCheck) {throw zErrType + typeCheck}
-		if (isGecko && isVer < 143) {
+		if (isVer < 143) {
 			if (!value.includes('rgb(')) {throw zErrInvalid +'got ' + value}
 		}
 		// ignore rgb values: we're using a custom value from css

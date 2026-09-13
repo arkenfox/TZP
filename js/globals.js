@@ -175,7 +175,7 @@ let isArchArray = zNA,
 	],
 	isStylesheet,
 	isSystemFont = [],
-	isVer = 0,
+	isVer, // undefined unless gecko so all non-gecko isVer > or < checks are always false
 	isVerExtra = '',
 	isViewportUnits = {},
 	isXML = {},

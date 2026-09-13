@@ -274,11 +274,11 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 							if ('iframe' == name && 'outer' == k) {target = iTarget.window} // switch iframe target
 							x = target[p]
 							if (runST) {x = undefined}
-							/* cause one error
-							if (name == 'screen' && k == 'screen' && axis == 'width') {x = undefined} // fail one screen
+							/* cause one diff (width) per oList[k] - doesn't matter if it's an error or a mismatch
+							if ('width' == axis) {if ('iframe' == name || 'inner' == k) {foo++}}
 							//*/
-							/* change one value: a little moot once we compare to css for zLIEs etc
-							if (name == 'window' && k == 'outer' && axis == 'width') {x = x - 30} // fail one outer
+							/* cause one diff (w+h) per oList[k]
+							if ('iframe' == name || 'inner' == k) {x = x-30}
 							//*/
 							let typeCheck = typeFn(x)
 							if ('number' !== typeCheck) {throw zErrType + typeCheck}
@@ -475,12 +475,15 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 
 		// health lookups
 		if (gRun) {
-			let strInner = oTmp.inner.width.window +' x '+ oTmp.inner.height.window
+			let strInner = oSummary.inner.width +' x '+ oSummary.inner.height
 			let initInner = isInitial.width.inner +' x '+ isInitial.height.inner
 			let initOuter = isInitial.width.outer +' x '+ isInitial.height.outer
 			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
 			sDetail[isScope].lookup['size_newwin'] = strInner
+			sDetail[isScope]['size_newwin_rawdetail'] = {'height': oSummary.inner.height, 'width': oSummary.inner.width}
+
 			sDetail[isScope].lookup['sizes_initial'] = initMatch
+			sDetail[isScope]['sizes_intitial_rawdetail'] = isInitial
 		}
 
 		/* ToDo: update oData/oDisplay/oSummary with lies
@@ -1299,46 +1302,6 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 	return resolve()
 })
 
-function get_scr_viewport_units() {
-	// https://developer.mozilla.org/en-US/docs/Web/CSS/length
-	// large, dynamic, small unit support: FF101, Safari 15.4, blink 108
-
-	// desktop + android use small in inner section
-	// android uses large as a standalone
-	let aList = isDesktop ? ['S'] : ['L','S']
-	let data = {'height': {}, 'width': {}}
-
-	aList.forEach(function(k) {
-		let METRIC = 'L' == k ? 'sizes_viewport' : 'sizes_inner'
-		let target
-		try {target = dom['tzp'+ k +'V']} catch(e) {}
-		let prefix = k.toLowerCase() + 'v'
-		for (const p of Object.keys(data)) {
-		//aItems.forEach(function(p) {
-			let name = prefix + p.slice(0,1)
-			try {
-				let x
-				if (isDomRect == -1) {
-					x = p == 'width' ? target.offsetWidth : target.offsetHeight
-				} else {
-					let method = measureFn(target, METRIC +'_'+ prefix)
-					if (undefined !== method.error) {throw method.errorstring}
-					x = 'width' == p ? method.width : method.height
-					//type check
-					if (runST) {x = p == 'width' ? undefined : '' }
-					let typeCheck = typeFn(x)
-					if ('number' !== typeCheck) {throw zErrType + typeCheck}
-					data[p][name] = x
-				}
-			} catch(e) {
-				log_error(1, METRIC +'_'+ p + '_' + prefix + p.slice(0,1), e)
-				data[p][name] = zErr
-			}
-		}
-	})
-	return data
-}
-
 const get_scr_viewport = (METRIC) => new Promise(resolve => {
 	// get viewport units
 	isViewportUnits = get_scr_viewport_units()
@@ -1426,6 +1389,106 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 	// resolve
 	return resolve(oData) // return the data for use in the parent function
 })
+
+function get_scr_viewport_segments(METRIC) {
+	//https://developer.mozilla.org/en-US/docs/Web/API/Viewport_segments_API/Using
+
+	let data = {}, display = {}, aList = ['horizontal','vertical']
+	aList.forEach(function(k) {
+		// media
+		let value = zNA, m = k +'_media'
+		try {
+			for (let i = 1; i < 6; i++) { // css only goes to 5
+				if (window.matchMedia('('+ k +'-viewport-segments:'+ i +')').matches) {value = i; break}
+			}
+			if (runSE) {foo++} else if (runSL) {value = 6}
+		} catch(e) {
+			value = zErr; log_error(1, METRIC +'_'+ m, e)
+		}
+		display[k] = value
+
+		m = k +'_css'
+		let pseudo = 'horizontal' == k ? ':before' : ':after'
+		let cssvalue = getElementProp(7, '#cssVS', METRIC +'_'+ m, pseudo)
+		/* we don't need lies, we can just report mixed
+		if (isSmart) {
+			if (cssvalue !== zErr && value !== zErr) {
+				if (value !== cssvalue) {
+					display[k] = log_known(1, METRIC +'_'+ k +'_media', value) // record and color up lies
+					value = zLIE
+				}
+			}
+		}
+		*/
+		data[k +'_media'] = value
+		data[k +'_css'] = cssvalue
+	})
+	// display media
+	addDisplay(1, METRIC +'_media', display.horizontal +' x '+ display.vertical)
+
+	// ToDo: also count the DOMRect objects in window.viewport.segments
+		// I guess we check the x,y values to determine if it's horizontal or vertical
+
+	//summary
+	let hash = mini(data)
+	if ('0632aa25' == hash) {
+		addBoth(1, METRIC, zNA) // simplify unsupported
+	} else if ('833d31a5' == hash) {
+		addBoth(1, METRIC, '1 x 1') // simplify unsupported
+		// nothing to record, we do this under viewport sizes
+	} else {
+		// ToDo: calculate summary: add + display
+		// ToDo: add meaurements
+		// css = e.g. env(viewport-segment-width 0 0)
+		// js = window.viewport.segments || segments.forEach
+
+		// rawdata
+		sDetail[isScope][METRIC +'_rawdetail'] = data
+
+		addData(1, METRIC, data, mini(data))
+	}
+	return
+}
+
+function get_scr_viewport_units() {
+	// https://developer.mozilla.org/en-US/docs/Web/CSS/length
+	// large, dynamic, small unit support: FF101, Safari 15.4, blink 108
+
+	// desktop + android use small in inner section
+	// android uses large as a standalone
+	let aList = isDesktop ? ['S'] : ['L','S']
+	let data = {'height': {}, 'width': {}}
+
+	aList.forEach(function(k) {
+		let METRIC = 'L' == k ? 'sizes_viewport' : 'sizes_inner'
+		let target
+		try {target = dom['tzp'+ k +'V']} catch(e) {}
+		let prefix = k.toLowerCase() + 'v'
+		for (const p of Object.keys(data)) {
+		//aItems.forEach(function(p) {
+			let name = prefix + p.slice(0,1)
+			try {
+				let x
+				if (isDomRect == -1) {
+					x = p == 'width' ? target.offsetWidth : target.offsetHeight
+				} else {
+					let method = measureFn(target, METRIC +'_'+ prefix)
+					if (undefined !== method.error) {throw method.errorstring}
+					x = 'width' == p ? method.width : method.height
+					//type check
+					if (runST) {x = p == 'width' ? undefined : '' }
+					let typeCheck = typeFn(x)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					data[p][name] = x
+				}
+			} catch(e) {
+				log_error(1, METRIC +'_'+ p + '_' + prefix + p.slice(0,1), e)
+				data[p][name] = zErr
+			}
+		}
+	})
+	return data
+}
 
 /* AGENT */
 
@@ -1914,6 +1977,7 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 		get_scr_pixels('pixels', isResize),
 		get_scr_orientation('orientation'),
 		get_scr_measure(isElementFS),
+		get_scr_viewport_segments('viewport-segments'),
 	]).then(function(){
 		// add listeners once
 		if (gLoad && isDesktop) {
