@@ -1053,22 +1053,30 @@ function get_font_support(METRIC) {
 
 	function get_document_fonts(m = 'document') {
 		fntDocEnabled = false // reset
-		let value, display ='', notation = default_red, fntTest = '\"test font name\"'
+		let value, display ='', notation = default_red
+		let fntTest = ['\"test font name\"']
+		// FF157+ 2067259 change to criteria to determine if foint-families are quoted
+		if (isVer > 156) {
+			fntTest.push('test font name')
+		}
 		try {
 			if (runSE) {foo++}
 			// dedicated div, hardcoded style
 			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
-				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
-			fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
+				fontnoquotes = font.slice(0, fntTest[0].length - 2) // ext may strip quotes marks
+			fntDocEnabled = (fntTest.includes(font) || fntTest.includes(fontnoquotes) ? true : false)
 			// test setting it: catches e.g. chameleon
-			dom.tzpDiv.style.fontFamily = fntTest
+			dom.tzpDiv.style.fontFamily = fntTest[0]
 			let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
 			// tidy
 			display = (fntDocEnabled ? zE : zD) +' | '+ font + (font !== font2 ? ' | '+ font2 : '')
 			value = [fntDocEnabled, font + (font !== font2 ? ' | '+ font2 : '')]
 			oData[m] = value
 			// notate: only default if exact match
-			if ('enabled | \"test font name\"' == display) {notation = default_green}
+			let hash = mini(display)
+			// 177eef88 enabled | "test font name"
+			// FF157+ 9cbe9514 enabled | test font name
+			if ('9cbe9514' == hash || '177eef88' == hash) {notation = default_green}
 			sDetail[isScope].lookup[METRIC +'_'+ m] = value.join(' | ')
 		} catch(e) {
 			display = log_error(12, METRIC +'_'+ m, e)
