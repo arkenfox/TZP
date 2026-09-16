@@ -2405,7 +2405,7 @@ function countJS(item) {
 					// hide TextAutosize
 					try {
 						dom.tzpTextAutosizeNo.style.display = 'none'
-						dom.tzpTextAutosizeyes.style.display = 'none'
+						dom.tzpTextAutosizeYes.style.display = 'none'
 					} catch(e) {}
 				} else {
 					dom.metricDownload.innerHTML = '[ &#8595; ]'
