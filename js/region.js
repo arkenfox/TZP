@@ -1308,6 +1308,7 @@ function get_timezone(METRIC) {
 	let offsets = get_timezone_offsets(METRIC +'_offsets', tzo.nowValue, tzo.utcValue)
 
 	// timezone: we can use tzo.tampered items to return if isLies
+		// note: FF158+ removed pref javascript.options.experimental.temporal
 	let aMethods = ['timeZone','timeZoneId','zonedDateTimeISO']
 	let aTemporal = ['plainDateISO','plainDateTimeISO','plainTimeISO','zonedDateTimeISO']
 	let errCount = 0, lieCount = 0, tzData = {'data': [], 'valid': []}, notation = rfp_red, isLies = false
