@@ -498,30 +498,29 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 
 const get_permissions_policy = (METRIC) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/FeaturePolicy/allowsFeature
-	// blink only but behind a pref for gecko 65+: dom.security.featurePolicy.webidl.enabled
+
+	// FF65-157 dom.security.featurePolicy.webidl.enabled (default disabled)
+	// FF158+ renamed to permissionsPolicy
+		// dom.reporting.permissionsPolicy.enabled
+		// dom.security.permissionsPolicy.experimental.enabled
+		// dom.security.permissionsPolicy.header.enabled
+		// dom.security.permissionsPolicy.webidl.enabled
 
 	function exit(hash, data ='', btn ='') {
 		addBoth(7, METRIC, hash, btn,'', data)
 		return resolve()
 	}
 	try {
-		let f = document.featurePolicy
+		let f = document.featurePolicy || document.permissionsPolicy
 		if (runST) {f = ''} else if (runSI) {f = {}}
 		let typeCheck = typeFn(f)
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if ('webkit' == isEngine) {
-			// webkit not supported
-			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
-			// blink/gecko
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
-			// note: FF157+ 2068035: "Feature-Policy" to "Permissions-Policy"
-				// does not affect dom yet but blink changed: just allow both
 			let expected = ['[object FeaturePolicy]','[object PermissionsPolicy]']
 			if (!expected.includes(f+'')) {throw zErrInvalid + 'expected '+ expected.join(' or ') +': got '+ f}
-
 			// enumerate: array
 			let aList = f.features()
 			// gecko: disabling geo or blocking geo requests or both doesn't remove geolocation
@@ -828,7 +827,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_integer('colorDepth','Screen.'),
 		get_device_integer('hardwareConcurrency','Navigator.'),
 		get_permissions('permissions'),
-		get_permissions_policy('permissionsPolicy'), // blink only | gecko behind a pref since FF65
+		get_permissions_policy('permissionsPolicy'),
 		// blink only
 		get_battery('battery'),
 		get_device_memory('deviceMemory'),
