@@ -1050,33 +1050,34 @@ function get_font_notation(METRIC, data) {
 
 function get_font_support(METRIC) {
 	let oData = {}, aHealth = []
+	// note: FF157+ 2067259 change to criteria to determine if foint-families are quoted
 
 	function get_document_fonts(m = 'document') {
 		fntDocEnabled = false // reset
 		let value, display ='', notation = default_red
-		let fntTest = ['\"test font name\"']
-		// FF157+ 2067259 change to criteria to determine if foint-families are quoted
-		if (isVer > 156) {
-			fntTest.push('test font name')
-		}
+		let fntQuote = '\"test font name\"', fntNoQuote = 'test font name'
+		// we allow both because extensions may strip or add quotes but that doesn't mean doc fonts are blocked
+		let fntOK = [fntNoQuote, fntQuote]
+
 		try {
 			if (runSE) {foo++}
-			// dedicated div, hardcoded style
-			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
-				fontnoquotes = font.slice(0, fntTest[0].length - 2) // ext may strip quotes marks
-			fntDocEnabled = (fntTest.includes(font) || fntTest.includes(fontnoquotes) ? true : false)
-			// test setting it: catches e.g. chameleon
-			dom.tzpDiv.style.fontFamily = fntTest[0]
+			// test hardcoded dedidcated div
+			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family')
+			fntDocEnabled = fntOK.includes(font)
+
+			// test setting it
+			dom.tzpDiv.style.fontFamily = fntQuote
 			let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
-			// tidy
-			display = (fntDocEnabled ? zE : zD) +' | '+ font + (font !== font2 ? ' | '+ font2 : '')
-			value = [fntDocEnabled, font + (font !== font2 ? ' | '+ font2 : '')]
+			// compare
+			let fontStr = font + (font !== font2 ? ' | '+ font2 : '')
+			display = (fntDocEnabled ? zE : zD) +' | '+ fontStr
+			value = [fntDocEnabled, fontStr]
 			oData[m] = value
 			// notate: only default if exact match
-			let hash = mini(display)
-			// 177eef88 enabled | "test font name"
-			// FF157+ 9cbe9514 enabled | test font name
-			if ('9cbe9514' == hash || '177eef88' == hash) {notation = default_green}
+				// 177eef88 enabled | "test font name"
+				// FF157+ 9cbe9514 enabled | test font name
+			let expectedHash = isVer > 156 ? '9cbe9514' : '177eef88'
+			if (mini(display) == expectedHash) {notation = default_green}
 			sDetail[isScope].lookup[METRIC +'_'+ m] = value.join(' | ')
 		} catch(e) {
 			display = log_error(12, METRIC +'_'+ m, e)
