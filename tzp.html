@@ -333,25 +333,19 @@
 			</td></tr>
 		<!--viewport-->
 		<tr class="togA"><td>[large viewport] lv*</td><td class="mono border-top">
-			<span id="viewport_large"></span>
-			<div class="btn-right s99">viewport</div>
-		</td></tr>
+			<span id="viewport_large"></span><div class="btn-right s99">viewport</div></td></tr>
 		<tr class="togA"><td>dynamic toolbar</td><td class="c mono" id="dynamic_toolbar"></td></tr>
-		<tr class="A2"><td>viewport</td><td class="mono">
-			<span class="c" id="viewport_summary"></span>
-			<span class="c" id="sizes_viewport"></span>
-		</td></tr>
-		<tr class="A2 togS"><td>document</td><td class="mono">
-			<span class="c" id="viewport_document"></span>
-			<div class="btn-right s99">viewport</div>
-		</td></tr>
+
+		<tr class="A2"><td>viewport</td><td class="mono"><span class="c" id="viewport_summary"></span><span class="c" id="sizes_viewport"></span></td></tr>
+		<tr class="A2 togS"><td>document</td><td class="mono"><span class="c" id="viewport_document"></span><div class="btn-right s99">viewport</div></td></tr>
 		<tr class="A2 togS"><td>element <sup>4</sup></td><td class="c mono" id="viewport_element"></td></tr>
 		<tr class="A2 togS"><td>segments</td><td class="c mono" id="viewport_segments"></td></tr> <!--totalled-->
 		<tr class="A2 togS"><td>visualViewport</td><td class="c mono" id="viewport_visualViewport"></td></tr>
+
 		<tr><td>viewport-segments</td><td class="c mono" id="viewport-segments"></td></tr>
-		<tr class="A2 togS"><td>css</sup></td><td class="mono">
+		<tr class="togS"><td>css</sup></td><td class="mono">
 			<span id="cssVS"></span><span class="cssc" id="viewport-segments_css"></span></td></tr>
-		<tr class="A2 togS"><td>matchMedia</td><td class="c mono" id="viewport-segments_media"></td></tr>
+		<tr class="togS"><td>matchMedia</td><td class="c mono" id="viewport-segments_media"></td></tr>
 
 		<!--other-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -1241,7 +1235,7 @@
 				<span class='btn0 btnc' onClick="metricsAction('download')" id="metricDownload">[DOWNLOAD]</span>
 				<span class='btn0 btnc' onClick="metricsAction('console')" id="metricsConsole">[CONSOLE]</span>
 				<span class='btn0 btnc' onClick="copyclip('metricsDisplay')" id="metricsBtnCopy">[COPY]</span>
-				<span class='btn0 btnc' onClick="metricsAction('close')"><abbr title="Esc">[CLOSE]</abbr></span>
+				<span class='btn0 btnc' onClick="metricsAction('close')"><abbr title="Esc">[ X ]</abbr></span>
 				<br><br>
 				<div id="metricOptions"><br><p><u>FORMAT</u></p>
 					<p id="optDetail">detail <input type="radio" name="optOverlay" id="optFormat_detail" value="_detail" checked onchange="metricsAction()"></p>
