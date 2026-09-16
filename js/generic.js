@@ -557,7 +557,7 @@ function get_isEngine(METRIC) {
 		if (aAllowed.length > 1) {
 			isEngineStr = ' or '+ aAllowed[aAllowed.length - 1]
 			aAllowed = aAllowed.slice(0,-1)
-			isEngineStr = aAllowed.join(',') + isEngineStr
+			isEngineStr = aAllowed.join(', ') + isEngineStr
 		}
 		if (aEngine.length == 1) {
 			isEngine = aEngine[0] // valid one result
@@ -776,12 +776,12 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		let fntEnabled = false
 		try {
 			if (runSG) {foo++}
-			// FF157+ 2067259 change to criteria to determine if foint-families are quoted
-			let fntTest = ['\"test font name\"','test font name']
+			let fntQuote = '\"test font name\"', fntNoQuote = 'test font name'
+			// we allow both because extensions may strip or add quotes but that doesn't mean doc fonts are blocked
+			let fntOK = [fntNoQuote, fntQuote]
 			//dom.tzpDocFont.style.fontFamily = fntTest
-			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
-				fontnoquotes = font.slice(0, fntTest[0].length - 2) // ext may strip quotes marks
-			fntEnabled = (fntTest.includes(font) || fntTest.includes(fontnoquotes) ? true : false)
+			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family')
+			fntEnabled = fntOK.includes(font)
 		} catch(e) {}
 		if (!fntEnabled) {trysomethingelse(); return}
 
@@ -2403,6 +2403,8 @@ function countJS(item) {
 				if (isDesktop) {
 					document.addEventListener('keydown', metricsEvent)
 				} else {
+					dom.metricDownload.innerHTML = '[ &#8595; ]'
+
 					showhide('A','table-row')
 					// A1 inner_document: html class hidden - only used by android
 					// add class togS so it shows when expanding, remove hidden class
