@@ -1076,6 +1076,9 @@ function get_font_support(METRIC) {
 			// notate: only default if exact match
 				// 177eef88 enabled | "test font name"
 				// FF157+ 9cbe9514 enabled | test font name
+			// FF157+ chameleon with font protection
+				// doc fonts = 1: enabled | test font name | Segoe UI
+				// doc fonts = 0: disabled | serif, test font name | Segoe UI
 			let expectedHash = isVer > 156 ? '9cbe9514' : '177eef88'
 			if (mini(display) == expectedHash) {notation = default_green}
 			sDetail[isScope].lookup[METRIC +'_'+ m] = value.join(' | ')
