@@ -157,7 +157,6 @@ let isArchArray = zNA,
 	isGecko = false,
 	isGeckoLike = false, // gecko/servo
 	isOS,
-	isOSCSS,
 	isOSErr,
 	isProps, // window properties
 	isProtoProxy = false,
