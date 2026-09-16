@@ -190,10 +190,11 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm('measure'),
 		get_scr_viewport('sizes_viewport'),
+		get_scr_viewport_segments('viewport-segments'),
 		get_scr_fullscreen('fullscreen', isElementFS),
 	]).then(function(res){
 		// get FS status
-		let isDisplayFS = 'fullscreen' == res[2]['display-mode']
+		let isDisplayFS = 'fullscreen' == res[3]['display-mode']
 
 		let oTmp = {
 			screen: {height: {}, width: {}},
@@ -235,6 +236,14 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 			let newobj = {'height': {'lvh': vpHeight.lvh}, 'width': {'lvw': vpWidth.lvw}}
 			addData(1, 'sizes_viewport', newobj, mini(newobj))
 		}
+
+		// viewport segments
+			// at this stage we it's only blink, and we don't distinguish blink desktop vs mobile
+			// mobile: IDK if this refers to dv, sv or lv (dynamic, large, small)
+			// display zNA or totals
+		// display only for now until we can confidently add it to a viewport object for compares etc
+		let segmentdisplay = 'string' == typeof res[2] ? res[2] : res[2].join(' x ')
+		addDisplay(1, 'viewport_segments', segmentdisplay)
 
 		// screen/window
 		// order matters: so property targets are correct
@@ -1305,13 +1314,12 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 const get_scr_viewport = (METRIC) => new Promise(resolve => {
 	// get viewport units
 	isViewportUnits = get_scr_viewport_units()
-
 	let oData = {height: {}, width: {}}
 	const id= 'vp-element', aMETRIC = 'sizes_inner'
 
 	function get_viewport(type) {
 		let w, h, method, target
-		let metric = isDesktop ? aMETRIC : METRIC
+		let metric = isDesktop ? METRIC : aMETRIC
 
 		try {
 			if ('element' == type) {
@@ -1433,21 +1441,47 @@ function get_scr_viewport_segments(METRIC) {
 	let hash = mini(data)
 	if ('0632aa25' == hash) {
 		addBoth(1, METRIC, zNA) // simplify unsupported
-	} else if ('833d31a5' == hash) {
-		addBoth(1, METRIC, '1 x 1') // simplify unsupported
-		// nothing to record, we do this under viewport sizes
+		return zNA
 	} else {
-		// ToDo: calculate summary: add + display
 		// ToDo: add meaurements
-		// css = e.g. env(viewport-segment-width 0 0)
-		// js = window.viewport.segments || segments.forEach
-
-		// rawdata
-		sDetail[isScope][METRIC +'_rawdetail'] = data
-
-		addData(1, METRIC, data, mini(data))
+			// css = e.g. env(viewport-segment-width 0 0)
+		let width = 0, height = 0, typeCheck
+		try {
+			let segments = window.viewport.segments
+			segments.forEach(function(segment){
+				let w = segment.width, h = segment.height
+				if (zErr !== width) {
+					typeCheck = typeFn(w)
+					if ('number' !== typeCheck) {
+						width = zErr // stop testing
+						log_error(1, 'sizes_viewport_segments_width', zErrType + typeCheck)
+					}
+				}
+				if (zErr !== height) {
+					typeCheck = typeFn(h)
+					if ('number' !== typeCheck) {
+						height = zErr // stop testing
+						log_error(1, 'sizes_viewport_segments_height', zErrType + typeCheck)
+					}
+				}
+				if (zErr !== width) {width += w}
+				if (zErr !== height) {height += h}
+			})
+		} catch(e) {
+			// the error is for viewport_segments (sizes)
+			log_error(1, 'sizes_viewport_segments', e)
+			width = zErr, height = zErr
+		}
+		if ('833d31a5' == hash) {
+			addBoth(1, METRIC, '1 x 1') // simplify unsupported
+		} else {
+			// ToDo: calculate summary
+			// rawdata
+			sDetail[isScope][METRIC +'_rawdetail'] = data
+			addData(1, METRIC, data, mini(data))
+		}
+		return [width, height]
 	}
-	return
 }
 
 function get_scr_viewport_units() {
@@ -1977,7 +2011,6 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 		get_scr_pixels('pixels', isResize),
 		get_scr_orientation('orientation'),
 		get_scr_measure(isElementFS),
-		get_scr_viewport_segments('viewport-segments'),
 	]).then(function(){
 		// add listeners once
 		if (gLoad && isDesktop) {
