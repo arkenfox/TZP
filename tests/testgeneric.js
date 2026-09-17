@@ -413,11 +413,13 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 157
+		isVerMax = 158
 		let test
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			// 158: fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
+			try{if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) return 158} catch(e) {} // 2068934
 			try {
 				test = '<nobr><table><marquee></table><nobr>'
 				if (2 == (new DOMParser).parseFromString(test, 'text/html').body.children.length) return 157 // 2049083

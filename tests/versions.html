@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 115, maxVer = 157, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 116, maxVer = 158, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,14 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 158: 2068934
+			// fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
+		let t158 = performance.now(), ver158
+		try {
+			if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) {ver158 = true}
+		} catch(e) {}
+		rec(158, 158, "2068934", ver158, performance.now()-t158, 'PREF') // 0.006 ms
 
 		// 157: 2049083
 			// checked FF52 = false | _should_ be no old-timey FF false positives
