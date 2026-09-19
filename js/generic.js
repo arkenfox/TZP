@@ -1527,18 +1527,19 @@ function metricsShow(name, scope) {
 			if (overlayFP == '_detail') {overlayFP = ''; target = name}
 		}
 		data = gData[name][scope + (isHealth ? overlayHealth + filter : overlayFP)]
-	} else if (name == 'alerts' || name == 'errors' || name == 'lies') {
-		// global alerts/errors/lies
+	} else if (name == 'alerts' || name == 'debug' || name == 'errors' || name == 'lies') {
+		// global alerts/debug/errors/lies
 		data = gData[name][scope]
 	} else if (isSection) {
 		// section
 		if (overlaySection == '_detail') {overlaySection = ''; target = name}
 		data = sData[zFP][scope + overlaySection][name]
 	} else {
-		// section alerts/errors/lies
+		// section alerts/debug/errors/lies
 		let nameslice = name.slice(0,4)
-		if (nameslice == 'erro' || nameslice == 'aler' || nameslice == 'lies') {
+		if (nameslice == 'erro' || nameslice == 'aler' || nameslice == 'lies' || nameslice == 'debu') {
 			let slicelen = nameslice == 'lies' ? 4 : 6
+			if (nameslice == 'debu') {slicelen = 5}
 			target = name.slice(0, slicelen)
 			name = name.slice(slicelen)
 			data = sData[target][scope][name]
@@ -1637,7 +1638,6 @@ function lookup_health(sect, metric, scope, isPass) {
 		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
 		if ('useragent_' == metric.slice(0,10)) {nested = 'useragent'; metric = metric.replace('useragent_','')}
 		if ('media_' == metric.slice(0,6)) {nested = 'media'; metric = metric.replace('media_','')}
-		if ('font_support_' == metric.slice(0,13)) {nested = 'font_support'; metric = metric.replace('font_support_','')}
 
 		// detail lookup
 		let datalookup
@@ -1943,7 +1943,8 @@ function output_section(section, scope) {
 					}
 					let count = Object.keys(sData[item][scope][name]).length
 					if (count > 0) {
-						let btnText = count + ' '+ (count == 1 ? item.slice(0,-1) : item) // single/plural
+						let btnText = item
+						if ('debug' !== item) {btnText = count +' '+ (count == 1 ? item.slice(0,-1) : item)} // single/plural
 						let color = ('alerts' === item) ? 'bad' : 0
 						btn = addButton(color, item + name, btnText, 'btns', scope)
 						aBtns.push(btn.trim())
@@ -2161,12 +2162,27 @@ function log_alert(section, metric, alert, scope = isScope, isOnce = false) {
 	}
 }
 
+function log_debug(section, title, info, scope = isScope, isOnce = false) {
+	if ('string' !== typeof section) {section = sectionMap[section]}
+	let key = 'debug'
+	if (gRun && isOnce) {
+		key += 'once'
+		//if (gData[key][scope] == undefined) {gData[key][scope] = {}}
+		if (gData[key][scope][section] == undefined) {gData[key][scope][section] = {}}
+		gData[key][scope][section][title] = info
+	} else {
+		if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
+		if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
+		sDataTemp[key][scope][section][title] = info
+	}
+}
+
 function log_error(section, metric, error = zErr, scope = isScope, isOnce = false) {
 	if ('string' !== typeof section) {section = sectionMap[section]}
 	if ('' == error || null == error || undefined == error) {error = zErr} else {error += ''}
 	// trim display errors
 	let isShorten = false
-	let aShortenStart = ['canPlayType','isTypeSuppo','textmetrics','audio_getCa','video_getCa',]
+	let aShortenStart = ['canPlayType','isTypeSuppo','textmetrics','audio_getCa','video_getCa']
 	let aShortenMatch = []
 	let len = isDesktop ? 50 : 25
 	if (aShortenStart.includes(metric.slice(0,11)) || aShortenMatch.includes(metric)) {
@@ -2292,7 +2308,8 @@ function log_section(name, time, scope = isScope) {
 					}
 				}
 				if (total > 0) {
-					let btnText = total +" "+ (total == 1 ? item.slice(0,-1) : item) // single/plural
+					let btnText = item
+					if ('debug' !== item) {btnText = total +" "+ (total == 1 ? item.slice(0,-1) : item)} // single/plural
 					let color = ('alerts' === item) ? 'bad' : 0
 					aBtns.push(addButton(color, item, btnText, 'btnc', scope))
 				}
