@@ -580,6 +580,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
 		// health raw data
 		for (const k of Object.keys(oData)) {sDetail[isScope]['sizes_'+ k +'_rawdetail'] = oData[k]}
+		//log_alert(1,'measurements', oData)
 		return resolve()
 	})
 })
@@ -884,6 +885,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			}
 			summary += ' | ' + strOrientation
 			addDisplay(1, METRIC +'_'+ k +'_summary', summary)
+			sDetail[isScope].lookup[METRIC +'_'+ k] = summary
 
 			// notation: use our summary
 				// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to BB
@@ -920,15 +922,14 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 			try {
 				let target = 'window' == k ? window : dom.tzpIframe.contentWindow.window
 				value = target.devicePixelRatio
-				if (runST) {value = NaN} // this will also trigger dpi_div as varDPI is not set
+				if (runSE) {foo++} else if (runST) {value = NaN} // this will also trigger dpi_div as varDPI is not set
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				display = value
 				varDPR = value
 			} catch(e) {
 				log_error(1, METRIC +'_'+ item + strIframe, e)
-				display = zErr
-				value = zErr
+				value = zErr; display = zErr
 			}
 			// FF127: 1554751
 			let notation = value == 2 ? rfp_green : rfp_red
@@ -940,7 +941,7 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 		value = undefined, display = undefined, item = 'devicePixelRatio_border'
 		try {
 			value = getComputedStyle(dom.tzpDPR).borderTopWidth // e.g. '1px'
-			if (runST) {value = undefined} else if (runSI) {value = '123'}
+			if (runSE) {foo++} else if (runST) {value = undefined} else if (runSI) {value = '123'}
 			let originalvalue = value
 			let typeCheck = typeFn(value)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
@@ -956,8 +957,7 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 				throw zErrInvalid + 'got '+ (1/value) // negative/Infinity
 			}
 		} catch(e) {
-			display = log_error(1, METRIC +'_'+ item, e)
-			value = zErr
+			display = log_error(1, METRIC +'_'+ item, e); value = zErr
 		}
 		addDisplay(1, item, display)
 		oData[item] = value
@@ -1003,7 +1003,7 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 			if ('number' !== typeCheck) {throw zErrType + typeCheck}
 			display = value
 		} catch(e) {
-			display = log_error(1, METRIC +'_'+ item, e), value = zErr
+			display = log_error(1, METRIC +'_'+ item, e); value = zErr
 		}
 		addDisplay(1, item, display)
 		oData[item] = value
@@ -1014,11 +1014,13 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 		try {
 			let target = 'image-set' == item ? dom.tzpImgSet : dom.tzpImgSetWebkit
 			value = target.getBoundingClientRect().height / target.getBoundingClientRect().width
+			if (runSE) {foo++} else if (runST) {value = ''}
 			let typeCheck = typeFn(value)
 			if ('number' !== typeCheck) {throw zErrType + typeCheck}
 			display = value
 		} catch(e) {
-			display = log_error(1, METRIC +'_'+ item, e), value = zErr
+			log_error(1, METRIC +'_'+ item, e)
+			value = zErr; display = zErr
 		}
 		addDisplay(1, METRIC +'_'+ item, display,'', (value == oMatch[item] ? rfp_green : rfp_red))
 		oData[item] = value
@@ -1029,12 +1031,13 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 		try {
 			let str = dom.tzpSrcSet.currentSrc
 			value = (str.slice(str.length - 6, -4)) * 1
+			if (runSE) {foo++} else if (runST) {value = '123'}
 			let typeCheck = typeFn(value)
 			if ('number' !== typeCheck) {throw zErrType + typeCheck}
 			value = value/10
 			display = value
 		} catch(e) {
-			display = log_error(1, METRIC +'_'+ item, e), value = zErr
+			display = log_error(1, METRIC +'_'+ item, e); value = zErr
 		}
 		addDisplay(1, METRIC +'_'+ item, display,'', (value == oMatch[item] ? rfp_green : rfp_red))
 		oData[item] = value
@@ -1051,13 +1054,13 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 			try {
 				let target = 'window' == k ? window : dom.tzpIframe.contentWindow.window
 				value = target.visualViewport.scale
-				if (runST) {value = undefined}
+				if (runSE) {foo++} else if (runST) {value = undefined}
 				let typeCheck = typeFn(value)
 				display = value
 				if ('number' !== typeof value) {throw zErrType + typeCheck}
 			} catch(e) {
 				display = log_error(1, METRIC +'_'+ item + strIframe, e)
-				value = zErr
+				value = zErr; display = zErr
 			}
 			addDisplay(1, item + strIframe, display)
 			oData[item + strIframe] = value
@@ -1265,6 +1268,7 @@ const get_scr_position_screen = (METRIC) => new Promise(resolve => {
 		display.push(isMatch ? oData[item] : 'mixed')
 	})
 	if (isMixed) {btn = addButton(1, METRIC)}
+	sDetail[isScope].lookup[METRIC] = display.join(', ')
 	addDisplay(1, METRIC, display.join(', '), btn, notation)
 	return resolve()
 })
