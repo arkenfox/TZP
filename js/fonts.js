@@ -701,10 +701,11 @@ let fntMaster = {
 		// combined non-gecko
 		all: [],
 	},
-	// blink/brave filter
-		// do for all blink: we have enough fonts in windows/mac for entropy
-		// windows: we lose ~23/260 fonts detected (half of those are weighted or offscreen) and ~12/150 unique sizes
-	blink: [
+	// brave filter
+		// limit to brave with shields on
+			// windows without shields: we lose ~23/260 fonts detected (half of those are weighted or offscreen)
+			// and ~12/150 unique sizes - but these are maximums and fonts are already limited by navigator.language
+	brave: [
 		// brave: win/android/mac: allows system fonts per navigator.language plus some random from a whitelist
 			// see https://github.com/brave/brave-core/blob/master/components/misc_metrics/resources/fingerprint_stability.js (~line 500)
 			// if we filter out the whitelist we are left with equivalency of language
@@ -760,9 +761,11 @@ function set_fntList() {
 				})
 			}
 		}
+		/* 
 		// negate brave random
-		if ('blink' == isEngine) {
-			let fntIgnore = fntMaster.blink
+		// don't skip these, catch them instead and debug shwoing it's working
+		if (isBraveSmart) {
+			let fntIgnore = fntMaster.brave
 			let list = ['base','baselang','system']
 			list.forEach(function(k){
 				for (const j of Object.keys(fntMaster[k])) {
@@ -773,6 +776,7 @@ function set_fntList() {
 				}
 			})
 		}
+		//*/
 	}
 
 	if (build) {
@@ -1430,6 +1434,9 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 		// if it's synthesized, a variable font, or an actual font(name)
 	// blocking document fonts does not affect this test
 
+	//METRIC = font_faces
+	//METRICD = font_detection
+
 	let t0 = nowFn()
 	// main test we don't pass an array of font names otherwise it's a test
 	let isMain = undefined == aFonts
@@ -1493,6 +1500,11 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 						results.forEach(function(item){
 							item = item.replace(/"/g, ''); data.push(item)
 						})
+						if (isBrave) {
+							let aIgnored = data.filter(x => fntMaster.brave.includes(x))
+							data = data.filter(x => !aIgnored.includes(x))
+							log_debug(12, METRIC +'_ignored', aIgnored)
+						}
 						value = mini(results)
 						btn = addButton(12, METRIC, results.length)
 						if (isMain && fntList.length) {
@@ -1593,6 +1605,11 @@ function get_fonts_offscreen(METRIC, METRICD) {
 			if (ctx.measureText(fntString).width !== base) {data.push(font)}
 		})
 		if (data.length) {
+			if (isBrave) {
+				let aIgnored = data.filter(x => fntMaster.brave.includes(x))
+				data = data.filter(x => !aIgnored.includes(x))
+				log_debug(12, METRIC +'_ignored', aIgnored)
+			}
 			value = mini(data)
 			btn = addButton(12, METRIC, data.length)
 			if (fntData.offscreen.base.length) {notation = get_font_notation(METRIC, data)}
@@ -1989,16 +2006,29 @@ function get_fonts(METRIC, METRICD) {
 		if ('object' !== typeCheck) {log_error(12, METRIC, zErrType + typeCheck); exit(zErr); return}
 
 		// organize oData: note: everything is already sorted
-		let oData = {}, oValid = {}
+		let oData = {}, oValid = {}, setIgnore = new Set()
 		for (let name in res) {
 			let data = res[name]
 			if (!data.hasOwnProperty('error')) {
+				// bit repetitive
+				if (isBrave) {
+					fntMaster.brave.forEach(function(item){
+						if (undefined !== data[item]) {
+							delete data[item]
+							setIgnore.add(item)
+						}
+					})
+				}
 				// group by hash
 				let hash = mini(data)
 				oValid[name] = hash
 				if (oData[hash] == undefined) {oData[hash] = {'names': [name], 'data': data}
 				} else {oData[hash].names.push(name)}
 			}
+		}
+		if (setIgnore.size) {
+			let aIgnore = Array.from(setIgnore)
+			log_debug(12, METRIC +'_ignored', aIgnore.sort())
 		}
 
 		// per hash: do stuff: font names, same size, handle isFontSizesMore
