@@ -577,7 +577,7 @@ const get_recursion = (METRIC) => new Promise(resolve => {
 		]).then(function(){
 			let newR = isRecursion[1]
 			if (initialR !== newR) {
-				log_alert(SECTG, METRIC, 'initial: '+ initialR +' | new: '+ newR, isScope, true)
+				log_debug(SECTG, METRIC, 'initial: '+ initialR +' | new: '+ newR, isScope, true)
 			}
 			addBoth(7, METRIC, isRecursion[0],'','', isRecursion[1])
 			return resolve()

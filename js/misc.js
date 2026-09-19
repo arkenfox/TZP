@@ -1083,7 +1083,7 @@ function get_window_props(METRIC) {
 						// don't record untrustworthy/lies - just collect tampered items
 							// maintaining is too burdensome: also many extensions can add extra tampered items
 							// e.g. AutocopySelection2Clipboard can trigger 'HTMLBodyElement','HTMLHeadElement','Selection'
-						console.log(mini(aTamperedNotInPossible), aTamperedNotInPossible)
+						log_debug(18, METRIC +'_tampered_new', aTamperedNotInPossible)
 					}
 				}
 				// notate console: mark as likely if additional tampering

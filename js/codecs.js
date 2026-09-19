@@ -423,6 +423,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		// skip: widevine due to permission prompts
 			// notes: android (PBM has a temp prompt) | LW added it to normal mode
 			// only these prompts should cause a timeout | it also means widevine+prompt is not super stable
+		// note: mediaCapabilities.decodingInfo also causes the permission prompt if present and blocks the promise
 		// note: BB is going to block prompts
 		if (isGecko && !isBB && !isDesktop) {
 			if ('widevine' == key) {
@@ -430,11 +431,6 @@ const get_eme = (METRIC) => new Promise(resolve => {
 				return resolve('skip')
 			}
 		}
-
-		// ToDo: there may be other ways to determine DRM e.g under mediacapabilties that don't prompt
-			// https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
-			// except then we wouldn't catch the error (disabled vs not shipped or other fuckery)
-
 		// catch timeouts
 		let isFound = false
 		setTimeout(function() {
