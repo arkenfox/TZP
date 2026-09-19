@@ -418,6 +418,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					if (zE == x) {hasWebGL = true}
 				}
 				value = value.join(' | ')
+				sDetail[isScope].lookup[metric] = value
 				// notation
 				if (isBB) {
 					if ('null | null | null' == value || 'enabled | enabled | null' == value) {notation = bb_green}
