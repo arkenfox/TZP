@@ -392,7 +392,8 @@ function get_media_css(METRIC) {
 			})()
 			if (runSE) {foo++} else if (runSI) {value = 4.5} else if (runSL) {value = 3}
 			if (zNA !== cssvalue) {
-				// unfortunately, servo returns all getElementProp calls with an empty string
+				// currently, servo returns all getElementProp calls with the number 0
+					// which causes servo's matchmedia color zNA to throw as a string
 				let typeCheck = typeFn(value)
 				if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
 			}
