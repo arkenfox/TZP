@@ -1026,6 +1026,8 @@ function get_window_props(METRIC) {
 				// FF147+
 				'JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget', // 543435 uBO exposes these 5
 				'Navigator', // NoScript aded this around 148alpha
+				// new in MB + FF (uBO related AFAICT) but not in TB (aug/sep 2026) both slider levels
+				'Array','CharacterData','HTMLHeadElement','HTMLScriptElement','Iterator','Math','Regex','Request','Text','globalThis',
 			]
 
 			if (isSmart) {
