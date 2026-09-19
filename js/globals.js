@@ -18,7 +18,7 @@ let sectionOrder = [], // numerical order for objects
 
 // ToDo: expand: some info can go into lies but we could create new items e.g methods/tampered-data
 	// some 'methods/entropy' are in the FP: e.g. canvas/domrect or errors e.g. font sizes
-const btnList = ['alerts', 'errors', 'lies']
+const btnList = ['alerts','debug','errors','lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
@@ -28,6 +28,7 @@ let jsFiles = 0, gCount = 0, gCountTiming = 0
 // global
 let gData = { // from sData
 	'alertsonce': {'document': {}},
+	'debugonce': {'document': {}},
 	'errorsonce': {'document': {}},
 	'health': {'document': {}},
 	'perf': [],
