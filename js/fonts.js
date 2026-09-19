@@ -701,6 +701,48 @@ let fntMaster = {
 		// combined non-gecko
 		all: [],
 	},
+	// blink/brave filter
+		// do for all blink: we have enough fonts in windows/mac for entropy
+		// windows: we lose ~23/260 fonts detected (half of those are weighted or offscreen) and ~12/150 unique sizes
+	blink: [
+		// brave: win/android/mac: allows system fonts per navigator.language plus some random from a whitelist
+			// see https://github.com/brave/brave-core/blob/master/components/misc_metrics/resources/fingerprint_stability.js (~line 500)
+			// if we filter out the whitelist we are left with equivalency of language
+		// the blast radius is a little hit and miss
+			// e.g. Leelawadee does not afffect Leelawadee UI but Gill Sans afffects Gill Sans Nova + Gill Sans MT
+			// localized seems blocked regardless, aliases I am not sure
+			// cover a wide blast radius to be sure | cover all fonts used in nonBB font tests
+		// windows unless stated
+		'Arabic Typesetting',
+		'Arial Unicode MS', // win + mac
+		'Batang','"바탕',
+		'Calibri','Calibri Light',
+		'Franklin Gothic', // not used in tzp due to a bug but keep for future proofing
+		'Helv',
+		'Helvetica Neue', // mac
+		'Gill Sans','Gill Sans Nova','Gill Sans MT','Gill Sans Nova Cond','Gill Sans Nova Light', // win + mac
+		'Leelawadee',
+		'Levenim MT',
+			// 'Lucida Sans Unicode', // ToDo after testing - this may be governed by Lucida Sans
+		'MS Mincho','ＭＳ 明朝','標準明朝',
+		'MS Outlook','MS Reference Specialty',
+		'MS UI Gothic',
+		'Marlett',
+		'Meiryo UI',
+		'Menlo','Menlo Bold','Menlo Bold Italic','Menlo Italic', // mac
+		'Microsoft Uighur',
+		'PMingLiU','新細明體',
+		'Segoe UI Light',
+		'SimHei','黑体',
+		'Small Fonts','Small Fonts Greek', // not used in windows
+		'Vrinda',
+		/* not in tzp lists
+		'sans-serif-thin','Arno Pro','Agency FB','AvantGarde Bk BT','BankGothic Md BT','Bitstream Vera Sans Mono','Century',
+		'Century Gothic','Clarendon','Eurostile','Futura Bk BT','Futura Md BT','Gotham','Haettenschweiler','Humanst521 BT',
+		'Letter Gothic','Lucida Bright','Lucida Sans','MT Extra','Myriad Pro','Minion Pro','Monotype Corsiva','Pristina',
+		'Scriptina','Serifa','Staccato222 BT','Trajan Pro','Univers CE 55 Medium','ZWAdobeF',
+		*/
+	],
 }
 
 function set_fntList() {
@@ -717,6 +759,19 @@ function set_fntList() {
 					fntMaster.base[key] = newarray
 				})
 			}
+		}
+		// negate brave random
+		if ('blink' == isEngine) {
+			let fntIgnore = fntMaster.blink
+			let list = ['base','baselang','system']
+			list.forEach(function(k){
+				for (const j of Object.keys(fntMaster[k])) {
+					if ('win' == j.slice(0,3) || 'mac' == j.slice(0,3)) {
+						let tmparray = fntMaster[k][j]
+						fntMaster[k][j] = tmparray.filter(x => !fntIgnore.includes(x))
+					}
+				}
+			})
 		}
 	}
 
