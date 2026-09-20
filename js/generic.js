@@ -442,34 +442,60 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			// keeping in mind that extensions etc could mess with these
 		if ('object' == typeof opr) return resolve() // opera
 		// navigator
-		let braveInN = 'brave' in navigator &&
+			// the position in nav shows it hasn't been tampered with IIUIC as any fake entry
+			// would be added after the constructor || there are ~70+ keys and brave is ~12th
+		isBrave = 'brave' in navigator &&
 			Object.getPrototypeOf(navigator.brave).constructor.name == 'Brave' &&
 			navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }' &&
 			'brave' in navigator ? Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)).indexOf("brave") < 20 : false
-		if (!braveInN) {
-			exit()
-		} else {
-			// userAgentData
-			Promise.all([
-				get_agent_data('', isOS, false)
-			]).then(function(res){
+		// if isBrave, cool .... if not then you might have removed the key and I can't directly detect that
+			// but we can check for shields: if shields are on then we can force isBrave
+
+		Promise.all([
+			get_agent_data('', isOS, false)
+		]).then(function(res){
+			if (!isBrave) {
+				// additional isBrave (with and w/o shields)
+					// catches extensions like "Brave Detection Block"
 				try {
-					// we already have braveInN, now we want braveInU
 					let data = res[0]
 					if ('object' !== typeof data) {exit()}
-					// the position of 'Brave' can/might vary (seems like a patch not randomizing)
-					// so we need to loop: assumes same position in brand + fullVersionList
-					for (let i = 0; i < data.brands.length; i++) {
-						if ('Brave' == data.brands[i].brand && 'Brave' == data.fullVersionList[i].brand) {
-							isBrave = true; break
+					// screen positions are 0
+						// weak but might weed out some false positives
+					let isBraveScreen = (0 == screen.availLeft && 0 == screen.availTop)
+					if (isBraveScreen) {
+						// userAgentData: the position of 'Brave' differs
+							// order is Brave, Not_A Brand, Chromium || chrome is Not_A Brand, Chromium, Google Chrome
+							// this is due to the patch, and is not randomized AFAICT (on windows at least)
+							// ignore position/order just in case
+						for (let i = 0; i < data.brands.length; i++) {
+							if ('Brave' == data.brands[i].brand && 'Brave' == data.fullVersionList[i].brand) {
+								isBrave = true; break
+							}
 						}
 					}
-					// if isBrave, we can check if FP protection is enabled: telltale signs we can easily check include
+					// storage is 2GiB and doesn't match webkit storage = too slow
+				} catch(e) {
+					log_debug(SECTG, METRIC +'_userAgentData', e+'', isScope, true) // persist sect3
+				}
+			}
+
+
+					// we can check if FP protection is enabled
+						// indicators below, at least 2 depend on not being disabled/empty
+						// if isBrave it's a no brainer. If !isBrave we could assume tampering and set isBrave = true
+					// quick
 						// null keyboard
 						// gibberish in plugins (if pdf enabled)
+						// tiny chrome (and not FS?)
+						// tiny window positions
+						// screen + available screen steps into first of one of seven stepped sizes
+						// ? languages is single ?
+					// slow
+						// screen matchmedia/css matches outer (whilst it lasts)
 						// canvas
-					// other possibles are: tiny chrome + tiny screen positions
-					// others: extendedscreen can't be true
+					// slower
+						// fake voice if voices not empty
 
 					// plugins gibberish
 						// items are always in a set order (check each platform) - brave mixes this ip
@@ -479,16 +505,13 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 						"aZMOPuXT: qdWTwBAIjRnTRQnb: WyhQIMtePHDBnyCJMtWyhYrdWTw3j47d",		8, 16, 32
 						"4k5k5cO:  BMteXyhQQv268mb:  FCgYzCBn6dt15FCo7GDJEKFpct9mbse",		7, 15, 31
 					*/
-					let aOrder = ['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer','WebKit built-in PDF']
+					//let aOrder = ['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer','WebKit built-in PDF']
 					// 2 out of 3 should be enough to determine gibberish
 
 					exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
-				} catch(e) {
-					log_error(3, METRIC, e, isScope, true) // persist sect3
-					exit(zErr)
-				}
+
 			})
-		}
+
 	} catch(e) {
 		log_error(3, METRIC, e, isScope, true) // persist sect3
 		exit(zErr)
