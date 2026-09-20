@@ -470,13 +470,15 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 							// ignore position/order just in case
 						for (let i = 0; i < data.brands.length; i++) {
 							if ('Brave' == data.brands[i].brand && 'Brave' == data.fullVersionList[i].brand) {
-								isBrave = true; break
+								isBrave = true
+								log_debug(SECTG, METRIC, 'navigator: false | userAgentData: true', isScope, true) // persist
+								break
 							}
 						}
 					}
 					// storage is 2GiB and doesn't match webkit storage = too slow
 				} catch(e) {
-					log_debug(SECTG, METRIC +'_userAgentData', e+'', isScope, true) // persist sect3
+					log_debug(SECTG, METRIC +'_userAgentData', e+'', isScope, true) // persist
 				}
 			}
 
