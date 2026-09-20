@@ -494,7 +494,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
 			// tiny window positions
-			let isBraveWindow = '>10' == res[1].screenX && '>10' == res[1].screenY
+			let isBraveWindow = '<10' == res[1].screenX && '<10' == res[1].screenY
 
 			// gibberish in plugins (if pdf enabled)
 			// plugins gibberish
