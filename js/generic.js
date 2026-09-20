@@ -895,6 +895,25 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 	}
 	// 3. now what? 
 	function trysomethingelse() {
+		if (!isGecko) {
+			// get svh and lvh: if they differ then you have a dynamic urlbar: this is fast
+				// note: like isBB apps may enforce dynamic urlbar off or like FF add a UI setting fopr it
+				// or extensions might tamper with it; at best we can only use if we have a diff
+			// for now just record the info for non-gecko
+			try {
+				let aList = ['L','S'], data = {}
+				aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
+				let diff = Math.abs(data['L'] - data['S'])
+				// do prompts affect this?
+				//if (diff > 20) { // allow some wriggle room
+					//if ('blink' == isEngine) {isOS = 'android'}
+				//}
+				log_debug(SECTG, METRIC +'_dynamic_urlbar', 'L: '+ data['L'] +' | S: '+ data['S'] + ' | diff: '+ diff, isScope, true)
+			} catch(e) {
+				log_debug(SECTG, METRIC +'_dynamic_urlbar', e+'', isScope, true)
+			}
+			// keyboard map size = 0 is a strong indicator of blink android but not brave (default shields keyboard is null)
+		}
 		exit()
 	}
 
@@ -902,28 +921,8 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 	if (isGecko) {
 		trywidget()
 	} else {
-		tryfonts()
-
-		/*
-		// get svh and lvh: if they differ then you have a dynamic urlbar
-		// this is fast - could we leverage it for gecko as well
-			// maybe not since isBB might restrict it for FPing dynamic urlbar
-			// also apps may allow disabling it
-			// also maybe apps will enable it on other devices/tablets/platforms
-			// or extensions might tamper with it
-		// so for now just record the info for non-gecko
-		let aList = ['L','S']
-		try {
-			let data = {}
-			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
-			let diff = Math.abs(data['L'] - data['S'])
-			if (diff > 20) { // allow some wriggle room
-				//if ('blink' == isEngine) {isOS = 'android'}
-			}
-			log_perf(SECTG, METRIC, t0, '', 'L: '+ data['L'] +' | S: '+ data['S'])
-		} catch(e) {}
-		//*/
-		return resolve()
+		//tryfonts()
+		trysomethingelse()
 	}
 })
 
@@ -2809,7 +2808,9 @@ function outputSection(id, isResize = false) {
 				get_isDomRect(),
 				outputPrototypeLies(isResize),
 			]).then(function(){
-				if (isBB && gClear && 'all' == id || !isGecko) {console.clear()}
+				if (gClear) { // default true
+					if (isBB && 'all' == id || !isGecko) {console.clear()}
+				}
 				if (isSmart) {log_section(SECTP, gt0)}
 				// WTF NoScript! sometimes we have to catch this later
 				try {if ('CSS1Compat' !== document.compatMode) {run_block('quirks'); return}} catch(e) {}
