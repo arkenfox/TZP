@@ -921,8 +921,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 	if (isGecko) {
 		trywidget()
 	} else {
-		//tryfonts()
-		trysomethingelse()
+		tryfonts()
 	}
 })
 
