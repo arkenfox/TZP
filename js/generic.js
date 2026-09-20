@@ -449,11 +449,12 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }' &&
 			'brave' in navigator ? Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)).indexOf("brave") < 20 : false
 		// if isBrave, cool .... if not then you might have removed the key and I can't directly detect that
-			// but we can check for shields: if shields are on then we can force isBrave
 
 		Promise.all([
-			get_agent_data('', isOS, false)
+			get_agent_data('', isOS, false),
+			get_scr_position_window('', false)
 		]).then(function(res){
+			// harden isBrave
 			if (!isBrave) {
 				// additional isBrave (with and w/o shields)
 					// catches extensions like "Brave Detection Block"
@@ -482,38 +483,73 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				}
 			}
 
+			// isBraveSmart
+				// toggling shields forces a page reload: we only need calculate this once
+				// we can check shields regardless of isBrave to catch more sophisticated "brave detector" fuckery
+				// and force isBrave if isBraveSmart || or we can ignore the tiny % doing that as not worth the cost
+				// for now we will check everyone and see how perf goes
 
-					// we can check if FP protection is enabled
-						// indicators below, at least 2 depend on not being disabled/empty
-						// if isBrave it's a no brainer. If !isBrave we could assume tampering and set isBrave = true
-					// quick
-						// null keyboard
-						// gibberish in plugins (if pdf enabled)
-						// tiny chrome (and not FS?)
-						// tiny window positions
-						// screen + available screen steps into first of one of seven stepped sizes
-						// ? languages is single ?
-					// slow
-						// screen matchmedia/css matches outer (whilst it lasts)
-						// canvas
-					// slower
-						// fake voice if voices not empty
+			// QUICK
+			// null keyboard: android no shields returns size 0 mapped keys
+			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
-					// plugins gibberish
-						// items are always in a set order (check each platform) - brave mixes this ip
-						// one of the five is always missing - brave tends to overwrite one of them
-						// non expected items have no spaces e.g. 
-					/* examples
-						"aZMOPuXT: qdWTwBAIjRnTRQnb: WyhQIMtePHDBnyCJMtWyhYrdWTw3j47d",		8, 16, 32
-						"4k5k5cO:  BMteXyhQQv268mb:  FCgYzCBn6dt15FCo7GDJEKFpct9mbse",		7, 15, 31
-					*/
-					//let aOrder = ['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer','WebKit built-in PDF']
-					// 2 out of 3 should be enough to determine gibberish
+			// tiny window positions
+			let isBraveWindow = '>10' == res[1].screenX && '>10' == res[1].screenY
 
-					exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
+			// gibberish in plugins (if pdf enabled)
+			// plugins gibberish
+				// it always adds some, so if < 6 then it can't be
+				// one of the five is always missing - brave tends to overwrite one of them
+					// so < 5 expected
+				// items are always in a set order (check each platform) - brave mixes this ip
+					// let expectedOrder = ['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer','WebKit built-in PDF']
+				// fake entries may lack "Portable Document Format", real ones always have that
+				// most non expected items have no spaces (and therefore no "Portable Document Format")
+					// we always have at least one like this
+				/* examples
+					"aZMOPuXT: qdWTwBAIjRnTRQnb: WyhQIMtePHDBnyCJMtWyhYrdWTw3j47d",   8, 16, 32
+					"4k5k5cO:  BMteXyhQQv268mb:  FCgYzCBn6dt15FCo7GDJEKFpct9mbse",    7, 15, 31
+					"Giwg368:  w3bVSRQvAny4cWL:  aRnTRIEKFhvfu2Eh368mTJr0aseXq89",    7, 15, 31
+					"n6dt9eu:  6lSoUSRIECozZz4:  aNlxBAIr0asePHDBnyCJMtePPuf2bVS",    7, 15, 31
+				but not all
+				"JavaScript com.adobe.pdf extension: 	Hi47laNl5kx3bVKs9mTJr8999HqVxgvf: Portable Document Format
+				*/
+			// so.. total > 5 && expected < 5 && 1xnospaces == should be sufficient
+			let isBravePDF = 'TBA'
 
-			})
+			// screen steps into first of one of seven stepped sizes
+			let isBraveScreen = 'TBA'
 
+			// available screen matches screen
+				// isBraveScreen must be true for this to be true: i.e correct size
+			let isBraveAvailable = 'TBA'
+
+			// unknown
+				// ? languages is single ?
+			// slow
+				// screen matchmedia/css matches outer (whilst it lasts)
+				// canvas
+			// very slow
+				// fake voice at end mirroring first voice with specific random name (if voices not empty)
+
+			let oBrave = {
+				'available_screen': isBraveAvailable,
+				'keyboard': isBraveKeyboard,
+				'pdf': isBravePDF,
+				'screen': isBraveScreen,
+				'window': isBraveWindow,
+			}
+			// ToDo: calculate if isBraveSmart and if so enforce isBrave
+				// notes
+				// - some items depend on being enabled (pdf), not empty (voices), or platform (screen*/window*)
+				// - keyboard + PDF (if enabled) + voice (if not none) are very unique/unusual as a result
+				// - keyboard is universal all platforms, voice is none on android and pdf is hit and miss if enabled
+
+			if (isBrave) {
+				log_debug(SECTG, METRIC +'Smart', oBrave, isScope, true)
+			}
+			exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
+		})
 	} catch(e) {
 		log_error(3, METRIC, e, isScope, true) // persist sect3
 		exit(zErr)
