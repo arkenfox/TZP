@@ -1273,7 +1273,7 @@ const get_scr_position_screen = (METRIC) => new Promise(resolve => {
 	return resolve()
 })
 
-const get_scr_position_window = (METRIC) => new Promise(resolve => {
+const get_scr_position_window = (METRIC, isMain = true) => new Promise(resolve => {
 	// FS = all 0 except sometimes mozInnerScreenY | maximized can include negatives for screenX/Y
 	let oData = {}, aList = ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']
 	// nonGecko: number vs undefined: i.e a string of "undefined" will be an error
@@ -1290,7 +1290,8 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
 			if (undefined == x) {x += ''}
 		} catch(e) {
-			log_error(1, METRIC +'_'+ k, e); x = zErr
+			if (isMain) {log_error(1, METRIC +'_'+ k, e)}
+			x = zErr
 		}
 
 		// negate brave randomizing | AFAICT it's always under 10: e.g. 3,0 2,6 6,5 5,6 4,3
@@ -1313,9 +1314,11 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 	})
 	let hash = mini(oData)
 	let notation = '66a7ee25' == hash ? rfp_green : rfp_red
-	addDisplay(1, METRIC, display.join(', '), '', notation)
-	addData(1, METRIC, oData, hash)
-	return resolve()
+	if (isMain) {
+		addDisplay(1, METRIC, display.join(', '), '', notation)
+		addData(1, METRIC, oData, hash)
+	}
+	return resolve(oData)
 })
 
 const get_scr_viewport = (METRIC) => new Promise(resolve => {
