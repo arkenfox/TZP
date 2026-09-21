@@ -1502,8 +1502,10 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 						})
 						if (isBraveSmart) {
 							let aIgnored = data.filter(x => fntMaster.brave.includes(x))
-							data = data.filter(x => !aIgnored.includes(x))
-							log_debug(12, METRIC +'_ignored', aIgnored)
+							if (aIgnored.length) {
+								data = data.filter(x => !aIgnored.includes(x))
+								log_debug(12, METRIC +'_ignored', aIgnored)
+							}
 						}
 						value = mini(results)
 						btn = addButton(12, METRIC, results.length)
@@ -1607,8 +1609,10 @@ function get_fonts_offscreen(METRIC, METRICD) {
 		if (data.length) {
 			if (isBraveSmart) {
 				let aIgnored = data.filter(x => fntMaster.brave.includes(x))
-				data = data.filter(x => !aIgnored.includes(x))
-				log_debug(12, METRIC +'_ignored', aIgnored)
+				if (aIgnored.length) {
+					data = data.filter(x => !aIgnored.includes(x))
+					log_debug(12, METRIC +'_ignored', aIgnored)
+				}
 			}
 			value = mini(data)
 			btn = addButton(12, METRIC, data.length)
@@ -2028,7 +2032,7 @@ function get_fonts(METRIC, METRICD) {
 		}
 		if (setIgnore.size) {
 			let aIgnore = Array.from(setIgnore)
-			log_debug(12, METRIC +'_ignored', aIgnore.sort())
+			if (aIgnored.length) {log_debug(12, METRIC +'_ignored', aIgnore.sort())}
 		}
 
 		// per hash: do stuff: font names, same size, handle isFontSizesMore
