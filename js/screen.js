@@ -1445,81 +1445,84 @@ function get_scr_viewport_segments(METRIC) {
 	addDisplay(1, METRIC +'_media', display.horizontal +' x '+ display.vertical)
 
 	let hash = mini(data)
-	if ('0632aa25' == hash) {
-		addBoth(1, METRIC, zNA) // simplify unsupported
+	// simplify unsupported
+	if ('0632aa25' == hash || '95830dcd' == hash) {
+		// 95830dcd = servo where cssvalues are returned as 0
+		addBoth(1, METRIC, zNA)
 		return zNA
-	} else {
-		// ToDo: add meaurements
-			// css = e.g. env(viewport-segment-width 0 0)
+	}
+
+	// ToDo: add meaurements
+		// css = e.g. env(viewport-segment-width 0 0)
 	// ToDo: also count the DOMRect objects in window.viewport.segments
 		// I guess we check the x,y values to determine if it's horizontal or vertical
 
-		let width = 0, height = 0, typeCheck
-		let metric = isDesktop ? 'sizes_viewport_segments' : METRIC
-		let oSegment = {}
-		try {
-			if (runSE) {foo++}
-			let segments = window.viewport.segments
-			for (const k of Object.keys(segments)) {
-				let w = segments[k].width, h = segments[k].height, x = segments[k].x, y = segments[k].y
-				if (runST) {w = undefined; h = '1'}
-				// width
-				typeCheck = typeFn(w)
-				if ('number' !== typeCheck) {
-					if (width !== zErr) {log_error(1, metric +'_width', zErrType + typeCheck)}
-					width = zErr; w = zErr
-				}
-				// height
-				typeCheck = typeFn(h)
-				if ('number' !== typeCheck) {
-					if (zErr !== height) {log_error(1, metric +'_height', zErrType + typeCheck)}
-					height = zErr; h = zErr
-				}
-				// x
-				typeCheck = typeFn(x)
-				if ('number' !== typeCheck) {
-					log_error(1, metric +'_x', zErrType + typeCheck)
-					x = zErr
-				}
-				// y
-				typeCheck = typeFn(y)
-				if ('number' !== typeCheck) {
-					log_error(1, metric +'_y', zErrType + typeCheck)
-					y = zErr
-				}
-				// total measurement
-				if (zErr !== width) {width += w}
-				if (zErr !== height) {height += h}
-				oSegment[k] = {'height': h, 'width': w ,'x': x, 'y': y}
+	let width = 0, height = 0, typeCheck
+	let metric = isDesktop ? 'sizes_viewport_segments' : METRIC
+	let oSegment = {}
+	try {
+		if (runSE) {foo++}
+		let segments = window.viewport.segments
+		for (const k of Object.keys(segments)) {
+			let w = segments[k].width, h = segments[k].height, x = segments[k].x, y = segments[k].y
+			if (runST) {w = undefined; h = '1'}
+			// width
+			typeCheck = typeFn(w)
+			if ('number' !== typeCheck) {
+				if (width !== zErr) {log_error(1, metric +'_width', zErrType + typeCheck)}
+				width = zErr; w = zErr
 			}
-		} catch(e) {
-			// desktop the error is for viewport_segments (sizes)
-			log_error(1, metric + (isDesktop ? '' : '_sizes'), e)
-			width = zErr, height = zErr
+			// height
+			typeCheck = typeFn(h)
+			if ('number' !== typeCheck) {
+				if (zErr !== height) {log_error(1, metric +'_height', zErrType + typeCheck)}
+				height = zErr; h = zErr
+			}
+			// x
+			typeCheck = typeFn(x)
+			if ('number' !== typeCheck) {
+				log_error(1, metric +'_x', zErrType + typeCheck)
+				x = zErr
+			}
+			// y
+			typeCheck = typeFn(y)
+			if ('number' !== typeCheck) {
+				log_error(1, metric +'_y', zErrType + typeCheck)
+				y = zErr
+			}
+			// total measurement
+			if (zErr !== width) {width += w}
+			if (zErr !== height) {height += h}
+			oSegment[k] = {'height': h, 'width': w ,'x': x, 'y': y}
 		}
-		data['segments'] = oSegment
-		data['total'] = {'height': height, 'width': width}
-
-		// rawdata: for now just add it for lookup
-			// in future it becomes part of the android fp metric
-		let newobj = {}
-		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]}
-		sDetail[isScope][METRIC +'_data'] = newobj
-		addDisplay(1, METRIC +'_data', addButton(1, METRIC +'_data', 'data'))
-
-		// IDThink we have foldable laptops, so desktop must always be
-			// 1x1 if supported and non 1x1's must be mobile
-		if (isDesktop && '833d31a5' == hash) {
-			// simplify
-				// on desktop we add the measurement under sizes_viewport as a check
-			addBoth(1, METRIC, '1 x 1')
-		} else {
-			// this should always be mobile AFAICT
-			// ToDo: calculate summary and include data
-			addBoth(1, METRIC, 'TBA')
-		}
-		return [width, height]
+	} catch(e) {
+		// desktop the error is for viewport_segments (sizes)
+		log_error(1, metric + (isDesktop ? '' : '_sizes'), e)
+		width = zErr, height = zErr
 	}
+	data['segments'] = oSegment
+	data['total'] = {'height': height, 'width': width}
+
+	// rawdata: for now just add it for lookup
+		// in future it becomes part of the android fp metric
+	let newobj = {}
+	for (const k of Object.keys(data).sort()) {newobj[k] = data[k]}
+	sDetail[isScope][METRIC +'_data'] = newobj
+	addDisplay(1, METRIC +'_data', addButton(1, METRIC +'_data', 'data'))
+
+	// IDThink we have foldable laptops, so desktop must always be
+	// 1x1 if supported and non 1x1's must be mobile
+	if (isDesktop && '833d31a5' == hash) {
+		// simplify
+			// on desktop we add the measurement under sizes_viewport as a check
+		addBoth(1, METRIC, '1 x 1')
+	} else {
+		// this should always be mobile AFAICT
+		// ToDo: calculate summary and include data
+		addBoth(1, METRIC, 'TBA')
+	}
+	return [width, height]
+
 }
 
 function get_scr_viewport_units() {

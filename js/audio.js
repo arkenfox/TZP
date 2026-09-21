@@ -170,6 +170,15 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 					} else {
 						if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
 					}
+
+					if (isBraveSmart) {
+						// ToDo: this isn't perfect: we should check isLies
+							// and allow non-gecko to process isLies
+						log_debug(11, METRIC +'_ignored', display)
+						data = 'protected'
+						display = 'protected '+ s99 +'('+ display +')'+ sc
+					}
+
 					addBoth(11, METRIC, display, '', notation, data, isLies)
 					log_perf(11, METRIC, t0)
 					return resolve()

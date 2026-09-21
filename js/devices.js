@@ -78,6 +78,11 @@ function get_device_integer(METRIC, proxyCheck) {
 		value = isHWC ? navigator[METRIC] : screen[METRIC]
 		if (runST) {value += ''} else if (runSL) {addProxyLie(proxyCheck + METRIC)}
 		if (!Number.isInteger(value)) {throw zErrType + typeFn(value)}
+		if (isBraveSmart && isHWC) {
+			log_debug(7, METRIC +'_ignored', value)
+			data = 'protected'
+			value = 'protected '+ s99 +'('+ value +')'+ sc
+		}
 	} catch(e) {
 		value = e; data = isHWC ? zErrLog : zErrShort
 	}

@@ -1500,7 +1500,7 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 						results.forEach(function(item){
 							item = item.replace(/"/g, ''); data.push(item)
 						})
-						if (isBrave) {
+						if (isBraveSmart) {
 							let aIgnored = data.filter(x => fntMaster.brave.includes(x))
 							data = data.filter(x => !aIgnored.includes(x))
 							log_debug(12, METRIC +'_ignored', aIgnored)
@@ -1605,7 +1605,7 @@ function get_fonts_offscreen(METRIC, METRICD) {
 			if (ctx.measureText(fntString).width !== base) {data.push(font)}
 		})
 		if (data.length) {
-			if (isBrave) {
+			if (isBraveSmart) {
 				let aIgnored = data.filter(x => fntMaster.brave.includes(x))
 				data = data.filter(x => !aIgnored.includes(x))
 				log_debug(12, METRIC +'_ignored', aIgnored)
@@ -2011,7 +2011,7 @@ function get_fonts(METRIC, METRICD) {
 			let data = res[name]
 			if (!data.hasOwnProperty('error')) {
 				// bit repetitive
-				if (isBrave) {
+				if (isBraveSmart) {
 					fntMaster.brave.forEach(function(item){
 						if (undefined !== data[item]) {
 							delete data[item]
