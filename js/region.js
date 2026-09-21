@@ -655,31 +655,51 @@ function get_language_locale() {
 		*/
 		let value, data ='', returnvalue
 		try {
+			let aSysLang = ['i-am-fake']
 			isLanguagesNav.sort()
-			// populate
-			let aText = ['<switch id="switch">']
-			isLanguagesNav.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
-			aText.push('<text systemLanguage="i-am-fake">i-am-fake</text>')
-			aText.push('<text>unknown</text></switch>')
-			let el = dom.tzpSwitch
-			el.innerHTML = aText.join('')
-			// walk nodes
-			let aDetected = []
-			const walker = document.createTreeWalker(dom['switch'], NodeFilter.SHOW_TEXT, null);
-			while(walker.nextNode() && walker.currentNode) {
-				let target = walker.currentNode
-				//* important: we check range.getClientRects DOMRectList length so only real nav items are detected
-					// we use range due to selectNode (I think)
-					// we can't use range.getBoundingClientRect's DOMRect object (can't get obj keys length)
-					// THIS IS THE WAY: range.getClientRects()
-				// e.g. if navigator has a fake 'fr' (e.g. extension) it won't be detected as it
-					// isn't a "rendered" node with a range (cuz it's fake) - IIUIC
-				let range = new Range()
-				range.selectNode(target)
-				if (range.getClientRects().length) {aDetected.push(target.textContent)}
+			isLanguagesNav.forEach(function(x){aSysLang.push(x)})
+			aSysLang.sort()
+			let aLoop = [aSysLang]
+			// blink only reports the first item, so instead of 1 large array, we want many arrays of 1 item each
+				// slow (1.2ms for 2 items) but only way I know to get all the values
+			if ('blink' == isEngine) {
+				aLoop = []
+				aSysLang.forEach(function(x){aLoop.push([x])})
 			}
-			// remove unknown
+			let aDetected = []
+			let el = dom.tzpSwitch
+
+			aLoop.forEach(function(array) {
+				// populate
+				let aText = ['<switch id="switch">']
+				array.forEach(function(l){aText.push('<text systemLanguage="'+ l +'">' + l +'</text>')})
+				aText.push('<text>unknown</text></switch>')
+				el.innerHTML = aText.join('')
+				// walk nodes
+				const walker = document.createTreeWalker(dom['switch'], NodeFilter.SHOW_TEXT, null);
+				while(walker.nextNode() && walker.currentNode) {
+					let target = walker.currentNode
+					//* important: we check range.getClientRects DOMRectList length so only real nav items are detected
+						// we use range due to selectNode (I think)
+						// we can't use range.getBoundingClientRect's DOMRect object (can't get obj keys length)
+						// THIS IS THE WAY: range.getClientRects()
+					// e.g. if navigator has a fake 'fr' (e.g. extension) it won't be detected as it
+						// isn't a "rendered" node with a range (cuz it's fake) - IIUIC
+					let range = new Range()
+					range.selectNode(target)
+					if (range.getClientRects().length) {aDetected.push(target.textContent)}
+				}
+				/* works in blink but is slower
+				let collection = el.firstChild.children
+				for (const k of Object.keys(collection)) {
+					if (collection[k].clientWidth > 0) {aDetected.push(collection[k].innerHTML)}
+				}
+				*/
+			})
+			// remove unknown, filter, sort
 			aDetected = aDetected.filter(x => !['unknown'].includes(x))
+			aDetected = dedupeArray(aDetected)
+			aDetected.sort()
 			if (0 == aDetected.length) {returnvalue = []; throw zErrType + 'empty array'}
 			value = aDetected.join(', ')
 			returnvalue = aDetected
