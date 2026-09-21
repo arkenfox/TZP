@@ -130,6 +130,11 @@ function get_device_memory(METRIC) {
 			if (!aValid.includes(value)) {
 				throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ value
 			}
+			if (isBraveSmart) {
+				log_debug(7, METRIC +'_ignored', value)
+				data = 'protected'
+				value = 'protected '+ s99 +'('+ value +')'+ sc
+			}
 		}
 	} catch(e) {
 		value = e; data = zErrLog
