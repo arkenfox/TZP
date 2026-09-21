@@ -658,9 +658,21 @@ function get_language_locale() {
 			let aSysLang = ['i-am-fake']
 			isLanguagesNav.sort()
 			isLanguagesNav.forEach(function(x){aSysLang.push(x)})
+			if (isBrave) {
+				// isBraveSmart nav only ever reports the first language, but we can add some extras
+					// e.g. we would expect en with most en-*
+					// this is more for show to indicate hidden langs are exposed: i.e 'en' shows up in a
+					// default en-US brave | and I suspect many defaults fallback to some combo of en*
+				// in future we could add other langs based on the first lang + common sets
+				let aSysExtras = ['en-US','en']
+				aSysExtras.forEach(function(x){
+					aSysLang.push(x.toLowerCase()) // always lower case
+				})
+				aSysLang = dedupeArray(aSysLang)
+			}
 			aSysLang.sort()
 			let aLoop = [aSysLang]
-			// blink only reports the first item, so instead of 1 large array, we want many arrays of 1 item each
+			// blink only detects the first item, so instead of 1 large array, we want many arrays of 1 item each
 				// slow (1.2ms for 2 items) but only way I know to get all the values
 			if ('blink' == isEngine) {
 				aLoop = []
