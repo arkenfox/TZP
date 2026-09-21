@@ -789,6 +789,24 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 						i.name +' | '+ i.lang + (i['default'] ? ' | default' : '') + (i.localService ? '' : ' | false') + (skipURI ? '' : ' | '+ uriStr)
 					)
 				})
+				if (isBraveSmart) {
+					// brave always ADDS a randomized single voice to the END
+						// this will do for now: we can get more sophisticated later if we need to
+					// future tightening: it bases it on the first item so e.g. on windows
+						//  1st item: "Microsoft David - English (United States) | en-US | default"
+						// last item: "Alva | en-US | Microsoft David - English (United States)"
+					let aFakeVoices = [
+						'Hubert','Vernon','Rudolph','Clayton','Irving','Wilson','Alva',
+						'Harley','Beauregard','Cleveland','Cecil','Reuben','Sylvester','Jasper',
+					]
+					// ToDo: check mac/linux - on windows it's the first split
+					let lastitem = res[res.length -1]
+					let check = lastitem.split(' | ')[0]
+					if (aFakeVoices.includes(check)) {
+						res = res.slice(0, -1)
+						log_debug(18, METRIC +'_ignored', lastitem)
+					}
+				}
 				let hash = mini(res)
 				addBoth(18, METRIC, hash, addButton(18, METRIC, res.length), notation, res, isProxyLie('speechSynthesis.getVoices'))
 				log_perf(18, METRIC, t0)
