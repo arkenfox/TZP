@@ -461,10 +461,11 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				try {
 					let data = res[0]
 					if ('object' !== typeof data) {exit()}
-					// screen positions are 0
-						// weak but might weed out some false positives
+					// screen positions are 0 || weak but might weed out some false positives
+					// connection is undefined
 					let isBraveScreen = (0 == screen.availLeft && 0 == screen.availTop)
-					if (isBraveScreen) {
+					let isBraveConnection = undefined == navigator.connection
+					if (isBraveScreen && isBraveConnection) {
 						// userAgentData: the position of 'Brave' differs
 							// order is Brave, Not_A Brand, Chromium || chrome is Not_A Brand, Chromium, Google Chrome
 							// this is due to the patch, and is not randomized AFAICT (on windows at least)
@@ -539,15 +540,15 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				'screen': isBraveScreen,
 				'window': isBraveWindow,
 			}
-			// ToDo: calculate if isBraveSmart and if so enforce isBrave
+			// ToDo: refine calculation of isBraveSmart and if so enforce isBrave
 				// notes
 				// - some items depend on being enabled (pdf), not empty (voices), or platform (screen*/window*)
 				// - keyboard + PDF (if enabled) + voice (if not none) are very unique/unusual as a result
 				// - keyboard is universal all platforms, voice is none on android and pdf is hit and miss if enabled
 
-			if (isBrave) {
-				log_debug(SECTG, METRIC +'Smart', oBrave, isScope, true)
-			}
+			// for now .. if already isBrave, just the keyboard is enough
+			if (isBraveKeyboard) {isBraveSmart = isBrave}
+			if (isBrave) {log_debug(SECTG, METRIC +'Smart', oBrave, isScope, true)} // debug for brave
 			exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
 		})
 	} catch(e) {
