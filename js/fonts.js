@@ -2032,7 +2032,7 @@ function get_fonts(METRIC, METRICD) {
 		}
 		if (setIgnore.size) {
 			let aIgnore = Array.from(setIgnore)
-			if (aIgnored.length) {log_debug(12, METRIC +'_ignored', aIgnore.sort())}
+			log_debug(12, METRIC +'_ignored', aIgnore.sort())
 		}
 
 		// per hash: do stuff: font names, same size, handle isFontSizesMore
