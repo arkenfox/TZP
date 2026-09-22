@@ -495,7 +495,9 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
 			// tiny window positions
+				// if true but android then ignore || false could be windowed ona tablet
 			let isBraveWindow = '<10' == res[1].screenX && '<10' == res[1].screenY
+			if (isBraveWindow && 'android' == isOS) {isBraveWindow = zNA + '(android)'}
 
 			// gibberish in plugins (if pdf enabled)
 			// plugins gibberish
@@ -2471,7 +2473,6 @@ function countJS(item) {
 		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 		Promise.all([
 			get_isBB('isBB'),
-			get_isBrave('isBrave'),
 			get_isFileSystem('isFileSystem'),
 			get_isAutoplay('getAutoplayPolicy'),
 		]).then(function(){
@@ -2480,6 +2481,8 @@ function countJS(item) {
 			Promise.all([
 				get_isOS('isOS')
 			]).then(function(){
+				get_isBrave('isBrave') // uses isOS
+
 				// tweak monospace size
 					// ToDo: this is bad design: we need a better way to get nice consistent sizes across
 					// TB vs linux vs other linux vs other platforms
