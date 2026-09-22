@@ -1035,7 +1035,7 @@ function set_fntList() {
 		}
 	}
 	// bail
-	if (isOS == undefined) {return}
+	if (undefined == isOS) {return}
 
 	// fnt*Btn data
 	if (gRun || build) {
@@ -2666,8 +2666,8 @@ function get_widget_fonts(METRIC) {
 		for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]; count += tmpdata[k].length}
 		hash = mini(data)
 		btn = addButton(12, METRIC, Object.keys(data).length +'/'+ count)
-		if (isVer > 153) {
-			// RFP FF154+
+		if (isVer > 153 && isVer < 158) {
+			// RFP FF154-157
 				// 2042294 caused changes to non-integers, but they are consistent: namely 13.3333 -> 13.3281
 				// IDK any more if RFP upstream or BB patches ever controlled the sizes or rely on defaults but
 				// this is a universal change, so if it is/was protected it still is IIUIC
@@ -2703,6 +2703,9 @@ function get_widget_fonts(METRIC) {
 			}
 		} else {
 			// RFP 153
+			// RFP158+ 2073465 - Tweak font-size quantization to prefer snapping to integer appUnit sizes
+				// ... aaaand 2042294 was marked as the cause of the regression :)
+				// ... soooo back to .3333
 			if ('windows' == isOS && '24717aa8' == hash) {notation = rfp_green
 			} else if ('mac' == isOS && '12e7f88a' == hash) {notation = rfp_green
 			} else if ('linux' == isOS) {
