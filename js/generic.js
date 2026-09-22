@@ -799,11 +799,13 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 				log_alert(SECTG, METRIC, "undefined", isScope, true)
 			}
 		}
+		oOS['9_outcome'] = value +''
+		log_debug(SECTG, METRIC +'_check', oOS, isScope, true)
 		return resolve()
 	}
 
-	// 1. widget font: mac/linux
-	function trywidget() {
+	// 1. widget font: windows/mac
+	function trywidget(m = '1_widget') {
 		try {
 			if (runSG) {foo++}
 			let aIgnore = [
@@ -811,29 +813,34 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 				'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
 			]
 			let font = getComputedStyle(dom.tzpbutton).getPropertyValue('font-family')
-			if ('string' !== typeFn(font) || aIgnore.includes(font)) {
-				throw zErr
+			let typeCheck = typeFn(font)
+			if ('string' !== typeCheck) {
+				throw zErrType + typeCheck
+			} else if (aIgnore.includes(font)) {
+				throw font
 			} else {
+				oOS[m] = font
 				if (isGecko) {
 					// button
 					if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
 					} else if (font == '-apple-system') {exit('mac')
-					} else {throw zErr}
+					} else {throw font}
 				} else {
 				// mac webkit
 					// search and select return -apple-system
 					// mozfonts (e.g. mozbutton) return webkit-standard
 					// status-bar returns -apple-status-bar
 					// menu returns -apple-menu
-					tryfonts()
+					throw font
 				}
 			}
 		} catch(e) {
+			oOS[m] = e+''
 			tryfonts()
 		}
 	}
 	// 2: fonts
-	function tryfonts() {
+	function tryfonts(m = '2_fonts') {
 		// check doc fonts
 		let fntEnabled = false
 		try {
@@ -844,16 +851,26 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			//dom.tzpDocFont.style.fontFamily = fntTest
 			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family')
 			fntEnabled = fntOK.includes(font)
-		} catch(e) {}
-		if (!fntEnabled) {trysomethingelse(); return}
+			if (!fntEnabled) {
+				oOS[m] = 'document fonts disabled'
+				trysomethingelse()
+				return
+			}
+		} catch(e) {
+			oOS[m] = e+''
+			trysomethingelse()
+			return
+		}
 
 		// check fonts
 		get_fonts_size(false).then(res => {
 			if ('object' == typeFn(res, true)) {
 				let aDetected = [], found
 				for (const k of Object.keys(res)) {aDetected.push(k)}
+				oOS[m] = aDetected.length ? aDetected : 'none'
 				if (isGecko) {
-					found = aDetected[0]
+					found = aDetected.length ? aDetected[0] : 'none'
+					oOS[m] = found
 					if (aDetected.length == 1) {
 						if (found == 'MS Shell Dlg \\32') {exit('windows')
 						} else if (found == '-apple-system') {exit('mac')
@@ -861,14 +878,12 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 						} else {
 							trysomethingelse()
 						}
-						//console.log('isOS font check', found, isOS)
-					} else if (isGecko && aDetected.length == 0) {
+					} else if ('none' == found) {
 						exit('linux')
 					} else {
 						trysomethingelse()
 					}
 				} else {
-					// console.log(aDetected)
 					// if we detected the fake font then ignore
 					//aDetected.push('--00'+ rnd_string()) // test
 					let aFake = aDetected.filter(x => !fntMaster.platform.all.includes(x)) 
@@ -895,35 +910,35 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		})
 	}
 	// 3. now what? 
-	function trysomethingelse() {
-		if (!isGecko) {
-			// get svh and lvh: if they differ then you have a dynamic urlbar: this is fast
-				// note: like isBB apps may enforce dynamic urlbar off or like FF add a UI setting fopr it
-				// or extensions might tamper with it; at best we can only use if we have a diff
-			// for now just record the info for non-gecko
-			try {
-				let aList = ['L','S'], data = {}
-				aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
-				let diff = Math.abs(data['L'] - data['S'])
-				// do prompts affect this?
-				//if (diff > 20) { // allow some wriggle room
-					//if ('blink' == isEngine) {isOS = 'android'}
-				//}
-				log_debug(SECTG, METRIC +'_dynamic_urlbar', 'L: '+ data['L'] +' | S: '+ data['S'] + ' | diff: '+ diff, isScope, true)
-			} catch(e) {
-				log_debug(SECTG, METRIC +'_dynamic_urlbar', e+'', isScope, true)
+	function trysomethingelse(m = '') {
+
+		// get svh and lvh: if they differ then you have a dynamic urlbar: this is fast
+			// note: like isBB apps may enforce dynamic urlbar off or like FF add a UI setting fopr it
+			// or extensions might tamper with it; at best we can only use if we have a diff
+		m = '3_dynamic_urlbar'
+		try {
+			let aList = ['L','S'], data = {'H': ''}
+			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
+			data['H'] = Math.abs(data['L'] - data['S'])
+			oOS[m] = data
+			// do prompts affect this?
+			if (data['H'] > 20) { // allow some wriggle room?
+				if ('webkit' !== isEngine) {
+					exit('android')
+					return
+				}
 			}
-			// keyboard map size = 0 is a strong indicator of blink android but not brave (default shields keyboard is null)
+		} catch(e) {
+			oOS[m] = e+''
 		}
+
+		// keyboard map size = 0 is a strong indicator of blink android but not brave (default shields keyboard is null)
 		exit()
 	}
 
+	let oOS = {}
 	set_fntList_mini()
-	if (isGecko) {
-		trywidget()
-	} else {
-		tryfonts()
-	}
+	trywidget()
 })
 
 const get_isRecursion = (runNo) => new Promise(resolve => {
