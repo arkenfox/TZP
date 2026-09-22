@@ -751,6 +751,19 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 					if (window.matchMedia('(device-'+ a +':1/1)').matches) value = s
 					if (window.matchMedia('(min-device-'+ a +':10000/9999)').matches) value = l
 					if (window.matchMedia('(max-device-'+ a +':9999/10000)').matches) value = p
+					// https://github.com/brave/brave-browser/issues/51616
+					// isBraveSmart has a bug where screen css/matchmedia return the spoofed outer sizes
+						// we expect landscape on desktop because screen is meant to stepped as landscape
+						// overwrite the result so FP hashes are consistent: e.g. I test with a inner at 1000x1000
+						// and it can swing either landscape or portrait or square: whatever spoofed outer decides
+						// or a user could have a tall narrow portrait browser window
+					if (isDesktop && isBraveSmart) {
+						if (l !== value) {
+							// orientation_device-aspect-ratio
+							log_debug(1, METRIC +'_'+ item, 'bug uses outer measurements: '+ value + ' ignored, using landscape')
+							value = l
+						}
+					}
 				} else if ('aspect-ratio' == item) {
 					if (window.matchMedia('('+ a +':1/1)').matches) value = s
 					if (window.matchMedia('(min-'+ a +':10000/9999)').matches) value = l
@@ -776,6 +789,16 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			// check matchmedia matches css
 			let cssvalue = getElementProp(1, cssID, METRIC +'_'+ cssitem)
 			let isErrCss = cssvalue == zErr
+			// https://github.com/brave/brave-browser/issues/51616
+			if (!isErrCss && '#cssDAR' == cssID) {
+				if (isDesktop && isBraveSmart) {
+					if (l !== cssvalue) {
+						// orientation_device-aspect-ratio_css
+						log_debug(1, METRIC +'_'+ cssitem, 'bug uses outer measurements: '+ cssvalue + ' ignored, using landscape')
+						cssvalue = l
+					}
+				}
+			}
 			let isLies = (!isErr && !isErrCss && value !== cssvalue)
 			oDisplay[METRIC +'_'+ item] = {'value': value +'', 'lies': isLies}
 			if (isSmart && isLies) {
