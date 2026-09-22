@@ -47,7 +47,7 @@ const get_scr_fs_measure = (isElementFS) => new Promise(resolve => {
 		} else {
 			w = window.innerWidth; h = window.innerHeight
 		}
-		if (firstW == undefined) {firstW = w; firstH = h} // remember first values
+		if (undefined == firstW) {firstW = w; firstH = h} // remember first values
 		lastW = w; lastH = h
 		return w +' x '+ h
 	}
@@ -472,7 +472,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 					} else {
 						// we can refine these rules later per key/OS: currently does it == inner
 						let match = 'width' == j ? controlw : controlh
-						if (aSet[0] !== match) {isSame = false}
+						if (match !== aSet[0]) {isSame = false}
 					}
 				}
 			}
@@ -539,7 +539,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 			}
 
 			let dockStr = ('windows' == isOS ? 'taskbar' : ('mac' == isOS ? 'menu bar/dock' : 'panel'))
-			if (isOS == undefined) {dockStr = 'taskbar/dock/panel'}
+			if (undefined == isOS) {dockStr = 'taskbar/dock/panel'}
 			sDetail[isScope].lookup['size_dock'] = dockW +' x '+ dockH
 			addDisplay(1, 'size_dock', '['+ dockStr +': '+ dockW +' x '+ dockH +']','', notation)
 		}
@@ -614,9 +614,10 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		dppx: 'pixels',
 	}
 
-	let list = oList[datatype], maxCount = oList[datatype].length, count = 0, oData = {}
+	let list = oList[datatype], count = 0, oData = {}
+	const maxCount = oList[datatype].length
 	function exit(id, value) {
-		if (value == unable) {
+		if (unable == value) {
 			if (!isGecko && '-moz-device-pixel-ratio' == id) {
 				value = zNA
 			} else {
@@ -628,9 +629,7 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		}
 		oData[id] = value
 		count++
-		if (count == maxCount) {
-			return resolve(oData)
-		}
+		if (maxCount == count) {return resolve(oData)}
 	}
 	function runTest(callback){
 		list.forEach(function(k){
@@ -760,7 +759,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 					if (isDesktop && isBraveSmart) {
 						if (l !== value) {
 							// orientation_device-aspect-ratio
-							log_debug(1, METRIC +'_'+ item, 'bug uses outer measurements: '+ value + ' ignored, using landscape')
+							log_debug(1, METRIC +'_'+ item +'_ignored', value +' (bug 51616) ignored, using landscape')
 							value = l
 						}
 					}
@@ -775,10 +774,10 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 				if (runST) {value = undefined} else if (runSL) {value += '_fake'}
 				// can only be undefined (default) or a string (which we set)
 				if (!isGecko && '-moz-device-orientation' == item) {
-					if (value !== undefined) {throw zErrType + typeFn(value)} // undefined in nonGecko
+					if (undefined !== value) {throw zErrType + typeFn(value)} // undefined in nonGecko
 					value += ''
 				} else {
-					if (value == undefined) {throw zErrType +'undefined'} // we expect values (in gecko)
+					if (undefined == value) {throw zErrType +'undefined'} // we expect values (in gecko)
 				}
 			} catch(e) {
 				log_error(1, METRIC +'_'+ type +'_'+ item, e)
@@ -788,13 +787,13 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			// css
 			// check matchmedia matches css
 			let cssvalue = getElementProp(1, cssID, METRIC +'_'+ cssitem)
-			let isErrCss = cssvalue == zErr
+			let isErrCss = zErr == cssvalue
 			// https://github.com/brave/brave-browser/issues/51616
 			if (!isErrCss && '#cssDAR' == cssID) {
 				if (isDesktop && isBraveSmart) {
 					if (l !== cssvalue) {
 						// orientation_device-aspect-ratio_css
-						log_debug(1, METRIC +'_'+ cssitem, 'bug uses outer measurements: '+ cssvalue + ' ignored, using landscape')
+						log_debug(1, METRIC +'_'+ cssitem +'_ignored', cssvalue +' (bug 51616) ignored, using landscape')
 						cssvalue = l
 					}
 				}
@@ -955,7 +954,7 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 				value = zErr; display = zErr
 			}
 			// FF127: 1554751
-			let notation = value == 2 ? rfp_green : rfp_red
+			let notation = 2 == value ? rfp_green : rfp_red
 			addDisplay(1, METRIC +'_'+ item + strIframe, display, '', notation)
 			oData[item + strIframe] = value
 		})
@@ -968,7 +967,7 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 			let originalvalue = value
 			let typeCheck = typeFn(value)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if (value.slice(-2) !== 'px') {throw zErrInvalid + 'got '+ originalvalue} // missing px
+			if ('px' !== value.slice(-2)) {throw zErrInvalid + 'got '+ originalvalue} // missing px
 			value = value.slice(0, -2)
 			if (value.length > 0) {value = value * 1}
 			if ('number' !== typeFn(value)) {throw zErrInvalid + 'got '+ originalvalue} // missing number
@@ -992,7 +991,7 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 		let value = getElementProp(1, '#P', METRIC +'_'+ item, ':before')
 		let typeCheck = typeFn(value)
 		// ignore errors (already caught) and of out of range (entirely possible?)
-		if (value !== '?' && value !== zErr) {
+		if ('?' !== value && zErr !== value) {
 			if ('number' !== typeCheck) {
 				log_error(1, METRIC +'_'+ item, zErrType + typeCheck), value = zErr
 			}
@@ -1180,7 +1179,7 @@ function get_scr_pixels_match(METRIC, oData) {
 			oPixels[k] = {}
 			let isBound
 			if ('devicePixelRatio' !== k) { // dpr _is_ the control
-				controlPx = (undefined == oControls[k]) ? dprValue : oControls[k]
+				controlPx = oControls[k] || dprValue
 				oPixels[k].control = controlPx
 			}
 			if ('devicePixelRatio_iframe' == k) {
@@ -1231,7 +1230,7 @@ function get_scr_pixels_match(METRIC, oData) {
 					if (false === testPx) {isPixelMatch = false}
 					oSummary[testPx].push(k)
 				}
-			} else if (oLists[k] !== undefined) {
+			} else if (undefined !== oLists[k]) {
 				// ToDo: is max actually needed, so we need min?
 				let unit = 'dppx' == k ? 'dppx' : ''
 				oLists[k].forEach(function(item){
@@ -1360,7 +1359,7 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 				target.setAttribute('id', id)
 				target.style.cssText = 'position:fixed;top:0;left:0;bottom:0;right:0;'
 				document.documentElement.insertBefore(target,document.documentElement.firstChild)
-				if (isDomRect == -1) {
+				if (-1 == isDomRect) {
 					w = target.offsetWidth
 					h = target.offsetHeight
 				} else {
@@ -1374,7 +1373,7 @@ const get_scr_viewport = (METRIC) => new Promise(resolve => {
 				// use domrect width as we know that is fixed | height we use clientHeight as this reports inner
 				target = document.documentElement
 				h = target.clientHeight
-				if (isDomRect == -1) {
+				if (-1 == isDomRect) {
 					w = target.clientWidth
 				} else {
 					method = measureFn(target, METRIC +'_'+ type)
@@ -1492,7 +1491,7 @@ function get_scr_viewport_segments(METRIC) {
 			// width
 			typeCheck = typeFn(w)
 			if ('number' !== typeCheck) {
-				if (width !== zErr) {log_error(1, metric +'_width', zErrType + typeCheck)}
+				if (zErr !== width) {log_error(1, metric +'_width', zErrType + typeCheck)}
 				width = zErr; w = zErr
 			}
 			// height
@@ -1567,14 +1566,14 @@ function get_scr_viewport_units() {
 			let name = prefix + p.slice(0,1)
 			try {
 				let x
-				if (isDomRect == -1) {
-					x = p == 'width' ? target.offsetWidth : target.offsetHeight
+				if (-1 == isDomRect) {
+					x = 'width' == p ? target.offsetWidth : target.offsetHeight
 				} else {
 					let method = measureFn(target, METRIC +'_'+ prefix)
 					if (undefined !== method.error) {throw method.errorstring}
 					x = 'width' == p ? method.width : method.height
 					//type check
-					if (runST) {x = p == 'width' ? undefined : '' }
+					if (runST) {x = 'width' == p ? undefined : '' }
 					let typeCheck = typeFn(x)
 					if ('number' !== typeCheck) {throw zErrType + typeCheck}
 					data[p][name] = x
@@ -1633,7 +1632,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			// i.e pocs for 160 and 162, but not 161
 	let maxCheck = '+' == isVerExtra ? 3 : 1
 	// add userAgent
-	if (os !== undefined) {
+	if (undefined !== os) {
 		for (const k of Object.keys(oRFP)) {
 			oRFP[k].userAgent = []
 			let uaBase = 'Mozilla/5.0 (' + oRFP[k].ua_os +'; rv:'
@@ -1740,10 +1739,10 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 					if (!isVerCheck) {isLies = true}
 				} else if ('appVersion' == k) {
 					// User-Agent Switcher
-					if ('windows' == os) {isLies = reported !== '5.0 (Windows)'}
+					if ('windows' == os) {isLies = '5.0 (Windows)' !== reported}
 				} else if ('platform' == k) {
 					// User-Agent Switcher
-					if ('windows' == os) {isLies = reported !== 'Win32'}
+					if ('windows' == os) {isLies = 'Win32' !== reported}
 				} else if ('oscpu' == k) {
 					// User-Agent Switcher
 					if ('windows' == os) {isLies = !reported.includes('Windows NT 10.0')
@@ -1752,12 +1751,12 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			}
 		}
 		let notation = isLies ? rfp_red : '' // in case os is undefined
-		if (os !== undefined) {
+		if (undefined !== os) {
 			let rfpvalue = oRFP[os][k], isMatch = false
-			isMatch = (k == 'userAgent' ? rfpvalue.includes(reported) : rfpvalue === reported)
+			isMatch = ('userAgent' == k ? rfpvalue.includes(reported) : rfpvalue === reported)
 			notation = isMatch ? rfp_green : rfp_red
 			// notate good desktopmode
-			if (k == 'userAgent' && isMatch && !isDesktop) {
+			if ('userAgent' == k && isMatch && !isDesktop) {
 				if (reported.includes('Linux')) {notation = desktopmode_green}
 			}
 			// catch non-errors and non-lies health failures
@@ -1882,7 +1881,7 @@ function get_agent_workers() {
 			else if (swr.waiting) {sw = swr.waiting}
 			else if (swr.active) {sw = swr.active}
 			sw.addEventListener('statechange', function(e) {
-				if (e.target.state == 'activated') {
+				if ('activated' == e.target.state) {
 					sw.postMessage('')
 				}
 			})
@@ -1948,7 +1947,7 @@ const outputFD = () => new Promise(resolve => {
 		value = zNA; display = zNA
 	} else {
 		if (undefined == isOS) {
-			value = zErr; display = isOSErr !== undefined ? isOSErr : zErr
+			value = zErr; display = isOSErr || zErr
 		} else {
 			value = isOS; display = isOS
 		}
@@ -2051,16 +2050,16 @@ const outputFD = () => new Promise(resolve => {
 	try {
 		let len = eval.toString().length
 		if (runST) {len = 43}
-		if (len !== 37) {throw zErrInvalid + 'expected 37: got '+ len}
+		if (37 !== len) {throw zErrInvalid + 'expected 37: got '+ len}
 	} catch(e) {
 		log_error(3, METRIC, e)
 	}
 
 	// version
-	addBoth(3, 'browser_version', (isVerExtra !== '' ? isVer + isVerExtra : isVer))
+	addBoth(3, 'browser_version', ('' !== isVerExtra ? isVer + isVerExtra : isVer))
 	// set metricsPrefix
 	if (isGecko && isSmart) {
-		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'
+		metricsPrefix = (isMB ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS || 'unknown') +'-'
 	}
 	return resolve()
 })
