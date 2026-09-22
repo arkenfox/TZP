@@ -1507,8 +1507,8 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 								log_debug(12, METRIC +'_ignored', aIgnored)
 							}
 						}
-						value = mini(results)
-						btn = addButton(12, METRIC, results.length)
+						value = mini(data)
+						btn = addButton(12, METRIC, data.length)
 						if (isMain && fntList.length) {
 							notation = get_font_notation(METRIC, data)
 							// enumerate fonts across all font tests
