@@ -494,10 +494,8 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			// null keyboard: android no shields returns size 0 mapped keys
 			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
-			// tiny window positions
-				// if true but android then ignore || false could be windowed ona tablet
+			// tiny window positions: note android 0's report as false
 			let isBraveWindow = '<10' == res[1].screenX && '<10' == res[1].screenY
-			if (isBraveWindow && 'android' == isOS) {isBraveWindow = zNA + '(android)'}
 
 			// gibberish in plugins (if pdf enabled)
 			// plugins gibberish
