@@ -496,7 +496,6 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 
 			// tiny chrome
 				// even in FS or FSElement, never changes even with zoom
-				// hey .. we already measured with type checks: isInitial holds numbers or zErr
 				// note: FSElement isn't relevant as it exits if reloading as it requires user actions
 				// note: on android we force inner min-width which can > outer = negative diff = throws error
 					// android isn't spoofed anyway, so we'll ignore it like the other window/screen metrics
@@ -504,8 +503,8 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let x, y
 			if (isDesktop) {
 				try {
-					x = isInitial.width.outer - isInitial.width.inner
-					y = isInitial.height.outer - isInitial.height.inner
+					x = window.outerWidth - window.innerWidth
+					y = window.outerHeight - window.innerHeight
 					// throw if anything isn't a number or is less than 0
 					if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
 					isBraveChrome = x < 10 && y < 10
