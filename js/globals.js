@@ -145,6 +145,7 @@ let isArchArray = zNA,
 	isAutoPlay,
 	isAutoPlayError,
 	isBrave = false,
+	isBravePDF = false, // used to calculate isBraveSmart, reused in pdf
 	isBraveSmart = false, // only if FP protection is on
 	isDesktop = true,
 	isDevices,
@@ -233,7 +234,7 @@ let gt0, gt1,
 	gRun = true,
 	gClick = true,
 	gFS = false, // don't run FS measurements if already tiggered
-	gClear = true, // clear console of xml and BB's prototype/proxy errors
+	gClear = true, // clear excessive console errors from BB and non-gecko
 	isAllowNonGecko = true, // allow some other engines
 	isAllowNonGeckoMin = true, // enforce min requirements on those other engines
 	isAllowNonGeckoUndefined = true, // allow undefined engines
