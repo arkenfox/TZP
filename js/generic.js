@@ -498,41 +498,48 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				// even in FS or FSElement, never changes even with zoom
 				// hey .. we already measured with type checks: isInitial holds numbers or zErr
 				// note: FSElement isn't relevant as it exits if reloading as it requires user actions
+				// note: on android we force inner min-width which can > outer = negative diff = throws error
+					// android isn't spoofed anyway, so we'll ignore it like the other window/screen metrics
 			let isBraveChrome = isDesktop ? false : zNA
 			let x, y
-			try {
-				x = isInitial.width.outer - isInitial.width.inner
-				y = isInitial.height.outer - isInitial.height.inner
-				// throw if anything isn't a number or is less than 0
-				if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
-				isBraveChrome = x < 10 && y < 10
-				// clean up at least one false positive (noting that two random 0's are possible)
-				if (0 == x && 0 == y) {
-					if (window.matchMedia('(display-mode:fullscreen)').matches) {isBraveChrome = false}
+			if (isDesktop) {
+				try {
+					x = isInitial.width.outer - isInitial.width.inner
+					y = isInitial.height.outer - isInitial.height.inner
+					// throw if anything isn't a number or is less than 0
+					if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
+					isBraveChrome = x < 10 && y < 10
+					// clean up at least one false positive (noting that two random 0's are possible)
+					if (0 == x && 0 == y) {
+						if (window.matchMedia('(display-mode:fullscreen)').matches) {isBraveChrome = false}
+					}
+				} catch(e) {
+					isBraveChrome = zErr
 				}
-			} catch(e) {
-				isBraveChrome = zErr
 			}
 
 			// tiny window positions: note android 0's report as false but we want n/a
 			let isBraveWindow = isDesktop ? false : zNA
-			try {
-				x = window.screenX
-				y = window.screenY
-				// throw if anything isn't a number or is less than 0
-				if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
-				isBraveWindow = x < 10 && y < 10
-				// clean up at least one false positive (noting that two random 0's are possible)
-				if (0 == x && 0 == y) {
-					if (window.matchMedia('(display-mode:fullscreen)').matches) {isBraveWindow = false}
+			if (isDesktop) {
+				try {
+					x = window.screenX
+					y = window.screenY
+					// throw if anything isn't a number or is less than 0
+					if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
+					isBraveWindow = x < 10 && y < 10
+					// clean up at least one false positive (noting that two random 0's are possible)
+					if (0 == x && 0 == y) {
+						if (window.matchMedia('(display-mode:fullscreen)').matches) {isBraveWindow = false}
+					}
+				} catch(e) {
+					isBraveWindow = zErr
 				}
-			} catch(e) {
-				isBraveWindow = zErr
 			}
 
 			// plugins: brave specific gibberish (if pdf enabled)
 				// reuse variable in pdf metric (no point calculating it twice)
 			isBravePDF = false
+			let oPDF = {}
 			try {
 				let obj = navigator.plugins
 				if ('object' !== typeFn(obj, true) || '[object PluginArray]' !== obj +'') {throw zErr}
@@ -591,10 +598,12 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 							}
 						}
 					})
-					if (aDetected.length) {isBravePDF = true}
-					let oPDF = {'detected': aDetected}
-					if (aDetected.length !== aUnexpected.length) {oPDF['unexpected'] = aUnexpected}
-					log_debug(SECTG, METRIC +'_pdf', oPDF, isScope, true) // persist
+					if (aDetected.length) {
+						oPDF = {'detected': aDetected}
+						if (aDetected.length !== aUnexpected.length) {oPDF['unexpected'] = aUnexpected}
+						isBravePDF = true
+					}
+					//log_debug(SECTG, METRIC +'_pdf', oPDF, isScope, true) // persist
 				} else {
 					if (!obj.length) {isBravePDF = zNA}
 				}
@@ -602,17 +611,16 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				isBravePDF = zErr
 			}
 
-
+			// languages is limited to one | lots of false postives to be sure
+			let isBraveLanguage = false
+			try {isBraveLanguage = 1 == navigator.languages.length} catch(e) {isBraveLanguage = zErr}
 
 			// screen steps into first of one of seven stepped sizes
 			let isBraveScreen = 'TBA'
-
 			// available screen matches screen
 				// isBraveScreen must be true for this to be true: i.e correct size
 			let isBraveAvailable = 'TBA'
 
-			// unknown
-				// ? languages is single ?
 			// slow
 				// screen matchmedia/css matches outer (whilst it lasts)
 				// canvas
@@ -620,13 +628,17 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				// fake voice at end mirroring first voice with specific random name (if voices not empty)
 
 			let oBrave = {
+				'available_screen': isBraveAvailable,
 				'chrome': isBraveChrome,
 				'keyboard': isBraveKeyboard,
+				'languages': isBraveLanguage,
 				'pdf': isBravePDF,
+				'pdf_check': oPDF,
 				'screen': isBraveScreen,
-				'screen_available': isBraveAvailable,
 				'window': isBraveWindow,
 			}
+			if (false === isBravePDF) {delete oBrave['pdf_check']}
+
 			// ToDo: refine calculation of isBraveSmart and if so enforce isBrave
 				// notes
 				// - some items depend on being enabled (pdf), not empty (voices), or platform (screen*/window*)
