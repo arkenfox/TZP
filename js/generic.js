@@ -451,8 +451,8 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 		// if isBrave, cool .... if not then you might have removed the key and I can't directly detect that
 
 		Promise.all([
-			get_agent_data('', isOS, false),
-			get_scr_position_window('', false)
+			// agentdata: retuns 'skipped' if already isBrave else eats 15ms perf :=( all those poor chrome users :sadtrombone:
+			get_agent_data('', false)
 		]).then(function(res){
 			// harden isBrave
 			if (!isBrave) {
@@ -494,8 +494,41 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			// null keyboard: android no shields returns size 0 mapped keys
 			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
+			// tiny chrome
+				// even in FS or FSElement, never changes even with zoom
+				// hey .. we already measured with type checks: isInitial holds numbers or zErr
+				// note: FSElement isn't relevant as it exits if reloading as it requires user actions
+			let isBraveChrome = isDesktop ? false : zNA
+			let x, y
+			try {
+				x = isInitial.width.outer - isInitial.width.inner
+				y = isInitial.height.outer - isInitial.height.inner
+				// throw if anything isn't a number or is less than 0
+				if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
+				isBraveChrome = x < 10 && y < 10
+				// clean up at least one false positive (noting that two random 0's are possible)
+				if (0 == x && 0 == y) {
+					if (window.matchMedia('(display-mode:fullscreen)').matches) {isBraveChrome = false}
+				}
+			} catch(e) {
+				isBraveChrome = zErr
+			}
+
 			// tiny window positions: note android 0's report as false but we want n/a
-			let isBraveWindow = !isDesktop ? zNA : '<10' == res[1].screenX && '<10' == res[1].screenY
+			let isBraveWindow = isDesktop ? false : zNA
+			try {
+				x = window.screenX
+				y = window.screenY
+				// throw if anything isn't a number or is less than 0
+				if (isNaN(x) || isNaN(y) || x < 0 || y < 0) {throw zErr}
+				isBraveWindow = x < 10 && y < 10
+				// clean up at least one false positive (noting that two random 0's are possible)
+				if (0 == x && 0 == y) {
+					if (window.matchMedia('(display-mode:fullscreen)').matches) {isBraveWindow = false}
+				}
+			} catch(e) {
+				isBraveWindow = zErr
+			}
 
 			// plugins: brave specific gibberish (if pdf enabled)
 				// reuse variable in pdf metric (no point calculating it twice)
@@ -563,11 +596,13 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 					if (aDetected.length !== aUnexpected.length) {oPDF['unexpected'] = aUnexpected}
 					log_debug(SECTG, METRIC +'_pdf', oPDF, isScope, true) // persist
 				} else {
-					isBravePDF = zNA
+					if (!obj.length) {isBravePDF = zNA}
 				}
 			} catch(e) {
 				isBravePDF = zErr
 			}
+
+
 
 			// screen steps into first of one of seven stepped sizes
 			let isBraveScreen = 'TBA'
@@ -585,10 +620,11 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				// fake voice at end mirroring first voice with specific random name (if voices not empty)
 
 			let oBrave = {
-				'available_screen': isBraveAvailable,
+				'chrome': isBraveChrome,
 				'keyboard': isBraveKeyboard,
 				'pdf': isBravePDF,
 				'screen': isBraveScreen,
+				'screen_available': isBraveAvailable,
 				'window': isBraveWindow,
 			}
 			// ToDo: refine calculation of isBraveSmart and if so enforce isBrave
