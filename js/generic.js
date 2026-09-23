@@ -637,7 +637,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				'screen': isBraveScreen,
 				'window': isBraveWindow,
 			}
-			if (false === isBravePDF) {delete oBrave['pdf_check']}
+			if (true !== isBravePDF) {delete oBrave['pdf_check']}
 
 			// ToDo: refine calculation of isBraveSmart and if so enforce isBrave
 				// notes
