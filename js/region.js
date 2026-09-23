@@ -55,7 +55,8 @@ function get_nav_connection(METRIC) {
 						if (runSI) {x = '1g'}
 						let aValid = oValid[k]
 						if (!aValid.includes(x)) {throw zErrInvalid + ': got ' + x}
-						if ('slow-2g' == x) {x = '2g'} // treat slow-2g as 2g
+						// strength is not super stable: e.g. i've seen 3g and 4g in sequential tests
+						if ('effectiveType' == k) {x = '2-4g'}
 					}
 					// cleanup
 					if ('function' === typeCheck) {x = typeCheck}
