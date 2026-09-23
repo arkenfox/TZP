@@ -494,29 +494,80 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			// null keyboard: android no shields returns size 0 mapped keys
 			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
-			// tiny window positions: note android 0's report as false
-			let isBraveWindow = '<10' == res[1].screenX && '<10' == res[1].screenY
+			// tiny window positions: note android 0's report as false but we want n/a
+			let isBraveWindow = !isDesktop ? zNA : '<10' == res[1].screenX && '<10' == res[1].screenY
 
-			// gibberish in plugins (if pdf enabled)
-			// plugins gibberish
-				// it always adds some, so if < 6 then it can't be
-				// one of the five is always missing - brave tends to overwrite one of them
-					// so < 5 expected
-				// items are always in a set order (check each platform) - brave mixes this ip
-					// let expectedOrder = ['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer','WebKit built-in PDF']
-				// fake entries may lack "Portable Document Format", real ones always have that
-				// most non expected items have no spaces (and therefore no "Portable Document Format")
-					// we always have at least one like this
-				/* examples
-					"aZMOPuXT: qdWTwBAIjRnTRQnb: WyhQIMtePHDBnyCJMtWyhYrdWTw3j47d",   8, 16, 32
-					"4k5k5cO:  BMteXyhQQv268mb:  FCgYzCBn6dt15FCo7GDJEKFpct9mbse",    7, 15, 31
-					"Giwg368:  w3bVSRQvAny4cWL:  aRnTRIEKFhvfu2Eh368mTJr0aseXq89",    7, 15, 31
-					"n6dt9eu:  6lSoUSRIECozZz4:  aNlxBAIr0asePHDBnyCJMtePPuf2bVS",    7, 15, 31
-				but not all
-				"JavaScript com.adobe.pdf extension: 	Hi47laNl5kx3bVKs9mTJr8999HqVxgvf: Portable Document Format
-				*/
-			// so.. total > 5 && expected < 5 && 1xnospaces == should be sufficient
-			let isBravePDF = 'TBA'
+			// plugins: brave specific gibberish (if pdf enabled)
+				// reuse variable in pdf metric (no point calculating it twice)
+			isBravePDF = false
+			try {
+				let obj = navigator.plugins
+				if ('object' !== typeFn(obj, true) || '[object PluginArray]' !== obj +'') {throw zErr}
+				let cyclicTest = mini(obj) // TypeError: cyclic object
+				if (obj.length > 5) {
+					// brave _adds_ 1 to 3 items, so if < 6 then it can't be
+					// we want to ignore these
+					let aExpected = [
+						"PDF Viewer: internal-pdf-viewer: Portable Document Format",
+						"Chrome PDF Viewer: internal-pdf-viewer: Portable Document Format",
+						"Chromium PDF Viewer: internal-pdf-viewer: Portable Document Format",
+						"Microsoft Edge PDF Viewer: internal-pdf-viewer: Portable Document Format",
+						"WebKit built-in PDF: internal-pdf-viewer: Portable Document Format"
+					]
+					let aUnexpected = []
+					for (let i=0; i < obj.length; i++) {
+						let str = obj[i].name + (obj[i].filename == '' ? ': * ' : ': '+ obj[i].filename)
+							+ (obj[i].description == '' ? ': *' : ': '+ obj[i].description)
+						if (!aExpected.includes(str)) {aUnexpected.push(str)}
+					}
+					// we can check the unexpected for any of two tell-tale patterns, but since it only
+						// adds 1 to 3, we only _know_ that we'll get _at least_ one, just not which_ one
+					// the first is the name comes from a finite list of possibilities
+						// 3 parts, each picked at random from a list and joined
+					// the second is this pattern
+						// "aZMOPuXT: qdWTwBAIjRnTRQnb: WyhQIMtePHDBnyCJMtWyhYrdWTw3j47d",   8, 16, 32
+						// "4k5k5cO:  BMteXyhQQv268mb:  FCgYzCBn6dt15FCo7GDJEKFpct9mbse",    7, 15, 31
+					let knownNames = [], aDetected = [], aUnknown = []
+					let oParts = {
+						1: ['Chrome','Chromium','Brave','Web','Browser','OpenSource','Online','JavaScript','WebKit','Web-Kit','WK',''],
+						2: ['PDF','Portable Document Format','portable-document-format','document','doc','PDF and PS','com.adobe.pdf',''],
+						3: ['Viewer','Renderer','Display','Plugin','plug-in','plug in','extension',''],
+					}
+					oParts[1].forEach(function(a) {
+						oParts[2].forEach(function(b) {
+							oParts[3].forEach(function(c) {
+								let abc = a +' '+ b +' '+ c
+								abc = abc.replace(/  +/g,' ')
+								knownNames.push(abc.trim())
+							})
+						})
+					})
+					aUnexpected.forEach(function(p) {
+						let parts = p.split(':')
+						let name = parts[0].trim(), file = parts[1].trim(), desc = parts[2].trim()
+						if (knownNames.includes(name)) {
+							aDetected.push(p)
+						} else {
+							let isOne = name.length > 5 && name.length < 10 && !name.includes(' ')
+							let isTwo = file.length > 13 && file.length < 18 && !file.includes(' ')
+							let isThree = desc.length > 30 && desc.length < 34 && !desc.includes(' ')
+							if (isOne && isTwo && isThree) {
+								aDetected.push(p)
+							} else {
+								aUnknown.push(p)
+							}
+						}
+					})
+					if (aDetected.length) {isBravePDF = true}
+					let oPDF = {'detected': aDetected}
+					if (aDetected.length !== aUnexpected.length) {oPDF['unexpected'] = aUnexpected}
+					log_debug(SECTG, METRIC +'_pdf', oPDF, isScope, true) // persist
+				} else {
+					isBravePDF = zNA
+				}
+			} catch(e) {
+				isBravePDF = zErr
+			}
 
 			// screen steps into first of one of seven stepped sizes
 			let isBraveScreen = 'TBA'
