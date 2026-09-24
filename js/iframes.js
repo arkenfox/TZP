@@ -68,18 +68,29 @@ const getDynamicIframeWindow = ({
 
 			// useragentdata
 			try {
-				let k = newNav.userAgentData
-				let typeCheck = typeFn(k, true)
+				let r = newNav.userAgentData
+				let typeCheck = typeFn(r, true)
 				if ('undefined' == typeCheck) {
 					exit(typeCheck)
 				} else {
 					if ('object' !== typeCheck) {throw zErr}
-					if ('[object NavigatorUAData]' !== k+'') {throw zErr}
-					navigator.userAgentData.getHighEntropyValues([
+					if ('[object NavigatorUAData]' !== r+'') {throw zErr}
+					r.getHighEntropyValues([
 						'architecture','bitness','brands','formFactors','fullVersionList','mobile',
 						'model','platform','platformVersion','uaFullVersion','wow64'
 					]).then(res => {
-						exit({'hash': mini(res), 'metrics': res})
+						let uadata = {}
+						for (const k of Object.keys(res).sort()) {
+							if ('brands' == k || 'fullVersionList' == k) {
+								let tmpobj = {}, newobj = {}
+								res[k].forEach(function(item){tmpobj[item.brand] = item.version})
+								for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
+								uadata[k] = newobj
+							} else {
+								uadata[k] = res[k]
+							}
+						}
+						exit({'hash': mini(uadata), 'metrics': uadata})
 					}).catch(function(err){
 						exit(zErr)
 					})
