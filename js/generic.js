@@ -532,8 +532,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			}
 
 			// 4. plugins: brave specific gibberish (if pdf enabled)
-				// reuse variable in pdf metric (no point calculating it twice)
-			isBravePDF = false
+			let isBravePDF = false
 			let oPDF = {}
 			try {
 				let obj = navigator.plugins
@@ -639,7 +638,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 					'window': isBraveWindow,
 				}
 				if (true !== isBravePDF) {delete oBrave['pdf_check']}
-				log_debug(SECTG, METRIC +'Smart', oBrave, isScope, true)
+				log_debug(SECTG, METRIC +'Shields', oBrave, isScope, true)
 
 				// calculate isBraveSmart
 						// for now .. we're already isBrave, just the keyboard is enough
