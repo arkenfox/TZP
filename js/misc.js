@@ -720,9 +720,8 @@ function get_pdf(METRIC) {
 		get_pdfViewer('pdfViewerEnabled'),
 		get_obj('plugins'),
 	]).then(function() {
-		// FF116 1838415 dropped RFP protection
-		// FF147 1999126 re-added: just notate as RFP regardless of version
-		let notation = rfp_red, isLies = false
+		// FF116 1838415 dropped RFP protection || FF147+ 1999126 re-added
+		let notation = rfp_red, isLies = false, ignoreBtn = ''
 		if (runSL) {data = {'mimeTypes': 'none', 'pdfViewerEnabled': true, 'plugins': 'none'}}
 		let hash = mini(data)
 		if (!['91073152','beccb452'].includes(hash) || isProxyLie('Navigator.pdfViewerEnabled')) {
@@ -733,8 +732,37 @@ function get_pdf(METRIC) {
 				if (keys.indexOf('pdfViewerEnabled') > keys.indexOf('constructor')) {isLies = true}
 			} catch(e) {}
 		}
-		if ('91073152' == hash) {notation = rfp_green}
-		addBoth(18, METRIC, hash, addButton(18, METRIC), notation, data, isLies)
+		if ('91073152' == hash) {
+			notation = rfp_green
+		} else if ('beccb452' == hash) {
+			// IDK if pdfViewer can be toggled with effect w/out a page reload but in gecko
+			// the pref pdfjs.enabled requires a page reload; regardless lets ignore disabled
+			// ignore {"mimeTypes": "none", "pdfViewerEnabled": false, "plugins": "none"}
+		} else if ('blink' == isEngine) {
+			// blink has a isAllowNonGeckoMin, so we expect only two possible results
+				// i.e pdfViewerEnabled exists | we do not care about the tiny long tail
+				// of possible users with injected 3rd party if that's even possible these days
+			// record raw data
+			let tmpdata = {}
+			for (const k of Object.keys(data)) {tmpdata[k] = data[k]}
+			sDetail[isScope][METRIC +'_ignored'] = tmpdata
+			ignoreBtn = addButton(18, METRIC +'_ignored', 'ignored')
+			// replace data + log
+			data = {
+				mimeTypes: ['application/pdf: application/pdf: pdf', 'text/pdf: text/pdf: pdf'],
+				pdfViewerEnabled: true,
+				plugins: [
+					'PDF Viewer: internal-pdf-viewer: Portable Document Format',
+					'Chrome PDF Viewer: internal-pdf-viewer: Portable Document Format',
+					'Chromium PDF Viewer: internal-pdf-viewer: Portable Document Format',
+					'Microsoft Edge PDF Viewer: internal-pdf-viewer: Portable Document Format',
+					'WebKit built-in PDF: internal-pdf-viewer: Portable Document Format'
+				]
+			}
+			hash = mini(data)
+			log_debug(18, METRIC +'_ignored', 'replaced by spec')
+		}
+		addBoth(18, METRIC, hash, addButton(18, METRIC) + ignoreBtn, notation, data, isLies)
 		return
 	})
 }
@@ -799,7 +827,8 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 						'Hubert','Vernon','Rudolph','Clayton','Irving','Wilson','Alva',
 						'Harley','Beauregard','Cleveland','Cecil','Reuben','Sylvester','Jasper',
 					]
-					// ToDo: check mac/linux - on windows it's the first split
+					// ToDo: check mac/linux
+						// works great on windows + android it's the first split
 					let lastitem = res[res.length -1]
 					let check = lastitem.split(' | ')[0]
 					if (aFakeVoices.includes(check)) {
