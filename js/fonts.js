@@ -763,8 +763,8 @@ function set_fntList() {
 		}
 		/* 
 		// negate brave random
-		// don't skip these, catch them instead and debug shwoing it's working
-		if (isBraveSmart) {
+		// don't skip these, catch them instead and debug showing it's working
+		if (isBraveFont) {
 			let fntIgnore = fntMaster.brave
 			let list = ['base','baselang','system']
 			list.forEach(function(k){
@@ -1500,7 +1500,7 @@ const get_fonts_faces = (METRIC, METRICD, aFonts) => new Promise(resolve => {
 						results.forEach(function(item){
 							item = item.replace(/"/g, ''); data.push(item)
 						})
-						if (isBraveSmart) {
+						if (isBraveFont) {
 							let aIgnored = data.filter(x => fntMaster.brave.includes(x))
 							if (aIgnored.length) {
 								data = data.filter(x => !aIgnored.includes(x))
@@ -1607,7 +1607,7 @@ function get_fonts_offscreen(METRIC, METRICD) {
 			if (ctx.measureText(fntString).width !== base) {data.push(font)}
 		})
 		if (data.length) {
-			if (isBraveSmart) {
+			if (isBraveFont) {
 				let aIgnored = data.filter(x => fntMaster.brave.includes(x))
 				if (aIgnored.length) {
 					data = data.filter(x => !aIgnored.includes(x))
@@ -2015,7 +2015,7 @@ function get_fonts(METRIC, METRICD) {
 			let data = res[name]
 			if (!data.hasOwnProperty('error')) {
 				// bit repetitive
-				if (isBraveSmart) {
+				if (isBraveFont) {
 					fntMaster.brave.forEach(function(item){
 						if (undefined !== data[item]) {
 							delete data[item]
