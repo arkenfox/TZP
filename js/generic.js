@@ -460,21 +460,15 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 					// catches extensions like "Brave Detection Block"
 				try {
 					let data = res[0]
-					if ('object' !== typeof data) {exit()}
-					// screen positions are 0 || weak but might weed out some false positives
-					// connection is undefined
-					let isBraveScreen = (0 == screen.availLeft && 0 == screen.availTop)
-					let isBraveConnection = undefined == navigator.connection
-					if (isBraveScreen && isBraveConnection) {
-						// userAgentData: the position of 'Brave' differs
-							// order is Brave, Not_A Brand, Chromium || chrome is Not_A Brand, Chromium, Google Chrome
-							// this is due to the patch, and is not randomized AFAICT (on windows at least)
-							// ignore position/order just in case
-						for (let i = 0; i < data.brands.length; i++) {
-							if ('Brave' == data.brands[i].brand && 'Brave' == data.fullVersionList[i].brand) {
+					if ('object' == typeof data) {
+						// screen positions are 0 || weak but might weed out some false positives
+						// connection is undefined
+						let isBraveScreen = (0 == screen.availLeft && 0 == screen.availTop)
+						let isBraveConnection = undefined == navigator.connection
+						if (isBraveScreen && isBraveConnection) {
+							if (undefined !== data.brands.Brave && undefined !== data.fullVersionList.Brave) {
 								isBrave = true
 								log_debug(SECTG, METRIC, 'navigator: false | userAgentData: true', isScope, true) // persist
-								break
 							}
 						}
 					}
