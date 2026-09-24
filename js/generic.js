@@ -2770,8 +2770,10 @@ function outputSection(id, isResize = false) {
 		// clear
 		let items = document.getElementsByClassName('c')
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = '&nbsp'}
+		/* we have none
 		items = document.getElementsByClassName('cssc') // inline css notations we don't want to add an empty space
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = ''}
+		*/
 		items = document.getElementsByClassName('gc') // user actions
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = '&nbsp'}
 		// reset global
@@ -2831,10 +2833,10 @@ function outputSection(id, isResize = false) {
 				'canvas',
 				'elements',
 				'storage', // little slow: cache + permissions
-				'misc', // cold on load: iframe props
 				'audio',
 				'webgl',
 				'fonts', // allow time for font fallback
+				'misc', // allow time for voices esp on android (brave often reports none on a 1st session load)
 				'region', // allow time for iframe assets
 				'devices', // allow time for isDevices
 				'codecs', // don't let anything else hold it up: it's slow on blink first run in a cold session
