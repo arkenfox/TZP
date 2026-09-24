@@ -486,15 +486,17 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 
 			// isBraveSmart
 				// toggling shields forces a page reload: we only need calculate this once
-				// we can check shields regardless of isBrave to catch more sophisticated "brave detector" fuckery
-				// and force isBrave if isBraveSmart || or we can ignore the tiny % doing that as not worth the cost
-				// for now we will check everyone and see how perf goes
+				// the perf from below is negliable: the problem is most brave keys are dependent on
+				// platform and/or are affected by fullscreen (window/screen), or being enabled (pdf),
+				// or not empty (voices). Only keyboard seems consistent.
+			// we will check all keys regardless of isBrave to help catch more sophisticated "brave detector"
+				// fuckery, and even if/when not used they are always good to debug
 
 			// QUICK
-			// null keyboard: android no shields returns size 0 mapped keys
+			// 1. null keyboard: android no shields returns size 0 mapped keys
 			let isBraveKeyboard = 'object' == typeof navigator.keyboard && 'null' == navigator.keyboard +''
 
-			// tiny chrome
+			// 2. tiny chrome
 				// even in FS or FSElement, never changes even with zoom
 				// note: FSElement isn't relevant as it exits if reloading as it requires user actions
 				// note: on android we force inner min-width which can > outer = negative diff = throws error
@@ -517,7 +519,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				}
 			}
 
-			// tiny window positions: note android 0's report as false but we want n/a
+			// 3. tiny window positions
 			let isBraveWindow = isDesktop ? false : zNA
 			if (isDesktop) {
 				try {
@@ -535,7 +537,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				}
 			}
 
-			// plugins: brave specific gibberish (if pdf enabled)
+			// 4. plugins: brave specific gibberish (if pdf enabled)
 				// reuse variable in pdf metric (no point calculating it twice)
 			isBravePDF = false
 			let oPDF = {}
@@ -610,7 +612,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				isBravePDF = zErr
 			}
 
-			// languages is limited to one | lots of false postives to be sure
+			// 5. languages is limited to one | lots of false postives to be sure
 			let isBraveLanguage = false
 			try {isBraveLanguage = 1 == navigator.languages.length} catch(e) {isBraveLanguage = zErr}
 
@@ -619,34 +621,42 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			// available screen matches screen
 				// isBraveScreen must be true for this to be true: i.e correct size
 			let isBraveAvailable = 'TBA'
-
 			// slow
 				// screen matchmedia/css matches outer (whilst it lasts)
 				// canvas
 			// very slow
 				// fake voice at end mirroring first voice with specific random name (if voices not empty)
 
-			let oBrave = {
-				'available_screen': isBraveAvailable,
-				'chrome': isBraveChrome,
-				'keyboard': isBraveKeyboard,
-				'languages': isBraveLanguage,
-				'pdf': isBravePDF,
-				'pdf_check': oPDF,
-				'screen': isBraveScreen,
-				'window': isBraveWindow,
+			// harden isBrave
+				// if you weren't before, you are now: pdf + keyboard combined are a very strong tell
+			if (isBraveKeyboard && isBravePDF) {isBrave == true}
+
+			// if isBrave
+			if (isBrave) {
+				// debug
+				let oBrave = {
+					'available_screen': isBraveAvailable,
+					'chrome': isBraveChrome,
+					'keyboard': isBraveKeyboard,
+					'languages': isBraveLanguage,
+					'pdf': isBravePDF,
+					'pdf_check': oPDF,
+					'screen': isBraveScreen,
+					'window': isBraveWindow,
+				}
+				if (true !== isBravePDF) {delete oBrave['pdf_check']}
+				log_debug(SECTG, METRIC +'Smart', oBrave, isScope, true)
+
+				// calculate isBraveSmart
+						// for now .. we're already isBrave, just the keyboard is enough
+				if (isBraveKeyboard) {
+					isBraveSmart = isBrave
+					// add some control _where_ we ignore fonts
+					// linux is not protected and android needs testing first
+					if ('windows' == isOS || 'mac' == isOS) {isBraveFont = true}
+				}
 			}
-			if (true !== isBravePDF) {delete oBrave['pdf_check']}
-
-			// ToDo: refine calculation of isBraveSmart and if so enforce isBrave
-				// notes
-				// - some items depend on being enabled (pdf), not empty (voices), or platform (screen*/window*)
-				// - keyboard + PDF (if enabled) + voice (if not none) are very unique/unusual as a result
-				// - keyboard is universal all platforms, voice is none on android and pdf is hit and miss if enabled
-
-			// for now .. if already isBrave, just the keyboard is enough
-			if (isBraveKeyboard) {isBraveSmart = isBrave}
-			if (isBrave) {log_debug(SECTG, METRIC +'Smart', oBrave, isScope, true)} // debug for brave
+			// tada!
 			exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
 		})
 	} catch(e) {
