@@ -1802,12 +1802,21 @@ const get_agent_data = (METRIC, isMain = true) => new Promise(resolve => {
 				'architecture','bitness','brands','formFactors','fullVersionList','mobile',
 				'model','platform','platformVersion','uaFullVersion','wow64'
 			]).then(res => {
-				//let data = res
-				// new object: merge versions + check for mismatches
-					// e.g. brands, fullVersionList, uaFullVersion
-				// keep order: e.g. opera vs chrome differs in order of array items
-				// only blink so no smarts, for now just add the object
- 				exit(mini(res), res, addButton(2, METRIC))
+				// new object
+					// ToDo: by stepping thru the keys we can check consistency etc
+				let uadata = {}
+				for (const k of Object.keys(res).sort()) {
+					if ('brands' == k || 'fullVersionList' == k) {
+						// sort brands for stability: spec says order must change over time
+						let tmpobj = {}, newobj = {}
+						res[k].forEach(function(item){tmpobj[item.brand] = item.version})
+						for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
+						uadata[k] = newobj
+					} else {
+						uadata[k] = res[k]
+					}
+				}
+ 				exit(mini(uadata), uadata, addButton(2, METRIC))
 			}).catch(function(err){
 				exit(err, zErrLog)
 			})
