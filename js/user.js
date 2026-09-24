@@ -11,7 +11,7 @@ const outputUserAgentOpen = (METRIC) => new Promise(resolve => {
 	let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 		'platform','product','productSub','userAgent','vendor','vendorSub']
 	
-	let data = {'useragent': {}, 'useragentdata': {}}, r
+	let data = {'useragent': {}, 'useragentdata': {}}
 	let newWin = window.open()
 	let newNavigator = newWin.navigator
 
@@ -40,6 +40,7 @@ const outputUserAgentOpen = (METRIC) => new Promise(resolve => {
 
 	// useragent
 	list.forEach(function(p) {
+		let r
 		try {
 			r = newNavigator[p]
 			let typeCheck = typeFn(r, true), expectedType = 'string'
@@ -56,24 +57,35 @@ const outputUserAgentOpen = (METRIC) => new Promise(resolve => {
 	})
 	// useragentdata
 	try {
-		let k = navigator.userAgentData
-		let typeCheck = typeFn(k, true)
+		let r = newNavigator.userAgentData
+		let typeCheck = typeFn(r, true)
 		if ('undefined' == typeCheck) {
 			exit(typeCheck)
 		} else {
 			if ('object' !== typeCheck) {throw zErr}
-			if ('[object NavigatorUAData]' !== k+'') {throw zErr}
-			navigator.userAgentData.getHighEntropyValues([
+			if ('[object NavigatorUAData]' !== r+'') {throw zErr}
+			r.getHighEntropyValues([
 				'architecture','bitness','brands','formFactors','fullVersionList','mobile',
 				'model','platform','platformVersion','uaFullVersion','wow64'
 			]).then(res => {
- 				exit(res)
+				let uadata = {}
+				for (const k of Object.keys(res).sort()) {
+					if ('brands' == k || 'fullVersionList' == k) {
+						let tmpobj = {}, newobj = {}
+						res[k].forEach(function(item){tmpobj[item.brand] = item.version})
+						for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
+						uadata[k] = newobj
+					} else {
+						uadata[k] = res[k]
+					}
+				}
+ 				exit(uadata)
 			}).catch(function(err){
-				exit(zErr)
+				exit(err+'')
 			})
 		}
 	} catch(e) {
-		exit(zErr)
+		exit(e+'')
 	}
 })
 
@@ -434,7 +446,7 @@ const outputUserStorageManager = (isUserTest = false, METRIC = 'storage_manager'
 					let typeCheck = typeFn(bytes)
 					if ('number' === typeCheck && Number.isInteger(bytes)) {
 						let value = lookup_storage_bucket('manager', bytes)
-						value += ' ['+ bytes +' bytes]'
+						value += ' ['+ bytes +']'
 						if (isProxyLie('StorageManager.estimate')) {
 							value = log_known(6, METRIC, value)
 						} else {
