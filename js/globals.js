@@ -146,7 +146,6 @@ let isArchArray = zNA,
 	isAutoPlayError,
 	isBrave = false,
 	isBraveFont = false,
-	isBravePDF = false, // used to calculate isBraveSmart, reused in pdf
 	isBraveSmart = false, // only if FP protection is on
 	isDesktop = true,
 	isDevices,
