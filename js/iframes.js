@@ -82,8 +82,16 @@ const getDynamicIframeWindow = ({
 						let uadata = {}
 						for (const k of Object.keys(res).sort()) {
 							if ('brands' == k || 'fullVersionList' == k) {
+								// sort brands for stability from greasyBrandList
 								let tmpobj = {}, newobj = {}
-								res[k].forEach(function(item){tmpobj[item.brand] = item.version})
+								res[k].forEach(function(item){
+									// stabilize 'Not A Brand' from greasyChars
+									let key = item.brand
+									if ('Not' == key.slice(0,3) && key.includes('A') && 'Brand' == key.slice(-5)) {
+										key = 'Not A Brand'
+									}
+									tmpobj[key] = item.version
+								})
 								for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
 								uadata[k] = newobj
 							} else {
