@@ -1803,13 +1803,21 @@ const get_agent_data = (METRIC, isMain = true) => new Promise(resolve => {
 				'model','platform','platformVersion','uaFullVersion','wow64'
 			]).then(res => {
 				// new object
+					// https://wicg.github.io/ua-client-hints/#dom-navigatorua-useragentdata
 					// ToDo: by stepping thru the keys we can check consistency etc
 				let uadata = {}
 				for (const k of Object.keys(res).sort()) {
 					if ('brands' == k || 'fullVersionList' == k) {
-						// sort brands for stability: spec says order must change over time
+						// sort brands for stability from greasyBrandList
 						let tmpobj = {}, newobj = {}
-						res[k].forEach(function(item){tmpobj[item.brand] = item.version})
+						res[k].forEach(function(item){
+							// stabilize 'Not A Brand' from greasyChars
+							let key = item.brand
+							if ('Not' == key.slice(0,3) && key.includes('A') && 'Brand' == key.slice(-5)) {
+								key = 'Not A Brand'
+							}
+							tmpobj[key] = item.version
+						})
 						for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
 						uadata[k] = newobj
 					} else {
