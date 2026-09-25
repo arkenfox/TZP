@@ -2833,10 +2833,10 @@ function outputSection(id, isResize = false) {
 				'canvas',
 				'elements',
 				'storage', // little slow: cache + permissions
+				'misc',
 				'audio',
 				'webgl',
 				'fonts', // allow time for font fallback
-				'misc', // allow time for voices esp on android (brave often reports none on a 1st session load)
 				'region', // allow time for iframe assets
 				'devices', // allow time for isDevices
 				'codecs', // don't let anything else hold it up: it's slow on blink first run in a cold session
@@ -3006,7 +3006,10 @@ function run_immediate() {
 		}
 		// other warm ups
 		get_isDevices()
-		try {let w = speechSynthesis.getVoices()} catch(e) {}
+		try {
+			if (undefined !== window.speechSynthesis) {speechSynthesis.getVoices().forEach((voice) => {})}
+		} catch(e) {}
+
 		try {
 			const config = {initDataTypes: ['cenc'], videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}]}
 			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {}).catch(function(e){})
