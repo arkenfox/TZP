@@ -1218,6 +1218,14 @@ function get_isVer(METRIC) {
 	}
 }
 
+function get_isVoices() {
+	try {
+		let t0 = nowFn(), v = []
+		speechSynthesis.getVoices().forEach((voice) => {v.push(voice.name)})
+		log_perf(SECTG, 'isVoices', t0, '', v.length)
+	} catch(e) {}
+}
+
 const get_isXML = () => new Promise(resolve => {
 	// get once ASAP +clear console: not going to change between tests
 		// gecko change app lang and it requires closing and a new tab
@@ -3006,8 +3014,17 @@ function run_immediate() {
 		}
 		// other warm ups
 		get_isDevices()
+		// speech
 		try {
-			if (undefined !== window.speechSynthesis) {speechSynthesis.getVoices().forEach((voice) => {})}
+			if (undefined !== window.speechSynthesis) {
+				// speech: AFAICT gecko requires getVoices before onchange
+				get_isVoices()
+				// voices are loaded async to the page | right now it's empty
+				// now we want to rerun when tghe voices load
+				if (undefined !== speechSynthesis.onvoiceschanged) {
+					speechSynthesis.onvoiceschanged = get_isVoices;
+				}
+			}
 		} catch(e) {}
 
 		try {
