@@ -772,6 +772,7 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn(), notation = rfp_red, isLies = false
 	function exit(display, value) {
 		addBoth(18, METRIC, display,'', notation, value, isLies)
+		log_perf(18, METRIC, t0)
 		return resolve()
 	}
 
@@ -845,17 +846,16 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 			exit(e, zErrLog)
 		}
 	}
-	try {
-		if ('undefined' == typeof window.speechSynthesis) {
-			exit('undefined')
-		} else {
-			populateVoiceList()
-			if (speechSynthesis.onvoiceschanged !== undefined) {
-				speechSynthesis.onvoiceschanged = populateVoiceList;
-			}
+
+	if (undefined == window.speechSynthesis) {
+		exit('undefined')
+	} else {
+		populateVoiceList()
+		/*
+		if (undefined !== speechSynthesis.onvoiceschanged) {
+			speechSynthesis.onvoiceschanged = populateVoiceList;
 		}
-	} catch(e) {
-		exit(e, zErrLog)
+		*/
 	}
 })
 
@@ -1225,6 +1225,10 @@ const outputTiming = () => new Promise(resolve => {
 
 const outputMisc = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('misc')) {return resolve()}
+	//
+	if (gLoad) {
+		try {speechSynthesis.getVoices().forEach((voice) => {})} catch(e) {}
+	}
 
 	if (runSL) {
 		addProxyLie('Math.sin')
