@@ -770,92 +770,77 @@ function get_pdf(METRIC) {
 const get_speech_engines = (METRIC) => new Promise(resolve => {
 	// media.webspeech.synth.enabled
 	let t0 = nowFn(), notation = rfp_red, isLies = false
-	function exit(display, value) {
+	function exit(display, value ='') {
 		addBoth(18, METRIC, display,'', notation, value, isLies)
-		log_perf(18, METRIC, t0)
+		return resolve()
+	}
+	if (undefined == window.speechSynthesis) {
+		exit('undefined')
 		return resolve()
 	}
 
-	function populateVoiceList() {
-		let res = [], ignoreLen, ignoreStr
-		/* examples
-			moz-tts:android:hr_HR
-			urn:moz-tts:sapi:Microsoft David - English (United States)?en-US
-			urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy
-		*/
-		let aStrip = [
-			'moz-tts:android:', // android
-			'urn:moz-tts:osx:com.apple.eloquence.', // mac
-			'urn:moz-tts:sapi:', // windows
-		]
-		try {
-			let v = speechSynthesis.getVoices()
-			if (runST) {v = null} else if (runSI) {v = [{}]} else if (runSL) {addProxyLie('speechSynthesis.getVoices')}
-			let typeCheck = typeFn(v, true)
-			if ('array' !== typeCheck) {throw zErrType + typeFn(v)}
-			if (v.length) {
-				let expected = '[object SpeechSynthesisVoice]'
-				if ((v +'').slice(0,29) !== '[object SpeechSynthesisVoice]') {throw zErrInvalid +'expected '+ expected}
-			}
-			if (v.length == 0) {
-				notation = rfp_green
-				exit('none','none')
-			} else {
-				// enumerate: reduce redundancy/noise
-					// only record default if true and localService if false | ignore voiceURI if it matches expected
-				v.forEach(function(i) {
-					let uriStr = i.voiceURI, skipURI = false
-					// replace useless strings
-					aStrip.forEach(function(str){uriStr = uriStr.replace(str, '')})
-					uriStr.trim()
-					if (isGecko) {
-						skipURI = (uriStr = i.name +'?'+ i.lang) // windows
-					} else {
-						// blink
-						skipURI = (uriStr == i.name) // dedupe repetitive crap
-					}
-					res.push(
-						i.name +' | '+ i.lang + (i['default'] ? ' | default' : '') + (i.localService ? '' : ' | false') + (skipURI ? '' : ' | '+ uriStr)
-					)
-				})
-				if (isBraveSmart) {
-					// brave always ADDS a randomized single voice to the END
-						// this will do for now: we can get more sophisticated later if we need to
-					// future tightening: it bases it on the first item so e.g. on windows
-						//  1st item: "Microsoft David - English (United States) | en-US | default"
-						// last item: "Alva | en-US | Microsoft David - English (United States)"
-					let aFakeVoices = [
-						'Hubert','Vernon','Rudolph','Clayton','Irving','Wilson','Alva',
-						'Harley','Beauregard','Cleveland','Cecil','Reuben','Sylvester','Jasper',
-					]
-					// ToDo: check mac/linux
-						// works great on windows + android it's the first split
-					let lastitem = res[res.length -1]
-					let check = lastitem.split(' | ')[0]
-					if (aFakeVoices.includes(check)) {
-						res = res.slice(0, -1)
-						log_debug(18, METRIC +'_ignored', lastitem)
-					}
+	let res = [], ignoreLen, ignoreStr
+	let aStrip = [
+		'moz-tts:android:', // android moz-tts:android:hr_HR
+		'urn:moz-tts:osx:com.apple.eloquence.', // mac urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy
+		'urn:moz-tts:sapi:', // windows urn:moz-tts:sapi:Microsoft David - English (United States)?en-US
+	]
+	try {
+		let v = speechSynthesis.getVoices()
+		if (runST) {v = null} else if (runSI) {v = [{}]} else if (runSL) {addProxyLie('speechSynthesis.getVoices')}
+		let typeCheck = typeFn(v, true)
+		if ('array' !== typeCheck) {throw zErrType + typeFn(v)}
+		if (v.length) {
+			let expected = '[object SpeechSynthesisVoice]'
+			if ((v +'').slice(0,29) !== '[object SpeechSynthesisVoice]') {throw zErrInvalid +'expected '+ expected}
+		}
+		if (v.length == 0) {
+			notation = rfp_green
+			exit('none')
+		} else {
+			// enumerate: reduce redundancy/noise
+				// only record default if true and localService if false | ignore voiceURI if it matches expected
+			v.forEach(function(i) {
+				let uriStr = i.voiceURI, skipURI = false
+				// replace useless strings
+				aStrip.forEach(function(str){uriStr = uriStr.replace(str, '')})
+				uriStr.trim()
+				if (isGecko) {
+					skipURI = (uriStr = i.name +'?'+ i.lang) // windows
+				} else {
+					// blink
+					skipURI = (uriStr == i.name) // dedupe repetitive crap
 				}
-				let hash = mini(res)
-				addBoth(18, METRIC, hash, addButton(18, METRIC, res.length), notation, res, isProxyLie('speechSynthesis.getVoices'))
-				log_perf(18, METRIC, t0)
-				return resolve()
+				res.push(
+					i.name +' | '+ i.lang + (i['default'] ? ' | default' : '') + (i.localService ? '' : ' | false') + (skipURI ? '' : ' | '+ uriStr)
+				)
+			})
+			if (isBraveSmart) {
+				// brave always ADDS a randomized single voice to the END
+					// this will do for now: we can get more sophisticated later if we need to
+				// future tightening: it bases it on the first item so e.g. on windows
+					//  1st item: "Microsoft David - English (United States) | en-US | default"
+					// last item: "Alva | en-US | Microsoft David - English (United States)"
+				let aFakeVoices = [
+					'Hubert','Vernon','Rudolph','Clayton','Irving','Wilson','Alva',
+					'Harley','Beauregard','Cleveland','Cecil','Reuben','Sylvester','Jasper',
+				]
+				// ToDo: check mac/linux
+					// works great on windows + android it's the first split
+				let lastitem = res[res.length -1]
+				let check = lastitem.split(' | ')[0]
+				if (aFakeVoices.includes(check)) {
+					res = res.slice(0, -1)
+					log_debug(18, METRIC +'_ignored', lastitem)
+				}
 			}
-		} catch(e) {
-			exit(e, zErrLog)
+			let hash = mini(res)
+			addBoth(18, METRIC, hash, addButton(18, METRIC, res.length), notation, res, isProxyLie('speechSynthesis.getVoices'))
+			log_perf(18, METRIC, t0)
+			return resolve()
 		}
-	}
-
-	if (undefined == window.speechSynthesis) {
-		exit('undefined')
-	} else {
-		populateVoiceList()
-		/*
-		if (undefined !== speechSynthesis.onvoiceschanged) {
-			speechSynthesis.onvoiceschanged = populateVoiceList;
-		}
-		*/
+	} catch(e) {
+		exit(e, zErrLog)
 	}
 })
 
@@ -1225,11 +1210,6 @@ const outputTiming = () => new Promise(resolve => {
 
 const outputMisc = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('misc')) {return resolve()}
-	//
-	if (gLoad) {
-		try {speechSynthesis.getVoices().forEach((voice) => {})} catch(e) {}
-	}
-
 	if (runSL) {
 		addProxyLie('Math.sin')
 		addProxyLie('Math.log')
@@ -1248,6 +1228,7 @@ const outputMisc = () => new Promise(resolve => {
 	addBoth(18, 'error_message_fix', value,'', notation)
 
 	Promise.all([
+		get_speech_engines('speech_engines'),
 		get_svg('svg_enabled'),
 		get_math('math_trig', isMathTrigLies),
 		get_math('math_other', isMathOtherLies),
@@ -1258,7 +1239,6 @@ const outputMisc = () => new Promise(resolve => {
 		get_navigator_keys('navigator_keys'),
 		get_webdriver('webdriver'),
 		get_pdf('pdf'),
-		get_speech_engines('speech_engines'),
 		get_webauthn_autofill('webauthn_autofill_ui'),
 	]).then(function(){
 		Promise.all([
