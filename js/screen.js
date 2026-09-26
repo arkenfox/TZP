@@ -230,7 +230,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 					// ToDo: 1x1 test windowed e.g. on tablet: is this going to match screen or outer or something else
 			// display only for now until we can confidently determine mobile vs desktop
 			// when we add it, do I need to redorder the object
-			let segmentdisplay = 'string' == typeof res[2] ? res[2] : res[2].join(' x ')
+			let segmentdisplay = 'string' == typeof res[2] ? res[2] : res[2].join(' x ') + s99 +' [info only]'+ sc
 			addDisplay(1, 'viewport_segments', segmentdisplay)
 		} else {
 			// android "document" is an inner size not viewport || calculate get dynamic toolbar
@@ -1467,16 +1467,13 @@ function get_scr_viewport_segments(METRIC) {
 	// simplify unsupported
 	if ('0632aa25' == hash || '95830dcd' == hash) {
 		// 95830dcd = servo where cssvalues are returned as 0
+		addDisplay(1, METRIC +'_js', zNA +' x '+ zNA)
 		addBoth(1, METRIC, zNA)
 		return zNA
 	}
 
-	// ToDo: add meaurements
-		// css = e.g. env(viewport-segment-width 0 0)
-	// ToDo: also count the DOMRect objects in window.viewport.segments
-		// I guess we check the x,y values to determine if it's horizontal or vertical
-
-	let width = 0, height = 0, typeCheck
+	// ToDo?: css = e.g. env(viewport-segment-width 0 0)
+	let width = 0, height = 0, typeCheck, countX = 0, countY = 0
 	let metric = isDesktop ? 'sizes_viewport_segments' : METRIC
 	let oSegment = {}
 	try {
@@ -1500,18 +1497,20 @@ function get_scr_viewport_segments(METRIC) {
 			// x
 			typeCheck = typeFn(x)
 			if ('number' !== typeCheck) {
-				log_error(1, metric +'_x', zErrType + typeCheck)
-				x = zErr
+				if (zErr !== countX) {log_error(1, metric +'_x', zErrType + typeCheck)}
+				countX = zErr; x = zErr
 			}
 			// y
 			typeCheck = typeFn(y)
 			if ('number' !== typeCheck) {
-				log_error(1, metric +'_y', zErrType + typeCheck)
-				y = zErr
+				if (zErr !== countY) {log_error(1, metric +'_y', zErrType + typeCheck)}
+				countY = zErr; y = zErr
 			}
 			// total measurement
 			if (zErr !== width) {width += w}
 			if (zErr !== height) {height += h}
+			if (zErr !== countX && 0 == x) {countX++}
+			if (zErr !== countY && 0 == y) {countY++}
 			oSegment[k] = {'height': h, 'width': w ,'x': x, 'y': y}
 		}
 	} catch(e) {
@@ -1519,6 +1518,11 @@ function get_scr_viewport_segments(METRIC) {
 		log_error(1, metric + (isDesktop ? '' : '_sizes'), e)
 		width = zErr, height = zErr
 	}
+	// js
+	data['horizontal'] = countY
+	data['vertical'] = countX
+	addDisplay(1, METRIC +'_js', countY +' x '+ countX)
+	// segment data + totals
 	data['segments'] = oSegment
 	data['total'] = {'height': height, 'width': width}
 
