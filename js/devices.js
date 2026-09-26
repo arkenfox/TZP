@@ -631,7 +631,6 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 
 	// ToDo: writer
 	let oData = {}
-	// do in sorted order
 	Promise.all([
 		get_value('LanguageDetector'),
 		get_value('LanguageModel'),
@@ -641,7 +640,10 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 		get_value('Translator'),
 		get_value('Writer'),
 	]).then(function(){
-		addBoth(7, METRIC, mini(oData), addButton(7, METRIC),'', oData)
+		// results are not guranteed in order: sort into a new obj
+		let newobj = {}
+		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
+		addBoth(7, METRIC, mini(newobj), addButton(7, METRIC),'', newobj)
 		return resolve()
 	})
 })
