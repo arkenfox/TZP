@@ -573,6 +573,79 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 	}
 })
 
+const get_prompt = (METRIC) => new Promise(resolve => {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Prompt_API/Using
+	// https://developer.chrome.com/docs/ai/prompt-api
+		// these are ai and grouped by google under "prompt api", but toggling the flag
+		// didn't affect all the APIs - but we'll stick with prompt as the metric name
+		// also keep it with permisions/permissionspolicy
+
+	// ToDo: catch DOMExceptions
+	const get_value = (key) => new Promise(resolve => {
+		let m = key.toLowerCase()
+		function exit(value) {
+			oData[m] = value
+			return resolve()
+		}
+		async function getAvailability() {
+			try {
+				let opt
+				if ('translator' == m) {opt = {sourceLanguage: 'en', targetLanguage: 'fr'}}
+				let a = await window[key].availability(opt)
+				if (runSE) {foo++} else if (runST) {a = 42} else if (runSI) {a = 'groot'}
+				if (null == a) {
+					// summarizer + languagedetector say null can be returned if support cannot
+					// be determined || it doesn't say that for languagemodel but lets allow it
+					// recording 'null' vs 'TypeError: null' makes no difference to the fingerprint
+					exit('null')
+				} else {
+					let typeCheck = typeFn(a)
+					if ('string' !== typeCheck) {throw zErrType + typeCheck}
+					let aValid = ['available','downloadable','downloading','unavailable']
+					if (!aValid.includes(a)) {throw zErrInvalid +'expected ' + aValid.join(', ') + ': got '+ a}
+					exit(a)
+				}
+			} catch(e) {
+				log_error(7, METRIC +'_'+ m, e)
+				exit(zErr)
+			}
+		}
+		if (undefined == window[key]) {
+			exit('undefined')
+		} else {
+			getAvailability()
+		}
+	})
+
+	// https://developer.mozilla.org/en-US/docs/Web/API/LanguageDetector
+	// https://developer.mozilla.org/en-US/docs/Web/API/Summarizer_API
+	// https://developer.mozilla.org/en-US/docs/Web/API/Translator
+		// ^ blink138+: may be subject to geographical restrictions.
+	// https://developer.mozilla.org/en-US/docs/Web/API/LanguageModel
+		// blink148+ | may need chrome://flags/ -> #prompt-api
+
+	// summarizer
+		// https://datadome.co/threat-research/how-chromes-new-ai-web-apis-enable-hardware-fingerprinting/
+		// unavailable: < 4GB of VRAM, < 16GB of RAM, or < 4 CPU cores
+		// downloadable or available: 4+ GB of VRAM, or 16+ GB of RAM or more, and 4+ CPU cores
+
+	// ToDo: writer
+	let oData = {}
+	// do in sorted order
+	Promise.all([
+		get_value('LanguageDetector'),
+		get_value('LanguageModel'),
+		get_value('Proofreader'),
+		get_value('Rewriter'),
+		get_value('Summarizer'),
+		get_value('Translator'),
+		get_value('Writer'),
+	]).then(function(){
+		addBoth(7, METRIC, mini(oData), addButton(7, METRIC),'', oData)
+		return resolve()
+	})
+})
+
 const get_recursion = (METRIC) => new Promise(resolve => {
 	// sometimes, at least on blink, I can get a different result on first run
 	// per tab or per session: e.g. i get 17 (incorrect) then 12 (stable)
@@ -845,6 +918,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_keyboard('keyboard'),
 		get_memory('memory'),
 		get_screen_isextended('screen_isextended'),
+		get_prompt('prompt'),
 	]).then(function(){
 		Promise.all([
 			get_recursion('recursion'), // run separately from all other functions
