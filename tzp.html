@@ -343,9 +343,11 @@
 		<tr class="A2 togS"><td>visualViewport</td><td class="c mono" id="viewport_visualViewport"></td></tr>
 		<tr><td>viewport-segments</td><td class="mono">
 			<span class="c" id="viewport-segments"></span><div class="btn-right c" id="viewport-segments_data"></div></td></tr>
-		<tr class="togS"><td>css</sup></td><td class="mono">
-			<span id="cssVS"></span><span class="cssc" id="viewport-segments_css"></span></td></tr>
-		<tr class="togS"><td>matchMedia</td><td class="c mono" id="viewport-segments_media"></td></tr>
+		<tr class="togS"><td>
+			css | js | matchMedia</sup></td>
+			<td class="mono">
+				<span id="cssVS"></span> | <span class="c" id="viewport-segments_js"></span> | <span class="c" id="viewport-segments_media"></span>
+			</td></tr>
 
 		<!--other-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -369,7 +371,7 @@
 			<div class="btn-right s99">pixels</div></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
 			&nbsp; [css min-resolution] dpi</td>
-			<td class="mono"><span id="P"></span><span class="cssc" id="pixels_dpi_css"></span>
+			<td class="mono"><span id="P"></span><span class="c" id="pixels_dpi_css"></span>
 				<div class="btn-right c" id="pixels_match"></div>
 			</td></tr>
 		<tr><td>[matchMedia] dpi</td><td class="mono"><span class="c" id="pixels_dpi"></span></td></tr>
@@ -763,6 +765,7 @@
 		<tr><td>permissionsPolicy</td><td class="c mono" id="permissionsPolicy"></td></tr>
 		<tr><td id="tzpPointer"><span class="btn btn0">[ run ]</span>
 			&nbsp; pointer event <sup>1</sup></td><td class="c mono" id="pointer_event"></td></tr>
+		<tr><td>prompt</td><td class="c mono" id="prompt"></td></tr>
 		<tr><td>recursion</td><td class="c mono" id="recursion"></td></tr>
 		<tr><td>screen.isExtended</td><td class="c mono" id="screen_isextended"></td></tr>
 		<tr><td>touch</td><td class="c mono" id="touch"></td></tr>
@@ -1183,8 +1186,8 @@
 			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.use_components_shim</span></div>
-			&nbsp; component interfaces</td><td class="c mono" id="component_interfaces"></td></tr>
+			<span class="ttxtb">dom.use_components_shim</span></div> component interfaces</td>
+			<td class="c mono" id="component_interfaces"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 74+ : javascript.options.<br>property_error_message_fix</span></div>
 			&nbsp; error message fix</td><td class="c mono" id="error_message_fix"></td></tr>
