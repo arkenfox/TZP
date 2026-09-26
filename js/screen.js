@@ -579,14 +579,19 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 				// so we will exclude gecko to keep things cleaner/easier
 				if (isDesktop && !isGecko) {
 					// we don't have to worry about RFP but brave randomizes including 0
-					let minDiff = 0, diff
+					let minDiff = -1, diff
 					// we already have chromeW, chromeH
 						// if the summary item is not a string and our chrome measurement is a number
 						// which it must be since no errs ... then do some math
+					// fullscreen/FSElement will report 0's - we should exclude that unless isBraveSmart
+					if (!isBraveSmart && window.matchMedia('(display-mode:fullscreen)').matches) {
+						minDiff = 0
+					}
 					let w = oSummary[k].width
 					if (!isNaN(w) && !isNaN(chromeW)) {
 						diff = Math.abs(chromeW)
 						if (diff > minDiff && diff < 10) {
+							log_debug(1, 'sizes_outer_width_ignored', w)
 							w = '±9 ' + s99 +'('+ w +')'+ sc
 							oSummary[k].width = '±9'
 						}
@@ -595,6 +600,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 					if (!isNaN(h) && !isNaN(chromeH)) {
 						diff = Math.abs(chromeH)
 						if (diff > minDiff && diff < 10) {
+							log_debug(1, 'sizes_outer_height_ignored', h)
 							h = '±9 ' + s99 +'('+ h +')'+ sc
 							oSummary[k].height = '±9'
 						}
