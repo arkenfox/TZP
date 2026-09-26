@@ -485,26 +485,6 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		//console.log('sum', oSummary)
 		//console.log('display', oDisplay)
 
-		// health lookups
-		if (gRun) {
-			let strInner = oSummary.inner.width +' x '+ oSummary.inner.height
-			let initInner = isInitial.width.inner +' x '+ isInitial.height.inner
-			let initOuter = isInitial.width.outer +' x '+ isInitial.height.outer
-			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
-			sDetail[isScope].lookup['size_newwin'] = strInner
-			sDetail[isScope]['size_newwin_rawdetail'] = {'height': oSummary.inner.height, 'width': oSummary.inner.width}
-
-			sDetail[isScope].lookup['sizes_initial'] = initMatch
-			sDetail[isScope]['sizes_intitial_rawdetail'] = isInitial
-		}
-
-		/* ToDo: update oData/oDisplay/oSummary with lies
-			i.e detect them, change oData to zLIE, color them
-			sData[SECT99] covers "Screen.width","Screen.height","Screen.availWidth","Screen.availHeight"
-			and we have if css is valid and it's not "isSame" i.e it matches within 1
-			about the only one we really can't tell is outer
-		*/
-
 		// display only: taskbar/dock + chrome
 			// on android there is no dock and we set a minimum width which means chrome is non-sensical
 			// and can be negative: e.g. outer 427 - inner 500, also display space is at a premium
@@ -563,15 +543,69 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		//*/
 		addDisplay(1, 'screen_aspect_ratio', '[aspect ratio: '+ aspect +']','', notation)
 
+
+		/* ToDo: update oData/oDisplay/oSummary with lies
+			i.e detect them, change oData to zLIE, color them
+			sData[SECT99] covers "Screen.width","Screen.height","Screen.availWidth","Screen.availHeight"
+			and we have if css is valid and it's not "isSame" i.e it matches within 1
+			about the only one we really can't tell is outer
+		*/
+
+		// health lookups
+		if (gRun) {
+			let strInner = oSummary.inner.width +' x '+ oSummary.inner.height
+			let initInner = isInitial.width.inner +' x '+ isInitial.height.inner
+			let initOuter = isInitial.width.outer +' x '+ isInitial.height.outer
+			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
+			sDetail[isScope].lookup['size_newwin'] = strInner
+			sDetail[isScope]['size_newwin_rawdetail'] = {'height': oSummary.inner.height, 'width': oSummary.inner.width}
+
+			sDetail[isScope].lookup['sizes_initial'] = initMatch
+			sDetail[isScope]['sizes_intitial_rawdetail'] = isInitial
+		}
 		// data
 			// we only want to record a single result or summary
 			// this makes it easier to control (e.g. zLIES or bucketed)
 			// it also removes the noise of mismatches, lies, errors
 		for (const k of Object.keys(oSummary)) {
-			// display
 			let str = oSummary[k].width +' x '+ oSummary[k].height
+			let displaystr = str
+
+			if ('outer' == k) {
+				// cleanup: bucketize <10 outer
+				// in blink only inner changes with zoom: and a default blink is within margins for width + height
+					// e.g. 80% = -234 x -121 | 100% = 16 x 129 | 110% = 107 x 220 - so we're good with <10
+				// in gecko all change with zoom: a default can be e.g. 16 x 93 || 110% = 7 x 77
+				// so we will exclude gecko to keep things cleaner/easier
+				if (isDesktop && !isGecko) {
+					// we don't have to worry about RFP but brave randomizes including 0
+					let minDiff = 0, diff
+					// we already have chromeW, chromeH
+						// if the summary item is not a string and our chrome measurement is a number
+						// which it must be since no errs ... then do some math
+					let w = oSummary[k].width
+					if (!isNaN(w) && !isNaN(chromeW)) {
+						diff = Math.abs(chromeW)
+						if (diff > minDiff && diff < 10) {
+							w = '±9 ' + s99 +'('+ w +')'+ sc
+							oSummary[k].width = '±9'
+						}
+					}
+					let h = oSummary[k].height
+					if (!isNaN(h) && !isNaN(chromeH)) {
+						diff = Math.abs(chromeH)
+						if (diff > minDiff && diff < 10) {
+							h = '±9 ' + s99 +'('+ h +')'+ sc
+							oSummary[k].height = '±9'
+						}
+					}
+					str = oSummary[k].width +' x '+ oSummary[k].height
+					displaystr = w +' x '+ h
+				}
+			}
+			// display
 			sDetail[isScope].lookup['sizes_'+ k] = str
-			oDisplay[k +'_summary'] = str
+			oDisplay[k +'_summary'] = displaystr
 			// data
 			addData(1, 'sizes_'+ k, oSummary[k], mini(oSummary[k]))
 		}
@@ -1328,7 +1362,7 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 			// the less reliance on isBrave the better | just bucketize all blink
 			let minDiff = 'blink' == isEngine ? -1 : 0
 			if (diff > minDiff && diff < 10) {
-				value = '<10'; x = value + s99 +'('+ x +')'+ sc
+				value = '±9'; x = value + s99 +'('+ x +')'+ sc
 			}
 		}
 		oData[k] = value; display.push(x)
