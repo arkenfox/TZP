@@ -593,7 +593,8 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 					if (!isNaN(w) && !isNaN(chromeW)) {
 						diff = Math.abs(chromeW)
 						if (diff > minDiff && diff < 10) {
-							log_debug(1, 'sizes_outer_width_ignored', w)
+							// don't debug; we're not ignoring it, we're bucketing it: see same as window position
+							//log_debug(1, 'sizes_outer_width_ignored', w)
 							w = '±9 ' + s99 +'('+ w +')'+ sc
 							oSummary[k].width = '±9'
 						}
@@ -602,7 +603,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 					if (!isNaN(h) && !isNaN(chromeH)) {
 						diff = Math.abs(chromeH)
 						if (diff > minDiff && diff < 10) {
-							log_debug(1, 'sizes_outer_height_ignored', h)
+							//log_debug(1, 'sizes_outer_height_ignored', h)
 							h = '±9 ' + s99 +'('+ h +')'+ sc
 							oSummary[k].height = '±9'
 						}
