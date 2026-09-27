@@ -7,7 +7,6 @@
 	this is behind currentTime which we already check
 */
 
-
 function check_timing(type) {
 	let aAllow = ['currenttime', 'date', 'mark', 'now', 'timestamp']
 	if (!aAllow.includes(type)) {return true}
