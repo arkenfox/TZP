@@ -609,6 +609,9 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let isBraveLanguage = false
 			try {isBraveLanguage = 1 == navigator.languages.length} catch(e) {isBraveLanguage = zErr}
 
+			/* not worth it: are either
+				// slow/very-slow, problematic, or desktop only using common sizes
+				// at best they would only be good to perhaps rule out isBraveSmart
 			// screen steps into first of one of seven stepped sizes
 			let isBraveScreen = 'TBA'
 			// available screen matches screen
@@ -616,30 +619,28 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let isBraveAvailable = 'TBA'
 			// slow
 				// screen matchmedia/css matches outer (whilst it lasts)
-				// canvas
-			// very slow
+			// problematic
+				// canvas: even a 'Brave' canvas FP (%, shift range etc) could be non-Brave (ext, another fork)
+			// very slow (voices not guaranteed in a timely manner)
 				// fake voice at end mirroring first voice with specific random name (if voices not empty)
+			//*/
 
 			// harden isBrave
 				// if you weren't before, you are now: pdf + keyboard combined are a very strong tell
 			if (isBraveKeyboard && isBravePDF) {isBrave == true}
-
 			// if isBrave
 			if (isBrave) {
 				// debug
 				let oBrave = {
-					'available_screen': isBraveAvailable,
 					'chrome': isBraveChrome,
 					'keyboard': isBraveKeyboard,
 					'languages': isBraveLanguage,
 					'pdf': isBravePDF,
 					'pdf_check': oPDF,
-					'screen': isBraveScreen,
 					'window': isBraveWindow,
 				}
 				if (true !== isBravePDF) {delete oBrave['pdf_check']}
 				log_debug(SECTG, METRIC +'Shields', oBrave, isScope, true)
-
 				// calculate isBraveSmart
 						// for now .. we're already isBrave, just the keyboard is enough
 				if (isBraveKeyboard) {

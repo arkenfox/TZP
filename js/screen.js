@@ -570,7 +570,9 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		for (const k of Object.keys(oSummary)) {
 			let str = oSummary[k].width +' x '+ oSummary[k].height
 			let displaystr = str
-
+			// we could cleanup isBraveSmart screen + availablescreen
+				// but these are not randomized they are deterministic (because they are based on fitting outer)
+				// note: screen returns mixed x mixed anyway - until they never get around to fixing it
 			if ('outer' == k) {
 				// cleanup: bucketize <10 outer
 				// in blink only inner changes with zoom: and a default blink is within margins for width + height
