@@ -574,6 +574,12 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 })
 
 const get_prompt = (METRIC) => new Promise(resolve => {
+	// blink only
+	if ('blink' !== isEngine) {
+		addBoth(7, METRIC, 'undefined')
+		return resolve()
+	}
+
 	// https://developer.mozilla.org/en-US/docs/Web/API/Prompt_API/Using
 	// https://developer.chrome.com/docs/ai/prompt-api
 		// these are ai and grouped by google under "prompt api", but toggling the flag
