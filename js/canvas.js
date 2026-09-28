@@ -416,7 +416,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 				if ('skip' == isCheck) {
 					data = 'trustworthy' // the test is random, return a stable FP
 				} else {
-					// we have trampering
+					// we have tampering
 					let isPersistent = hash0 == hash
 					if (isPersistent) {
 						oRaw[k] = oData[k][0]
@@ -563,6 +563,7 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 		let oRaw = {}
 		const m = 'canvas_'
 		let oKnown = {
+			// AFAICT these are the same on every engine, every platform, every config?
 			'isPointInPath': ['db0e3f08'],
 			'isPointInStroke': ['a77e328a'],
 		}
@@ -575,7 +576,7 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 				if (isSupport) {hash = oErrors[k]; data = zErrLog} else {hash = zNA}
 				oRaw[k] = hash
 			} else {
-				// persistent or per execution || no errors so we muct have two results
+				// persistent or per execution || no errors so we must have two results
 					// tidy oRaw as we go since we've hashed results
 				let hash0 = mini(oData[k][0])
 				hash = mini(oData[k][1]) // always display a hash, make it the last one read
@@ -583,7 +584,9 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 				// only set notationExtra if tampered with
 				if (isPersistent) {
 					oRaw[k] = oData[k][0]
-					if (!oKnown[k].includes(hash)) {
+					if (oKnown[k].includes(hash)) {
+						data = 'trustworthy'
+					} else {
 						notationExtra = ' [persistent]'
 						let isProxy = isProxyLie('CanvasRenderingContext2D.'+ k)
 						if ('93bd94c5' == hash && !isProxy) {notation = rfp_green} // persistent, all zeroes + no proxy lies
