@@ -417,11 +417,8 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 						notationExtra = ' [persistent]'
 						isWhite = hash == whitehash // isWhite only if persistent
 					} else {
-						//oRaw[k] = {'run0': oData[k][0], 'run1': oData[k][1]}
-						for (const j of Object.keys(oData[k])) {
-							//oRaw[k]['run' + j] = Array.from(oData[k][j])
-							oRaw[k]['run' + j] = 'banana'
-						}
+						oRaw[k] = {}
+						for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
 						notationExtra = ' [per execution]'
 						if (isCheck && !isProxy && !isFontStealth) {
 							notation = rfp_green // meets rfp stats, no lies, + no font stealth fuckery
@@ -823,17 +820,16 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		//console.log(res)
 		let oRaw = {}, oInfo = {}
 		// FF95+: compression 1724331 / 1737038 
-		// libz-rs
 			// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
 			// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
-			// ToDo: clean out hashes, check what other graphics configs produce what hashes
-				// e.g. skia, software, hardware etc
-		const oKnown = {
-			'toBlob': ['3afc375a','e328ec8e'],
-			'toBlob_solid': ['56ea6104','9d0b9932','cfd52a1f'],
-			'toDataURL': ['3afc375a','e328ec8e'],
-			'toDataURL_solid': ['56ea6104','9d0b9932','cfd52a1f'],
+		// ToDo: clean out hashes, check what other graphics configs produce what hashes
+		let oKnown = {
+			'toBlob': ['e328ec8e'], // old? '3afc375a',
+			'toBlob_solid': ['9d0b9932','cfd52a1f'], // old? '56ea6104',
 		}
+		oKnown['toDataURL'] = oKnown['toBlob']
+		oKnown['toDataURL_solid'] = oKnown['toBlob_solid']
+
 		for (const k of Object.keys(oData)) {
 			// if an error,. report that, else compare the tfwo runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
@@ -867,6 +863,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					} else if (isGecko) {
 						if (isChunk && !isProxy) {
 							// we can bypass the chunk and just record the IDAT data
+							// this assumes no other tampering so we'd want known IDAT hashes
 							notationExtra = ' [persistent*]'+ s99 + ' ['+ mini(oInfo[hash].chunks[1].data) +']'+ sc
 							notation = fpp_green
 						} else if (!oKnown[k].includes(hash)) {
