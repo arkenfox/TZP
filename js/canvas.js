@@ -2,20 +2,6 @@
 
 /* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
 
-function check_canvas_to(data) {
-	// only called if per-execution
-	let len = data.length
-	if (![166,170,174,178].includes(len)) {return false}
-	let slice1 = data.slice(72,80)
-	if ('lEQVQoU2' == slice1) {
-		let	slice2 = data.slice(data.length - 10, data.length)
-		if ('VORK5CYII=' == slice2 || '5ErkJggg==' == slice2  || 'lFTkSuQmCC' == slice2) {
-			return true // RFP
-		}
-	}
-	return false
-}
-
 function get_canvas_info(target) {
 	// ToDo:
 		// pass the base64 from to* tests
@@ -162,8 +148,308 @@ function get_canvas_info(target) {
 	console.log(tEnd-t0, 'ms', pngData);
 }
 
-const get_canvas_ispoint = () => new Promise(resolve => {
+const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 
+	function check(dataname, runNo) {
+		// return skip if no tampering, otherwise return true/false if it matches RFP
+		let data = oData[dataname][runNo]
+		let dataDrawn = oDataDrawn[dataname]
+		let isMatch = mini(dataDrawn) == mini(data)
+		if (isMatch) {return 'skip'}
+
+		// run2 otherwise return if RFP-like and create strings
+		let aDrawn = [], aRead = [], indexChanged = []
+		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
+		for (let x=0; x < pixelcount; x++) {
+			let k = x * 4
+			aDrawn = dataDrawn.slice(k, k+4)
+			aRead = data.slice(k, k+4)
+			if (aDrawn.join() !== aRead.join()) { // pixels
+				altP++
+				indexChanged.push(k)
+			}
+			if (aDrawn[0] !== aRead[0]) { altR++} // channels
+			if (aDrawn[1] !== aRead[1]) { altG++}
+			if (aDrawn[2] !== aRead[2]) { altB++}
+			if (aDrawn[3] !== aRead[3]) { altA++}
+			// ToDo: range: worth it?
+		}
+		// stealth check: anything in changed not in font
+		let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
+		isFontStealth = aNotInFonts.length == 0
+
+		// noise FP
+		let strFP ='', aNote = []
+		aNote.push('p'+ Math.floor((altP / pixelcount) * 100))
+		if (altR > 0) {strFP += 'r'; aNote.push('r'+Math.floor((altR / pixelcount) * 100))}
+		if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
+		if (altB > 0) {strFP += 'b'; aNote.push('b'+ Math.floor((altB / pixelcount) * 100))}
+		if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
+		// FP data
+		isCheckChannels = (isFontStealth ? 'stealth | ' : '') + strFP
+		// display data: keep android short
+		if (isDesktop) {isCheckNotation = ' ['+ (isFontStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
+		} else if (isFontStealth) {isCheckNotation = ' [stealth]'}
+
+		// pixels: allow 4 collisions
+		if (altP < (pixelcount - 4)) {return false}
+		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
+			// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
+		let maxCollisions = 'getImageData_solid' == dataname ? 24 : 8
+		if (altR < (pixelcount - maxCollisions)) {return false}
+		if (altG < (pixelcount - maxCollisions)) {return false}
+		if (altB < (pixelcount - maxCollisions)) {return false}
+		// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
+		if ((altA / pixelcount) < .66) {return false}
+		return true // RFP traits
+	}
+
+	function generate() {
+		// random getImageData
+		let tmpDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
+		let tmpSolid = new Uint8ClampedArray(sizeW * sizeH * 4)
+		let solidR = Math.floor(Math.random()*255),
+			solidG = Math.floor(Math.random()*255),
+			solidB = Math.floor(Math.random()*255)
+		solidClrs = solidR +','+ solidG +','+ solidB +',255'
+		let counter = -1
+		for (let x=0; x < sizeW; x++) {
+			let xEven = (x % 2 == 0)
+			for (let y=0; y < sizeH; y++) {
+				counter ++
+				let k = counter * 4
+				let yEven = (y % 2 == 0)
+				// xEven + yEven == 1 = checkerboard = 1/2
+				// xEven + yEven == 2 = another 1/4
+				// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
+				let isRandom = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
+				if (!isRandom) {
+					if ((x * y) % 3 == 0 ) {isRandom = true} // brings us to 113/128
+				}
+				if (isRandom) {
+					// random: 113
+					let valueR = Math.floor(Math.random()*255),
+						valueG = Math.floor(Math.random()*255),
+						valueB = Math.floor(Math.random()*255)
+					tmpDrawn[k] = valueR
+					tmpDrawn[k+1] = valueG
+					tmpDrawn[k+2] = valueB
+					tmpDrawn[k+3] = 255
+					dataToDraw.push('rgba('+ valueR +','+ valueG +','+ valueB +',255)')
+				} else {
+					indexFont.push(k)
+					// solid: 15
+					tmpDrawn[k] = solidR
+					tmpDrawn[k+1] = solidG
+					tmpDrawn[k+2] = solidB
+					tmpDrawn[k+3] = 255
+					dataToDraw.push('rgba('+ solidClrs +')')
+				}
+				// solid
+				tmpSolid[k] = solidR
+				tmpSolid[k+1] = solidG
+				tmpSolid[k+2] = solidB
+				tmpSolid[k+3] = 255
+			}
+		}
+		oDataDrawn = {'getImageData': tmpDrawn, 'getImageData_solid': tmpSolid}
+	}
+
+	var known = {
+		createHashes: function(window, runNo){
+			let outputs = [
+				{
+					class: window.CanvasRenderingContext2D,
+					name: 'getImageData',
+					value: function(){
+						const METRIC = 'getImageData'
+						if (undefined !== oErrors[METRIC]) {return zErr} // if you erred once, don't bother with the 2nd test
+						try {
+							var context = getKnownGet()
+							let imageData = context.getImageData(0,0, sizeW, sizeH)
+							if (runST) {imageData = null} else if (runSI) {imageData = {}}
+							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
+							let expected = '[object ImageData]'
+							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
+							oData[METRIC][runNo] = imageData.data
+							return 'success'
+						} catch(e) {
+							oErrors[METRIC] = e+''
+							return zErr
+						}
+					}
+				},
+				{
+					class: window.CanvasRenderingContext2D,
+					name: 'getImageData_solid',
+					value: function(){
+						const METRIC = 'getImageData_solid'
+						if (undefined !== oErrors[METRIC]) {return zErr} 
+						try {
+							var context = getKnownGetSolid()
+							let imageData = context.getImageData(0,0, sizeW, sizeH)
+							if (runST) {imageData = null} else if (runSI) {imageData = {}}
+							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
+							let expected = '[object ImageData]'
+							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
+							oData[METRIC][runNo] = imageData.data
+							return 'success'
+						} catch(e) {
+							oErrors[METRIC] = e+''
+							return zErr
+						}
+					}
+				},
+			];
+			function isSupported(output){
+				let key = output.name
+				if (key.includes('_solid')) {key = key.slice(0,-6)}
+				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[key]
+			}
+			function getKnownGet(){
+				let canvas = dom.tzpCanvasGet
+				let ctx = canvas.getContext('2d')
+				// color the background
+				ctx.fillStyle = 'rgba('+ solidClrs +')'
+				ctx.fillRect(0, 0, sizeW, sizeH)
+				// trigger fillText stealth: try to cover every pixel
+				let fpText = '\u2588\u2588\u2588\u2588' // full block
+				ctx.font = '512px sans-serif' // large
+				ctx.textBaseline = 'top'
+				ctx.textBaseline = 'alphabetic'
+				ctx.fillText(fpText,0,0)
+				/*
+				// trigger strokeText stealth
+					// don't overwrite all the fillText
+					// see PoC notes: too risky
+				fpText = '-'
+				ctx.font = '16px monospace'
+				ctx.strokeStyle ='rgba('+ solidClrs +')'
+				for (let x=0; x < sizeW/2; x++) {
+					for (let y=0; y < sizeH/2; y++) {ctx.strokeText(fpText,x,y)}
+				}
+				//*/
+				// now color the rest with our random colors
+				// swap x/y loop order to match getImageData uint
+				let ignore = 'rgba('+ solidClrs +')'
+				for (let y=0; y < sizeH; y++) {
+					for (let x=0; x < sizeW; x++) {
+						let style = dataToDraw[(y * sizeW) + x]
+						if (style !== ignore) {
+							ctx.fillStyle = style
+							ctx.fillRect(x, y, 1, 1)
+						}
+					}
+				}
+				return ctx
+			}
+			function getKnownGetSolid(){
+				let canvas = dom.tzpCanvasGetSolid
+				let ctx = canvas.getContext('2d')
+				ctx.fillStyle = 'rgba('+ solidClrs +')'
+				ctx.fillRect(0, 0, sizeW, sizeH)
+				return ctx
+			}
+
+			var finished = Promise.all(outputs.map(function(output){
+				return new Promise(function(resolve, reject){
+					var displayValue
+					try {
+						var supported = output.supported? output.supported(): isSupported(output);
+						if (supported){
+							displayValue = output.value()
+						} else {
+							oErrors[output.name] = zErr; displayValue = zErr
+						}
+					} catch(e) {
+						oErrors[output.name] = e+''; displayValue = zErr
+					}
+					Promise.resolve(displayValue).then(function(displayValue){
+						output.displayValue = displayValue
+						resolve(output)
+					}, function(e){
+						oErrors[output.name] = e+''; output.displayValue = zErr
+						resolve(zErr)
+					})
+				})
+			}))
+			return finished
+		}
+	}
+
+	let oDataDrawn, solidClrs, dataToDraw = [], indexFont = []
+	let isCheckNotation ='', isCheckChannels ='', isFontStealth = false
+	const pixelcount = sizeW * sizeH
+	generate()
+
+	let oData = {'getImageData': {}, 'getImageData_solid': {}}, oErrors = {}
+	Promise.all([
+		known.createHashes(window, 0),
+		known.createHashes(window, 1),
+	]).then(function(res){
+		//console.log(oData)
+		//console.log(oErrors)
+		//console.log(res)
+		let oRaw = {}
+		const m = 'canvas_'
+		let isProxy = isProxyLie('CanvasRenderingContext2D.getImageData')
+		// all white: e.g. perps setting false for privacy.resistFingerprinting.randomDataOnCanvasExtract
+			// this pref was removed in FF134, but some extensions still do this
+		let whitehash = 'd5f8f171'
+		// ToDo: replace whitehash or enhance whitehash with solidhash
+
+		for (const k of Object.keys(oData)) {
+			// if an error,. report that, else compare the two runs etc
+			let hash, data ='', notation = rfp_red, notationExtra = ''
+			if (undefined !== oErrors[k]) {
+				hash = oErrors[k]; data = zErrLog
+				oRaw[k] = hash
+				addBoth(9, m+k, hash,'', notation + notationExtra, data)
+			} else {
+				// persistent or per execution || no errors so we muct have two results
+					// tidy oRaw as we go since we've hashed results
+				let hash0 = mini(oData[k][0]), isWhite = false
+				hash = mini(oData[k][1]) // always display a hash, make it the last one read
+
+				let isCheck = check(k, 1) // use the last result to be consistent
+				//console.log(k, isCheck, isCheckNotation, isCheckChannels, isFontStealth)
+				if ('skip' == isCheck) {
+					data = 'trustworthy' // the test is random, return a stable FP
+				} else {
+					// we have trampering
+					let isPersistent = hash0 == hash
+					if (isPersistent) {
+						oRaw[k] = oData[k][0]
+						notationExtra = ' [persistent]'
+						isWhite = hash == whitehash // isWhite only if persistent
+					} else {
+						oRaw[k] = {}
+						for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
+						notationExtra = ' [per execution]'
+						if (isCheck && !isProxy && !isFontStealth) {
+							notation = rfp_green // meets rfp stats, no lies, + no font stealth fuckery
+						}
+					}
+					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
+					if (isWhite) {
+						data += ' | white'
+						notationExtra += ' [white]'
+					} else {
+						notationExtra += isCheckNotation
+						if (isGecko && rfp_green == notation) {data += ' | RFP'
+						} else {data += ' | '+ isCheckChannels}
+					}
+					// non gecko doesn't display notation, but with data !== '' the hash becomes display-only
+					if (!isGecko) {hash += s99 +' '+ notationExtra +sc}
+					addBoth(9, m+k, hash,'', notation + notationExtra, data)
+				}
+			}
+		}
+		return resolve(oRaw)
+	})
+})
+
+const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 	var known = {
 		createHashes: function(window, runNo){
 			let isDrawn = false // only draw once per run
@@ -267,8 +553,6 @@ const get_canvas_ispoint = () => new Promise(resolve => {
 	}
 
 	let oData = {'isPointInPath': {}, 'isPointInStroke': {}}, oErrors = {}
-	const sizeW = 16, sizeH = 8
-
 	Promise.all([
 		known.createHashes(window, 0),
 		known.createHashes(window, 1),
@@ -292,27 +576,24 @@ const get_canvas_ispoint = () => new Promise(resolve => {
 				oRaw[k] = hash
 			} else {
 				// persistent or per execution || no errors so we muct have two results
+					// tidy oRaw as we go since we've hashed results
 				let hash0 = mini(oData[k][0])
 				hash = mini(oData[k][1]) // always display a hash, make it the last one read
-
-				// tidy oRaw since we've hashed results
 				let isPersistent = hash0 == hash
+				// only set notationExtra if tampered with
 				if (isPersistent) {
 					oRaw[k] = oData[k][0]
-				} else {
-					oRaw[k] = {}
-					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
-				}
-				// only display extra if tampered
-				if (isPersistent) {
 					if (!oKnown[k].includes(hash)) {
 						notationExtra = ' [persistent]'
 						let isProxy = isProxyLie('CanvasRenderingContext2D.'+ k)
-						if ('93bd94c5' == hash && !isProxy) {notation = rfp_green} // all zeroes + no proxy lies
+						if ('93bd94c5' == hash && !isProxy) {notation = rfp_green} // persistent, all zeroes + no proxy lies
 					}
 				} else {
+					oRaw[k] = {}
+					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
 					notationExtra = ' [per execution]'
 				}
+				// notationExtra is only set if tampered with
 				if (notationExtra.length) {
 					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
 					if (isGecko && rfp_green == notation) {data += ' | RFP'}
@@ -324,124 +605,37 @@ const get_canvas_ispoint = () => new Promise(resolve => {
 	})
 })
 
-const get_canvas = () => new Promise(resolve => {
+const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 
-	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH
+	function check(data) {
+		// only called if per-execution
+		let len = data.length
+		if (![166,170,174,178].includes(len)) {return false}
+		let slice1 = data.slice(72,80)
+		if ('lEQVQoU2' == slice1) {
+			let	slice2 = data.slice(data.length - 10, data.length)
+			if ('VORK5CYII=' == slice2 || '5ErkJggg==' == slice2  || 'lFTkSuQmCC' == slice2) {
+				return true // RFP
+			}
+		}
+		return false
+	}
+
 	// FF95+: compression 1724331 / 1737038 
 	// libz-rs
   	// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
   	// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
 	const oKnown = {
-		'ge_white': ['d5f8f171'],
 		'to_white': ['35e41537','3e72d1fd'],
 		'toBlob': ['3afc375a','e328ec8e'],
 		'toBlob_solid': ['56ea6104','9d0b9932','cfd52a1f'],
 		'toDataURL': ['3afc375a','e328ec8e'],
 		'toDataURL_solid': ['56ea6104','9d0b9932','cfd52a1f'],
 	}
-	let isCanvasGet ='', isCanvasGetChannels ='', isGetStealth = false
-
-	function check_canvas_get(dataname, runNo) {
-		let data = oData[dataname]
-		let dataDrawn = oDataDrawn[dataname]
-		let isMatch = mini(dataDrawn) == mini(data)
-		// run1 return if a match or not
-		if (runNo == 1) {return isMatch}
-		// run2 quick exit: return skip if nothing to do
-		if (isMatch) {return 'skip'}
-
-		// run2 otherwise return if RFP-like and create strings
-		let aDrawn = [], aRead = [], indexChanged = []
-		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
-		for (let x=0; x < pixelcount; x++) {
-			let k = x * 4
-			aDrawn = dataDrawn.slice(k, k+4)
-			aRead = data.slice(k, k+4)
-			if (aDrawn.join() !== aRead.join()) { // pixels
-				altP++
-				indexChanged.push(k)
-			}
-			if (aDrawn[0] !== aRead[0]) { altR++} // channels
-			if (aDrawn[1] !== aRead[1]) { altG++}
-			if (aDrawn[2] !== aRead[2]) { altB++}
-			if (aDrawn[3] !== aRead[3]) { altA++}
-			// ToDo: range: worth it?
-		}
-		// stealth check: anything in changed not in font
-		let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
-		isGetStealth = aNotInFonts.length == 0
-
-		// noise FP
-		let strFP ='', aNote = []
-		aNote.push('p'+ Math.floor((altP / pixelcount) * 100))
-		if (altR > 0) {strFP += 'r'; aNote.push('r'+Math.floor((altR / pixelcount) * 100))}
-		if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
-		if (altB > 0) {strFP += 'b'; aNote.push('b'+ Math.floor((altB / pixelcount) * 100))}
-		if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
-		// FP data
-		isCanvasGetChannels = (isGetStealth ? 'stealth | ' : '') + strFP
-		// display data: keep android short
-		if (isDesktop) {isCanvasGet = ' ['+ (isGetStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
-		} else if (isGetStealth) {isCanvasGet = ' [stealth]'}
-
-		// pixels: allow 2 collision
-		if (altP < (pixelcount - 2)) {return false}
-		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
-			// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
-		let maxCollisions = 'getImageData_solid' == dataname ? 24 : 8
-		if (altR < (pixelcount - maxCollisions)) {return false}
-		if (altG < (pixelcount - maxCollisions)) {return false}
-		if (altB < (pixelcount - maxCollisions)) {return false}
-		// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
-		if ((altA / pixelcount) < .66) {return false}
-		return true // RFP traits
-	}
 
 	var known = {
 		createHashes: function(window, runNo){
 			let outputs = [
-				{
-					class: window.CanvasRenderingContext2D,
-					name: 'getImageData',
-					value: function(){
-						const METRIC = 'getImageData'
-						if (aSkip.includes(METRIC)) {return 'skip'}
-						try {
-							var context = getKnownGet()
-							let imageData = context.getImageData(0,0, sizeW, sizeH)
-							if (runST) {imageData = null} else if (runSI) {imageData = {}}
-							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
-							let expected = '[object ImageData]'
-							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
-							oData[METRIC] = imageData.data
-							return mini(imageData.data)
-						} catch(e) {
-							oErrors[METRIC] = e+''
-							return zErr
-						}
-					}
-				},
-				{
-					class: window.CanvasRenderingContext2D,
-					name: 'getImageData_solid',
-					value: function(){
-						const METRIC = 'getImageData_solid'
-						if (aSkip.includes(METRIC)) {return 'skip'}
-						try {
-							var context = getKnownGetSolid()
-							let imageData = context.getImageData(0,0, sizeW, sizeH)
-							if (runST) {imageData = null} else if (runSI) {imageData = {}}
-							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
-							let expected = '[object ImageData]'
-							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
-							oData[METRIC] = imageData.data
-							return mini(imageData.data)
-						} catch(e) {
-							oErrors[METRIC] = e+''
-							return zErr
-						}
-					}
-				},
 				{
 					name: 'toBlob',
 					value: function(){
@@ -602,54 +796,6 @@ const get_canvas = () => new Promise(resolve => {
 				oDrawn['to_solid'] = true
 				return ctx
 			}
-			function getKnownGet(){
-				let canvas = dom.tzpCanvasGet
-				let ctx = canvas.getContext('2d')
-				if (oDrawn['get']) {return ctx}
-				// color the background
-				ctx.fillStyle = 'rgba('+ solidClrs +')'
-				ctx.fillRect(0, 0, sizeW, sizeH)
-				// trigger fillText stealth: try to cover every pixel
-				let fpText = '\u2588\u2588\u2588\u2588' // full block
-				ctx.font = '512px sans-serif' // large
-				ctx.textBaseline = 'top'
-				ctx.textBaseline = 'alphabetic'
-				ctx.fillText(fpText,0,0)
-				/*
-				// trigger strokeText stealth
-					// don't overwrite all the fillText
-					// see PoC notes: too risky
-				fpText = '-'
-				ctx.font = '16px monospace'
-				ctx.strokeStyle ='rgba('+ solidClrs +')'
-				for (let x=0; x < sizeW/2; x++) {
-					for (let y=0; y < sizeH/2; y++) {ctx.strokeText(fpText,x,y)}
-				}
-				//*/
-				// now color the rest with our random colors
-				// swap x/y loop order to match getImageData uint
-				let ignore = 'rgba('+ solidClrs +')'
-				for (let y=0; y < sizeH; y++) {
-					for (let x=0; x < sizeW; x++) {
-						let style = dataToDraw[(y * sizeW) + x]
-						if (style !== ignore) {
-							ctx.fillStyle = style
-							ctx.fillRect(x, y, 1, 1)
-						}
-					}
-				}
-				oDrawn['get'] = true
-				return ctx
-			}
-			function getKnownGetSolid(){
-				let canvas = dom.tzpCanvasGetSolid
-				let ctx = canvas.getContext('2d')
-				if (oDrawn['get_solid']) {return ctx}
-				ctx.fillStyle = 'rgba('+ solidClrs +')'
-				ctx.fillRect(0, 0, sizeW, sizeH)
-				oDrawn['get_solid'] = true
-				return ctx
-			}
 
 			var finished = Promise.all(outputs.map(function(output){
 				return new Promise(function(resolve, reject){
@@ -659,19 +805,16 @@ const get_canvas = () => new Promise(resolve => {
 						if (supported){
 							displayValue = output.value()
 						} else {
-							oErrors[output.name] = zErr
-							displayValue = zErr
+							oErrors[output.name] = zErr; displayValue = zErr
 						}
 					} catch(e) {
-						oErrors[output.name] = e+''
-						displayValue = zErr
+						oErrors[output.name] = e+''; displayValue = zErr
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
 						output.displayValue = displayValue
 						resolve(output)
 					}, function(e){
-						oErrors[output.name] = e+''
-						output.displayValue = zErr
+						oErrors[output.name] = e+''; output.displayValue = zErr
 						resolve(zErr)
 					})
 				})
@@ -682,59 +825,9 @@ const get_canvas = () => new Promise(resolve => {
 
 	// oDrawn: only draw the canvas once per runNo
 		// if input is faked, it would also be faked the second time
-	let oDrawn = {'get': false, 'get_solid': false, 'path': false, 'to': false, 'to_solid': false}
+	let oDrawn = {'to': false, 'to_solid': false}
 	let oRes = {}, oFP = {}, oErrors = {}, oData = {}, aSkip = [], countFake = 0
 	let solidPink = '224,33,138,255' // go Barbie!
-
-	// random getImageData
-	let tmpDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
-	let tmpSolid = new Uint8ClampedArray(sizeW * sizeH * 4)
-	let dataToDraw = [], indexFont = []
-	let solidR = Math.floor(Math.random()*255),
-		solidG = Math.floor(Math.random()*255),
-		solidB = Math.floor(Math.random()*255)
-	let solidClrs = solidR +','+ solidG +','+ solidB +',255'
-	let counter = -1
-	for (let x=0; x < sizeW; x++) {
-		let xEven = (x % 2 == 0)
-		for (let y=0; y < sizeH; y++) {
-			counter ++
-			let k = counter * 4
-			let yEven = (y % 2 == 0)
-			// xEven + yEven == 1 = checkerboard = 1/2
-			// xEven + yEven == 2 = another 1/4
-			// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
-			let isRandom = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
-			if (!isRandom) {
-				if ((x * y) % 3 == 0 ) {isRandom = true} // brings us to 113/128
-			}
-			if (isRandom) {
-				// random: 113
-				let valueR = Math.floor(Math.random()*255),
-					valueG = Math.floor(Math.random()*255),
-					valueB = Math.floor(Math.random()*255)
-				tmpDrawn[k] = valueR
-				tmpDrawn[k+1] = valueG
-				tmpDrawn[k+2] = valueB
-				tmpDrawn[k+3] = 255
-				dataToDraw.push('rgba('+ valueR +','+ valueG +','+ valueB +',255)')
-			} else {
-				indexFont.push(k)
-				// solid: 15
-				tmpDrawn[k] = solidR
-				tmpDrawn[k+1] = solidG
-				tmpDrawn[k+2] = solidB
-				tmpDrawn[k+3] = 255
-				dataToDraw.push('rgba('+ solidClrs +')')
-			}
-			// solid
-			tmpSolid[k] = solidR
-			tmpSolid[k+1] = solidG
-			tmpSolid[k+2] = solidB
-			tmpSolid[k+3] = 255
-		}
-	}
-	let oDataDrawn = {'getImageData': tmpDrawn, 'getImageData_solid': tmpSolid}
 
 	function exit() {
 		/* data
@@ -769,35 +862,21 @@ const get_canvas = () => new Promise(resolve => {
 				aSkip.push(name)
 				value = oErrors[name]; notation = rfp_red; data = zErrLog
 			} else {
-				if (!isGecko) {
-					if ('ge' == key) {data = zNA} // test is random, return a stable FP
-				} else {
-					if ('ge' == key) {
-						// run 1 check returns mini(dataDrawn) == mini(data)
-						let getCheck = check_canvas_get(name, 1)
-						if (getCheck) {
-							data = 'trustworthy' // the test is random, return a stable FP
+				if (isGecko) {
+					// chunk test
+					// gecko: we can already detect tampering since we use known hashes
+					// but in future we might use randomness and read back the value from the png
+					hasChunk = false // reset
+					aChunk.forEach(function(str){if (oData[name].includes(str)) {hasChunk = true}})
+					if (hasChunk) {
+						countFake++
+						hasChunk = true
+					} else {
+						if (oKnown[name].includes(value)) {
 							aSkip.push(name)
 						} else {
 							data = 'protected'
 							countFake++
-						}
-					} else {
-						// chunk test
-						// gecko: we can already detect tampering since we use known hashes
-						// but in future we might use randomness and read back the value from the png
-						hasChunk = false // reset
-						if ('to' == key) {aChunk.forEach(function(str){if (oData[name].includes(str)) {hasChunk = true}})}
-						if (hasChunk) {
-							countFake++
-							hasChunk = true
-						} else {
-							if (oKnown[name].includes(value)) {
-								aSkip.push(name)
-							} else {
-								data = 'protected'
-								countFake++
-							}
 						}
 					}
 				}
@@ -821,13 +900,12 @@ const get_canvas = () => new Promise(resolve => {
 		}
 		const proxyMap = {
 			convertToBlob: 'OffscreenCanvas',
-			getImageData: 'CanvasRenderingContext2D',
 			toBlob: 'HTMLCanvasElement',
 			toDataURL: 'HTMLCanvasElement',
 		}
 		// smart + some lies, do 2nd run
 		// for non skips, force a redraw
-		oDrawn = {'get': false, 'get_solid': false, 'to': false, 'to_solid': false}
+		oDrawn = {'to': false, 'to_solid': false}
 
 		Promise.all([
 			known.createHashes(window, 2)
@@ -837,26 +915,13 @@ const get_canvas = () => new Promise(resolve => {
 				let value = item.displayValue
 				let checkValue = value
 				let hasChunk = false
-				// getImageData doesn't get a 'skip' so we handle it differently
-				// don't check if already skipped: e.g. type error null
-				// run2 check returns skip if nothing to do, or true/false if RFP-like
-				// why do I need this?
-				if ('ge' == key && 'skip' !== checkValue) {
-					let getCheck = check_canvas_get(name, 2)
-					if ('skip' == getCheck) {checkValue = 'skip'}
-				}
 				if (checkValue !== 'skip') {
 					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
 					// proxy
 					let isProxy = isProxyLie(proxyMap[proxyname] +'.'+ proxyname)
-
 					// chunk test
 					hasChunk = false // reset
-					if ('to' == key) {
-						aChunk.forEach(function(str){
-							if (oData[name].includes(str)) {hasChunk = true}
-						})
-					}
+					aChunk.forEach(function(str){if (oData[name].includes(str)) {hasChunk = true}})
 					if (hasChunk) {
 						// privacyX, which doesn't protect toBlob yet, is causing intermittent false positive isChunk
 						// on it's (per execution) *toDataURL when FPP is on. This is FPP kicking in somewhere due to
@@ -868,46 +933,28 @@ const get_canvas = () => new Promise(resolve => {
 						// persistent
 						let isWhite = false
 						notation = rfp_red
-						// all white: e.g. perps stupidly being told to flip
-							// privacy.resistFingerprinting.randomDataOnCanvasExtract
+						// all white: e.g. perps setting false for privacy.resistFingerprinting.randomDataOnCanvasExtract
+							// this pref was removed in FF134, but some extensions still do this
 						if (oKnown[key +'_white'].includes(value)) {isWhite = true}
 						// exclude BB which must fail if not RFP
 						if (isFPPFallback) {
 							// FPP: 119+ and no proxy lies and no getImageData stealth
-							// FF144 or lower: exclude solids: FPP does not tamper with those
 							// exclude if all white | exclude if proxy lies
-							// note: isGetStealth is getImageData
 							if (!isWhite) {
 								if (!isProxy) {
-									if ('ge' == key && !isGetStealth || 'ge' !== key) {
-										// no proxy lies but persistent, so must be FPP
-										notation = fpp_green
-									}
+									// no proxy lies but persistent, so must be FPP
+									if (hasChunk) {notation = fpp_green}
 								}
 							}
 						}
 						rfpvalue = notation == rfp_green ? ' | RFP' : (notation == fpp_green ? ' | FPP' : '')
-						if ('ge' == key) {
-							stats = isCanvasGet
-							rfpvalue += ' | '+ isCanvasGetChannels
-						}
 						notation += ' [persistent' + isChunk + (isWhite ? ' white]' : ']'+ stats)
 						data = 'protected | persistent'+ isChunk + (isWhite ? ' white' : rfpvalue)
 
 					} else {
 						// per execution
-						if ('is' == key) {
-							notation = rfp_red
-						} else if ('to' == key) {
-							notation = check_canvas_to(oData[name]) ? rfp_green : rfp_red
-						} else {
-							notation = check_canvas_get(name, 2) ? rfp_green : rfp_red
-						}
+						notation = check(oData[name]) ? rfp_green : rfp_red
 						rfpvalue = notation == rfp_green ? ' | RFP' : ''
-						if ('ge' == key) {
-							stats = isCanvasGet
-							data += ' | '+ isCanvasGetChannels
-						}
 						notation += ' [per execution' + isChunk +']'+ stats
 						data = 'protected | per execution'+ isChunk + rfpvalue
 					}
@@ -931,10 +978,10 @@ const outputCanvas = () => new Promise(resolve => {
 		} catch(e) {}
 	})
 
-
 	Promise.all([
-		get_canvas_ispoint(),
-		get_canvas(),
+		get_canvas_ispoint(sizeW, sizeH),
+		get_canvas_getimage(sizeW, sizeH),
+		get_canvas_to(sizeW, sizeH),
 	]).then(function(){
 		return resolve()
 	})
