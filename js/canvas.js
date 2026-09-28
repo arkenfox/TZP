@@ -1,151 +1,148 @@
 'use strict';
 
 /* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
+/* 	const proxyMap = {convertToBlob: 'OffscreenCanvas'} */
 
-function get_canvas_info(target) {
-	// ToDo:
-		// pass the base64 from to* tests
-		// ^ no point getting it twice, plus we need to control the method used to get it
-		// this allows us to detect the number of chunks and definitively gives away FF protection
-		// we can also return the colorType: e.g. 6 = sRGB
-
-	if (undefined == target) {target = dom.tzpCanvasTo}
-	// https://stackoverflow.com/a/37997175
-	var PNG = {
-		parse: function(imgTag) {
-			var base64 = PNG.asBase64(imgTag);
-			var byteData = PNG.utils.base64StringToByteArray(base64);
-			var parsedPngData = PNG.utils.parseBytes(byteData);
-			return PNG.utils.enrichParsedData(parsedPngData);
-		},
-		asBase64: function(imgTag) {
-			var canvas = document.createElement("canvas");
-			canvas.width = imgTag.width; 
-			canvas.height = imgTag.height; 
-			var ctx = canvas.getContext("2d"); 
-			ctx.drawImage(imgTag, 0, 0); 
-			var dataURL = canvas.toDataURL("image/png"); // we already have this info
-			return dataURL.split('base64,')[1];
-		},
-		utils: {
-			base64StringToByteArray: function(base64String) {
-				//http://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
-				var byteCharacters = atob(base64String);
-				var byteNumbers = new Array(byteCharacters.length);
-				for (var i = 0; i < byteCharacters.length; i++) {
-					byteNumbers[i] = byteCharacters.charCodeAt(i);
-				}
-				return new Uint8Array(byteNumbers);
+function get_canvas_info(dataURL) {
+	try {
+		// https://stackoverflow.com/a/37997175
+		var PNG = {
+			parse: function(imgTag) {
+				var base64 = PNG.asBase64(imgTag);
+				var byteData = PNG.utils.base64StringToByteArray(base64);
+				var parsedPngData = PNG.utils.parseBytes(byteData);
+				return PNG.utils.enrichParsedData(parsedPngData);
 			},
-			parseBytes: function(bytes) {
-				var pngData = {};
-				//see https://en.wikipedia.org/wiki/Portable_Network_Graphics
-				//verify file header
-				pngData['headerIsValid'] = bytes[0] == 0x89
-					&& bytes[1] == 0x50
-					&& bytes[2] == 0x4E
-					&& bytes[3] == 0x47
-					&& bytes[4] == 0x0D
-					&& bytes[5] == 0x0A
-					&& bytes[6] == 0x1A
-					&& bytes[7] == 0x0A
-				if (!pngData.headerIsValid) {
-					console.warn('Provided data does not belong to a png');
-					return pngData;
-				}
-				//parsing chunks
-				var chunks = [];
-				var chunk = PNG.utils.parseChunk(bytes, 8);
-				chunks.push(chunk);
-				while (chunk.name !== 'IEND') {
-					chunk = PNG.utils.parseChunk(bytes, chunk.end);
+			asBase64: function(imgTag) {
+				/* we already have all this
+				var canvas = document.createElement("canvas");
+				canvas.width = imgTag.width; 
+				canvas.height = imgTag.height; 
+				var ctx = canvas.getContext("2d"); 
+				ctx.drawImage(imgTag, 0, 0); 
+				var dataURL = canvas.toDataURL("image/png");
+				//*/
+				return dataURL.split('base64,')[1];
+			},
+			utils: {
+				base64StringToByteArray: function(base64String) {
+					//http://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+					var byteCharacters = atob(base64String);
+					var byteNumbers = new Array(byteCharacters.length);
+					for (var i = 0; i < byteCharacters.length; i++) {
+						byteNumbers[i] = byteCharacters.charCodeAt(i);
+					}
+					return new Uint8Array(byteNumbers);
+				},
+				parseBytes: function(bytes) {
+					var pngData = {};
+					//see https://en.wikipedia.org/wiki/Portable_Network_Graphics
+					//verify file header
+					pngData['headerIsValid'] = bytes[0] == 0x89
+						&& bytes[1] == 0x50
+						&& bytes[2] == 0x4E
+						&& bytes[3] == 0x47
+						&& bytes[4] == 0x0D
+						&& bytes[5] == 0x0A
+						&& bytes[6] == 0x1A
+						&& bytes[7] == 0x0A
+					if (!pngData.headerIsValid) {
+						console.warn('Provided data does not belong to a png');
+						return pngData;
+					}
+					//parsing chunks
+					var chunks = [];
+					var chunk = PNG.utils.parseChunk(bytes, 8);
 					chunks.push(chunk);
-				}
-				pngData['chunks'] = chunks;
-				return pngData;
-			},
-			parseChunk: function(bytes, start) {
-				var chunkLength = PNG.utils.bytes2Int(bytes.slice(start, start + 4));
-
-				var chunkName = '';
-				chunkName += String.fromCharCode(bytes[start + 4]);
-				chunkName += String.fromCharCode(bytes[start + 5]);
-				chunkName += String.fromCharCode(bytes[start + 6]);
-				chunkName += String.fromCharCode(bytes[start + 7]);
-
-				var chunkData = [];
-				for (var idx = start + 8; idx<chunkLength + start + 8; idx++) {
-					chunkData.push(bytes[idx]);
-				}
-				//TODO validate crc as required!
-				return {
-					start: start,
-					end: Number(start) + Number(chunkLength) + 12, //12 = 4 (length) + 4 (name) + 4 (crc)
-					length: chunkLength,
-					name: chunkName,
-					data: chunkData,
-					crc: [
-						bytes[chunkLength + start + 8],
-						bytes[chunkLength + start + 9],
-						bytes[chunkLength + start + 10],
-						bytes[chunkLength + start + 11]
-					],
-					crcChecked: false
-				};
-			},
-			enrichParsedData: function(pngData) {
-				var idhrChunk = PNG.utils.getChunk(pngData, 'IDHR');
-
-				//see http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
-				pngData.width = PNG.utils.bytes2Int(idhrChunk.data.slice(0, 4));
-				pngData.height = PNG.utils.bytes2Int(idhrChunk.data.slice(4, 8));
-				pngData.bitDepth = PNG.utils.bytes2Int(idhrChunk.data.slice(8, 9));
-				pngData.colorType = PNG.utils.bytes2Int(idhrChunk.data.slice(9, 10));
-				pngData.compressionMethod = PNG.utils.bytes2Int(idhrChunk.data.slice(10, 11));
-				pngData.filterMethod = PNG.utils.bytes2Int(idhrChunk.data.slice(11, 12));
-				pngData.interlaceMethod = PNG.utils.bytes2Int(idhrChunk.data.slice(12, 13));
-
-				pngData.isGreyScale = pngData.colorType == 0 || pngData.colorType == 4;
-				pngData.isRgb = pngData.colorType == 2 || pngData.colorType == 6;
-				pngData.hasAlpha = pngData.colorType == 4 || pngData.colorType == 6;
-				pngData.hasPaletteMode = pngData.colorType == 3 && PNG.utils.getChunk(pngData, 'PLTE') != null;
-				return pngData;
-			},
-			getChunks: function(pngData, chunkName) {
-				var chunksForName = [];
-				for (var idx = 0; idx<pngData.chunks.length; idx++) {
-					if (pngData.chunks[idx].name = chunkName) {
-						chunksForName.push(pngData.chunks[idx]);
+					while (chunk.name !== 'IEND') {
+						chunk = PNG.utils.parseChunk(bytes, chunk.end);
+						chunks.push(chunk);
 					}
-				}
-				return chunksForName;
-			},
-			getChunk: function(pngData, chunkName) {
-				for (var idx = 0; idx<pngData.chunks.length; idx++) {
-					if (pngData.chunks[idx].name = chunkName) {
-						return pngData.chunks[idx];
+					pngData['chunks'] = chunks;
+					return pngData;
+				},
+				parseChunk: function(bytes, start) {
+					var chunkLength = PNG.utils.bytes2Int(bytes.slice(start, start + 4));
+
+					var chunkName = '';
+					chunkName += String.fromCharCode(bytes[start + 4]);
+					chunkName += String.fromCharCode(bytes[start + 5]);
+					chunkName += String.fromCharCode(bytes[start + 6]);
+					chunkName += String.fromCharCode(bytes[start + 7]);
+
+					var chunkData = [];
+					for (var idx = start + 8; idx<chunkLength + start + 8; idx++) {
+						chunkData.push(bytes[idx]);
 					}
-				}
-				return null;
-			},
-			bytes2Int: function(bytes) {
-				var ret = 0;
-				for (var idx = 0; idx<bytes.length; idx++) {
-					ret += bytes[idx];
-					if (idx < bytes.length - 1) {
-						ret = ret << 8;
+					//TODO validate crc as required!
+					return {
+						start: start,
+						end: Number(start) + Number(chunkLength) + 12, //12 = 4 (length) + 4 (name) + 4 (crc)
+						length: chunkLength,
+						name: chunkName,
+						data: chunkData,
+						crc: [
+							bytes[chunkLength + start + 8],
+							bytes[chunkLength + start + 9],
+							bytes[chunkLength + start + 10],
+							bytes[chunkLength + start + 11]
+						],
+						crcChecked: false
+					};
+				},
+				enrichParsedData: function(pngData) {
+					var idhrChunk = PNG.utils.getChunk(pngData, 'IDHR');
+
+					//see http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
+					pngData.width = PNG.utils.bytes2Int(idhrChunk.data.slice(0, 4));
+					pngData.height = PNG.utils.bytes2Int(idhrChunk.data.slice(4, 8));
+					pngData.bitDepth = PNG.utils.bytes2Int(idhrChunk.data.slice(8, 9));
+					pngData.colorType = PNG.utils.bytes2Int(idhrChunk.data.slice(9, 10));
+					pngData.compressionMethod = PNG.utils.bytes2Int(idhrChunk.data.slice(10, 11));
+					pngData.filterMethod = PNG.utils.bytes2Int(idhrChunk.data.slice(11, 12));
+					pngData.interlaceMethod = PNG.utils.bytes2Int(idhrChunk.data.slice(12, 13));
+
+					pngData.isGreyScale = pngData.colorType == 0 || pngData.colorType == 4;
+					pngData.isRgb = pngData.colorType == 2 || pngData.colorType == 6;
+					pngData.hasAlpha = pngData.colorType == 4 || pngData.colorType == 6;
+					pngData.hasPaletteMode = pngData.colorType == 3 && PNG.utils.getChunk(pngData, 'PLTE') != null;
+					return pngData;
+				},
+				getChunks: function(pngData, chunkName) {
+					var chunksForName = [];
+					for (var idx = 0; idx<pngData.chunks.length; idx++) {
+						if (pngData.chunks[idx].name = chunkName) {
+							chunksForName.push(pngData.chunks[idx]);
+						}
 					}
+					return chunksForName;
+				},
+				getChunk: function(pngData, chunkName) {
+					for (var idx = 0; idx<pngData.chunks.length; idx++) {
+						if (pngData.chunks[idx].name = chunkName) {
+							return pngData.chunks[idx];
+						}
+					}
+					return null;
+				},
+				bytes2Int: function(bytes) {
+					var ret = 0;
+					for (var idx = 0; idx<bytes.length; idx++) {
+						ret += bytes[idx];
+						if (idx < bytes.length - 1) {
+							ret = ret << 8;
+						}
+					}
+					return ret;
 				}
-				return ret;
 			}
 		}
+		var pngData = PNG.parse(dataURL);
+		return (pngData)
+	} catch(e) {
+		log_alert(9, 'canvas_info', e+'')
+		return zErr
 	}
-
-	// used as follows
-	let t0 = nowFn()
-	var pngData = PNG.parse(target);
-	let tEnd = nowFn()
-	console.log(tEnd-t0, 'ms', pngData);
 }
 
 const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
@@ -382,7 +379,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 	const pixelcount = sizeW * sizeH
 	generate()
 
-	let oData = {'getImageData': {}, 'getImageData_solid': {}}, oErrors = {}
+	let oData = {'getImageData': {}, 'getImageData_solid': {}}, oErrors = {}, oRaw = {}
 	Promise.all([
 		known.createHashes(window, 0),
 		known.createHashes(window, 1),
@@ -390,21 +387,17 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 		//console.log(oData)
 		//console.log(oErrors)
 		//console.log(res)
-		let oRaw = {}
-		const m = 'canvas_'
 		let isProxy = isProxyLie('CanvasRenderingContext2D.getImageData')
 		// all white: e.g. perps setting false for privacy.resistFingerprinting.randomDataOnCanvasExtract
 			// this pref was removed in FF134, but some extensions still do this
 		let whitehash = 'd5f8f171'
 		// ToDo: replace whitehash or enhance whitehash with solidhash
-
 		for (const k of Object.keys(oData)) {
 			// if an error,. report that, else compare the two runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
-				hash = oErrors[k]; data = zErrLog
-				oRaw[k] = hash
-				addBoth(9, m+k, hash,'', notation + notationExtra, data)
+				hash = oErrors[k]; oRaw[k] = hash
+				addBoth(9, 'canvas_'+ k, hash,'', notation, zErrLog)
 			} else {
 				// persistent or per execution || no errors so we muct have two results
 					// tidy oRaw as we go since we've hashed results
@@ -415,6 +408,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 				//console.log(k, isCheck, isCheckNotation, isCheckChannels, isFontStealth)
 				if ('skip' == isCheck) {
 					data = 'trustworthy' // the test is random, return a stable FP
+					oRaw[k] = oData[k][0]
 				} else {
 					// we have tampering
 					let isPersistent = hash0 == hash
@@ -423,8 +417,11 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 						notationExtra = ' [persistent]'
 						isWhite = hash == whitehash // isWhite only if persistent
 					} else {
-						oRaw[k] = {}
-						for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
+						//oRaw[k] = {'run0': oData[k][0], 'run1': oData[k][1]}
+						for (const j of Object.keys(oData[k])) {
+							//oRaw[k]['run' + j] = Array.from(oData[k][j])
+							oRaw[k]['run' + j] = 'banana'
+						}
 						notationExtra = ' [per execution]'
 						if (isCheck && !isProxy && !isFontStealth) {
 							notation = rfp_green // meets rfp stats, no lies, + no font stealth fuckery
@@ -442,7 +439,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 					// non gecko doesn't display notation, but with data !== '' the hash becomes display-only
 					if (!isGecko) {hash += s99 +' '+ notationExtra +sc}
 				}
-				addBoth(9, m+k, hash,'', notation + notationExtra, data)
+				addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
 			}
 		}
 		return resolve(oRaw)
@@ -561,7 +558,6 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 		//console.log(oErrors)
 		//console.log(res)
 		let oRaw = {}
-		const m = 'canvas_'
 		let oKnown = {
 			// AFAICT these are the same on every engine, every platform, every config?
 			'isPointInPath': ['db0e3f08'],
@@ -602,7 +598,7 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 					if (isGecko && rfp_green == notation) {data += ' | RFP'}
 				}
 			}
-			addBoth(9, m+k, hash,'', notation + notationExtra, data)
+			addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
 		}
 		return resolve(oRaw)
 	})
@@ -624,27 +620,17 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		return false
 	}
 
-	// FF95+: compression 1724331 / 1737038 
-	// libz-rs
-  	// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
-  	// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
-	const oKnown = {
-		'to_white': ['35e41537','3e72d1fd'],
-		'toBlob': ['3afc375a','e328ec8e'],
-		'toBlob_solid': ['56ea6104','9d0b9932','cfd52a1f'],
-		'toDataURL': ['3afc375a','e328ec8e'],
-		'toDataURL_solid': ['56ea6104','9d0b9932','cfd52a1f'],
-	}
-
 	var known = {
 		createHashes: function(window, runNo){
+			let isDrawn = false // only draw once per run
+			let isDrawnSolid = false
 			let outputs = [
 				{
 					name: 'toBlob',
 					value: function(){
 						return new Promise(function(resolve, reject){
 							const METRIC = 'toBlob'
-							if (aSkip.includes(METRIC)) {resolve('skip')}
+							if (undefined !== oErrors[METRIC]) {return zErr} // if you erred once, don't bother with the 2nd test
 							try {
 								var timeout = window.setTimeout(function(){
 									oErrors[METRIC] = zErrTime
@@ -659,8 +645,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 											if (runST) {value =''}
 											let typeCheck = typeFn(value)
 											if ('string' === typeCheck ) {
-												oData[METRIC] = value
-												resolve(mini(reader.result))
+												oData[METRIC][runNo] = value
+												resolve('success')
 											} else {
 												oErrors[METRIC] = zErrType + typeCheck
 												resolve(zErr)
@@ -685,7 +671,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					value: function(){
 						return new Promise(function(resolve, reject){
 							const METRIC = 'toBlob_solid'
-							if (aSkip.includes(METRIC)) {resolve('skip')}
+							if (undefined !== oErrors[METRIC]) {return zErr}
 							try {
 								var timeout = window.setTimeout(function(){
 									oErrors[METRIC] = zErrTime
@@ -700,8 +686,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 											if (runST) {value =''}
 											let typeCheck = typeFn(value)
 											if ('string' === typeCheck ) {
-												oData[METRIC] = value
-												resolve(mini(reader.result))
+												oData[METRIC][runNo] = value
+												resolve('success')
 											} else {
 												oErrors[METRIC] = zErrType + typeCheck
 												resolve(zErr)
@@ -725,14 +711,14 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					name: 'toDataURL',
 					value: function(){
 						let METRIC = 'toDataURL'
-						if (aSkip.includes(METRIC)) {return 'skip'}
+						if (undefined !== oErrors[METRIC]) {return zErr}
 						try {
 							let data = getKnownTo().canvas.toDataURL()
 							if (runST) {data = undefined}
 							let typeCheck = typeFn(data)
 							if ('string' !== typeCheck) {throw zErrType + typeCheck}
-							oData[METRIC] = data
-							return mini(data)
+							oData[METRIC][runNo] = data
+							return 'success'
 						} catch(e) {
 							oErrors[METRIC] = e+''
 							return zErr
@@ -743,14 +729,14 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					name: 'toDataURL_solid',
 					value: function(){
 						let METRIC = 'toDataURL_solid'
-						if (aSkip.includes(METRIC)) {return 'skip'}
+						if (undefined !== oErrors[METRIC]) {return zErr}
 						try {
 							let data = getKnownToSolid().canvas.toDataURL()
 							if (runST) {data = undefined}
 							let typeCheck = typeFn(data)
 							if ('string' !== typeCheck) {throw zErrType + typeCheck}
-							oData[METRIC] = data
-							return mini(data)
+							oData[METRIC][runNo] = data
+							return 'success'
 						} catch(e) {
 							oErrors[METRIC] = e+''
 							return zErr
@@ -766,7 +752,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 			function getKnownTo(){
 				let canvas = dom.tzpCanvasTo
 				let ctx = canvas.getContext('2d')
-				if (oDrawn['to']) {return ctx}
+				if (isDrawn) {return ctx}
 				// color the background
 				ctx.fillStyle = 'rgba('+ solidPink +')'
 				ctx.fillRect(0, 0, sizeW, sizeH)
@@ -787,16 +773,16 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 						}
 					}
 				}
-				oDrawn['to'] = true
+				isDrawn = true
 				return ctx
 			}
 			function getKnownToSolid(){
 				let canvas = dom.tzpCanvasToSolid
 				let ctx = canvas.getContext('2d')
-				if (oDrawn['to_solid']) {return ctx}
+				if (isDrawnSolid) {return ctx}
 				ctx.fillStyle = 'rgba('+ solidPink +')'
 				ctx.fillRect(0, 0, sizeW, sizeH)
-				oDrawn['to_solid'] = true
+				isDrawnSolid = true
 				return ctx
 			}
 
@@ -826,146 +812,88 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		}
 	}
 
-	// oDrawn: only draw the canvas once per runNo
-		// if input is faked, it would also be faked the second time
-	let oDrawn = {'to': false, 'to_solid': false}
-	let oRes = {}, oFP = {}, oErrors = {}, oData = {}, aSkip = [], countFake = 0
 	let solidPink = '224,33,138,255' // go Barbie!
-
-	function exit() {
-		/* data
-		let metric = 'canvas_data'
-		sDetail[isScope][metric] = oData
-		addDisplay(9, metric, addButton(9, metric, 'data'))
-		//*/
-		// fp
-		for (const m of Object.keys(oFP)) {
-			addBoth(9, 'canvas_'+m, oFP[m].value, '', oFP[m].notation, oFP[m].data)
-		}
-		return resolve()
-	}
-
+	let oData = {'toBlob': {}, 'toBlob_solid': {}, 'toDataURL': {}, 'toDataURL_solid': {}}, oErrors = {}
 	Promise.all([
+		known.createHashes(window, 0),
 		known.createHashes(window, 1)
-	]).then(function(run1){
-		// ToDo: learn more about PNG file structure and detect this more robustly
-		let aChunk = [
-			'ABBkZUJH', // initial analysis 
-			'AAQZGVCR', // this comes up in solid FF145 but not FF146+
-		]
-		//aChunk = ['5ErkJggg==','VORK5CYII='] // test
-
-		run1[0].forEach(function(item){
-			let name = item.name, key = name.slice(0,2), value = item.displayValue, data =''
-			let notation = rfp_red // they're all red if only a single run: we green up on second runs
-			let hasChunk = false
-			oRes[name] = {}
-			oRes[name][1] = value
-			if (undefined !== oErrors[name]) {
-				aSkip.push(name)
-				value = oErrors[name]; notation = rfp_red; data = zErrLog
+	]).then(function(res){
+		//console.log(oData)
+		//console.log(oErrors)
+		//console.log(res)
+		let oRaw = {}, oInfo = {}
+		// FF95+: compression 1724331 / 1737038 
+		// libz-rs
+			// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
+			// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
+		const oKnown = {
+			'toBlob': ['3afc375a','e328ec8e'],
+			'toBlob_solid': ['56ea6104','9d0b9932','cfd52a1f'],
+			'toDataURL': ['3afc375a','e328ec8e'],
+			'toDataURL_solid': ['56ea6104','9d0b9932','cfd52a1f'],
+		}
+		for (const k of Object.keys(oData)) {
+			// if an error,. report that, else compare the tfwo runs etc
+			let hash, data ='', notation = rfp_red, notationExtra = ''
+			if (undefined !== oErrors[k]) {
+				hash = oErrors[k]; oRaw[k] = hash
+				addBoth(9, 'canvas_'+ k, hash,'', notation, zErrLog)
 			} else {
-				if (isGecko) {
-					// chunk test
-					// gecko: we can already detect tampering since we use known hashes
-					// but in future we might use randomness and read back the value from the png
-					hasChunk = false // reset
-					aChunk.forEach(function(str){if (oData[name].includes(str)) {hasChunk = true}})
-					if (hasChunk) {
-						countFake++
-						hasChunk = true
-					} else {
-						if (oKnown[name].includes(value)) {
-							aSkip.push(name)
-						} else {
-							data = 'protected'
-							countFake++
+				// persistent or per execution || no errors so we must have two results
+					// tidy oRaw as we go since we've hashed results
+				let hash0 = mini(oData[k][0])
+				hash = mini(oData[k][1]) // always display a hash, make it the last one read
+				let isProxy = isProxyLie('HTMLCanvasElement.'+ k.replace('_solid',''))
+				// memorize per hash info
+				if (undefined == oInfo[hash]) {oInfo[hash] = get_canvas_info(oData[k][1])}
+				let isChunk = false
+				if (zErr !== oInfo[hash]) {
+					let chunks = Object.keys(oInfo[hash].chunks).length
+					// this should be good enough
+					isChunk = chunks > 3
+					// otherwise we could check
+					// 'deBG' == oInfo[hash].chunks[2].name
+				}
+				let isPersistent = hash0 == hash
+				// only set notationExtra if tampered with
+				if (isPersistent) {
+					oRaw[k] = oData[k][0]
+					if (isBraveSmart) {
+						notationExtra = s99 +' [persistent]'+ sc
+						log_debug(9, 'canvas_'+ k +'_ignored', hash)
+					} else if (isGecko) {
+						if (isChunk && !isProxy) {
+							notationExtra = ' [persistent*]'
+							notation = fpp_green
+						} else if (!oKnown[k].includes(hash)) {
+							notationExtra = ' [persistent]'
+						}
+					}
+				} else {
+					oRaw[k] = {}
+					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
+					notationExtra = ' [per execution]'
+					notation = check(oData[k][1]) ? rfp_green : rfp_red
+				}
+				// notationExtra is only set if tampered with
+				if (notationExtra.length) {
+					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
+					if (isGecko) {
+						if (rfp_green == notation) {data += ' | RFP'
+						} else if (fpp_green == notation) {data += ' | FPP'
 						}
 					}
 				}
+				addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
 			}
-			oFP[name] = {'value': value, 'notation': notation, 'chunk': hasChunk, 'data': data}
-		})
-		/*
-		console.log(aSkip)
-		console.log(oData)
-		console.log(oFP)
-		//*/
-
-		// test
-		//aSkip = aSkip.filter(x => ![toBlob].includes(x))
-
-		// we're testing for protection so always do two passes, including gecko basic mode
-			// ToDo: handle canvas spoofing in nonGecko: e.g. we can easily test getImageData: for now just exit
-		if (countFake == 0 || !isGecko) {
-			exit()
-			return
 		}
-		const proxyMap = {
-			convertToBlob: 'OffscreenCanvas',
-			toBlob: 'HTMLCanvasElement',
-			toDataURL: 'HTMLCanvasElement',
-		}
-		// smart + some lies, do 2nd run
-		// for non skips, force a redraw
-		oDrawn = {'to': false, 'to_solid': false}
-
-		Promise.all([
-			known.createHashes(window, 2)
-		]).then(function(run2){
-			run2[0].forEach(function(item){
-				let name = item.name, key = name.slice(0,2), proxyname = name.replace('_solid', '')
-				let value = item.displayValue
-				let checkValue = value
-				let hasChunk = false
-				if (checkValue !== 'skip') {
-					let data ='', notation ='', stats ='', rfpvalue ='', isChunk =''
-					// proxy
-					let isProxy = isProxyLie(proxyMap[proxyname] +'.'+ proxyname)
-					// chunk test
-					hasChunk = false // reset
-					aChunk.forEach(function(str){if (oData[name].includes(str)) {hasChunk = true}})
-					if (hasChunk) {
-						// privacyX, which doesn't protect toBlob yet, is causing intermittent false positive isChunk
-						// on it's (per execution) *toDataURL when FPP is on. This is FPP kicking in somewhere due to
-						// timing. It's not sufficient to check the chunk is persistent (but we'll do that)
-						// I think all we can do is exclude if proxylies
-						if (oFP[name].chunk == true && !isProxy) {isChunk = '*'}
-					}
-					if (oRes[name][1] == value) {
-						// persistent
-						let isWhite = false
-						notation = rfp_red
-						// all white: e.g. perps setting false for privacy.resistFingerprinting.randomDataOnCanvasExtract
-							// this pref was removed in FF134, but some extensions still do this
-						if (oKnown[key +'_white'].includes(value)) {isWhite = true}
-						// exclude BB which must fail if not RFP
-						if (isFPPFallback) {
-							// FPP: 119+ and no proxy lies and no getImageData stealth
-							// exclude if all white | exclude if proxy lies
-							if (!isWhite) {
-								if (!isProxy) {
-									// no proxy lies but persistent, so must be FPP
-									if (hasChunk) {notation = fpp_green}
-								}
-							}
-						}
-						rfpvalue = notation == rfp_green ? ' | RFP' : (notation == fpp_green ? ' | FPP' : '')
-						notation += ' [persistent' + isChunk + (isWhite ? ' white]' : ']'+ stats)
-						data = 'protected | persistent'+ isChunk + (isWhite ? ' white' : rfpvalue)
-
-					} else {
-						// per execution
-						notation = check(oData[name]) ? rfp_green : rfp_red
-						rfpvalue = notation == rfp_green ? ' | RFP' : ''
-						notation += ' [per execution' + isChunk +']'+ stats
-						data = 'protected | per execution'+ isChunk + rfpvalue
-					}
-					oFP[name] = {'value': value, 'notation': notation, 'data': data}
-				}
-			})
-			exit()
-		})
+		// add oInfo
+		let tmpobj = {}
+		for (const k of Object.keys(oInfo).sort()) {tmpobj[k] = oInfo[k]}
+		sDetail[isScope]['canvas_png'] = tmpobj
+		addDisplay(9, 'canvas_png', addButton(9,'canvas_png','PNG'))
+		// out of here
+		return resolve(oRaw)
 	})
 })
 
@@ -982,10 +910,17 @@ const outputCanvas = () => new Promise(resolve => {
 	})
 
 	Promise.all([
-		get_canvas_ispoint(sizeW, sizeH),
 		get_canvas_getimage(sizeW, sizeH),
+		get_canvas_ispoint(sizeW, sizeH),
 		get_canvas_to(sizeW, sizeH),
-	]).then(function(){
+	]).then(function(res){
+		// combine raw data returns
+		let newobj = {}
+		res.forEach(function(obj){
+			for (const k of Object.keys(obj).sort()) {newobj[k] = obj[k]}
+		})
+		sDetail[isScope]['canvas_data'] = newobj
+		addDisplay(9, 'canvas_data', addButton(9,'canvas_data','data'))
 		return resolve()
 	})
 })
