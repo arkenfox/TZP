@@ -826,6 +826,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		// libz-rs
 			// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
 			// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
+			// ToDo: clean out hashes, check what other graphics configs produce what hashes
+				// e.g. skia, software, hardware etc
 		const oKnown = {
 			'toBlob': ['3afc375a','e328ec8e'],
 			'toBlob_solid': ['56ea6104','9d0b9932','cfd52a1f'],
@@ -864,7 +866,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 					} else if (isGecko) {
 						if (isChunk && !isProxy) {
-							notationExtra = ' [persistent*]'
+							// we can bypass the chunk and just record the IDAT data
+							notationExtra = ' [persistent*]'+ s99 + ' ['+ mini(oInfo[hash].chunks[1].data) +']'+ sc
 							notation = fpp_green
 						} else if (!oKnown[k].includes(hash)) {
 							notationExtra = ' [persistent]'
