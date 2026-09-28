@@ -441,8 +441,8 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 					}
 					// non gecko doesn't display notation, but with data !== '' the hash becomes display-only
 					if (!isGecko) {hash += s99 +' '+ notationExtra +sc}
-					addBoth(9, m+k, hash,'', notation + notationExtra, data)
 				}
+				addBoth(9, m+k, hash,'', notation + notationExtra, data)
 			}
 		}
 		return resolve(oRaw)
