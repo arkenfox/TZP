@@ -859,7 +859,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				if (isPersistent) {
 					oRaw[k] = oData[k][0]
 					if (isBraveSmart) {
-						notationExtra = s99 +' [persistent]'+ sc
+						data = 'protected'
+						hash += s99 +' [persistent]'+ sc
 						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 					} else if (isGecko) {
 						if (isChunk && !isProxy) {
