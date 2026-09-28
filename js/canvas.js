@@ -162,17 +162,174 @@ function get_canvas_info(target) {
 	console.log(tEnd-t0, 'ms', pngData);
 }
 
+const get_canvas_ispoint = () => new Promise(resolve => {
+
+	var known = {
+		createHashes: function(window, runNo){
+			let isDrawn = false // only draw once per run
+			let outputs = [
+				{
+					class: window.CanvasRenderingContext2D,
+					name: 'isPointInPath',
+					value: function(){
+						const METRIC = 'isPointInPath'
+						if (undefined !== oErrors[METRIC]) {return zErr} // if you erred once, don't bother with the 2nd test
+						try {
+							var context = getKnownPath()
+							var data = new Uint8Array(sizeW * sizeH)
+							var dataR = context.isPointInPath(0, 0)
+							if (runST) {dataR = 0}
+							let typeCheck = typeFn(dataR)
+							if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+							for (let x = 0; x < sizeW; x++){
+								for (let y = 0; y < sizeH; y++){
+									data[y * sizeW + x] = context.isPointInPath(x, y)
+								}
+							}
+							data = data.join('') //+ (1 == runNo ? '5' : '') // test per execution
+							oData[METRIC][runNo] = data
+							return ''
+						} catch(e) {
+							oErrors[METRIC] = e+''
+							return zErr
+						}
+					}
+				},
+				{
+					class: window.CanvasRenderingContext2D,
+					name: 'isPointInStroke',
+					value: function(){
+						const METRIC = 'isPointInStroke'
+						if (undefined !== oErrors[METRIC]) {return zErr}
+						try {
+							let context = getKnownPath()
+							var data = new Uint8Array(sizeW * sizeH)
+							var dataR = context.isPointInStroke(0, 0)
+							if (runST) {dataR = 'false'}
+							let typeCheck = typeFn(dataR)
+							if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+							for (let x = 0; x < sizeW; x++){
+								for (let y = 0; y < sizeH; y++){
+									data[y * sizeW + x] = context.isPointInStroke(x, y)
+								}
+							}
+							data = data.join('') //+ (1 == runNo ? '5' : '') // test per execution
+							oData[METRIC][runNo] = data
+							return ''
+						} catch(e) {
+							oErrors[METRIC] = e+''
+							return zErr
+						}
+					}
+				},
+			];
+			function isSupported(output){
+				let key = output.name
+				//return window.CanvasRenderingContext2D.prototype.hasOwnProperty(key)
+				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[key]
+			}
+			function getKnownPath(){
+				let ctx = dom.tzpCanvasPath.getContext('2d')
+				if (isDrawn) {return ctx} // we draw once per run, but call this for two tests
+				ctx.fillStyle = 'rgba(255,255,255,255)'
+				ctx.beginPath()
+				ctx.rect(2,5,8,7)
+				ctx.closePath()
+				ctx.fill()
+				isDrawn = true
+				return ctx
+			}
+
+			var finished = Promise.all(outputs.map(function(output){
+				return new Promise(function(resolve, reject){
+					var displayValue
+					try {
+						var supported = output.supported? output.supported(): isSupported(output);
+						if (supported){
+							displayValue = output.value()
+						} else {
+							oErrors[output.name] = zErr; displayValue = zErr
+						}
+					} catch(e) {
+						oErrors[output.name] = e+''; displayValue = zErr
+					}
+					Promise.resolve(displayValue).then(function(displayValue){
+						output.displayValue = displayValue
+						resolve(output)
+					}, function(e){
+						oErrors[output.name] = e+''; output.displayValue = zErr
+						resolve(zErr)
+					})
+				})
+			}))
+			return finished
+		}
+	}
+
+	let oData = {'isPointInPath': {}, 'isPointInStroke': {}}, oErrors = {}
+	const sizeW = 16, sizeH = 8
+
+	Promise.all([
+		known.createHashes(window, 0),
+		known.createHashes(window, 1),
+	]).then(function(res){
+		//console.log(oData)
+		//console.log(oErrors)
+		//console.log(res)
+		let oRaw = {}
+		const m = 'canvas_'
+		let oKnown = {
+			'isPointInPath': ['db0e3f08'],
+			'isPointInStroke': ['a77e328a'],
+		}
+		for (const k of Object.keys(oData)) {
+			// if an error,. report that, else compare the tfwo runs etc
+			let hash, data ='', notation = rfp_red, notationExtra = ''
+			if (undefined !== oErrors[k]) {
+				// cleanup support: e.g. servo
+				let isSupport = window.CanvasRenderingContext2D.prototype.hasOwnProperty(k)
+				if (isSupport) {hash = oErrors[k]; data = zErrLog} else {hash = zNA}
+				oRaw[k] = hash
+			} else {
+				// persistent or per execution || no errors so we muct have two results
+				let hash0 = mini(oData[k][0])
+				hash = mini(oData[k][1]) // always display a hash, make it the last one read
+
+				// tidy oRaw since we've hashed results
+				let isPersistent = hash0 == hash
+				if (isPersistent) {
+					oRaw[k] = oData[k][0]
+				} else {
+					oRaw[k] = {}
+					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
+				}
+				// only display extra if tampered
+				if (isPersistent) {
+					if (!oKnown[k].includes(hash)) {
+						notationExtra = ' [persistent]'
+						let isProxy = isProxyLie('CanvasRenderingContext2D.'+ k)
+						if ('93bd94c5' == hash && !isProxy) {notation = rfp_green} // all zeroes + no proxy lies
+					}
+				} else {
+					notationExtra = ' [per execution]'
+				}
+				if (notationExtra.length) {data = 'protected'}
+			}
+			addBoth(9, m+k, hash,'', notation + notationExtra, data)
+		}
+		return resolve(oRaw)
+	})
+})
+
 const get_canvas = () => new Promise(resolve => {
 
-	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = '93bd94c5'
+	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH
 	// FF95+: compression 1724331 / 1737038 
 	// libz-rs
   	// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
   	// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
 	const oKnown = {
 		'ge_white': ['d5f8f171'],
-		'isPointInPath': ['db0e3f08'],
-		'isPointInStroke': ['a77e328a'],
 		'to_white': ['35e41537','3e72d1fd'],
 		'toBlob': ['3afc375a','e328ec8e'],
 		'toBlob_solid': ['56ea6104','9d0b9932','cfd52a1f'],
@@ -276,60 +433,6 @@ const get_canvas = () => new Promise(resolve => {
 							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
 							oData[METRIC] = imageData.data
 							return mini(imageData.data)
-						} catch(e) {
-							oErrors[METRIC] = e+''
-							return zErr
-						}
-					}
-				},
-				{
-					class: window.CanvasRenderingContext2D,
-					name: 'isPointInPath',
-					value: function(){
-						const METRIC = 'isPointInPath'
-						if (aSkip.includes(METRIC)) {return 'skip'}
-						try {
-							var context = getKnownPath()
-							var data = new Uint8Array(sizeW * sizeH)
-							var dataR = context.isPointInPath(0, 0)
-							if (runST) {dataR = 0}
-							let typeCheck = typeFn(dataR)
-							if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-							for (let x = 0; x < sizeW; x++){
-								for (let y = 0; y < sizeH; y++){
-									data[y * sizeW + x] = context.isPointInPath(x, y)
-								}
-							}
-							data = data.join('')
-							oData[METRIC] = data
-							return mini(data)
-						} catch(e) {
-							oErrors[METRIC] = e+''
-							return zErr
-						}
-					}
-				},
-				{
-					class: window.CanvasRenderingContext2D,
-					name: 'isPointInStroke',
-					value: function(){
-						const METRIC = 'isPointInStroke'
-						if (aSkip.includes(METRIC)) {return 'skip'}
-						try {
-							let context = getKnownPath()
-							var data = new Uint8Array(sizeW * sizeH)
-							var dataR = context.isPointInStroke(0, 0)
-							if (runST) {dataR = 'false'}
-							let typeCheck = typeFn(dataR)
-							if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-							for (let x = 0; x < sizeW; x++){
-								for (let y = 0; y < sizeH; y++){
-									data[y * sizeW + x] = context.isPointInStroke(x, y)
-								}
-							}
-							data = data.join('')
-							oData[METRIC] = data
-							return mini(data)
 						} catch(e) {
 							oErrors[METRIC] = e+''
 							return zErr
@@ -544,17 +647,6 @@ const get_canvas = () => new Promise(resolve => {
 				oDrawn['get_solid'] = true
 				return ctx
 			}
-			function getKnownPath(){
-				let ctx = dom.tzpCanvasPath.getContext('2d')
-				if (oDrawn['path']) {return ctx}
-				ctx.fillStyle = 'rgba(255,255,255,255)'
-				ctx.beginPath()
-				ctx.rect(2,5,8,7)
-				ctx.closePath()
-				ctx.fill()
-				oDrawn['path'] = true
-				return ctx
-			}
 
 			var finished = Promise.all(outputs.map(function(output){
 				return new Promise(function(resolve, reject){
@@ -641,18 +733,15 @@ const get_canvas = () => new Promise(resolve => {
 	}
 	let oDataDrawn = {'getImageData': tmpDrawn, 'getImageData_solid': tmpSolid}
 
-	// ensure sizes
-	let aCanvas = ['Get','GetSolid','Path','To','ToSolid']
-	aCanvas.forEach(function(k){let el = dom['tzpCanvas'+ k]; el.width = sizeW; el.height = sizeH})
-
 	function exit() {
-		// data
+		/* data
 		let metric = 'canvas_data'
 		sDetail[isScope][metric] = oData
 		addDisplay(9, metric, addButton(9, metric, 'data'))
+		//*/
 		// fp
 		for (const m of Object.keys(oFP)) {
-			addBoth(9, m, oFP[m].value, '', oFP[m].notation, oFP[m].data)
+			addBoth(9, 'canvas_'+m, oFP[m].value, '', oFP[m].notation, oFP[m].data)
 		}
 		return resolve()
 	}
@@ -730,14 +819,12 @@ const get_canvas = () => new Promise(resolve => {
 		const proxyMap = {
 			convertToBlob: 'OffscreenCanvas',
 			getImageData: 'CanvasRenderingContext2D',
-			isPointInPath: 'CanvasRenderingContext2D',
-			isPointInStroke: 'CanvasRenderingContext2D',
 			toBlob: 'HTMLCanvasElement',
 			toDataURL: 'HTMLCanvasElement',
 		}
 		// smart + some lies, do 2nd run
 		// for non skips, force a redraw
-		oDrawn = {'get': false, 'get_solid': false, 'path': false, 'to': false, 'to_solid': false}
+		oDrawn = {'get': false, 'get_solid': false, 'to': false, 'to_solid': false}
 
 		Promise.all([
 			known.createHashes(window, 2)
@@ -777,25 +864,21 @@ const get_canvas = () => new Promise(resolve => {
 					if (oRes[name][1] == value) {
 						// persistent
 						let isWhite = false
-						if ('is' == key) {
-							notation = (value === allZeros && !isProxy) ? rfp_green : rfp_red // all zeros
-						} else {
-							notation = rfp_red
-							// all white: e.g. perps stupidly being told to flip
-								// privacy.resistFingerprinting.randomDataOnCanvasExtract
-							if (oKnown[key +'_white'].includes(value)) {isWhite = true}
-							// exclude BB which must fail if not RFP
-							if (isFPPFallback) {
-								// FPP: 119+ and no proxy lies and no getImageData stealth
-								// FF144 or lower: exclude solids: FPP does not tamper with those
-								// exclude if all white | exclude if proxy lies
-								// note: isGetStealth is getImageData
-								if (!isWhite) {
-									if (!isProxy) {
-										if ('ge' == key && !isGetStealth || 'ge' !== key) {
-											// no proxy lies but persistent, so must be FPP
-											notation = fpp_green
-										}
+						notation = rfp_red
+						// all white: e.g. perps stupidly being told to flip
+							// privacy.resistFingerprinting.randomDataOnCanvasExtract
+						if (oKnown[key +'_white'].includes(value)) {isWhite = true}
+						// exclude BB which must fail if not RFP
+						if (isFPPFallback) {
+							// FPP: 119+ and no proxy lies and no getImageData stealth
+							// FF144 or lower: exclude solids: FPP does not tamper with those
+							// exclude if all white | exclude if proxy lies
+							// note: isGetStealth is getImageData
+							if (!isWhite) {
+								if (!isProxy) {
+									if ('ge' == key && !isGetStealth || 'ge' !== key) {
+										// no proxy lies but persistent, so must be FPP
+										notation = fpp_green
 									}
 								}
 							}
@@ -836,8 +919,19 @@ const get_canvas = () => new Promise(resolve => {
 const outputCanvas = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('canvas')) {return resolve()}
 
+	// ensure sizes
+	const sizeW = 16, sizeH = 8
+	let aCanvas = ['Get','GetSolid','Path','To','ToSolid']
+	aCanvas.forEach(function(k){
+		try {
+			let el = dom['tzpCanvas'+ k]; el.width = sizeW; el.height = sizeH
+		} catch(e) {}
+	})
+
+
 	Promise.all([
-		get_canvas()
+		get_canvas_ispoint(),
+		get_canvas(),
 	]).then(function(){
 		return resolve()
 	})
