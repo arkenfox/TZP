@@ -313,7 +313,10 @@ const get_canvas_ispoint = () => new Promise(resolve => {
 				} else {
 					notationExtra = ' [per execution]'
 				}
-				if (notationExtra.length) {data = 'protected'}
+				if (notationExtra.length) {
+					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
+					if (isGecko && rfp_green == notation) {data += ' | RFP'}
+				}
 			}
 			addBoth(9, m+k, hash,'', notation + notationExtra, data)
 		}
