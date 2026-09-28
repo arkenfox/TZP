@@ -15,33 +15,11 @@
 
 <body>
 	<div id="element-fp"></div>
-
 	<!--for async fallback-->
 	<div class="offscreen">
-		<div class="monospace">
-			<span lang='ar'>.</span><span lang='bn'>.</span><span lang='bo'>.</span><span lang='cr'>.</span><span lang='el'>.</span>
-			<span lang='en'>.</span><span lang='gez'>.</span><span lang='gu'>.</span><span lang='he'>.</span><span lang='hi'>.</span>
-			<span lang='hy'>.</span><span lang='ja'>.</span><span lang='ka'>.</span><span lang='km'>.</span><span lang='kn'>.</span>
-			<span lang='ko'>.</span><span lang='ml'>.</span><span lang='my'>.</span><span lang='or'>.</span><span lang='pa'>.</span>
-			<span lang='ru'>.</span><span lang='si'>.</span><span lang='ta'>.</span><span lang='te'>.</span><span lang='th'>.</span>
-			<span lang='x-math'>.</span><span lang='zh-CN'>.</span><span lang='zh-HK'>.</span><span lang='zh-TW'>.</span>
-		</div>
-		<div class="serif">
-			<span lang='ar'>.</span><span lang='bn'>.</span><span lang='bo'>.</span><span lang='cr'>.</span><span lang='el'>.</span>
-			<span lang='en'>.</span><span lang='gez'>.</span><span lang='gu'>.</span><span lang='he'>.</span><span lang='hi'>.</span>
-			<span lang='hy'>.</span><span lang='ja'>.</span><span lang='ka'>.</span><span lang='km'>.</span><span lang='kn'>.</span>
-			<span lang='ko'>.</span><span lang='ml'>.</span><span lang='my'>.</span><span lang='or'>.</span><span lang='pa'>.</span>
-			<span lang='ru'>.</span><span lang='si'>.</span><span lang='ta'>.</span><span lang='te'>.</span><span lang='th'>.</span>
-			<span lang='x-math'>.</span><span lang='zh-CN'>.</span><span lang='zh-HK'>.</span><span lang='zh-TW'>.</span>
-		</div>
-		<div class="sans-serif">
-			<span lang='ar'>.</span><span lang='bn'>.</span><span lang='bo'>.</span><span lang='cr'>.</span><span lang='el'>.</span>
-			<span lang='en'>.</span><span lang='gez'>.</span><span lang='gu'>.</span><span lang='he'>.</span><span lang='hi'>.</span>
-			<span lang='hy'>.</span><span lang='ja'>.</span><span lang='ka'>.</span><span lang='km'>.</span><span lang='kn'>.</span>
-			<span lang='ko'>.</span><span lang='ml'>.</span><span lang='my'>.</span><span lang='or'>.</span><span lang='pa'>.</span>
-			<span lang='ru'>.</span><span lang='si'>.</span><span lang='ta'>.</span><span lang='te'>.</span><span lang='th'>.</span>
-			<span lang='x-math'>.</span><span lang='zh-CN'>.</span><span lang='zh-HK'>.</span><span lang='zh-TW'>.</span>
-		</div>
+		<div id="divmono" class="monospace"></div>
+		<div id="divserif" class="serif"></div>
+		<div id="divsans" class="sans-serif"></div>
 	</div>
 
 	<table>
@@ -65,12 +43,16 @@
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Basic <code>generic-family</code> and
 				<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/lang" class="blue" target="_blank">
-					<code>lang</code></a> font element test</span>
+					<code>lang</code></a> font element test. The default text <code>'...'</code>' can be changed with
+					<code>setString(string)</code></span>
+					<div class="indent no_color">- e.g. try <code>latin <span>קובץ</span> <span>ليبدو</span> <span>تتت</span> 示 მჩნ 이 ဆက် ไฟล์ 文 包</code></div>
+				
 			<br><br>
 			<span class="btnfirst btn15" onClick="run(`everything`)">[ everything ]</span>
 			<span class="btn btn15" onClick="run(`base`)">[ base ]</span>
 			<span class="btn btn15" onClick="run(`TZP`)">[ TZP ]</span>
 			<span class="btn15 btnfirst" onClick="copyclip('results')">[ COPY ]</span>
+			<div class="btn-right mono">text used: <span id="textused"></span></div>
 		</td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
@@ -83,16 +65,39 @@
 <script>
 'use strict';
 let isLanguage = '', isLocale = '', defaultType = 'TZP', oData = {}, oTests = {}
+let strUsed
+let allLangs = [
+	// one of each script (from default script sizes)
+	'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
+	'ar','cr','el','gez','hy','my','ru','zh-HK','default',
+]
+
+function setString(str = '...') {
+	if ('string' !== typeof str) {
+		console.log('use a string')
+		return
+	} else if ('' == str) {
+		console.log('you can\'t use an empty string')
+		return
+	}
+	strUsed = str
+	let aDivs = ['divmono','divserif','divsans']
+	let aSpans = []
+	allLangs.forEach(function(lang){
+		if ('default' !== lang) {
+			aSpans.push('<span lang="' + lang +'">' + strUsed +'</span><br>')
+		}
+	})
+	aDivs.forEach(function(element){
+		dom[element].innerHTML = aSpans.join('')
+	})
+}
 
 function build_tests() {
 	oTests = {
 		// all notes/numbers are FF windows 11 (ETP Strict)
 		'everything': {
-			'lang': [
-				// one of each script (from default script sizes)
-				'bn','bo','en','gu','he','hi','ja','ka','km','kn','ko','ml','or','pa','si','ta','te','th','x-math','zh-CN','zh-TW',
-				'ar','cr','el','gez','hy','my','ru','zh-HK','default',
-			],
+			'lang': allLangs,
 			'sizes': [
 				'xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large',
 				//'3.9pt',141.7pt','266.6pt','947.7pt'
@@ -170,12 +175,15 @@ function build_tests() {
 
 function get_element_lang(type) {
 	if (undefined == type) {type = defaultType}
+	dom.textused.innerHTML = s99 + strUsed + sc
 
 	let t0 = performance.now()
 	let hash, data = {}, method
 	let aStyles = oTests[type].styles, aSizes = oTests[type].sizes, aLang = oTests[type].lang
 	// params
-	let params = [s15 + type + sc], params2= []
+	let typeStr = type
+	if ('TZP' == type && '...' !== strUsed) {typeStr += ' + custom text'}
+	let params = [s15 + typeStr + sc], params2= []
 	params.push(aStyles.length +' generic-families')
 	let allSizes = []
 	aSizes.forEach(function(s){allSizes.push(s)})
@@ -213,7 +221,7 @@ function get_element_lang(type) {
 				arraySizes.forEach(function(size) {
 					testCount++
 					// create + measure each individually as preceeding elements can affect subsequent ones
-					parent.innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>...</div>"
+					parent.innerHTML = "<div lang='"+ lang +"' style='font-size:"+ size +";' class='"+ style +"'>" + strUsed +"</div>"
 					let target = parent.firstChild
 					// method
 					method = target.getBoundingClientRect()
@@ -332,9 +340,9 @@ function run(type) {
 }
 //defaultType = 'everything' // temp change whilst testing
 buildnav_element()
+setString()
 build_tests()
 get_element_lang()
-
 
 </script>
 </body>
