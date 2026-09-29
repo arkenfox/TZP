@@ -947,7 +947,13 @@ const outputCanvas = () => new Promise(resolve => {
 		// combine raw data returns
 		let newobj = {}
 		res.forEach(function(obj){
-			for (const k of Object.keys(obj).sort()) {newobj[k] = obj[k]}
+			for (const k of Object.keys(obj).sort()) {
+				// skip getImageData as its meaningless, the source was random
+				// if we did, we should instead show per pixel changes or something
+				if (!k.includes('getImage')) {
+					newobj[k] = obj[k]
+				}
+			}
 		})
 		sDetail[isScope]['canvas_data'] = newobj
 		addDisplay(9, 'canvas_data', addButton(9,'canvas_data','data'))
