@@ -876,7 +876,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 						hash += s99 +' [persistent]'+ sc
 						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 					} else if (isChunk) {
-						data = 'protected* | persistent'
+						data = 'protected | persistent*'
 						// display the IDAT data hash
 						let IDAThash = mini(oInfo[hash].chunks[1].data)
 						let IDATStr = ' ['+ IDAThash +']'
