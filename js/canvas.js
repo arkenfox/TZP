@@ -822,16 +822,30 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		// FF95+: compression 1724331 / 1737038 
 			// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
 			// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
-		// ToDo: clean out hashes, check what other graphics configs produce what hashes
+		// ToDo: check grfx/hardware/comporession configs
 		let oKnown = {
-			'toBlob': ['e328ec8e'], // old? '3afc375a',
-			'toBlob_solid': ['9d0b9932','cfd52a1f'], // old? '56ea6104',
+			// FF153+e328ec8e + 9d0b9932 on both 
+			'toBlob': [
+				'e328ec8e', // my droid + windows
+			],
+			'toBlob_solid': [
+				'9d0b9932', // my droid + windows
+				'cfd52a1f', // nfi but it was added after 9d0b9932 i think
+			], 
 		}
 		oKnown['toDataURL'] = oKnown['toBlob']
 		oKnown['toDataURL_solid'] = oKnown['toBlob_solid']
+		let oIDAT = {
+			'nonsolid': [
+				'668fd61f',	// from 'e328ec8e'
+			],
+			'solid': [
+				'b350ce6e', // from '9d0b9932'
+			]
+		}
 
 		for (const k of Object.keys(oData)) {
-			// if an error,. report that, else compare the tfwo runs etc
+			// if an error,. report that, else compare the two runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
 				hash = oErrors[k]; oRaw[k] = hash
@@ -841,7 +855,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					// tidy oRaw as we go since we've hashed results
 				let hash0 = mini(oData[k][0])
 				hash = mini(oData[k][1]) // always display a hash, make it the last one read
-				let isProxy = isProxyLie('HTMLCanvasElement.'+ k.replace('_solid',''))
+				let isProxy = isProxyLie('HTMLCanvasElement.'+ k.replace('_solid','')),
+					isProxy2 = isProxyLie('HTMLCanvasElement.getContext')
 				// memorize per hash info
 				if (undefined == oInfo[hash]) {oInfo[hash] = get_canvas_info(oData[k][1])}
 				let isChunk = false
@@ -860,13 +875,25 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 						data = 'protected'
 						hash += s99 +' [persistent]'+ sc
 						log_debug(9, 'canvas_'+ k +'_ignored', hash)
+					} else if (isChunk) {
+						// we can bypass the chunk and just record the IDAT data
+						// this assumes no other tampering so we'd want known IDAT hashes
+						let IDAThash = mini(oInfo[hash].chunks[1].data)
+						let IDATStr = ' ['+ IDAThash +']'
+						if (isGecko) {
+							notationExtra = ' [persistent*]'+ s99 + IDATStr + sc
+							// FPP happens on top of extension tampering, so we need to check
+							// the underlying IDAT data is a known value
+							let lookup = k.includes('solid') ? 'solid' : 'nonsolid'
+							if (!isProxy && oIDAT[lookup].includes(IDAThash)) {
+								notation = fpp_green // underlying data not changed, has chunks, !isProxy
+							}
+						} else {
+							data = 'protected'
+							hash += s99 +' [persistent*]'+ IDATStr + sc
+						}
 					} else if (isGecko) {
-						if (isChunk && !isProxy) {
-							// we can bypass the chunk and just record the IDAT data
-							// this assumes no other tampering so we'd want known IDAT hashes
-							notationExtra = ' [persistent*]'+ s99 + ' ['+ mini(oInfo[hash].chunks[1].data) +']'+ sc
-							notation = fpp_green
-						} else if (!oKnown[k].includes(hash)) {
+						if (!oKnown[k].includes(hash)) {
 							notationExtra = ' [persistent]'
 						}
 					}
