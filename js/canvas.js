@@ -861,11 +861,12 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				if (undefined == oInfo[hash]) {oInfo[hash] = get_canvas_info(oData[k][1])}
 				let isChunk = false
 				if (zErr !== oInfo[hash]) {
-					let chunks = Object.keys(oInfo[hash].chunks).length
-					// this should be good enough
-					isChunk = chunks > 3
-					// otherwise we could check
-					// 'deBG' == oInfo[hash].chunks[2].name
+					// the nummer of chunks can vary per engine (or compression?)
+					// e.g. FF has 3, blink has 4 | cycle the chunks and check for a 'deBG'
+					let chunkdata = Object.keys(oInfo[hash].chunks
+					for (const c of Object.keys(chunkdata)) {
+						if ('deBG' == chunkdata[c].name) {isChunk = true}
+					}
 				}
 				let isPersistent = hash0 == hash
 				// only set notationExtra if tampered with
@@ -899,8 +900,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					}
 					/* data should be:
 						'protected | persistent' = brave or extension
-						'protected* | persistent | FPP' = pure FPP
-						'protected* | persistent' = extension + chunk (presumable FPP)
+						'protected | persistent* | FPP' = pure FPP
+						'protected | persistent*' = extension + chunk (presumable FPP)
 					*/
 				} else {
 					// not going to bother checking for per execution chunks
