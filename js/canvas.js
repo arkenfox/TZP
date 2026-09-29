@@ -950,9 +950,7 @@ const outputCanvas = () => new Promise(resolve => {
 			for (const k of Object.keys(obj).sort()) {
 				// skip getImageData as its meaningless, the source was random
 				// if we did, we should instead show per pixel changes or something
-				if (!k.includes('getImage')) {
-					newobj[k] = obj[k]
-				}
+				if (!k.includes('getImage')) {newobj[k] = obj[k]}
 			}
 		})
 		sDetail[isScope]['canvas_data'] = newobj
