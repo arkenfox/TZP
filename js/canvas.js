@@ -872,12 +872,12 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				if (isPersistent) {
 					oRaw[k] = oData[k][0]
 					if (isBraveSmart) {
-						data = 'protected'
+						data = 'protected | persistent'
 						hash += s99 +' [persistent]'+ sc
 						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 					} else if (isChunk) {
-						// we can bypass the chunk and just record the IDAT data
-						// this assumes no other tampering so we'd want known IDAT hashes
+						data = 'protected* | persistent'
+						// display the IDAT data hash
 						let IDAThash = mini(oInfo[hash].chunks[1].data)
 						let IDATStr = ' ['+ IDAThash +']'
 						if (isGecko) {
@@ -889,29 +889,28 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 								notation = fpp_green // underlying data not changed, has chunks, !isProxy
 							}
 						} else {
-							data = 'protected'
 							hash += s99 +' [persistent*]'+ IDATStr + sc
 						}
 					} else if (isGecko) {
 						if (!oKnown[k].includes(hash)) {
+							data = 'protected | persistent'
 							notationExtra = ' [persistent]'
 						}
 					}
+					/* data should be:
+						'protected | persistent' = brave or extension
+						'protected* | persistent | FPP' = pure FPP
+						'protected* | persistent' = extension + chunk (presumable FPP)
+					*/
 				} else {
+					// not going to bother checking for per execution chunks
 					oRaw[k] = {}
 					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
+					data = 'protected | per execution'
 					notationExtra = ' [per execution]'
 					notation = check(oData[k][1]) ? rfp_green : rfp_red
 				}
-				// notationExtra is only set if tampered with
-				if (notationExtra.length) {
-					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
-					if (isGecko) {
-						if (rfp_green == notation) {data += ' | RFP'
-						} else if (fpp_green == notation) {data += ' | FPP'
-						}
-					}
-				}
+				if (rfp_green == notation) {data += ' | RFP'} else if (fpp_green == notation) {data += ' | FPP'}
 				addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
 			}
 		}
