@@ -178,6 +178,7 @@ let isArchArray = zNA,
 	isSystemFont = [],
 	isVer, // undefined unless gecko so all non-gecko isVer > or < checks are always false
 	isVerExtra = '',
+	is158 = false,
 	isViewportUnits = {},
 	isXML = {},
 	isXSLT // dom.xslt.enabled

@@ -1175,7 +1175,7 @@ function get_isVer(METRIC) {
 			if (!isCascade) return 139
 
 			// now cascade
-
+			if (is158) return 158 // 2074024: set earlier
 			// 158: fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
 			try{if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) return 158} catch(e) {} // 2068934
 			try {
@@ -2615,7 +2615,6 @@ function countJS(item) {
 					} catch(e) {}
 				} else {
 					dom.metricDownload.innerHTML = '[ &#8595; ]'
-
 					showhide('A','table-row')
 					// A1 inner_document: html class hidden - only used by android
 					// add class togS so it shows when expanding, remove hidden class
@@ -2951,6 +2950,18 @@ function outputSection(id, isResize = false) {
 function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
+
+	// early version checks
+	// 158: 2074024
+	try {
+		is158 = false
+		let alg = {hash: 'SHA-256', length: 4294967424, name: 'HMAC'}
+		crypto.subtle.generateKey(alg, false, ['sign']).catch(err => {
+			log_perf(SECTG, 'is158', t00)
+			if ('TypeError: The operation could not be performed.' == err+'') {is158 = true}
+		})
+	} catch(e) {}
+
 	zErrLog = rnd_string()
 	zErrShort = rnd_string()
 	gData['perf'].push([1, 'IMMEDIATE', t00])
