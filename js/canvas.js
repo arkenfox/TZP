@@ -564,9 +564,11 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 			// if an error,. report that, else compare the tfwo runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
+				hash = oErrors[k]; data = zErrLog
 				// cleanup support: e.g. servo
-				let isSupport = window.CanvasRenderingContext2D.prototype.hasOwnProperty(k)
-				if (isSupport) {hash = oErrors[k]; data = zErrLog} else {hash = zNA}
+				if (zErr == hash) {
+					if (!window.CanvasRenderingContext2D.prototype.hasOwnProperty(k)) {hash = zNA; data =''}
+				}
 				oRaw[k] = hash
 			} else {
 				// persistent or per execution || no errors so we must have two results
@@ -875,9 +877,9 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				if (isPersistent) {
 					oRaw[k] = oData[k][0]
 					if (isBraveSmart) {
+						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 						data = 'protected | persistent'
 						hash += s99 +' [persistent]'+ sc
-						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 					} else if (isChunk) {
 						data = 'protected | persistent*'
 						// display the IDAT data hash
