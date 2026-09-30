@@ -1828,8 +1828,10 @@ const get_agent_data = (METRIC, isMain = true) => new Promise(resolve => {
 
 	function exit(hash, data ='', btn ='') {
 		if (isMain) {
-			sDetail[isScope]['agent_reported'][METRIC] = ('' == data ? hash : data)
 			addBoth(2, METRIC, hash, btn,'', data)
+			// tweak return for comparing to iframe
+			if (zErrLog == data) {data = zErr}
+			sDetail[isScope]['agent_reported'][METRIC] = ('' == data ? hash : data)
 		}
 		return resolve(data)
 	}
