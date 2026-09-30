@@ -685,7 +685,7 @@ let fntMaster = {
 		gecko: [
 			// note: '-apple-menu','-apple-status-bar' not detected in gecko
 			'-apple-system',
-			'Dancing Script', // android fallback // 'Roboto'
+			'Dancing Script', // AFAICT all androids have this || only android 9+ has 'Roboto'
 			'MS Shell Dlg \\32',
 		],
 		// non-gecko: all expected fonts that wouldn't likely be found on other platforms
@@ -1109,7 +1109,7 @@ function get_font_notation(METRIC, data) {
 
 function get_font_support(METRIC) {
 	let oData = {}, aHealth = []
-	// note: FF157+ 2067259 change to criteria to determine if foint-families are quoted
+	// note: FF158+ 2067259 change to criteria to determine if foint-families are quoted
 
 	function get_document_fonts(m = 'document') {
 		fntDocEnabled = false // reset
@@ -1134,11 +1134,11 @@ function get_font_support(METRIC) {
 			oData[m] = value
 			// notate: only default if exact match
 				// 177eef88 enabled | "test font name"
-				// FF157+ 9cbe9514 enabled | test font name
-			// FF157+ chameleon with font protection
+				// FF158+ 9cbe9514 enabled | test font name
+			// FF158+ chameleon with font protection
 				// doc fonts = 1: enabled | test font name | Segoe UI
 				// doc fonts = 0: disabled | serif, test font name | Segoe UI
-			let expectedHash = isVer > 156 ? '9cbe9514' : '177eef88'
+			let expectedHash = isVer > 157 ? '9cbe9514' : '177eef88'
 			if (mini(display) == expectedHash) {notation = default_green}
 			sDetail[isScope].lookup[METRIC +'_'+ m] = value.join(' | ')
 		} catch(e) {
