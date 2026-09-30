@@ -1011,30 +1011,58 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			}
 		})
 	}
-	// 3. now what? 
-	function trysomethingelse(m = '') {
+	// now what
+	function trysomethingelse() {
+		let mobileCounter = 0, test
 
-		// get svh and lvh: if they differ then you have a dynamic urlbar: this is fast
-			// note: like isBB apps may enforce dynamic urlbar off or like FF add a UI setting fopr it
-			// or extensions might tamper with it; at best we can only use if we have a diff
-		m = '3_dynamic_urlbar'
+		// 3. HTMLInputElement.capture is mobile only
+			// https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/capture
+		let m = '3_HTMLInputElement.capture'
 		try {
-			let aList = ['L','S'], data = {'H': ''}
-			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
-			data['H'] = Math.abs(data['L'] - data['S'])
-			oOS[m] = data
-			// do prompts affect this?
-			if (data['H'] > 20) { // allow some wriggle room?
-				if ('webkit' !== isEngine) {
-					exit('android')
-					return
-				}
-			}
+			test = typeof HTMLInputElement.capture
+			oOS[m] = test
+			if ('undefined' !== test) {mobileCounter++}
 		} catch(e) {
 			oOS[m] = e+''
 		}
+		// 4: dynamic urlbar
+			// diff svh and lvh. note: browsers may have settings for dynamic urlbar or enforce
+			// it on or off, and extensions might tamper with it; at best we can only use if we have a diff
+		m = '4_dynamic_urlbar'
+		try {
+			let aList = ['L','S'], data = {'H': ''}
+			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
+			test = Math.abs(data['L'] - data['S'])
+			// do prompts affect this?
+			if (test > 20) {mobileCounter++} // allow some wriggle room?
+			test += ' ('+ data['L'] +' - '+ data['S'] +')'
+			oOS[m] = test 
+		} catch(e) {
+			oOS[m] = e+''
+		}
+		// 5: ontypechange in navigator.connection
+			// exists in gecko desktop with dom.netinfo.enabled
+			// NetworkInformation never added to safari
+		if ('blink' == isEngine) {
+			m = '5_connection.ontypechange'
+			try {
+				test = zNA
+				if (undefined !== navigator.connection) {
+					test = typeof navigator.connection.ontypechange
+					mobileCounter++
+				}
+				oOS[m] = test+''
+			} catch(e) {
+				oOS[m] = e+''
+			}
+		}
+		// ? keyboard map size = 0 is a strong indicator (if enabled e.g. brave shields disables these)
 
-		// keyboard map size = 0 is a strong indicator of blink android but not brave (default shields keyboard is null)
+		// mobile: must hasve 2 out of 3 (so far)
+		if (mobileCounter > 1) {
+			if ('blink' == isEngine) {exit('android'); return
+			} else if ('webkit' == isEngine) {exit('isOS'); return}
+		}
 		exit()
 	}
 
@@ -2952,7 +2980,7 @@ function run_immediate() {
 	let t00 = nowFn()
 
 	// early version checks
-	// 158: 2074024
+	// 158: 2074024 ~0.15ms
 	try {
 		is158 = false
 		let alg = {hash: 'SHA-256', length: 4294967424, name: 'HMAC'}
