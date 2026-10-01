@@ -976,7 +976,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 					if (aDetected.length == 1) {
 						if (found == 'MS Shell Dlg \\32') {exit('windows')
 						} else if (found == '-apple-system') {exit('mac')
-						} else if (found == 'Dancing Script') { exit('android')
+						} else if (found == 'Dancing Script') {	exit('android')
 						} else {
 							trysomethingelse()
 						}
@@ -1019,9 +1019,9 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			// https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/capture
 		let m = '3_HTMLInputElement.capture'
 		try {
-			test = typeof HTMLInputElement.capture
+			test = HTMLInputElement.prototype.hasOwnProperty('capture')
 			oOS[m] = test
-			if ('undefined' !== test) {mobileCounter++}
+			if (true == test) {mobileCounter++}
 		} catch(e) {
 			oOS[m] = e+''
 		}
