@@ -626,19 +626,36 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			//*/
 
 			// harden isBrave
-				// if you weren't before, you are now: pdf + keyboard combined are a very strong tell
-			if (isBraveKeyboard && isBravePDF) {isBrave == true}
+			let oBrave = {
+				'chrome': isBraveChrome,
+				'keyboard': isBraveKeyboard, // 5
+				'languages': isBraveLanguage,
+				'pdf': isBravePDF, // 6
+				'pdf_check': oPDF,
+				'window': isBraveWindow,
+			}
+			let countBrave = 0
+			for (const k of Object.keys(oBrave)) {
+				if (true == oBrave[k]) {
+					// pdf (7) is very distinctive | keyboard (5) is unusual (maybe similar to extensions)
+					// and the rest (1) could be commonmly spoofed
+					let x = 'pdf' == k ? 7 : ('keyboard' == k ? 5 : 1)
+					countBrave = countBrave + x
+				}
+			}
+			// if you weren't before, you are now
+				// a little lax, overengineered and probably not worth it
+				// allows for some wriggle room e.g. extension interference +/or regression
+				// all this to catch a possible tiny few users trying to hide brave
+			if (!isBrave) {
+				// e.g. desktop: pdf(7) | keyboard(5) + 2 others (1 each)
+				// e.g. android: pdf(7) or keyboard(5)
+				let min = isDesktop ? 6 : 4
+				if (countBrave > min) {isBrave = true}
+			}
+
 			// if isBrave
 			if (isBrave) {
-				// debug
-				let oBrave = {
-					'chrome': isBraveChrome,
-					'keyboard': isBraveKeyboard,
-					'languages': isBraveLanguage,
-					'pdf': isBravePDF,
-					'pdf_check': oPDF,
-					'window': isBraveWindow,
-				}
 				if (true !== isBravePDF) {delete oBrave['pdf_check']}
 				log_debug(SECTG, METRIC +'Shields', oBrave, isScope, true)
 				// calculate isBraveSmart
