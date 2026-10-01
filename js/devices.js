@@ -586,7 +586,6 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 		// didn't affect all the APIs - but we'll stick with prompt as the metric name
 		// also keep it with permisions/permissionspolicy
 
-	// ToDo: catch DOMExceptions
 	const get_value = (key) => new Promise(resolve => {
 		let m = key.toLowerCase()
 		function exit(value) {
@@ -594,10 +593,9 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 			return resolve()
 		}
 		async function getAvailability() {
-			try {
-				let opt
-				if ('translator' == m) {opt = {sourceLanguage: 'en', targetLanguage: 'fr'}}
-				let a = await window[key].availability(opt)
+			let opt
+			if ('translator' == m) {opt = {sourceLanguage: 'en', targetLanguage: 'fr'}}
+			await window[key].availability(opt).then(a => {
 				if (runSE) {foo++} else if (runST) {a = 42} else if (runSI) {a = 'groot'}
 				if (null == a) {
 					// summarizer + languagedetector say null can be returned if support cannot
@@ -611,10 +609,10 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 					if (!aValid.includes(a)) {throw zErrInvalid +'expected ' + aValid.join(', ') + ': got '+ a}
 					exit(a)
 				}
-			} catch(e) {
-				log_error(7, METRIC +'_'+ m, e)
+			}).catch(function(err){
+				log_error(7, METRIC +'_'+ m, err)
 				exit(zErr)
-			}
+			})
 		}
 		if (undefined == window[key]) {
 			exit('undefined')
@@ -635,23 +633,45 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 		// unavailable: < 4GB of VRAM, < 16GB of RAM, or < 4 CPU cores
 		// downloadable or available: 4+ GB of VRAM, or 16+ GB of RAM or more, and 4+ CPU cores
 
-	// ToDo: writer
-	let oData = {}
+	let oData = {}, isDone = false
+	setTimeout(() => {
+console.log('timed out', isDone)
+		if (!isDone) {
+			isDone = true
+			let aList = ['languagedetector','languagemodel','proofreader',
+				'rewriter','summarizer','translator','writer']
+			aList.forEach(function(k){
+				if (undefined == oData[k]) {
+					log_error(7, METRIC +'_'+ k, zErrTime)
+					oData[k] = zErrTime
+				}
+			})
+			let newobj = {}
+			for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
+			addBoth(7, METRIC, mini(newobj), addButton(7, METRIC),'', newobj)
+			return resolve()
+		}
+	}, 250)
+
 	Promise.all([
 		get_value('LanguageDetector'),
-		get_value('LanguageModel'),
+		get_value('LanguageModel'), // never resolves in opera
 		get_value('Proofreader'),
 		get_value('Rewriter'),
-		get_value('Summarizer'),
+		get_value('Summarizer'), // never resolves in opera
 		get_value('Translator'),
 		get_value('Writer'),
 	]).then(function(){
-		// results are not guranteed in order: sort into a new obj
+console.log('promises all done', isDone)
+		if (isDone) {return resolve()}
+		isDone = true
+		// results are not guaranteed in order: sort into a new obj
 		let newobj = {}
 		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
 		addBoth(7, METRIC, mini(newobj), addButton(7, METRIC),'', newobj)
 		return resolve()
 	})
+
 })
 
 const get_recursion = (METRIC) => new Promise(resolve => {
