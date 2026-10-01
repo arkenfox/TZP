@@ -301,7 +301,7 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 		if (isTB) {
 			notation = 'undefined' == value ? bb_green : bb_red
 		} else {
-			notation = '75e77887' == value ? rfp_green : rfp_red
+			notation = '7a2e5d0c' == value ? rfp_green : rfp_red
 		}
 		return notation
 	}
@@ -322,20 +322,14 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 				// enumerate
 					// don't combine kind, keep order, record length not strings
 					// checking length of undefined (fake) will catch an error
-				data = {}
-				let sLen = new Set(), index = 0
+				data = []
 				devices.forEach(function(d) {
 					let kind = d.kind, kindtest = kind.length,
 						dLen = d.deviceId.length,
-						gLen = d.groupId.length,
-						indexKey = (index+'').padStart(2,'0')
-					data[indexKey +'-'+ kind] = [dLen, gLen, d.label.length]
-					sLen.add(dLen)
-					sLen.add(gLen)
-					index ++
-					// we could check valid lengths (0 or 44 in 115+: labels always 0)
-						// and if 44 is valid then the last char is '=', and we could type check
+						gLen = d.groupId.length
+					data.push([kind, dLen, gLen, d.label.length])
 				})
+				if (isBraveSmart) {data.sort()}
 				hash = mini(data); btn = addButton(7, METRIC, data.length)
 			}
 		} catch(e) {
