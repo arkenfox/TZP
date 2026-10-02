@@ -2923,7 +2923,9 @@ function outputSection(id, isResize = false) {
 		// android and alpha are moving to RR and it's not feasible to keep up with per release changes
 		// and alpha is based on beta with pref flips yet to ride the train
 	isBBESR = false
-	if (isSmart && isBB && 'android' !== isOS && isBBVer.includes(isVer)) {isBBESR = true}
+	if (isSmart && isBB && isBBVer.includes(isVer) && isBBPlatform.includes(isOS)) {
+		isBBESR = true
+	}
 
 	if (!isSmart) {isBBESR = false}
 
