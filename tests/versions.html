@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 116, maxVer = 158, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 117, maxVer = 159, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,14 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 159: 1960845
+			// fast-path: pref dom.security.sanitizer.enabled (true FF148+)
+		let t159 = performance.now(), ver159
+		try {
+			if (undefined !== Document.parseHTML('<noscript><p>x</noscript>y').body.firstChild.localName) {ver159 = true}
+		} catch(e) {}
+		rec(159, 159, "1960845", ver159, performance.now()-t159, 'PREF') // 0.15 ms
 
 		// 158: 2068934
 			// fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
