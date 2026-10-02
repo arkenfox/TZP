@@ -962,12 +962,12 @@ function get_window_functions(METRIC) {
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['47c888c4','10d7fc22'] // 906 | 907 | diff = WebAssembly
+					'windows': ['b27ca95f','7a75e11d']
 				},
 				TB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['', '']
+					'windows': ['c4b6d6c2', '09dbde44']
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
@@ -1161,12 +1161,12 @@ function get_window_props(METRIC) {
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['','']
+					'windows': ['b67440ff','e74ff321'] // 904, 903
 				},
 				TB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['','']
+					'windows': ['57f01ac2','32df5790'] // 878, 877
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
