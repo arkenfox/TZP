@@ -531,31 +531,32 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					// we don't need to worry about missing contexts (already health checked in contexts metric and
 					// the health differs in FF vs BB) and we built in error counts: so we just need to check the hash
 				if ('57a5a98f' == hash) {
-					notation = rfp_green // 4 x Mozilla
-				} else if (isVer > 153) {
-					// FF154+ 2050515 FPP enabled nightly
-					// vendor, renderer are always constants | unmasked_renderer _might_ be sanitized into families
-						// ToDo: 2055176 check final family strings
-					let aSanitized = ['Mozilla'] //'NVDIA GPU','Intel Graphics','AMD Graphics','Apple GPU','Google SwiftShader']
+					// 4 x Mozilla || FF154+ 2050515 FPP enabled nightly
+					notation = rfp_green
+				} else if (isFPPFallback && isVer > 158) {
+					// 2055176 FPP bucketize unmasked vendor
+					let aBucketUVendor = ['AMD','Apple','Intel','NVIDIA Corporation','Other']
 					if ('Mozilla' == data.renderer
+						&& 'Mozilla' == data.unmasked_renderer
 						&& 'Mozilla' == data.vendor
-						&& aSanitized.includes(data.unmasked_renderer)
-					) {
-						// unmasked_vendor was initialy randomized | 2056780 backed that out at least temporarily
-						/* OBSOLETE for now until FPP settles down
-						if ('per execution' == data.unmasked_vendor) {
-							// unmasked_vendor randomness should match FPP pattern
-							let isMatch = true, aRandom = oRandom['unmasked_vendor']
-							aRandom.forEach(function(item){
-								// pattern is "Mozilla " + 11 alphanumeric/symbols + '='
-								if (20 !== item.length) {isMatch = false
-								} else if ('=' != item.slice(19)) {isMatch = false
-								} else if ('Mozilla ' != item.slice(0,8)) {isMatch = false}
-							})
-							if (isMatch) {notation = fpp_green}
-						}
-						//*/
+						&& aBucketUVendor.includes(data.unmasked_vendor)
+					} {
+						notation = fpp_green
 					}
+					// FPP: unmasked_vendor was initialy randomized | 2056780 backed that out at least temporarily
+					/* OBSOLETE code snippet
+					if ('per execution' == data.unmasked_vendor) {
+						// unmasked_vendor randomness should match FPP pattern
+						let isMatch = true, aRandom = oRandom['unmasked_vendor']
+						aRandom.forEach(function(item){
+							// pattern is "Mozilla " + 11 alphanumeric/symbols + '='
+							if (20 !== item.length) {isMatch = false
+							} else if ('=' != item.slice(19)) {isMatch = false
+							} else if ('Mozilla ' != item.slice(0,8)) {isMatch = false}
+						})
+						if (isMatch) {notation = fpp_green}
+					}
+					//*/
 				}
 			} catch(e) {
 				hash = e; data = zErrLog
