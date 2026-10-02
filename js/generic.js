@@ -1199,7 +1199,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 158) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
+	if (isVer == 159) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -1220,6 +1220,8 @@ function get_isVer(METRIC) {
 			if (!isCascade) return 139
 
 			// now cascade
+			// 159: fast-path: pref dom.security.sanitizer.enabled (true FF148+)
+			try {if (undefined !== Document.parseHTML('<noscript><p>x</noscript>y').body.firstChild.localName) return 159} catch(e) {} // 1960845
 			if (is158) return 158 // 2074024: set earlier
 			// 158: fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
 			try{if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) return 158} catch(e) {} // 2068934
