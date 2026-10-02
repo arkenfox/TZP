@@ -246,7 +246,7 @@ function get_element_keys(METRIC) {
 			// hashes must be calculated on HTTPS not file schema
 			// awaiting BB16
 			// key: standard | safer (including webgl clicked-to-play - has no effect AFAICT)
-			if ('' == hash || '' == hash) {notation = bb_green} // windows
+			if ('5ea234fa' == hash || 'dca895b5' == hash) {notation = bb_green} // windows
 		}
 
 		// tampering: this is for display info only, the data is already in the FP
