@@ -534,29 +534,15 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					// 4 x Mozilla || FF154+ 2050515 FPP enabled nightly
 					notation = rfp_green
 				} else if (isFPPFallback && isVer > 158) {
-					// 2055176 FPP bucketize unmasked vendor
+					// FF159 2055176 FPP bucketize unmasked vendor
 					let aBucketUVendor = ['AMD','Apple','Intel','NVIDIA Corporation','Other']
 					if ('Mozilla' == data.renderer
 						&& 'Mozilla' == data.unmasked_renderer
 						&& 'Mozilla' == data.vendor
 						&& aBucketUVendor.includes(data.unmasked_vendor)
-					} {
+					) {
 						notation = fpp_green
 					}
-					// FPP: unmasked_vendor was initialy randomized | 2056780 backed that out at least temporarily
-					/* OBSOLETE code snippet
-					if ('per execution' == data.unmasked_vendor) {
-						// unmasked_vendor randomness should match FPP pattern
-						let isMatch = true, aRandom = oRandom['unmasked_vendor']
-						aRandom.forEach(function(item){
-							// pattern is "Mozilla " + 11 alphanumeric/symbols + '='
-							if (20 !== item.length) {isMatch = false
-							} else if ('=' != item.slice(19)) {isMatch = false
-							} else if ('Mozilla ' != item.slice(0,8)) {isMatch = false}
-						})
-						if (isMatch) {notation = fpp_green}
-					}
-					//*/
 				}
 			} catch(e) {
 				hash = e; data = zErrLog
