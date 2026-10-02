@@ -185,7 +185,8 @@ let isArchArray = zNA,
 
 let isBB = false,
 	isBBESR = false,
-	isBBVer = [], // value only checked to determine isBBESR if isSmart: we'll add 153 once TB/MB153 hits stable
+	isBBPlatform = ['windows'], // value only checked to determine isBBESR if isSmart
+	isBBVer = [153], // value only checked to determine isBBESR if isSmart
 	isMB = false,
 	isTB = false,
 	isFPPFallback = false // helps track FPP health, block BB giving passes to FPP protections
