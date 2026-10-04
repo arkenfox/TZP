@@ -102,11 +102,12 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 	const get_oscillator = (metric) => new Promise(resolve => {
 		let btn =''
 		function exit(value, data) {
-			if (undefined !== data) {
+			if ('object' == typeof data) {
 				sDetail[isScope][metric] = data
 				btn = addButton(11, metric)
 			}
 			addDisplay(11, metric, value, btn)
+			if ('string' == typeof data) {value = data}
 			return resolve([metric, value])
 		}
 		try {
@@ -153,11 +154,12 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 	const get_oscillator_compressor = (metric) => new Promise(resolve => {
 		let btn =''
 		function exit(value, data) {
-			if (undefined !== data) {
+			if ('object' == typeof data) {
 				sDetail[isScope][metric] = data
 				btn = addButton(11, metric)
 			}
 			addDisplay(11, metric, value, btn)
+			if ('string' == typeof data) {value = data}
 			return resolve([metric, value])
 		}
 		try {
