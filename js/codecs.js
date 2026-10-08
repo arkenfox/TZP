@@ -476,8 +476,11 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		let request = window.navigator.requestMediaKeySystemAccess
 		if (runST) {request = ''}
 		let typeCheck = typeFn(request)
-		if ('undefined' == typeCheck) {exit(typeCheck)
-		} else if ('function' !== typeCheck) {throw zErrType +'requestMediaKeySystemAccess: ' + typeCheck
+		if ('undefined' == typeCheck) {
+			addBoth(13, METRIC, typeCheck, '', notation)
+			return resolve()
+		} else if ('function' !== typeCheck) {
+			throw zErrType +'requestMediaKeySystemAccess: ' + typeCheck
 		} else {
 			config = {
 				initDataTypes: ['keyids', 'webm'],
