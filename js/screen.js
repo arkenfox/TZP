@@ -1865,12 +1865,12 @@ const get_agent_data = (METRIC, isMain = true) => new Promise(resolve => {
 							if ('Not' == key.slice(0,3) && key.includes('A') && 'Brand' == key.slice(-5)) {
 								key = 'Not A Brand'
 							}
-							tmpobj[key] = item.version
+							tmpobj[key] = 'fullVersionList' == k ? reduceVer(item.version, k+'_'+key) : item.version
 						})
 						for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
 						uadata[k] = newobj
 					} else {
-						uadata[k] = res[k]
+						uadata[k] = 'uaFullVersion' == k ? reduceVer(res[k], k) : res[k]
 					}
 				}
  				exit(mini(uadata), uadata, addButton(2, METRIC))
