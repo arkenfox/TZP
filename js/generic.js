@@ -113,7 +113,7 @@ function dedupeArray(array, toString = false) {
 function reduceVer(str, key) {
 	// useragentdata: reduce precison by replacing insignificant version numbering
 		// for better stability (but TBH useragents are not great) and also to negate
-		// nonsense e.g. helium randomizes the fourth part. notate change by using 'x'
+		// possible nonsense e.g. randomizing the minor versioning. notate change by using 'x'
 	let parts = str.split('.'), newparts = [parts[0]]
 	let value = parts[1]; if (undefined !== value) {newparts.push(value)}
 	value = parts[2]
@@ -121,7 +121,7 @@ function reduceVer(str, key) {
 	value = parts[3]
 	if (undefined !== value) {value = '0' == value ? value : 'x'; newparts.push(value)}
 	let newstr = newparts.join('.')
-	if (undefined !== key && newstr !== str) {log_debug(2, 'useragentdata_'+ key, str +' -> '+ newstr)}
+	//if (undefined !== key && newstr !== str) {log_debug(2, 'useragentdata_'+ key, str +' -> '+ newstr)}
 	return newstr
 }
 
