@@ -90,12 +90,12 @@ const getDynamicIframeWindow = ({
 									if ('Not' == key.slice(0,3) && key.includes('A') && 'Brand' == key.slice(-5)) {
 										key = 'Not A Brand'
 									}
-									tmpobj[key] = item.version
+									tmpobj[key] = 'fullVersionList' == k ? reduceVer(item.version) : item.version
 								})
 								for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]}
 								uadata[k] = newobj
 							} else {
-								uadata[k] = res[k]
+								uadata[k] = 'uaFullVersion' == k ? reduceVer(res[k]) : res[k]
 							}
 						}
 						exit({'hash': mini(uadata), 'metrics': uadata})
