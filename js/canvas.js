@@ -7,22 +7,11 @@ function get_canvas_info(dataURL) {
 	try {
 		// https://stackoverflow.com/a/37997175
 		var PNG = {
-			parse: function(imgTag) {
-				var base64 = PNG.asBase64(imgTag);
+			parse: function() {
+				var base64 = dataURL.split('base64,')[1]
 				var byteData = PNG.utils.base64StringToByteArray(base64);
 				var parsedPngData = PNG.utils.parseBytes(byteData);
 				return PNG.utils.enrichParsedData(parsedPngData);
-			},
-			asBase64: function(imgTag) {
-				/* we already have all this
-				var canvas = document.createElement("canvas");
-				canvas.width = imgTag.width; 
-				canvas.height = imgTag.height; 
-				var ctx = canvas.getContext("2d"); 
-				ctx.drawImage(imgTag, 0, 0); 
-				var dataURL = canvas.toDataURL("image/png");
-				//*/
-				return dataURL.split('base64,')[1];
 			},
 			utils: {
 				base64StringToByteArray: function(base64String) {
@@ -137,7 +126,7 @@ function get_canvas_info(dataURL) {
 				}
 			}
 		}
-		var pngData = PNG.parse(dataURL);
+		var pngData = PNG.parse();
 		return (pngData)
 	} catch(e) {
 		log_alert(9, 'canvas_info', e+'')
@@ -431,7 +420,17 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 					} else {
 						notationExtra += isCheckNotation
 						if (isGecko && rfp_green == notation) {data += ' | RFP'
-						} else {data += ' | '+ isCheckChannels}
+						} else {
+							// stability: report 1 or 2 channels as a number
+							// e.g. helium does this with a single channel to solids and it's random
+							// everytime I have seen less than rgb, it's always been random channels
+							let isAlpha = isCheckChannels.includes('a')
+							let rgbCount = isCheckChannels.replace('a','').length
+							if (rgbCount < 3) {
+								isCheckChannels = rgbCount +' channel' + (rgbCount > 1 ? 's' : '') + (isAlpha ? ' + alpha' : '')
+							}
+							data += ' | '+ isCheckChannels
+						}
 					}
 					// non gecko doesn't display notation, but with data !== '' the hash becomes display-only
 					if (!isGecko) {hash += s99 +' '+ notationExtra +sc}
