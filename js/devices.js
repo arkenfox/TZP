@@ -629,7 +629,6 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 
 	let oData = {}, isDone = false
 	setTimeout(() => {
-console.log('timed out', isDone)
 		if (!isDone) {
 			isDone = true
 			let aList = ['languagedetector','languagemodel','proofreader',
@@ -645,7 +644,7 @@ console.log('timed out', isDone)
 			addBoth(7, METRIC, mini(newobj), addButton(7, METRIC),'', newobj)
 			return resolve()
 		}
-	}, 250)
+	}, 1000)
 
 	Promise.all([
 		get_value('LanguageDetector'),
@@ -656,7 +655,6 @@ console.log('timed out', isDone)
 		get_value('Translator'),
 		get_value('Writer'),
 	]).then(function(){
-console.log('promises all done', isDone)
 		if (isDone) {return resolve()}
 		isDone = true
 		// results are not guaranteed in order: sort into a new obj
