@@ -334,10 +334,10 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 				}
 			}) 
 		}
-
-		data = {
-			...components, extensions
-		}
+		// spread syntax in objects requires FF55+
+		//data = {...components, extensions}
+		data = {'extensions': extensions}
+		for (const k of Object.keys(components).sort()) {data[k] = components[k]}
 		return data
 	}
 
@@ -534,7 +534,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					// 4 x Mozilla || FF154+ 2050515 FPP enabled nightly
 					notation = rfp_green
 				} else if (isFPPFallback && isVer > 158) {
-					// FF159 2055176 FPP bucketize unmasked vendor
+					// FF159 nightly 2055176 FPP bucketize unmasked vendor
 					let aBucketUVendor = ['AMD','Apple','Intel','NVIDIA Corporation','Other']
 					if ('Mozilla' == data.renderer
 						&& 'Mozilla' == data.unmasked_renderer
