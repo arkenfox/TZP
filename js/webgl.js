@@ -550,23 +550,52 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			addBoth(10, metric, hash, btn, notation, data)
 		}
 
+		// EXTENSIONS
 		function add_ext(metric) {
+			// AFAICT: experimental + webgl are always the same
+				// and webgl2 duplicates most (12-15 for me) but adds some (3 for me)
+				// IIUIC: pretty sure the spec knows which is where, so we can just
+				// combine, dedupe and sort
 			let hash, data='', btn='', notation ='' //rfp_red
 			try {
-				hash = 'TBA'
-
-
+				let oTmp = {}
+				// get data
+				for (const r of Object.keys(oRaw)) { // r = run number
+					let aTmp = []
+					let tmpdata = oRaw[r]
+					for (const c of Object.keys(tmpdata)) { // c = context
+						let data = tmpdata[c].extensions
+						if ('array' == typeFn(data)) {aTmp = aTmp.concat(data)}
+					}
+					aTmp = dedupeArray(aTmp)
+					oTmp[r] = aTmp
+				}
+				// compare
+				hash = mini(oTmp[0])
+				if (hash == mini(oTmp[1])) {
+					// identical
+					data = oTmp[0]
+					if (!data.length) {
+						// note: we already recorded per context extension errors
+						// but we still need something for the overall summary metric
+						throw zErrInvalid +'none'
+					}
+					btn = addButton(10, metric, data.length)
+				} else {
+					// random
+					hash = 'random | per execution'
+				}
 			} catch(e) {
 				hash = e; data = zErrLog
 			}
 			addBoth(10, metric, hash, btn, notation, data)
 		}
 
+		// PARAMETERS
 		function add_params(metric) {
 			let hash, data='', btn='', notation ='' //rfp_red
 			try {
 				hash = 'TBA'
-
 			} catch(e) {
 				hash = e; data = zErrLog
 			}
