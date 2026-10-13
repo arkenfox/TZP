@@ -2898,7 +2898,6 @@ function outputSection(id, isResize = false) {
 			// run sequentially awaiting each before running the next
 			// order: use number or section name
 			let order = [
-				3, // first: sets isMB (legacy method)
 				2, 1, 5, 14, // fast
 				'canvas',
 				'elements',
@@ -2911,6 +2910,7 @@ function outputSection(id, isResize = false) {
 				'devices', // allow time for isDevices
 				'codecs', // don't let anything else hold it up: it's slow on blink first run in a cold session
 					// and the gecko timeout is a bottleneck + we want to be able to set that as low as possible
+				3, // allow time for os font
 				17 // timing last: uses data collected during gRun
 			]
 			const forEachSection = async (iterable, action) => {
