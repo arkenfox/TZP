@@ -555,8 +555,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		function add_ext(metric) {
 			// AFAICT: experimental + webgl are always the same
 				// and webgl2 duplicates most (12-15 for me) but adds some (3 for me)
-				// IIUIC: pretty sure the spec knows which is where, so we can just
-				// combine, dedupe and sort
+				// IIUIC: pretty sure the spec knows which is where, so we can just combine + dedupe
 			let hash, data='', btn='', notation ='' //rfp_red
 			try {
 				let oTmp = {}, aTmp
@@ -569,7 +568,9 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						if ('array' == typeFn(data)) {aTmp = aTmp.concat(data)}
 					}
 					aTmp = dedupeArray(aTmp)
-					oTmp[r] = aTmp.sort()
+					oTmp[r] = aTmp
+					// note: don't sort: we're concat'ing in context alphabetical order: exp,1,2
+					// and unsorted deduped results highlight the unique webgl2 items at the end
 				}
 				// compare
 				hash = mini(oTmp[0])
