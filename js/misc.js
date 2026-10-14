@@ -1160,12 +1160,12 @@ function get_window_props(METRIC) {
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['b67440ff','2490c33f'] // 904, 903
+					'windows': ['97a3a9ef','355cf591'] // 904, 903
 				},
 				TB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['57f01ac2','32df5790'] // 878, 877
+					'windows': ['de08ca16','afee3538'] // 878, 877
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
