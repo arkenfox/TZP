@@ -1996,6 +1996,37 @@ const outputFD = () => new Promise(resolve => {
 	addDisplay(3, METRIC +'_'+ m, value)
 	oArch[m] = value
 
+	// arch simd
+		// https://github.com/GoogleChromeLabs/wasm-feature-detect | https://wasm-feature-detect.surma.technology/
+		// not entirely sure this returns false on non-simd
+	// in gecko ~2% of devices lack SIMD support | ~1% is 32bit ARM which is already distinguishable
+		// (audio/math) but we're working on that. The other ~1% come from old-timey devices
+	// all the other wasm features are IIUIC equivalency of engine/version e.g. typeReflection was added in FF160 nightly
+	/* 2026
+		0.573% │ Intel Sandy/Ivy/Haswell Pentium & Celeron — SSE4.x fused off
+		0.153% │ Core 2-era Pentium Dual-Core / Celeron E-series
+		0.103% │ AMD K8/K10 — Phenom, Athlon II, Sempron, Turion
+		0.054% │ Core 2 Conroe/Merom
+		0.051% │ Generic QEMU/KVM virtual CPUs (qemu64/kvm64 stop at SSE3)
+		0.031% │ AMD Bobcat (has SSE4a, not SSE4.1)
+		0.027% │ AMD Llano A-series
+		0.002% │ Bonnell/Saltwell Atom
+	*/
+	m = 'simd'
+	try {
+		// note: javascript.options.wasm requires a page reload, but we'll test everytime regardless
+		if (undefined == window.WebAssembly) {
+			value = 'undefined'
+		} else {
+			let test = [0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11]
+			value = WebAssembly.validate(new Uint8Array(test)) ? true : false
+		}
+	} catch(e) {
+		log_error(3, METRIC +'_'+ m, e); value = zErr
+	}
+	addDisplay(3, METRIC +'_'+ m, value)
+	oArch[m] = value
+
 	// isArchString is always a string: zNA, zErr or an upper bound
 	m = 'string'
 	addDisplay(3, METRIC +'_'+ m, isArchString)
