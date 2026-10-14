@@ -336,6 +336,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		}
 		// spread syntax in objects requires FF55+
 		//data = {...components, extensions}
+		//if (isBrave) {extensions.push('EXT_groot_blender')}
 		data = {'extensions': extensions}
 		for (const k of Object.keys(components).sort()) {data[k] = components[k]}
 		return data
@@ -558,17 +559,17 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 				// combine, dedupe and sort
 			let hash, data='', btn='', notation ='' //rfp_red
 			try {
-				let oTmp = {}
+				let oTmp = {}, aTmp
 				// get data
 				for (const r of Object.keys(oRaw)) { // r = run number
-					let aTmp = []
+					aTmp = []
 					let tmpdata = oRaw[r]
 					for (const c of Object.keys(tmpdata)) { // c = context
 						let data = tmpdata[c].extensions
 						if ('array' == typeFn(data)) {aTmp = aTmp.concat(data)}
 					}
 					aTmp = dedupeArray(aTmp)
-					oTmp[r] = aTmp
+					oTmp[r] = aTmp.sort()
 				}
 				// compare
 				hash = mini(oTmp[0])
@@ -579,6 +580,20 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						// note: we already recorded per context extension errors
 						// but we still need something for the overall summary metric
 						throw zErrInvalid +'none'
+					}
+					if (isBrave) {
+						// brave shields adds oen random item to each context _at the end_ starting with
+						// withg EXT_ meaning it's out of alphabetical order: blink returns then in
+						// order and we would always have WEBGL_debug_renderer_info
+						// examples: EXT_draw_compressor, EXT_draw_sampler, EXT_expanded_sampler, EXT_polygon_sampler
+							// EXT_blend_compressor, EXT_circle_compressor, EXT_expanded_blender
+						aTmp = oRaw[0].webgl.extensions
+						let lastItem = aTmp[aTmp.length - 1]
+						if ('EXT_' == lastItem.slice(0,4)) {
+							data = data.filter(x => ![lastItem].includes(x))
+							hash = mini(data)
+							log_debug(10, metric +'_ignored', lastItem)
+						}
 					}
 					btn = addButton(10, metric, data.length)
 				} else {
