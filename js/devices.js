@@ -461,15 +461,19 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 				if (isGecko) {
 					// TypeError: 'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
 					// this is what we expect from unsupported values: e.g. local-network in FF140
-					let testErr = 'TypeError: \''+ k +'\' (value of \'name\' member of '
-						+ 'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
-					let isLogErr = err+'' !== testErr
+					let aExpectedErrs = [
+						'TypeError: \''+ key +'\' (value of \'name\' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.',
+							// ^ FF
+						'TypeError: \'name\' member of PermissionDescriptor \'' + key + '\' is not a valid value for enumeration PermissionName.',
+							// seamonkey should we ever let it thru
+					]
+					let isLogErr = !aExpectedErrs.includes(err+'')
 					if (isLogErr) {
 						// 2050333
 						// TypeError: Permissions.query: 'local-network' (value of...
 						// but this is what we get for local-network and loopback-network once it was added - diff is 'Permissions.query: '
 						if ('local-network' == k || 'loopback-network' == k) {
-							testErr = 'TypeError: Permissions.query: \''+ k +'\' (value of \'name\' member of '
+							let testErr = 'TypeError: Permissions.query: \''+ k +'\' (value of \'name\' member of '
 								+ 'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
 							isLogErr = err+'' !== testErr
 						}
