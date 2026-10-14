@@ -1882,9 +1882,11 @@ function lookup_health(sect, metric, scope, isPass) {
 	try {
 		// nested
 		let nested ='', tmpdata, sDetailTemp
-		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
-		if ('useragent_' == metric.slice(0,10)) {nested = 'useragent'; metric = metric.replace('useragent_','')}
-		if ('media_' == metric.slice(0,6)) {nested = 'media'; metric = metric.replace('media_','')}
+		if ('pixels_match' !== metric && 'pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')
+		} else if ('useragent_' == metric.slice(0,10)) {nested = 'useragent'; metric = metric.replace('useragent_','')
+		} else if ('media_' == metric.slice(0,6)) {nested = 'media'; metric = metric.replace('media_','')
+		} else if ('font_support_graphite_test' == metric) {nested = 'font_support'; metric = metric.replace('font_support_','')
+		}
 
 		// detail lookup
 		let datalookup
