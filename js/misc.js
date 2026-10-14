@@ -1048,17 +1048,16 @@ function get_window_props(METRIC) {
 				'Event','Location','PerformanceTiming','console','Promise','PageTransitionEvent','NodeList', // nodelist from android
 			]
 			let aPossible = [
-				'Audio','Blob','Crypto','CustomEvent','Element','Error','HTMLAudioElement','HTMLCanvasElement',
-				'HTMLElement','HTMLFrameElement','HTMLHtmlElement','HTMLIFrameElement','HTMLImageElement',
-				'HTMLMediaElement','HTMLObjectElement','HTMLVideoElement','Image','MediaSource','NodeList',
-				'OffscreenCanvas','Promise','Proxy','SecurityPolicyViolationEvent','SharedWorker','String','URL',
-				'WebAssembly','Worker','XMLHttpRequest','XMLHttpRequestEventTarget','decodeURI','decodeURIComponent',
-				'encodeURI','encodeURIComponent','escape','unescape','webkitURL',
-				// FF147+
-				'JSON','MutationObserver','WebSocket','XMLHttpRequest','XMLHttpRequestEventTarget', // 543435 uBO exposes these 5
-				'Navigator', // NoScript aded this around 148alpha
-				// new in MB + FF (uBO related AFAICT) but not in TB (aug/sep 2026) both slider levels
-				'Array','CharacterData','HTMLHeadElement','HTMLScriptElement','Iterator','Math','RegExp','Request','Text','globalThis',
+				// TB16 safer
+				'AbstractRange','Blob','BroadcastChannel','CharacterData','Crypto','CustomEvent','Element','Error',
+				'HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLHeadElement','HTMLHtmlElement','HTMLIFrameElement',
+				'HTMLMediaElement','HTMLMetaElement','HTMLObjectElement','HTMLVideoElement','JSON','MediaSource',
+				'MutationObserver','Navigator','OffscreenCanvas','Proxy','Range','SecurityPolicyViolationEvent',
+				'SharedWorker','TrustedScriptURL','TrustedTypePolicyFactory','URL','WebGLRenderingContext','WebSocket',
+				'Worker','Worklet','XMLHttpRequest','XMLHttpRequestEventTarget','webkitURL',
+				// + MB16 safer
+				'Array','HTMLScriptElement','Iterator','Math','RegExp','Request','String','Text','decodeURI',
+				'decodeURIComponent','encodeURI','encodeURIComponent','escape','globalThis','unescape',
 			]
 
 			if (isSmart) {
@@ -1161,7 +1160,7 @@ function get_window_props(METRIC) {
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['b67440ff','e74ff321'] // 904, 903
+					'windows': ['b67440ff','2490c33f'] // 904, 903
 				},
 				TB : {
 					'linux': ['',''],
