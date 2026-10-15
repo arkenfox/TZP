@@ -685,8 +685,29 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					btn = addButton(10, metric +'_diffs', 'diffs')
 					sDetail[isScope][metric +'_diffs'] = newobj
 				}
-				// ToDo: isBraveSmart / garbage figures
-
+				// tampering
+				if (isBrave) {
+					// brave: reduces some values by 1, seems to always be MAX_ items: in fact it seems to be only 12 specific MAX_ items
+					// on my machine: 3 of 34 MAX items are odd by default but those 3 never seem to be affected
+					// the other 31 MAX items are all even + positive
+					let aTamper = []
+					let aIgnore = ['MAX_PROGRAM_TEXEL_OFFSET','MAX_VERTEX_UNIFORM_VECTORS','MAX_VIEWPORT_DIMS']
+					for (const p of Object.keys(data)) {
+						if ('MAX_' == p.slice(0,4) && !aIgnore.includes(p)) {
+							if ('number' == typeof data[p]) {
+								// any MAX item not excluded from our list, round up to even
+								if (data[p] % 2) {
+									data[p] = data[p] + 1
+									aTamper.push(p)
+								}
+							}
+						}
+					}
+					// debug for a while so I can see _what_ is being altered
+					if (aTamper.length) {
+						log_debug(10, metric +'_tampered', aTamper)
+					}
+				}
 				// finalize
 				hash = mini(data)
 				btn = addButton(10, metric, Object.keys(data).length) + btn
