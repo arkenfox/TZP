@@ -703,9 +703,18 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 							}
 						}
 					}
-					// debug for a while so I can see _what_ is being altered
 					if (aTamper.length) {
 						log_debug(10, metric +'_tampered', aTamper)
+						let aKnown = [
+							'MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS','MAX_COMBINED_UNIFORM_BLOCKS',
+							'MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS','MAX_FRAGMENT_INPUT_COMPONENTS',
+							'MAX_FRAGMENT_UNIFORM_BLOCKS','MAX_FRAGMENT_UNIFORM_COMPONENTS',
+							'MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS','MAX_UNIFORM_BUFFER_BINDINGS',
+							'MAX_VARYING_COMPONENTS','MAX_VERTEX_OUTPUT_COMPONENTS',
+							'MAX_VERTEX_UNIFORM_BLOCKS','MAX_VERTEX_UNIFORM_COMPONENTS',
+						]
+						let aNew = aTamper.filter(x => !aKnown.includes(x))
+						if (aNew.length) {log_alert(10, metric+'_tampered_new', aNew)} // alert if new
 					}
 				}
 				// finalize
