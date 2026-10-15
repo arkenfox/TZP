@@ -687,23 +687,39 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 				}
 				// tampering
 				if (isBrave) {
-					// brave: reduces some values by 1, seems to always be MAX_ items: in fact it seems to be only 12 specific MAX_ items
+					// brave: reduces some values by 1, seems to always be MAX_ items: it seems to be only 12 specific items
 					// on my machine: 3 of 34 MAX items are odd by default but those 3 never seem to be affected
-					// the other 31 MAX items are all even + positive
+					// the other 31 MAX items are all even + positive + single values
+						// except for MAX_TEXTURE_LOD_BIAS + MAX_VARYING_VECTORS these all seem to always be multiples of 4
+						// note: on my android MAX_TEXTURE_LOD_BIAS is not an integer: this appears to be the only one
+					// [1] on my android I have seen
+						// MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS + MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS
+						// changed from 2147483648 (real) to 2147483646 (spoofed)
+						// i.e a diff of 2: we can cover this and even a diff of 3 by using %4
 					let aTamper = []
 					let aIgnore = ['MAX_PROGRAM_TEXEL_OFFSET','MAX_VERTEX_UNIFORM_VECTORS','MAX_VIEWPORT_DIMS']
+					let a2 = ['MAX_TEXTURE_LOD_BIAS','MAX_VARYING_VECTORS']
 					for (const p of Object.keys(data)) {
 						if ('MAX_' == p.slice(0,4) && !aIgnore.includes(p)) {
-							if ('number' == typeof data[p]) {
-								// any MAX item not excluded from our list, round up to even
-								if (data[p] % 2) {
-									data[p] = data[p] + 1
+							let value = data[p]
+							if ('number' == typeof value && Number.isInteger(value)) {
+								// any MAX integer item not excluded from our list, round up
+								let add = 0, remainder = value % 4
+								if (a2.includes(p)) {
+									if (value % 2) {add = 1} // round up to even
+								} else if (remainder > 0) {
+									add = 4 - remainder // round up to nearest multiple of 4
+								}
+								if (0 !== add) {
+									data[p] = value + add
 									aTamper.push(p)
 								}
 							}
 						}
 					}
 					if (aTamper.length) {
+						// this doesn't necessarily mean they were tampered with, it just means for
+						// brave these values will always be rounded up in certain increments
 						log_debug(10, metric +'_tampered', aTamper)
 						let aKnown = [
 							'MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS','MAX_COMBINED_UNIFORM_BLOCKS',
