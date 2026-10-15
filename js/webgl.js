@@ -599,14 +599,22 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						// brave shields adds oen random item to each context _at the end_ starting with
 						// withg EXT_ meaning it's out of alphabetical order: blink returns then in
 						// order and we would always have WEBGL_debug_renderer_info
-						// examples: EXT_draw_compressor, EXT_draw_sampler, EXT_expanded_sampler, EXT_polygon_sampler
-							// EXT_blend_compressor, EXT_circle_compressor, EXT_expanded_blender
 						aTmp = oRaw[0].webgl.extensions
 						let lastItem = aTmp[aTmp.length - 1]
 						if ('EXT_' == lastItem.slice(0,4)) {
 							data = data.filter(x => ![lastItem].includes(x))
 							hash = mini(data)
 							log_debug(10, metric +'_ignored', lastItem)
+							// in future it would be more robust to check every value
+							// using known fake strings: lets alert and build those strings up
+							let aMiddle = ['blend','circle','draw','expanded','polygon','triangle']
+							let aEnd = ['blender','compressor','sampler']
+							let parts = lastItem.split('_'), oNew = {}
+							if (!aEnd.includes(parts[2])) {oNew['end'] = parts[2]}
+							if (!aMiddle.includes(parts[1])) {oNew['middle'] = parts[1]}
+							if (Object.keys(oNew).length) {
+								log_alert(10, metric +'_ignored_new', oNew)
+							}
 						}
 					}
 					btn = addButton(10, metric, data.length)
