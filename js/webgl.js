@@ -696,7 +696,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						// MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS + MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS
 						// changed from 2147483648 (real) to 2147483646 (spoofed)
 						// i.e a diff of 2: we can cover this and even a diff of 3 by using %4
-					let aTamper = []
+					let aTamper = [], oTamper = {}
 					let aIgnore = ['MAX_PROGRAM_TEXEL_OFFSET','MAX_VERTEX_UNIFORM_VECTORS','MAX_VIEWPORT_DIMS']
 					let a2 = ['MAX_TEXTURE_LOD_BIAS','MAX_VARYING_VECTORS']
 					for (const p of Object.keys(data)) {
@@ -713,6 +713,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 								if (0 !== add) {
 									data[p] = value + add
 									aTamper.push(p)
+									oTamper[p] = add
 								}
 							}
 						}
@@ -720,7 +721,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					if (aTamper.length) {
 						// this doesn't necessarily mean they were tampered with, it just means for
 						// brave these values will always be rounded up in certain increments
-						log_debug(10, metric +'_tampered', aTamper)
+						log_debug(10, metric +'_rounded', oTamper)
 						let aKnown = [
 							'MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS','MAX_COMBINED_UNIFORM_BLOCKS',
 							'MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS','MAX_FRAGMENT_INPUT_COMPONENTS',
@@ -730,7 +731,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 							'MAX_VERTEX_UNIFORM_BLOCKS','MAX_VERTEX_UNIFORM_COMPONENTS',
 						]
 						let aNew = aTamper.filter(x => !aKnown.includes(x))
-						if (aNew.length) {log_alert(10, metric+'_tampered_new', aNew)} // alert if new
+						if (aNew.length) {log_alert(10, metric+'_rounded_new', aNew)} // alert if new
 					}
 				}
 				// finalize
