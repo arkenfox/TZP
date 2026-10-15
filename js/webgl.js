@@ -112,15 +112,17 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			'MAX_VERTEX_OUTPUT_COMPONENTS',
 			'MAX_VARYING_COMPONENTS',
 			'VERTEX_SHADER_BEST_FLOAT_PRECISION',
-			// was info
+			// info
 			'ANTIALIAS',
-			/* IDK
+			// 2019364
+				// ToDo: IDK if this is right
+			'IMPLEMENTATION_COLOR_READ_FORMAT',
+			'IMPLEMENTATION_COLOR_READ_TYPE',
 			'STENCIL_BACK_VALUE_MASK',
 			'STENCIL_BACK_WRITEMASK',
 			'STENCIL_VALUE_MASK',
 			'STENCIL_WRITEMASK',
 			'SUBPIXEL_BITS',
-			//*/
 		],
 		gpu: [
 			//'CONTEXT',
@@ -373,6 +375,17 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			// we can add readpixel data later
 		function add_raw(metric) {
 			try {
+				// sort parameters
+				for (const r of Object.keys(oRaw)) { // per run
+					for (const c of Object.keys(oRaw[r])) { // per context
+						let newobj = {}, olddata = oRaw[r][c].parameters
+						if (undefined !== olddata) {
+							for (const k of Object.keys(olddata).sort()) {newobj[k] = olddata[k]}
+							oRaw[r][c].parameters = newobj
+						}
+					}
+				}
+				// combine
 				let newdata = {}
 				let hash0 = mini(oRaw[0]), hash1 = mini(oRaw[1])
 				if (hash0 == hash1) {
@@ -564,8 +577,8 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					aTmp = []
 					let tmpdata = oRaw[r]
 					for (const c of Object.keys(tmpdata)) { // c = context
-						let data = tmpdata[c].extensions
-						if ('array' == typeFn(data)) {aTmp = aTmp.concat(data)}
+						let newdata = tmpdata[c].extensions
+						if ('array' == typeFn(newdata)) {aTmp = aTmp.concat(newdata)}
 					}
 					aTmp = dedupeArray(aTmp)
 					oTmp[r] = aTmp
@@ -609,9 +622,74 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 
 		// PARAMETERS
 		function add_params(metric) {
-			let hash, data='', btn='', notation ='' //rfp_red
+			// same as extensions: experimental + webgl are always the same and webgl2 duplicates some and adds some
+			// we have 2 runs x upto 3 results: upto 6 in all
+			// if it's not per execution then is it the same across each run, if not then it's "mixed"
+			// TBH: I doubt these will ever be triggered; and what is tampered with may vary per session/eTLD+1
+
+			let hash, data = {}, btn='', notation ='' //rfp_red
 			try {
-				hash = 'TBA'
+				let oPara = {}, oDiffs = {}
+				// group by parameter then run
+				for (const r of Object.keys(oRaw)) { // r = run number
+					for (const c of Object.keys(oRaw[r])) { // c = context
+						let pdata = oRaw[r][c].parameters
+						if ('object' == typeFn(pdata)) {
+							for (const p of Object.keys(pdata)) { // p = parameter
+								if (undefined == oPara[p]) {oPara[p] = {0: [], 1: []}}
+								oPara[p][r].push(pdata[p])
+							}
+						}
+					}
+				}
+				// reduce to single run
+				for (const p of Object.keys(oPara)) {
+					let data0 = oPara[p][0], data1 = oPara[p][1]
+					if (mini(data0) == mini(data1)) {
+						oPara[p] = data0
+					} else {
+						oDiffs[p] = {0: data0, 1: data1}
+						oPara[p] = 'random | per execution'
+					}
+				}
+				// reduce to single context, sorted into data
+					// we're either a string ('random...') or an array
+				for (const p of Object.keys(oPara).sort()) {
+					let value = oPara[p]
+					if ('object' == typeof oPara[p]) {
+						let s = new Set()
+						oPara[p].forEach(function(item){s.add(item+'')})
+						if (1 == s.size) {
+							value = oPara[p][0]
+						} else {
+							value = 'mixed'
+							oDiffs[p] = oPara[p]
+						}
+					}
+					data[p] = value
+				}
+				// diffs
+				if (Object.keys(oDiffs).length) {
+					// ToDo: test
+					// tidy/sort diffs object, add diffs button lookup
+					let newobj = {'per_context': {}, 'per_run' : {}}
+					for (const p of Object.keys(data)) {
+						if ('string' == typeof data[p]) {
+							let target = 'mixed' == data[p] ? 'per_context' : 'per_run'
+							newobj[target][p] = oDiffs[p]
+						}
+					}
+					for (const k of Object.keys(newobj)) {
+						if (0 == Object.keys(newobj[k]).length) {delete newobj[k]}
+					}
+					btn = addButton(10, metric +'_diffs', 'diffs')
+					sDetail[isScope][metric +'_diffs'] = newobj
+				}
+				// ToDo: isBraveSmart / garbage figures
+
+				// finalize
+				hash = mini(data)
+				btn = addButton(10, metric, Object.keys(data).length) + btn
 			} catch(e) {
 				hash = e; data = zErrLog
 			}
