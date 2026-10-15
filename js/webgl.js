@@ -596,25 +596,48 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						throw zErrInvalid +'none'
 					}
 					if (isBrave) {
-						// brave shields adds oen random item to each context _at the end_ starting with
-						// withg EXT_ meaning it's out of alphabetical order: blink returns then in
-						// order and we would always have WEBGL_debug_renderer_info
-						aTmp = oRaw[0].webgl.extensions
-						let lastItem = aTmp[aTmp.length - 1]
-						if ('EXT_' == lastItem.slice(0,4)) {
-							data = data.filter(x => ![lastItem].includes(x))
-							hash = mini(data)
-							log_debug(10, metric +'_ignored', lastItem)
-							// in future it would be more robust to check every value
-							// using known fake strings: lets alert and build those strings up
-							let aMiddle = ['blend','circle','draw','expanded','polygon','triangle']
-							let aEnd = ['blender','compressor','sampler']
-							let parts = lastItem.split('_'), oNew = {}
-							if (!aEnd.includes(parts[2])) {oNew['end'] = parts[2]}
-							if (!aMiddle.includes(parts[1])) {oNew['middle'] = parts[1]}
-							if (Object.keys(oNew).length) {
-								log_alert(10, metric +'_ignored_new', oNew)
+						let aMiddle = ['blend','circle','draw','expanded','polygon','triangle']
+						let aEnd = ['blender','compressor','sampler']
+						// check each context's last item for new strings
+							// brave shields adds one random EXT_ item to each context _at the end_
+							// meaning it's out of alphabetical order (blink returns then in order)
+							// and we would always have a WEBGL_ item
+						let oNew = {}, newmiddle = [], newend = []
+						for (const c of Object.keys(oRaw[0])) {
+							aTmp = oRaw[0][c].extensions
+							let lastItem = aTmp[aTmp.length - 1]
+							if ('EXT_' == lastItem.slice(0,4)) {
+								let parts = lastItem.split('_'), oNew = {}
+								let middle = parts[1], end = parts[2]
+								if (undefined !== end && !aEnd.includes(end)) {
+									aEnd.push(end); newend.push(end)
+								}
+								if (undefined !== middle && !aMiddle.includes(middle)) {
+									aMiddle.push(middle); newmiddle.push(middle)
+								}
 							}
+						}
+						if (newend.length) {oNew['end'] = newend}
+						if (newmiddle.length) {oNew['middle'] = newmiddle}
+						if (Object.keys(oNew).length) {
+							log_alert(10, metric +'_ignored_new', oNew)
+						}
+						// find spoofs
+						let aIgnored = []
+						data.forEach(function(ext){
+							let parts = ext.split('_')
+							if ('EXT' == parts[0]) {
+								let middle = parts[1], end = parts[2]
+								if (undefined !== end && aEnd.includes(end)) {
+									if (undefined !== middle && aMiddle.includes(middle)) {aIgnored.push(ext)}
+								}
+							}
+						})
+						// sanitize, rehash, log
+						if (aIgnored.length) {
+							data = data.filter(x => !aIgnored.includes(x))
+							hash = mini(data)
+							log_debug(10, metric +'_ignored', aIgnored)
 						}
 					}
 					btn = addButton(10, metric, data.length)
