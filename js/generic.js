@@ -336,6 +336,33 @@ function get_isArchString(METRIC) {
 	}
 }
 
+async function get_isArchWebGPU(METRIC) {
+	if (!isGecko) {return}
+	// FF152+ 1889639 32bit browser builds return null
+	// return undefined, true, null or zErr
+
+	// IDK if 32bit builds enable webgpu (when it rolls out)
+	// FF portable does because it's 32/64bit AIO
+	let t0 = nowFn()
+	function exit(value) {
+		isArchWebGPU = value
+		log_perf(SECTG, METRIC, t0,'', isArchWebGPU)
+	}
+	if (undefined == navigator.gpu) {
+		// dom.webgpu.enabled = false
+		exit('undefined')
+	} else {
+		await navigator.gpu.requestAdapter().then(a => {
+			if (runSG) {foo++}
+			if (null == a) {exit('null') // 32bit build including on 64bit platforms
+			} else {exit(true)} // [object GPUAdapter]
+		}).catch(function(err){
+			log_error(3, 'architecture_webgpu', err, isScope, true) // persist sect3
+			exit(zErr)
+		})
+	}
+}
+
 function get_isAutoplay(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getAutoplayPolicy
 	// get non-user-gesture values once
@@ -3041,6 +3068,10 @@ function run_immediate() {
 			// return if not supported
 			if (!isAllowNonGecko || undefined === isEngine) {return}
 		} else {
+			// this can take 100+ms, but we have an enforced delay _and_ feature
+			// is the 2nd to last section to run
+			get_isArchWebGPU('isArchWebGPU')
+
 			// search https://searchfox.org/firefox-main/source/dom/locales/en-US/chrome/dom/dom.properties for 'is deprecated'
 			// trigger gecko deprecated items. They are recorded regardless of API. The API pref simply allows access to read them
 			let aItems = [
