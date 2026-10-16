@@ -2031,7 +2031,10 @@ const outputFD = () => new Promise(resolve => {
 	m = 'string'
 	addDisplay(3, METRIC +'_'+ m, isArchString)
 	oArch[m] = isArchString
-
+	// isArchWebGPU: undefined, true, null or zErr
+	m = 'webgpu', value = isVer > 151 ? isArchWebGPU : zNA
+	addDisplay(3, METRIC +'_'+ m, value)
+	oArch[m] = value
 	// add arch obj
 	addData(3, METRIC, oArch, mini(oArch))
 
