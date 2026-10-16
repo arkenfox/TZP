@@ -142,6 +142,7 @@ let bb_green = sgtick+'TB]'+sc,
 // run once
 let isArchArray = zNA,
 	isArchString = zNA,
+	isArchWebGPU,
 	isAutoPlay,
 	isAutoPlayError,
 	isBrave = false,
