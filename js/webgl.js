@@ -375,13 +375,17 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			// we can add readpixel data later
 		function add_raw(metric) {
 			try {
-				// sort parameters
+				// sort parameters, sort extensions if need be
 				for (const r of Object.keys(oRaw)) { // per run
 					for (const c of Object.keys(oRaw[r])) { // per context
 						let newobj = {}, olddata = oRaw[r][c].parameters
 						if (undefined !== olddata) {
 							for (const k of Object.keys(olddata).sort()) {newobj[k] = olddata[k]}
 							oRaw[r][c].parameters = newobj
+						}
+						// servo doesn't sort and we get different orders per run
+						if ('servo' == isEngine) {
+							try {oRaw[r][c].extensions.sort()} catch(e) {}
 						}
 					}
 				}
@@ -722,6 +726,10 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					// on my machine: 3 of 34 MAX items are odd by default but those 3 never seem to be affected
 					// the other 31 MAX items are all even + positive + single values
 						// except for MAX_TEXTURE_LOD_BIAS + MAX_VARYING_VECTORS these all seem to always be multiples of 4
+							// in brave, but not neccessarily in blink/gecko
+							// e.g. blink/gecko MAX_COMBINED_*_UNIFORM_COMPONENTS at 2147483647 but brave at 2147483648
+							// ^ these two seem to be the only ones
+							// doesn't matter: effectively we are bucketizing most brave MAX values
 						// note: on my android MAX_TEXTURE_LOD_BIAS is not an integer: this appears to be the only one
 					// [1] on my android I have seen
 						// MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS + MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS
