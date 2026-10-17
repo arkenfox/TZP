@@ -18,7 +18,7 @@ function get_nav_connection(METRIC) {
 				// gecko only
 				addEventListener: 'function',
 				dispatchEvent: 'function',
-				ontypechange: 'null',
+				ontypechange: 'null', // in blink this is android | gecko has this on dekstop w/ dom.netinfo.enabled
 				removeEventListener: 'function',
 				type: 'string', // android + chromeOS only
 				// also in blink
@@ -664,12 +664,16 @@ function get_language_locale() {
 					// e.g. we would expect en with most en-*
 					// this is more for show to indicate hidden langs are exposed: i.e 'en' shows up in a
 					// default en-US brave | and I suspect many defaults fallback to some combo of en*
-				// in future we could add other langs based on the first lang + common sets
 				let aSysExtras = ['en-US','en']
-				aSysExtras.forEach(function(x){
-					aSysLang.push(x.toLowerCase()) // always lower case
-				})
+				// always add the base langugae: e.g. if de-DE, add de
+				let firstLang = isLanguagesNav[0]
+				if (firstLang.includes('-')) {
+					aSysExtras.push(firstLang.split('-')[0])
+				}
+				aSysExtras.forEach(function(x){aSysLang.push(x.toLowerCase())}) // always lower case
 				aSysLang = dedupeArray(aSysLang)
+				// in future we could add other langs based on the first lang + common sets
+				// chrome UI settings has ~100 languages: if we could speed this up we could do the lot
 			}
 			aSysLang.sort()
 			let aLoop = [aSysLang]
