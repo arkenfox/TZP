@@ -690,19 +690,19 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let oBrave = {
 				'_total': 0,
 				'chrome': isBraveChrome,
-				'keyboard': isBraveKeyboard, // 4
+				'keyboard': isBraveKeyboard, // 3
 				'languages': isBraveLanguage,
-				'pdf': isBravePDF, // 6
+				'pdf': isBravePDF, // 7
 				'pdf_check': oPDF,
-				'webgl': isBraveWebGL, // 6
+				'webgl': isBraveWebGL, // 7
 				'window': isBraveWindow,
 			}
 			let countBrave = 0
 			for (const k of Object.keys(oBrave)) {
 				if (true == oBrave[k]) {
-					// pdf + webgl (7) are very distinctive | keyboard (4) is unusual (maybe similar to extensions)
-					// and the rest (1) could be commonmly spoofed
-					let x = ('pdf' == k || 'webgl' == k) ? 7 : ('keyboard' == k ? 4 : 1)
+					// pdf + webgl (7) are very distinctive | keyboard (3) is unusual (maybe similar to extensions)
+					// and the rest (1) could be commonly spoofed
+					let x = ('pdf' == k || 'webgl' == k) ? 7 : ('keyboard' == k ? 3 : 1)
 					countBrave = countBrave + x
 				}
 			}
@@ -713,10 +713,10 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				// all this to catch a possible tiny few users trying to hide brave
 			if (!isBrave) {
 				// android: 7 or higher
-					// e.g. webgl(6) + keyboard(4)
-					// pdf(6) great if enabled, the rest are not realiable/used
-				// desktop: 12 or kigher
-					// e.g. pdf(6) or webgl(6) + keyboard(4) + 2 others (1 each)
+					// e.g. webgl(7) or pdf(7 if enabled)
+					// the rest are not realiable/used or enough
+				// desktop: 12 or higher
+					// e.g. pdf(7)/webgl(7) + keyboard(3) + 2 others (1 each)
 				let min = isDesktop ? 11 : 6
 				if (countBrave > min) {isBrave = true}
 			}
