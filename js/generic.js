@@ -659,7 +659,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				let extensions = context.getSupportedExtensions()
 				let lastItem = extensions[extensions.length - 1]
 				if ('EXT_' == lastItem.slice(0,4)) {
-					let aMiddle = ['blend','circle','draw','expanded','polygon','triangle'],
+					let aMiddle = ['blend','circle','draw','expanded','polygon','texture','triangle'],
 						aEnd = ['blender','compressor','sampler'],
 						parts = lastItem.split('_')
 					if (aMiddle.includes(parts[1]) && aEnd.includes(parts[2])) {
