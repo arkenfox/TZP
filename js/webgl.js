@@ -600,7 +600,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						throw zErrInvalid +'none'
 					}
 					if (isBrave) {
-						let aMiddle = ['blend','circle','draw','expanded','polygon','triangle']
+						let aMiddle = ['blend','circle','draw','expanded','polygon','texture','triangle']
 						let aEnd = ['blender','compressor','sampler']
 						// check each context's last item for new strings
 							// brave shields adds one random EXT_ item to each context _at the end_
