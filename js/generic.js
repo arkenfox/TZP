@@ -651,6 +651,25 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 			let isBraveLanguage = false
 			try {isBraveLanguage = 1 == navigator.languages.length} catch(e) {isBraveLanguage = zErr}
 
+			// 6. webgl
+				// 20+ ms but bolsters android checks where a lot of checks don't apply
+			let isBraveWebGL = false
+			try {
+				let	context = document.createElement('canvas').getContext('webgl')
+				let extensions = context.getSupportedExtensions()
+				let lastItem = extensions[extensions.length - 1]
+				if ('EXT_' == lastItem.slice(0,4)) {
+					let aMiddle = ['blend','circle','draw','expanded','polygon','triangle'],
+						aEnd = ['blender','compressor','sampler'],
+						parts = lastItem.split('_')
+					if (aMiddle.includes(parts[1]) && aEnd.includes(parts[2])) {
+						isBraveWebGL = true
+					}
+				}
+			} catch (e) {
+				isBraveWebGL = zErr
+			}
+
 			/* not worth it: are either
 				// slow/very-slow, problematic, or desktop only using common sizes
 				// at best they would only be good to perhaps rule out isBraveSmart
@@ -669,30 +688,36 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 
 			// harden isBrave
 			let oBrave = {
+				'_total': 0,
 				'chrome': isBraveChrome,
-				'keyboard': isBraveKeyboard, // 5
+				'keyboard': isBraveKeyboard, // 4
 				'languages': isBraveLanguage,
 				'pdf': isBravePDF, // 6
 				'pdf_check': oPDF,
+				'webgl': isBraveWebGL, // 6
 				'window': isBraveWindow,
 			}
 			let countBrave = 0
 			for (const k of Object.keys(oBrave)) {
 				if (true == oBrave[k]) {
-					// pdf (7) is very distinctive | keyboard (5) is unusual (maybe similar to extensions)
+					// pdf + webgl (7) are very distinctive | keyboard (4) is unusual (maybe similar to extensions)
 					// and the rest (1) could be commonmly spoofed
-					let x = 'pdf' == k ? 7 : ('keyboard' == k ? 5 : 1)
+					let x = ('pdf' == k || 'webgl' == k) ? 7 : ('keyboard' == k ? 4 : 1)
 					countBrave = countBrave + x
 				}
 			}
+			oBrave['_total'] = countBrave
 			// if you weren't before, you are now
 				// a little lax, overengineered and probably not worth it
 				// allows for some wriggle room e.g. extension interference +/or regression
 				// all this to catch a possible tiny few users trying to hide brave
 			if (!isBrave) {
-				// e.g. desktop: pdf(7) | keyboard(5) + 2 others (1 each)
-				// e.g. android: pdf(7) or keyboard(5)
-				let min = isDesktop ? 6 : 4
+				// android: 7 or higher
+					// e.g. webgl(6) + keyboard(4)
+					// pdf(6) great if enabled, the rest are not realiable/used
+				// desktop: 12 or kigher
+					// e.g. pdf(6) or webgl(6) + keyboard(4) + 2 others (1 each)
+				let min = isDesktop ? 11 : 6
 				if (countBrave > min) {isBrave = true}
 			}
 
@@ -701,8 +726,10 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				if (true !== isBravePDF) {delete oBrave['pdf_check']}
 				log_debug(SECTG, METRIC +'Shields', oBrave, isScope, true)
 				// calculate isBraveSmart
-						// for now .. we're already isBrave, just the keyboard is enough
-				if (isBraveKeyboard) {
+					// not all brave's protections need isBraveSmart to counter them, but some do
+					// we are already isBrave - so anything distinctively brave shields is enough
+
+				if (isBraveKeyboard || isBravePDF || isBraveWebGL) {
 					isBraveSmart = isBrave
 					// add some control _where_ we ignore fonts
 					// linux is not protected and android needs testing first
@@ -710,7 +737,7 @@ const get_isBrave = (METRIC) => new Promise(resolve => {
 				}
 			}
 			// tada!
-			exit(isBrave + (isBrave ? ' '+ isBraveSmart : ''))
+			exit(isBrave + (isBrave ? ' | '+ isBraveSmart : ''))
 		})
 	} catch(e) {
 		log_error(3, METRIC, e, isScope, true) // persist sect3
