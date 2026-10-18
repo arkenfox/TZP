@@ -1,7 +1,6 @@
 'use strict';
 
-/* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
-/* 	const proxyMap = {convertToBlob: 'OffscreenCanvas'} */
+/* note: const proxyMap = {convertToBlob: 'OffscreenCanvas'} */
 
 function get_canvas_info(dataURL) {
 	try {
@@ -432,10 +431,9 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 							data += ' | '+ isCheckChannels
 						}
 					}
-					// non gecko doesn't display notation, but with data !== '' the hash becomes display-only
-					if (!isGecko) {hash += s99 +' '+ notationExtra +sc}
 				}
-				addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
+				addDisplay(9, 'canvas_'+ k +'_note', s99 + notationExtra + sc)
+				addBoth(9, 'canvas_'+ k, hash,'', notation, data)
 			}
 		}
 		return resolve(oRaw)
@@ -594,9 +592,10 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 				if (notationExtra.length) {
 					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
 					if (isGecko && rfp_green == notation) {data += ' | RFP'}
+					addDisplay(9, 'canvas_'+ k +'_note', s99 + notationExtra + sc)
 				}
 			}
-			addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
+			addBoth(9, 'canvas_'+ k, hash,'', notation, data)
 		}
 		return resolve(oRaw)
 	})
@@ -878,7 +877,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					if (isBraveSmart) {
 						log_debug(9, 'canvas_'+ k +'_ignored', hash)
 						data = 'protected | persistent'
-						hash += s99 +' [persistent]'+ sc
+						notationExtra = ' [persistent]'
 					} else if (isChunk) {
 						data = 'protected | persistent*'
 						// display the IDAT data hash
@@ -915,7 +914,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					notation = check(oData[k][1]) ? rfp_green : rfp_red
 				}
 				if (rfp_green == notation) {data += ' | RFP'} else if (fpp_green == notation) {data += ' | FPP'}
-				addBoth(9, 'canvas_'+ k, hash,'', notation + notationExtra, data)
+				addDisplay(9, 'canvas_'+ k +'_note', s99 + notationExtra + sc)
+				addBoth(9, 'canvas_'+ k, hash,'', notation, data)
 			}
 		}
 		// add oInfo
