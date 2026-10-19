@@ -22,7 +22,7 @@ const btnList = ['alerts','debug','errors','lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 138
+	expectedMetrics = 137
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -209,7 +209,9 @@ let languagesSupported = {},
 	oIntlDate = {},
 	oIntlDateKeys = {},
 	// test dates
-	oIntlDates = {}
+	oIntlDates = {},
+	// cached canvas results
+	oCanvasInfo = {}
 
 // other
 let aDomRect = [true, true, true, true],

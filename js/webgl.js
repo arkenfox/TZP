@@ -800,35 +800,14 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 	})
 })
 
-function get_readpixels(METRIC, hasWebGL) {
-	let hash, data='', btn='', notation ='' //rfp_red
-	if (!hasWebGL) {
-		hash = zNA
-	} else {
-		try {
-			hash = 'TBA'
-
-		} catch(e) {
-			hash = e; data = zErrLog
-		}
-	}
-	addBoth(10, METRIC, hash, btn, notation, data)
-}
-
 const outputWebGL = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('webgl')) {return resolve()}
 
-	// ToDo: readPixels, webGPU
 	// ToDo: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
 	Promise.all([
 		get_webgl('webgl'),
 	]).then(function(res){
-		let hasWebGL = res[0]
-		Promise.all([
-			get_readpixels('webgl_readpixels', hasWebGL),
-		]).then(function(res){
-			return resolve()
-		})
+		return resolve()
 	})
 })
 
