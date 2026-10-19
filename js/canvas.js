@@ -2,7 +2,89 @@
 
 /* note: const proxyMap = {convertToBlob: 'OffscreenCanvas'} */
 
-function get_canvas_info(dataURL) {
+function check_canvas_info(dataname, runNo) {
+	// return skip if no tampering, otherwise return true/false if it matches RFP
+	let lookupname = 'drawn' + (dataname.includes('solid') ? '_solid' : '')
+	let dataDrawn = oCanvasInfo[lookupname]
+	let expectedhash = oCanvasInfo[lookupname +'_hash']
+
+	let data = oCanvasInfo[dataname][runNo], hash = mini(data)
+	let isMatch = expectedhash == hash
+	if (isMatch) {return 'skip'}
+
+	// return if cached results
+	if (undefined !== oCanvasInfo[hash]) {return oCanvasInfo[hash]}
+
+	// run2 otherwise return if RFP-like and create strings
+	let aDrawn = [], aRead = [], indexChanged = []
+	let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
+	let pixelcount = oCanvasInfo.pixelcount
+
+	for (let x=0; x < pixelcount; x++) {
+		let k = x * 4
+		aDrawn = dataDrawn.slice(k, k+4)
+		aRead = data.slice(k, k+4)
+		if (aDrawn.join() !== aRead.join()) { // pixels
+			altP++
+			indexChanged.push(k)
+		}
+		if (aDrawn[0] !== aRead[0]) { altR++} // channels
+		if (aDrawn[1] !== aRead[1]) { altG++}
+		if (aDrawn[2] !== aRead[2]) { altB++}
+		if (aDrawn[3] !== aRead[3]) { altA++}
+		// ToDo: range: worth it?
+	}
+	// stealth check: anything in changed not in font
+	let indexFont = oCanvasInfo.draw_font
+	let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
+	let isFontStealth = aNotInFonts.length == 0
+
+	// noise FP
+	let strFP ='', aNote = []
+	aNote.push('p'+ Math.floor((altP / pixelcount) * 100))
+	if (altR > 0) {strFP += 'r'; aNote.push('r'+Math.floor((altR / pixelcount) * 100))}
+	if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
+	if (altB > 0) {strFP += 'b'; aNote.push('b'+ Math.floor((altB / pixelcount) * 100))}
+	if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
+	// FP data
+		// stability: report 1 or 2 channels as a number
+		// e.g. helium does this with a single channel to solids and it's random
+		// everytime I have seen less than rgb, it's always been random channels
+	let isAlpha = strFP.includes('a')
+	let rgbCount = strFP.replace('a','').length
+	if (rgbCount < 3) {
+		strFP = rgbCount +' channel' + (rgbCount > 1 ? 's' : '') + (isAlpha ? ' + alpha' : '')
+	}
+	let isCheckChannels = (isFontStealth ? 'stealth | ' : '') + strFP
+	// display data: keep android short
+	let isCheckNotation = ''
+	if (isDesktop) {isCheckNotation = ' ['+ (isFontStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
+	} else if (isFontStealth) {isCheckNotation = ' [stealth]'}
+
+	// RFP match
+	let matchRFP = true
+	// pixels: allow 4 collisions
+	if (altP < (pixelcount - 4)) {matchRFP = false}
+	// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
+		// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
+	let maxCollisions = dataname.includes('solid') ? 24 : 8
+	if (altR < (pixelcount - maxCollisions)) {matchRFP = false}
+	if (altG < (pixelcount - maxCollisions)) {matchRFP = false}
+	if (altB < (pixelcount - maxCollisions)) {matchRFP = false}
+	// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
+	if ((altA / pixelcount) < .66) {matchRFP = false}
+
+	// remember result
+	oCanvasInfo[hash] = {
+		'isCheckChannels': isCheckChannels,
+		'isCheckNotation': isCheckNotation,
+		'isFontStealth': isFontStealth,
+		'isCheck': matchRFP,
+	}
+	return oCanvasInfo[hash]
+}
+
+function check_png_info(dataURL) {
 	try {
 		// https://stackoverflow.com/a/37997175
 		var PNG = {
@@ -134,112 +216,6 @@ function get_canvas_info(dataURL) {
 }
 
 const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
-
-	function check(dataname, runNo) {
-		// return skip if no tampering, otherwise return true/false if it matches RFP
-		let data = oData[dataname][runNo]
-		let dataDrawn = oDataDrawn[dataname]
-		let isMatch = mini(dataDrawn) == mini(data)
-		if (isMatch) {return 'skip'}
-
-		// run2 otherwise return if RFP-like and create strings
-		let aDrawn = [], aRead = [], indexChanged = []
-		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
-		for (let x=0; x < pixelcount; x++) {
-			let k = x * 4
-			aDrawn = dataDrawn.slice(k, k+4)
-			aRead = data.slice(k, k+4)
-			if (aDrawn.join() !== aRead.join()) { // pixels
-				altP++
-				indexChanged.push(k)
-			}
-			if (aDrawn[0] !== aRead[0]) { altR++} // channels
-			if (aDrawn[1] !== aRead[1]) { altG++}
-			if (aDrawn[2] !== aRead[2]) { altB++}
-			if (aDrawn[3] !== aRead[3]) { altA++}
-			// ToDo: range: worth it?
-		}
-		// stealth check: anything in changed not in font
-		let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
-		isFontStealth = aNotInFonts.length == 0
-
-		// noise FP
-		let strFP ='', aNote = []
-		aNote.push('p'+ Math.floor((altP / pixelcount) * 100))
-		if (altR > 0) {strFP += 'r'; aNote.push('r'+Math.floor((altR / pixelcount) * 100))}
-		if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
-		if (altB > 0) {strFP += 'b'; aNote.push('b'+ Math.floor((altB / pixelcount) * 100))}
-		if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
-		// FP data
-		isCheckChannels = (isFontStealth ? 'stealth | ' : '') + strFP
-		// display data: keep android short
-		if (isDesktop) {isCheckNotation = ' ['+ (isFontStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
-		} else if (isFontStealth) {isCheckNotation = ' [stealth]'}
-
-		// pixels: allow 4 collisions
-		if (altP < (pixelcount - 4)) {return false}
-		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
-			// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
-		let maxCollisions = 'getImageData_solid' == dataname ? 24 : 8
-		if (altR < (pixelcount - maxCollisions)) {return false}
-		if (altG < (pixelcount - maxCollisions)) {return false}
-		if (altB < (pixelcount - maxCollisions)) {return false}
-		// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
-		if ((altA / pixelcount) < .66) {return false}
-		return true // RFP traits
-	}
-
-	function generate() {
-		// random getImageData
-		let tmpDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
-		let tmpSolid = new Uint8ClampedArray(sizeW * sizeH * 4)
-		let solidR = Math.floor(Math.random()*255),
-			solidG = Math.floor(Math.random()*255),
-			solidB = Math.floor(Math.random()*255)
-		solidClrs = solidR +','+ solidG +','+ solidB +',255'
-		let counter = -1
-		for (let x=0; x < sizeW; x++) {
-			let xEven = (x % 2 == 0)
-			for (let y=0; y < sizeH; y++) {
-				counter ++
-				let k = counter * 4
-				let yEven = (y % 2 == 0)
-				// xEven + yEven == 1 = checkerboard = 1/2
-				// xEven + yEven == 2 = another 1/4
-				// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
-				let isRandom = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
-				if (!isRandom) {
-					if ((x * y) % 3 == 0 ) {isRandom = true} // brings us to 113/128
-				}
-				if (isRandom) {
-					// random: 113
-					let valueR = Math.floor(Math.random()*255),
-						valueG = Math.floor(Math.random()*255),
-						valueB = Math.floor(Math.random()*255)
-					tmpDrawn[k] = valueR
-					tmpDrawn[k+1] = valueG
-					tmpDrawn[k+2] = valueB
-					tmpDrawn[k+3] = 255
-					dataToDraw.push('rgba('+ valueR +','+ valueG +','+ valueB +',255)')
-				} else {
-					indexFont.push(k)
-					// solid: 15
-					tmpDrawn[k] = solidR
-					tmpDrawn[k+1] = solidG
-					tmpDrawn[k+2] = solidB
-					tmpDrawn[k+3] = 255
-					dataToDraw.push('rgba('+ solidClrs +')')
-				}
-				// solid
-				tmpSolid[k] = solidR
-				tmpSolid[k+1] = solidG
-				tmpSolid[k+2] = solidB
-				tmpSolid[k+3] = 255
-			}
-		}
-		oDataDrawn = {'getImageData': tmpDrawn, 'getImageData_solid': tmpSolid}
-	}
-
 	var known = {
 		createHashes: function(window, runNo){
 			let outputs = [
@@ -295,7 +271,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 				let canvas = dom.tzpCanvasGet
 				let ctx = canvas.getContext('2d')
 				// color the background
-				ctx.fillStyle = 'rgba('+ solidClrs +')'
+				ctx.fillStyle = 'rgba('+ oCanvasInfo.draw_solid +')'
 				ctx.fillRect(0, 0, sizeW, sizeH)
 				// trigger fillText stealth: try to cover every pixel
 				let fpText = '\u2588\u2588\u2588\u2588' // full block
@@ -309,14 +285,15 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 					// see PoC notes: too risky
 				fpText = '-'
 				ctx.font = '16px monospace'
-				ctx.strokeStyle ='rgba('+ solidClrs +')'
+				ctx.strokeStyle ='rgba('+ oCanvasInfo.draw_solid +')'
 				for (let x=0; x < sizeW/2; x++) {
 					for (let y=0; y < sizeH/2; y++) {ctx.strokeText(fpText,x,y)}
 				}
 				//*/
 				// now color the rest with our random colors
 				// swap x/y loop order to match getImageData uint
-				let ignore = 'rgba('+ solidClrs +')'
+				let dataToDraw = oCanvasInfo.draw_data
+				let ignore = 'rgba('+ oCanvasInfo.draw_solid +')'
 				for (let y=0; y < sizeH; y++) {
 					for (let x=0; x < sizeW; x++) {
 						let style = dataToDraw[(y * sizeW) + x]
@@ -331,7 +308,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 			function getKnownGetSolid(){
 				let canvas = dom.tzpCanvasGetSolid
 				let ctx = canvas.getContext('2d')
-				ctx.fillStyle = 'rgba('+ solidClrs +')'
+				ctx.fillStyle = 'rgba('+ oCanvasInfo.draw_solid +')'
 				ctx.fillRect(0, 0, sizeW, sizeH)
 				return ctx
 			}
@@ -362,17 +339,12 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 		}
 	}
 
-	let oDataDrawn, solidClrs, dataToDraw = [], indexFont = []
-	let isCheckNotation ='', isCheckChannels ='', isFontStealth = false
-	const pixelcount = sizeW * sizeH
-	generate()
-
 	let oData = {'getImageData': {}, 'getImageData_solid': {}}, oErrors = {}, oRaw = {}
 	Promise.all([
 		known.createHashes(window, 0),
 		known.createHashes(window, 1),
 	]).then(function(res){
-		//console.log(oData)
+		//console.log(oData) // Uint8ClampedArray
 		//console.log(oErrors)
 		//console.log(res)
 		let isProxy = isProxyLie('CanvasRenderingContext2D.getImageData')
@@ -381,6 +353,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 		let whitehash = 'd5f8f171'
 		// ToDo: replace whitehash or enhance whitehash with solidhash
 		for (const k of Object.keys(oData)) {
+			oCanvasInfo[k] = oData[k]
 			// if an error,. report that, else compare the two runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
@@ -392,8 +365,13 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 				let hash0 = mini(oData[k][0]), isWhite = false
 				hash = mini(oData[k][1]) // always display a hash, make it the last one read
 
-				let isCheck = check(k, 1) // use the last result to be consistent
+				let oCheck = check_canvas_info(k, 1) // use the last result to be consistent
+				let isCheck = oCheck.isCheck, // matches RFP
+					isCheckNotation = oCheck.isCheckNotation,
+					isCheckChannels = oCheck.isCheckChannels,
+					isFontStealth = oCheck.isFontStealth
 				//console.log(k, isCheck, isCheckNotation, isCheckChannels, isFontStealth)
+
 				if ('skip' == isCheck) {
 					data = 'trustworthy' // the test is random, return a stable FP
 					oRaw[k] = oData[k][0]
@@ -420,14 +398,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 						notationExtra += isCheckNotation
 						if (isGecko && rfp_green == notation) {data += ' | RFP'
 						} else {
-							// stability: report 1 or 2 channels as a number
-							// e.g. helium does this with a single channel to solids and it's random
-							// everytime I have seen less than rgb, it's always been random channels
-							let isAlpha = isCheckChannels.includes('a')
-							let rgbCount = isCheckChannels.replace('a','').length
-							if (rgbCount < 3) {
-								isCheckChannels = rgbCount +' channel' + (rgbCount > 1 ? 's' : '') + (isAlpha ? ' + alpha' : '')
-							}
+
 							data += ' | '+ isCheckChannels
 						}
 					}
@@ -558,6 +529,7 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 			'isPointInStroke': ['a77e328a'],
 		}
 		for (const k of Object.keys(oData)) {
+			oCanvasInfo[k] = oData[k]
 			// if an error,. report that, else compare the tfwo runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
@@ -845,6 +817,8 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		}
 
 		for (const k of Object.keys(oData)) {
+			oCanvasInfo[k] = oData[k]
+
 			// if an error,. report that, else compare the two runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
@@ -858,7 +832,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				let isProxy = isProxyLie('HTMLCanvasElement.'+ k.replace('_solid','')),
 					isProxy2 = isProxyLie('HTMLCanvasElement.getContext')
 				// memorize per hash info
-				if (undefined == oInfo[hash]) {oInfo[hash] = get_canvas_info(oData[k][1])}
+				if (undefined == oInfo[hash]) {oInfo[hash] = check_png_info(oData[k][1])}
 				let isChunk = false
 				if (zErr !== oInfo[hash]) {
 					try {
@@ -928,9 +902,43 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 	})
 })
 
+const get_webgl_read = (sizeW, sizeH) => new Promise(resolve => {
+	// temp sizes
+	sizeW = 16
+	sizeH = 8
+
+	try {
+		let canvas = dom.tzpCanvasTo
+		let ctx = canvas.getContext('webgl', {preserveDrawingBuffer: true})
+
+		let pixels = new Uint8Array(
+			//ctx.drawingBufferWidth * ctx.drawingBufferHeight * 4,
+			sizeW * sizeH *4
+		)
+		console.log(pixels) // Uint8Array
+
+		// ctx is always null
+		ctx.readPixels(
+			0,
+			0,
+			gl.drawingBufferWidth,
+			gl.drawingBufferHeight,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			pixels,
+		);
+		console.log(pixels); // Uint8Array
+	} catch(e) {
+		console.log(e+'')
+	}
+
+})
+
 const outputCanvas = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('canvas')) {return resolve()}
 
+	// clear
+	oCanvasInfo = {}
 	// ensure sizes
 	const sizeW = 16, sizeH = 8
 	let aCanvas = ['Get','GetSolid','Path','To','ToSolid']
@@ -940,6 +948,68 @@ const outputCanvas = () => new Promise(resolve => {
 		} catch(e) {}
 	})
 
+	// generate random image data used across several tests
+	function generate() {
+		let solidClrs, dataToDraw = [], indexFont = []
+		let tmpDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
+		let tmpSolid = new Uint8ClampedArray(sizeW * sizeH * 4)
+		let solidR = Math.floor(Math.random()*255),
+			solidG = Math.floor(Math.random()*255),
+			solidB = Math.floor(Math.random()*255)
+		solidClrs = solidR +','+ solidG +','+ solidB +',255'
+		let counter = -1
+		for (let x=0; x < sizeW; x++) {
+			let xEven = (x % 2 == 0)
+			for (let y=0; y < sizeH; y++) {
+				counter ++
+				let k = counter * 4
+				let yEven = (y % 2 == 0)
+				// xEven + yEven == 1 = checkerboard = 1/2
+				// xEven + yEven == 2 = another 1/4
+				// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
+				let isRandom = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
+				if (!isRandom) {
+					if ((x * y) % 3 == 0 ) {isRandom = true} // brings us to 113/128
+				}
+				if (isRandom) {
+					// random: 113
+					let valueR = Math.floor(Math.random()*255),
+						valueG = Math.floor(Math.random()*255),
+						valueB = Math.floor(Math.random()*255)
+					tmpDrawn[k] = valueR
+					tmpDrawn[k+1] = valueG
+					tmpDrawn[k+2] = valueB
+					tmpDrawn[k+3] = 255
+					dataToDraw.push('rgba('+ valueR +','+ valueG +','+ valueB +',255)')
+				} else {
+					indexFont.push(k)
+					// solid: 15
+					tmpDrawn[k] = solidR
+					tmpDrawn[k+1] = solidG
+					tmpDrawn[k+2] = solidB
+					tmpDrawn[k+3] = 255
+					dataToDraw.push('rgba('+ solidClrs +')')
+				}
+				// solid
+				tmpSolid[k] = solidR
+				tmpSolid[k+1] = solidG
+				tmpSolid[k+2] = solidB
+				tmpSolid[k+3] = 255
+			}
+		}
+		oCanvasInfo = {
+			'draw_data': dataToDraw,
+			'draw_font': indexFont,
+			'draw_solid': solidClrs,
+			'drawn': tmpDrawn,
+			'drawn_hash': mini(tmpDrawn),
+			'drawn_solid': tmpSolid,
+			'drawn_solid_hash': mini(tmpSolid),
+			'pixelcount': sizeW * sizeH,
+		}
+	}
+
+	generate()
 	Promise.all([
 		get_canvas_getimage(sizeW, sizeH),
 		get_canvas_ispoint(sizeW, sizeH),
