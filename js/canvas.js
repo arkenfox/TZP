@@ -20,10 +20,12 @@ function check_canvas_info(dataname, runNo) {
 	let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
 	let pixelcount = oCanvasInfo.pixelcount
 
+	let sSolid = new Set()
 	for (let x=0; x < pixelcount; x++) {
 		let k = x * 4
 		aDrawn = dataDrawn.slice(k, k+4)
 		aRead = data.slice(k, k+4)
+		sSolid.add(aRead.join())
 		if (aDrawn.join() !== aRead.join()) { // pixels
 			altP++
 			indexChanged.push(k)
@@ -33,6 +35,15 @@ function check_canvas_info(dataname, runNo) {
 		if (aDrawn[2] !== aRead[2]) { altB++}
 		if (aDrawn[3] !== aRead[3]) { altA++}
 		// ToDo: range: worth it?
+	}
+	let isSolid = 1 == sSolid.size
+	let isSolidColor = ''
+	if (isSolid) {
+		let aSolid = Array.from(sSolid)
+		isSolidColor = aSolid[0]
+		if ('255,255,255,255' == isSolidColor) {isSolidColor = 'white'
+		} else if ('0,0,0,255'== isSolidColor) {isSolidColor = 'black'
+		}
 	}
 	// stealth check: anything in changed not in font
 	let indexFont = oCanvasInfo.draw_font
@@ -55,11 +66,21 @@ function check_canvas_info(dataname, runNo) {
 	if (rgbCount < 3) {
 		strFP = rgbCount +' channel' + (rgbCount > 1 ? 's' : '') + (isAlpha ? ' + alpha' : '')
 	}
-	let isCheckChannels = (isFontStealth ? 'stealth | ' : '') + strFP
-	// display data: keep android short
-	let isCheckNotation = ''
-	if (isDesktop) {isCheckNotation = ' ['+ (isFontStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
-	} else if (isFontStealth) {isCheckNotation = ' [stealth]'}
+	// fp is the string used in the metric | notation can be more descriptive
+	let aFP = [], aNotation = []
+	aFP.push(strFP)
+	aNotation.push('% '+ aNote.join(' '))
+	if (isFontStealth) {
+		aFP.push('stealth')
+		aNotation.push('stealth')
+	}
+	if (isSolid) {
+		let color = isSolidColor.includes(',') ? '' : '-'+ isSolidColor
+		aFP.push('solid'+ color)
+		aNotation.push('solid '+ isSolidColor)
+	}
+	let isFP = aFP.join(' | ')
+	let	isNotation = '['+ aNotation.join(' | ') +']'
 
 	// RFP match
 	let matchRFP = true
@@ -76,10 +97,10 @@ function check_canvas_info(dataname, runNo) {
 
 	// remember result
 	oCanvasInfo[hash] = {
-		'isCheckChannels': isCheckChannels,
-		'isCheckNotation': isCheckNotation,
-		'isFontStealth': isFontStealth,
-		'isCheck': matchRFP,
+		'font': isFontStealth,
+		'fp': isFP,
+		'notation': isNotation,
+		'rfp': matchRFP,
 	}
 	return oCanvasInfo[hash]
 }
@@ -350,8 +371,6 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 		let isProxy = isProxyLie('CanvasRenderingContext2D.getImageData')
 		// all white: e.g. perps setting false for privacy.resistFingerprinting.randomDataOnCanvasExtract
 			// this pref was removed in FF134, but some extensions still do this
-		let whitehash = 'd5f8f171'
-		// ToDo: replace whitehash or enhance whitehash with solidhash
 		for (const k of Object.keys(oData)) {
 			oCanvasInfo[k] = oData[k]
 			// if an error,. report that, else compare the two runs etc
@@ -362,46 +381,31 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 			} else {
 				// persistent or per execution || no errors so we muct have two results
 					// tidy oRaw as we go since we've hashed results
-				let hash0 = mini(oData[k][0]), isWhite = false
+				let hash0 = mini(oData[k][0])
 				hash = mini(oData[k][1]) // always display a hash, make it the last one read
 
 				let oCheck = check_canvas_info(k, 1) // use the last result to be consistent
-				let isCheck = oCheck.isCheck, // matches RFP
-					isCheckNotation = oCheck.isCheckNotation,
-					isCheckChannels = oCheck.isCheckChannels,
-					isFontStealth = oCheck.isFontStealth
-				//console.log(k, isCheck, isCheckNotation, isCheckChannels, isFontStealth)
-
 				if ('skip' == oCheck) {
 					data = 'trustworthy' // the test is random, return a stable FP
 					oRaw[k] = oData[k][0]
 				} else {
 					// we have tampering
+					let isRFP = oCheck.rfp, isFontStealth = oCheck.font
 					let isPersistent = hash0 == hash
 					if (isPersistent) {
 						oRaw[k] = oData[k][0]
 						notationExtra = ' [persistent]'
-						isWhite = hash == whitehash // isWhite only if persistent
 					} else {
 						oRaw[k] = {}
 						for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
 						notationExtra = ' [per execution]'
-						if (isCheck && !isProxy && !isFontStealth) {
+						if (isRFP && !isProxy && !isFontStealth ) {
 							notation = rfp_green // meets rfp stats, no lies, + no font stealth fuckery
 						}
 					}
 					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
-					if (isWhite) {
-						data += ' | white'
-						notationExtra += ' [white]'
-					} else {
-						notationExtra += isCheckNotation
-						if (isGecko && rfp_green == notation) {data += ' | RFP'
-						} else {
-
-							data += ' | '+ isCheckChannels
-						}
-					}
+					notationExtra += oCheck.notation
+					if (isGecko && rfp_green == notation) {data += ' | RFP'} else {data += ' | '+ oCheck.fp}
 				}
 				addDisplay(9, 'canvas_'+ k +'_note', s99 + notationExtra + sc)
 				addBoth(9, 'canvas_'+ k, hash,'', notation, data)
@@ -956,7 +960,9 @@ const outputCanvas = () => new Promise(resolve => {
 		let solidR = Math.floor(Math.random()*255),
 			solidG = Math.floor(Math.random()*255),
 			solidB = Math.floor(Math.random()*255)
-		solidClrs = solidR +','+ solidG +','+ solidB +',255'
+		solidClrs = solidR +','+ solidG +','+ solidB
+		if ('0,0,0' == solidClrs || '255,255,255' == solidClrs) {solidClrs = '128,128,128'} // don't allow solid white or black
+		solidClrs += ',255'
 		let counter = -1
 		for (let x=0; x < sizeW; x++) {
 			let xEven = (x % 2 == 0)
