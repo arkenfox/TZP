@@ -372,7 +372,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 					isFontStealth = oCheck.isFontStealth
 				//console.log(k, isCheck, isCheckNotation, isCheckChannels, isFontStealth)
 
-				if ('skip' == isCheck) {
+				if ('skip' == oCheck) {
 					data = 'trustworthy' // the test is random, return a stable FP
 					oRaw[k] = oData[k][0]
 				} else {
