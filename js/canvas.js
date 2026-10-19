@@ -17,8 +17,8 @@ function check_canvas_info(dataname, runNo) {
 
 	// run2 otherwise return if RFP-like and create strings
 	let aDrawn = [], aRead = [], indexChanged = []
-	let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
-	let pixelcount = oCanvasInfo.pixelcount
+	let oShift = {'r': [], 'g': [], 'b': [], 'a': []}
+	let pixelcount = oCanvasInfo.pixelcount, altP = 0
 
 	let sSolid = new Set()
 	for (let x=0; x < pixelcount; x++) {
@@ -30,12 +30,13 @@ function check_canvas_info(dataname, runNo) {
 			altP++
 			indexChanged.push(k)
 		}
-		if (aDrawn[0] !== aRead[0]) { altR++} // channels
-		if (aDrawn[1] !== aRead[1]) { altG++}
-		if (aDrawn[2] !== aRead[2]) { altB++}
-		if (aDrawn[3] !== aRead[3]) { altA++}
-		// ToDo: range: worth it?
+		if (aDrawn[0] !== aRead[0]) {oShift.r.push(aDrawn[0] - aRead[0])} // channels
+		if (aDrawn[1] !== aRead[1]) {oShift.g.push(aDrawn[1] - aRead[1])}
+		if (aDrawn[2] !== aRead[2]) {oShift.b.push(aDrawn[2] - aRead[2])}
+		if (aDrawn[3] !== aRead[3]) {oShift.a.push(aDrawn[3] - aRead[3])}
 	}
+
+	// solid?
 	let isSolid = 1 == sSolid.size
 	let isSolidColor = ''
 	if (isSolid) {
@@ -46,14 +47,17 @@ function check_canvas_info(dataname, runNo) {
 		}
 	}
 	// stealth check: anything in changed not in font
+		// to test stealth change cnvas blocker to input = protected part of canmvas API
 	let indexFont = oCanvasInfo.draw_font
 	let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
 	let isFontStealth = aNotInFonts.length == 0
 
 	// noise FP
 	let strFP ='', aNote = []
-	aNote.push('p'+ Math.floor((altP / pixelcount) * 100))
-	if (altR > 0) {strFP += 'r'; aNote.push('r'+Math.floor((altR / pixelcount) * 100))}
+	let isPercentage = Math.floor((altP / pixelcount) * 100)
+	aNote.push('p'+ isPercentage)
+	let altR = oShift.r.length, altG = oShift.g.length, altB = oShift.b.length, altA = oShift.a.length
+	if (altR > 0) {strFP += 'r'; aNote.push('r'+ Math.floor((altR / pixelcount) * 100))}
 	if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
 	if (altB > 0) {strFP += 'b'; aNote.push('b'+ Math.floor((altB / pixelcount) * 100))}
 	if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
@@ -69,35 +73,62 @@ function check_canvas_info(dataname, runNo) {
 	// fp is the string used in the metric | notation can be more descriptive
 	let aFP = [], aNotation = []
 	aFP.push(strFP)
-	aNotation.push('% '+ aNote.join(' '))
+	aNotation.push(aNote.join(' '))
+	if (!isSolid) {
+		// note: isSolid e.g. canvas blocker returning white always results in 100%
+		// unless we fluked a white or black or same color pixel as the solid color
+		// and if isSolid then it's not shifting, it's pre-determined, hence !isSolid
+
+		// 1. bucketize percentage
+		// RFP doesn't matter (we only record 'RFP') but it's like 99 to 100
+		// > 66
+			// brave tests: is 75,82,78,78,71,82,75,73,73,73,75,82,79,72
+			// canvas blocker tests: 87,90,85,87,89,89,88,85,89,91,86,88
+			// helium: 93,89,94,96,97,97,95,92,96,98
+		// < 33
+			// helium solid: 30,30,25,25,25,25,25,17,25,30,17,
+			// cb + stealth: 8,10,11
+		if (isPercentage > 66) {isPercentage = 'high'
+		} else if (isPercentage < 33) {isPercentage = 'low'
+		} else {isPercentage = 'medium'}
+		aFP.push('pixel % '+ isPercentage)
+		// 2. ToDo: range/shift/direction etc
+			// we can count + and - : per channel + overall
+			// we can average the shift (absolute values): per channel and overall
+		//console.log(oShift)
+
+	}
 	if (isFontStealth) {
 		aFP.push('stealth')
 		aNotation.push('stealth')
 	}
 	if (isSolid) {
-		let color = isSolidColor.includes(',') ? '' : '-'+ isSolidColor
-		aFP.push('solid'+ color)
-		aNotation.push('solid '+ isSolidColor)
+		// fp return solid, white or black
+		aFP.push(isSolidColor.includes(',') ? 'solid' : isSolidColor)
+		aNotation.push(isSolidColor)
 	}
 	let isFP = aFP.join(' | ')
-	let	isNotation = '['+ aNotation.join(' | ') +']'
+	let	isNotation = '['+ aNotation.join(' ') +']'
 
 	// RFP match
-	let matchRFP = true
-	// pixels: allow 4 collisions
-	if (altP < (pixelcount - 4)) {matchRFP = false}
-	// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
-		// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
-	let maxCollisions = dataname.includes('solid') ? 24 : 8
-	if (altR < (pixelcount - maxCollisions)) {matchRFP = false}
-	if (altG < (pixelcount - maxCollisions)) {matchRFP = false}
-	if (altB < (pixelcount - maxCollisions)) {matchRFP = false}
-	// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
-	if ((altA / pixelcount) < .66) {matchRFP = false}
+	let matchRFP = !isFontStealth // can't be RFP if stealth
+	if (isGecko) {
+		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
+			// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
+		let maxCollisions = dataname.includes('solid') ? 24 : 8
+		// pixels: allow 4 collisions
+		if (altP < (pixelcount - 4)) {matchRFP = false
+		} else if (altR < (pixelcount - maxCollisions)) {matchRFP = false
+		} else if (altG < (pixelcount - maxCollisions)) {matchRFP = false
+		} else if (altB < (pixelcount - maxCollisions)) {matchRFP = false
+		} else if ((altA / pixelcount) < .66) {
+			// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
+			matchRFP = false
+		}
+	}
 
 	// remember result
 	oCanvasInfo[hash] = {
-		'font': isFontStealth,
 		'fp': isFP,
 		'notation': isNotation,
 		'rfp': matchRFP,
@@ -390,7 +421,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 					oRaw[k] = oData[k][0]
 				} else {
 					// we have tampering
-					let isRFP = oCheck.rfp, isFontStealth = oCheck.font
+					let isRFP = oCheck.rfp
 					let isPersistent = hash0 == hash
 					if (isPersistent) {
 						oRaw[k] = oData[k][0]
@@ -399,12 +430,12 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 						oRaw[k] = {}
 						for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
 						notationExtra = ' [per execution]'
-						if (isRFP && !isProxy && !isFontStealth ) {
-							notation = rfp_green // meets rfp stats, no lies, + no font stealth fuckery
+						if (isRFP && !isProxy) {
+							notation = rfp_green // meets rfp stats, no lies
 						}
 					}
 					data = 'protected | ' + (isPersistent ? 'persistent' : 'per execution')
-					notationExtra += oCheck.notation
+					notationExtra += ' '+ oCheck.notation
 					if (isGecko && rfp_green == notation) {data += ' | RFP'} else {data += ' | '+ oCheck.fp}
 				}
 				addDisplay(9, 'canvas_'+ k +'_note', s99 + notationExtra + sc)
@@ -575,6 +606,45 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 		}
 		return resolve(oRaw)
 	})
+})
+
+const get_canvas_offscreen = (sizeW, sizeH) => new Promise(resolve => {
+	try {
+
+	} catch(e) {
+		console.log(e+'')
+	}
+})
+
+const get_canvas_read = (sizeW, sizeH) => new Promise(resolve => {
+	// temp sizes
+	sizeW = 16
+	sizeH = 8
+
+	try {
+		let canvas = dom.tzpCanvasTo
+		let ctx = canvas.getContext('webgl', {preserveDrawingBuffer: true})
+
+		let pixels = new Uint8Array(
+			//ctx.drawingBufferWidth * ctx.drawingBufferHeight * 4,
+			sizeW * sizeH *4
+		)
+		console.log(pixels) // Uint8Array
+
+		// ctx is always null
+		ctx.readPixels(
+			0,
+			0,
+			gl.drawingBufferWidth,
+			gl.drawingBufferHeight,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			pixels,
+		);
+		console.log(pixels); // Uint8Array
+	} catch(e) {
+		console.log(e+'')
+	}
 })
 
 const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
@@ -904,38 +974,6 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		// out of here
 		return resolve(oRaw)
 	})
-})
-
-const get_webgl_read = (sizeW, sizeH) => new Promise(resolve => {
-	// temp sizes
-	sizeW = 16
-	sizeH = 8
-
-	try {
-		let canvas = dom.tzpCanvasTo
-		let ctx = canvas.getContext('webgl', {preserveDrawingBuffer: true})
-
-		let pixels = new Uint8Array(
-			//ctx.drawingBufferWidth * ctx.drawingBufferHeight * 4,
-			sizeW * sizeH *4
-		)
-		console.log(pixels) // Uint8Array
-
-		// ctx is always null
-		ctx.readPixels(
-			0,
-			0,
-			gl.drawingBufferWidth,
-			gl.drawingBufferHeight,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			pixels,
-		);
-		console.log(pixels); // Uint8Array
-	} catch(e) {
-		console.log(e+'')
-	}
-
 })
 
 const outputCanvas = () => new Promise(resolve => {
