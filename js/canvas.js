@@ -954,7 +954,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 					oRaw[k] = oData[k][0]
 					if (isBraveSmart || isChunk || isGecko && !oKnown[k].includes(hash)) {
 						if (isBraveSmart) {log_debug(9, 'canvas_'+ k +'_ignored', hash)}
-						data = 'protected | persistent'+ isChunk ? ' | deBG' : ''
+						data = 'protected | persistent'+ (isChunk ? ' | deBG' : '')
 						notationExtra = '[persistent'+ (isChunk ? ' | deBG' : '') +']'
 						if (isChunk) {
 							// display the IDAT data hash
@@ -966,17 +966,18 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 							let lookup = k.includes('solid') ? 'solid' : 'nonsolid'
 							if (isGecko && !isProxy && oIDAT[lookup].includes(IDAThash)) {
 								notation = fpp_green // underlying data not changed, has chunks, !isProxy
+								data += ' | FPP'
 							}
 						}
 					}
 				} else {
 					oRaw[k] = {}
 					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
-					data = 'protected | per execution'+ isChunk ? ' | deBG' : ''
+					data = 'protected | per execution'+ (isChunk ? ' | deBG' : '')
 					notationExtra = '[per execution'+ (isChunk ? ' | deBG' : '') +']'
 					notation = check(oData[k][1]) ? rfp_green : rfp_red
+					if (rfp_green == notation) {data += ' | RFP'}
 				}
-				if (rfp_green == notation) {data += ' | RFP'} else if (fpp_green == notation) {data += ' | FPP'}
 				addDisplay(9, 'canvas_'+ k +'_note', s99 + notationExtra + sc)
 				addBoth(9, 'canvas_'+ k, hash,'', notation, data)
 			}
