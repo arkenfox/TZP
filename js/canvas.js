@@ -98,6 +98,7 @@ function check_canvas_info(dataname, runNo) {
 		aFP.push('pixel % '+ isPercentage)
 
 		// 3. subtleness/movement
+		let isMovement = ''
 		let sum = 0, altered = 0, max = 0, min = 255
 		for (const k of Object.keys(oShift)) {
 			altered += oShift[k].length
@@ -108,12 +109,24 @@ function check_canvas_info(dataname, runNo) {
 				sum += a
 			})
 		}
-		console.log('range: ', min, '-', max, '|', max-min, '| average ', sum/altered, '['+ sum + '/'+ altered +']')
+		let avg = (Math.floor((sum/altered) * 10))/10 
 		// RFP: not used if RFP because RFP is pre-determined
 			// because both src and spoof are random, results (e.g. min, max etc) can vary a lot
-			// range: <20 to >190 | >200 | average >65
-		// CB: range: 1 - 1 | 0 | average  1
-
+			// <20 to >190 | range >200 | average >65
+		// tests
+			// 1 - 1 | 0 | average 1   = min = CB, brave, helium solid
+			// 1 - 2 | 1 | average 1.5 = helium
+		// bucketize: min (lowest possible), low, high, chaotic
+			// except min, determine this on avg
+		if (1 == min && 1 == max) {isMovement = 'min' // avg will be 1 and range will be 0
+		} else if (avg < 10) {isMovement = 'low'
+		} else if (avg < 50) {isMovement = 'high'
+		} else {isMovement = 'chaotic'}
+		aFP.push(isMovement +' movement')
+		aNotation.push(Math.floor(avg))
+		if ('min' !== isMovement) {
+			console.log(dataname, min, '-', max, '| range: ', max-min, '| average', avg, '['+ sum + '/'+ altered +']')
+		}
 	}
 	if (isFontStealth) {
 		aFP.push('stealth')
