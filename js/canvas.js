@@ -594,7 +594,7 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 			'isPointInStroke': ['a77e328a'],
 		}
 		for (const k of Object.keys(oData)) {
-			oCanvasInfo[k] = oData[k]
+			//oCanvasInfo[k] = oData[k]
 			// if an error,. report that, else compare the tfwo runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
 			if (undefined !== oErrors[k]) {
@@ -921,7 +921,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		}
 
 		for (const k of Object.keys(oData)) {
-			oCanvasInfo[k] = oData[k]
+			//oCanvasInfo[k] = oData[k]
 
 			// if an error,. report that, else compare the two runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
@@ -952,43 +952,28 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				// only set notationExtra if tampered with
 				if (isPersistent) {
 					oRaw[k] = oData[k][0]
-					if (isBraveSmart) {
-						log_debug(9, 'canvas_'+ k +'_ignored', hash)
-						data = 'protected | persistent'
-						notationExtra = ' [persistent]'
-					} else if (isChunk) {
-						data = 'protected | persistent*'
-						// display the IDAT data hash
-						let IDAThash = mini(oInfo[hash].chunks[1].data)
-						let IDATStr = ' ['+ IDAThash +']'
-						if (isGecko) {
-							notationExtra = ' [persistent*]'+ s99 + IDATStr + sc
+					if (isBraveSmart || isChunk || isGecko && !oKnown[k].includes(hash)) {
+						if (isBraveSmart) {log_debug(9, 'canvas_'+ k +'_ignored', hash)}
+						data = 'protected | persistent'+ isChunk ? ' | deBG' : ''
+						notationExtra = '[persistent'+ (isChunk ? ' | deBG' : '') +']'
+						if (isChunk) {
+							// display the IDAT data hash
+							let IDAThash = mini(oInfo[hash].chunks[1].data)
+							let IDATStr = ' ['+ IDAThash +']'
+							notationExtra += s99 + IDATStr + sc
 							// FPP happens on top of extension tampering, so we need to check
 							// the underlying IDAT data is a known value
 							let lookup = k.includes('solid') ? 'solid' : 'nonsolid'
-							if (!isProxy && oIDAT[lookup].includes(IDAThash)) {
+							if (isGecko && !isProxy && oIDAT[lookup].includes(IDAThash)) {
 								notation = fpp_green // underlying data not changed, has chunks, !isProxy
 							}
-						} else {
-							hash += s99 +' [persistent*]'+ IDATStr + sc
-						}
-					} else if (isGecko) {
-						if (!oKnown[k].includes(hash)) {
-							data = 'protected | persistent'
-							notationExtra = ' [persistent]'
 						}
 					}
-					/* data should be:
-						'protected | persistent' = brave or extension
-						'protected | persistent* | FPP' = pure FPP
-						'protected | persistent*' = extension + chunk (presumable FPP)
-					*/
 				} else {
-					// not going to bother checking for per execution chunks
 					oRaw[k] = {}
 					for (const j of Object.keys(oData[k])) {oRaw[k]['run' + j] = oData[k][j]}
-					data = 'protected | per execution'
-					notationExtra = ' [per execution]'
+					data = 'protected | per execution'+ isChunk ? ' | deBG' : ''
+					notationExtra = '[per execution'+ (isChunk ? ' | deBG' : '') +']'
 					notation = check(oData[k][1]) ? rfp_green : rfp_red
 				}
 				if (rfp_green == notation) {data += ' | RFP'} else if (fpp_green == notation) {data += ' | FPP'}
