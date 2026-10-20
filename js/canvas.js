@@ -36,7 +36,7 @@ function check_canvas_info(dataname, runNo) {
 		if (aDrawn[3] !== aRead[3]) {oShift.a.push(aDrawn[3] - aRead[3])}
 	}
 
-	// solid?
+	// isSolid
 	let isSolid = 1 == sSolid.size
 	let isSolidColor = ''
 	if (isSolid) {
@@ -72,14 +72,18 @@ function check_canvas_info(dataname, runNo) {
 	}
 	// fp is the string used in the metric | notation can be more descriptive
 	let aFP = [], aNotation = []
-	aFP.push(strFP)
-	aNotation.push(aNote.join(' '))
-	if (!isSolid) {
-		// note: isSolid e.g. canvas blocker returning white always results in 100%
-		// unless we fluked a white or black or same color pixel as the solid color
-		// and if isSolid then it's not shifting, it's pre-determined, hence !isSolid
+	aFP.push(strFP) // even a solid can alter e.g. alpha, so we want to catch that
 
-		// 1. bucketize percentage
+	if (!isSolid) {
+		// note: isSolid e.g. canvas blocker returning white
+		// - channel percentages: see percentage
+		// - percentage: is always 100% (unless we fluked a white or black or same color pixel as the solid color)
+		// - movement: is not shifting, it's pre-determined
+
+		// 1. channels
+		aNotation.push(aNote.join(' '))
+
+		// 2. bucketize percentage
 		// RFP doesn't matter (we only record 'RFP') but it's like 99 to 100
 		// > 66
 			// brave tests: is 75,82,78,78,71,82,75,73,73,73,75,82,79,72
@@ -92,10 +96,23 @@ function check_canvas_info(dataname, runNo) {
 		} else if (isPercentage < 33) {isPercentage = 'low'
 		} else {isPercentage = 'medium'}
 		aFP.push('pixel % '+ isPercentage)
-		// 2. ToDo: range/shift/direction etc
-			// we can count + and - : per channel + overall
-			// we can average the shift (absolute values): per channel and overall
-		//console.log(oShift)
+
+		// 3. subtleness/movement
+		let sum = 0, altered = 0, max = 0, min = 255
+		for (const k of Object.keys(oShift)) {
+			altered += oShift[k].length
+			oShift[k].forEach(function(x){
+				let a = Math.abs(x)
+				if (a > max) {max = a}
+				if (a < min) {min = a}
+				sum += a
+			})
+		}
+		console.log('range: ', min, '-', max, '|', max-min, '| average ', sum/altered, '['+ sum + '/'+ altered +']')
+		// RFP: not used if RFP because RFP is pre-determined
+			// because both src and spoof are random, results (e.g. min, max etc) can vary a lot
+			// range: <20 to >190 | >200 | average >65
+		// CB: range: 1 - 1 | 0 | average  1
 
 	}
 	if (isFontStealth) {
@@ -105,7 +122,7 @@ function check_canvas_info(dataname, runNo) {
 	if (isSolid) {
 		// fp return solid, white or black
 		aFP.push(isSolidColor.includes(',') ? 'solid' : isSolidColor)
-		aNotation.push(isSolidColor)
+		aNotation.push('solid '+ isSolidColor)
 	}
 	let isFP = aFP.join(' | ')
 	let	isNotation = '['+ aNotation.join(' ') +']'
