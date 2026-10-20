@@ -86,13 +86,13 @@ function check_canvas_info(dataname, runNo) {
 		// 2. bucketize percentage
 		// RFP doesn't matter (we only record 'RFP') but it's like 99 to 100
 		// > 66
-			// brave tests: is 75,82,78,78,71,82,75,73,73,73,75,82,79,72
+			// brave tests: is 75,82,78,78,71,82,75,73,73,73,75,82,79,72 ... 64,64
 			// canvas blocker tests: 87,90,85,87,89,89,88,85,89,91,86,88
 			// helium: 93,89,94,96,97,97,95,92,96,98
 		// < 33
 			// helium solid: 30,30,25,25,25,25,25,17,25,30,17,
 			// cb + stealth: 8,10,11
-		if (isPercentage > 66) {isPercentage = 'high'
+		if (isPercentage > 60) {isPercentage = 'high'
 		} else if (isPercentage < 33) {isPercentage = 'low'
 		} else {isPercentage = 'medium'}
 		aFP.push('pixel % '+ isPercentage)
