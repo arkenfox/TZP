@@ -779,7 +779,8 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			} catch(e) {
 				hash = e; data = zErrLog
 			}
-			addBoth(10, metric, hash, btn, notation, data)
+			let isLies = isProxyLie('WebGL2RenderingContext.getParameter') || isProxyLie('WebGLRenderingContext.getParameter')
+			addBoth(10, metric, hash, btn, notation, data, isLies)
 		}
 
 		add_context(METRIC +'_context') // sets hasWebGL
