@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 117, maxVer = 159, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 118, maxVer = 160, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,18 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 160: 2078698
+			// FF150 or lower also returns true
+		let t160 = performance.now(), ver160
+		try {
+			if (SVGAElement.prototype.hasOwnProperty('origin')) {
+				let test160 = new RegExp('(?:[\\u{1F600}])$','u').exec('abc'+ String.fromCodePoint(0x1F600))
+				if (test160 === null || test160.index !== 3 || test160[0].length !== 2) throw 'error'
+				ver160 = true
+			}
+		} catch(e) {}
+		rec(160, 160, "2078698", ver160, performance.now()-t160) // 0.02 ms
 
 		// 159: 1960845
 			// fast-path: pref dom.security.sanitizer.enabled (true FF148+)
