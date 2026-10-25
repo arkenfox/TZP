@@ -22,7 +22,7 @@ const btnList = ['alerts','debug','errors','lies']
 
 const jsFilesExpected = 15,
 	gSectionsExpected = 16,
-	expectedMetrics = 137
+	expectedMetrics = 138
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -159,6 +159,7 @@ let isArchArray = zNA,
 	isFontDelay = false, // BB win/mac require a delay for async font fallback if font.vis used
 	isGecko = false,
 	isGeckoLike = false, // gecko/servo
+	isIonJIT = zNA,
 	isOS,
 	isOSErr,
 	isProps, // window properties
