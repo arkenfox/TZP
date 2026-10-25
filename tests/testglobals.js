@@ -59,6 +59,8 @@ let gTimezones = [
 'Greenwich','HST','Hongkong','Iceland','Iran','Israel','Jamaica','Japan','Kwajalein','Libya','MET','MST','MST7MDT',
 'NZ','NZ-CHAT','Navajo','PRC','PST8PDT','Poland','Portugal','ROC','ROK','Singapore','Turkey','UCT','UTC','Universal',
 'W-SU','WET','Zulu',
+// 2079869
+'EST5EDT','CST6CDT','MST7MDT','PST8PDT',
 
 // THE REST
 'Africa/Abidjan','Africa/Accra','Africa/Addis_Ababa','Africa/Algiers','Africa/Asmara','Africa/Asmera','Africa/Bamako',
