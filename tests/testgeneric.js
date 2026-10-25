@@ -413,16 +413,24 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 159
+		isVerMax = 160
 		let test
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
 
+			// 160: 2078698
+			try {
+				if (SVGAElement.prototype.hasOwnProperty('origin')) {
+					test = new RegExp('(?:[\\u{1F600}])$','u').exec('abc'+ String.fromCodePoint(0x1F600))
+					if (test === null || test.index !== 3 || test[0].length !== 2) throw 'error'
+					return 160
+				}
+			} catch(e) {}
 			// 159: fast-path: pref dom.security.sanitizer.enabled (true FF148+)
 			try {if (undefined !== Document.parseHTML('<noscript><p>x</noscript>y').body.firstChild.localName) return 159} catch(e) {} // 1960845
 			// 158: fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
-			try{if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) return 158} catch(e) {} // 2068934
+			try {if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) return 158} catch(e) {} // 2068934
 			try {
 				test = '<nobr><table><marquee></table><nobr>'
 				if (2 == (new DOMParser).parseFromString(test, 'text/html').body.children.length) return 157 // 2049083
