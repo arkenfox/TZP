@@ -766,6 +766,31 @@ function get_pdf(METRIC) {
 	})
 }
 
+const get_recursion = (METRIC) => new Promise(resolve => {
+	// sometimes, at least on blink, I can get a different result on first run
+	// per tab or per session: e.g. i get 17 (incorrect) then 12 (stable)
+	// easily reproducible for me on file:// - 99% sure I saw this on https
+	if (gLoad) {
+		// if page load run it again and compare
+			// if different log a global alert so I know what's happening
+			// tests indicate this is working: leave the global alert for a while
+		let initialR = isRecursion[1]
+		Promise.all([
+			get_isRecursion(1) // resets isRecursion
+		]).then(function(){
+			let newR = isRecursion[1]
+			if (initialR !== newR) {
+				log_debug(SECTG, METRIC, 'initial: '+ initialR +' | new: '+ newR, isScope, true)
+			}
+			addBoth(18, METRIC, isRecursion[0],'','', isRecursion[1])
+			return resolve()
+		})
+	} else {
+		addBoth(18, METRIC, isRecursion[0],'','', isRecursion[1])
+		return resolve()
+	}
+})
+
 const get_speech_engines = (METRIC) => new Promise(resolve => {
 	// media.webspeech.synth.enabled
 	let t0 = nowFn(), notation = rfp_red, isLies = false
@@ -1225,7 +1250,14 @@ const outputMisc = () => new Promise(resolve => {
 	}
 	addBoth(18, 'error_message_fix', value,'', notation)
 
+	// ion/JIT shit (we should collect slider notations and make sure they're the same)
+	notation = isBB ? bb_slider_red : ''; value = isIonJIT
+	let data = 'string' == typeof isIonJIT ? zErr : ''
+	if (isBB && 'boolean' == typeof isIonJIT) {notation = isIonJIT ? bb_standard : bb_safer}
+	addBoth(18, 'ion_jit', isIonJIT, '', notation, data)
+
 	Promise.all([
+		get_window_props('window_properties'),
 		get_speech_engines('speech_engines'),
 		get_svg('svg_enabled'),
 		get_math('math_trig', isMathTrigLies),
@@ -1233,7 +1265,6 @@ const outputMisc = () => new Promise(resolve => {
 		get_math_css('math_css'),
 		get_component_shims('component_interfaces'),
 		get_window_prop('wasm'),
-		get_window_props('window_properties'),
 		get_navigator_keys('navigator_keys'),
 		get_webdriver('webdriver'),
 		get_pdf('pdf'),
@@ -1242,7 +1273,11 @@ const outputMisc = () => new Promise(resolve => {
 		Promise.all([
 			get_window_functions('window_functions')
 		]).then(function(){
-			return resolve()
+			Promise.all([
+				get_recursion('recursion'), // run separately from all other functions
+			]).then(function(){
+				return resolve()
+			})
 		})
 	})
 })

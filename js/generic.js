@@ -350,6 +350,7 @@ async function get_isArchWebGPU(METRIC) {
 	}
 	if (undefined == navigator.gpu) {
 		// dom.webgpu.enabled = false
+		// note: toggling the pref requires a page reload to take effect
 		exit('undefined')
 	} else {
 		await navigator.gpu.requestAdapter().then(a => {
@@ -956,6 +957,58 @@ function get_isGecko(METRIC) {
 	log_perf(SECTG, METRIC, t0,'', value)
 	return
 }
+
+const get_isIonJIT = (METRIC) => new Promise(resolve => {
+	let is113 = CanvasRenderingContext2D.prototype.hasOwnProperty('reset')
+	if (!isGecko || !is113) {return resolve()}
+
+	let t0 = nowFn()
+	// javascript.options.ion | javascript.options.baselinejit
+	// test1 FF113-159 | test2 FF143+
+	// if both prefs are true, we return true (~0.5ms)
+	// if either or both prefs are false, returns false
+		// if baselinejit is false = 4.5ms (test1) and 2ms (test2)
+	// Note: both these prefs require a restart to take efect, so memorize
+
+	function exit(value) {
+		isIonJIT = value
+		log_perf(SECTG, METRIC, t0,'', isIonJIT)
+		return resolve()
+	}
+	try {
+		if (runSG) {foo++}
+		// we'll split on version 144 as it's fast and reliable (no-prefs/not-a-date etc)
+		if (undefined == window.CSS2Properties) {
+			// FF144+
+			function mul(x, y, active) {return active ? x * y : 1}
+			for (let i = 0; i < 10000; i++) mul(3, 5, true)
+			function caller(active) {return mul(0, -5, active)}
+			for (let i = 0; i < 10000; i++) caller(false)
+			const actual = caller(true) // -0
+			let x = !Object.is(actual, -0)
+			exit(x)
+		} else {
+			function f(arr, c1, c2) {
+				var d = c1 ? 1 : -0
+				var a = arr[d]
+				var r = 0
+				if (c2) {r = d * 1}
+				return r
+			}
+			var arr = [10, 20, 30]
+			for (var i = 0; i < 200; i++) {f(arr, false, false)}
+			for (var i = 0; i < 20000; i++) {
+				f(arr, true, true)
+				f(arr, false, false)
+			}
+			var r = f(arr, false, true)
+			let x = !Object.is(r, -0)
+			exit(x)
+		}
+	} catch(e) {
+		exit(log_error(18, 'ion_jit', e, isScope, true)) // persist sect18
+	}
+})
 
 function get_isPointerRawUpdate(event) {
 	let value = 'undefined'
@@ -2710,6 +2763,7 @@ function countJS(item) {
 			get_isBB('isBB'),
 			get_isFileSystem('isFileSystem'),
 			get_isAutoplay('getAutoplayPolicy'),
+			get_isIonJIT('isIonJIT'),
 		]).then(function(){
 			// 140+ notations: if isBB then block FPP notations & vice versa
 			isFPPFallback = !isBB
