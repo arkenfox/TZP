@@ -425,7 +425,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 
 		// CONTEXT
 		function add_context(metric) {
-			let value = [], data = {}, notation = isBB ? bb_red : default_red
+			let value = [], data = {}, notation = isBB ? bb_slider_red : default_red
 			try {
 				// just use run 0
 				for (const c of Object.keys(oRaw[0]).sort()) {
@@ -439,7 +439,12 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 				sDetail[isScope].lookup[metric] = value
 				// notation
 				if (isBB) {
-					if ('null | null | null' == value || 'enabled | enabled | null' == value) {notation = bb_green}
+					if ('null | null | null' == value) {
+						notation = bb_safer
+					} else if ('enabled | enabled | null' == value) {
+						// try and match wasm
+						notation = undefined == window.WebAssembly ? bb_safer : bb_standard
+					}
 				} else if ('enabled | enabled | enabled' == value) {
 					notation = default_green
 				}
