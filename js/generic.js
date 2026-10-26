@@ -2083,7 +2083,10 @@ function output_health(scope) {
 			for (const k of Object.keys(target).sort()) {
 				let level = target[k][0], detail = target[k][1]
 				// except math these are all binary: enabled/disabled | true/false
-				if (k.includes('math') && 'standard' == level) {detail = zE}
+					// math is a hash, but standard/safer is always set based on zE/zD so just reverse it
+				if (k.includes('math') {
+					if ('standard' == level) {detail = zE} else if ('safer' == level) {detail = zD}
+				}
 				if (undefined == tmpobj[level]) {tmpobj[level] = {}}
 				tmpobj[level][k] = detail
 			}
