@@ -443,7 +443,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						notation = bb_safer
 					} else if ('enabled | enabled | null' == value) {
 						// try and match wasm
-						notation = undefined == window.WebAssembly ? bb_safer : bb_standard
+						notation = undefined == window.WebAssembly ? bb_safer +' [clicked-to-play]' : bb_standard
 					}
 				} else if ('enabled | enabled | enabled' == value) {
 					notation = default_green
