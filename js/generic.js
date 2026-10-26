@@ -1716,7 +1716,7 @@ function json_highlight(json, clrValues = false, target = '') {
 		} else if (/null/.test(match)) {
 			cls = 'null';
 		}
-		return '<span class="'+ cls +'">'+ match +'</span>';
+		return '<span class="'+ cls +'">'+ match +'</span>'
 	})
 }
 
@@ -1854,7 +1854,7 @@ function metricsEvent(evt) {
 function metricsShow(name, scope) {
 	overlayName = name
 
-	let isKit = false
+	let isKit = false, isComment = ''
 	if (isGecko & isSmart) {
 		// atm this is pretty much limited to health, pixels_match, timezone_offsets_data
 		// and fonts_detected
@@ -1884,6 +1884,8 @@ function metricsShow(name, scope) {
 	} else if (scope+'_health_slider' == name) {
 		data = gData.health[scope+'_slider']
 		target = 'health_slider'
+		isComment = 'note: <code>ion_jit</code> only indicates that at least one of '
+			+ '<code>ion</code> or <code>baselinejit</code> is as such - it does not guarantee both'
 	} else if (zFP+'_metrics' == name) {
 		data = gData[zFP][scope+'_metrics']
 	} else if (aShowFormat.includes(name)) {
@@ -1926,6 +1928,7 @@ function metricsShow(name, scope) {
 	let aNoColor = ['element_keys','window_functions']
 	let isColor = !aNoColor.includes(target)
 	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][cTarget] : json_highlight(data, isColor, target)): ''
+	if ('' !== isComment) {display += '<br><br>'+ s99 + isComment + sc}
 	// dev: no need to display overlayInfo everywhere, limit
 	if ('feature' == name) {dom.overlayInfo.innerHTML = overlayInfo}
 
@@ -2084,7 +2087,7 @@ function output_health(scope) {
 				let level = target[k][0], detail = target[k][1]
 				// except math these are all binary: enabled/disabled | true/false
 					// math is a hash, but standard/safer is always set based on zE/zD so just reverse it
-				if (k.includes('math') {
+				if (k.includes('math')) {
 					if ('standard' == level) {detail = zE} else if ('safer' == level) {detail = zD}
 				}
 				if (undefined == tmpobj[level]) {tmpobj[level] = {}}
