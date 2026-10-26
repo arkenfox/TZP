@@ -2493,7 +2493,16 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 			} else if (notation.includes('Standard')) {isSlider = 'standard'
 			} else if (notation.includes('Slider')) {isSlider = 'fail'}
 			if ('' !== isSlider) {
-				gData['health'][isScope +'_collect_slider'][metric] = [isSlider, str]
+				// clean up names
+				let oSlider = {
+					'element_math': 'mathml',
+					'font_support_graphite_test': 'graphite',
+					'ion_jit': 'ion_and/or_jit',
+					'svg_enabled': 'svg',
+					'wasm': 'wasm',
+					'webgl_context': 'webgl',
+				}
+				gData['health'][isScope +'_collect_slider'][oSlider[metric]] = [isSlider, str]
 			}
 		}
 	}
