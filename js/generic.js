@@ -964,11 +964,12 @@ const get_isIonJIT = (METRIC) => new Promise(resolve => {
 
 	let t0 = nowFn()
 	// javascript.options.ion | javascript.options.baselinejit
+	// Note: both these prefs require a restart to take efect, so memorize
+
 	// test1 FF113-159 | test2 FF143+
 	// if both prefs are true, we return true (~0.5ms)
 	// if either or both prefs are false, returns false
 		// if baselinejit is false = 4.5ms (test1) and 2ms (test2)
-	// Note: both these prefs require a restart to take efect, so memorize
 
 	function exit(value) {
 		isIonJIT = value
@@ -979,7 +980,7 @@ const get_isIonJIT = (METRIC) => new Promise(resolve => {
 		if (runSG) {foo++}
 		// we'll split on version 144 as it's fast and reliable (no-prefs/not-a-date etc)
 		if (undefined == window.CSS2Properties) {
-			// FF144+
+			// 2078762 FF144+
 			function mul(x, y, active) {return active ? x * y : 1}
 			for (let i = 0; i < 10000; i++) mul(3, 5, true)
 			function caller(active) {return mul(0, -5, active)}
@@ -988,6 +989,7 @@ const get_isIonJIT = (METRIC) => new Promise(resolve => {
 			let x = !Object.is(actual, -0)
 			exit(x)
 		} else {
+			// 2078745
 			function f(arr, c1, c2) {
 				var d = c1 ? 1 : -0
 				var a = arr[d]
@@ -1879,6 +1881,9 @@ function metricsShow(name, scope) {
 	} else if (scope+'_health_metrics' == name) {
 		data = gData.health[scope+'_metrics']
 		target = 'health_metrics'
+	} else if (scope+'_health_slider' == name) {
+		data = gData.health[scope+'_slider']
+		target = 'health_slider'
 	} else if (zFP+'_metrics' == name) {
 		data = gData[zFP][scope+'_metrics']
 	} else if (aShowFormat.includes(name)) {
@@ -2069,7 +2074,32 @@ function output_health(scope) {
 	gData[h][scope +'_summary_fail'] = {}
 	gData[h][scope +'_summary_pass'] = {}
 
-	let target = gData.health[scope +'_collect']
+	// slider
+	let target = gData.health[scope +'_collect_slider']
+	let btnSlider = ''
+	if (isBB) {
+		try {
+			let tmpobj = {}
+			for (const k of Object.keys(target).sort()) {
+				let level = target[k][0], detail = target[k][1]
+				// except math these are all binary: enabled/disabled | true/false
+				if (k.includes('math') && 'standard' == level) {detail = zE}
+				if (undefined == tmpobj[level]) {tmpobj[level] = {}}
+				tmpobj[level][k] = detail
+			}
+			// sort by level
+			let key = scope +'_slider' 
+			gData[h][key] = {}
+			for (const k of Object.keys(tmpobj).sort()) {gData[h][key][k] = tmpobj[k]}
+			// any failures or more than one level, then red
+			let color = (undefined !== tmpobj['fail'] || 1 !== Object.keys(tmpobj).length) ? 'bad' : 'good'
+			btnSlider = addButton(color, scope +'_health_slider', 'slider')
+		} catch(e) {
+			console.log(e)
+		}
+	}
+
+	target = gData.health[scope +'_collect']
 	try {
 		for (const metric of Object.keys(target).sort()) {
 			try {
@@ -2100,14 +2130,16 @@ function output_health(scope) {
 			let overlayHealthCount = countPass +'/'+ countTotal
 			let btnPart1 = addButton((isAll ? 'good' : 'bad'), h, countPass)
 			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> | </span>'
-			dom[scope + h].innerHTML = btnPart1
+			dom[scope + h].innerHTML = btnSlider + btnPart1
 				+ addButton(0,'document_health_metrics', countTotal).replace('[','')
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
-		delete gData[h][scope +'_collect']
 	} catch(e) {
 		console.log(e)
 	}
+
+	delete gData.health[scope +'_collect_slider']
+	delete gData[h][scope +'_collect']
 }
 
 function output_perf(id, click = false) {
@@ -2420,26 +2452,43 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 		notation = notation.replace("class='good'", "class='bad'")
 		notation = notation.replace(tick, cross)
 	}
-	str += ''
-	if (isSmart && !isLies && 8 == str.length && !str.includes(' ')) { // limit to hopefully just hashes
-		if (str.includes('6') && str.includes('7')) {
-			if (str.indexOf('6') < str.indexOf('7')) {
-				str = str.replace('7','<span class="s67 s' + section +'">7</span>')
-				str = str.replace('6','<span class="s67 s' + section +'">6</span>')
+	let newstr = str +''
+	if (isSmart && !isLies && 8 == newstr.length && !newstr.includes(' ')) { // limit to hopefully just hashes
+		if (newstr.includes('6') && newstr.includes('7')) {
+			if (newstr.indexOf('6') < newstr.indexOf('7')) {
+				newstr = newstr.replace('7','<span class="s67 s' + section +'">7</span>')
+				newstr = newstr.replace('6','<span class="s67 s' + section +'">6</span>')
 			}
 		}
 	}
 	if ('manual' == isScope) {
-		sDataTemp['display'][isScope][metric] = str + btn + notation
+		sDataTemp['display'][isScope][metric] = newstr + btn + notation
 		return
 	}
-	sDataTemp['display'][isScope][section][metric] = str + btn + notation
-	// global health: just grab pass/fail
-	if (gRun && '' !== notation && notation.includes("class='health'")) {
-		let isPass
-		if (notation.includes('>'+ tick +'<')) {isPass = true} else if (notation.includes('>'+ cross +'<')) {isPass = false}
-		if (isPass !== undefined) {
-			gData['health'][isScope +'_collect'][metric] = [sectionMap[section], isPass]
+	sDataTemp['display'][isScope][section][metric] = newstr + btn + notation
+	// global
+	if (gRun && '' !== notation) {
+		if (notation.includes("class='health'")) {
+			// health: just grab pass/fail
+			let isPass
+			if (notation.includes('>'+ tick +'<')) {isPass = true} else if (notation.includes('>'+ cross +'<')) {isPass = false}
+			if (isPass !== undefined) {
+				gData['health'][isScope +'_collect'][metric] = [sectionMap[section], isPass]
+			}
+		} else if (!notation.includes("class='healthsilent'")) {
+			// everything else that is notated but not health
+
+		}
+		// slider
+			// bb_slider_red is both health + slider, so we have to check every notation
+		if (isBB) {
+			let isSlider = ''
+			if (notation.includes('Safer')) {isSlider = 'safer'
+			} else if (notation.includes('Standard')) {isSlider = 'standard'
+			} else if (notation.includes('Slider')) {isSlider = 'fail'}
+			if ('' !== isSlider) {
+				gData['health'][isScope +'_collect_slider'][metric] = [isSlider, str]
+			}
 		}
 	}
 }
@@ -2921,7 +2970,7 @@ function outputSection(id, isResize = false) {
 			log_alert(5, 'm', "z", isScope, true)
 		}
 		gData[zFP] = {'document': {}}
-		gData.health = {'document_collect': {}}
+		gData.health = {'document_collect': {}, 'document_collect_slider': {}}
 		gTiming.forEach(function(item){gData.timing[item] = []})
 		btnList.forEach(function(item){gData[item] = {}})
 		if (!gLoad) { // don't wipe gLoad perf

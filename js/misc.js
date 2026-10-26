@@ -869,7 +869,9 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 })
 
 function get_svg(METRIC) {
-	let hash, data ='', target = dom.tzpSVG
+	// note: notate svg even though it's the same in standard vs safer because its part
+		// of the slider and changes in safest: i.e we should make sure it's set correctly
+	let hash, data ='', target = dom.tzpSVG, notation = isBB ? bb_slider_red : ''
 	try {
 		if (runSE) {foo++}
 		target.innerHTML =''
@@ -881,10 +883,14 @@ function get_svg(METRIC) {
 		shape.appendChild(rect)
 		target.appendChild(shape)
 		hash = target.offsetHeight > 0 ? zE : zD
+		if (isBB && zE == hash) {
+			// try and match wasm
+			notation = undefined == window.WebAssembly ? bb_safer : bb_standard
+		}
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	addBoth(18, METRIC, hash,'','', data)
+	addBoth(18, METRIC, hash,'', notation, data)
 	return
 }
 
