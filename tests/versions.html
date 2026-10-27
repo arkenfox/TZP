@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 118, maxVer = 160, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 119, maxVer = 161, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -292,6 +292,13 @@ function testperf() {
 	let tEnd = performance.now()
 	console.log(tEnd - tStart, 'ms', testversion)
 }
+
+		// 161: 2079321 (not affected by svg.disabled)
+		let t161 = performance.now(), ver161
+		try {
+			ver161 = SVGImageElement.prototype.hasOwnProperty('referrerPolicy')
+		} catch(e) {}
+		rec(161, 161, "2079321", ver161, performance.now()-t161) // 0.006 ms
 
 		// 160: 2078698
 			// FF150 or lower also returns true

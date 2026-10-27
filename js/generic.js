@@ -1323,7 +1323,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 160) {isVerExtra = '+'} else if (isVer == 139) {isVerExtra = ' or lower'}
+	if (161 == isVer) {isVerExtra = '+'} else if (139 == isVer) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -1344,7 +1344,7 @@ function get_isVer(METRIC) {
 			if (!isCascade) return 139
 
 			// now cascade
-
+			try {if (SVGImageElement.prototype.hasOwnProperty('referrerPolicy')) return 161} catch(e) {} // 2079321
 			// 160: 2078698 (requires FF151+)
 			try {
 				if (SVGAElement.prototype.hasOwnProperty('origin')) { // FF155+

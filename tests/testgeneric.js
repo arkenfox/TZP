@@ -413,12 +413,13 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 160
+		isVerMax = 161
 		let test
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
 
+			try {if (SVGImageElement.prototype.hasOwnProperty('referrerPolicy')) return 161} catch(e) {} // 2079321
 			// 160: 2078698
 			try {
 				if (SVGAElement.prototype.hasOwnProperty('origin')) {
