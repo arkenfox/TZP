@@ -70,7 +70,7 @@ function get_domrect(METRIC) {
 				var z = -Math.floor(Math.log10(max) + 1) // leading zeros
 				// cap at 5: chameleon varies from 6 to 9 in a few tests
 				z = z > 5 ? 5 : z
-				max = '< '+ sign +'0.' + '0'.repeat(z-1) + '1'
+				max = '< '+ sign +'0.' +'0'.repeat(z-1) +'1'
 			}
 			value = {
 				'properties': aProps.length == 8 ? 'all' : aProps.join(', '),
@@ -91,7 +91,7 @@ function get_domrect(METRIC) {
 	hash = mini(data)
 	let btn = addButton(15, METRIC, countPass +'/4')
 	// servo we just want to see what we got
-	if ('servo' == isEngine) {btn = '', data = '', hash = zNA}
+	if (isServo) {btn = '', data = '', hash = zNA}
 	addBoth(15, METRIC, hash, btn, default_red, data)
 	return
 }
@@ -891,7 +891,7 @@ function get_element_scrollbars(METRIC, isLies) {
 				let typeCheck = typeFn(width)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				value = 100 - width // 100 set in html, not affected by zoom
-				if (value < 0) {throw zErrInvalid + '< 0'}
+				if (value < 0) {throw zErrInvalid +'< 0'}
 				// get scrollbar width for json overlay
 				if (undefined == isScrollbar && 'auto' == p) {isScrollbar = value}
 			} catch(e) {
@@ -914,7 +914,7 @@ function get_element_scrollbars(METRIC, isLies) {
 				if (runST) {value = NaN} else if (runSI) {value = -1}
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				if (value < 0) {throw zErrInvalid + '< 0'}
+				if (value < 0) {throw zErrInvalid +'< 0'}
 				// get scrollbar width for json overlay
 				if (undefined == isScrollbar && 'auto' == p) {isScrollbar = value}
 			} catch(e) {
