@@ -1096,7 +1096,7 @@ function get_font_notation(METRIC, data) {
 		}
 		addDetail(tmpName, tmpobj)
 		let brand = isTB ? (isMB ? 'MB' : 'TB') : 'RFP'
-		notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
+		notation = addButton('bad', tmpName, "<span class='health'>"+ cross +'</span> '+ count +' '+ brand)
 		// BB doesn't have baselang but check FPP fallback regardless
 		if (isFPPFallback && obj.baselang.length) {
 			// FFP if all unexpected are in baselang then we're fpp_green
@@ -1218,7 +1218,7 @@ function get_font_support(METRIC) {
 				let key = get_font_group(item)
 				try {
 					if (runSE) {foo++}
-					let supported = CSS.supports(k +'('+ item + ')')
+					let supported = CSS.supports(k +'('+ item +')')
 					oData[key][item] = supported
 				} catch(e) {
 					oData[key][item] = zErr
@@ -1236,7 +1236,7 @@ function get_font_support(METRIC) {
 		let value, display ='', notation = isBB ? bb_red : default_red
 		let isCount = true
 		try {
-			if (!fntDocEnabled) {throw zErrInvalid + 'document fonts disabled'}
+			if (!fntDocEnabled) {throw zErrInvalid +'document fonts disabled'}
 			// ToDo: handle when font face is blocked
 			let el = dom.tzpGraphite,
 				test = el.children[0].offsetWidth,
@@ -1414,7 +1414,7 @@ function get_fonts_base(METRICB, selected) {
 		// unless we had an error which means we never end up here, we will have fntBase data
 	let btnAll = addButton(12, METRICB +'_reported', Object.keys(reportedBase).length +'/'+ fntData.family.generic_name.length)
 	addDetail(METRICB +'_reported', reportedBase)
-	addDisplay(12, METRICB+ '_reported', mini(reportedBase), btnAll)
+	addDisplay(12, METRICB +'_reported', mini(reportedBase), btnAll)
 
 	// add selected/unknown/n/a
 	if (isSelected) {
@@ -1546,7 +1546,7 @@ function get_fonts_max(METRIC, isLies) {
 			value = method.height
 			if (runST) {value += ''}
 			let typeCheck = typeFn(value)
-			if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
+			if ('number' !== typeCheck) {throw zErrInvalid +'got '+ typeCheck}
 			data[style] = value
 		})
 		value = mini(data); btn = addButton(12, METRIC)
@@ -1860,8 +1860,8 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			try {
 				if ('number' !== wType || 'number' !== hType) {
 					throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
-				} else if (wValue < 1 || hValue < 1) {throw zErrInvalid + 'width or height < 1'
-				} else if (wValue == hValue < 1) {throw zErrInvalid + 'width == height'}
+				} else if (wValue < 1 || hValue < 1) {throw zErrInvalid +'width or height < 1'
+				} else if (wValue == hValue < 1) {throw zErrInvalid +'width == height'}
 				aTests.push(k)
 			} catch(e) {
 				fntBaseInvalid[k] = zErr
@@ -2295,7 +2295,7 @@ function get_glyphs(METRIC, isLies) {
 		for (const k of Object.keys(tmpobj)) {newobj[tmpobj[k].names.join(' ')] = tmpobj[k].data}
 		for (const k of Object.keys(newobj).sort()) {data[k] = newobj[k]}
 
-		hash = mini(data), strSizes = gRun ? setSize.size + ' unique sizes' : ''
+		hash = mini(data), strSizes = gRun ? setSize.size +' unique sizes' : ''
 		btn = addButton(12, METRIC)
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -2331,7 +2331,7 @@ function get_script_defaults(METRIC) {
 			let test = getComputedStyle(el).getPropertyValue('font-family')
 			if (runST) {test =''}
 			let typeCheck = typeFn(test)
-			if ('string' !== typeCheck) {throw zErrType + 'font-family: '+ typeCheck}
+			if ('string' !== typeCheck) {throw zErrType +'font-family: '+ typeCheck}
 
 			// size typecheck
 			test = getComputedStyle(el).getPropertyValue('font-size').trim()
@@ -2339,10 +2339,10 @@ function get_script_defaults(METRIC) {
 			let originalvalue = test
 			typeCheck = typeFn(test)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if (test.slice(-2) !== 'px') {throw zErrInvalid + 'got '+ originalvalue} // missing px
+			if (test.slice(-2) !== 'px') {throw zErrInvalid +'got '+ originalvalue} // missing px
 			test = test.slice(0, -2)
 			if (test.length > 0) {test = test * 1}
-			if ('number' !== typeFn(test)) {throw zErrInvalid + 'got '+ originalvalue} // missing number
+			if ('number' !== typeFn(test)) {throw zErrInvalid +'got '+ originalvalue} // missing number
 
 			// loop
 			let tmpdata = {}
@@ -2423,10 +2423,16 @@ function get_system_fonts(METRIC) {
 				if ('7e76c987' == hash) {notation = default_green} // 16px normal 400 sans-serif
 			}
 		} else {
+			// non-RFP
+				// TBH I'm not sure if they change on other platform languages
+				// it didn't change with app language + languages + locale changes e.g. on windows to 'ko'
+
 			// RFP FF128+
 			if ('windows' == isOS) {
-				if ('a75e7a17' == hash) {notation = rfp_green} // 12px normal 400 sans-serif
+				if ('a75e7a17' == hash) {notation = rfp_green // 12px normal 400 sans-serif
+				} else if (!isBB && '0cd76a91' == hash) {notation = default_green} // 12px normal 400 Segoe UI
 			} else if ('mac' == isOS) {
+				// ToDo: check default FF on mac
 				if ('0b6c0dbe' == hash) {notation = rfp_green}
 				/* mac
 				11px normal 400 -apple-system: [message-box, status-bar],
@@ -2435,14 +2441,17 @@ function get_system_fonts(METRIC) {
 				13px normal 400 -apple-system: [caption, menu]
 				*/
 			} else if ('linux' == isOS) {
+				// non RFP/BB linux is a lottery, there is no default
+				// e.g. Cantarell on debian 12
 				if (isBB) {
-					// BB14: due to font config aliases
+					// BB14+: due to font config aliases
 					if ('ea0ea5d7' == hash) {notation = rfp_green} // 15px normal 400 Arimo
 				} else {
 					if ('48e3d1b4' == hash) {notation = rfp_green} // 15px normal 400 sans-serif
 				}
 			} else if ('android' == isOS) {
-				if ('7e83ef35' == hash) {notation = rfp_green} // 12px normal 400 Roboto
+				// same with and without RFP
+				if ('7e83ef35' == hash) {notation = default_green} // 12px normal 400 Roboto
 			}
 		}
 		if (isSmart) {count = (count +'').padStart(2,' ')} // aesthetics: align the last three "font" health metrics
