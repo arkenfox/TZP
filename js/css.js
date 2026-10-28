@@ -126,7 +126,7 @@ function get_computed_styles(METRIC) {
 					ownEnumerablePropertyNames = [],
 					cssVar = /^--.*$/
 				// chrome getComputedStyle prepends "-" to some webkit* keys which it doesn't do in the other methods
-				if (type == 2 && 'blink' === isEngine) {cssVar = /^-.*$/}
+				if (type == 2 && isBlink) {cssVar = /^-.*$/}
 
 				Object.keys(cssStyleDeclaration).forEach(key => {
 					let numericKey = !isNaN(key),
@@ -250,9 +250,9 @@ function get_computed_styles(METRIC) {
 					let typeCheck = typeFn(obj)
 					if ('object' !== typeCheck) {throw zErrType + typeCheck}
 					typeCheck = typeFn(obj.keys)
-					if ('array' !== typeCheck) {throw zErrType + 'keys: '+ typeCheck}
+					if ('array' !== typeCheck) {throw zErrType +'keys: '+ typeCheck}
 					let data = obj.keys
-					if ('blink' == isEngine) {data.sort()} // sort for blink
+					if (isBlink) {data.sort()} // sort for blink
 					let hash = mini(data)
 					aHashes.push(hash)
 					intHashes.push(i)
@@ -499,7 +499,7 @@ function get_media_css(METRIC) {
 							// atm it's only any-pointer with only two max values
 								// the order is coarse, fine, none
 							// exact spec match: in case of fuckery
-							if (aTest[0] +' + ' + aTest[1] == value) {value = 'any'}
+							if (aTest[0] +' + '+ aTest[1] == value) {value = 'any'}
 						}
 					}
 				}
