@@ -15,7 +15,7 @@ const get_battery = (METRIC) => new Promise(resolve => {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if ('blink' !== isEngine) {
+		} else if (!isBlink) {
 			// non-blink
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -37,9 +37,9 @@ const get_battery = (METRIC) => new Promise(resolve => {
 					if (typeCheck !== typeExpected) {if (!isTimeCheck) {throw zErrType + k +': '+ typeCheck}}
 					// validity
 					if (isTimeCheck) {
-						if (!Number.isInteger(x) || x < 0) {throw zErrInvalid + k + ': expected a positive integer: got '+ x}
+						if (!Number.isInteger(x) || x < 0) {throw zErrInvalid + k +': expected a positive integer: got '+ x}
 					} else if ('level' == k) {
-						if (x < 0 || x > 1) {throw zErrInvalid + k + ': expected 0 to 1: got '+ x}
+						if (x < 0 || x > 1) {throw zErrInvalid + k +': expected 0 to 1: got '+ x}
 					}
 					if (Infinity == x) (x += '')
 					if (isTime) {aTimes.push(x)}
@@ -111,7 +111,7 @@ function get_device_memory(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			value = typeCheck
-		} else if ('blink' !== isEngine) {
+		} else if (!isBlink) {
 			// non-blink
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -152,22 +152,22 @@ function get_device_posture(METRIC) {
 		let value
 		try {
 			value = navigator[m]
-			if ('webkit' == isEngine && runST) {value = false} else if (runSI) {value = 'blink' == isEngine ? {} : 'folder'}
+			if (isWebkit && runST) {value = false} else if (runSI) {value = isBlink ? {} : 'folder'}
 			let typeCheck = typeFn(value, true)
 			if ('undefined' == typeCheck) {
 				// any engine e.g. not implemented yet or disabled by fork or due to sandboxing etc
 				value = typeCheck
-			} else if ('blink' !== isEngine) {
+			} else if (!isBlink) {
 				// non-blink
 				throw zErrInvalid +'expected undefined: got '+ ('string' == typeCheck ? value : typeCheck)
 			} else {
 				// blink
-				if ('object' !== typeCheck) {throw zErrType + 'devicePosture: '+ typeCheck}
+				if ('object' !== typeCheck) {throw zErrType +'devicePosture: '+ typeCheck}
 				let expected = '[object DevicePosture]'
-				if (value+'' !== expected) {throw zErrInvalid + 'devicePosture expected '+ expected +': got '+ value+''}
+				if (value+'' !== expected) {throw zErrInvalid +'devicePosture expected '+ expected +': got '+ value+''}
 				value = value.type
 				typeCheck = typeFn(value)
-				if ('string' !== typeCheck) {throw zErrType + 'devicePosture.type: '+ typeCheck}
+				if ('string' !== typeCheck) {throw zErrType +'devicePosture.type: '+ typeCheck}
 				if (!aValid.includes(value)) {
 					throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ value
 				}
@@ -186,8 +186,8 @@ function get_device_posture(METRIC) {
 			for (let i=0; i < aValid.length; i++) {
 				if (window.matchMedia('('+ m +':'+ aValid[i] +')').matches) {value = aValid[i]; break}
 			}
-			if ('webkit' !== isEngine && runSI) {value = 'folder'}
-			if ('blink' !== isEngine && 'undefined' !== value) {
+			if (!isWebkit && runSI) {value = 'folder'}
+			if (!isBlink && 'undefined' !== value) {
 				// non-blink
 				throw zErrInvalid +'expected undefined: got '+ value
 			}
@@ -198,8 +198,8 @@ function get_device_posture(METRIC) {
 
 		// css
 		if (zErr !== cssvalue) {
-			if ('webkit' !== isEngine && runSI) {cssvalue = 'folder'}
-			if ('blink' !== isEngine && 'undefined' !== cssvalue) {
+			if (!isWebkit && runSI) {cssvalue = 'folder'}
+			if (!isBlink && 'undefined' !== cssvalue) {
 				// non-blink
 				log_error(7, METRIC +'_'+ m +'_css', zErrInvalid +'expected undefined: got '+ cssvalue)
 			}
@@ -234,7 +234,7 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if ('blink' !== isEngine) {
+		} else if (!isBlink) {
 			// non-blink
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else if ('object' !== typeFn(k, true)) {
@@ -243,7 +243,7 @@ const get_keyboard = (METRIC) => new Promise(resolve => {
 			// blink
 			let expected = '[object Keyboard]'
 			if (k+'' !== expected) {
-				throw zErrInvalid + 'expected '+ expected +': got '+ (typeCheck.includes('object') ? k : typeCheck)
+				throw zErrInvalid +'expected '+ expected +': got '+ (typeCheck.includes('object') ? k : typeCheck)
 			}
 			let aKeys = [
 				'Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma','Digit0',
@@ -391,14 +391,14 @@ function get_memory(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. removed by blink (deprecated) or disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if ('blink' !== isEngine) {
+		} else if (!isBlink) {
 			// non-blink
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
 			// blink
 			let expected = '[object MemoryInfo]'
 			if (k+'' !== expected) {
-				throw zErrInvalid + 'expected '+ expected +': got '+ (typeCheck.includes('object') ? k : typeCheck)
+				throw zErrInvalid +'expected '+ expected +': got '+ (typeCheck.includes('object') ? k : typeCheck)
 			}
 			value = k.jsHeapSizeLimit
 			if (runST) {value = null}
@@ -464,17 +464,17 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 					let aExpectedErrs = [
 						'TypeError: \''+ key +'\' (value of \'name\' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.',
 							// ^ FF
-						'TypeError: \'name\' member of PermissionDescriptor \'' + key + '\' is not a valid value for enumeration PermissionName.',
+						'TypeError: \'name\' member of PermissionDescriptor \''+ key +'\' is not a valid value for enumeration PermissionName.',
 							// seamonkey should we ever let it thru
 					]
-					let isLogErr = !aExpectedErrs.includes(err+'')
+					let isLogErr = !aExpectedErrs.includes(err +'')
 					if (isLogErr) {
 						// 2050333
 						// TypeError: Permissions.query: 'local-network' (value of...
 						// but this is what we get for local-network and loopback-network once it was added - diff is 'Permissions.query: '
 						if ('local-network' == k || 'loopback-network' == k) {
 							let testErr = 'TypeError: Permissions.query: \''+ k +'\' (value of \'name\' member of '
-								+ 'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
+								+'PermissionDescriptor) is not a valid value for enumeration PermissionName.'
 							isLogErr = err+'' !== testErr
 						}
 					}
@@ -528,7 +528,7 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 		} else {
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = ['[object FeaturePolicy]','[object PermissionsPolicy]']
-			if (!expected.includes(f+'')) {throw zErrInvalid + 'expected '+ expected.join(' or ') +': got '+ f}
+			if (!expected.includes(f+'')) {throw zErrInvalid +'expected '+ expected.join(' or ') +': got '+ f}
 			// enumerate: array
 			let aList = f.features()
 			// gecko: disabling geo or blocking geo requests or both doesn't remove geolocation
@@ -573,7 +573,7 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 
 const get_prompt = (METRIC) => new Promise(resolve => {
 	// blink only
-	if ('blink' !== isEngine) {
+	if (!isBlink) {
 		addBoth(7, METRIC, 'undefined')
 		return resolve()
 	}
@@ -604,7 +604,7 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 					let typeCheck = typeFn(a)
 					if ('string' !== typeCheck) {throw zErrType + typeCheck}
 					let aValid = ['available','downloadable','downloading','unavailable']
-					if (!aValid.includes(a)) {throw zErrInvalid +'expected ' + aValid.join(', ') + ': got '+ a}
+					if (!aValid.includes(a)) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ a}
 					exit(a)
 				}
 			}).catch(function(err){
@@ -682,7 +682,7 @@ function get_screen_isextended(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			value = typeCheck
-		} else if ('blink' !== isEngine) {
+		} else if (!isBlink) {
 			// non-blink
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -713,10 +713,10 @@ function get_touc_h(METRIC) {
 			let typeCheck = typeFn(value)
 			if ('undefined' == typeCheck) {value = typeCheck
 			} else if ('number' !== typeCheck) {throw zErrType + typeCheck
-			} else if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value
+			} else if (!Number.isInteger(value) || value < 0) {throw zErrInvalid +'expected +Integer: got '+ value
 			} else if (!aValid.includes(value)) {
 				// lets not enforce this for now: there's no limitation on values
-				//throw zErrInvalid + 'expected '+ aValid.join(', ') +': got '+ value
+				//throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ value
 			}
 			if (isProxyLie('Navigator.'+ m)) {
 				log_known(7, METRIC +'_'+ m, value)
