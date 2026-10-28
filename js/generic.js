@@ -273,7 +273,7 @@ function get_isArchArray(METRIC) {
 }
 
 function get_isArchString(METRIC) {
-	//if ('blink' !== isEngine) {return}
+	//if (!isBlink) {return}
 	// https://firefox-source-docs.mozilla.org/js/constraints.html
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/length
 		// In V8 (used by Chrome and Node), the maximum length is 2**29 - 24 (~1GiB). On 32-bit systems, the maximum length is 2**28 - 16 (~512MiB).
@@ -302,7 +302,7 @@ function get_isArchString(METRIC) {
 	let oErrs = {
 		'blink': ['cc5986a4'], // RangeError: Invalid string length
 		'gecko': ['e06bd848'], // RangeError: repeat count must be less than infinity and not overflow maximum string size
-		'undefined': ['e06bd848'], // servo same as gecko
+		'servo': ['e06bd848'], // servo same as gecko
 	}
 	let oData = {}
 	try {
@@ -473,7 +473,7 @@ const get_isBB = (METRIC) => new Promise(resolve => {
 })
 
 const get_isBrave = (METRIC) => new Promise(resolve => {
-	if ('blink' !== isEngine) return resolve()
+	if (!isBlink) return resolve()
 
 	let t0 = nowFn()
 	function exit(value = false) {
@@ -832,6 +832,7 @@ function get_isEngine(METRIC) {
 				]
 				let aMozFound = aKeys.filter(x => aMoz.includes(x))
 				if (aMozFound.length/aMoz.length > 0.5) {
+					isServo = true
 					isEngine = 'servo'
 					isEngineStats = aMozFound.length +'/'+ aMoz.length
 				}
@@ -845,11 +846,13 @@ function get_isEngine(METRIC) {
 			if (isAllowNonGeckoMin) {
 				try {
 					if ('blink' == isEngine) {
+						isBlink = true
 						// 109 is the last version supported on win7
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
 						if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
 						//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129 2024-Sep
 					} else if ('webkit' == isEngine) {
+						isWebkit = true
 						// https://en.wikipedia.org/wiki/Safari_(web_browser)#Version_compatibility
 						// 15.6.1 2022-Aug = last version supported on macOS 10.15?
 						if ('function' == typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar
@@ -1033,7 +1036,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		isOS = value
 		isDesktop = 'android' !== isOS
 		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
-			+ (isDesktop ? '' : 'fav') + "icon64.png')" // set icon
+			+ (isDesktop ? '' : 'fav') +"icon64.png')" // set icon
 		log_perf(SECTG, METRIC, t0, '', isOS +'')
 		if (undefined == isOS) {
 			// for now only alert isGecko
@@ -1137,8 +1140,16 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 						aAndroid = aDetected.filter(x => fntMaster.platform.android.includes(x))
 					let intW = aWindows.length, intM = aMac.length, intA = aAndroid.length
 					//console.log(aWindows, intW, aMac, intM, aAndroid, intA)
-					if (intW > 0 && (intM + intA == 0)) {exit('windows')
-					} else if (intM > 0 && (intW + intA == 0)) {exit('mac')
+					if (intW > 0 && (intM + intA == 0)) {
+						exit('windows')
+					} else if (intM > 0 && (intW + intA == 0)) {
+						// hmm I don't have iOS, not sure what that returns
+						// so let's wrap this in a basic mobile check
+						if (!HTMLInputElement.prototype.hasOwnProperty('capture')) {
+							exit('mac')
+						} else {
+							trysomethingelse()
+						}
 					} else {
 						// blink droid seems broken (mayhbe it always was)
 						// fontdebug PoC can't even detect Roboto or Dancing Script
@@ -1152,17 +1163,19 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			}
 		})
 	}
+
 	// now what
 	function trysomethingelse() {
-		let mobileCounter = 0, test
+		let mobileCount = 0, test
 
 		// 3. HTMLInputElement.capture is mobile only
 			// https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/capture
 		let m = '3_HTMLInputElement.capture'
+		let isEssential = false
 		try {
 			test = HTMLInputElement.prototype.hasOwnProperty('capture')
 			oOS[m] = test
-			if (true == test) {mobileCounter++}
+			if (true == test) {mobileCount++; isEssential = true}
 		} catch(e) {
 			oOS[m] = e+''
 		}
@@ -1175,7 +1188,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			aList.forEach(function(k) {data[k] = dom['tzp'+ k +'V'].offsetHeight})
 			test = Math.abs(data['L'] - data['S'])
 			// do prompts affect this?
-			if (test > 20) {mobileCounter++} // allow some wriggle room?
+			if (test > 20) {mobileCount++; isEssential = true} // allow some wriggle room?
 			test += ' ('+ data['L'] +' - '+ data['S'] +')'
 			oOS[m] = test 
 		} catch(e) {
@@ -1184,13 +1197,13 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		// 5: ontypechange in navigator.connection
 			// exists in gecko desktop with dom.netinfo.enabled
 			// NetworkInformation never added to safari
-		if ('blink' == isEngine) {
+		if (isBlink) {
 			m = '5_connection.ontypechange'
 			try {
 				test = zNA
 				if (undefined !== navigator.connection) {
 					test = typeof navigator.connection.ontypechange
-					mobileCounter++
+					mobileCount++
 				}
 				oOS[m] = test+''
 			} catch(e) {
@@ -1199,12 +1212,17 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		}
 		// ? keyboard map size = 0 is a strong indicator (if enabled e.g. brave shields disables these)
 
-		// mobile: must hasve 2 out of 3 (so far)
-		if (mobileCounter > 1) {
-			if ('blink' == isEngine) {exit('android'); return
-			} else if ('webkit' == isEngine) {exit('isOS'); return}
+		// mobile
+			// until we have more tests, using mobileCount isn't feasible: network is useless, but collect for now
+			// e.g. network disabled (e.g. brave), dynamic urlbar off (settings) means min count == 1
+				// but if that one item was network spoofed on desktop then it's no good. So we need to weight the
+				// other two and at this point if either we're good ... until we get more tests
+		if (isEssential) {
+			if (isBlink) {exit('android'); return
+			} else if (isWebkit) {exit('iOS'); return}
+		} else {
+			exit('linux')
 		}
-		exit()
 	}
 
 	let oOS = {}
@@ -1885,7 +1903,7 @@ function metricsShow(name, scope) {
 		data = gData.health[scope+'_slider']
 		target = 'health_slider'
 		isComment = 'note: <code>ion_jit</code> only indicates that at least one of '
-			+ '<code>ion</code> or <code>baselinejit</code> is as such - it does not guarantee both'
+			+'<code>ion</code> or <code>baselinejit</code> is as such - it does not guarantee both'
 	} else if (zFP+'_metrics' == name) {
 		data = gData[zFP][scope+'_metrics']
 	} else if (aShowFormat.includes(name)) {
@@ -2135,7 +2153,7 @@ function output_health(scope) {
 			let isAll = countPass == countTotal
 			let overlayHealthCount = countPass +'/'+ countTotal
 			let btnPart1 = addButton((isAll ? 'good' : 'bad'), h, countPass)
-			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> | </span>'
+			btnPart1 = btnPart1.replace(']','') +'<span style="letter-spacing: -0.2em"> | </span>'
 			dom[scope + h].innerHTML = btnSlider + btnPart1
 				+ addButton(0,'document_health_metrics', countTotal).replace('[','')
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
@@ -2636,7 +2654,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	if (!isDesktop && isShorten) {
 		error = zErr
 	} else if (error.length > len) {
-		error = error.slice(0,len-3) + "..."
+		error = error.slice(0,len-3) +'...'
 	}
 	return error
 }
@@ -2710,8 +2728,8 @@ function log_section(name, time, scope = isScope) {
 			let color = (metricCount == expectedMetrics || sectionIgnore.length) ? 0 : 'red' // use red to override color in basic mode
 			
 			let btnPart1 = addButton(color, zFP, metricCount)
-			btnPart1 = btnPart1.replace(']','')	+ '<span style="letter-spacing: -0.2em"> </span>'
-			dom[scope + 'hash'].innerHTML = mini(gData[zFP][scope]) + btnPart1
+			btnPart1 = btnPart1.replace(']','')	+'<span style="letter-spacing: -0.2em"> </span>'
+			dom[scope +'hash'].innerHTML = mini(gData[zFP][scope]) + btnPart1
 				+ addButton(0,'fingerprint_metrics', 'metrics').replace('[','')
 		} catch(e) {
 			console.log(e)
@@ -3252,7 +3270,7 @@ function run_immediate() {
 		get_isFileSystem('isFileSystem', true)
 		try {window.caches.keys()} catch(e) {}
 		// get some usage into storage estimate
-		if ('blink' == isEngine) {
+		if (isBlink) {
 			try {
 				let t1 = nowFn()
 				let rndStr = rnd_string()
