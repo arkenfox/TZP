@@ -99,7 +99,7 @@ function lookup_storage_bucket(type, bytes, usage, granted = false) {
 		}
 	}
 	// webkit private window returns 1048576000 bytes = 1000MB
-	if ('webkit' == isEngine && 1048576000 == bytes) {value = '1000 MB'} else {value += ' GiB'}
+	if (isWebkit && 1048576000 == bytes) {value = '1000 MB'} else {value += ' GiB'}
 	return value + isPlusUsage
 }
 
@@ -191,7 +191,7 @@ const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 			value = zE
 			if (isFile) {
 				// file://
-				value += ' | '+ zSKIP + ' | '+ zSKIP
+				value += ' | '+ zSKIP +' | '+ zSKIP
 				exit()
 			} else {
 				// test: use a different suffix than cookies
@@ -230,6 +230,7 @@ function get_filesystem(METRIC) {
 		display = log_error(6, METRIC, isFileSystemError)
 	}
 	// PBmode: SecurityError: Security error when calling GetDirectory
+	// FF159+ 2071656 dom.fs.privateBrowsing.enabled
 	if (isBB) {
 		notation = ('SecurityError: Security error when calling GetDirectory' == isFileSystemError ? bb_green : bb_red)
 	} else {
@@ -296,7 +297,7 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 					let typeCheck = typeFn(bytes)
 					if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
 					let value = lookup_storage_bucket('quota', bytes, usage, isAuto)
-					let usageStr = ('blink' == isEngine && usage > 0) ? ' | '+ usage : ''
+					let usageStr = (isBlink && usage > 0) ? ' | '+ usage : ''
 					let display = value +' ['+ bytes + usageStr +']'
 					if (isProxyLie('StorageManager.estimate')) {isLies = true}
 					// 1781277 RFP can only be exactly 10GB or 50GB
@@ -471,7 +472,7 @@ const test_worker_shared_new = (log = false) => new Promise(resolve => {
 	} else {
 		try {
 			const workerScript = 'var ports = []; onconnect = function(e) {let port = e.ports[0]; ports.push(port); '
-				+ 'port.start(); port.onmessage = function(e) {port.postMessage("eek")}'
+				+'port.start(); port.onmessage = function(e) {port.postMessage("eek")}'
 			const workerBlob = new Blob([workerScript], {type: 'application/javascript'})
 			const workerURL = URL.createObjectURL(workerBlob)
 			const shared = new SharedWorker(workerURL)
