@@ -12,7 +12,7 @@ function get_nav_connection(METRIC) {
 			let typeCheck = typeFn(hash, true)
 			if ('object' !== typeCheck) {throw zErrType + typeFn(hash)}
 			let expected = '[object NetworkInformation]'
-			if (hash+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ hash}
+			if (hash+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ hash}
 			// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
 			let keyTypes = {
 				// gecko only
@@ -45,7 +45,7 @@ function get_nav_connection(METRIC) {
 						let isInvalid = true
 						// https://groups.google.com/a/chromium.org/g/blink-dev/c/tU_Hqqytx8g/m/HTJebzVHBAAJ
 						// "WiFi on Android reports Infinity for downlinkMax as Chrome recently dropped the required permission to get Wifi linkSpeed
-						if ('blink' == isEngine && 'downlinkMax' == k) {
+						if (isBlink && 'downlinkMax' == k) {
 							if ('Infinity' == typeCheck || 'number' == typeCheck) {isInvalid = false}
 						}
 						if (isInvalid) {throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck}
@@ -54,7 +54,7 @@ function get_nav_connection(METRIC) {
 					if ('type' == k || 'effectiveType' == k) {
 						if (runSI) {x = '1g'}
 						let aValid = oValid[k]
-						if (!aValid.includes(x)) {throw zErrInvalid + ': got ' + x}
+						if (!aValid.includes(x)) {throw zErrInvalid +': got '+ x}
 						// strength is not super stable: e.g. i've seen 3g and 4g in sequential tests
 						if ('effectiveType' == k) {x = '2-4g'}
 					}
@@ -94,13 +94,13 @@ function get_nav_dnt(METRIC) {
 		hash = navigator[METRIC]
 		if (runST) {hash = 1} else if (runSI) {hash = '2'}
 		let typeCheck = typeFn(hash)
-		if ('blink' == isEngine) {
+		if (isBlink) {
 			// blink can be pnly be "1" or null
-			if ('1' !== hash && null !== hash) {throw zErrInvalid + 'expected 1 or null: got ' + hash}
+			if ('1' !== hash && null !== hash) {throw zErrInvalid +'expected 1 or null: got ' + hash}
 		} else {
 			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
 			if (isGecko) {
-				if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid + 'expected 1 or unspecified: got ' + hash}
+				if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid +'expected 1 or unspecified: got ' + hash}
 			}
 		}
 		hash += '' // gecko is a string, otherwise we can only be null/undefined, so convert to a string
@@ -143,7 +143,7 @@ function get_nav_gpc(METRIC) {
 			hash = hash+''
 			// 1983296: FF157+ remove privacy.globalprivacycontrol.functionality.enabled
 				// with pref removed we can only get a boolean
-			if (isVer > 156) {throw zErrType + 'undefined'}
+			if (isVer > 156) {throw zErrType +'undefined'}
 		} else {
 			let typeCheck = typeFn(hash)
 			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
@@ -636,7 +636,7 @@ function get_language_locale() {
 			if (runST) {r = undefined} else if (runSI) {r = 'collator' !== m ? 'en-USA' : 'tzp'}
 			let typeCheck = typeFn(r)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if (!Intl.DateTimeFormat.supportedLocalesOf([r]).length) {throw zErrInvalid + 'locale '+ r +' not supported'}
+			if (!Intl.DateTimeFormat.supportedLocalesOf([r]).length) {throw zErrInvalid +'locale '+ r +' not supported'}
 			oLoc[m] = r
 			return r
 		} catch(e) {
@@ -679,7 +679,7 @@ function get_language_locale() {
 			let aLoop = [aSysLang]
 			// blink only detects the first item, so instead of 1 large array, we want many arrays of 1 item each
 				// slow (1.2ms for 2 items) but only way I know to get all the values
-			if ('blink' == isEngine) {
+			if (isBlink) {
 				aLoop = []
 				aSysLang.forEach(function(x){aLoop.push([x])})
 			}
@@ -717,7 +717,7 @@ function get_language_locale() {
 			aDetected = aDetected.filter(x => !['unknown'].includes(x))
 			aDetected = dedupeArray(aDetected)
 			aDetected.sort()
-			if (0 == aDetected.length) {returnvalue = []; throw zErrType + 'empty array'}
+			if (0 == aDetected.length) {returnvalue = []; throw zErrType +'empty array'}
 			value = aDetected.join(', ')
 			returnvalue = aDetected
 		} catch(e) {
@@ -1400,8 +1400,8 @@ function get_timezone(METRIC) {
 	if (notation == rfp_red && 'Atlantic/Reykjavik' == value) {
 		// then we must have had lies and/or errors
 		let aHealth = []
-		if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
-		if (lieCount > 0) {aHealth.push(lieCount + ' mismatch' + (lieCount == 1 ? '' : 'es'))}
+		if (errCount > 0) {aHealth.push(errCount +' error' + (errCount == 1 ? '' : 's'))}
+		if (lieCount > 0) {aHealth.push(lieCount +' mismatch' + (lieCount == 1 ? '' : 'es'))}
 		if (gRun) {sDetail[isScope].lookup[METRIC] = aHealth.join(' | ')}
 	}
 	// display
@@ -1932,8 +1932,8 @@ function get_timezone_offset(METRIC) {
 		} else if (gRun) {
 			// health lookup
 			let aHealth = []
-			if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
-			if (tamperCount > 0) {aHealth.push(tamperCount + ' mismatch' + (tamperCount == 1 ? '' : 'es'))}
+			if (errCount > 0) {aHealth.push(errCount +' error' + (errCount == 1 ? '' : 's'))}
+			if (tamperCount > 0) {aHealth.push(tamperCount +' mismatch' + (tamperCount == 1 ? '' : 'es'))}
 			if (gRun) {sDetail[isScope].lookup[METRIC] = aHealth.join(' | ')}
 		}
 		addDisplay(4, METRIC, finaldisplay,'', notation)
@@ -1950,7 +1950,6 @@ function get_timezone_offset(METRIC) {
 			addBoth(4, METRIC, finalvalue,'', notation,'', isTamper)
 		}
 	}
-	//if (isFile) {console.log('timezone offset\n', oData)}
 	log_perf(4, METRIC, t0)
 	return {'nowValue': finalvalue, 'utcValue': utcValue, 'tampered': oData.tampered}
 }
@@ -2294,8 +2293,8 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 	let tamperCount = Object.keys(oData.lies).length
 	if (gRun && errCount + tamperCount > 0) {
 		let aHealth = []
-		if (errCount > 0) {aHealth.push(errCount + ' error' + (errCount == 1 ? '' : 's'))}
-		if (tamperCount > 0) {aHealth.push(tamperCount + ' mismatch' + (tamperCount == 1 ? '' : 'es'))}
+		if (errCount > 0) {aHealth.push(errCount +' error' + (errCount == 1 ? '' : 's'))}
+		if (tamperCount > 0) {aHealth.push(tamperCount +' mismatch' + (tamperCount == 1 ? '' : 'es'))}
 		if (gRun) {sDetail[isScope].lookup[METRIC] = aHealth.join(' | ')}
 	}
 
@@ -2326,7 +2325,6 @@ function get_timezone_offsets(METRIC, nowValue, utcValue) {
 		}
 	}
 	addBoth(4, METRIC, hash, btn, notation, data, isLies)
-	//if (isFile) {console.log('timezone offsets\n', oData)}
 	log_perf(4, METRIC, t0)
 	// return health as true if no errors and no lies and only one valid hash for all methods
 	return {'health': notation == tz_green, 'hash': hash}
@@ -2503,19 +2501,19 @@ function get_l10n_validation_messages(METRIC) {
 		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
 		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
 	const input = "<input type='number' required>"
-		+ "<input type='checkbox' required>"
-		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
-		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
-		+ "<input type='file' required>"
-		+ "<input type='email' value='a'>"
-		+ "<input type='url' value='a'>"
-		+ "<input type='number' max='1974.3' value='2000'>"
-		+ "<input type='number' min='8026.5' value='1'>"
-		+ "<input type='tel' pattern='[0-9]{1}' value='a'>"
-		+ "<input type='radio' required name='radiogroup'>"
-		+ "<select required><option></option></select>"
-		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
-		+ "<input type='text' required>"
+		+"<input type='checkbox' required>"
+		+"<input type='date' value='2024-01-01' max='2023-12-31'>"
+		+"<input type='date' value='2022-01-01' min='2023-12-31'>"
+		+"<input type='file' required>"
+		+"<input type='email' value='a'>"
+		+"<input type='url' value='a'>"
+		+"<input type='number' max='1974.3' value='2000'>"
+		+"<input type='number' min='8026.5' value='1'>"
+		+"<input type='tel' pattern='[0-9]{1}' value='a'>"
+		+"<input type='radio' required name='radiogroup'>"
+		+"<select required><option></option></select>"
+		+"<input type='number' min='1.2345' step='1005.5545' value='2'>"
+		+"<input type='text' required>"
 
 	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
 	try {
