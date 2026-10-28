@@ -170,7 +170,7 @@ function get_autoplay(METRIC) {
 		let display = (ares === atest ? ares : ares +', '+ atest) +' | '+ (mres === mtest ? mres : mres +', '+ mtest)
 		addDisplay(13, METRICuser, display)
 	} catch(e) {
-		addDisplay(13, METRICuser, (e+'').slice(0,47) + '...')
+		addDisplay(13, METRICuser, (e+'').slice(0,47) +'...')
 	}
 	return
 }
@@ -417,7 +417,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		// once warmed-up/cached it's 3 or 4 ms
 	// blink shouldn't timeout, we just need lots of time to ensure we get the results
 	// gecko we need to catch DRM prompts
-	let timeout = 'blink' == isEngine ? 4000 : (isDesktop ? 1000 : 2000)
+	let timeout = isBlink ? 4000 : (isDesktop ? 1000 : 2000)
 	if (!gLoad) {timeout = 100}
 	const get_eme_item = (key, item) => new Promise(resolve => {
 		// skip: widevine due to permission prompts
@@ -444,7 +444,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 			let typeCheck = typeFn(result)
 			if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
 			let expected = '[object MediaKeySystemAccess]'
-			if (result +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ result}
+			if (result +'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ result}
 			isFound = true
 			return resolve([key, item, true])
 		}).catch(function(e){
@@ -458,7 +458,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 					// winevine: BB NotSupportedError: EME has been preffed off
 					// winevine: FF NotSupportedError: Widevine EME disabled
 				aCheck.push('NotSupportedError: Key system is unsupported') // default unsupported
-			} else if ('blink' == isEngine) {
+			} else if (isBlink) {
 				aCheck.push('NotSupportedError: Unsupported keySystem or supportedConfigurations.')
 			}
 			// errors: item names are unique, we don't need the key
@@ -537,7 +537,7 @@ function get_preload_media(METRIC) {
 		if ('string' !== typeFn(value, true)) {throw zErrType + typeFn(value)}
 		if ('' == value) {value = typeFn(value)}
 		let aValid = ['auto','metadata','none'] // 'empty string' dropped FF140 929890
-		if (!aValid.includes(value)) {aValid.sort(); throw zErrInvalid +'expected ' + aValid.join(', ') + ': got '+ value}
+		if (!aValid.includes(value)) {aValid.sort(); throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ value}
 		if ('auto' == value) {notation = rfp_green}
 	} catch(e) {
 		value = e; data = zErrLog

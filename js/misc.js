@@ -215,7 +215,7 @@ function get_timing(METRIC) {
 		'ten': [0, 10, 20, 30, 40],
 	}
 	let aNotInteger = ['mark','now','timestamp']
-	let calc1 = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
+	let calc1 = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) +'})?')
 	let str, data, notation, oData = {}, countFail = 0, countErr = 0
 
 	sDetail[isScope][METRIC +'_data'] = {}
@@ -246,7 +246,7 @@ function get_timing(METRIC) {
 				isNoise = isDateNoise
 				if ('.000' !== start.slice(-4)) {isMatch = false}
 				// we use epoch time so each entry is always moving forward in time | remove leading 0 in ms
-				start = start.slice(0,20) + start.slice(-2)+ '0'
+				start = start.slice(0,20) + start.slice(-2) +'0'
 				start = (new Date(start))[Symbol.toPrimitive]('number')
 			} else if ('instant' == k) {
 				start = start.slice(0,-1) // remove trailing Z
@@ -274,7 +274,7 @@ function get_timing(METRIC) {
 				// clean up
 				if ('exslt' == k) {
 					if ('.000' !== end.slice(-4)) {isMatch = false}
-					end = end.slice(0,20) + end.slice(-2)+ '0'
+					end = end.slice(0,20) + end.slice(-2) +'0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				} else if ('instant' == k) {
 					end = end.slice(0,-1) // remove trailing Z
@@ -659,7 +659,7 @@ function get_navigator_keys(METRIC) {
 			}
 		}
 		// if tampered use notation to fail health
-		if (isLies) {notation += addButton('bad', METRIC +'_tampered', "<span class='health'>"+ cross + '</span> tampered')}
+		if (isLies) {notation += addButton('bad', METRIC +'_tampered', "<span class='health'>"+ cross +'</span> tampered')}
 	} catch(e) {
 		hash = e; aNav = zErrLog
 	}
@@ -737,7 +737,7 @@ function get_pdf(METRIC) {
 			// IDK if pdfViewer can be toggled with effect w/out a page reload but in gecko
 			// the pref pdfjs.enabled requires a page reload; regardless lets ignore disabled
 			// ignore {"mimeTypes": "none", "pdfViewerEnabled": false, "plugins": "none"}
-		} else if ('blink' == isEngine) {
+		} else if (isBlink) {
 			// blink has a isAllowNonGeckoMin, so we expect only two possible results
 				// i.e pdfViewerEnabled exists | we do not care about the tiny long tail
 				// of possible users with injected 3rd party if that's even possible these days
@@ -1047,7 +1047,7 @@ function get_window_props(METRIC) {
 		el.setAttribute('id', id)
 		el.setAttribute('style', 'display: none')
 		/* ToDo: investigate
-		if ('blink' == isEngine) {
+		if (isBlink) {
 			// content scripts never run in frames like this
 			// javascript:undefined, javascript:null as long as it's not a string
 			el.setAttribute('src', 'javascript:false')
@@ -1093,7 +1093,7 @@ function get_window_props(METRIC) {
 
 			if (isSmart) {
 				/* determine console state before we start messing around with the array
-				FF147 and lower 'Event' and FF148+ 'console' is low=closed high=open
+				FF147 and lower 'Event' and FF148+ `console` is low=closed high=open
 				- e.g. FF141 event moves from ~175 to ~935, FF145 from ~417 to ~944
 				- e.g. FF148 console moves from ~241 to ~962
 				So checking if it is within 150 or so from the end is a loose ranged check that allows
@@ -1121,7 +1121,7 @@ function get_window_props(METRIC) {
 				aTampered = aTampered.filter(x => !aIgnore.includes(x))
 				if (aTampered.length) {
 					addDetail(METRIC +'_tampered', aTampered.sort())
-					tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
+					tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length +' tampered')
 					tamperHash = mini(aTampered)
 				} else {
 					aTampered = ''

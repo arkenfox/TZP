@@ -384,7 +384,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 							oRaw[r][c].parameters = newobj
 						}
 						// servo doesn't sort and we get different orders per run
-						if ('servo' == isEngine) {
+						if (isServo) {
 							try {oRaw[r][c].extensions.sort()} catch(e) {}
 						}
 					}

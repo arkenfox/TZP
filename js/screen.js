@@ -295,7 +295,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 							let typeCheck = typeFn(x)
 							if ('number' !== typeCheck) {throw zErrType + typeCheck}
 							// only matchmedia can be non Integer
-							if (!Number.isInteger(x)) {throw zErrInvalid + 'expected Integer: got '+ typeCheck}
+							if (!Number.isInteger(x)) {throw zErrInvalid +'expected Integer: got '+ typeCheck}
 						}
 					} catch(e) {
 						log_error(1, 'sizes_'+ k +'_'+ axis +'_'+ metricname, e)
@@ -320,7 +320,7 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 					value = zErr
 				} else if (!Number.isInteger(value)) {
 					// only matchmedia can be non integer
-					log_error(1, 'sizes_'+ metric +'_'+ axis +'_css', zErrInvalid + 'expected Integer: got '+ cType)
+					log_error(1, 'sizes_'+ metric +'_'+ axis +'_css', zErrInvalid +'expected Integer: got '+ cType)
 					value = zErr
 				}
 			}
@@ -351,8 +351,8 @@ const get_scr_measure = (isElementFS) => new Promise(resolve => {
 		}
 
 		// initial
-		oDisplay['initial_inner'] = isInitial.width.inner + ' x ' + isInitial.height.inner
-		oDisplay['initial_outer'] = isInitial.width.outer + ' x ' + isInitial.height.outer
+		oDisplay['initial_inner'] = isInitial.width.inner +' x '+ isInitial.height.inner
+		oDisplay['initial_outer'] = isInitial.width.outer +' x '+ isInitial.height.outer
 
 		// notation
 		let notation ='', initData = zNA, initHash =''
@@ -885,7 +885,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 				if (isAngle) {
 					let aGood = [0, 90, 180, 270]
 					if (!aGood.includes(Math.abs(value))) {
-						throw zErrInvalid + 'expected 0, 90, 180 or 270: got '+ value
+						throw zErrInvalid +'expected 0, 90, 180 or 270: got '+ value
 					}
 				}
 				// lies
@@ -1010,16 +1010,16 @@ const get_scr_pixels = (METRIC, isResize) => new Promise(resolve => {
 			let originalvalue = value
 			let typeCheck = typeFn(value)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			if ('px' !== value.slice(-2)) {throw zErrInvalid + 'got '+ originalvalue} // missing px
+			if ('px' !== value.slice(-2)) {throw zErrInvalid +'got '+ originalvalue} // missing px
 			value = value.slice(0, -2)
 			if (value.length > 0) {value = value * 1}
-			if ('number' !== typeFn(value)) {throw zErrInvalid + 'got '+ originalvalue} // missing number
+			if ('number' !== typeFn(value)) {throw zErrInvalid +'got '+ originalvalue} // missing number
 			if (value > 0) {
 				value = 1/value
 				display = value
 				varDPR = value
 			} else {
-				throw zErrInvalid + 'got '+ (1/value) // negative/Infinity
+				throw zErrInvalid +'got '+ (1/value) // negative/Infinity
 			}
 		} catch(e) {
 			display = log_error(1, METRIC +'_'+ item, e); value = zErr
@@ -1369,7 +1369,7 @@ const get_scr_position_window = (METRIC) => new Promise(resolve => {
 			// brave randomizes using 0, but we want a stable result so e.g. 3,0 == 2,6
 				// RFP we require exactly 0
 			// the less reliance on isBrave the better | just bucketize all blink
-			let minDiff = 'blink' == isEngine ? -1 : 0
+			let minDiff = isBlink ? -1 : 0
 			if (diff > minDiff && diff < 10) {
 				value = '±9'; x = value + s99 +'('+ x +')'+ sc
 			}
@@ -1604,7 +1604,7 @@ function get_scr_viewport_units() {
 		let METRIC = 'L' == k ? 'sizes_viewport' : 'sizes_inner'
 		let target
 		try {target = dom['tzp'+ k +'V']} catch(e) {}
-		let prefix = k.toLowerCase() + 'v'
+		let prefix = k.toLowerCase() +'v'
 		for (const p of Object.keys(data)) {
 		//aItems.forEach(function(p) {
 			let name = prefix + p.slice(0,1)
@@ -1623,7 +1623,7 @@ function get_scr_viewport_units() {
 					data[p][name] = x
 				}
 			} catch(e) {
-				log_error(1, METRIC +'_'+ p + '_' + prefix + p.slice(0,1), e)
+				log_error(1, METRIC +'_'+ p +'_'+ prefix + p.slice(0,1), e)
 				data[p][name] = zErr
 			}
 		}
@@ -1773,7 +1773,7 @@ const get_agent = (METRIC, os = isOS) => new Promise(resolve => {
 			}
 			if (!isLies) {
 				if ('userAgent' == k) {
-					// check version: all platforms contain '; rv:' + version + '.0)'
+					// check version: all platforms contain '; rv:' + version +'.0)'
 					aFlags = []
 					for (let x = 0; x < maxCheck; x++){aFlags.push(isVer + x)}
 					let isVerCheck = false
@@ -2149,7 +2149,7 @@ const outputFD = () => new Promise(resolve => {
 	try {
 		let len = eval.toString().length
 		if (runST) {len = 43}
-		if (37 !== len) {throw zErrInvalid + 'expected 37: got '+ len}
+		if (37 !== len) {throw zErrInvalid +'expected 37: got '+ len}
 	} catch(e) {
 		log_error(3, METRIC, e)
 	}

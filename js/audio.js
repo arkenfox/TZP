@@ -158,7 +158,7 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 						display = 'mixed'
 					} else {
 						isLies = check_audioLies()
-						display = hashC + ' | '+ sum; data = hashC
+						display = hashC +' | '+ sum; data = hashC
 					}
 					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
 						// isArchAray: true = large arrays else it's an error string
