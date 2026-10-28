@@ -125,7 +125,7 @@ function check_canvas_info(dataname, runNo) {
 		aFP.push(isMovement +' movement')
 		aNotation.push(Math.floor(avg))
 		if ('min' !== isMovement) {
-			console.log(dataname, min, '-', max, '| range: ', max-min, '| average', avg, '['+ sum + '/'+ altered +']')
+			console.log(dataname, min, '-', max, '| range: ', max-min, '| average', avg, '['+ sum +'/'+ altered +']')
 		}
 	}
 	if (isFontStealth) {
@@ -639,42 +639,11 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 })
 
 const get_canvas_offscreen = (sizeW, sizeH) => new Promise(resolve => {
-	try {
 
-	} catch(e) {
-		console.log(e+'')
-	}
 })
 
 const get_canvas_read = (sizeW, sizeH) => new Promise(resolve => {
-	// temp sizes
-	sizeW = 16
-	sizeH = 8
 
-	try {
-		let canvas = dom.tzpCanvasTo
-		let ctx = canvas.getContext('webgl', {preserveDrawingBuffer: true})
-
-		let pixels = new Uint8Array(
-			//ctx.drawingBufferWidth * ctx.drawingBufferHeight * 4,
-			sizeW * sizeH *4
-		)
-		console.log(pixels) // Uint8Array
-
-		// ctx is always null
-		ctx.readPixels(
-			0,
-			0,
-			gl.drawingBufferWidth,
-			gl.drawingBufferHeight,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			pixels,
-		);
-		console.log(pixels); // Uint8Array
-	} catch(e) {
-		console.log(e+'')
-	}
 })
 
 const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
@@ -921,7 +890,7 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		}
 
 		for (const k of Object.keys(oData)) {
-			//oCanvasInfo[k] = oData[k]
+			//oCanvasInfo[k] = oData[k] // oCanvasInfo is for pixel arrays, not base64
 
 			// if an error,. report that, else compare the two runs etc
 			let hash, data ='', notation = rfp_red, notationExtra = ''
@@ -929,6 +898,12 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 				hash = oErrors[k]; oRaw[k] = hash
 				addBoth(9, 'canvas_'+ k, hash,'', notation, zErrLog)
 			} else {
+				// ToDo: we need a better way to distinguish
+					// "protected | whatever | deBG" <-- that doesn't tell me in non-Gecko if pixels were also randomized
+						// in gecko, non-spoofed pixels get an 'FPP' added to the FP
+					// ^ but when we can decode the PNG and use check_canvas_info then the resultant
+					// fp string with pecentage/channels etc does this for us
+
 				// persistent or per execution || no errors so we must have two results
 					// tidy oRaw as we go since we've hashed results
 				let hash0 = mini(oData[k][0])
@@ -1065,7 +1040,9 @@ const outputCanvas = () => new Promise(resolve => {
 			'drawn_hash': mini(tmpDrawn),
 			'drawn_solid': tmpSolid,
 			'drawn_solid_hash': mini(tmpSolid),
+			'height': sizeH,
 			'pixelcount': sizeW * sizeH,
+			'width': sizeW,
 		}
 	}
 
