@@ -145,6 +145,7 @@ let isArchArray = zNA,
 	isArchWebGPU,
 	isAutoPlay,
 	isAutoPlayError,
+	isBlink = false,
 	isBrave = false,
 	isBraveFont = false,
 	isBraveSmart = false, // only if FP protection is on
@@ -167,6 +168,7 @@ let isArchArray = zNA,
 	isRecursion,
 	isReporting, // ReportingAPI
 	isScrollbar, // used to adjust overlay json format length
+	isServo = false,
 	isStyles = ['cursive','math','monospace','sans-serif','serif','system-ui'],
 		// FF145+ nightly 1788937 math | 2014703 FF149+
 		// 'emoji','ui-monospace','ui-rounded','ui-serif' = currently at least gecko + blink redundant (windows)
@@ -182,6 +184,7 @@ let isArchArray = zNA,
 	isVerExtra = '',
 	is158 = false,
 	isViewportUnits = {},
+	isWebkit = false,
 	isXML = {},
 	isXSLT // dom.xslt.enabled
 
