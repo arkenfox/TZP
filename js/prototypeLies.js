@@ -47,9 +47,9 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 
 	const getPrototypeLies = scope => {
 		// engine
-		const IS_BLINK = 'blink' == isEngine
+		const IS_BLINK = isBlink
 		const IS_GECKO = isGecko
-		const IS_WEBKIT = 'webkit' == isEngine
+		const IS_WEBKIT = isWebkit
 
 		const getRandomValues = () => (
 			String.fromCharCode(Math.random() * 26 + 97) +
@@ -136,7 +136,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		const getNullConversionTypeErrorLie = apiFunction => {
 			const nativeProto = Object.getPrototypeOf(apiFunction)
 			try {
-				Object.setPrototypeOf(apiFunction, null) + ''
+				Object.setPrototypeOf(apiFunction, null) +''
 				return true
 			} catch (error) {
 				return error.constructor.name != 'TypeError'
@@ -354,7 +354,7 @@ const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
 		// setPrototypeOf error tests
 		const spawnError = (apiFunction, method) => {
 			if (method == 'setPrototypeOf') {
-				return Object.setPrototypeOf(apiFunction, Object.create(apiFunction)) + ''
+				return Object.setPrototypeOf(apiFunction, Object.create(apiFunction)) +''
 			} else {
 				apiFunction.__proto__ = apiFunction
 				return apiFunction++
