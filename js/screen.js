@@ -1289,10 +1289,10 @@ function get_scr_pixels_match(METRIC, oData) {
 		sDetail[isScope][METRIC] = oPixels
 		let btncolor = isPixelMatch ? 'good' : 'bad'
 		let btnsymbol = isPixelMatch ? tick : cross
-		addDisplay(1, METRIC,'','', addButton(btncolor, METRIC, "<span class='health'>"+ btnsymbol +"</span> RFP pixels"))
+		addDisplay(1, METRIC,'','', addButton(btncolor, METRIC, "<span class='health'>"+ btnsymbol +"</span> pixels"))
 	} catch(e) {
 		sDetail[isScope][METRIC] = e+''
-		addDisplay(1, METRIC,'','', sbx+' RFP pixels]'+sc)
+		addDisplay(1, METRIC,'','', sbx+' pixels]'+sc)
 	}
 }
 

@@ -1874,8 +1874,9 @@ function metricsShow(name, scope) {
 
 	let isKit = false, isComment = ''
 	if (isGecko & isSmart) {
-		// atm this is pretty much limited to health, pixels_match, timezone_offsets_data
-		// and fonts_detected
+		// atm this is pretty much limited to:
+			// health, health_slider, pixels_match, timezone_offsets_data, fonts_detected
+			// timing_precision_data
 		try {
 			let btn = dom[scope+name]
 			if (undefined == btn) {btn = dom[name]}
@@ -1899,11 +1900,11 @@ function metricsShow(name, scope) {
 	} else if (scope+'_health_metrics' == name) {
 		data = gData.health[scope+'_metrics']
 		target = 'health_metrics'
-	} else if (scope+'_health_slider' == name) {
+	} else if ('health_slider' == name) {
 		data = gData.health[scope+'_slider']
 		target = 'health_slider'
-		isComment = 'note: <code>ion_jit</code> only indicates that at least one of '
-			+'<code>ion</code> or <code>baselinejit</code> is as such - it does not guarantee both'
+		isComment = 'note: <code>ion_and/or_jit</code> only indicates that at least one of '
+			+'<code>ion</code> or <code>baselinejit</code> is as such'
 	} else if (zFP+'_metrics' == name) {
 		data = gData[zFP][scope+'_metrics']
 	} else if (aShowFormat.includes(name)) {
@@ -2097,7 +2098,6 @@ function output_health(scope) {
 
 	// slider
 	let target = gData.health[scope +'_collect_slider']
-	let btnSlider = ''
 	if (isBB) {
 		try {
 			let tmpobj = {}
@@ -2117,7 +2117,7 @@ function output_health(scope) {
 			for (const k of Object.keys(tmpobj).sort()) {gData[h][key][k] = tmpobj[k]}
 			// any failures or more than one level, then red
 			let color = (undefined !== tmpobj['fail'] || 1 !== Object.keys(tmpobj).length) ? 'bad' : 'good'
-			btnSlider = addButton(color, scope +'_health_slider', 'slider')
+			dom[scope + h +'_slider'].innerHTML = addButton(color, 'health_slider', 'slider')
 		} catch(e) {
 			console.log(e)
 		}
@@ -2154,7 +2154,7 @@ function output_health(scope) {
 			let overlayHealthCount = countPass +'/'+ countTotal
 			let btnPart1 = addButton((isAll ? 'good' : 'bad'), h, countPass)
 			btnPart1 = btnPart1.replace(']','') +'<span style="letter-spacing: -0.2em"> | </span>'
-			dom[scope + h].innerHTML = btnSlider + btnPart1
+			dom[scope + h].innerHTML = btnPart1
 				+ addButton(0,'document_health_metrics', countTotal).replace('[','')
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
