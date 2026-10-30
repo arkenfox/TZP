@@ -255,7 +255,7 @@ let gt0, gt1,
 	isSmartAllowed = false, // data-only mode - do not give off false health signals if not maintained
 	isStop = false
 
-const isBlockMin = 140,
+const isBlockMin = 153,
 	isSmartMin = 153
 
 /** DEV **/

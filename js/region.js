@@ -2384,8 +2384,8 @@ function get_l10n_parsererror_direction(METRIC) {
 		// 1666613: currently relies on chrome://global/locale/intl.css
 	let value, data = '', notation = isLanguageSmart ? locale_red : ''
 	try {
-		if (isVer > 146) {
-			// 1666613: no need to touch the dom in gecko: 0.17ms
+		if (isGecko) {
+			// 1666613: FF146+ no need to touch the dom in gecko: 0.17ms
 			let parser = (new DOMParser()).parseFromString('INVALID', 'text/xml')
 			value = parser.firstChild.attributes[0].nodeValue
 		} else {
