@@ -851,8 +851,8 @@ function get_isEngine(METRIC) {
 						// 109 is the last version supported on win7
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
 						//if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
-						//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129 2024-Sep
-						if ('function' !== typeof(Math.sumPrecise)) {isEngineBlocked = false} // 147 2026-Apr
+						//if ('function' == typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129 2024-Sep
+						if ('function' == typeof(Math.sumPrecise)) {isEngineBlocked = false} // 147 2026-Apr
 					} else if ('webkit' == isEngine) {
 						// https://webkit.org/ e.g. https://webkit.org/blog/15865/webkit-features-in-safari-18-0/
 						isWebkit = true
