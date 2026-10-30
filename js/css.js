@@ -55,14 +55,7 @@ function get_colors() {
 	if (!isGecko) {
 		delete oList.moz
 		addBoth(14,'colors_moz', zNA)
-	} else {
-	// with forced colors, removed -moz named colors will be false positives (and our alpha setting is retained)
-		// wrecking our RFP deterministic hash: to solve this we will add them if we expect them
-		let aAdd = []
-		if (isVer < 141) {aAdd.push('-moz-buttonhoverface','-moz-buttonhovertext')} // removed FF141: 1968925
-		if (aAdd.length) {oList.moz = oList.moz.concat(aAdd).sort()}
 	}
-	//console.log(oList)
 
 	for (const type of Object.keys(oList)) {
 		const element = dom.tzpColor
@@ -345,12 +338,8 @@ function get_link(METRIC) {
 		if (runST) {value = null} else if (runSI) {value = 'x'}
 		let typeCheck = typeFn(value)
 		if ('string' !== typeCheck) {throw zErrType + typeCheck}
-		if (isVer < 143) {
-			if (!value.includes('rgb(')) {throw zErrInvalid +'got ' + value}
-		}
-		// ignore rgb values: we're using a custom value from css
-		// but even if we weren't we already have that info from LinkText
-		value = 'underline' == value.slice(0,9) ? 'underline' : 'none'
+		let aExpected = ['none','underline']
+		if (!aExpected.includes(value)) {throw zErrInvalid +'expected '+ aExpected.join(' or ') +': got '+ value}
 		if ('none' == value) {notation = default_green}
 	} catch(e) {
 		value = e; data = zErrLog
