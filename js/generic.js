@@ -846,17 +846,21 @@ function get_isEngine(METRIC) {
 			if (isAllowNonGeckoMin) {
 				try {
 					if ('blink' == isEngine) {
+						// https://developer.chrome.com/release-notes/
 						isBlink = true
 						// 109 is the last version supported on win7
 						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 117 2023-Sept
-						if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
+						//if ('function' == typeof(Document.parseHTMLUnsafe)) {isEngineBlocked = false} // 124 2024-Apr
 						//if ('function' !== typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 129 2024-Sep
+						if ('function' !== typeof(Math.sumPrecise)) {isEngineBlocked = false} // 147 2026-Apr
 					} else if ('webkit' == isEngine) {
+						// https://webkit.org/ e.g. https://webkit.org/blog/15865/webkit-features-in-safari-18-0/
 						isWebkit = true
 						// https://en.wikipedia.org/wiki/Safari_(web_browser)#Version_compatibility
 						// 15.6.1 2022-Aug = last version supported on macOS 10.15?
-						if ('function' == typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar
-						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4 2024-Mar
+						//if ('function' == typeof(Intl.DurationFormat)) {isEngineBlocked = false} // 16.4 2023-Mar -> macOS 11 Big Sur+ (2020)
+						//if ('function' == typeof(Map.groupBy)) {isEngineBlocked = false} // 17.4 2024-Mar -> macOS 12 Monterey+ (2021)
+						if ('function' == typeof(URL.parse)) {isEngineBlocked = false} // 18.0 2024-Sept -> macOS 13 Ventura+ (2022)
 					} else {
 						// we have no min check to run, so allow
 						isEngineBlocked = false
