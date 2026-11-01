@@ -231,7 +231,7 @@ function get_computed_styles(METRIC) {
 		//*/
 		//console.log(res)
 
-		let moz, webkit
+		let moz, webkit, oBlink = {}
 		for (let i=0; i < res.length; i++) {
 			let obj = res[i]
 			let type = METRIC +'_'+ names[i]
@@ -245,7 +245,11 @@ function get_computed_styles(METRIC) {
 					typeCheck = typeFn(obj.keys)
 					if ('array' !== typeCheck) {throw zErrType +'keys: '+ typeCheck}
 					let data = obj.keys
-					if (isBlink) {data.sort()} // sort for blink
+					if (isBlink) {
+						let tmpdata = []
+						data.forEach(function(item){tmpdata.push(item)})
+						oBlink[names[i]] = tmpdata.sort()
+					}
 					let hash = mini(data)
 					aHashes.push(hash)
 					intHashes.push(i)
@@ -306,8 +310,6 @@ function get_computed_styles(METRIC) {
 				} catch(e) {}
 
 			} else {
-				// mixed hashes
-				hash = 'mixed'; isLies = true // gecko is never mixed
 				// for the first of each unique hash add sDetail + update display
 				let aDone = {}
 				intHashes.forEach(function(item) {
@@ -318,6 +320,33 @@ function get_computed_styles(METRIC) {
 						oDisplay[name] = hash + addButton(14, name, res[item]['keys'].length)
 					}
 				})
+				if (isBlink) {
+					// blink getComputedStyle is a different order | if all sorted == the same we are good
+					let aBlink = []
+					for (const k of Object.keys(oBlink)) {aBlink.push(mini(oBlink[k]))}
+					aBlink = dedupeArray(aBlink)
+					if (1 == aBlink.length) {
+						// same hash when sorted
+						hash = 'i am groot'
+						let aPreference = ['cssrulelist','domparser','htmlelement','getcomputed']
+						for (let i=0; i < aPreference.length; i++) {
+							let name = aPreference[i]
+							if (undefined !== oBlink[name]) {
+								let id = names.indexOf(name)
+								data = res[id]['keys']
+								hash = mini(data)
+								btn = addButton(14, METRIC, data.length)
+								break
+							}
+						}
+					} else {
+						// mixed hashes
+						hash = 'mixed'
+					}
+				} else {
+					// mixed hashes
+					hash = 'mixed'; isLies = true // gecko is never mixed
+				}
 			}
 		}
 		addBoth(14, METRIC, hash, btn, notation, data, isLies)
