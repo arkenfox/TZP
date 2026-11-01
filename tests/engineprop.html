@@ -612,14 +612,13 @@ function run() {
 		rec(typeof webkitStorageInfo, "webkitStorageInfo", code, "object") // to-be-deprecated see console
 		// stuff showing up in scrape > new
 		rec(typeof fetchLater, "fetchLater", code, "function")
-		rec(typeof onpagereveal, "onpagereveal", code, "object")
-		rec(typeof onpageswap, "onpageswap", code, "object")
 		rec(typeof onscrollsnapchange, "onscrollsnapchange", code, "object")
 		rec(typeof onscrollsnapchanging, "onscrollsnapchanging", code, "object")
 		rec(typeof viewport, "viewport", code, "object")
 		rec(typeof when, "when", code, "function")
 		rec(typeof crashReport, "crashReport", code, "object")
 		rec(typeof CrashReportContext, "CrashReportContext", code, "function")
+		rec(typeof requestResize, "requestResize", code, "function")
 
 		// edgeHTML only
 		code = 11
@@ -719,6 +718,8 @@ function run() {
 		rec(typeof originAgentCluster, "originAgentCluster", code, "boolean") // FF138+ 1665474
 		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object") // FF140+ 1550462
 		rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object") // FF148n 1858562
+		rec(typeof onpagereveal, "onpagereveal", code, "object") // FF161n 2009499
+		rec(typeof onpageswap, "onpageswap", code, "object") // FF161n 1881438
 
 		// blink + webkit (not seen in gecko)
 		code = 52
