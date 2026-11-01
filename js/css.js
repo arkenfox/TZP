@@ -231,7 +231,7 @@ function get_computed_styles(METRIC) {
 		//*/
 		//console.log(res)
 
-		let moz, webkit, oBlink = {}
+		let moz, webkit, oSorted = {}
 		for (let i=0; i < res.length; i++) {
 			let obj = res[i]
 			let type = METRIC +'_'+ names[i]
@@ -245,10 +245,10 @@ function get_computed_styles(METRIC) {
 					typeCheck = typeFn(obj.keys)
 					if ('array' !== typeCheck) {throw zErrType +'keys: '+ typeCheck}
 					let data = obj.keys
-					if (isBlink) {
+					if (!isGecko) {
 						let tmpdata = []
 						data.forEach(function(item){tmpdata.push(item)})
-						oBlink[names[i]] = tmpdata.sort()
+						oSorted[names[i]] = tmpdata.sort()
 					}
 					let hash = mini(data)
 					aHashes.push(hash)
@@ -320,18 +320,20 @@ function get_computed_styles(METRIC) {
 						oDisplay[name] = hash + addButton(14, name, res[item]['keys'].length)
 					}
 				})
-				if (isBlink) {
-					// blink getComputedStyle is a different order | if all sorted == the same we are good
-					let aBlink = []
-					for (const k of Object.keys(oBlink)) {aBlink.push(mini(oBlink[k]))}
-					aBlink = dedupeArray(aBlink)
-					if (1 == aBlink.length) {
-						// same hash when sorted
-						hash = 'i am groot'
-						let aPreference = ['cssrulelist','domparser','htmlelement','getcomputed']
+				if (!isGecko) {
+					// non gecko can have diofferent orders per method
+						// e.g. blink getcomputed is very divergent, cssrulelist has a single item placed differently
+						// e.g. older safari used to be different from memory
+						// but when sorted they are identical
+					let aSorted = []
+					for (const k of Object.keys(oSorted)) {aSorted.push(mini(oSorted[k]))}
+					aSorted = dedupeArray(aSorted)
+					if (1 == aSorted.length) {
+						// same hash when sorted | just be consistent in which data set we chose
+						let aPreference = ['domparser','htmlelement','cssrulelist','getcomputed']
 						for (let i=0; i < aPreference.length; i++) {
 							let name = aPreference[i]
-							if (undefined !== oBlink[name]) {
+							if (undefined !== oSorted[name]) {
 								let id = names.indexOf(name)
 								data = res[id]['keys']
 								hash = mini(data)
