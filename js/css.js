@@ -411,9 +411,12 @@ function get_media_css(METRIC) {
 				return zNA // to match
 			})()
 			if (runSE) {foo++} else if (runSI) {value = 4.5} else if (runSL) {value = 3}
-			if (zNA !== cssvalue) {
+			// treat servo returning 0 as unsupported
 				// currently, servo returns all getElementProp calls with the number 0
-					// which causes servo's matchmedia color zNA to throw as a string
+				// so when our matchmedia result is n/a, it throws an error as a string as we think its
+				// supported (css pseudo is not n/a despite that being displayed) and are expecting an integer
+			let isSupported = (isServo && 0 == cssvalue) ? false : zNA !== cssvalue
+			if (isSupported) {
 				let typeCheck = typeFn(value)
 				if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
 			}
