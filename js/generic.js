@@ -2788,7 +2788,11 @@ function countJS(item) {
 		// non-gecko
 		if (!isGecko) {
 			if (isEngineBlocked) {run_block('upgrade'); return}
-			if (isAllowNonGecko && undefined !== isEngine) {run_basic()} else {run_block(isEngine+' engine'); return}
+			if (isAllowNonGecko && undefined !== isEngine) {
+				//run_basic() // we'll do this later so we can expempt some engines e.g. brave
+			} else {
+				run_block(isEngine+' engine'); return
+			}
 		}
 		// update tooltip
 		if (undefined !== isStylesheet) {
@@ -2921,6 +2925,7 @@ function outputSection(id, isResize = false) {
 	}
 	// set the onion skin pattern background if TB and dark
 	// if MB swap kit for cookie
+	// set basic mode if required
 	if (gLoad) {
 		try {
 			if (isTB && 'android' !== isOS) {
@@ -2935,6 +2940,16 @@ function outputSection(id, isResize = false) {
 				dom.overlaykit.style.backgroundImage ='url("images/mullvad.svg")'
 				dom.overlaykit.style.height ='60px'
 				dom.overlaykit.style.top ='88%'
+			} else if (!isGecko) {
+				// gecko is already handled
+					// notate other engines as we like to distinguish them from basic mode
+					// e.g. to explain canvas results
+				let modeStr = isBrave ? 'brave' : 'basic'
+				if ('basic' == modeStr) {
+					dom.basiccanvas.innerHTML = ' In <u>basic mode</u> only some checks apply.'
+				}
+
+				run_basic(modeStr)
 			}
 		} catch(e) {}
 	}
