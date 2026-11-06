@@ -914,7 +914,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_integer('hardwareConcurrency','Navigator.'),
 		get_permissions('permissions'),
 		get_permissions_policy('permissionsPolicy'),
-		// blink only
+		// blink or unknown engine
 		get_battery('battery'),
 		get_device_memory('deviceMemory'),
 		get_device_posture('devicePosture'),
