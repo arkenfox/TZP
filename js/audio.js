@@ -96,12 +96,19 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 })
 
 const get_audio_offline = (METRIC) => new Promise(resolve => {
-	let t0 = nowFn(), notation = rfp_red, isLies = false
+	let t0 = nowFn(), notation = rfp_red, isLies = false, isDone = false
 
 	function outputErrors(display) {
+		isDone = true
 		addBoth(11, METRIC, display,'', notation, zErr)
 		return resolve()
 	}
+
+	setTimeout(function() {
+		if (!isDone) {
+			outputErrors(log_error(11, METRIC, zErrTime))
+		}
+	}, 500)
 
 	// ToDo: maybe reduce bufferLen as long as it doesn't change entropy
 		// also: when we add RFP + math PoC we need only check for protection (like canvas)
@@ -178,7 +185,7 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 						data = 'protected'
 						display = 'protected '+ s99 +'('+ display +')'+ sc
 					}
-
+					isDone = true
 					addBoth(11, METRIC, display, '', notation, data, isLies)
 					log_perf(11, METRIC, t0)
 					return resolve()
@@ -192,7 +199,9 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 		}
 	} catch(e) {
 		try {
-			if (gRun) {dom.audio_test_oscillator_compressor = zNA; dom.audio_test_oscillator = zNA; dom.audio_test = zNA}
+			if (gRun) {
+				dom.audio_test_oscillator_compressor = zNA; dom.audio_test_oscillator = zNA; dom.audio_test = zNA
+			}
 		} catch(e) {}
 		outputErrors(log_error(11, METRIC, e))
 	}
