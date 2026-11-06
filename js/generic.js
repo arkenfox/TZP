@@ -3216,7 +3216,6 @@ function outputSection(id, isResize = false) {
 function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
-
 	// early version checks
 	// 158: 2074024 ~0.15ms
 	try {
