@@ -45,8 +45,11 @@ function get_nav_connection(METRIC) {
 						let isInvalid = true
 						// https://groups.google.com/a/chromium.org/g/blink-dev/c/tU_Hqqytx8g/m/HTJebzVHBAAJ
 						// "WiFi on Android reports Infinity for downlinkMax as Chrome recently dropped the required permission to get Wifi linkSpeed
-						if (isBlink && 'downlinkMax' == k) {
-							if ('Infinity' == typeCheck || 'number' == typeCheck) {isInvalid = false}
+						if ('downlinkMax' == k) {
+							if (isBlink || 'undefined' == isEngine) {
+								// blink or unknown engines
+								if ('Infinity' == typeCheck || 'number' == typeCheck) {isInvalid = false}
+							}							
 						}
 						if (isInvalid) {throw zErrInvalid +'expected '+ expectedType +': got '+ typeCheck}
 					}
@@ -94,13 +97,15 @@ function get_nav_dnt(METRIC) {
 		hash = navigator[METRIC]
 		if (runST) {hash = 1} else if (runSI) {hash = '2'}
 		let typeCheck = typeFn(hash)
-		if (isBlink) {
-			// blink can be pnly be "1" or null
-			if ('1' !== hash && null !== hash) {throw zErrInvalid +'expected 1 or null: got ' + hash}
-		} else {
-			if (expectedType !== typeCheck) {throw zErrType + typeCheck}
-			if (isGecko) {
-				if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid +'expected 1 or unspecified: got ' + hash}
+		if ('undefined' !== isEngine) {
+			if (isBlink) {
+				// blink can be pnly be "1" or null
+				if ('1' !== hash && null !== hash) {throw zErrInvalid +'expected 1 or null: got ' + hash}
+			} else {
+				if (expectedType !== typeCheck) {throw zErrType + typeCheck}
+				if (isGecko) {
+					if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid +'expected 1 or unspecified: got ' + hash}
+				}
 			}
 		}
 		hash += '' // gecko is a string, otherwise we can only be null/undefined, so convert to a string

@@ -303,6 +303,7 @@ function get_isArchString(METRIC) {
 		'blink': ['cc5986a4'], // RangeError: Invalid string length
 		'gecko': ['e06bd848'], // RangeError: repeat count must be less than infinity and not overflow maximum string size
 		'servo': ['e06bd848'], // servo same as gecko
+		'undefined': [] , // 
 	}
 	let oData = {}
 	try {
@@ -314,9 +315,15 @@ function get_isArchString(METRIC) {
 				value = true
 			} catch(e) {
 				let eHash = mini(e+''), isThrow = true
-				let lookup = isGecko ? 'gecko' : isEngine
-				if (undefined !== oErrs[lookup]) {
-					if (oErrs[lookup].includes(eHash)) {isThrow = false}
+				if ('undefined' == isEngine) {
+					// unkown engines
+					// e.g. RangeError: string too long // Nordstjernen Web Browser
+					if ('RangeError' == e.name) {isThrow = false}
+				} else {
+					let lookup = isGecko ? 'gecko' : isEngine
+					if (undefined !== oErrs[lookup]) {
+						if (oErrs[lookup].includes(eHash)) {isThrow = false}
+					}
 				}
 				if (isThrow) {throw e+''}
 				value = false
@@ -2946,9 +2953,8 @@ function outputSection(id, isResize = false) {
 					// e.g. to explain canvas results
 				let modeStr = isBrave ? 'brave' : 'basic'
 				if ('basic' == modeStr) {
-					dom.basiccanvas.innerHTML = ' In <u>basic mode</u> only some checks apply.'
+					dom.basiccanvas.innerHTML = ' In <u>basic mode</u> only some checks may apply.'
 				}
-
 				run_basic(modeStr)
 			}
 		} catch(e) {}

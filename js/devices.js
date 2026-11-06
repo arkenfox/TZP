@@ -15,8 +15,8 @@ const get_battery = (METRIC) => new Promise(resolve => {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if (!isBlink) {
-			// non-blink
+		} else if (!isBlink && 'undefined' !== isEngine) {
+			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
 			// blink
@@ -111,8 +111,8 @@ function get_device_memory(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			value = typeCheck
-		} else if (!isBlink) {
-			// non-blink
+		} else if (!isBlink && 'undefined' !== isEngine) {
+			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
 			// blink
@@ -391,8 +391,8 @@ function get_memory(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. removed by blink (deprecated) or disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if (!isBlink) {
-			// non-blink
+		} else if (!isBlink && 'undefined' !== isEngine) {
+			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
 			// blink
@@ -573,6 +573,9 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 
 const get_prompt = (METRIC) => new Promise(resolve => {
 	// blink only
+		// in a new sessiuon, most of these almost always timeout (1000ms) on the first page-load
+		// after which they become stable (assuming no changed from downloading to downloaded)
+		// ToDo: determine how long they take, maybe we can call these early like mediaDevices to prime the API
 	if (!isBlink) {
 		addBoth(7, METRIC, 'undefined')
 		return resolve()
@@ -682,8 +685,8 @@ function get_screen_isextended(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			value = typeCheck
-		} else if (!isBlink) {
-			// non-blink
+		} else if (!isBlink && 'undefined' !== isEngine) {
+			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
 			// blink
@@ -816,7 +819,8 @@ function get_touc_h(METRIC) {
 			if (isGecko) {
 				let expected, got = 'none' == value ? value : value.join(', ')
 				if ('mac' == isOS) {
-					// mac doesn't have touch
+					// ToDo: see 2086846
+						// shipping Nov 2026 MacBook Pro M5 is touch capable
 					if ('none' !== value) {throw zErrInvalid +'expected none: got '+ got}
 				} else if (!isDesktop) {
 					// android
