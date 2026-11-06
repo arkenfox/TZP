@@ -2809,7 +2809,6 @@ const outputRegion = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('region')) {return resolve()}
 
 	oIntlLocalePerf = {} // reset
-
 	set_isLanguageSmart() // required for BB health in get_language_locale()
 	Promise.all([
 		get_geo('geolocation'),
