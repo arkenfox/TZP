@@ -1122,6 +1122,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		// check fonts
 		get_fonts_size(false).then(res => {
 			if ('object' == typeFn(res, true)) {
+				isFontsUsable = true // not an error
 				let aDetected = [], found
 				for (const k of Object.keys(res)) {aDetected.push(k)}
 				oOS[m] = aDetected.length ? aDetected : 'none'
@@ -1170,6 +1171,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 					}
 				}
 			} else {
+				oOS[m] = res +''
 				trysomethingelse()
 			}
 		})
@@ -1232,11 +1234,16 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 			if (isBlink) {exit('android'); return
 			} else if (isWebkit) {exit('iOS'); return}
 		} else {
-			exit('linux')
+			if (isFontsUsable) {
+				exit('linux')
+			} else {
+				exit()
+			}
 		}
 	}
 
 	let oOS = {}
+	let isFontsUsable = false
 	set_fntList_mini()
 	trywidget()
 })
@@ -3216,6 +3223,7 @@ function outputSection(id, isResize = false) {
 function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
+
 	// early version checks
 	// 158: 2074024 ~0.15ms
 	try {
