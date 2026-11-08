@@ -132,18 +132,18 @@ function run_block(trace) {
 	try {
 		dom.tzpContent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
-		let msg = 'TZP requires gecko '+ isBlockMin +'+'
+		let msg = ''
 		if ('iframe' == trace) {
 			msg = 'i\'m in an iframe'
 		} else if ('insecure' == trace) {
 			msg = 'i\'m in an insecure context'
 		} else if ('quirks' == trace) {
 			msg = 'i\'m in quirks mode - try again'
-		} else if (isAllowNonGecko) {
-			if (undefined !== isEngine) {
-				msg = 'update your '+ isEngine +' browser'
-			} else if (!isGecko) {
-				msg = 'TZP requires gecko '+ (isEngineStr.includes(' or ') ? ', ' : ' or ') + isEngineStr
+		} else if (isGecko || !isAllowNonGecko) {
+			msg = 'TZP requires gecko '+ isBlockMin +'+'
+		} else {
+			if (isAllowNonGecko) {
+				if (!isUndefined) {msg = 'update '+ isEngine} else {msg = 'TZP only supports '+ isEngineStr}
 			}
 		}
 		dom.blockmsg.innerHTML = "<center><br><span style='font-size: 14px;'><b>"+ (isGecko ? 'Gah.' : 'Aw, Snap!')
@@ -166,7 +166,7 @@ function run_basic(str = 'basic') {
 	}
 	// basic/other modes: notation
 	if (str.length) {
-		if ('undefined' == isEngine) {str = 'experimental'} else {str += ' mode'}
+		if (isUndefined) {str = 'experimental'} else {str += ' mode'}
 		let items = document.getElementsByClassName('nav-down')
 		for (let i=0; i < items.length; i++) {
 			// find '<a href' to end, prepend span
@@ -180,21 +180,10 @@ function run_basic(str = 'basic') {
 
 function getElementProp(sect, id, name, pseudo = ':after') {
 	// default none: https://www.w3.org/TR/CSS21/generate.html#content
+		// ^ e.g. if css is blocked
 	//console.log(sect, id, pseudo)
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo).content
-		// if supported but css blocked we get 'none' but if not supported (e.g. servo during development) we get ''
-			// we want the FP css metrics to reflect what the css actually says, so match the defaults
-		if ('undefined' == isEngine && '' == item) {
-			// out of range: screen, inner, dpi: default is '' but we return '?'
-			if ('#S' == id || '#D' == id || '#P' == id) {return '?'}
-			// deviceposture, orientations, aspect ratios, display-mode
-			let aUndefined = ['#cssDP','#cssOm','#cssDAR','#cssO','#cssAR','#cssDM']
-			if (aUndefined.includes(id)) {return 'undefined'}
-			// everything else
-			return zNA
-		}
-
 		if (runSI && !runSL) {item = 'none'} // don't error if runSL
 		let typeCheck = typeFn(item, true)
 		if ('string' !== typeCheck) {throw zErrType + typeCheck}
@@ -303,7 +292,6 @@ function get_isArchString(METRIC) {
 		'blink': ['cc5986a4'], // RangeError: Invalid string length
 		'gecko': ['e06bd848'], // RangeError: repeat count must be less than infinity and not overflow maximum string size
 		'servo': ['e06bd848'], // servo same as gecko
-		'undefined': [] , // 
 	}
 	let oData = {}
 	try {
@@ -315,15 +303,13 @@ function get_isArchString(METRIC) {
 				value = true
 			} catch(e) {
 				let eHash = mini(e+''), isThrow = true
-				if ('undefined' == isEngine) {
-					// unkown engines
-					// e.g. RangeError: string too long // Nordstjernen Web Browser
-					if ('RangeError' == e.name) {isThrow = false}
+				if (undefined !== oErrs[isEngine]) {
+					if (oErrs[isEngine].includes(eHash)) {isThrow = false}
 				} else {
-					let lookup = isGecko ? 'gecko' : isEngine
-					if (undefined !== oErrs[lookup]) {
-						if (oErrs[lookup].includes(eHash)) {isThrow = false}
-					}
+					// unknown/other engines
+					// e.g. RangeError: string too long // Nordstjernen Web Browser
+					log_debug(SECTG, METRIC +'_error', e+'', isScope, true) // persist
+					if ('RangeError' == e.name) {isThrow = false}
 				}
 				if (isThrow) {throw e+''}
 				value = false
@@ -795,10 +781,10 @@ function get_isEngine(METRIC) {
 				'object' === typeof onmsinertiastart,
 				'object' === typeof onreadystatechange,
 				'function' === typeof setImmediate,
-				/*
-				'MSStream' in window, 'msLaunchUri' in navigator, 'msSaveBlob' in navigator
-				*/
-			]
+			],
+			// add all known engine names here
+			servo: [],
+			gecko: [],
 		}
 		// array engine matches, so subsequent results doesn't override prev
 		let aEngine = [], aAllowed = [], sumTrue
@@ -813,7 +799,7 @@ function get_isEngine(METRIC) {
 		aAllowed.sort()
 		isEngineStr = aAllowed.join(', ')
 		if (aAllowed.length > 1) {
-			isEngineStr = ' or '+ aAllowed[aAllowed.length - 1]
+			isEngineStr = ' and '+ aAllowed[aAllowed.length - 1]
 			aAllowed = aAllowed.slice(0,-1)
 			isEngineStr = aAllowed.join(', ') + isEngineStr
 		}
@@ -823,7 +809,7 @@ function get_isEngine(METRIC) {
 		}
 		// servo
 			// easiest way to check for servo is it's not isGecko but has a lot of moz css properties
-		if (undefined == isEngine) {
+		if ('undefined' == isEngine) {
 			try {
 				// get all properties
 				let cssStyleDeclaration = ((new DOMParser).parseFromString('', 'text/html')).body.style
@@ -845,8 +831,11 @@ function get_isEngine(METRIC) {
 				}
 			} catch(e) {}
 		}
-		// set minimum
-		if (undefined !== isEngine) {
+		// set isUndefined else check minimum
+		if ('undefined' == isEngine) {
+			isUndefined = true
+			if (isAllowNonGeckoUndefined) {isEngineBlocked = false}
+		} else {
 			// approved engine detected, if not enforcing min, disable block
 			isEngineBlocked = isAllowNonGeckoMin
 			// if enforcing min, check
@@ -874,9 +863,6 @@ function get_isEngine(METRIC) {
 					}
 				} catch(e) {}
 			}
-		} else if (isAllowNonGeckoUndefined) {
-			isEngine = 'undefined' // a string vs undefined typeof
-			isEngineBlocked = false
 		}
 	} catch(e) {}
 	log_perf(SECTG, METRIC, t0,'', isEngine + ('' == isEngineStats ? '' : ' | '+ isEngineStats))
@@ -960,6 +946,7 @@ function get_isGecko(METRIC) {
 		let found = (list.length - aNo.length)
 		if (found > 5) {
 			isGecko = true
+			isEngine = 'gecko'
 			// alert if any gecko checks fail
 			if (aNo.length) {log_alert(SECTG, METRIC, aNo.join(', '), isScope, true)}
 		}
@@ -1435,9 +1422,9 @@ const get_isXML = () => new Promise(resolve => {
 	try {
 		let parser = new DOMParser
 		let isMethod = isGecko ? 'gecko' : 'other'
-		// determine method to get values if engine is 'undefined'
-		if ('undefined' == isEngine) {
-			// servo fails in both
+		// determine method for non-gecko engines
+		if (!isGecko) {
+			// e.g. servo fails in both
 				//'gecko': can't access property "firstChild", target is undefined
 				//'other': can't access property "innerText", target is undefined
 			try {
@@ -1602,7 +1589,7 @@ function get_isDomRect() {
 		}
 	}
 	// fixup servo which we're running to see what we get
-	if ('servo' == isEngine) {
+	if (isServo) {
 		aDomRect = [true, true, true, true]
 	}
 
@@ -2801,11 +2788,11 @@ function countJS(item) {
 		if (!isFile && 'https:' !== location.protocol) {run_block('insecure'); return}
 		// non-gecko
 		if (!isGecko) {
-			if (isEngineBlocked) {run_block('upgrade'); return}
-			if (isAllowNonGecko && undefined !== isEngine) {
-				//run_basic() // we'll do this later so we can expempt some engines e.g. brave
-			} else {
-				run_block(isEngine+' engine'); return
+			if (isEngineBlocked) {
+				run_block('upgrade'); return // min spec on known non-geckos not met
+			} else if (!isAllowNonGecko || isUndefined && !isAllowNonGeckoUndefined) {
+				// non-geckos not allowed || undefined engines not allowed
+				run_block(isEngine +' engine'); return
 			}
 		}
 		// update tooltip
@@ -2831,7 +2818,7 @@ function countJS(item) {
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
-		// block: quirks, iframe, insecure, upgrade required, !isAllowNonGecko, undefined isEngine | also if gecko is below min version
+		// block: quirks, iframe, insecure, upgrade required, !isAllowNonGecko, isUndefined | also if gecko is below min version
 		if (isStop) {return}
 		// otherwise not blocked
 		isBlock = false
@@ -3246,7 +3233,7 @@ function run_immediate() {
 			// get engine regardless
 			get_isEngine('isEngine')
 			// return if not supported
-			if (!isAllowNonGecko || undefined === isEngine) {return}
+			if (!isAllowNonGecko) {return}
 		} else {
 			// this can take 100+ms, but we have an enforced delay _and_ feature
 			// is the 2nd to last section to run
@@ -3266,10 +3253,9 @@ function run_immediate() {
 				// X attribute is deprecated and will be removed in the future.
 		}
 		// set geckolike
-		isGeckoLike = (isGecko || 'servo' == isEngine)
+		isGeckoLike = (isGecko || isServo)
 		// set isProtoProxy on known engines
-			// we already returned if isEngine == undefined just above
-		isProtoProxy = 'undefined' == isEngine ? false : true
+		isProtoProxy = isUndefined ? false : true
 		// expand css, record stylesheet info
 		get_isStylesheet(7680)
 		// recursion
