@@ -90,9 +90,14 @@ function get_domrect(METRIC) {
 	for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]}
 	hash = mini(data)
 	let btn = addButton(15, METRIC, countPass +'/4')
-	// servo we just want to see what we got
-	if (isServo) {btn = '', data = '', hash = zNA}
-	addBoth(15, METRIC, hash, btn, default_red, data)
+
+	if (isServo) {
+		// servo: we just want to see what we got until we can get the PoC to work
+		log_debug(15, METRIC, data)
+		addBoth(15, METRIC, zNA)
+	} else {
+		addBoth(15, METRIC, hash, btn, default_red, data)
+	}
 	return
 }
 
