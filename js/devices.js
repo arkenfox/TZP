@@ -15,7 +15,7 @@ const get_battery = (METRIC) => new Promise(resolve => {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if (!isBlink && 'undefined' !== isEngine) {
+		} else if (!isBlink && !isUndefined) {
 			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -111,7 +111,7 @@ function get_device_memory(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			value = typeCheck
-		} else if (!isBlink && 'undefined' !== isEngine) {
+		} else if (!isBlink && !isUndefined) {
 			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -391,7 +391,7 @@ function get_memory(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. removed by blink (deprecated) or disabled by fork or due to sandboxing etc
 			exit(typeCheck)
-		} else if (!isBlink && 'undefined' !== isEngine) {
+		} else if (!isBlink && !isUndefined) {
 			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -685,7 +685,7 @@ function get_screen_isextended(METRIC) {
 		if ('undefined' == typeCheck) {
 			// any engine e.g. disabled by fork or due to sandboxing etc
 			value = typeCheck
-		} else if (!isBlink && 'undefined' !== isEngine) {
+		} else if (!isBlink && !isUndefined) {
 			// non-blink known engine
 			throw zErrInvalid +'expected undefined: got '+ typeCheck
 		} else {
@@ -914,7 +914,7 @@ const outputDevices = () => new Promise(resolve => {
 		get_device_integer('hardwareConcurrency','Navigator.'),
 		get_permissions('permissions'),
 		get_permissions_policy('permissionsPolicy'),
-		// blink or unknown engine
+		// blink (or undefined engine) only
 		get_battery('battery'),
 		get_device_memory('deviceMemory'),
 		get_device_posture('devicePosture'),
