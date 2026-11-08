@@ -140,26 +140,31 @@ let bb_green = sgtick+'TB]'+sc,
 	bb_safer = sg+'[TB Safer]'+sc // don't tick/cross slider
 
 // run once
+	// engines
+let isBlink = false,
+	isEngine = 'undefined',
+	isGecko = false,
+	isGeckoLike = false, // gecko/servo
+	isServo = false,
+	isUndefined = false,
+	isWebkit = false
+	// other
 let isArchArray = zNA,
 	isArchString = zNA,
 	isArchWebGPU,
 	isAutoPlay,
 	isAutoPlayError,
-	isBlink = false,
 	isBrave = false,
 	isBraveFont = false,
 	isBraveSmart = false, // only if FP protection is on
 	isDesktop = true,
 	isDevices,
-	isEngine,
 	isEngineBlocked = true,
 	isEngineStr = '',
 	isFile = false,
 	isFileSystem,
 	isFileSystemError,
 	isFontDelay = false, // BB win/mac require a delay for async font fallback if font.vis used
-	isGecko = false,
-	isGeckoLike = false, // gecko/servo
 	isIonJIT = zNA,
 	isOS,
 	isOSErr,
@@ -168,7 +173,6 @@ let isArchArray = zNA,
 	isRecursion,
 	isReporting, // ReportingAPI
 	isScrollbar, // used to adjust overlay json format length
-	isServo = false,
 	isStyles = ['cursive','math','monospace','sans-serif','serif','system-ui'],
 		// FF145+ nightly 1788937 math | 2014703 FF149+
 		// 'emoji','ui-monospace','ui-rounded','ui-serif' = currently at least gecko + blink redundant (windows)
@@ -184,7 +188,6 @@ let isArchArray = zNA,
 	isVerExtra = '',
 	is158 = false,
 	isViewportUnits = {},
-	isWebkit = false,
 	isXML = {},
 	isXSLT // dom.xslt.enabled
 
@@ -244,9 +247,6 @@ let gt0, gt1,
 	gClick = true,
 	gFS = false, // don't run FS measurements if already tiggered
 	gClear = true, // clear excessive console errors from BB and non-gecko
-	isAllowNonGecko = true, // allow some other engines
-	isAllowNonGeckoMin = true, // enforce min requirements on those other engines
-	isAllowNonGeckoUndefined = true, // allow undefined engines
 	isBlock = true,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 
@@ -254,6 +254,11 @@ let gt0, gt1,
 	isSmartDataMode = false, // when in data-only mode we still want to run proxy/prototype lies
 	isSmartAllowed = false, // data-only mode - do not give off false health signals if not maintained
 	isStop = false
+
+// engines | known and undefined are independent
+const isAllowKnown = true, // allow known engines besides gecko
+	isAllowKnownMin = true, // enforce min req on known engines
+	isAllowUndefined = true // allow undefined engines
 
 const isBlockMin = 153,
 	isSmartMin = 153

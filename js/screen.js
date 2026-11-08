@@ -2077,7 +2077,7 @@ const outputFD = () => new Promise(resolve => {
 		// browser
 			// generally we're not interested in returning names of forks etc, but
 			// we can/do distinguish some (e.g. Brave) or the engine needs proper case
-		let isBrowser = isBrave ? 'Brave' : isEngine+'' // +'' ensure not undefined
+		let isBrowser = isBrave ? 'Brave' : isEngine
 		isBrowser = 'servo' == isBrowser ? 'Servo' : isBrowser // proper case
 		addBoth(3, 'browser', isBrowser)
 		return resolve()

@@ -46,7 +46,7 @@ function get_nav_connection(METRIC) {
 						// https://groups.google.com/a/chromium.org/g/blink-dev/c/tU_Hqqytx8g/m/HTJebzVHBAAJ
 						// "WiFi on Android reports Infinity for downlinkMax as Chrome recently dropped the required permission to get Wifi linkSpeed
 						if ('downlinkMax' == k) {
-							if (isBlink || 'undefined' == isEngine) {
+							if (isBlink || isUndefined) {
 								// blink or unknown engines
 								if ('Infinity' == typeCheck || 'number' == typeCheck) {isInvalid = false}
 							}							
@@ -97,7 +97,7 @@ function get_nav_dnt(METRIC) {
 		hash = navigator[METRIC]
 		if (runST) {hash = 1} else if (runSI) {hash = '2'}
 		let typeCheck = typeFn(hash)
-		if ('undefined' !== isEngine) {
+		if (!isUndefined) {
 			if (isBlink) {
 				// blink can be pnly be "1" or null
 				if ('1' !== hash && null !== hash) {throw zErrInvalid +'expected 1 or null: got ' + hash}

@@ -738,7 +738,7 @@ function get_pdf(METRIC) {
 			// the pref pdfjs.enabled requires a page reload; regardless lets ignore disabled
 			// ignore {"mimeTypes": "none", "pdfViewerEnabled": false, "plugins": "none"}
 		} else if (isBlink) {
-			// blink has a isAllowNonGeckoMin, so we expect only two possible results
+			// blink has a isAllowKnownMin, so we expect only two possible results
 				// i.e pdfViewerEnabled exists | we do not care about the tiny long tail
 				// of possible users with injected 3rd party if that's even possible these days
 			// record raw data
