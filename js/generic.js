@@ -139,12 +139,10 @@ function run_block(trace) {
 			msg = 'i\'m in an insecure context'
 		} else if ('quirks' == trace) {
 			msg = 'i\'m in quirks mode - try again'
-		} else if (isGecko || !isAllowNonGecko) {
+		} else if (isGecko || !isAllowKnown) {
 			msg = 'TZP requires gecko '+ isBlockMin +'+'
-		} else {
-			if (isAllowNonGecko) {
-				if (!isUndefined) {msg = 'update '+ isEngine} else {msg = 'TZP only supports '+ isEngineStr}
-			}
+		} else if (isAllowKnown || isUndefined) {
+			if (!isUndefined) {msg = 'update '+ isEngine} else {msg = 'TZP only supports '+ isEngineStr}
 		}
 		dom.blockmsg.innerHTML = "<center><br><span style='font-size: 14px;'><b>"+ (isGecko ? 'Gah.' : 'Aw, Snap!')
 			+"<br><br>" + msg +'<b></span></center>'
@@ -834,12 +832,12 @@ function get_isEngine(METRIC) {
 		// set isUndefined else check minimum
 		if ('undefined' == isEngine) {
 			isUndefined = true
-			if (isAllowNonGeckoUndefined) {isEngineBlocked = false}
+			if (isAllowUndefined) {isEngineBlocked = false}
 		} else {
 			// approved engine detected, if not enforcing min, disable block
-			isEngineBlocked = isAllowNonGeckoMin
+			isEngineBlocked = isAllowKnownMin
 			// if enforcing min, check
-			if (isAllowNonGeckoMin) {
+			if (isAllowKnownMin) {
 				try {
 					if ('blink' == isEngine) {
 						// https://developer.chrome.com/release-notes/
@@ -2790,7 +2788,7 @@ function countJS(item) {
 		if (!isGecko) {
 			if (isEngineBlocked) {
 				run_block('upgrade'); return // min spec on known non-geckos not met
-			} else if (!isAllowNonGecko || isUndefined && !isAllowNonGeckoUndefined) {
+			} else if (!isAllowKnown && !isUndefined || isUndefined && !isAllowUndefined) {
 				// non-geckos not allowed || undefined engines not allowed
 				run_block(isEngine +' engine'); return
 			}
@@ -2818,7 +2816,7 @@ function countJS(item) {
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
-		// block: quirks, iframe, insecure, upgrade required, !isAllowNonGecko, isUndefined | also if gecko is below min version
+		// block: quirks, iframe, insecure, upgrade required, !isAllowKnown, isUndefined | also if gecko is below min version
 		if (isStop) {return}
 		// otherwise not blocked
 		isBlock = false
@@ -2945,7 +2943,7 @@ function outputSection(id, isResize = false) {
 				// gecko is already handled
 					// notate other engines as we like to distinguish them from basic mode
 					// e.g. to explain canvas results
-				let modeStr = isBrave ? 'brave' : 'basic'
+				let modeStr = isBraveSmart ? 'brave' : 'basic'
 				if ('basic' == modeStr) {
 					dom.basiccanvas.innerHTML = ' In <u>basic mode</u> only some checks may apply.'
 				}
@@ -3232,8 +3230,10 @@ function run_immediate() {
 		if (!isGecko) {
 			// get engine regardless
 			get_isEngine('isEngine')
-			// return if not supported
-			if (!isAllowNonGecko) {return}
+			// return if we're going to block it
+			if (!isAllowKnown && !isUndefined || isUndefined && !isAllowUndefined) {
+				return
+			}
 		} else {
 			// this can take 100+ms, but we have an enforced delay _and_ feature
 			// is the 2nd to last section to run
