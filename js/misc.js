@@ -1087,8 +1087,8 @@ function get_window_props(METRIC) {
 				'SharedWorker','TrustedScriptURL','TrustedTypePolicyFactory','URL','WebGLRenderingContext','WebSocket',
 				'Worker','Worklet','XMLHttpRequest','XMLHttpRequestEventTarget','webkitURL',
 				// + MB16 safer
-				'Array','HTMLScriptElement','Iterator','Math','RegExp','Request','String','Text','decodeURI',
-				'decodeURIComponent','encodeURI','encodeURIComponent','escape','globalThis','unescape',
+				'Array','Boolean','DOMStringList','HTMLScriptElement','Iterator','Math','RegExp','Request','Set','String',
+				'Symbol','Text','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','escape','globalThis','unescape',
 			]
 
 			if (isSmart) {
