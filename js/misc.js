@@ -1191,12 +1191,12 @@ function get_window_props(METRIC) {
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['97a3a9ef','355cf591'] // 904, 903
+					'windows': ['7cbf4c47','8d1cd5e5'] // 904, 903
 				},
 				TB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['de08ca16','afee3538'] // 878, 877
+					'windows': ['a9102780','d131419e'] // 878, 877
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
