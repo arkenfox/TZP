@@ -456,7 +456,8 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 				if (!aValid.includes(state)) {throw zErrInvalid +'expected '+ aValid.join(', ') +': got '+ state}
 				accrue(k, state)
 			}).catch(err => {
-				state = isGecko ? zErr : err.name.toLowerCase()
+				state = err.name.toLowerCase()
+				if (isGecko && 'typeerror' == state) {state = zErr}
 				// only log non-standard gecko
 				if (isGecko) {
 					// TypeError: 'local-network' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.
@@ -484,7 +485,7 @@ const get_permissions = (METRIC) => new Promise(resolve => {
 			})
 		} catch(e) {
 			state = e.name.toLowerCase()
-			if (isGecko) {state = zErr; log_error(7, METRIC +'_'+ k, e)}
+			if (isGecko) {log_error(7, METRIC +'_'+ k, e)}
 			accrue(k, state)
 		}
 	}
