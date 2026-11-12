@@ -265,8 +265,18 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getSupportedExtensions
 		// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Using_Extensions
 		let extensions
+		let extensionIdentityMismatches
 		try {
 			extensions = context.getSupportedExtensions()
+
+			if (isBraveSmart) {
+				// Brave's farbled extension returns a new object on each call
+				// unlike the "real" extensions
+				extensionIdentityMismatches = extensions.filter(name => {
+					const first = context.getExtension(name)
+					return first !== context.getExtension(name)
+				})
+			}
 		} catch (e) {
 			log_error(10, 'webgl_extensions_'+ contextType, e)
 		}
