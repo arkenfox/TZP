@@ -264,9 +264,17 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		// get supported extensions
 		// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getSupportedExtensions
 		// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Using_Extensions
-		let extensions
+		let extensions, extensionIdentityMismatches = []
 		try {
 			extensions = context.getSupportedExtensions()
+			try {
+				// brave's randomized extension returns a new object on each call unlike "real" extensions
+				extensionIdentityMismatches = extensions.filter(name => {
+					const first = context.getExtension(name)
+					return first !== context.getExtension(name)
+				})
+			} catch(err) {console.log(contextType, e+'')}
+
 		} catch (e) {
 			log_error(10, 'webgl_extensions_'+ contextType, e)
 		}
@@ -339,7 +347,10 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		// spread syntax in objects requires FF55+
 		//data = {...components, extensions}
 		//if (isBrave) {extensions.push('EXT_groot_blender')}
-		data = {'extensions': extensions}
+		data = {
+			'extensions': extensions,
+			'extensions_mismatches': extensionIdentityMismatches,
+		}
 		for (const k of Object.keys(components).sort()) {data[k] = components[k]}
 		return data
 	}
