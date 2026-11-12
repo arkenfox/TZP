@@ -346,10 +346,9 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		}
 		// spread syntax in objects requires FF55+
 		//data = {...components, extensions}
-		//if (isBrave) {extensions.push('EXT_groot_blender')}
-		data = {
-			'extensions': extensions,
-			'extensions_mismatches': extensionIdentityMismatches,
+		data = {'extensions': extensions}
+		if (extensionIdentityMismatches.length) {
+			data['extensions_mismatches'] = extensionIdentityMismatches
 		}
 		for (const k of Object.keys(components).sort()) {data[k] = components[k]}
 		return data
