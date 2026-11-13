@@ -154,6 +154,7 @@ let isArchArray = zNA,
 	isArchWebGPU,
 	isAutoPlay,
 	isAutoPlayError,
+	isBasic = false,
 	isBrave = false,
 	isBraveFont = false,
 	isBraveSmart = false, // only if FP protection is on

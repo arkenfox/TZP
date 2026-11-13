@@ -150,6 +150,7 @@ function run_block(trace) {
 }
 
 function run_basic(str = 'basic') {
+	isBasic = 'basic' == str || isUndefined
 	// basic mode: colors: gecko only, let other engines have some color
 	if (isGecko && 'basic' == str) {
 		log_perf(SECTG, 'isBasic','')
@@ -988,17 +989,16 @@ const get_isIonJIT = (METRIC) => new Promise(resolve => {
 			let x = !Object.is(actual, -0)
 			exit(x)
 		} else {
-			// 2078745
+			// 2078745 FF113-159
 			function f(arr, c1, c2) {
-				var d = c1 ? 1 : -0
-				var a = arr[d]
-				var r = 0
+				let d = c1 ? 1 : -0
+				let a = arr[d], r = 0
 				if (c2) {r = d * 1}
 				return r
 			}
 			var arr = [10, 20, 30]
-			for (var i = 0; i < 200; i++) {f(arr, false, false)}
-			for (var i = 0; i < 20000; i++) {
+			for (let i = 0; i < 200; i++) {f(arr, false, false)}
+			for (let i = 0; i < 20000; i++) {
 				f(arr, true, true)
 				f(arr, false, false)
 			}

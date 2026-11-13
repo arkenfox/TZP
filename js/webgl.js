@@ -228,7 +228,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 	/* get WebGLRenderingContext or WebGL2RenderingContext */
 	// https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
 	// https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext
-	function getWebGL(contextType) {
+	function getWebGL(contextType, runNo) {
 		let data = {}
 		const isWebGL = /^(experimental-)?webgl$/ 
 		const isWebGL2 = /^(experimental-)?webgl2$/
@@ -274,7 +274,10 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					return first !== context.getExtension(name)
 				})
 			} catch(err) {console.log(contextType, e+'')}
-
+			/* test
+			extensionIdentityMismatches.push('EXT_iam_groot','BANANA_not_groot')
+			extensions.push('EXT_iam_groot','BANANA_not_groot')
+			//*/
 		} catch (e) {
 			log_error(10, 'webgl_extensions_'+ contextType, e)
 		}
@@ -356,9 +359,9 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 
 	function run(runNo) {
 		Promise.all([
-			getWebGL('experimental-webgl'),
-			getWebGL('webgl'),
-			getWebGL('webgl2'),
+			getWebGL('experimental-webgl', runNo),
+			getWebGL('webgl', runNo),
+			getWebGL('webgl2', runNo),
 		]).then((result) => {
 			const [experimental, webgl, webgl2] = result
 			oRaw[runNo] = {
@@ -590,13 +593,20 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 				// IIUIC: pretty sure the spec knows which is where, so we can just combine + dedupe
 			let hash, data='', btn='', notation ='' //rfp_red
 			try {
-				let oTmp = {}, aTmp
+				let oTmp = {}, aTmp, aMismatch = []
 				// get data
 				for (const r of Object.keys(oRaw)) { // r = run number
 					aTmp = []
 					let tmpdata = oRaw[r]
 					for (const c of Object.keys(tmpdata)) { // c = context
+						let mismatchdata = tmpdata[c]['extensions_mismatches']
 						let newdata = tmpdata[c].extensions
+						if ('array' == typeFn(mismatchdata)) {
+							// regardless of runNo or context, collect mismatched ext names
+							aMismatch = aMismatch.concat(mismatchdata)
+							// we could filter out spoofs here but instead we'll do it below if identical runs
+							//newdata = newdata.filter(x => !mismatchdata.includes(x))
+						}
 						if ('array' == typeFn(newdata)) {aTmp = aTmp.concat(newdata)}
 					}
 					aTmp = dedupeArray(aTmp)
@@ -604,6 +614,9 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 					// note: don't sort: we're concat'ing in context alphabetical order: exp,1,2
 					// and unsorted deduped results highlight the unique webgl2 items at the end
 				}
+				// fake extensions
+				aMismatch = dedupeArray(aMismatch)
+
 				// compare
 				hash = mini(oTmp[0])
 				if (hash == mini(oTmp[1])) {
@@ -614,50 +627,58 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						// but we still need something for the overall summary metric
 						throw zErrInvalid +'none'
 					}
+					// expand mismatches
+						// get all lastItems until we hit WEBGL_
+						// e.g. brave shields adds one random EXT_ item to each context _at the end_
+						// AFAICT all engines return these sorted and there will always be a WEBGL_ item last
+					for (const c of Object.keys(oRaw[0])) {
+						aTmp = oRaw[0][c].extensions
+						for (let i= aTmp.length - 1; i > -1; i--) {
+							let lastItem = aTmp[i]
+							if ('WEBGL_' == lastItem.slice(0,6)) {break}
+							aMismatch.push(lastItem)
+						}
+					}
+					aMismatch = dedupeArray(aMismatch)
+
+					// do some brave checks
+						// totally redundant for now, but keep up our sleeves
 					if (isBrave) {
 						let aMiddle = ['blend','circle','draw','expanded','polygon','texture','triangle']
 						let aEnd = ['blender','compressor','sampler']
-						// check each context's last item for new strings
-							// brave shields adds one random EXT_ item to each context _at the end_
-							// meaning it's out of alphabetical order (blink returns then in order)
-							// and we would always have a WEBGL_ item
-						let oNew = {}, newmiddle = [], newend = []
-						for (const c of Object.keys(oRaw[0])) {
-							aTmp = oRaw[0][c].extensions
-							let lastItem = aTmp[aTmp.length - 1]
-							if ('EXT_' == lastItem.slice(0,4)) {
-								let parts = lastItem.split('_'), oNew = {}
-								let middle = parts[1], end = parts[2]
-								if (undefined !== end && !aEnd.includes(end)) {
-									aEnd.push(end); newend.push(end)
-								}
-								if (undefined !== middle && !aMiddle.includes(middle)) {
-									aMiddle.push(middle); newmiddle.push(middle)
-								}
+						// alert if this method needs new strings
+						let aNew = []
+						aMismatch.forEach(function(item){
+							let parts = item.split('_')
+							let middle = parts[1], end = parts[2]
+							if (undefined !== end && !aEnd.includes(end) || undefined !== middle && !aMiddle.includes(middle)) {
+								aNew.push(item)
 							}
+						})
+						if (aNew.length) {
+							aNew = dedupeArray(aNew)
+							// we only ignore if !isBasic, so tweak alert to match
+							log_alert(10, metric + (isBasic ? '' : '_ignored') +'_new', aNew)
 						}
-						if (newend.length) {oNew['end'] = newend}
-						if (newmiddle.length) {oNew['middle'] = newmiddle}
-						if (Object.keys(oNew).length) {
-							log_alert(10, metric +'_ignored_new', oNew)
-						}
-						// find spoofs
-						let aIgnored = []
+						// expand mismatches based on strings
 						data.forEach(function(ext){
 							let parts = ext.split('_')
 							if ('EXT' == parts[0]) {
 								let middle = parts[1], end = parts[2]
 								if (undefined !== end && aEnd.includes(end)) {
-									if (undefined !== middle && aMiddle.includes(middle)) {aIgnored.push(ext)}
+									if (undefined !== middle && aMiddle.includes(middle)) {aMismatch.push(ext)}
 								}
 							}
 						})
-						// sanitize, rehash, log
-						if (aIgnored.length) {
-							data = data.filter(x => !aIgnored.includes(x))
-							hash = mini(data)
-							log_debug(10, metric +'_ignored', aIgnored)
-						}
+						aMismatch = dedupeArray(aMismatch)
+					}
+					// non-basic mode: sanitize, rehash, log
+						// ToDo: we should add tampering entropy to gecko/any FPs
+						// but we don't really do bypasses and lack a mechanism for it
+					if (!isBasic && aMismatch.length) {
+						data = data.filter(x => !aMismatch.includes(x))
+						hash = mini(data)
+						log_debug(10, metric +'_ignored', aMismatch)
 					}
 					btn = addButton(10, metric, data.length)
 				} else {
