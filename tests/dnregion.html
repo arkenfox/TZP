@@ -232,7 +232,6 @@ function generate_codes() {
 	aRegions = aAll
 }
 
-
 function compute_data() {
 	aRes = []
 	for (const key of Object.keys(oTestData)) {
@@ -243,13 +242,14 @@ function compute_data() {
 	console.log(aRes.join('\n'))
 }
 
-
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
 	oTestData = {},
+	oEmpties = {},
 	isSupported = false,
 	localesHashAll = "" // to compare min to
+
 
 function testitems() {
 	//loop each script on it's own
@@ -321,10 +321,12 @@ function legend() {
 
 function run_main(method, aTest, isLoop = false) {
 	let t0 = performance.now()
-	let oData = {}, oTempData = {} 
+	let oData = {}, oTempData = {}
 	let spacer = '<br><br>'
 	let tests = {}
 	let aUsed = undefined == aTest ? aItems: aTest
+	oEmpties = {} // reset
+
 	if (!isLoop) {
 		dom.perf = ""
 		dom.results = ""
@@ -361,14 +363,25 @@ function run_main(method, aTest, isLoop = false) {
 				for (const s of Object.keys(tests[t])) { // for each style
 					oType[t][s] = ('tiny' !== method) ? [] : {}
 					let dn = new Intl.DisplayNames([code], {type: t, style: s})
-					tests[t][s].sort().forEach(function(item){
+					tests[t][s].sort().forEach(function(item){ // each region code
 						let value = dn.of(item)
-						if ('tiny' !== method) {
-							oType[t][s].push(item +': '+ value)	
-						} else {
-							oType[t][s][item] = value
+						// info density: only add if valuoe is different from region code
+						if (value !== item) {
+							if ('tiny' !== method) {
+								oType[t][s].push(item +': '+ value)	
+							} else {
+								oType[t][s][item] = value
+							}
 						}
 					})
+					// check for empties since we only record if valuoe !== region code 
+					let count
+					if ('tiny' !== method) {count = oType[t][s].length
+					} else {count = Object.keys(oType[t][s]).length}
+					if (count < 5) {
+						if (undefined == oEmpties[code]) {oEmpties[code] = {}}
+						oEmpties[code][s] = count
+					}
 				}
 			})
 			let hash = mini(oType) +" " // make numbers sort like strings
@@ -421,13 +434,18 @@ function run_main(method, aTest, isLoop = false) {
 									item = item.replace(parts[0] +':', s12 + parts[0]+ ':' + sc)
 									aParts.push(item)
 								})
+								if (0 == aParts.length) {aParts = ['none']}
 								str += s16 + s.slice(0,1).toUpperCase() +": "+ sc + aParts.join(', ') +"</br>"
 							} else {
-								str += s16 + s + sc + '<ul class="main">'
-								Object.keys(oData[k][type][s]).forEach(function(item){ // for each item
-									str += "<li>"+ s12 + item +': '+ sc + oData[k][type][s][item] +"</li>"
-								})
-								str += '</ul>'
+								if (0 == Object.keys(oData[k][type][s]).length) {
+									str += s16 + s + sc + ': none'
+								} else {
+									str += s16 + s + sc + '<ul class="main">'
+									Object.keys(oData[k][type][s]).forEach(function(item){ // for each item
+										str += "<li>"+ s12 + item +': '+ sc + oData[k][type][s][item] +"</li>"
+									})
+									str += '</ul>'
+								}
 							}
 						})
 					}
@@ -480,7 +498,7 @@ function run_main(method, aTest, isLoop = false) {
 			localesHashAll = localesHash
 			if (isVer >= isVerMin) {
 				// results
-				if (resultsHash == "7b25db13") { // FF147+
+				if (resultsHash == "0e93aa49") { // FF147+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
@@ -597,6 +615,7 @@ Promise.all([
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	//list = ['en','de','fr','pl','pt','sv']
+	//list = ['uz-af']
 
 	legend()
 	if (isSupported) {
