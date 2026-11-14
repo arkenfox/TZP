@@ -476,7 +476,26 @@ function set_oIntlLocale() {
 			calendar: {
 				'short': ['chinese','dangi','ethiopic','gregory','islamic-tbla','islamic-umalqura','japanese','roc'],
 			},
-			currency: {'long': ['JPY','NIO','SEK','SZL','TZS','XAF']},
+			currency: {
+				// this is a full min test rather than a tiny one, as it gives us max results of ~408
+				// possible different locales and we can achive info density by only recordng if the
+				// value doesn't equal the currency code e.g. the vast majority if short tests
+				'long': ['AUD','CAD','GBP','JPY','MZN','NIO','SEK','SZL','TZS','USD','XAF'],
+				'narrow': ['BND','EUR'],
+				'short': [
+					'AFN','ANG','AOA','AUD','AWG','AZN','BAM','BBD','BIF','BMD',
+					'BND','BOB','BRL','BSD','BWP','BZD','CAD','CDF','CLP','CNY',
+					'COP','CRC','CUP','DJF','DKK','DOP','DZD','ERN','ETB','EUR',
+					'FJD','FKP','FRF','GBP','GHS','GIP','GMD','GNF','GTQ','GYD',
+					'HNL','HTG','IDR','IQD','JMD','JPY','KES','KGS','KMF','KYD',
+					'KZT','LKR','LRD','LSL','LUF','MDL','MGA','MKD','MOP','MRU',
+					'MUR','MWK','MYR','MZN','NAD','NGN','NIO','NZD','PAB','PEN',
+					'PGK','PHP','PKR','PLN','PTE','PYG','RUB','RUR','RWF','SBD',
+					'SCR','SDG','SEK','SGD','SHP','SLE','SOS','SRD','SSP','STN',
+					'SYP','SZL','TND','TOP','TTD','TZS','UGX','USD','UYW','VES', 
+					'VUV','WST','XAF','XCD','ZAR','ZMW'
+				]
+			},
 			datetimefield: {
 				'narrow': ['day','dayPeriod','weekOfYear','weekday'],
 				'short': ['era','month','second','timeZoneName'],
@@ -1010,6 +1029,7 @@ function get_locale_intl() {
 			} else if ('displaynames' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
+					let isCurrency = 'currency' == key
 					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) { // for each style
 						let optkey = 'datetimefield' == key ? 'dateTimeField' : key // fix key case
@@ -1020,10 +1040,22 @@ function get_locale_intl() {
 						let locIntl = undefined == locTest ? [] : locTest
 						formatter = new Intl.DisplayNames(locIntl, options); countC++
 						if (isCheck) {checker = new Intl.DisplayNames(locCheck, options); countC++}
-						tests[key][s].forEach(function(item) {
-							data[item] = formatter.of(item)
-							if (isCheck) {datacheck[item] = checker.of(item)}
-						})
+						if (isCurrency) {
+							// currency: for info density we only record if value !== currency code
+							tests[key][s].forEach(function(item) {
+								let itemvalue = formatter.of(item)
+								if (itemvalue !== item) {data[item] = itemvalue}
+								if (isCheck) {
+									itemvalue = checker.of(item)
+									if (itemvalue !== item) {datacheck[item] = itemvalue}
+								}
+							})
+						} else {
+							tests[key][s].forEach(function(item) {
+								data[item] = formatter.of(item)
+								if (isCheck) {datacheck[item] = checker.of(item)}
+							})
+						}
 						obj[key][s] = data; objcheck[key][s] = datacheck
 					})
 				}
