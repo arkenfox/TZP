@@ -477,9 +477,9 @@ function set_oIntlLocale() {
 				'short': ['chinese','dangi','ethiopic','gregory','islamic-tbla','islamic-umalqura','japanese','roc'],
 			},
 			currency: {
-				// this is a full min test rather than a tiny one, as it gives us max results of ~408
-				// possible different locales and we can achive info density by only recordng if the
-				// value doesn't equal the currency code e.g. the vast majority if short tests
+				// full min test rather than a tiny one, as in gecko it gives us ~408 different
+				// locale hashes and we can apply info density by only recording if the value doesn't equal
+				// the currency code e.g. the vast majority isn't recorded, only the bits that matter
 				'long': ['AUD','CAD','GBP','JPY','MZN','NIO','SEK','SZL','TZS','USD','XAF'],
 				'narrow': ['BND','EUR'],
 				'short': [
@@ -501,7 +501,16 @@ function set_oIntlLocale() {
 				'short': ['era','month','second','timeZoneName'],
 			},
 			language: {'dialect': ['bn-in','en','fr-ch','gu','kl','sr-ba','zh-hk']},
-			region: {'narrow': ['CM','FR','TL','US','VC','VI','ZZ']},
+			region: {
+				// full min test in gecko ~283 vs ~245 tiny locale hashes
+				// info density only record if the value doesn't equal the region code
+				// doesn't help much but it's not as huge array
+				'narrow': [
+					'AS','CM','CN','EH','FR','GB','GH','GL','GS','IM','IT','JT','KE',
+					'KH','KP','KY','LS','MM','MO','MS','MZ','NL','PK','PL','PS','QO',
+					'RW','SJ','SS','SZ','TF','TL','UM','US','VC','VI','ZA','ZM','ZZ'
+				]
+			},
 			script: {
 				// blink is case sensitive
 				'short': ['Arab','Beng','Cyrl','Deva','Guru','Hans','Hrkt','Latn','Mong','Mymr','Orya','Zxxx','Zzzz'],
@@ -1029,7 +1038,7 @@ function get_locale_intl() {
 			} else if ('displaynames' == m) {
 				for (let i=0; i < testkeys.length; i++) {
 					let key = testkeys[i]
-					let isCurrency = 'currency' == key
+					let isDiffOnly = 'currency' == key || 'region' == key
 					obj[key] = {}; objcheck[key] = {}
 					Object.keys(tests[key]).forEach(function(s) { // for each style
 						let optkey = 'datetimefield' == key ? 'dateTimeField' : key // fix key case
@@ -1040,7 +1049,7 @@ function get_locale_intl() {
 						let locIntl = undefined == locTest ? [] : locTest
 						formatter = new Intl.DisplayNames(locIntl, options); countC++
 						if (isCheck) {checker = new Intl.DisplayNames(locCheck, options); countC++}
-						if (isCurrency) {
+						if (isDiffOnly) {
 							// currency: for info density we only record if value !== currency code
 							tests[key][s].forEach(function(item) {
 								let itemvalue = formatter.of(item)
@@ -1050,6 +1059,8 @@ function get_locale_intl() {
 									if (itemvalue !== item) {datacheck[item] = itemvalue}
 								}
 							})
+							if (0 == Object.keys(data).length) {data = 'none'}
+							if (isCheck && 0 == Object.keys(datacheck).length) {datacheck = 'none'}
 						} else {
 							tests[key][s].forEach(function(item) {
 								data[item] = formatter.of(item)
@@ -1301,7 +1312,7 @@ function get_locale_intl() {
 	let oStringExpected = {}, oStringExpectedChildren = {}
 	let locTest = undefined, locCheck = isLocaleValue // use variables so I can test them
 	let strTest = undefined, strCheck = isLocaleValue
-	//locTest = 'de'; locCheck = 'de' // should be the same
+	//locTest = 'uz-af'; locCheck = 'uz-af' // should be the same
 	//locTest = 'it'; locCheck = 'ko' // everything should be different
 
 	//strTest = 'fr', strCheck = 'fr' // should be the same
