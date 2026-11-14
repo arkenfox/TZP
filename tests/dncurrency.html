@@ -295,7 +295,7 @@ function run_main(method, aTest, isLoop = false) {
 			// so ignore those
 
 		tests = {
-			// anything outside of the core longs is miniscule +1s or +2s
+			// anything outside of the core longs is miniscule +1's or +2's
 			'long': [
 'JPY', // 177
 'XAF', // 197 +20
@@ -329,7 +329,10 @@ function run_main(method, aTest, isLoop = false) {
 				let dn = new Intl.DisplayNames([code], {type: 'currency', style: s})
 				tests[s].sort().forEach(function(item){
 					let value = dn.of(item)
-					oType[s][item] = value
+					// information density: only record if the value differs from curency code
+					if (value !== item) { 
+						oType[s][item] = value
+					}
 				})
 			}
 			let hash = mini(oType) +" " // make numbers sort like strings
@@ -431,7 +434,7 @@ function run_main(method, aTest, isLoop = false) {
 			localesHashAll = localesHash
 			if (isVer >= isVerMin) {
 				// results
-				if (resultsHash == "c2325de7") { // FF147+
+				if (resultsHash == "31976e48") { // FF147+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
