@@ -105,9 +105,12 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 			if ('object' == typeof data) {
 				sDetail[isScope][metric] = data
 				btn = addButton(11, metric)
+				if (isBraveSmart) {value = 'protected '+ s99 +'('+ value +')'+ sc}
 			}
 			addDisplay(11, metric, value, btn)
 			if ('string' == typeof data) {value = data}
+
+			if (isBraveSmart) {value = 'protected'}
 			return resolve([metric, value])
 		}
 		try {
@@ -157,9 +160,11 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 			if ('object' == typeof data) {
 				sDetail[isScope][metric] = data
 				btn = addButton(11, metric)
+				if (isBraveSmart) {value = 'protected '+ s99 +'('+ value +')'+ sc}
 			}
 			addDisplay(11, metric, value, btn)
 			if ('string' == typeof data) {value = data}
+			if (isBraveSmart) {value = 'protected'}
 			return resolve([metric, value])
 		}
 		try {
@@ -254,6 +259,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 	}
 	// start
 	Promise.all([
+		get_isAudioNoise(11),
 		outputPrototypeLies(),
 	]).then(function(){
 		run()

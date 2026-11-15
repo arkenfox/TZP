@@ -1536,6 +1536,93 @@ function get_isXSLT() {
 
 /*** PREREQ ***/
 
+const get_isAudioNoise = (id) => new Promise(resolve => {
+	isAudioNoise = false
+	isAudioString = ''
+	// no need to do anything if not running the audio section
+	if ('all' !== id && 11 !== id || undefined == window.OfflineAudioContext) {return resolve()}
+
+	// create a known array of one value and diff
+	// offset at 0.5 (1/2), 0.25 (1/4), 0.125 (1/87), 0.0625, 0.015625, 0.0078125, 0.00390625 etc
+		// all work: i.e no noise if there is no noise (gecko/blink)
+		// some extensions require smaller sizes to trigger noise e.g. chameleon requires 0.0078125 or lower
+	/* results | at 0.0078125, 1000, no bucketing
+	100% noise |   0% variation      = chameleon
+	 10% noise |  95% variation | ±  = canvas blocker
+		1% noise |   0% variation      = fingerprint spoofing (it's an extension)
+	100% noise | 100% variation | ±  = JShelter little
+	100% noise | 100% variation | -  = JShelter strict
+	 25% noise | 100% variation | ±  = Privacy Thing
+	100% noise |   0% variation      = brave
+	100% noise |  67% variation | ±  = helium
+	*/
+
+	function exit(string, noise) {
+		// string zErr, zErrTime, none .. or a noise FP
+		isDone = true
+		log_perf(SECTP, 'isAudioNoise', t0,'', string)
+		// if zErr or timed out we should add an alert
+		if (zErr == string || zErrTime == string) {
+			log_alert(11, 'isAudioNoise', string, isScope, false) // don't persist since it's a prereq
+		}
+		isAudioNoise = noise
+		if (isAudioNoise) {isAudioString = string}
+		return resolve()
+	}
+	setTimeout(function() {if (!isDone) {exit(zErrTime, false)}}, 30)
+
+	async function get_noise(offset = 0.0078125, len = 1000) {
+		try {
+			if (!runTE) {
+				if (runSE) {foo++}
+				const OfflineContext = window.OfflineAudioContext
+				const context = new OfflineContext(1, len, 44100);
+				const source = context.createConstantSource();
+				source.offset.value = offset;
+				source.connect(context.destination);
+				source.start(0);
+				const samples = (await context.startRendering()).getChannelData(0);
+
+				let countUp = 0, countDown = 0, sNoise = new Set()
+				for (let i=0; i < samples.length; i++) {
+					let value = samples[i]
+					if (value !== offset) {
+						sNoise.add(offset - value)
+						if (value < offset) {countDown++} else if (value > offset) {countUp++}
+					}
+				}
+				let count = countUp + countDown, aFP = []
+				if (count > 0) {
+					// we can bucketize these later
+					let percentage = Math.round((count/len) * 100)
+					aFP.push(percentage +'% noise')
+					// variations
+					let isStable = 1 == sNoise.size
+					if (isStable) {
+						// if all noise is the same no need to measure + or - as it could be random
+						aFP.push('0% variation')
+					} else {
+						percentage = Math.round((sNoise.size/count) * 100)
+						aFP.push(percentage +'% variation')
+						// movement direction
+						if (countUp > 0 && countDown > 0) {aFP.push('±')
+						} else if (countUp > 0) {aFP.push('+')} else {aFP.push('-')}
+					}
+				}
+				if (!isDone) {
+					let str = aFP.length ? aFP.join(' | ') : 'none'
+					exit(str, 'none' !== str)
+				}
+			}
+		} catch (e) {
+			exit(zErr, false)
+		}
+	}
+
+	let t0 = nowFn(), isDone = false
+	get_noise()
+})
+
 function get_isDomRect() {
 	// notes: isGeckoLike: servo seems stable (different results to gecko), but not all four methods match
 	if (!isGeckoLike) {return}
@@ -3191,6 +3278,7 @@ function outputSection(id, isResize = false) {
 			gt0 = nowFn()
 			Promise.all([
 				get_isDomRect(),
+				get_isAudioNoise(id),
 				outputPrototypeLies(isResize),
 			]).then(function(){
 				if (gClear) { // default true

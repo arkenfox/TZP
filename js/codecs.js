@@ -436,7 +436,7 @@ const get_eme = (METRIC) => new Promise(resolve => {
 		setTimeout(function() {
 			if (!isFound) {
 				isFound = true
-				return resolve([key, item, 'timed out'])
+				return resolve([key, item, zErrTime])
 			}
 		}, timeout)
 		// get value
