@@ -222,7 +222,9 @@ let languagesSupported = {},
 	oCanvasInfo = {}
 
 // other
-let aDomRect = [true, true, true, true],
+let isAudioNoise = false,
+	isAudioString ='',
+	aDomRect = [true, true, true, true],
 	isDomRect = 0, // default non-gecko
 	oDomRect = {},
 	isDecimal = false,
