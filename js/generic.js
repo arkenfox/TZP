@@ -1569,7 +1569,7 @@ const get_isAudioNoise = (id) => new Promise(resolve => {
 		if (isAudioNoise) {isAudioString = string}
 		return resolve()
 	}
-	setTimeout(function() {if (!isDone) {exit(zErrTime, false)}}, 30)
+	setTimeout(function() {if (!isDone) {exit(zErrTime, false)}}, 100)
 
 	async function get_noise(offset = 0.0078125, len = 1000) {
 		try {
