@@ -1537,19 +1537,19 @@ function get_isXSLT() {
 /*** PREREQ ***/
 
 const get_isAudioNoise = (id) => new Promise(resolve => {
-	isAudioNoise = false
-	isAudioString = ''
 	// no need to do anything if not running the audio section
 	if ('all' !== id && 11 !== id || undefined == window.OfflineAudioContext) {return resolve()}
+	isAudioNoise = false
+	isAudioString = ''
 
 	// create a known array of one value and diff
-	// offset at 0.5 (1/2), 0.25 (1/4), 0.125 (1/87), 0.0625, 0.015625, 0.0078125, 0.00390625 etc
+	// offset at 0.5 (1/2), 0.25 (1/4), 0.125 (1/8), 0.0625, 0.015625, 0.0078125, 0.00390625 etc
 		// all work: i.e no noise if there is no noise (gecko/blink)
 		// some extensions require smaller sizes to trigger noise e.g. chameleon requires 0.0078125 or lower
 	/* results | at 0.0078125, 1000, no bucketing
 	100% noise |   0% variation      = chameleon
 	 10% noise |  95% variation | ±  = canvas blocker
-		1% noise |   0% variation      = fingerprint spoofing (it's an extension)
+	  1% noise |   0% variation      = fingerprint spoofing (it's an extension)
 	100% noise | 100% variation | ±  = JShelter little
 	100% noise | 100% variation | -  = JShelter strict
 	 25% noise | 100% variation | ±  = Privacy Thing
