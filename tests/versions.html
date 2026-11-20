@@ -220,7 +220,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 119, maxVer = 161, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 122, maxVer = 163, oTZP = {}, oResults = {}
 	let is144 = 'undefined' === typeof CSS2Properties
 
 	function run_tzp() {
@@ -242,7 +242,7 @@ function outputVersion() {
 			// now do stuff after we have finished
 			if (countTZP == expectTZP) {
 				let totalPerf = Math.round((performance.now() - gTZP))
-				let strSuccess = ""
+				let strSuccess = ''
 				if (isFF) {
 					//console.debug(oResults)
 					let results = []
@@ -251,7 +251,7 @@ function outputVersion() {
 
 					// loop: stop at first success: so this covers dual tests where one fails and one passes
 						// e.g. [105, "0 ms", true]
-					let myVer = "", myPerf = ""
+					let myVer = '', myPerf = ''
 					for (let i = 0; i < results.length; i++) {
 						let array = results[i]
 						if (array[2]) {
@@ -293,6 +293,20 @@ function testperf() {
 	console.log(tEnd - tStart, 'ms', testversion)
 }
 
+		// 163: 2092545
+		let t163 = performance.now(), ver163
+		try {
+			let n163 = 0
+			let test163 = {__proto__: Iterator.prototype,
+				next() {let i = ++n163; return {done: false, get value() {if (i === 1) throw 'a'}}}
+			}
+			test163.drop(1).next().value; ver163 = true
+		} catch (e) {}
+		rec(163, 163, "2092545", ver163, performance.now()-t163) // 0.08 ms
+
+		// 162: 2084937 0.15ms calculated earlier
+		rec(162, 162, "2084937", is162, 0)
+
 		// 161: 2079321 (not affected by svg.disabled)
 		let t161 = performance.now(), ver161
 		try {
@@ -322,11 +336,14 @@ function testperf() {
 
 		// 158: 2068934
 			// fast-path: pref dom.security.sanitizer.enabled (true FF148+) controls the API | property is FF158+
-		let t158 = performance.now(), ver158
+		let t158a = performance.now(), ver158a
 		try {
-			if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) {ver158 = true}
+			if (window.Sanitizer.prototype.hasOwnProperty('setJavascriptURLs')) {ver158a = true}
 		} catch(e) {}
-		rec(158, 158, "2068934", ver158, performance.now()-t158, 'PREF') // 0.006 ms
+		rec(158.1, 158, "2068934", ver158a, performance.now()-t158a, 'PREF') // 0.006 ms
+
+		// 158: 2074024 0.15ms calculated earlier
+		rec(158, 158, "2074024", is158, 0)
 
 		// 157: 2049083
 			// checked FF52 = false | _should_ be no old-timey FF false positives
@@ -1668,7 +1685,36 @@ function testperf() {
 
 }
 
+let is158 = false
+let is162 = false
+function get_lookups() {
+	// note: when cascading and breaking on first match, we would need to promise some tests before
+	// the next one. In this version PoC we run all tests and pick the highest match so that wouldn't
+	// apply: but it does fuck up our timing (7ms vs 0.15ms || FF52 took 0.7ms) as promsies are held up
+	// in the stack. In TZP we get these values early on (whilst the page is still downloading files)
+	// for later use and avoid promises altogether
+
+	// 158: 2074024
+	try {
+		let alg = {hash: 'SHA-256', length: 4294967424, name: 'HMAC'}
+		crypto.subtle.generateKey(alg, false, ['sign']).catch(err => {
+			is158 = 'TypeError: The operation could not be performed.' == err
+		})
+	} catch(e) {}
+
+	// 162: 2084937
+	try {
+		const jwk = {kty: 'oct', k: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8', alg: 'HS256', key_ops: ['sign', 'verify', 'verify']}
+		crypto.subtle.importKey('jwk', jwk, {name: 'HMAC', hash: 'SHA-256'}, true, ['sign']).then(a => {
+			// FF52-161 | 0.15 ms
+		}).catch(function(err){
+			is162 = 'DataError: Data provided to an operation does not meet requirements' == err // 0.15 ms
+		})
+	} catch(e) {}
+}
+
 function run() {
+	get_lookups()
 	try {let warmup = Intl.supportedValuesOf("timeZone").includes("America/Coyhaique")} catch(e) {}
 	setTimeout(function() {
 		Promise.all([
@@ -1676,7 +1722,7 @@ function run() {
 		]).then(function(){
 			outputVersion()
 		})
-	}, 50)	
+	}, 100)
 }
 run()
 
