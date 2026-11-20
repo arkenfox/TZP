@@ -164,13 +164,10 @@ function run_main(method) {
 				"alwaysnarrow0year",  // A: in 0y
 				"autonarrow1year",    // B: next yr.
 			]
-			// older versions need some help
-			if (isVer > 67 && isVer < 91) {
-				minList.push("autolong1week") // FF68-90
-			}
-			if (isVer > 71 && isVer < 96) {
-				minList.push("autoshort-1week") // FF72-95
-			}
+			/* we don't care about old versions
+			minList.push("autolong1week") // FF68-90
+			minList.push("autoshort-1week") // FF72-95
+			*/
 
 /* troubleshooting list
 "autonarrow-3second",
@@ -416,10 +413,9 @@ function setBtn(method) {
 }
 
 Promise.all([
-	get_globals()
+	get_globals(),
 ]).then(function(){
 	Promise.all([
-		get_is95(),
 		get_isVer(),
 		buildnav()
 	]).then(function(){
