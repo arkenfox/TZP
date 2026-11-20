@@ -602,21 +602,11 @@ function run(type) {
 
 function start() {
 	get_globals()
-	get_isVer()
 	// chrome has more groups with full vs supported
 		// but this creates a false sense of uniqueness as aliases pair up
 		// e.g. supported = 280 | all = 229
 		//dom.useAll.checked = isFF ? false : true
 	dom.useAll.checked = false
-
-	aYearsTZP = [1879,1952,1976,2025]
-	if (isVer < 112) {aYearsTZP = [1879,1921,1952,1976,2025]}
-	/*
-	aYearsTZP = []
-	for (let i = 1879; i < 2030; i++) {
-		aYearsTZP.push(i)
-	}
-	*/
 
 	// remove any sloppy duplicates
 	gTimezones = gTimezones.filter(function(item, position) {return gTimezones.indexOf(item) === position})
@@ -628,6 +618,21 @@ function start() {
 	})
 	baselist.sort()
 	oLists['full'] = baselist
+
+	aYearsTZP = [1879,1952,1976,2025]
+	if (isFF) {
+		try {
+			let is112 = CanvasRenderingContext2D.prototype.hasOwnProperty('roundRect')
+			if (!is112) {aYearsTZP = [1879,1921,1952,1976,2025]}
+		} catch(e) {}
+	}
+	/*
+	aYearsTZP = []
+	for (let i = 1879; i < 2030; i++) {
+		aYearsTZP.push(i)
+	}
+	*/
+
 	try {
 		let supported = Intl.supportedValuesOf('timeZone')
 		let newlist = []
