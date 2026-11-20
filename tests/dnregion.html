@@ -32,15 +32,13 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.
-			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
 				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
-				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
 			<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -340,18 +338,12 @@ function run_main(method, aTest, isLoop = false) {
 		tests = {
 			'region': {
 				'narrow': [
-					'VI','US','ZZ','CM','VC','TL','FR','QO','GB','ZA','KP','PL','KH','ZM',
-					// in ones
-					'AS','CN','EH','GH','GL','GS','IM','IT','JT','KE','KY','LS',
-					'MM','MO','MS','MZ','NL','PK','PS','RW','SJ','SS','SZ','TF',
-					'UM', // and UM for blink
+					'AS','CM','CN','EH','FR','GB','GH','GL','GS','IM','IT','JT','KE',
+					'KH','KP','KY','LS','MM','MO','MS','MZ','NL','PK','PL','PS','QO',
+					'RW','SJ','SS','SZ','TF','TL','UM','US','VC','VI','ZA','ZM','ZZ'
+					// UM for blink
 				],
 			}
-		}
-	} else {
-		// TINY
-		tests = {
-			'region': {'narrow': ['VI','US','ZZ','CM','VC','TL','FR'],}
 		}
 	}
 
@@ -361,23 +353,15 @@ function run_main(method, aTest, isLoop = false) {
 			Object.keys(tests).sort().forEach(function(t){ // for each type
 				oType[t] = {}
 				for (const s of Object.keys(tests[t])) { // for each style
-					oType[t][s] = ('tiny' !== method) ? [] : {}
+					oType[t][s] = []
 					let dn = new Intl.DisplayNames([code], {type: t, style: s})
 					tests[t][s].sort().forEach(function(item){ // each region code
 						let value = dn.of(item)
 						// info density: only add if valuoe is different from region code
-						if (value !== item) {
-							if ('tiny' !== method) {
-								oType[t][s].push(item +': '+ value)	
-							} else {
-								oType[t][s][item] = value
-							}
-						}
+						if (value !== item) {oType[t][s].push(item +': '+ value)}
 					})
 					// check for empties since we only record if valuoe !== region code 
-					let count
-					if ('tiny' !== method) {count = oType[t][s].length
-					} else {count = Object.keys(oType[t][s]).length}
+					let count = oType[t][s].length
 					if (count < 5) {
 						if (undefined == oEmpties[code]) {oEmpties[code] = {}}
 						oEmpties[code][s] = count
@@ -426,31 +410,19 @@ function run_main(method, aTest, isLoop = false) {
 					if (type !== "locales") {
 						str += "<li>"+ s14 + type + sc +"</li>"
 						Object.keys(oData[k][type]).forEach(function(s){ // for each style
-							if ('tiny' !== method) {
-								// color up the parts
-								let aParts = [], array = oData[k][type][s]
-								array.forEach(function(item){ // for each item
-									let parts = item.split(":")
-									item = item.replace(parts[0] +':', s12 + parts[0]+ ':' + sc)
-									aParts.push(item)
-								})
-								if (0 == aParts.length) {aParts = ['none']}
-								str += s16 + s.slice(0,1).toUpperCase() +": "+ sc + aParts.join(', ') +"</br>"
-							} else {
-								if (0 == Object.keys(oData[k][type][s]).length) {
-									str += s16 + s + sc + ': none'
-								} else {
-									str += s16 + s + sc + '<ul class="main">'
-									Object.keys(oData[k][type][s]).forEach(function(item){ // for each item
-										str += "<li>"+ s12 + item +': '+ sc + oData[k][type][s][item] +"</li>"
-									})
-									str += '</ul>'
-								}
-							}
+							// color up the parts
+							let aParts = [], array = oData[k][type][s]
+							array.forEach(function(item){ // for each item
+								let parts = item.split(":")
+								item = item.replace(parts[0] +':', s12 + parts[0]+ ':' + sc)
+								aParts.push(item)
+							})
+							if (0 == aParts.length) {aParts = ['none']}
+							str += s16 + s.slice(0,1).toUpperCase() +": "+ sc + aParts.join(', ') +"</br>"
 						})
 					}
 				}
-				if ('tiny' !== method) {str = "<details><summary>details</summary>"+ str +"</details>"}
+				str = "<details><summary>details</summary>"+ str +"</details>"
 				displaylist.push(
 					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
 					+ "<ul class='main'>"+ str
