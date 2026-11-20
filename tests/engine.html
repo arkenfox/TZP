@@ -162,13 +162,6 @@ function fnDisplay() {
 		+"PASS: ".padStart(7) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
 		+"FAIL: ".padStart(7) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
 	if (countNA > 0) {summary += "N/A: ".padStart(6) + countNA}
-	if (isFF) {
-		summary += s14+ "DEBUG".padStart(7) + sc
-		let strVer = isVer
-		strVer += (isVer == isVerMax ? "+" : "")
-		strVer += (isVer == 52 ? " or lower" : "")
-		summary += "VER: ".padStart(6) + strVer
-	}
 	summary += " " + buildButton(3, "all", "all details")
 	// output
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
@@ -2021,7 +2014,6 @@ setTimeout(function() {
 		get_globals()
 	]).then(function(){
 		Promise.all([
-			get_is95(),
 			get_isVer(),
 		]).then(function(){
 			run()
