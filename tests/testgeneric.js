@@ -367,29 +367,6 @@ const get_globals = () => new Promise(resolve => {
 	return resolve()
 })
 
-function get_is95() {
-	// requires a dom element
-	return new Promise(resolve => {
-		if (!isFF) {
-			return resolve()
-		}
-		// pre-compute slow 95 test
-		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
-			// ^ do if 94+ but not 95+ fast path
-			try {
-				if ("sc" !== Intl.PluralRules.supportedLocalesOf("sc").join()) {
-					// but not if 96+
-					let ratio = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-					is95 = (ratio > 0.4 && ratio < 0.6)
-				}
-			} catch(e) {
-				console.debug(e.name, e.message)
-			}
-		}
-		return resolve()
-	})
-}
-
 const get_isVer = () => new Promise(resolve => {
 	// NOTE: requires dom for 95 and 76, and a promised is95
 	if (!isFF) {return resolve()}
@@ -450,7 +427,9 @@ const get_isVer = () => new Promise(resolve => {
 			try {if (SVGTextPathElement.prototype.hasOwnProperty('side')) return 152} catch(e) {} // 2034371
 			try {if (CSSContainerRule.prototype.hasOwnProperty('conditions')) return 151} catch(e) {} // 2022827
 			if ('object' == typeof visualViewport.onscrollend) return 150 // 1801658
-			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {if ('RangeError' == e.name) return 149} // 2009792
+			try {Temporal.PlainDate.from({calendar:'gregory', monthCode:'M12', month:13, year:2019, day:1})} catch(e) {
+				if ('RangeError' == e.name) return 149 // 2009792
+			}
 			// 148: fast-path: pref dom.location.ancestorOrigins.enabled (default true)
 			try {if (undefined !== location.ancestorOrigins) return 148} catch(e) {} // 1085214
 			try {test = new Temporal.Duration(0).total({unit:'years', relativeTo:'-271821-04-19'}); return 148} catch(e) {} // 2004851
