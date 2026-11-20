@@ -42,7 +42,6 @@ let s0 = "<span class='",
 	zUQ = "\"undefined\"",
 	zNEW = sb+'[NEW]'+sc,
 // other
-	is95 = false,
 	isEngine = '',
 	isEnginePretty = '', // results string with perf
 	isFF = false,

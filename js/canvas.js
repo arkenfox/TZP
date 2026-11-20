@@ -313,7 +313,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 							if (runST) {imageData = null} else if (runSI) {imageData = {}}
 							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
 							let expected = '[object ImageData]'
-							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
+							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData +''}
 							oData[METRIC][runNo] = imageData.data
 							return 'success'
 						} catch(e) {
@@ -334,7 +334,7 @@ const get_canvas_getimage = (sizeW, sizeH) => new Promise(resolve => {
 							if (runST) {imageData = null} else if (runSI) {imageData = {}}
 							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
 							let expected = '[object ImageData]'
-							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
+							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData +''}
 							oData[METRIC][runNo] = imageData.data
 							return 'success'
 						} catch(e) {
@@ -639,11 +639,9 @@ const get_canvas_ispoint = (sizeW, sizeH) => new Promise(resolve => {
 })
 
 const get_canvas_offscreen = (sizeW, sizeH) => new Promise(resolve => {
-
 })
 
 const get_canvas_read = (sizeW, sizeH) => new Promise(resolve => {
-
 })
 
 const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
@@ -872,10 +870,11 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 			// FF153+e328ec8e + 9d0b9932 on both 
 			'toBlob': [
 				'e328ec8e', // my droid + windows
+				'96752b2f', // pre libz-rs e.g. seamonkey
 			],
 			'toBlob_solid': [
 				'9d0b9932', // my droid + windows
-				'cfd52a1f', // nfi but it was added after 9d0b9932 i think
+				'b3c52d1d', // pre libz-rs e.g. seamonkey
 			], 
 		}
 		oKnown['toDataURL'] = oKnown['toBlob']

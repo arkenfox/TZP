@@ -32,15 +32,13 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.
-			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
 				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
-				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
 			<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -272,40 +270,20 @@ function run_main(method, aTest, isLoop = false) {
 			'long': ['AUD','CAD','GBP','JPY','MZN','NIO','SEK','SZL','TZS','USD','XAF'],
 			'narrow': ['BND','EUR'],
 			'short': [
-				// long/narrow items: tested by removing them: all needed
-				'AUD', 'BND', 'CAD', 'EUR', 'GBP', 'JPY', 'MZN', 'NIO', 'SEK', 'SZL', 'TZS', 'USD', 'XAF',
-				// the rest: required from earlier testing
-				'AFN', 'ANG', 'AOA', 'AWG', 'AZN', 'BAM', 'BBD', 'BIF', 'BMD', 
-				'BOB', 'BRL', 'BSD', 'BWP', 'BZD', 'CDF', 'CLP', 'CNY', 
-				'COP', 'CRC', 'CUP', 'DJF', 'DKK', 'DOP', 'DZD', 'ERN', 'ETB',  
-				'FJD', 'FKP', 'FRF', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 
-				'HNL', 'HTG', 'IDR', 'IQD', 'JMD', 'KES', 'KGS', 'KMF', 'KYD', 
-				'KZT', 'LKR', 'LRD', 'LSL', 'LUF', 'MDL', 'MGA', 'MKD', 'MOP', 'MRU', 
-				'MUR', 'MWK', 'MYR', 'NAD', 'NGN', 'NZD', 'PAB', 'PEN', 
-				'PGK', 'PHP', 'PKR', 'PLN', 'PTE', 'PYG', 'RUB', 'RUR', 'RWF', 'SBD', 
-				'SCR', 'SDG', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 
-				'SYP', 'TND', 'TOP', 'TTD', 'UGX', 'UYW', 'VES', 
-				'VUV', 'WST', 'XCD', 'ZAR', 'ZMW',
+				'AFN','ANG','AOA','AUD','AWG','AZN','BAM','BBD','BIF','BMD',
+				'BND','BOB','BRL','BSD','BWP','BZD','CAD','CDF','CLP','CNY',
+				'COP','CRC','CUP','DJF','DKK','DOP','DZD','ERN','ETB','EUR',
+				'FJD','FKP','FRF','GBP','GHS','GIP','GMD','GNF','GTQ','GYD',
+				'HNL','HTG','IDR','IQD','JMD','JPY','KES','KGS','KMF','KYD',
+				'KZT','LKR','LRD','LSL','LUF','MDL','MGA','MKD','MOP','MRU',
+				'MUR','MWK','MYR','MZN','NAD','NGN','NIO','NZD','PAB','PEN',
+				'PGK','PHP','PKR','PLN','PTE','PYG','RUB','RUR','RWF','SBD',
+				'SCR','SDG','SEK','SGD','SHP','SLE','SOS','SRD','SSP','STN',
+				'SYP','SZL','TND','TOP','TTD','TZS','UGX','USD','UYW','VES', 
+				'VUV','WST','XAF','XCD','ZAR','ZMW'
 			]
 		}
 		tests.short = tests.short.sort()
-	} else {
-		// TINY
-			// we already use USD, GBP, ETB and KES in numberformat: currencydisplay
-			// so ignore those
-
-		tests = {
-			// anything outside of the core longs is miniscule +1's or +2's
-			'long': [
-'JPY', // 177
-'XAF', // 197 +20
-'NIO', // 204 +7
-'SZL', // 207 +3
-'TZS', // 210 +3
-'SEK', // 212 +2
-//'AUD','CAD','MZN','GBP','USD',
-			],
-		}
 	}
 	if ('all' !== method) {
 		let tmpArray = []
@@ -381,7 +359,7 @@ function run_main(method, aTest, isLoop = false) {
 						str += "</li>"
 					}
 				}
-				if ('tiny' !== method) {str = "<details><summary>data</summary>"+ str +"</details>"}
+				str = "<details><summary>data</summary>"+ str +"</details>"
 				displaylist.push(
 					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
 					+ "<ul class='main'>"+ str

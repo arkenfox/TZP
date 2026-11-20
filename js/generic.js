@@ -1342,9 +1342,10 @@ const get_isSystemFont = () => new Promise(resolve => {
 function get_isVer(METRIC) {
 	if (!isGecko) {return}
 	let t0 = nowFn()
+	//console.log('isVer start', t0)
 
 	isVer = cascade()
-	if (161 == isVer) {isVerExtra = '+'} else if (152 == isVer) {isVerExtra = ' or lower'}
+	if (163 == isVer) {isVerExtra = '+'} else if (152 == isVer) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -1364,6 +1365,15 @@ function get_isVer(METRIC) {
 			if (!isCascade) return 152
 
 			// now cascade
+			try {
+				let n = 0
+				let test = {__proto__: Iterator.prototype,
+					next() {let i = ++n; return {done: false, get value() {if (i === 1) throw 'a'}}}
+				}
+				test.drop(1).next().value; return 163 // 2092545
+			} catch (e) {}
+
+			if (is162) return 162 // 2084937: set earlier
 			try {if (SVGImageElement.prototype.hasOwnProperty('referrerPolicy')) return 161} catch(e) {} // 2079321
 			// 160: 2078698 (requires FF151+)
 			try {
@@ -1394,6 +1404,39 @@ function get_isVer(METRIC) {
 			return 0
 		}
 	}
+}
+
+let is158 = false, is162 = false
+function get_isVer_lookups() {
+	// early version checks
+		// version detection exits on first match, but the following are promises
+		// check these early  - see run_immediate()
+		// ToDo: not promised here either as ample time but should really promise each one
+	// timestamps
+		// cold page load: tests at 91 vs isVer at 390
+		//   cached files: tests at 30 vs isVer at 78 to 116
+
+	// 162: 2084937 0.15ms
+	try {
+		let t1 = nowFn()
+		const jwk = {kty: 'oct', k: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8', alg: 'HS256', key_ops: ['sign', 'verify', 'verify']}
+		crypto.subtle.importKey('jwk', jwk, {name: 'HMAC', hash:'SHA-256'}, true, ['sign']).then(a => {
+		}).catch(function(err){
+			is162 = 'DataError: Data provided to an operation does not meet requirements' == err
+			//console.log('162', performance.now())
+			//log_perf(SECTG, 'is162', t1,'', is162)
+		})
+	} catch(e) {}
+	// 158: 2074024 0.15ms | 158 has a fast-path fallback
+	try {
+		let t0 = nowFn()
+		let alg = {hash: 'SHA-256', length: 4294967424, name: 'HMAC'}
+		crypto.subtle.generateKey(alg, false, ['sign']).catch(err => {
+			is158 = 'TypeError: The operation could not be performed.' == err
+			//console.log('158', performance.now())
+			//log_perf(SECTG, 'is158', t0,'', is158)
+		})
+	} catch(e) {}
 }
 
 function get_isVoices() {
@@ -3296,17 +3339,7 @@ function outputSection(id, isResize = false) {
 function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
-
-	// early version checks
-	// 158: 2074024 ~0.15ms
-	try {
-		is158 = false
-		let alg = {hash: 'SHA-256', length: 4294967424, name: 'HMAC'}
-		crypto.subtle.generateKey(alg, false, ['sign']).catch(err => {
-			log_perf(SECTG, 'is158', t00)
-			if ('TypeError: The operation could not be performed.' == err+'') {is158 = true}
-		})
-	} catch(e) {}
+	get_isVer_lookups()
 
 	zErrLog = rnd_string()
 	zErrShort = rnd_string()

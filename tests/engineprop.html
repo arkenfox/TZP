@@ -674,7 +674,6 @@ function run() {
 		rec(typeof InstallTrigger, "InstallTrigger", code, "object") // to-be-deprecated (+prefs)
 		rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code, "object") // removed FF110 1689631
 		rec(typeof sizeToContent, "sizeToContent", code, "function") // removed nightly FF117+ 1832733 / 1600400
-
 			// prefs
 		rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code, "object") // dom.vr.enabled (+ not in FF52)
 		rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code, "object")
@@ -682,6 +681,7 @@ function run() {
 		rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code, "object")
 		rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code, "object")
 		rec(typeof u2f, "u2f", code, "object") // security.webauth.u2f | pref removed in FF114
+		rec(typeof pushManager, "pushManager", code, "object") // 2071974 dom.push.window_pushmanager.enabled | FF159 | enabled 162n
 
 		// webkit only
 		code = 14

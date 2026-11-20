@@ -62,6 +62,7 @@
 'use strict';
 
 let isReverse = false
+let isVerMin = 153
 
 var list = []
 gLocales.forEach(function(str) {
@@ -565,10 +566,9 @@ function collator() {
 				let ff = ""
 				// don't notate unless it's our own preset
 				if (isFF && thisHash == exampleHash) {
-					// notate new if 140+
-					if (isVer > 139) {
+					// notate new if 153+
+					if (isVer >= isVerMin) {
 						if (localesHash == "874da3f0") { // 1937541: FF150+ 83
-						} else if (localesHash == "bbe811d0") { // FF140+ 84
 						} else {localesHash += ' '+ zNEW}
 					}
 				}

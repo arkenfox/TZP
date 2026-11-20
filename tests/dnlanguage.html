@@ -32,15 +32,13 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.
-			The <code>TINY</code> test is a minimalist hardcoded test built for speed.</span>
+			<span class="no_color">A gecko <span id="version"></span> proof to confirm minimum tests for maximum entropy.</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
 				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
-				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
 			<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -89,7 +87,6 @@ let aItems = [
 	'nb','nyn','pa-arab','raj','ro-md','rwk','saq','szl','te','twq',
 	'uz-arab','vmw','vun','zgh','zu',
 	// end of gecko
-
 ]
 
 function setup_items(level = 'default') {
@@ -115,8 +112,10 @@ function setup_items(level = 'default') {
 		}
 	})
 	aItems.sort()
+	//aItems = aItems.filter(function(item, position) {return aItems.indexOf(item) === position})
 }
 setup_items('likely')
+aItems = aItems.filter(function(item, position) {return aItems.indexOf(item) === position})
 
 var list = gLocales,
 	aLegend = [],
@@ -209,42 +208,38 @@ function run_main(method, aTest, isLoop = false) {
 		dom.perf = ""
 		dom.results = ""
 	}
+	let aMinItems = []
+	if ('min' == method) {
+		aMinItems = [
+			// existing
+			'ar-eh','bho','bn-in','da','en','en-ae','en-ke','en-sb','en-sh','ff',
+			'fr-ch','gu','guz','gv','kl','kk','ko-kp','kok','ksh','kw','mgo','nb',
+			'nyn','pa-arab','raj','ro-md','rwk','saq','sd','sr-ba','sw-cd','szl',
+			'te','twq','uz-arab','vmw','vun','zgh','zh-hk','zu',
+			// we can add all aItems here and eliminate line by line to find required locales
+			//console.log("'" + aItems.join("','") + "'")
+		]
+		aMinItems = aMinItems.filter(function(item, position) {return aMinItems.indexOf(item) === position})
+	}
 
 	if (method == "all") {
 		aUsed.sort()
-		//tests = {'language': {'dialect': aUsed, 'standard': aUsed}}
+		tests = {'language': {'dialect': aUsed, 'standard': aUsed}}
 		// temp just use dialect as we work out min items
-		tests = {'language': {'dialect': aUsed}}
+		//tests = {'language': {'dialect': aUsed}}
 
 	} else if (method == "min") {
 		tests = {
 			'language': {
 				'dialect': [
-					'en','fr-ch','kl','zh-hk','gu','bn-in','sr-ba', //258
-					// down to +2's
-					'bho','en-sb','gv','ko-kp','sw-cd', // 268
-					// down to +1s
-					'ar-eh','da','en-ae','en-ke','en-sh','ff', 'guz','ksh','kw','mgo',
-					'nb','nyn','pa-arab','raj','ro-md','rwk','saq','szl','te','twq',
-					'uz-arab','vmw','vun','zgh','zu',
+					'ar-eh','bho','bn-in','da','en','en-ae','en-ke','en-sb','en-sh','ff',
+					'fr-ch','gu','guz','gv','kk','kl','ko-kp','kok','ksh','kw','mgo','nb',
+					'nyn','pa-arab','raj','ro-md','rwk','saq','sd','sr-ba','sw-cd','szl',
+					'te','twq','uz-arab','vmw','vun','zgh','zh-hk','zu',
+					// ad,kk,kok <- for blink
 				],
 				// and blink needs help
-				'standard': [
-					'ak','az','be','bs','haw',
-				],
-			}
-		}
-
-	} else {
-		// TINY
-		tests = {
-			'language': {
-				'dialect': [
-				'en','fr-ch','kl','zh-hk',
-				'gu', // splits include en-us, various spanish/french
-				'bn-in', // splits include en-au, en-in
-				'sr-ba', // splits include en-ca, es-br
-				]
+				'standard': ['ak','az','be','bs','haw'],
 			}
 		}
 	}
@@ -328,7 +323,7 @@ function run_main(method, aTest, isLoop = false) {
 						})
 					}
 				}
-				if ('tiny' !== method) {str = "<details><summary>details</summary>"+ str +"</details>"}
+				str = "<details><summary>details</summary>"+ str +"</details>"
 				displaylist.push(
 					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
 					+ "<ul class='main'>"+ str
@@ -376,7 +371,7 @@ function run_main(method, aTest, isLoop = false) {
 			localesHashAll = localesHash
 			if (isVer >= isVerMin) {
 				// results
-				if (resultsHash == "5dc44060") { // FF147+
+				if (resultsHash == "25a187a6") { // FF147+
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
