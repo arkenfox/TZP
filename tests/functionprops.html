@@ -755,16 +755,8 @@ function run() {
 	}
 }
 
-Promise.all([
-	get_globals()
-]).then(function(){
-	Promise.all([
-		get_isVer()
-	]).then(function(){
-		build_list()
-		run()
-	})
-})
+build_list()
+run()
 
 </script>
 
