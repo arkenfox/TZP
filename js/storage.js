@@ -134,6 +134,8 @@ const get_caches = (METRIC) => new Promise(resolve => {
 })
 
 function get_cookies(METRIC, rndStr) {
+	// note: 2094146: FF162 network.cookie.blockFileScheme
+		// default true nightly 162+
 	let value
 	try {
 		let test = navigator.cookieEnabled
