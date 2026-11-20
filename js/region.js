@@ -477,7 +477,7 @@ function set_oIntlLocale() {
 				'short': ['chinese','dangi','ethiopic','gregory','islamic-tbla','islamic-umalqura','japanese','roc'],
 			},
 			currency: {
-				// full min test rather than a tiny one, as in gecko it gives us ~408 different
+				// use a full min test rather than a tiny one, as in gecko it gives us ~408 different
 				// locale hashes and we can apply info density by only recording if the value doesn't equal
 				// the currency code e.g. the vast majority isn't recorded, only the bits that matter
 				'long': ['AUD','CAD','GBP','JPY','MZN','NIO','SEK','SZL','TZS','USD','XAF'],
@@ -500,11 +500,17 @@ function set_oIntlLocale() {
 				'narrow': ['day','dayPeriod','weekOfYear','weekday'],
 				'short': ['era','month','second','timeZoneName'],
 			},
-			language: {'dialect': ['bn-in','en','fr-ch','gu','kl','sr-ba','zh-hk']},
+			language: {
+				'dialect': [
+					'ar-eh','bho','bn-in','da','en','en-ae','en-ke','en-sb','en-sh','ff',
+					'fr-ch','gu','guz','gv','kk','kl','ko-kp','kok','ksh','kw','mgo','nb',
+					'nyn','pa-arab','raj','ro-md','rwk','saq','sd','sr-ba','sw-cd','szl',
+					'te','twq','uz-arab','vmw','vun','zgh','zh-hk','zu',
+					// ad,kk,kok <- for blink
+				],
+				'standard': ['ak','az','be','bs','haw'],
+			},
 			region: {
-				// full min test in gecko ~283 vs ~245 tiny locale hashes
-				// info density only record if the value doesn't equal the region code
-				// doesn't help much but it's not as huge array
 				'narrow': [
 					'AS','CM','CN','EH','FR','GB','GH','GL','GS','IM','IT','JT','KE',
 					'KH','KP','KY','LS','MM','MO','MS','MZ','NL','PK','PL','PS','QO',
@@ -565,7 +571,7 @@ function set_oIntlLocale() {
 			},
 		},
 		resolvedoptions: {
-			collator: ['caseFirst'],
+			collator: ['caseFirst','collation'], // 'collation' for blink
 			datetimeformat: ['calendar','day','hourcycle','month','numberingSystem'],
 			pluralrules: ['pluralCategories'],
 		},
@@ -2809,7 +2815,7 @@ const get_dates = () => new Promise(resolve => {
 								tz = formatter.format(day)
 							} catch(e) {
 								if (day == tzDays[0]) {
-									log_error(4, itemPad +': '+ name, e)
+									//log_error(4, itemPad +': '+ name, e)
 								}
 								tz = zErr
 							}
@@ -2818,7 +2824,7 @@ const get_dates = () => new Promise(resolve => {
 					})
 					return tzRes.join(' | ')
 				} catch(e) {
-					log_error(4, itemPad +': timeZoneName', e)
+					//log_error(4, itemPad +': timeZoneName', e)
 					return zErr
 				}
 			} else if (item == 15) {
@@ -2831,7 +2837,7 @@ const get_dates = () => new Promise(resolve => {
 				return zSKIP
 			}
 		} catch(e) {
-			log_error(4, itemPad, e)
+			//log_error(4, itemPad, e)
 			return zErr
 		}
 	}
