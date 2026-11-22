@@ -574,12 +574,40 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 
 const get_prompt = (METRIC) => new Promise(resolve => {
 	// blink only
-		// in a new sessiuon, most of these almost always timeout (1000ms) on the first page-load
+		// in a new session, most of these almost always timeout (even at 1000ms) on the first page-load
 		// after which they become stable (assuming no changed from downloading to downloaded)
-		// ToDo: determine how long they take, maybe we can call these early like mediaDevices to prime the API
-	if (!isBlink) {
-		addBoth(7, METRIC, 'undefined')
-		return resolve()
+	// ToDo: determine how long they take, maybe we can call these early like mediaDevices to prime the API
+		// if warmed up it's 5 to 15 ms
+
+	let isDone = false
+	if (!isBlink) {exit()}
+
+	function exit() {
+		if (!isDone) {
+			// results are not guaranteed in order: sort into a new obj
+			// detect any timeouts
+			isDone = true
+			let hash = 'undefined', btn ='', data ='', timeout = 0
+			if (isBlink) {
+				let aList = ['languagedetector','languagemodel','proofreader',
+					'rewriter','summarizer','translator','writer']
+				data = {}
+				aList.forEach(function(k){
+					if (undefined == oData[k]) {
+						log_error(7, METRIC +'_'+ k, zErrTime)
+						data[k] = zErrTime; timeout++
+					} else {
+						data[k] = oData[k]
+					}
+				})
+				sDetail[isScope][METRIC] = data // display only so record data
+				hash = mini(data); btn = addButton(7, METRIC)
+				log_perf(7, METRIC, t0,'', (0 == timeout ? '' : timeout +' timeouts'))
+			}
+			addBoth(7, METRIC, hash, btn,'', data)
+			//addDisplay(7, METRIC, hash, btn) // display only if we can't make this stable
+			return resolve()
+		}
 	}
 
 	// https://developer.mozilla.org/en-US/docs/Web/API/Prompt_API/Using
@@ -595,8 +623,7 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 			return resolve()
 		}
 		async function getAvailability() {
-			let opt
-			if ('translator' == m) {opt = {sourceLanguage: 'en', targetLanguage: 'fr'}}
+			let opt = 'translator' == m ? {sourceLanguage: 'en', targetLanguage: 'fr'} : undefined
 			await window[key].availability(opt).then(a => {
 				if (runSE) {foo++} else if (runST) {a = 42} else if (runSI) {a = 'groot'}
 				if (null == a) {
@@ -635,25 +662,8 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 		// unavailable: < 4GB of VRAM, < 16GB of RAM, or < 4 CPU cores
 		// downloadable or available: 4+ GB of VRAM, or 16+ GB of RAM or more, and 4+ CPU cores
 
-	let oData = {}, isDone = false
-	setTimeout(() => {
-		if (!isDone) {
-			isDone = true
-			let aList = ['languagedetector','languagemodel','proofreader',
-				'rewriter','summarizer','translator','writer']
-			aList.forEach(function(k){
-				if (undefined == oData[k]) {
-					log_error(7, METRIC +'_'+ k, zErrTime)
-					oData[k] = zErrTime
-				}
-			})
-			let newobj = {}
-			for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
-			addBoth(7, METRIC, mini(newobj), addButton(7, METRIC),'', newobj)
-			return resolve()
-		}
-	}, 1000)
-
+	let t0 = nowFn(), oData = {}
+	setTimeout(() => {exit()}, 2000)
 	Promise.all([
 		get_value('LanguageDetector'),
 		get_value('LanguageModel'), // never resolves in opera
@@ -663,13 +673,7 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 		get_value('Translator'),
 		get_value('Writer'),
 	]).then(function(){
-		if (isDone) {return resolve()}
-		isDone = true
-		// results are not guaranteed in order: sort into a new obj
-		let newobj = {}
-		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
-		addBoth(7, METRIC, mini(newobj), addButton(7, METRIC),'', newobj)
-		return resolve()
+		exit()
 	})
 
 })

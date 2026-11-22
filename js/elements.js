@@ -11,8 +11,9 @@
 function get_domrect(METRIC) {
 	// quick exits
 	let hash, data = {}
-	if (!isGeckoLike) {hash = zNA} else if ('9e6f19c5' == mini(oDomRect)) {hash = 'trustworthy'}
+	if (isGecko && '9e6f19c5' == mini(oDomRect)) {hash = 'trustworthy'}
 	if (undefined !== hash) {
+		// exit if trustworthy
 		addBoth(15, METRIC, hash)
 		return
 	}
@@ -81,7 +82,8 @@ function get_domrect(METRIC) {
 		}
 		oDomRect[k].methods.forEach(function(method){tmpdata[method] = value})
 	}
-	// raw data | gecko we failed, servo we're observing
+
+	// raw data | gecko we failed (we already exited if trustworthy), other engines we're observing
 	let btnDataColor = isGecko ? 'bad' : 15
 	let btnData = addButton(btnDataColor, METRIC +'_data', 'data')
 	addDisplay(17, METRIC +'_data', btnData)
@@ -91,12 +93,11 @@ function get_domrect(METRIC) {
 	hash = mini(data)
 	let btn = addButton(15, METRIC, countPass +'/4')
 
-	if (isServo) {
-		// servo: we just want to see what we got until we can get the PoC to work
-		log_debug(15, METRIC, data)
-		addBoth(15, METRIC, zNA)
-	} else {
+	if (isGecko) {
 		addBoth(15, METRIC, hash, btn, default_red, data)
+	} else {
+		addDisplay(15, METRIC, zNA + s99 +'['+ mini(sDetail[isScope][METRIC +'_data']) +']'+ sc)
+		addData(15, METRIC, zNA)
 	}
 	return
 }
@@ -344,6 +345,8 @@ function get_element_font(METRIC, isLies) {
 }
 
 function get_element_forms(METRIC, isLies) {
+	// 2076738, 2076789: PEPCS: position positive gecko | geo, camera, mic
+
 	let t0 = nowFn()
 	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
 

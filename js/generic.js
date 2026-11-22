@@ -1667,18 +1667,21 @@ const get_isAudioNoise = (id) => new Promise(resolve => {
 })
 
 function get_isDomRect() {
-	// notes: isGeckoLike: servo seems stable (different results to gecko), but not all four methods match
-	if (!isGeckoLike) {return}
 	// like canvas: this is only testing for protection, so always run in gecko including basic mode
 	// determine valid domrect methods + grab data for analysis
+
+	// run for all engines, but only use rsults in gecko
+	// reset
+	oDomRect = {}
+	if (isGecko) {
+		// assume lies
+		isDomRect = -1
+		aDomRect = [false, false, false, false]		
+	}
+
 	let t0 = nowFn()
 	const names = ['element_getbounding', 'element_getclient','range_getbounding','range_getclient']
 	const props = ['bottom','height','left','right','top','width','x','y']
-	// reset: assume lies
-	isDomRect = -1
-	aDomRect = [false, false, false, false]
-	oDomRect = {}
-
 	let el = dom.tzpRect
 	for (let i=0; i < 4; i++) {
 		let METRIC = names[i]
@@ -1716,8 +1719,12 @@ function get_isDomRect() {
 			oDomRect[hash]['methods'].push(METRIC)
 		}
 	}
-	// fixup servo which we're running to see what we get
-	if (isServo) {
+
+	if (!isGecko) {
+		// set true on non-gecko
+		// notes
+			// servo seems stable (different results to gecko), but not all four methods match
+			// blink is unstable, changes with zoom
 		aDomRect = [true, true, true, true]
 	}
 
@@ -3373,8 +3380,6 @@ function run_immediate() {
 			try {screen.mozOrientation} catch(e) {} // FF147 2003169 deprecate mozOrientation
 				// X attribute is deprecated and will be removed in the future.
 		}
-		// set geckolike
-		isGeckoLike = (isGecko || isServo)
 		// set isProtoProxy on known engines
 		isProtoProxy = isUndefined ? false : true
 		// expand css, record stylesheet info
@@ -3407,6 +3412,17 @@ function run_immediate() {
 					log_perf(SECTG, 'storage.usage', t1)
 				}
 			} catch(e) {}
+			//* test if this warms up prompts
+			let aPrompt = ['LanguageDetector','LanguageModel','Proofreader','Rewriter','Summarizer','Translator','Writer']
+			aPrompt.forEach(function(item){
+				if (undefined !== window[item]) {
+					try {
+						let opt = 'Translator' == item ? {sourceLanguage: 'en', targetLanguage: 'fr'} : undefined
+						window[item].availability(opt)
+					} catch(e) {}
+				}
+			})
+			//*/
 		}
 		// other warm ups
 		get_isDevices()
