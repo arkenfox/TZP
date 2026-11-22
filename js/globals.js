@@ -144,7 +144,6 @@ let bb_green = sgtick+'TB]'+sc,
 let isBlink = false,
 	isEngine = 'undefined',
 	isGecko = false,
-	isGeckoLike = false, // gecko/servo
 	isServo = false,
 	isUndefined = false,
 	isWebkit = false
