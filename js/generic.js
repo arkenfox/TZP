@@ -3216,6 +3216,7 @@ function outputSection(id, isResize = false) {
 		if (n == 13) { return(outputMedia())}
 		if (n == 14) { return(outputCSS())}
 		if (n == 15) { return(outputElements())}
+		if (n == 16) { return(outputSecurity())}
 		if (n == 17) { return(outputTiming())}
 		if (n == 18) { return(outputMisc())}
 	}
@@ -3241,6 +3242,7 @@ function outputSection(id, isResize = false) {
 				'devices', // allow time for isDevices
 				'codecs', // don't let anything else hold it up: it's slow on blink first run in a cold session
 					// and the gecko timeout is a bottleneck + we want to be able to set that as low as possible
+				16, // security
 				3, // allow time for os font
 				17 // timing last: uses data collected during gRun
 			]
