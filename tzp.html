@@ -518,7 +518,7 @@
 				<span style="font-family: Arimo, ABR;">linux</span>
 				<span	style="font-family: '-apple-system', Lucida Grande, ABR;">mac</span>
 				<span style="font-family: Roboto, 'Dancing Script', ABR;">android</span>
-			</span>
+			</span> | <span class="c" id="os_line_ending"></span>
 		</td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="normal">
@@ -816,20 +816,21 @@
 			<div class="btn-right"><span class="c" id="canvas_data"></span><span class="c" id="canvas_png"></span></div>
 		</td></tr>
 		<!--image-->
+		<tr><td>copyTo</td><td class="mono">
+			<span class="c" id="canvas_copyto"></span> <span class="c" id="canvas_copyto_note"></span>
+			<div class="btn-right s99">image</div></td></tr>
 		<tr><td><a class="blue" href="tests/canvasnoise.html" target="blank">[PoC]</a>
 			&nbsp; <div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">random per run</span></div>
 			&nbsp; getImageData</td><td class="mono">
-			<span class="c" id="canvas_getImageData"></span> <span class="c" id="canvas_getImageData_note"></span>
-			<div class="btn-right s99">image</div>
-			</td></tr>
-		<tr><td>offscreen</td><td class="c">
-			<span class="c" id="canvas_offscreen"></span> <span class="c" id="canvas_offscreen_note"></span> </td></tr>
-		<tr><td>readPixels</td><td class="c">
-			<span class="c" id="canvas_readPixels"></span> <span class="c" id="canvas_readPixels_note"></span> </td></tr>
+			<span class="c" id="canvas_getImageData"></span> <span class="c" id="canvas_getImageData_note"></span></td></tr>
+		<tr><td>offscreen</td><td class="mono">
+			<span class="c" id="canvas_offscreen"></span> <span class="c" id="canvas_offscreen_note"></span></td></tr>
+		<tr><td>readPixels</td><td class="mono">
+			<span class="c" id="canvas_readPixels"></span> <span class="c" id="canvas_readPixels_note"></span></td></tr>
 		<tr><td>toBlob</td><td class="mono">
 			<span class="c" id="canvas_toBlob"></span> <span class="c" id="canvas_toBlob_note"></span></td></tr>
 		<tr><td>toDataURL</td><td class="mono border-bottom">
-			<span class="c" id="canvas_toDataURL"></span> <span class="c" id="canvas_toDataURL_note"></span> </td></tr>
+			<span class="c" id="canvas_toDataURL"></span> <span class="c" id="canvas_toDataURL_note"></span></td></tr>
 		<!--isPoint-->
 		<tr><td>isPointInPath</td><td class="mono">
 			<span class="c" id="canvas_isPointInPath"></span> <span class="c" id="canvas_isPointInPath_note"></span>
@@ -837,17 +838,19 @@
 		<tr><td>isPointInStroke</td><td class="mono border-bottom">
 			<span class="c" id="canvas_isPointInStroke"></span> <span class="c" id="canvas_isPointInStroke_note"></span></td></tr>
 		<!--solid-->
-		<tr><td>getImageData</td><td class="mono">
-			<span class="c" id="canvas_getImageData_solid"></span> <span class="c" id="canvas_getImageData_solid_note"></span>
+		<tr><td>copyTo</td><td class="mono">
+			<span class="c" id="canvas_copyto_solid"></span> <span class="c" id="canvas_copyto_solid_note"></span>
 			<div class="btn-right s99">solid</div></td></tr>
+		<tr><td>getImageData</td><td class="mono">
+			<span class="c" id="canvas_getImageData_solid"></span> <span class="c" id="canvas_getImageData_solid_note"></span></td></tr>
 		<tr><td>offscreen</td><td class="mono">
-			<span class="c" id="canvas_offscreen_solid"></span> <span class="c" id="canvas_offscreen_solid_note"></span> </td></tr>
+			<span class="c" id="canvas_offscreen_solid"></span> <span class="c" id="canvas_offscreen_solid_note"></span></td></tr>
 		<tr><td>readPixels</td><td class="mono">
-			<span class="c" id="canvas_readPixels_solid"></span> <span class="c" id="canvas_readPixels_solid_note"></span> </td></tr>
+			<span class="c" id="canvas_readPixels_solid"></span> <span class="c" id="canvas_readPixels_solid_note"></span></td></tr>
 		<tr><td>toBlob</td><td class="mono">
-			<span class="c" id="canvas_toBlob_solid"></span> <span class="c" id="canvas_toBlob_solid_note"></span> </td></tr>
+			<span class="c" id="canvas_toBlob_solid"></span> <span class="c" id="canvas_toBlob_solid_note"></span></td></tr>
 		<tr><td>toDataURL</td><td class="mono">
-			<span class="c" id="canvas_toDataURL_solid"></span> <span class="c" id="canvas_toDataURL_solid_note"></span> </td></tr>
+			<span class="c" id="canvas_toDataURL_solid"></span> <span class="c" id="canvas_toDataURL_solid_note"></span></td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
 
@@ -1111,7 +1114,7 @@
 			<div class="nav-title">
 				<a href="#elements">elements</a>
 				<div class="nav-up"><a href="#css">&#9650;</a> <span class="c perf" id="perfelements"></span></div>
-				<div class="nav-down"><a href="#ciphersd">&#9660;</a></div>
+				<div class="nav-down"><a href="#securityd">&#9660;</a></div>
 				<div class="nav-right"><a name="elementsd"></a></div>
 			</div>
 		</th></tr></thead>
@@ -1141,16 +1144,23 @@
 		</td></tr>
 	</table>
 
-	<!--ciphers-->
+	<!--security-->
 	<table id="tb16">
 		<col width="31%"><col width="69%">
-		<thead><tr><th colspan="2"><a name="ciphers"></a>
-			<div class="nav-title"><a href="#ciphers">ciphers / tls</a>
-			<div class="nav-up"><a href="#elements">&#9650;</a></div>
+		<thead><tr><th colspan="2"><a name="security"></a>
+			<div class="nav-title"><a href="#security">security</a>
+			<div class="nav-up"><a href="#elements">&#9650;</a> <span class="c perf" id="perfsecurity"></span></div>
 			<div class="nav-down"><a href="#timingd">&#9660;</a></div>
-			<div class="nav-right"><a name="ciphersd"></a></div></div>
+			<div class="nav-right"><a name="securityd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>test</td><td class="mono">result</td></tr>
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><span class="btn99 btn" style="cursor: default;">[ re-run ]</span></div>
+			<span class="c" id="securityhash"></span>
+			<div class="btn-right"></div>
+		</td></tr>
+		<!-- -->
+		<tr><td>[autofill ui] webauthn</td><td class="c mono" id="webauthn_autofill_ui"></td></tr>
+		<tr><td>[capabilities] webauthn</td><td class="c mono" id="webauthn_capabilities"></td></tr>
 	</table>
 
 	<!--timing-->
@@ -1158,7 +1168,7 @@
 		<col width="31%"><col width="69%">
 		<thead><tr><th colspan="2"><a name="timing"></a>
 			<div class="nav-title"><a href="#timing">timing</a>
-			<div class="nav-up"><a href="#ciphers">&#9650;</a> <span class="c perf" id="perftiming"></span></div>
+			<div class="nav-up"><a href="#security">&#9650;</a> <span class="c perf" id="perftiming"></span></div>
 			<div class="nav-down"><a href="#miscd">&#9660;</a></div>
 			<div class="nav-right"><a name="timingd"></a></div></div>
 		</th></tr></thead>
@@ -1231,7 +1241,6 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp; wasm</td><td class="c mono" id="wasm"></td></tr>
-		<tr><td>[autofill ui] webauthn</td><td class="c mono" id="webauthn_autofill_ui"></td></tr>
 		<tr><td>webdriver</td><td class="c mono" id="webdriver"></td></tr>
 		<tr><td>window functions</td><td class="c mono" id="window_functions"></td></tr>
 		<tr><td>window properties</td><td class="mono">
