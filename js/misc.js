@@ -1,5 +1,63 @@
 'use strict';
 
+/* SECURITY: CIPHERS / TLS / CREDENTIALS etc */
+
+const get_webauthn_autofill = async (METRIC) => {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#autofill_ui
+		// webauthn API: security.webauth.webauthn
+
+	// https://github.com/brave/brave-browser/issues/56378
+		// blink: disabled in Guest mode for isolation
+	// note we don't need to distinguish between API vs API functionality as that is all captured
+		// in window properties and functions metrics
+	function exit(value, data ='') {
+		addBoth(16, METRIC, value,'','', data)
+		return		
+	}
+	try {
+		if (runSE) {foo++}
+		if (undefined == window.PublicKeyCredential) {
+			exit('undefined')
+		} else {
+			await PublicKeyCredential.isConditionalMediationAvailable().then(a => {
+				let typeCheck = typeFn(a)
+				if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+				exit(a)
+			}).catch(function(err){
+				throw err
+			})
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+}
+
+const get_webauthn_capabilities = async (METRIC) => {
+	//https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential
+		// webauthn API: security.webauth.webauthn
+	function exit(hash, data = '', btn = '') {
+		addBoth(16, METRIC, hash, btn,'', data); return
+	}
+	try {
+		if (runSE) {foo++}
+		if (undefined == window.PublicKeyCredential) {
+			exit('undefined')
+		} else {
+			await PublicKeyCredential.getClientCapabilities().then(a => {
+				let typeCheck = typeFn(a)
+				if ('object' !== typeCheck) {throw zErrType + tytpeCheck}
+				let newobj = {}
+				for (const k of Object.keys(a).sort()) {newobj[k] = a[k]}
+				exit(mini(newobj), newobj, addButton(16, METRIC))
+			}).catch(function(err){
+				throw err
+			})
+		}
+	} catch(e) {
+		exit(e, zErrLog)
+	}
+}
+
 /* TIMING */
 /*
 	Web Animations 2
@@ -894,33 +952,6 @@ function get_svg(METRIC) {
 	return
 }
 
-const get_webauthn_autofill = async (METRIC) => {
-	// https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#autofill_ui
-		// webauthn API: security.webauth.webauthn
-
-	// https://github.com/brave/brave-browser/issues/56378
-		// blink: disabled in Guest mode for isolation
-	// note we don't need to distinguish between API vs API functionality as that is all captured
-		// in window properties and functions metrics
-	function exit(value, data ='') {
-		addBoth(18, METRIC, value,'','', data)
-		return		
-	}
-	try {
-		if (runSE) {foo++}
-		if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
-			const isCMA = await PublicKeyCredential.isConditionalMediationAvailable()
-			let typeCheck = typeFn(isCMA)
-			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-			exit(isCMA)
-		} else {
-			exit('undefined')
-		}
-	} catch(e) {
-		exit(e, zErrLog)
-	}
-}
-
 function get_webdriver(METRIC) {
 	// expected FF60+
 	let value, data =''
@@ -1204,7 +1235,6 @@ function get_window_props(METRIC) {
 				if (oHashes[key][isOS].includes(hash)) {notation = bb_green}
 			}
 		}
-
 	} catch(e) {
 		hash = e; data = zErrLog
 		if (isProps.length == 0) {isProps = e+''}
@@ -1218,9 +1248,18 @@ function get_window_props(METRIC) {
 	return
 }
 
+const outputSecurity = () => new Promise(resolve => {
+	if (gRun && sectionIgnore.includes('security')) {return resolve()}
+	Promise.all([
+		get_webauthn_autofill('webauthn_autofill_ui'),
+		get_webauthn_capabilities('webauthn_capabilities'),
+	]).then(function(){
+		return resolve()
+	})
+})
+
 const outputTiming = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('timing')) {return resolve()}
-
 	if (!gRun) {return resolve()}
 	/* other perf prefs are in window properties
 		dom.enable_performance_observer: PerformanceObserver, PerformanceObserverEntryList
@@ -1274,7 +1313,6 @@ const outputMisc = () => new Promise(resolve => {
 		get_navigator_keys('navigator_keys'),
 		get_webdriver('webdriver'),
 		get_pdf('pdf'),
-		get_webauthn_autofill('webauthn_autofill_ui'),
 	]).then(function(){
 		Promise.all([
 			get_window_functions('window_functions')
