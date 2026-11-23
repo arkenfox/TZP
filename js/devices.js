@@ -574,10 +574,11 @@ const get_permissions_policy = (METRIC) => new Promise(resolve => {
 
 const get_prompt = (METRIC) => new Promise(resolve => {
 	// blink only
-		// in a new session, most of these almost always timeout (even at 1000ms) on the first page-load
+		// in a new session, most of these almost always timeout (even at 2000ms + warmup) on the first page-load
 		// after which they become stable (assuming no changed from downloading to downloaded)
-	// ToDo: determine how long they take, maybe we can call these early like mediaDevices to prime the API
-		// if warmed up it's 5 to 15 ms
+	// determine how long they take, maybe we can call these early like mediaDevices to prime the API
+		// if warmed up it's 5 to 15 ms when not timing out
+	// too unstable
 
 	let isDone = false
 	if (!isBlink) {exit()}
@@ -604,8 +605,8 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 				hash = mini(data); btn = addButton(7, METRIC)
 				log_perf(7, METRIC, t0,'', (0 == timeout ? '' : timeout +' timeouts'))
 			}
-			addBoth(7, METRIC, hash, btn,'', data)
-			//addDisplay(7, METRIC, hash, btn) // display only if we can't make this stable
+			//addBoth(7, METRIC, hash, btn,'', data)
+			addDisplay(7, METRIC, hash, btn) // display only if we can't make this stable
 			return resolve()
 		}
 	}
@@ -663,7 +664,7 @@ const get_prompt = (METRIC) => new Promise(resolve => {
 		// downloadable or available: 4+ GB of VRAM, or 16+ GB of RAM or more, and 4+ CPU cores
 
 	let t0 = nowFn(), oData = {}
-	setTimeout(() => {exit()}, 2000)
+	setTimeout(() => {exit()}, 100) // we warmed up, no amount of time here will help
 	Promise.all([
 		get_value('LanguageDetector'),
 		get_value('LanguageModel'), // never resolves in opera
