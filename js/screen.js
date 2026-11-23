@@ -2068,6 +2068,16 @@ const outputFD = () => new Promise(resolve => {
 	}
 	oOS[m] = aOS
 	addData(3, METRIC, oOS, mini(oOS))
+	// line ending size: can differ between platforms: e.g. 4 on windows, 3 on linux
+	m = 'os_line_ending'
+	try {
+		value = new Blob(["a\nb"], { endings: "native" }).size
+	} catch (e) {
+		log_error(3, METRIC +'_'+ m, e); value = zErr
+	}
+	oOS[m] = value
+	addData(3, METRIC, oOS, mini(oOS))
+	addDisplay(3, m, value)
 
 	if (!isGecko) {
 		let aList = ['browser_branding','browser_version']
