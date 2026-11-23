@@ -8,7 +8,7 @@ const SECTG = '_global', SECTP = '_prereq', SECTNF = 'NON-FP',
 const sectionMap = {
 	1: 'screen', 2: 'agent', 3: 'feature', 4: 'region', 5: 'headers', 6: 'storage',
 	7: 'devices', 9: 'canvas', 10: 'webgl', 11: 'audio', 12: 'fonts', 13: 'codecs',
-	14: 'css', 15: 'elements', 17: 'timing', 18: 'misc',
+	14: 'css', 15: 'elements', 16: 'security', 17: 'timing', 18: 'misc',
 }
 let sectionOrder = [], // numerical order for objects
 	sectionNames = [], // lookup names by number
@@ -21,8 +21,8 @@ let sectionOrder = [], // numerical order for objects
 const btnList = ['alerts','debug','errors','lies']
 
 const jsFilesExpected = 15,
-	gSectionsExpected = 16,
-	expectedMetrics = 138
+	gSectionsExpected = 17,
+	expectedMetrics = 139
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
