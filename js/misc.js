@@ -1124,7 +1124,8 @@ function get_window_props(METRIC) {
 			]
 			if ('array' == typeFn(isWindowTamper)) {
 				// set isWindowTamper from console
-				// replace aPossible so we can calculate hashes using https
+					// replace aPossible so we can dynamically calculate/test hashes since NS seems to change
+					// every release - TBH IDK why I bother to notate this except for the insights it alerts me to
 				aPossible = isWindowTamper
 			}
 			if (isSmart) {
@@ -1224,15 +1225,16 @@ function get_window_props(METRIC) {
 			// awaiting BB16
 			let oHashes = {
 				// key: standard (has WebAssembly) | safer (should be identical w/ and w/o webgl clicktoplay)
+				// ToDo: tails has uBO so would have a different hash at least in safer
 				MB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['7cbf4c47','8d1cd5e5'] // 904, 903
+					'windows': ['c138bec7','d1964865'] // 904, 903
 				},
 				TB : {
 					'linux': ['',''],
 					'mac': ['',''],
-					'windows': ['a9102780','d131419e'] // 878, 877
+					'windows': ['348f5698','5cb070b6'] // 878, 877
 				},
 			}
 			let key = isTB ? 'TB' : 'MB'
