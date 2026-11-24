@@ -373,7 +373,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 		})
 	}
 
-	let oRaw = {}, hasWebGL = false
+	let oRaw = {}, hasWebGL = false, t0 = nowFn()
 	Promise.all([
 		run(0),
 		run(1),
@@ -456,6 +456,9 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						notation = bb_safer
 					} else if ('enabled | enabled | null' == value) {
 						// try and match wasm
+						// Note: when webgl is clicktoplay, windoiw tampered items include
+							// HTMLCanvasElement, OffscreenCanvas, WebGLRenderingContext but relying
+							// on a 3rd party extension that users can tweak is risky
 						notation = undefined == window.WebAssembly ? bb_safer +' [clicked-to-play]' : bb_standard
 					}
 				} else if ('enabled | enabled | enabled' == value) {
@@ -830,6 +833,7 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 			let aMetrics = ['_extensions','_gpu','_parameters']
 			aMetrics.forEach(function(m){addBoth(10, METRIC + m, zNA)})
 		}
+		log_perf(10, METRIC, t0)
 		return resolve(hasWebGL)
 	}).catch(error => {
 		console.error(error)
@@ -837,12 +841,108 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 	})
 })
 
+const get_webgpu = (METRIC) => new Promise(resolve => {
+
+	// navigator.gpu.getPreferredCanvasFormat()
+
+	async function getWebGPU() {
+		if (!navigator.gpu) {return zNA}
+		return navigator.gpu.requestAdapter().then(adapter => {
+			try {
+				if (runSE) {foo++}
+				// typeFn(adapter) returns 'empty object' but it's not empty
+				let typeCheck = typeof adapter
+				if (runST) {typeCheck = 'null'}
+				if ('object' !== typeCheck) {throw zErrType + typeFn(adapter)}
+				let expected = runSI ? '[groot]' : '[object GPUAdapter]'
+				if (adapter+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ adapter+''}
+				const { limits, features, info } = adapter
+
+				// ToDo: separately check for undefined, type, errors etc
+
+				// Latest implementations use info instead of requestAdapterInfo
+				const adapterInfoPromise = info ? Promise.resolve(info) : adapter.requestAdapterInfo()
+
+				return adapterInfoPromise.then(adapterInfo => {
+					const limitsData = {};
+						for (const prop in limits) {
+							limitsData[prop] = limits[prop]
+						}
+						return {
+							adapterInfo: {
+								// https://developer.mozilla.org/en-US/docs/Web/API/GPUAdapterInfo
+								architecture: adapterInfo.architecture,
+								description: adapterInfo.description,
+								device: adapterInfo.device,
+								isFallbackAdapter: adapterInfo.isFallbackAdapter,
+								subgroupMaxSize: adapterInfo.subgroupMaxSize,
+								subgroupMinSize: adapterInfo.subgroupMinSize,
+								vendor: adapterInfo.vendor,
+               },
+							limits: limitsData,
+							features: [...features.values()],
+						}
+				})
+
+			} catch(e) {
+				throw e+''
+			}
+		}).catch(function(err){
+			return err+''
+		})
+	}
+
+	let t0 = nowFn()
+	Promise.all([
+		getWebGPU()
+	]).then(function(res){
+		let aOutput = ['adapterInfo','limits','features']
+		if ('string' == typeof res[0]) {
+			// string: 'n/a' else it's an overall gpu error
+			let value = res[0], isErr = zNA !== value
+			aOutput.forEach(function(m){
+				addData(10, METRIC +'_'+ m, (isErr ? zErr : value))
+				// display longer error on first item
+				let errorstr = 'adapterInfo' == m && isErr ? log_error(10, METRIC, res[0]) : zErr
+				addDisplay(10, METRIC +'_'+ m, (isErr ? errorstr : value))
+			})
+		} else {
+			//console.log(res[0])
+			// tmp
+			aOutput.forEach(function(m){
+				// sort into new obj
+				let data = res[0][m], newdata = {}, btntext, count
+				if ('features' == m) {
+					newdata = data.sort(); count = newdata.length; btntext = count
+				} else {
+					for (const k of Object.keys(data).sort()) {
+						if (undefined !== data[k]) {
+							newdata[k] = ('' === data[k] ? 'empty string' : data[k])
+						}
+					}
+					count = Object.keys(newdata).length
+					if ('limits' == m) {btntext = count}
+				}
+				if (count > 0) {
+					addBoth(10, METRIC +'_'+ m, mini(data), addButton(10, METRIC +'_'+ m, btntext),'', newdata)
+				} else {
+					addBoth(10, METRIC +'_'+ m, 'none')
+				}
+			})
+		}
+		log_perf(10, METRIC, t0)
+		return resolve()
+	})
+})
+
+let testdata
 const outputWebGL = () => new Promise(resolve => {
 	if (gRun && sectionIgnore.includes('webgl')) {return resolve()}
 
 	// ToDo: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
 	Promise.all([
 		get_webgl('webgl'),
+		get_webgpu('webgpu'),
 	]).then(function(res){
 		return resolve()
 	})
