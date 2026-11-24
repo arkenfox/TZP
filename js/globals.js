@@ -187,6 +187,7 @@ let isArchArray = zNA,
 	isVer, // undefined unless gecko so all non-gecko isVer > or < checks are always false
 	isVerExtra = '',
 	isViewportUnits = {},
+	isWindowTamper, // array; if !undefined replaced tamper list in window properties
 	isXML = {},
 	isXSLT // dom.xslt.enabled
 

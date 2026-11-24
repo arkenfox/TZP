@@ -1112,16 +1112,21 @@ function get_window_props(METRIC) {
 			let aPossible = [
 				// TB16 safer
 				'AbstractRange','Blob','BroadcastChannel','CharacterData','Crypto','CustomEvent','Element','Error',
-				'HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLHeadElement','HTMLHtmlElement','HTMLIFrameElement',
-				'HTMLMediaElement','HTMLMetaElement','HTMLObjectElement','HTMLVideoElement','JSON','MediaSource',
-				'MutationObserver','Navigator','OffscreenCanvas','Proxy','Range','SecurityPolicyViolationEvent',
-				'SharedWorker','TrustedScriptURL','TrustedTypePolicyFactory','URL','WebGLRenderingContext','WebSocket',
+				'ErrorEvent','HTMLCanvasElement','HTMLElement','HTMLFrameElement','HTMLHeadElement','HTMLHtmlElement',
+				'HTMLIFrameElement','HTMLMediaElement','HTMLMetaElement','HTMLObjectElement','HTMLVideoElement','JSON',
+				'MediaSource','MutationObserver','Navigator','OffscreenCanvas','PromiseRejectionEvent','Proxy','Range',
+				'SecurityPolicyViolationEvent','SharedWorker','TrustedHTML','TrustedScript','TrustedScriptURL',
+				'TrustedTypePolicy','TrustedTypePolicyFactory','URL','WebGLRenderingContext','WebSocket',
 				'Worker','Worklet','XMLHttpRequest','XMLHttpRequestEventTarget','webkitURL',
 				// + MB16 safer
 				'Array','Boolean','DOMStringList','HTMLScriptElement','Iterator','Math','RegExp','Request','Set','String',
 				'Symbol','Text','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','escape','globalThis','unescape',
 			]
-
+			if ('array' == typeFn(isWindowTamper)) {
+				// set isWindowTamper from console
+				// replace aPossible so we can calculate hashes using https
+				aPossible = isWindowTamper
+			}
 			if (isSmart) {
 				/* determine console state before we start messing around with the array
 				FF147 and lower 'Event' and FF148+ `console` is low=closed high=open
