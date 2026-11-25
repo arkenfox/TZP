@@ -169,15 +169,36 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 					}
 					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
 						// isArchAray: true = large arrays else it's an error string
-					if (64 == isArchArray) {
-						// ToDo: FF152+ 2036977 supposedly now only one hash for 64bit
-							// ^ update: awaiting 2040494
-						if ('a7c1fbb6' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
-						} else if ('a34c73cd' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
-					} else {
-						if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
-					}
 
+					// ToDo: FF152+ 2036977 supposedly now only one hash for 64bit
+						// ^ update: awaiting 2040494
+
+					if (isVer < 162) {
+						if (64 == isArchArray) {
+							if ('a7c1fbb6' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
+							} else if ('a34c73cd' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
+						} else {
+							if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
+						}
+					} else if (162 == isVer) {
+						// find moz-regression
+						if (64 == isArchArray) {
+							if ('cf2257ad' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
+							} else if ('3b6ba5d7' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
+						} else {
+							// ToDo: I need a 32bit platform
+							if ('' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
+						}
+					} else {
+						// ToDo: confirm FF163+ 2093385 caused these new hashes : approx 20-nov
+						if (64 == isArchArray) {
+							if ('f630795b' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
+							} else if ('2326ce2f' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
+						} else {
+							// ToDo: I need a 32bit platform
+							if ('' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
+						}
+					}
 					if (isBraveSmart) {
 						// ToDo: this isn't perfect: we should check isLies
 							// and allow non-gecko to process isLies
