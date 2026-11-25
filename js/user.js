@@ -233,17 +233,47 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 				for (const k of Object.keys(section).sort()) {obj[k.replace('audio_test_', '')] = section[k]}
 				let hash = mini(obj)
 				addDetail(METRIC, obj)
-				if (64 == isArchArray) {
-					if ('e2bbb839' == hash) {
-						// {"oscillator": "5b3956a9", "oscillator_compressor": "e08487bf"}
-						notation = sgtick+'x86_64/amd_64]'+sc
-					} else if ('011d0e6e' == hash) {
-						// {"oscillator": "f263f055", "oscillator_compressor": "1f38e089"}
-						notation = sgtick+'ARM64/aarch64]'+sc
+				// see audioContext test in TZP for bugzilla details
+				if (isVer < 162) {
+					if (64 == isArchArray) {
+						if ('e2bbb839' == hash) {
+							// {"oscillator": "5b3956a9", "oscillator_compressor": "e08487bf"}
+							notation = sgtick+'x86_64/amd_64]'+sc
+						} else if ('011d0e6e' == hash) {
+							// {"oscillator": "f263f055", "oscillator_compressor": "1f38e089"}
+							notation = sgtick+'ARM64/aarch64]'+sc
+						}
+					} else if ('75398d16' == hash) {
+						// {"oscillator": "e9f98e24", "oscillator_compressor": "bafe56d6"}
+						notation = sgtick+'x86/i686/ARMv7]'+sc
 					}
-				} else if ('75398d16' == hash) {
-					// {"oscillator": "e9f98e24", "oscillator_compressor": "bafe56d6"}
-					notation = sgtick+'x86/i686/ARMv7]'+sc
+				} else if (162 == isVer) {
+					if (64 == isArchArray) {
+						if ('5e857954' == hash) {
+							// {"oscillator": "5b3956a9", "oscillator_compressor": "49b916bf"}
+							notation = sgtick+'x86_64/amd_64]'+sc
+						} else if ('53df628c' == hash) {
+							// {"oscillator": "f263f055", "oscillator_compressor": "c44a5db9"}
+							notation = sgtick+'ARM64/aarch64]'+sc
+						}
+					} else if ('' == hash) {
+						// ToDo: I need a 32bit platform
+						notation = sgtick+'x86/i686/ARMv7]'+sc
+					}
+				} else {
+					// FF163+
+					if (64 == isArchArray) {
+						if ('d78b451b' == hash) {
+							// {"oscillator": "5b3956a9", "oscillator_compressor": "0829e67c"}
+							notation = sgtick+'x86_64/amd_64]'+sc
+						} else if ('884b62b1' == hash) {
+							// {"oscillator": "f263f055", "oscillator_compressor": "ac615add"}
+							notation = sgtick+'ARM64/aarch64]'+sc
+						}
+					} else if ('' == hash) {
+						// ToDo: I need a 32bit platform
+						notation = sgtick+'x86/i686/ARMv7]'+sc
+					}
 				}
 				addDisplay(11, METRIC, hash, addButton(0, METRIC, Object.keys(section).length +' metrics'), notation)
 				if (isPerf) {
