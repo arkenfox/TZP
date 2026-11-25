@@ -850,10 +850,12 @@ const get_webgpu = (METRIC) => new Promise(resolve => {
 		return navigator.gpu.requestAdapter().then(adapter => {
 			try {
 				if (runSE) {foo++}
-				// typeFn(adapter) returns 'empty object' but it's not empty
 				let typeCheck = typeof adapter
-				if (runST) {typeCheck = 'null'}
-				if ('object' !== typeCheck) {throw zErrType + typeFn(adapter)}
+				let typeCheck2 = typeFn(adapter) // returns 'empty object' but it's not empty
+				// handle nulls: e.g. 32bit gecko
+				if ('null' == typeCheck2) {return 'null'}
+				if (runST) {typeCheck = 'string'}
+				if ('object' !== typeCheck) {throw zErrType + typeCheck2}
 				let expected = runSI ? '[groot]' : '[object GPUAdapter]'
 				if (adapter+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ adapter+''}
 				const { limits, features, info } = adapter
@@ -898,8 +900,8 @@ const get_webgpu = (METRIC) => new Promise(resolve => {
 	]).then(function(res){
 		let aOutput = ['adapterInfo','limits','features']
 		if ('string' == typeof res[0]) {
-			// string: 'n/a' else it's an overall gpu error
-			let value = res[0], isErr = zNA !== value
+			// string: 'null', 'n/a' else it's an overall gpu error
+			let value = res[0], isErr = !(zNA == value || 'null' == value)
 			aOutput.forEach(function(m){
 				addData(10, METRIC +'_'+ m, (isErr ? zErr : value))
 				// display longer error on first item
