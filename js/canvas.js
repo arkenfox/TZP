@@ -862,24 +862,29 @@ const get_canvas_to = (sizeW, sizeH) => new Promise(resolve => {
 		//console.log(oErrors)
 		//console.log(res)
 		let oRaw = {}, oInfo = {}
-		// FF95+: compression 1724331 / 1737038 
-			// FF137 1910796: Enable libz-rs on nightly: this changes our known hashes
-			// FF139 1949947: Upgrade zlib-rs/libz-rs-sys to 0.4.2. (new to*_solids)
+			// changes to compression levels, libraries, library versions can all change hashes
+			// see FF96+ (1724331, 1737038), see library changes in 1910796, 1949947, 
 		// ToDo: check grfx/hardware/comporession configs
 		let oKnown = {
-			// FF153+e328ec8e + 9d0b9932 on both 
+			// comfirmed windows unless stated
+			// i do not know if these hashes cover all gecko results over all devices/hardware
+			// old-timey added if we drop min block version
 			'toBlob': [
-				'e328ec8e', // my droid + windows
-				'96752b2f', // pre libz-rs e.g. seamonkey
+				'e328ec8e', // FF152+ | my android
+				'3afc375a', // FF96-151
+				'9da92bdd', // FF52-95
+				'96752b2f', // seamonkey140
 			],
 			'toBlob_solid': [
-				'9d0b9932', // my droid + windows
-				'b3c52d1d', // pre libz-rs e.g. seamonkey
+				'9d0b9932', // FF152+ | my android
+				'56ea6104', // FF96-151
+				'b3c52d1d', // FF52-95 | also seamonkey140
 			], 
 		}
 		oKnown['toDataURL'] = oKnown['toBlob']
 		oKnown['toDataURL_solid'] = oKnown['toBlob_solid']
 		let oIDAT = {
+			// these only cover FF153+ but this protection started before then
 			'nonsolid': [
 				'668fd61f',	// from 'e328ec8e'
 			],
