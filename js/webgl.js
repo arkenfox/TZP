@@ -596,10 +596,9 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 				// IIUIC: pretty sure the spec knows which is where, so we can just combine + dedupe
 			let hash, data='', btn='', notation ='' //rfp_red
 			try {
-				let oTmp = {}, aTmp, aMismatch = []
+				let oTmp = {}, aTmp = [], aMismatch = []
 				// get data
 				for (const r of Object.keys(oRaw)) { // r = run number
-					aTmp = []
 					let tmpdata = oRaw[r]
 					for (const c of Object.keys(tmpdata)) { // c = context
 						let mismatchdata = tmpdata[c]['extensions_mismatches']
@@ -636,10 +635,14 @@ const get_webgl = (METRIC) => new Promise(resolve => {
 						// AFAICT all engines return these sorted and there will always be a WEBGL_ item last
 					for (const c of Object.keys(oRaw[0])) {
 						aTmp = oRaw[0][c].extensions
-						for (let i= aTmp.length - 1; i > -1; i--) {
-							let lastItem = aTmp[i]
-							if ('WEBGL_' == lastItem.slice(0,6)) {break}
-							aMismatch.push(lastItem)
+						// check for undefined, e.g. the context may be a string: e.g. webgl2: null
+						if (undefined !== aTmp) {
+							let len = aTmp.length - 1
+							for (let i= len; i > -1; i--) {
+								let lastItem = aTmp[i]
+								if ('WEBGL_' == lastItem.slice(0,6)) {break}
+								aMismatch.push(lastItem)
+							}
 						}
 					}
 					aMismatch = dedupeArray(aMismatch)
