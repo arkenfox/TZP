@@ -233,7 +233,6 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 				for (const k of Object.keys(section).sort()) {obj[k.replace('audio_test_', '')] = section[k]}
 				let hash = mini(obj)
 				addDetail(METRIC, obj)
-				// see audioContext test in TZP for bugzilla details
 				if (isVer < 162) {
 					if (64 == isArchArray) {
 						if ('e2bbb839' == hash) {
@@ -248,6 +247,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 						notation = sgtick+'x86/i686/ARMv7]'+sc
 					}
 				} else if (162 == isVer) {
+					// FF162+: 2089739 use fdlibm_expf instead of fdlibm_powf
 					if (64 == isArchArray) {
 						if ('5e857954' == hash) {
 							// {"oscillator": "5b3956a9", "oscillator_compressor": "49b916bf"}
@@ -261,7 +261,7 @@ const outputUserAudio = (METRIC) => new Promise(resolve => {
 						notation = sgtick+'x86/i686/ARMv7]'+sc
 					}
 				} else {
-					// FF163+
+					// FF163+ 2093385 use faster exponentiation for compressor attack smoothing
 					if (64 == isArchArray) {
 						if ('d78b451b' == hash) {
 							// {"oscillator": "5b3956a9", "oscillator_compressor": "0829e67c"}
