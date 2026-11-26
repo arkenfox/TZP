@@ -181,7 +181,7 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 							if ('24fc63ce' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
 						}
 					} else if (162 == isVer) {
-						// find moz-regression
+						// FF162+: 2089739 use fdlibm_expf instead of fdlibm_powf
 						if (64 == isArchArray) {
 							if ('cf2257ad' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
 							} else if ('3b6ba5d7' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
@@ -190,7 +190,7 @@ const get_audio_offline = (METRIC) => new Promise(resolve => {
 							if ('' == hashC) {notation = sgtick+'x86/i686/ARMv7]'+sc}
 						}
 					} else {
-						// ToDo: confirm FF163+ 2093385 caused these new hashes : approx 20-nov
+						// FF163+ 2093385 use faster exponentiation for compressor attack smoothing
 						if (64 == isArchArray) {
 							if ('f630795b' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
 							} else if ('2326ce2f' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
